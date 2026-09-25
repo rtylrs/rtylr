@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// RecruitCareer is a job posting on the careers page.
 type RecruitCareer struct {
 	Id             int64  `json:"id,omitempty"`
 	BusinessId     int64  `json:"business_id,omitempty"`
@@ -210,6 +211,7 @@ func (x *RecruitCareer) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// Submission is a candidate's application to one career.
 type Submission struct {
 	Id            int64  `json:"id,omitempty"`
 	CareerId      int64  `json:"career_id,omitempty"`
@@ -351,6 +353,7 @@ func (x *Submission) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// ListSubmissionsRequest selects submissions for this business.
 type ListSubmissionsRequest struct {
 	Page     int64 `json:"page,omitempty"`
 	PageSize int64 `json:"page_size,omitempty"`
@@ -372,6 +375,7 @@ func (x *ListSubmissionsRequest) GetPageSize() int64 {
 	return x.PageSize
 }
 
+// ListSubmissionsResponse returns one page of submissions.
 type ListSubmissionsResponse struct {
 	Submissions []*Submission `json:"submissions,omitempty"`
 	Total       int64         `json:"total,omitempty"`
@@ -411,13 +415,30 @@ func (x *ListSubmissionsResponse) GetPageSize() int64 {
 	return x.PageSize
 }
 
+// UpdateSubmissionStatusRequest advances a candidate through the funnel.
 type UpdateSubmissionStatusRequest struct {
-	Id   *int64                      `json:"id,omitempty"`
+	// body carries the submission id and new status bound from the HTTP payload.
 	Body *UpdateSubmissionStatusBody `json:"body,omitempty"`
 }
 
-func (m *UpdateSubmissionStatusRequest) MarshalJSON() ([]byte, error) {
-	type alias UpdateSubmissionStatusRequest
+func (x *UpdateSubmissionStatusRequest) GetBody() *UpdateSubmissionStatusBody {
+	if x == nil {
+		var zero *UpdateSubmissionStatusBody
+		return zero
+	}
+	return x.Body
+}
+
+// UpdateSubmissionStatusBody carries the status transition.
+type UpdateSubmissionStatusBody struct {
+	// id identifies the submission to update.
+	Id *int64 `json:"id,omitempty"`
+	// status is one of: pending | reviewing | interview | offer | hired | rejected.
+	Status string `json:"status,omitempty"`
+}
+
+func (m *UpdateSubmissionStatusBody) MarshalJSON() ([]byte, error) {
+	type alias UpdateSubmissionStatusBody
 	aux := struct {
 		*alias
 		Id *string `json:"id,omitempty"`
@@ -429,8 +450,8 @@ func (m *UpdateSubmissionStatusRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *UpdateSubmissionStatusRequest) UnmarshalJSON(data []byte) error {
-	type alias UpdateSubmissionStatusRequest
+func (m *UpdateSubmissionStatusBody) UnmarshalJSON(data []byte) error {
+	type alias UpdateSubmissionStatusBody
 	aux := struct {
 		*alias
 		Id *string `json:"id,omitempty"`
@@ -448,7 +469,7 @@ func (m *UpdateSubmissionStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (x *UpdateSubmissionStatusRequest) GetId() int64 {
+func (x *UpdateSubmissionStatusBody) GetId() int64 {
 	if x == nil {
 		var zero int64
 		return zero
@@ -460,18 +481,6 @@ func (x *UpdateSubmissionStatusRequest) GetId() int64 {
 	return *x.Id
 }
 
-func (x *UpdateSubmissionStatusRequest) GetBody() *UpdateSubmissionStatusBody {
-	if x == nil {
-		var zero *UpdateSubmissionStatusBody
-		return zero
-	}
-	return x.Body
-}
-
-type UpdateSubmissionStatusBody struct {
-	Status string `json:"status,omitempty"`
-}
-
 func (x *UpdateSubmissionStatusBody) GetStatus() string {
 	if x == nil {
 		var zero string
@@ -480,7 +489,9 @@ func (x *UpdateSubmissionStatusBody) GetStatus() string {
 	return x.Status
 }
 
+// UpdateSubmissionStatusResponse confirms the transition.
 type UpdateSubmissionStatusResponse struct {
+	// message is a human-readable result.
 	Message string `json:"message,omitempty"`
 }
 

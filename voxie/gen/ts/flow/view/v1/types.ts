@@ -5,7 +5,14 @@ export interface View {
 id?: string | undefined;
 name?: string | undefined;
 icon?: string | undefined;
+/**
+ * visibility is "shared" (every colleague in the business can use this view)
+ * or "private" (only its creator). Empty on create means "shared", which is
+ * how every view behaved before this field existed, so an older client keeps
+ * its current behaviour rather than silently making views private.
+ */
 visibility?: string | undefined;
+/** JSON-encoded filter criteria for this saved view. */
 filters?: string | undefined;
 groupBy?: string | undefined;
 sortBy?: string | undefined;
@@ -54,9 +61,13 @@ return violations;
 
 export interface ListViewsRequest {
 workspaceId?: string | undefined;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -124,7 +135,14 @@ export interface CreateViewRequest {
 workspaceId?: string | undefined;
 name: string;
 icon?: string | undefined;
+/**
+ * visibility is "shared" (every colleague in the business can use this view)
+ * or "private" (only its creator). Empty on create means "shared", which is
+ * how every view behaved before this field existed, so an older client keeps
+ * its current behaviour rather than silently making views private.
+ */
 visibility?: string | undefined;
+/** JSON-encoded filter criteria for this saved view. */
 filters?: string | undefined;
 groupBy?: string | undefined;
 sortBy?: string | undefined;
@@ -200,7 +218,14 @@ export interface UpdateViewRequest {
 id?: string | undefined;
 name?: string | undefined;
 icon?: string | undefined;
+/**
+ * visibility is "shared" (every colleague in the business can use this view)
+ * or "private" (only its creator). Empty on create means "shared", which is
+ * how every view behaved before this field existed, so an older client keeps
+ * its current behaviour rather than silently making views private.
+ */
 visibility?: string | undefined;
+/** JSON-encoded filter criteria for this saved view. */
 filters?: string | undefined;
 groupBy?: string | undefined;
 sortBy?: string | undefined;

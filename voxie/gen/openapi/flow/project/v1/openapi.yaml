@@ -12,44 +12,62 @@ paths:
             parameters:
                 - name: workspace_id
                   in: query
-                  required: true
+                  description: workspace_id is the workspace id value for this contract.
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.ListProjectsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ProjectService
@@ -62,12 +80,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.CreateProjectRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.CreateProjectResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/{id}:
         put:
             tags:
@@ -77,10 +107,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
@@ -90,12 +124,24 @@ paths:
                             description: body carries updatable project fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.UpdateProjectResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ProjectService
@@ -104,17 +150,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.DeleteProjectResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/columns:
         get:
             tags:
@@ -124,45 +186,63 @@ paths:
             parameters:
                 - name: project_id
                   in: query
+                  description: project_id is the project id value for this contract.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.ListProjectColumnsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ProjectService
@@ -175,12 +255,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.CreateProjectColumnRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.CreateProjectColumnResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/columns/{id}:
         put:
             tags:
@@ -190,23 +282,54 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the column identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the column identifier.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.project.v1.UpdateProjectColumnRequest'
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                    description: name is the column name.
+                                color:
+                                    type: string
+                                    description: color is the column color.
+                                sort_order:
+                                    type: integer
+                                    format: int32
+                                    description: sort_order is the column sort order.
+                            required:
+                                - name
+                                - color
+                                - sort_order
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.UpdateProjectColumnResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ProjectService
@@ -215,17 +338,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the column identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the column identifier.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.DeleteProjectColumnResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/columns/move:
         put:
             tags:
@@ -239,12 +378,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.MoveTaskToColumnRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.MoveTaskToColumnResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/members:
         get:
             tags:
@@ -254,45 +405,63 @@ paths:
             parameters:
                 - name: project_id
                   in: query
+                  description: project_id is the project id value for this contract.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.ListProjectMembersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ProjectService
@@ -305,12 +474,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.AddProjectMemberRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.AddProjectMemberResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ProjectService
@@ -319,27 +500,43 @@ paths:
             parameters:
                 - name: project_id
                   in: query
+                  description: project_id is the project id value for this contract.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 - name: user_id
                   in: query
+                  description: user_id identifies the user associated with this request.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.RemoveProjectMemberResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/members/role:
         put:
             tags:
@@ -353,12 +550,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.UpdateProjectMemberRoleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.UpdateProjectMemberRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/members/invite:
         post:
             tags:
@@ -372,12 +581,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.InviteProjectMemberRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.InviteProjectMemberResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/transfer:
         put:
             tags:
@@ -391,12 +612,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.TransferProjectOwnershipRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.TransferProjectOwnershipResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/move:
         put:
             tags:
@@ -410,12 +643,24 @@ paths:
                             $ref: '#/components/schemas/flow.project.v1.MoveProjectRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.MoveProjectResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/project/v1/projects/{id}/labour-cost:
         get:
             tags:
@@ -431,17 +676,32 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the Flow project id path parameter.
                   required: true
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the Flow project id path parameter.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.project.v1.GetProjectLabourCostResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.project.v1.ListProjectsRequest:
@@ -449,6 +709,7 @@ components:
             properties:
                 workspace_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 page:
@@ -490,14 +751,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 workspace_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 name:
@@ -523,6 +787,7 @@ components:
                     description: due_date is the due date value for this contract.
                 created_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: created_by is the created by value for this contract.
                 created_at:
@@ -603,6 +868,7 @@ components:
                 workspace_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 name:
@@ -646,6 +912,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -701,6 +968,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -719,6 +987,7 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 page:
@@ -760,14 +1029,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the column.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 workspace_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 name:
@@ -801,10 +1073,12 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 workspace_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 name:
@@ -838,6 +1112,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the column identifier.
                 name:
@@ -869,6 +1144,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the column identifier.
             required:
@@ -887,10 +1163,12 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task identifier.
                 column_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: column_id is the destination column identifier.
             required:
@@ -910,6 +1188,7 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 page:
@@ -951,14 +1230,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the membership record.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 name:
@@ -972,6 +1254,7 @@ components:
                     description: role is the role value for this contract.
                 added_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: added_by is the user id of the inviter, if any.
                 added_at:
@@ -992,11 +1275,13 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 role:
@@ -1020,11 +1305,13 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
             required:
@@ -1044,11 +1331,13 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 role:
@@ -1072,6 +1361,7 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 email:
@@ -1098,11 +1388,13 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 new_owner_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: new_owner_id is the new owner user id.
             required:
@@ -1122,11 +1414,13 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 workspace_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the destination workspace id.
             required:
@@ -1145,6 +1439,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the Flow project id path parameter.
             required:
@@ -1167,10 +1462,12 @@ components:
             properties:
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project the cost was computed for.
                 cost_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         cost_minor_units is the labour cost of billable logged time in the
@@ -1178,12 +1475,14 @@ components:
                         the caller sees it.
                 costed_minutes:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         costed_minutes is billable logged time whose contributor had a rate on
                         record; it is the time included in cost_minor_units.
                 uncosted_minutes:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         uncosted_minutes is billable logged time whose contributor has no rate
@@ -1207,3 +1506,12 @@ components:
                 per-person rows: hourly rates stay inside HR. Cost covers billable time;
                 time whose contributor has no rate on record is reported separately as
                 uncosted rather than silently folded in as zero-cost work.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ProjectService

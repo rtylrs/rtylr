@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface ShiftServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** ShiftService defines HR shift and roster endpoints. */
 export class ShiftServiceClient {
 private baseUrl: string;
 private options: ShiftServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listShifts(req: ListShiftsRequest): Promise<ListShiftsResponse> {
+/** Returns shifts with optional filters. */
+async listShifts(req: ListShiftsRequest, opts?: RequestOptions): Promise<ListShiftsResponse> {
 const violations = validateListShiftsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/shifts";
 const query = new URLSearchParams();
 if (req.locationId !== undefined) {
@@ -98,7 +138,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -110,14 +151,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListShiftsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createShift(req: CreateShiftRequest): Promise<CreateShiftResponse> {
+/** Creates a new shift. */
+async createShift(req: CreateShiftRequest, opts?: RequestOptions): Promise<CreateShiftResponse> {
 const violations = validateCreateShiftRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/shifts";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateShiftRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -129,14 +172,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateShiftResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateShift(req: UpdateShiftRequest): Promise<UpdateShiftResponse> {
+/** Updates an existing shift. */
+async updateShift(req: UpdateShiftRequest, opts?: RequestOptions): Promise<UpdateShiftResponse> {
 const violations = validateUpdateShiftRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/shifts";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateShiftRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -148,16 +193,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateShiftResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteShift(req: DeleteShiftRequest): Promise<DeleteShiftResponse> {
+/** Deletes a shift. */
+async deleteShift(req: DeleteShiftRequest, opts?: RequestOptions): Promise<DeleteShiftResponse> {
 const violations = validateDeleteShiftRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/shifts";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -169,14 +216,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteShiftResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createShiftAssignment(req: CreateShiftAssignmentRequest): Promise<CreateShiftAssignmentResponse> {
+/** Assigns an employee to a shift. */
+async createShiftAssignment(req: CreateShiftAssignmentRequest, opts?: RequestOptions): Promise<CreateShiftAssignmentResponse> {
 const violations = validateCreateShiftAssignmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/assignments";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateShiftAssignmentRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -188,9 +237,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateShiftAssignmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getRoster(req: GetRosterRequest): Promise<GetRosterResponse> {
+/** Returns the shift roster for a location and week. */
+async getRoster(req: GetRosterRequest, opts?: RequestOptions): Promise<GetRosterResponse> {
 const violations = validateGetRosterRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/roster/{location_id}";
 path = path.replace("{location_id}", encodeURIComponent(String(req.locationId)));
 const query = new URLSearchParams();
@@ -201,7 +251,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -213,14 +264,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetRosterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async publishRoster(req: PublishRosterRequest): Promise<PublishRosterResponse> {
+/** Publishes the roster for a week. */
+async publishRoster(req: PublishRosterRequest, opts?: RequestOptions): Promise<PublishRosterResponse> {
 const violations = validatePublishRosterRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/roster/publish";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePublishRosterRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -232,9 +285,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodePublishRosterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listAvailability(req: ListAvailabilityRequest): Promise<ListAvailabilityResponse> {
+/** Returns staff availability windows with optional filters. */
+async listAvailability(req: ListAvailabilityRequest, opts?: RequestOptions): Promise<ListAvailabilityResponse> {
 const violations = validateListAvailabilityRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/availability";
 const query = new URLSearchParams();
 if (req.staffId !== undefined) {
@@ -259,7 +313,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -271,14 +326,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListAvailabilityResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async setAvailability(req: SetAvailabilityRequest): Promise<SetAvailabilityResponse> {
+/** Creates or updates one staff availability window. */
+async setAvailability(req: SetAvailabilityRequest, opts?: RequestOptions): Promise<SetAvailabilityResponse> {
 const violations = validateSetAvailabilityRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/availability";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSetAvailabilityRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -290,9 +347,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeSetAvailabilityResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteAvailability(req: DeleteAvailabilityRequest): Promise<DeleteAvailabilityResponse> {
+/** Deletes a staff availability window. */
+async deleteAvailability(req: DeleteAvailabilityRequest, opts?: RequestOptions): Promise<DeleteAvailabilityResponse> {
 const violations = validateDeleteAvailabilityRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shift/v1/availability/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -300,7 +358,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

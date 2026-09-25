@@ -2,9 +2,16 @@
 package v1
 
 import (
-	"errors"
 	"strings"
 )
+
+type ValidationErrors struct {
+	Violations []string
+}
+
+func (e *ValidationErrors) Error() string { return strings.Join(e.Violations, "; ") }
+
+func (e *ValidationErrors) ViolationList() []string { return e.Violations }
 
 func (m *Appointment) Validate() error {
 	if m == nil {
@@ -12,7 +19,7 @@ func (m *Appointment) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -40,7 +47,7 @@ func (m *CreateAppointmentRequest) Validate() error {
 		violations = append(violations, "end_time is required")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -51,7 +58,7 @@ func (m *CreateAppointmentResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -65,7 +72,7 @@ func (m *DeleteAppointmentRequest) Validate() error {
 		violations = append(violations, "id must be greater than 0")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -76,7 +83,7 @@ func (m *DeleteAppointmentResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -87,7 +94,7 @@ func (m *ListAppointmentsRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -103,7 +110,7 @@ func (m *ListAppointmentsResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -114,7 +121,7 @@ func (m *ListTodayAppointmentsRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -130,7 +137,7 @@ func (m *ListTodayAppointmentsResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -144,7 +151,7 @@ func (m *UpdateAppointmentRequest) Validate() error {
 		violations = append(violations, "id must be greater than 0")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -155,7 +162,7 @@ func (m *UpdateAppointmentResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }

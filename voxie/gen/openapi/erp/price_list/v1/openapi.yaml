@@ -12,25 +12,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of price lists to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Maximum number of price lists to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of price lists to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Number of price lists to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.price_list.v1.ListPriceListsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - PriceListService
@@ -43,12 +57,24 @@ paths:
                             $ref: '#/components/schemas/erp.price_list.v1.CreatePriceListRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.price_list.v1.CreatePriceListResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.price_list.v1.ListPriceListsRequest:
@@ -94,9 +120,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -134,9 +162,19 @@ components:
             properties:
                 price_list_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
             required:
                 - price_list_id
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: PriceListService

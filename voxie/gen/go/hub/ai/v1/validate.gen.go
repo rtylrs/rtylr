@@ -2,9 +2,16 @@
 package v1
 
 import (
-	"errors"
 	"strings"
 )
+
+type ValidationErrors struct {
+	Violations []string
+}
+
+func (e *ValidationErrors) Error() string { return strings.Join(e.Violations, "; ") }
+
+func (e *ValidationErrors) ViolationList() []string { return e.Violations }
 
 func (m *AiQuotaStatus) Validate() error {
 	if m == nil {
@@ -12,7 +19,7 @@ func (m *AiQuotaStatus) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -23,7 +30,7 @@ func (m *AiQuotaSettings) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -34,7 +41,7 @@ func (m *GetAiUsageRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -50,7 +57,7 @@ func (m *GetAiUsageResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -61,7 +68,7 @@ func (m *GetAiQuotaSettingsRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -77,7 +84,7 @@ func (m *GetAiQuotaSettingsResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -91,7 +98,7 @@ func (m *UpdateAiQuotaSettingsRequest) Validate() error {
 		violations = append(violations, "mode is required")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -107,7 +114,7 @@ func (m *UpdateAiQuotaSettingsResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }

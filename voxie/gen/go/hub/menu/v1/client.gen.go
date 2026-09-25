@@ -10,7 +10,24 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
+
+type UnexpectedStatusError struct {
+	StatusCode int
+	Header     http.Header
+	Body       []byte
+}
+
+func (e *UnexpectedStatusError) Error() string {
+	return fmt.Sprintf("unexpected status %d: %s", e.StatusCode, e.Body)
+}
+
+var defaultHTTPClient = func() *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = 30 * time.Second
+	return &http.Client{Transport: transport}
+}()
 
 const defaultMaxResponseBodyBytes int64 = 8 << 20
 const defaultMaxSSELineBytes = 1 << 20
@@ -34,6 +51,24 @@ func readResponseBody(body io.Reader, limit int64) ([]byte, error) {
 	return data, nil
 }
 
+type CallOption func(*http.Request)
+
+func WithHeader(name, value string) CallOption {
+	return func(r *http.Request) { r.Header.Set(name, value) }
+}
+
+func WithRequestEditor(edit func(*http.Request)) CallOption {
+	return func(r *http.Request) { edit(r) }
+}
+
+func applyCallOptions(r *http.Request, opts []CallOption) {
+	for _, opt := range opts {
+		if opt != nil {
+			opt(r)
+		}
+	}
+}
+
 type MenuServiceClient struct {
 	BaseURL              string
 	HTTPClient           *http.Client
@@ -43,10 +78,14 @@ type MenuServiceClient struct {
 }
 
 func NewMenuServiceClient(baseURL string) *MenuServiceClient {
-	return &MenuServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
+	for len(baseURL) > 0 && baseURL[len(baseURL)-1] == '/' {
+		baseURL = baseURL[:len(baseURL)-1]
+	}
+	return &MenuServiceClient{BaseURL: baseURL, HTTPClient: defaultHTTPClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
 }
 
-func (c *MenuServiceClient) ListMenu(ctx context.Context, req *ListMenuRequest) (*ListMenuResponse, error) {
+// Returns the navigation menu for the current user.
+func (c *MenuServiceClient) ListMenu(ctx context.Context, req *ListMenuRequest, opts ...CallOption) (*ListMenuResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -64,6 +103,7 @@ func (c *MenuServiceClient) ListMenu(ctx context.Context, req *ListMenuRequest) 
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -75,16 +115,17 @@ func (c *MenuServiceClient) ListMenu(ctx context.Context, req *ListMenuRequest) 
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(ListMenuResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *MenuServiceClient) UpdateMenu(ctx context.Context, req *UpdateMenuRequest) (*UpdateMenuResponse, error) {
+// Replaces the navigation menu items.
+func (c *MenuServiceClient) UpdateMenu(ctx context.Context, req *UpdateMenuRequest, opts ...CallOption) (*UpdateMenuResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -103,6 +144,7 @@ func (c *MenuServiceClient) UpdateMenu(ctx context.Context, req *UpdateMenuReque
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -114,16 +156,17 @@ func (c *MenuServiceClient) UpdateMenu(ctx context.Context, req *UpdateMenuReque
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(UpdateMenuResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *MenuServiceClient) ListMenuBanners(ctx context.Context, req *ListMenuBannersRequest) (*ListMenuBannersResponse, error) {
+// Returns menu banners for the current business.
+func (c *MenuServiceClient) ListMenuBanners(ctx context.Context, req *ListMenuBannersRequest, opts ...CallOption) (*ListMenuBannersResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -141,6 +184,7 @@ func (c *MenuServiceClient) ListMenuBanners(ctx context.Context, req *ListMenuBa
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -152,16 +196,17 @@ func (c *MenuServiceClient) ListMenuBanners(ctx context.Context, req *ListMenuBa
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(ListMenuBannersResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *MenuServiceClient) CreateMenuBanner(ctx context.Context, req *CreateMenuBannerRequest) (*CreateMenuBannerResponse, error) {
+// Creates a menu banner for the current business.
+func (c *MenuServiceClient) CreateMenuBanner(ctx context.Context, req *CreateMenuBannerRequest, opts ...CallOption) (*CreateMenuBannerResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -180,6 +225,7 @@ func (c *MenuServiceClient) CreateMenuBanner(ctx context.Context, req *CreateMen
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -191,16 +237,17 @@ func (c *MenuServiceClient) CreateMenuBanner(ctx context.Context, req *CreateMen
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(CreateMenuBannerResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *MenuServiceClient) UpdateMenuBanner(ctx context.Context, req *UpdateMenuBannerRequest) (*UpdateMenuBannerResponse, error) {
+// Updates a menu banner for the current business.
+func (c *MenuServiceClient) UpdateMenuBanner(ctx context.Context, req *UpdateMenuBannerRequest, opts ...CallOption) (*UpdateMenuBannerResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -220,6 +267,7 @@ func (c *MenuServiceClient) UpdateMenuBanner(ctx context.Context, req *UpdateMen
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -231,16 +279,17 @@ func (c *MenuServiceClient) UpdateMenuBanner(ctx context.Context, req *UpdateMen
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(UpdateMenuBannerResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *MenuServiceClient) DeleteMenuBanner(ctx context.Context, req *DeleteMenuBannerRequest) (*DeleteMenuBannerResponse, error) {
+// Deletes a menu banner for the current business.
+func (c *MenuServiceClient) DeleteMenuBanner(ctx context.Context, req *DeleteMenuBannerRequest, opts ...CallOption) (*DeleteMenuBannerResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -259,6 +308,7 @@ func (c *MenuServiceClient) DeleteMenuBanner(ctx context.Context, req *DeleteMen
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -270,10 +320,10 @@ func (c *MenuServiceClient) DeleteMenuBanner(ctx context.Context, req *DeleteMen
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(DeleteMenuBannerResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil

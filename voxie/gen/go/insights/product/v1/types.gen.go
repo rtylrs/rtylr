@@ -7,10 +7,14 @@ import (
 )
 
 type BestSeller struct {
-	ProductId         int64   `json:"product_id,omitempty"`
-	Name              string  `json:"name,omitempty"`
-	UnitsSold         float64 `json:"units_sold,omitempty"`
-	RevenueMinorUnits int64   `json:"revenue_minor_units,omitempty"`
+	// product_id is the product id value for this contract.
+	ProductId int64 `json:"product_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// units_sold is the units sold value for this contract.
+	UnitsSold float64 `json:"units_sold,omitempty"`
+	// revenue_minor_units is the revenue minor units value for this contract.
+	RevenueMinorUnits int64 `json:"revenue_minor_units,omitempty"`
 }
 
 func (m *BestSeller) MarshalJSON() ([]byte, error) {
@@ -85,8 +89,11 @@ func (x *BestSeller) GetRevenueMinorUnits() int64 {
 }
 
 type SlowMover struct {
-	ProductId     int64   `json:"product_id,omitempty"`
-	Name          string  `json:"name,omitempty"`
+	// product_id is the product id value for this contract.
+	ProductId int64 `json:"product_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// stock_quantity is the stock quantity value for this contract.
 	StockQuantity float64 `json:"stock_quantity,omitempty"`
 }
 
@@ -144,10 +151,14 @@ func (x *SlowMover) GetStockQuantity() float64 {
 }
 
 type MarginBucket struct {
-	Label        string  `json:"label,omitempty"`
-	LowerPct     float64 `json:"lower_pct,omitempty"`
-	UpperPct     float64 `json:"upper_pct,omitempty"`
-	ProductCount int64   `json:"product_count,omitempty"`
+	// label is the label value for this contract.
+	Label string `json:"label,omitempty"`
+	// lower_pct is the lower pct value for this contract.
+	LowerPct float64 `json:"lower_pct,omitempty"`
+	// upper_pct is the upper pct value for this contract.
+	UpperPct float64 `json:"upper_pct,omitempty"`
+	// product_count is the product count value for this contract.
+	ProductCount int64 `json:"product_count,omitempty"`
 }
 
 func (m *MarginBucket) MarshalJSON() ([]byte, error) {
@@ -212,10 +223,14 @@ func (x *MarginBucket) GetProductCount() int64 {
 }
 
 type CategorySales struct {
-	CategoryId        int64   `json:"category_id,omitempty"`
-	CategoryName      string  `json:"category_name,omitempty"`
-	UnitsSold         float64 `json:"units_sold,omitempty"`
-	RevenueMinorUnits int64   `json:"revenue_minor_units,omitempty"`
+	// category_id is the category id value for this contract.
+	CategoryId int64 `json:"category_id,omitempty"`
+	// category_name is the category name value for this contract.
+	CategoryName string `json:"category_name,omitempty"`
+	// units_sold is the units sold value for this contract.
+	UnitsSold float64 `json:"units_sold,omitempty"`
+	// revenue_minor_units is the revenue minor units value for this contract.
+	RevenueMinorUnits int64 `json:"revenue_minor_units,omitempty"`
 }
 
 func (m *CategorySales) MarshalJSON() ([]byte, error) {
@@ -290,6 +305,7 @@ func (x *CategorySales) GetRevenueMinorUnits() int64 {
 }
 
 type GetBestSellersRequest struct {
+	// limit is the maximum number of products to return.
 	Limit int32 `json:"limit,omitempty"`
 }
 
@@ -302,6 +318,7 @@ func (x *GetBestSellersRequest) GetLimit() int32 {
 }
 
 type GetBestSellersResponse struct {
+	// products is the products value for this contract.
 	Products []*BestSeller `json:"products,omitempty"`
 }
 
@@ -317,6 +334,7 @@ type GetCategoryPerformanceRequest struct {
 }
 
 type GetCategoryPerformanceResponse struct {
+	// categories is the categories value for this contract.
 	Categories []*CategorySales `json:"categories,omitempty"`
 }
 
@@ -332,11 +350,19 @@ type GetProductMarginsRequest struct {
 }
 
 type ProductMargin struct {
-	ProductId         int64   `json:"product_id,omitempty"`
-	Name              string  `json:"name,omitempty"`
-	UnitsSold         float64 `json:"units_sold,omitempty"`
-	RevenueMinorUnits int64   `json:"revenue_minor_units,omitempty"`
-	CostMinorUnits    *int64  `json:"cost_minor_units,omitempty"`
+	// product_id is the ERP product.
+	ProductId int64 `json:"product_id,omitempty"`
+	// name is the product name at the time of the report.
+	Name string `json:"name,omitempty"`
+	// units_sold is the quantity sold in the period.
+	UnitsSold float64 `json:"units_sold,omitempty"`
+	// revenue_minor_units is gross sales value in the smallest unit of the
+	// reporting currency.
+	RevenueMinorUnits int64 `json:"revenue_minor_units,omitempty"`
+	// cost_minor_units is units_sold multiplied by the product's cost price,
+	// in the same minor unit. Absent when the product has no cost price on
+	// record, which is distinct from a cost of zero.
+	CostMinorUnits *int64 `json:"cost_minor_units,omitempty"`
 }
 
 func (m *ProductMargin) MarshalJSON() ([]byte, error) {
@@ -436,7 +462,11 @@ func (x *ProductMargin) GetCostMinorUnits() int64 {
 }
 
 type GetProductMarginsResponse struct {
-	Buckets  []*MarginBucket  `json:"buckets,omitempty"`
+	// buckets is the buckets value for this contract.
+	Buckets []*MarginBucket `json:"buckets,omitempty"`
+	// products is one row per product sold in the period, so margin per item
+	// is answerable without pulling the ERP catalogue client-side. Absent when
+	// the report is requested at distribution granularity only.
 	Products []*ProductMargin `json:"products,omitempty"`
 }
 
@@ -460,9 +490,13 @@ type GetProductPerformanceRequest struct {
 }
 
 type GetProductPerformanceResponse struct {
-	TotalSkus    int64   `json:"total_skus,omitempty"`
-	ActiveSkus   int64   `json:"active_skus,omitempty"`
-	OutOfStock   int64   `json:"out_of_stock,omitempty"`
+	// total_skus is the total SKU count.
+	TotalSkus int64 `json:"total_skus,omitempty"`
+	// active_skus is the active SKU count.
+	ActiveSkus int64 `json:"active_skus,omitempty"`
+	// out_of_stock is the out-of-stock SKU count.
+	OutOfStock int64 `json:"out_of_stock,omitempty"`
+	// avg_margin_pct is the average margin percentage.
 	AvgMarginPct float64 `json:"avg_margin_pct,omitempty"`
 }
 
@@ -548,6 +582,7 @@ func (x *GetProductPerformanceResponse) GetAvgMarginPct() float64 {
 }
 
 type GetSlowMoversRequest struct {
+	// days is the trailing sales window used to detect slow movers.
 	Days int32 `json:"days,omitempty"`
 }
 
@@ -560,6 +595,7 @@ func (x *GetSlowMoversRequest) GetDays() int32 {
 }
 
 type GetSlowMoversResponse struct {
+	// products is the products value for this contract.
 	Products []*SlowMover `json:"products,omitempty"`
 }
 

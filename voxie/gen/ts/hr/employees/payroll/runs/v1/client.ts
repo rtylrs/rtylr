@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface RunsServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** RunsService defines HR payroll run endpoints. */
 export class RunsServiceClient {
 private baseUrl: string;
 private options: RunsServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listPayrollRuns(req: ListPayrollRunsRequest): Promise<ListPayrollRunsResponse> {
+/** ListPayrollRuns returns payroll runs. */
+async listPayrollRuns(req: ListPayrollRunsRequest, opts?: RequestOptions): Promise<ListPayrollRunsResponse> {
 const violations = validateListPayrollRunsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/payroll/runs/v1/runs";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListPayrollRunsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async triggerPayrollRun(req: TriggerPayrollRunRequest): Promise<TriggerPayrollRunResponse> {
+/** TriggerPayrollRun triggers a new payroll run. */
+async triggerPayrollRun(req: TriggerPayrollRunRequest, opts?: RequestOptions): Promise<TriggerPayrollRunResponse> {
 const violations = validateTriggerPayrollRunRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/payroll/runs/v1/runs/trigger";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeTriggerPayrollRunRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,15 +154,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeTriggerPayrollRunResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async approvePayrollRun(req: ApprovePayrollRunRequest): Promise<ApprovePayrollRunResponse> {
+/** ApprovePayrollRun approves a payroll run. */
+async approvePayrollRun(req: ApprovePayrollRunRequest, opts?: RequestOptions): Promise<ApprovePayrollRunResponse> {
 const violations = validateApprovePayrollRunRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/payroll/runs/v1/runs/{id}/approve";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeApprovePayrollRunRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -131,14 +176,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeApprovePayrollRunResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async exportPayroll(req: ExportPayrollRequest): Promise<ExportPayrollResponse> {
+/** ExportPayroll exports payroll data. */
+async exportPayroll(req: ExportPayrollRequest, opts?: RequestOptions): Promise<ExportPayrollResponse> {
 const violations = validateExportPayrollRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/payroll/runs/v1/runs/export";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeExportPayrollRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

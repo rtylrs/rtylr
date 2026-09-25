@@ -2,9 +2,16 @@
 package v1
 
 import (
-	"errors"
 	"strings"
 )
+
+type ValidationErrors struct {
+	Violations []string
+}
+
+func (e *ValidationErrors) Error() string { return strings.Join(e.Violations, "; ") }
+
+func (e *ValidationErrors) ViolationList() []string { return e.Violations }
 
 func (m *Template) Validate() error {
 	if m == nil {
@@ -12,7 +19,7 @@ func (m *Template) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -32,7 +39,7 @@ func (m *CreateTemplateRequest) Validate() error {
 		violations = append(violations, "body is required")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -43,7 +50,7 @@ func (m *CreateTemplateResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -54,7 +61,7 @@ func (m *DeleteTemplateRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -65,7 +72,7 @@ func (m *DeleteTemplateResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -76,7 +83,7 @@ func (m *ListTemplatesRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -92,7 +99,7 @@ func (m *ListTemplatesResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -106,7 +113,7 @@ func (m *UpdateTemplateBody) Validate() error {
 		violations = append(violations, "name is required")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -122,7 +129,7 @@ func (m *UpdateTemplateRequest) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -133,7 +140,7 @@ func (m *UpdateTemplateResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }

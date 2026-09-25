@@ -10,7 +10,24 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
+
+type UnexpectedStatusError struct {
+	StatusCode int
+	Header     http.Header
+	Body       []byte
+}
+
+func (e *UnexpectedStatusError) Error() string {
+	return fmt.Sprintf("unexpected status %d: %s", e.StatusCode, e.Body)
+}
+
+var defaultHTTPClient = func() *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = 30 * time.Second
+	return &http.Client{Transport: transport}
+}()
 
 const defaultMaxResponseBodyBytes int64 = 8 << 20
 const defaultMaxSSELineBytes = 1 << 20
@@ -34,6 +51,24 @@ func readResponseBody(body io.Reader, limit int64) ([]byte, error) {
 	return data, nil
 }
 
+type CallOption func(*http.Request)
+
+func WithHeader(name, value string) CallOption {
+	return func(r *http.Request) { r.Header.Set(name, value) }
+}
+
+func WithRequestEditor(edit func(*http.Request)) CallOption {
+	return func(r *http.Request) { edit(r) }
+}
+
+func applyCallOptions(r *http.Request, opts []CallOption) {
+	for _, opt := range opts {
+		if opt != nil {
+			opt(r)
+		}
+	}
+}
+
 type GroupsServiceClient struct {
 	BaseURL              string
 	HTTPClient           *http.Client
@@ -43,10 +78,14 @@ type GroupsServiceClient struct {
 }
 
 func NewGroupsServiceClient(baseURL string) *GroupsServiceClient {
-	return &GroupsServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
+	for len(baseURL) > 0 && baseURL[len(baseURL)-1] == '/' {
+		baseURL = baseURL[:len(baseURL)-1]
+	}
+	return &GroupsServiceClient{BaseURL: baseURL, HTTPClient: defaultHTTPClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
 }
 
-func (c *GroupsServiceClient) ListGroups(ctx context.Context, req *ListGroupsRequest) (*ListGroupsResponse, error) {
+// Returns groups for the active business.
+func (c *GroupsServiceClient) ListGroups(ctx context.Context, req *ListGroupsRequest, opts ...CallOption) (*ListGroupsResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -64,6 +103,7 @@ func (c *GroupsServiceClient) ListGroups(ctx context.Context, req *ListGroupsReq
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -75,16 +115,17 @@ func (c *GroupsServiceClient) ListGroups(ctx context.Context, req *ListGroupsReq
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(ListGroupsResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *GroupsServiceClient) CreateGroup(ctx context.Context, req *CreateGroupRequest) (*CreateGroupResponse, error) {
+// Creates a new group.
+func (c *GroupsServiceClient) CreateGroup(ctx context.Context, req *CreateGroupRequest, opts ...CallOption) (*CreateGroupResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -103,6 +144,7 @@ func (c *GroupsServiceClient) CreateGroup(ctx context.Context, req *CreateGroupR
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -114,16 +156,17 @@ func (c *GroupsServiceClient) CreateGroup(ctx context.Context, req *CreateGroupR
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(CreateGroupResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *GroupsServiceClient) GetGroupDetail(ctx context.Context, req *GetGroupDetailRequest) (*GetGroupDetailResponse, error) {
+// Returns a group with its members.
+func (c *GroupsServiceClient) GetGroupDetail(ctx context.Context, req *GetGroupDetailRequest, opts ...CallOption) (*GetGroupDetailResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -142,6 +185,7 @@ func (c *GroupsServiceClient) GetGroupDetail(ctx context.Context, req *GetGroupD
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -153,16 +197,17 @@ func (c *GroupsServiceClient) GetGroupDetail(ctx context.Context, req *GetGroupD
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(GetGroupDetailResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *GroupsServiceClient) UpdateGroup(ctx context.Context, req *UpdateGroupRequest) (*UpdateGroupResponse, error) {
+// Updates an existing group.
+func (c *GroupsServiceClient) UpdateGroup(ctx context.Context, req *UpdateGroupRequest, opts ...CallOption) (*UpdateGroupResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -182,6 +227,7 @@ func (c *GroupsServiceClient) UpdateGroup(ctx context.Context, req *UpdateGroupR
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -193,16 +239,17 @@ func (c *GroupsServiceClient) UpdateGroup(ctx context.Context, req *UpdateGroupR
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(UpdateGroupResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *GroupsServiceClient) DeleteGroup(ctx context.Context, req *DeleteGroupRequest) (*DeleteGroupResponse, error) {
+// Deletes a group.
+func (c *GroupsServiceClient) DeleteGroup(ctx context.Context, req *DeleteGroupRequest, opts ...CallOption) (*DeleteGroupResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -221,6 +268,7 @@ func (c *GroupsServiceClient) DeleteGroup(ctx context.Context, req *DeleteGroupR
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -232,16 +280,17 @@ func (c *GroupsServiceClient) DeleteGroup(ctx context.Context, req *DeleteGroupR
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(DeleteGroupResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *GroupsServiceClient) AddGroupMembers(ctx context.Context, req *AddGroupMembersRequest) (*AddGroupMembersResponse, error) {
+// Adds users to a group.
+func (c *GroupsServiceClient) AddGroupMembers(ctx context.Context, req *AddGroupMembersRequest, opts ...CallOption) (*AddGroupMembersResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -261,6 +310,7 @@ func (c *GroupsServiceClient) AddGroupMembers(ctx context.Context, req *AddGroup
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -272,16 +322,17 @@ func (c *GroupsServiceClient) AddGroupMembers(ctx context.Context, req *AddGroup
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(AddGroupMembersResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *GroupsServiceClient) RemoveGroupMember(ctx context.Context, req *RemoveGroupMemberRequest) (*RemoveGroupMemberResponse, error) {
+// Removes a user from a group.
+func (c *GroupsServiceClient) RemoveGroupMember(ctx context.Context, req *RemoveGroupMemberRequest, opts ...CallOption) (*RemoveGroupMemberResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -301,6 +352,7 @@ func (c *GroupsServiceClient) RemoveGroupMember(ctx context.Context, req *Remove
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -312,16 +364,17 @@ func (c *GroupsServiceClient) RemoveGroupMember(ctx context.Context, req *Remove
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(RemoveGroupMemberResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *GroupsServiceClient) GetUserGroups(ctx context.Context, req *GetUserGroupsRequest) (*GetUserGroupsResponse, error) {
+// Returns the groups a user belongs to.
+func (c *GroupsServiceClient) GetUserGroups(ctx context.Context, req *GetUserGroupsRequest, opts ...CallOption) (*GetUserGroupsResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -340,6 +393,7 @@ func (c *GroupsServiceClient) GetUserGroups(ctx context.Context, req *GetUserGro
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -351,10 +405,10 @@ func (c *GroupsServiceClient) GetUserGroups(ctx context.Context, req *GetUserGro
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(GetUserGroupsResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil

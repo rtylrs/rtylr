@@ -10,7 +10,24 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
+
+type UnexpectedStatusError struct {
+	StatusCode int
+	Header     http.Header
+	Body       []byte
+}
+
+func (e *UnexpectedStatusError) Error() string {
+	return fmt.Sprintf("unexpected status %d: %s", e.StatusCode, e.Body)
+}
+
+var defaultHTTPClient = func() *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = 30 * time.Second
+	return &http.Client{Transport: transport}
+}()
 
 const defaultMaxResponseBodyBytes int64 = 8 << 20
 const defaultMaxSSELineBytes = 1 << 20
@@ -34,6 +51,24 @@ func readResponseBody(body io.Reader, limit int64) ([]byte, error) {
 	return data, nil
 }
 
+type CallOption func(*http.Request)
+
+func WithHeader(name, value string) CallOption {
+	return func(r *http.Request) { r.Header.Set(name, value) }
+}
+
+func WithRequestEditor(edit func(*http.Request)) CallOption {
+	return func(r *http.Request) { edit(r) }
+}
+
+func applyCallOptions(r *http.Request, opts []CallOption) {
+	for _, opt := range opts {
+		if opt != nil {
+			opt(r)
+		}
+	}
+}
+
 type LoyaltyServiceClient struct {
 	BaseURL              string
 	HTTPClient           *http.Client
@@ -43,10 +78,14 @@ type LoyaltyServiceClient struct {
 }
 
 func NewLoyaltyServiceClient(baseURL string) *LoyaltyServiceClient {
-	return &LoyaltyServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
+	for len(baseURL) > 0 && baseURL[len(baseURL)-1] == '/' {
+		baseURL = baseURL[:len(baseURL)-1]
+	}
+	return &LoyaltyServiceClient{BaseURL: baseURL, HTTPClient: defaultHTTPClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
 }
 
-func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoyaltyConfigRequest) (*GetLoyaltyConfigResponse, error) {
+// Returns the loyalty program configuration for the active business.
+func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoyaltyConfigRequest, opts ...CallOption) (*GetLoyaltyConfigResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -64,6 +103,7 @@ func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoy
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -75,16 +115,17 @@ func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoy
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(GetLoyaltyConfigResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *UpdateLoyaltyConfigRequest) (*UpdateLoyaltyConfigResponse, error) {
+// Updates the loyalty program configuration.
+func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *UpdateLoyaltyConfigRequest, opts ...CallOption) (*UpdateLoyaltyConfigResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -103,6 +144,7 @@ func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *Upd
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -114,16 +156,17 @@ func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *Upd
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(UpdateLoyaltyConfigResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req *ListLoyaltyTransactionsRequest) (*ListLoyaltyTransactionsResponse, error) {
+// Returns loyalty transactions, optionally filtered by customer.
+func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req *ListLoyaltyTransactionsRequest, opts ...CallOption) (*ListLoyaltyTransactionsResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -142,6 +185,7 @@ func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req 
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -153,16 +197,17 @@ func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req 
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(ListLoyaltyTransactionsResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *LoyaltyServiceClient) EarnPoints(ctx context.Context, req *EarnPointsRequest) (*EarnPointsResponse, error) {
+// Records points earned by a customer for an order.
+func (c *LoyaltyServiceClient) EarnPoints(ctx context.Context, req *EarnPointsRequest, opts ...CallOption) (*EarnPointsResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -181,6 +226,7 @@ func (c *LoyaltyServiceClient) EarnPoints(ctx context.Context, req *EarnPointsRe
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -192,16 +238,17 @@ func (c *LoyaltyServiceClient) EarnPoints(ctx context.Context, req *EarnPointsRe
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(EarnPointsResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *LoyaltyServiceClient) RedeemPoints(ctx context.Context, req *RedeemPointsRequest) (*RedeemPointsResponse, error) {
+// Redeems loyalty points for a customer.
+func (c *LoyaltyServiceClient) RedeemPoints(ctx context.Context, req *RedeemPointsRequest, opts ...CallOption) (*RedeemPointsResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -220,6 +267,7 @@ func (c *LoyaltyServiceClient) RedeemPoints(ctx context.Context, req *RedeemPoin
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -231,16 +279,17 @@ func (c *LoyaltyServiceClient) RedeemPoints(ctx context.Context, req *RedeemPoin
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(RedeemPointsResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *LoyaltyServiceClient) GetLoyaltyBalance(ctx context.Context, req *GetLoyaltyBalanceRequest) (*GetLoyaltyBalanceResponse, error) {
+// Returns the loyalty points balance for a customer.
+func (c *LoyaltyServiceClient) GetLoyaltyBalance(ctx context.Context, req *GetLoyaltyBalanceRequest, opts ...CallOption) (*GetLoyaltyBalanceResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -261,6 +310,7 @@ func (c *LoyaltyServiceClient) GetLoyaltyBalance(ctx context.Context, req *GetLo
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -272,10 +322,10 @@ func (c *LoyaltyServiceClient) GetLoyaltyBalance(ctx context.Context, req *GetLo
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(GetLoyaltyBalanceResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil

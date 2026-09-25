@@ -6,18 +6,30 @@ import (
 	"strconv"
 )
 
+// ReviewGoalPayload is a performance goal assigned to an employee within a review cycle.
 type ReviewGoalPayload struct {
-	Id              int64    `json:"id,omitempty"`
-	OwnerId         int64    `json:"owner_id,omitempty"`
-	EmployeeId      int64    `json:"employee_id,omitempty"`
-	ReviewCycleId   int64    `json:"review_cycle_id,omitempty"`
-	Title           string   `json:"title,omitempty"`
-	Description     string   `json:"description,omitempty"`
-	Weight          *float64 `json:"weight,omitempty"`
-	SuccessCriteria *string  `json:"success_criteria,omitempty"`
-	Status          string   `json:"status,omitempty"`
-	CreatedAt       int64    `json:"created_at,omitempty"`
-	UpdatedAt       int64    `json:"updated_at,omitempty"`
+	// Unique identifier for the review goal.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this goal belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee this goal is assigned to.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Review cycle this goal is part of.
+	ReviewCycleId int64 `json:"review_cycle_id,omitempty"`
+	// Short title summarising the goal.
+	Title string `json:"title,omitempty"`
+	// Detailed description of the goal and expectations.
+	Description string `json:"description,omitempty"`
+	// Relative importance of this goal within the cycle; absent if all goals are weighted equally.
+	Weight *float64 `json:"weight,omitempty"`
+	// Measurable criteria that define goal achievement; absent if not yet specified.
+	SuccessCriteria *string `json:"success_criteria,omitempty"`
+	// Goal status (active | achieved | missed).
+	Status string `json:"status,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ReviewGoalPayload) MarshalJSON() ([]byte, error) {
@@ -195,19 +207,32 @@ func (x *ReviewGoalPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// PerformanceReviewPayload is a single reviewer's evaluation of an employee within a review cycle.
 type PerformanceReviewPayload struct {
-	Id                   *int64  `json:"id,omitempty"`
-	OwnerId              int64   `json:"owner_id,omitempty"`
-	EmployeeId           int64   `json:"employee_id,omitempty"`
-	ReviewCycleId        int64   `json:"review_cycle_id,omitempty"`
-	ReviewerEmployeeId   int64   `json:"reviewer_employee_id,omitempty"`
-	ReviewType           string  `json:"review_type,omitempty"`
-	OverallRating        *string `json:"overall_rating,omitempty"`
-	Narrative            *string `json:"narrative,omitempty"`
-	Status               string  `json:"status,omitempty"`
-	SharedWithEmployeeAt *int64  `json:"shared_with_employee_at,omitempty"`
-	CreatedAt            int64   `json:"created_at,omitempty"`
-	UpdatedAt            int64   `json:"updated_at,omitempty"`
+	// Unique identifier for the performance review.
+	Id *int64 `json:"id,omitempty"`
+	// Tenant owner this review belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee being reviewed.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Review cycle this review is part of.
+	ReviewCycleId int64 `json:"review_cycle_id,omitempty"`
+	// Employee conducting the review.
+	ReviewerEmployeeId int64 `json:"reviewer_employee_id,omitempty"`
+	// Type of review (self | manager | peer).
+	ReviewType string `json:"review_type,omitempty"`
+	// Overall rating assigned by the reviewer; absent while still in draft.
+	OverallRating *string `json:"overall_rating,omitempty"`
+	// Free-form written feedback from the reviewer; absent while still in draft.
+	Narrative *string `json:"narrative,omitempty"`
+	// Workflow status (draft | submitted | completed | shared).
+	Status string `json:"status,omitempty"`
+	// Unix timestamp when the review was shared with the employee; absent if not yet shared.
+	SharedWithEmployeeAt *int64 `json:"shared_with_employee_at,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *PerformanceReviewPayload) MarshalJSON() ([]byte, error) {
@@ -427,16 +452,26 @@ func (x *PerformanceReviewPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ReviewCyclePayload is a recurring performance review period (e.g. an annual cycle).
 type ReviewCyclePayload struct {
-	Id          *int64 `json:"id,omitempty"`
-	OwnerId     int64  `json:"owner_id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Type        string `json:"type,omitempty"`
+	// Unique identifier for the review cycle.
+	Id *int64 `json:"id,omitempty"`
+	// Tenant owner this cycle belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Human-readable name for the cycle (e.g. "2026 Annual Review").
+	Name string `json:"name,omitempty"`
+	// Cycle type (annual | mid_year | probation | adhoc).
+	Type string `json:"type,omitempty"`
+	// Start of the review period (ISO-8601 date).
 	PeriodStart string `json:"period_start,omitempty"`
-	PeriodEnd   string `json:"period_end,omitempty"`
-	Status      string `json:"status,omitempty"`
-	CreatedAt   int64  `json:"created_at,omitempty"`
-	UpdatedAt   int64  `json:"updated_at,omitempty"`
+	// End of the review period (ISO-8601 date).
+	PeriodEnd string `json:"period_end,omitempty"`
+	// Workflow status (draft | open | in_review | completed).
+	Status string `json:"status,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ReviewCyclePayload) MarshalJSON() ([]byte, error) {
@@ -581,10 +616,14 @@ type ListReviewCyclesRequest struct {
 }
 
 type ListReviewCyclesResponse struct {
+	// Page of review cycles.
 	Cycles []*ReviewCyclePayload `json:"cycles,omitempty"`
-	Total  int64                 `json:"total,omitempty"`
-	Limit  int32                 `json:"limit,omitempty"`
-	Offset int32                 `json:"offset,omitempty"`
+	// Total number of review cycles across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListReviewCyclesResponse) GetCycles() []*ReviewCyclePayload {
@@ -620,10 +659,14 @@ func (x *ListReviewCyclesResponse) GetOffset() int32 {
 }
 
 type CreateReviewCycleRequest struct {
-	Name        string `json:"name,omitempty"`
-	Type        string `json:"type,omitempty"`
+	// Human-readable name for the cycle.
+	Name string `json:"name,omitempty"`
+	// Cycle type (annual | mid_year | probation | adhoc).
+	Type string `json:"type,omitempty"`
+	// Start of the review period (ISO-8601 date).
 	PeriodStart string `json:"period_start,omitempty"`
-	PeriodEnd   string `json:"period_end,omitempty"`
+	// End of the review period (ISO-8601 date).
+	PeriodEnd string `json:"period_end,omitempty"`
 }
 
 func (x *CreateReviewCycleRequest) GetName() string {
@@ -659,6 +702,7 @@ func (x *CreateReviewCycleRequest) GetPeriodEnd() string {
 }
 
 type CreateReviewCycleResponse struct {
+	// The newly created review cycle.
 	Cycle *ReviewCyclePayload `json:"cycle,omitempty"`
 }
 
@@ -671,6 +715,7 @@ func (x *CreateReviewCycleResponse) GetCycle() *ReviewCyclePayload {
 }
 
 type OpenReviewCycleRequest struct {
+	// ID of the review cycle to open for submissions.
 	CycleId *int64 `json:"cycle_id,omitempty"`
 }
 
@@ -719,6 +764,7 @@ func (x *OpenReviewCycleRequest) GetCycleId() int64 {
 }
 
 type OpenReviewCycleResponse struct {
+	// The review cycle after transitioning to open status.
 	Cycle *ReviewCyclePayload `json:"cycle,omitempty"`
 }
 
@@ -731,7 +777,9 @@ func (x *OpenReviewCycleResponse) GetCycle() *ReviewCyclePayload {
 }
 
 type ListGoalsRequest struct {
-	EmployeeId    *int64 `json:"employee_id,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by review cycle; absent to include all cycles.
 	ReviewCycleId *int64 `json:"review_cycle_id,omitempty"`
 }
 
@@ -805,10 +853,14 @@ func (x *ListGoalsRequest) GetReviewCycleId() int64 {
 }
 
 type ListGoalsResponse struct {
-	Goals  []*ReviewGoalPayload `json:"goals,omitempty"`
-	Total  int64                `json:"total,omitempty"`
-	Limit  int32                `json:"limit,omitempty"`
-	Offset int32                `json:"offset,omitempty"`
+	// Page of review goals matching the filters.
+	Goals []*ReviewGoalPayload `json:"goals,omitempty"`
+	// Total number of matching goals across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListGoalsResponse) GetGoals() []*ReviewGoalPayload {
@@ -844,9 +896,12 @@ func (x *ListGoalsResponse) GetOffset() int32 {
 }
 
 type SubmitReviewRequest struct {
-	ReviewId      *int64 `json:"review_id,omitempty"`
+	// ID of the performance review being submitted.
+	ReviewId *int64 `json:"review_id,omitempty"`
+	// Overall rating assigned by the reviewer.
 	OverallRating string `json:"overall_rating,omitempty"`
-	Narrative     string `json:"narrative,omitempty"`
+	// Free-form written feedback from the reviewer.
+	Narrative string `json:"narrative,omitempty"`
 }
 
 func (m *SubmitReviewRequest) MarshalJSON() ([]byte, error) {
@@ -910,6 +965,7 @@ func (x *SubmitReviewRequest) GetNarrative() string {
 }
 
 type SubmitReviewResponse struct {
+	// The submitted performance review.
 	Review *PerformanceReviewPayload `json:"review,omitempty"`
 }
 

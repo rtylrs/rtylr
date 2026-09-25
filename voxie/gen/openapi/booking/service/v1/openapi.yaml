@@ -10,12 +10,24 @@ paths:
             summary: listServices
             operationId: BookingServiceService_listServices
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/booking.service.v1.ListServicesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - BookingServiceService
@@ -28,12 +40,24 @@ paths:
                             $ref: '#/components/schemas/booking.service.v1.CreateServiceRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/booking.service.v1.CreateServiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /booking/service/v1/services/{id}:
         put:
             tags:
@@ -45,21 +69,59 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/booking.service.v1.UpdateServiceRequest'
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                description:
+                                    type: string
+                                duration_minutes:
+                                    exclusiveMinimum: 0
+                                    type: integer
+                                    format: int32
+                                price:
+                                    type: number
+                                    minimum: 0
+                                    format: double
+                                color:
+                                    type: string
+                                is_active:
+                                    type: boolean
+                            required:
+                                - name
+                                - description
+                                - duration_minutes
+                                - price
+                                - color
+                                - is_active
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/booking.service.v1.UpdateServiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - BookingServiceService
@@ -70,15 +132,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/booking.service.v1.DeleteServiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         booking.service.v1.ListServicesRequest:
@@ -97,12 +173,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -165,6 +244,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -177,6 +257,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -215,6 +296,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -225,3 +307,12 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: BookingServiceService

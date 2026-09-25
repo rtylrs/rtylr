@@ -2,9 +2,16 @@
 package v1
 
 import (
-	"errors"
 	"strings"
 )
+
+type ValidationErrors struct {
+	Violations []string
+}
+
+func (e *ValidationErrors) Error() string { return strings.Join(e.Violations, "; ") }
+
+func (e *ValidationErrors) ViolationList() []string { return e.Violations }
 
 func (m *Floor) Validate() error {
 	if m == nil {
@@ -12,7 +19,7 @@ func (m *Floor) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -42,7 +49,7 @@ func (m *CreateFloorRequest) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -53,7 +60,7 @@ func (m *CreateFloorResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -75,7 +82,7 @@ func (m *UpdateFloorBody) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -94,7 +101,7 @@ func (m *UpdateFloorRequest) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -105,7 +112,7 @@ func (m *UpdateFloorResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -119,7 +126,7 @@ func (m *DeleteFloorRequest) Validate() error {
 		violations = append(violations, "id must be greater than 0")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -130,7 +137,7 @@ func (m *DeleteFloorResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -141,7 +148,7 @@ func (m *ListFloorsRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -157,7 +164,7 @@ func (m *ListFloorsResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }

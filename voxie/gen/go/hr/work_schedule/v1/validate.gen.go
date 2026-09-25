@@ -2,9 +2,16 @@
 package v1
 
 import (
-	"errors"
 	"strings"
 )
+
+type ValidationErrors struct {
+	Violations []string
+}
+
+func (e *ValidationErrors) Error() string { return strings.Join(e.Violations, "; ") }
+
+func (e *ValidationErrors) ViolationList() []string { return e.Violations }
 
 func (m *WorkSchedulePayload) Validate() error {
 	if m == nil {
@@ -12,7 +19,7 @@ func (m *WorkSchedulePayload) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -23,7 +30,7 @@ func (m *ListWorkSchedulesRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -39,7 +46,7 @@ func (m *ListWorkSchedulesResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -89,7 +96,7 @@ func (m *CreateWorkScheduleRequest) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -105,7 +112,7 @@ func (m *CreateWorkScheduleResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -119,7 +126,7 @@ func (m *UpdateWorkScheduleBody) Validate() error {
 		violations = append(violations, "working_days must have at least 1 items")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -138,7 +145,7 @@ func (m *UpdateWorkScheduleRequest) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -154,7 +161,7 @@ func (m *UpdateWorkScheduleResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }

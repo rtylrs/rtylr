@@ -13,7 +13,9 @@ discountAmount?: number | undefined;
 taxRate?: number | undefined;
 total?: number | undefined;
 notes?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -77,12 +79,14 @@ return violations;
 
 export interface Order {
 id?: string | undefined;
+/** owner_id identifies the tenant that owns the resource. */
 ownerId?: string | undefined;
 sessionId?: string | undefined;
 tableId?: string | undefined;
 locationId?: string | undefined;
 orderNumber?: string | undefined;
 type?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
 customerId?: string | undefined;
 customerName?: string | undefined;
@@ -97,7 +101,9 @@ amountPaid?: number | undefined;
 changeDue?: number | undefined;
 notes?: string | undefined;
 kitchenNotes?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
+/** updated_at is when the record was last updated. */
 updatedAt?: string | undefined;
 paidAt?: string | undefined;
 items?: (OrderItem)[] | undefined;
@@ -452,6 +458,7 @@ export interface CreatePublicOrderResponse {
 orderId?: string | undefined;
 orderNumber?: string | undefined;
 status?: string | undefined;
+/** Opaque credential required to retrieve this order's public status. */
 publicToken?: string | undefined;
 }
 
@@ -533,7 +540,16 @@ return violations;
 
 export interface GetPublicOrderStatusRequest {
 orderId?: string | undefined;
+/**
+ * business_id scopes the lookup to the business the order belongs to,
+ * preventing cross-tenant order enumeration on this anonymous endpoint.
+ */
 businessId: string;
+/**
+ * Single-use? No: this credential is scoped to this order and is safe to
+ * present repeatedly for status polling. It must never be replaced by the
+ * sequential order ID alone.
+ */
 publicToken: string;
 }
 
@@ -599,11 +615,15 @@ return violations;
 
 export interface ListOrdersRequest {
 sessionId: string;
+/** status is the current lifecycle state. */
 status?: string | undefined;
 dateFrom?: string | undefined;
 dateTo?: string | undefined;
+/** search filters orders by order number, customer, or matching text. */
 search?: string | undefined;
+/** page is the one-based page number to return. */
 page?: number | undefined;
+/** page_size is the maximum number of orders to return. */
 pageSize?: number | undefined;
 }
 
@@ -648,9 +668,13 @@ return violations;
 
 export interface ListOrdersResponse {
 orders?: (Order)[] | undefined;
+/** total is the total number of matching records. */
 total?: number | undefined;
+/** has_more indicates another page is available. */
 hasMore?: boolean | undefined;
+/** page is the one-based page number returned. */
 page?: number | undefined;
+/** page_size is the page size returned. */
 pageSize?: number | undefined;
 }
 
@@ -787,6 +811,7 @@ return violations;
 }
 
 export interface UpdateOrderStatusBody {
+/** status is the current lifecycle state. */
 status: string;
 }
 
@@ -812,6 +837,7 @@ return violations;
 
 export interface UpdateOrderStatusRequest {
 orderId?: string | undefined;
+/** body carries the new order status bound from the HTTP payload. */
 body?: UpdateOrderStatusBody | undefined;
 }
 

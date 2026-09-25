@@ -6,26 +6,52 @@ import (
 	"strconv"
 )
 
+// ShiftPayload is a row in the shift table, which holds two kinds of record.
+// A template row is a reusable shift for a location: it carries location_id,
+// name and color, and has no staff_id. An attendance row records one staff
+// member's worked shift: it carries staff_id and date plus the clock and hours
+// fields. The two are told apart by whether staff_id is present.
 type ShiftPayload struct {
-	Id                   int64    `json:"id,omitempty"`
-	OwnerId              int64    `json:"owner_id,omitempty"`
-	LocationId           int64    `json:"location_id,omitempty"`
-	Name                 string   `json:"name,omitempty"`
-	StartTime            string   `json:"start_time,omitempty"`
-	EndTime              string   `json:"end_time,omitempty"`
-	Color                string   `json:"color,omitempty"`
-	StaffId              *int64   `json:"staff_id,omitempty"`
-	DepartmentId         *int64   `json:"department_id,omitempty"`
-	Date                 *string  `json:"date,omitempty"`
-	BreakDurationMinutes *int32   `json:"break_duration_minutes,omitempty"`
-	Status               *string  `json:"status,omitempty"`
-	ClockInAt            *int64   `json:"clock_in_at,omitempty"`
-	ClockOutAt           *int64   `json:"clock_out_at,omitempty"`
-	HoursWorked          *float64 `json:"hours_worked,omitempty"`
-	OvertimeHours        *float64 `json:"overtime_hours,omitempty"`
-	Notes                *string  `json:"notes,omitempty"`
-	CreatedAt            int64    `json:"created_at,omitempty"`
-	UpdatedAt            int64    `json:"updated_at,omitempty"`
+	// Unique identifier for the shift row.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this shift belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Location where this shift takes place. Zero on attendance rows, which have
+	// no location; kept non-optional so existing readers see no type change.
+	LocationId int64 `json:"location_id,omitempty"`
+	// Human-readable shift name (e.g. "Morning", "Night"). Empty on attendance
+	// rows; kept non-optional so existing readers see no type change.
+	Name string `json:"name,omitempty"`
+	// Shift start time (HH:MM 24-hour format).
+	StartTime string `json:"start_time,omitempty"`
+	// Shift end time (HH:MM 24-hour format).
+	EndTime string `json:"end_time,omitempty"`
+	// Hex colour code used to render this shift on the roster (e.g. "#4CAF50").
+	Color string `json:"color,omitempty"`
+	// Staff member whose worked shift this is; absent on template rows.
+	StaffId *int64 `json:"staff_id,omitempty"`
+	// Department the staff member worked under; absent when not tracked.
+	DepartmentId *int64 `json:"department_id,omitempty"`
+	// Calendar date this attendance row covers (ISO-8601); absent on template rows.
+	Date *string `json:"date,omitempty"`
+	// Unpaid break length in minutes, deducted from worked hours.
+	BreakDurationMinutes *int32 `json:"break_duration_minutes,omitempty"`
+	// Lifecycle state (scheduled | in_progress | completed | absent | cancelled).
+	Status *string `json:"status,omitempty"`
+	// Unix timestamp when the staff member clocked in; absent until clock-in.
+	ClockInAt *int64 `json:"clock_in_at,omitempty"`
+	// Unix timestamp when the staff member clocked out; absent until clock-out.
+	ClockOutAt *int64 `json:"clock_out_at,omitempty"`
+	// Hours worked on this shift, computed at clock-out.
+	HoursWorked *float64 `json:"hours_worked,omitempty"`
+	// Hours worked beyond the scheduled window.
+	OvertimeHours *float64 `json:"overtime_hours,omitempty"`
+	// Free-text note attached to this shift.
+	Notes *string `json:"notes,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ShiftPayload) MarshalJSON() ([]byte, error) {
@@ -341,15 +367,24 @@ func (x *ShiftPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ShiftAssignmentPayload assigns an employee to a shift on a given date.
 type ShiftAssignmentPayload struct {
-	Id         int64  `json:"id,omitempty"`
-	OwnerId    int64  `json:"owner_id,omitempty"`
-	EmployeeId int64  `json:"employee_id,omitempty"`
-	ShiftId    int64  `json:"shift_id,omitempty"`
-	Date       string `json:"date,omitempty"`
-	Status     string `json:"status,omitempty"`
-	CreatedAt  int64  `json:"created_at,omitempty"`
-	UpdatedAt  int64  `json:"updated_at,omitempty"`
+	// Unique identifier for the assignment.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this assignment belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee assigned to the shift.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Shift template being assigned.
+	ShiftId int64 `json:"shift_id,omitempty"`
+	// Date the assignment is for (ISO-8601 date).
+	Date string `json:"date,omitempty"`
+	// Assignment status (scheduled | worked | missed | swapped).
+	Status string `json:"status,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ShiftAssignmentPayload) MarshalJSON() ([]byte, error) {
@@ -496,12 +531,18 @@ func (x *ShiftAssignmentPayload) GetUpdatedAt() int64 {
 }
 
 type ListShiftsRequest struct {
-	LocationId *int64  `json:"location_id,omitempty"`
-	StaffId    *int64  `json:"staff_id,omitempty"`
-	Date       *string `json:"date,omitempty"`
-	Kind       *string `json:"kind,omitempty"`
-	Limit      *int32  `json:"limit,omitempty"`
-	Offset     *int32  `json:"offset,omitempty"`
+	// Filter by location; absent to include all locations.
+	LocationId *int64 `json:"location_id,omitempty"`
+	// Filter to one staff member's attendance rows; absent to include all.
+	StaffId *int64 `json:"staff_id,omitempty"`
+	// Filter attendance rows to a single date (ISO-8601); absent to include all.
+	Date *string `json:"date,omitempty"`
+	// Restrict to one record kind (template | attendance); absent returns both.
+	Kind *string `json:"kind,omitempty"`
+	// Page size; absent applies the server default.
+	Limit *int32 `json:"limit,omitempty"`
+	// Offset for pagination; absent starts at the first page.
+	Offset *int32 `json:"offset,omitempty"`
 }
 
 func (m *ListShiftsRequest) MarshalJSON() ([]byte, error) {
@@ -622,10 +663,14 @@ func (x *ListShiftsRequest) GetOffset() int32 {
 }
 
 type ListShiftsResponse struct {
+	// Shift templates matching the filter.
 	Shifts []*ShiftPayload `json:"shifts,omitempty"`
-	Total  int64           `json:"total,omitempty"`
-	Limit  int32           `json:"limit,omitempty"`
-	Offset int32           `json:"offset,omitempty"`
+	// Total number of matching shifts across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListShiftsResponse) GetShifts() []*ShiftPayload {
@@ -660,18 +705,33 @@ func (x *ListShiftsResponse) GetOffset() int32 {
 	return x.Offset
 }
 
+// CreateShiftRequest creates either a template row or an attendance row.
+// Supply location_id and name for a template; supply staff_id and date for an
+// attendance row. location_id and name are no longer unconditionally required
+// because attendance rows have neither.
 type CreateShiftRequest struct {
-	LocationId           *int64  `json:"location_id,omitempty"`
-	Name                 *string `json:"name,omitempty"`
-	StartTime            string  `json:"start_time,omitempty"`
-	EndTime              string  `json:"end_time,omitempty"`
-	Color                *string `json:"color,omitempty"`
-	StaffId              *int64  `json:"staff_id,omitempty"`
-	DepartmentId         *int64  `json:"department_id,omitempty"`
-	Date                 *string `json:"date,omitempty"`
-	BreakDurationMinutes *int32  `json:"break_duration_minutes,omitempty"`
-	Status               *string `json:"status,omitempty"`
-	Notes                *string `json:"notes,omitempty"`
+	// Location where this shift takes place; required for a template row.
+	LocationId *int64 `json:"location_id,omitempty"`
+	// Human-readable shift name; required for a template row.
+	Name *string `json:"name,omitempty"`
+	// Shift start time (HH:MM 24-hour format).
+	StartTime string `json:"start_time,omitempty"`
+	// Shift end time (HH:MM 24-hour format).
+	EndTime string `json:"end_time,omitempty"`
+	// Hex colour code for roster display; defaults server-side when absent.
+	Color *string `json:"color,omitempty"`
+	// Staff member this attendance row belongs to; required for an attendance row.
+	StaffId *int64 `json:"staff_id,omitempty"`
+	// Department the staff member worked under.
+	DepartmentId *int64 `json:"department_id,omitempty"`
+	// Calendar date of the attendance row (ISO-8601); required for an attendance row.
+	Date *string `json:"date,omitempty"`
+	// Unpaid break length in minutes.
+	BreakDurationMinutes *int32 `json:"break_duration_minutes,omitempty"`
+	// Lifecycle state; defaults to "scheduled" when absent.
+	Status *string `json:"status,omitempty"`
+	// Free-text note attached to this shift.
+	Notes *string `json:"notes,omitempty"`
 }
 
 func (m *CreateShiftRequest) MarshalJSON() ([]byte, error) {
@@ -857,6 +917,7 @@ func (x *CreateShiftRequest) GetNotes() string {
 }
 
 type CreateShiftResponse struct {
+	// The newly created shift.
 	Shift *ShiftPayload `json:"shift,omitempty"`
 }
 
@@ -868,18 +929,31 @@ func (x *CreateShiftResponse) GetShift() *ShiftPayload {
 	return x.Shift
 }
 
+// UpdateShiftRequest edits an existing shift row of either kind. Only the
+// fields present are applied; absent fields keep their stored value.
 type UpdateShiftRequest struct {
-	Id                   int64   `json:"id,omitempty"`
-	LocationId           *int64  `json:"location_id,omitempty"`
-	Name                 *string `json:"name,omitempty"`
-	StartTime            *string `json:"start_time,omitempty"`
-	EndTime              *string `json:"end_time,omitempty"`
-	Color                *string `json:"color,omitempty"`
-	DepartmentId         *int64  `json:"department_id,omitempty"`
-	Date                 *string `json:"date,omitempty"`
-	BreakDurationMinutes *int32  `json:"break_duration_minutes,omitempty"`
-	Status               *string `json:"status,omitempty"`
-	Notes                *string `json:"notes,omitempty"`
+	// Identifier of the shift row to update.
+	Id int64 `json:"id,omitempty"`
+	// New location for a template row.
+	LocationId *int64 `json:"location_id,omitempty"`
+	// New shift name for a template row.
+	Name *string `json:"name,omitempty"`
+	// New start time (HH:MM 24-hour format).
+	StartTime *string `json:"start_time,omitempty"`
+	// New end time (HH:MM 24-hour format).
+	EndTime *string `json:"end_time,omitempty"`
+	// New hex colour code for roster display.
+	Color *string `json:"color,omitempty"`
+	// New department for an attendance row.
+	DepartmentId *int64 `json:"department_id,omitempty"`
+	// New calendar date for an attendance row (ISO-8601).
+	Date *string `json:"date,omitempty"`
+	// New unpaid break length in minutes.
+	BreakDurationMinutes *int32 `json:"break_duration_minutes,omitempty"`
+	// New lifecycle state.
+	Status *string `json:"status,omitempty"`
+	// New free-text note.
+	Notes *string `json:"notes,omitempty"`
 }
 
 func (m *UpdateShiftRequest) MarshalJSON() ([]byte, error) {
@@ -1066,6 +1140,7 @@ func (x *UpdateShiftRequest) GetNotes() string {
 }
 
 type UpdateShiftResponse struct {
+	// The shift as stored after the update.
 	Shift *ShiftPayload `json:"shift,omitempty"`
 }
 
@@ -1078,6 +1153,7 @@ func (x *UpdateShiftResponse) GetShift() *ShiftPayload {
 }
 
 type DeleteShiftRequest struct {
+	// Identifier of the shift row to delete.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1119,6 +1195,7 @@ func (x *DeleteShiftRequest) GetId() int64 {
 }
 
 type DeleteShiftResponse struct {
+	// Whether the shift was deleted.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -1131,9 +1208,12 @@ func (x *DeleteShiftResponse) GetSuccess() bool {
 }
 
 type CreateShiftAssignmentRequest struct {
+	// Employee to assign.
 	EmployeeId *int64 `json:"employee_id,omitempty"`
-	ShiftId    *int64 `json:"shift_id,omitempty"`
-	Date       string `json:"date,omitempty"`
+	// Shift template to assign.
+	ShiftId *int64 `json:"shift_id,omitempty"`
+	// Date of the assignment (ISO-8601 date).
+	Date string `json:"date,omitempty"`
 }
 
 func (m *CreateShiftAssignmentRequest) MarshalJSON() ([]byte, error) {
@@ -1214,8 +1294,22 @@ func (x *CreateShiftAssignmentRequest) GetDate() string {
 }
 
 type CreateShiftAssignmentResponse struct {
+	// The newly created assignment.
 	Assignment *ShiftAssignmentPayload `json:"assignment,omitempty"`
-	Warnings   []string                `json:"warnings,omitempty"`
+	// Human-readable availability warnings raised against the assignee for this
+	// date (e.g. "Jane Doe is unavailable 09:00-12:00 on 2026-08-20"), read off
+	// the AvailabilityPayload rows in this package.
+	//
+	// Advisory only. The assignment is still created, because a scheduler
+	// legitimately needs to staff someone against a stated preference: cover for
+	// a no-show, a swap the pair agreed offline, a rush the roster did not
+	// anticipate. A hard block would make those ordinary cases impossible
+	// without first editing the availability record, so the check informs rather
+	// than refuses. Empty when no conflict was found.
+	//
+	// Mirrors GetRosterResponse.conflicts, which already reports this class of
+	// problem the same non-blocking way.
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 func (x *CreateShiftAssignmentResponse) GetAssignment() *ShiftAssignmentPayload {
@@ -1235,8 +1329,10 @@ func (x *CreateShiftAssignmentResponse) GetWarnings() []string {
 }
 
 type GetRosterRequest struct {
-	LocationId int64  `json:"location_id,omitempty"`
-	WeekStart  string `json:"week_start,omitempty"`
+	// Location to fetch the roster for.
+	LocationId int64 `json:"location_id,omitempty"`
+	// Monday of the week to retrieve (ISO-8601 date).
+	WeekStart string `json:"week_start,omitempty"`
 }
 
 func (m *GetRosterRequest) MarshalJSON() ([]byte, error) {
@@ -1285,8 +1381,10 @@ func (x *GetRosterRequest) GetWeekStart() string {
 }
 
 type GetRosterResponse struct {
+	// All shift assignments for the requested week and location.
 	Assignments []*ShiftAssignmentPayload `json:"assignments,omitempty"`
-	Conflicts   []string                  `json:"conflicts,omitempty"`
+	// Human-readable conflict descriptions (e.g. "John Smith: double-booked on 2026-04-15").
+	Conflicts []string `json:"conflicts,omitempty"`
 }
 
 func (x *GetRosterResponse) GetAssignments() []*ShiftAssignmentPayload {
@@ -1306,8 +1404,12 @@ func (x *GetRosterResponse) GetConflicts() []string {
 }
 
 type PublishRosterRequest struct {
+	// Location to publish the roster for. Optional, and currently not used to
+	// scope the publish: a publish covers every location's assignments for the
+	// week, so requiring it rejected callers over a field that had no effect.
 	LocationId *int64 `json:"location_id,omitempty"`
-	WeekStart  string `json:"week_start,omitempty"`
+	// Monday of the week being published (ISO-8601 date).
+	WeekStart string `json:"week_start,omitempty"`
 }
 
 func (m *PublishRosterRequest) MarshalJSON() ([]byte, error) {
@@ -1363,6 +1465,7 @@ func (x *PublishRosterRequest) GetWeekStart() string {
 }
 
 type PublishRosterResponse struct {
+	// Whether the roster was successfully published.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -1374,17 +1477,48 @@ func (x *PublishRosterResponse) GetSuccess() bool {
 	return x.Success
 }
 
+// AvailabilityPayload is one window in which a staff member can, or explicitly
+// cannot, be scheduled for a shift. A row is either a recurring weekly pattern
+// (day_of_week set, specific_date absent) or a single-date override
+// (specific_date set, day_of_week absent); an override takes precedence over the
+// recurring pattern for the date it names.
+//
+// Exactly one of day_of_week and specific_date is set on every stored row. .onk
+// has no cross-field decorator for that constraint (the same gap documented on
+// flow.task.v1.ListTasksRequest), so it is enforced in the onion handler rather
+// than in this schema.
 type AvailabilityPayload struct {
-	Id           int64   `json:"id,omitempty"`
-	StaffId      int64   `json:"staff_id,omitempty"`
-	OwnerId      int64   `json:"owner_id,omitempty"`
-	DayOfWeek    *int32  `json:"day_of_week,omitempty"`
+	// Unique identifier for the availability entry.
+	Id int64 `json:"id,omitempty"`
+	// Staff member whose availability this is. Matches ShiftPayload.staff_id, not
+	// the older ShiftAssignmentPayload.employee_id in this same package.
+	StaffId int64 `json:"staff_id,omitempty"`
+	// Tenant owner this entry belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Weekday of a recurring pattern: 0 = Monday through 6 = Sunday. Absent on a
+	// single-date override. Numbered Monday-first so the value indexes the same
+	// week the roster already uses (GetRosterRequest.week_start is a Monday).
+	// This is deliberately not JavaScript's Date.getDay(), where 0 = Sunday.
+	DayOfWeek *int32 `json:"day_of_week,omitempty"`
+	// Calendar date a single-date override applies to (ISO-8601, e.g.
+	// "2026-08-17"). Absent on a recurring pattern.
 	SpecificDate *string `json:"specific_date,omitempty"`
-	StartTime    string  `json:"start_time,omitempty"`
-	EndTime      string  `json:"end_time,omitempty"`
-	IsAvailable  bool    `json:"is_available,omitempty"`
-	CreatedAt    int64   `json:"created_at,omitempty"`
-	UpdatedAt    int64   `json:"updated_at,omitempty"`
+	// Start of the window (HH:MM 24-hour format).
+	StartTime string `json:"start_time,omitempty"`
+	// End of the window (HH:MM 24-hour format). An end_time earlier than
+	// start_time means the window crosses midnight and ends the following day,
+	// which is how availability for a night shift is expressed.
+	EndTime string `json:"end_time,omitempty"`
+	// Whether the staff member can be scheduled in this window. False marks a
+	// deliberate block, which is how a single-date override withdraws
+	// availability that the recurring pattern would otherwise grant.
+	// Wire note: the generated Go server tags every scalar `omitempty`, so a
+	// false value is dropped from the response body. Read an absent key as false.
+	IsAvailable bool `json:"is_available,omitempty"`
+	// Unix timestamp when this entry was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this entry was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *AvailabilityPayload) MarshalJSON() ([]byte, error) {
@@ -1544,13 +1678,26 @@ func (x *AvailabilityPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ListAvailabilityRequest filters availability entries. Recurring patterns carry
+// no date, so date_from and date_to constrain single-date overrides only and
+// leave recurring rows in the result; narrow those with day_of_week.
 type ListAvailabilityRequest struct {
-	StaffId   *int64  `json:"staff_id,omitempty"`
-	DayOfWeek *int32  `json:"day_of_week,omitempty"`
-	DateFrom  *string `json:"date_from,omitempty"`
-	DateTo    *string `json:"date_to,omitempty"`
-	Limit     *int32  `json:"limit,omitempty"`
-	Offset    *int32  `json:"offset,omitempty"`
+	// Filter to one staff member; absent returns entries for every staff member
+	// in the tenant, which is what the weekly roster grid loads in one call.
+	StaffId *int64 `json:"staff_id,omitempty"`
+	// Filter recurring patterns to one weekday, 0 = Monday through 6 = Sunday;
+	// absent includes every weekday.
+	DayOfWeek *int32 `json:"day_of_week,omitempty"`
+	// Inclusive start of a date range matched against specific_date (ISO-8601);
+	// absent leaves the range open at the start.
+	DateFrom *string `json:"date_from,omitempty"`
+	// Inclusive end of a date range matched against specific_date (ISO-8601);
+	// absent leaves the range open at the end.
+	DateTo *string `json:"date_to,omitempty"`
+	// Page size; absent applies the server default.
+	Limit *int32 `json:"limit,omitempty"`
+	// Offset for pagination; absent starts at the first page.
+	Offset *int32 `json:"offset,omitempty"`
 }
 
 func (m *ListAvailabilityRequest) MarshalJSON() ([]byte, error) {
@@ -1658,10 +1805,15 @@ func (x *ListAvailabilityRequest) GetOffset() int32 {
 }
 
 type ListAvailabilityResponse struct {
+	// Availability entries matching the filters, recurring patterns and
+	// single-date overrides alike.
 	Entries []*AvailabilityPayload `json:"entries,omitempty"`
-	Total   int64                  `json:"total,omitempty"`
-	Limit   int32                  `json:"limit,omitempty"`
-	Offset  int32                  `json:"offset,omitempty"`
+	// Total number of matching entries across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListAvailabilityResponse) GetEntries() []*AvailabilityPayload {
@@ -1696,14 +1848,37 @@ func (x *ListAvailabilityResponse) GetOffset() int32 {
 	return x.Offset
 }
 
+// SetAvailabilityRequest creates or updates one availability window. With id
+// present the identified entry is replaced. With id absent the write upserts on
+// owner_id, staff_id, start_time and whichever of day_of_week or specific_date
+// is set, so re-submitting an unchanged window is idempotent instead of
+// producing a duplicate. start_time belongs to that key so one staff member can
+// hold several windows on the same day, for example a split shift of 09:00 to
+// 12:00 and 14:00 to 18:00.
+//
+// Supply exactly one of day_of_week and specific_date. As on
+// AvailabilityPayload, no decorator can express that, so the handler rejects a
+// request carrying both or neither.
 type SetAvailabilityRequest struct {
-	Id           *int64  `json:"id,omitempty"`
-	StaffId      *int64  `json:"staff_id,omitempty"`
-	DayOfWeek    *int32  `json:"day_of_week,omitempty"`
+	// Entry to replace; absent creates the entry or upserts it by natural key.
+	Id *int64 `json:"id,omitempty"`
+	// Staff member this availability is for.
+	StaffId *int64 `json:"staff_id,omitempty"`
+	// Weekday for a recurring pattern: 0 = Monday through 6 = Sunday.
+	DayOfWeek *int32 `json:"day_of_week,omitempty"`
+	// Calendar date for a single-date override (ISO-8601).
 	SpecificDate *string `json:"specific_date,omitempty"`
-	StartTime    string  `json:"start_time,omitempty"`
-	EndTime      string  `json:"end_time,omitempty"`
-	IsAvailable  *bool   `json:"is_available,omitempty"`
+	// Start of the window (HH:MM 24-hour format).
+	StartTime string `json:"start_time,omitempty"`
+	// End of the window (HH:MM 24-hour format). Earlier than start_time means the
+	// window crosses midnight into the following day.
+	EndTime string `json:"end_time,omitempty"`
+	// Whether the staff member can be scheduled in this window. Optional so that
+	// an explicit false arrives as a set value rather than as a decoded zero:
+	// absent means true, the ordinary case of declaring availability, and false
+	// marks a deliberate block. Without that distinction, omitting the field
+	// would silently block the window.
+	IsAvailable *bool `json:"is_available,omitempty"`
 }
 
 func (m *SetAvailabilityRequest) MarshalJSON() ([]byte, error) {
@@ -1828,6 +2003,7 @@ func (x *SetAvailabilityRequest) GetIsAvailable() bool {
 }
 
 type SetAvailabilityResponse struct {
+	// The availability entry as stored after the write.
 	Entry *AvailabilityPayload `json:"entry,omitempty"`
 }
 
@@ -1840,6 +2016,7 @@ func (x *SetAvailabilityResponse) GetEntry() *AvailabilityPayload {
 }
 
 type DeleteAvailabilityRequest struct {
+	// Identifier of the availability entry to delete.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1881,6 +2058,7 @@ func (x *DeleteAvailabilityRequest) GetId() int64 {
 }
 
 type DeleteAvailabilityResponse struct {
+	// Whether the availability entry was deleted.
 	Success bool `json:"success,omitempty"`
 }
 

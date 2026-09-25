@@ -14,21 +14,43 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/pos.orders.splits.v1.SplitOrderRequest'
+                            type: object
+                            properties:
+                                splits:
+                                    type: array
+                                    items:
+                                        $ref: '#/components/schemas/pos.orders.v1.SplitGroup'
+                                    minItems: 1
+                            required:
+                                - splits
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.splits.v1.SplitOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.orders.splits.v1.SplitOrderRequest:
@@ -37,6 +59,7 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 splits:
                     type: array
@@ -53,6 +76,7 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
             required:
                 - item_ids
@@ -63,9 +87,19 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                 message:
                     type: string
             required:
                 - order_ids
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OrderSplitService

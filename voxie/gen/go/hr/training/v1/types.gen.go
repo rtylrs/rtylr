@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// TrainingCourse is a training course offered to staff.
 type TrainingCourse struct {
 	Id            int64   `json:"id,omitempty"`
 	OwnerId       int64   `json:"owner_id,omitempty"`

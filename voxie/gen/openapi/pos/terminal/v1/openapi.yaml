@@ -11,12 +11,24 @@ paths:
             description: Returns terminals for the active business.
             operationId: TerminalService_listTerminals
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.terminal.v1.ListTerminalsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - TerminalService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/pos.terminal.v1.CreateTerminalRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.terminal.v1.CreateTerminalResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/terminal/v1/terminals/{id}:
         put:
             tags:
@@ -48,7 +72,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -59,12 +85,24 @@ paths:
                             description: body carries updatable terminal fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.terminal.v1.UpdateTerminalResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/terminal/v1/terminals/heartbeat:
         post:
             tags:
@@ -79,12 +117,24 @@ paths:
                             $ref: '#/components/schemas/pos.terminal.v1.HeartbeatTerminalRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.terminal.v1.HeartbeatTerminalResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.terminal.v1.ListTerminalsRequest:
@@ -103,12 +153,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -135,6 +188,7 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -149,6 +203,7 @@ components:
             properties:
                 terminal_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -161,6 +216,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -175,6 +231,7 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -200,6 +257,7 @@ components:
                 terminal_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - terminal_id
@@ -210,3 +268,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TerminalService
+      description: TerminalService defines POS terminal device endpoints.

@@ -6,29 +6,31 @@ import (
 	"strconv"
 )
 
+// Customer is a CRM customer profile with loyalty and engagement data.
 type Customer struct {
-	Id            int64           `json:"id,omitempty"`
-	OwnerId       int64           `json:"owner_id,omitempty"`
-	FirstName     string          `json:"first_name,omitempty"`
-	LastName      string          `json:"last_name,omitempty"`
-	Email         string          `json:"email,omitempty"`
-	Phone         string          `json:"phone,omitempty"`
-	DateOfBirth   *string         `json:"date_of_birth,omitempty"`
-	Gender        string          `json:"gender,omitempty"`
-	Address       string          `json:"address,omitempty"`
-	City          string          `json:"city,omitempty"`
-	Country       string          `json:"country,omitempty"`
-	LoyaltyPoints int64           `json:"loyalty_points,omitempty"`
-	TotalSpent    float64         `json:"total_spent,omitempty"`
-	VisitCount    int64           `json:"visit_count,omitempty"`
-	LastVisitAt   *string         `json:"last_visit_at,omitempty"`
-	LoyaltyTier   string          `json:"loyalty_tier,omitempty"`
-	Tags          []string        `json:"tags,omitempty"`
-	Notes         string          `json:"notes,omitempty"`
-	Consent       map[string]bool `json:"consent,omitempty"`
-	IsActive      bool            `json:"is_active,omitempty"`
-	CreatedAt     string          `json:"created_at,omitempty"`
-	UpdatedAt     string          `json:"updated_at,omitempty"`
+	Id            int64    `json:"id,omitempty"`
+	OwnerId       int64    `json:"owner_id,omitempty"`
+	FirstName     string   `json:"first_name,omitempty"`
+	LastName      string   `json:"last_name,omitempty"`
+	Email         string   `json:"email,omitempty"`
+	Phone         string   `json:"phone,omitempty"`
+	DateOfBirth   *string  `json:"date_of_birth,omitempty"`
+	Gender        string   `json:"gender,omitempty"`
+	Address       string   `json:"address,omitempty"`
+	City          string   `json:"city,omitempty"`
+	Country       string   `json:"country,omitempty"`
+	LoyaltyPoints int64    `json:"loyalty_points,omitempty"`
+	TotalSpent    float64  `json:"total_spent,omitempty"`
+	VisitCount    int64    `json:"visit_count,omitempty"`
+	LastVisitAt   *string  `json:"last_visit_at,omitempty"`
+	LoyaltyTier   string   `json:"loyalty_tier,omitempty"`
+	Tags          []string `json:"tags,omitempty"`
+	Notes         string   `json:"notes,omitempty"`
+	// Explicit communication consent captured at customer creation/update.
+	Consent   map[string]bool `json:"consent,omitempty"`
+	IsActive  bool            `json:"is_active,omitempty"`
+	CreatedAt string          `json:"created_at,omitempty"`
+	UpdatedAt string          `json:"updated_at,omitempty"`
 }
 
 func (m *Customer) MarshalJSON() ([]byte, error) {
@@ -275,8 +277,9 @@ func (x *Customer) GetUpdatedAt() string {
 }
 
 type CreateCustomerRequest struct {
-	FirstName   string          `json:"first_name,omitempty"`
-	LastName    string          `json:"last_name,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
+	LastName  string `json:"last_name,omitempty"`
+	// Not yet enforced server-side; clients may send "".
 	Email       string          `json:"email,omitempty"`
 	Phone       string          `json:"phone,omitempty"`
 	DateOfBirth string          `json:"date_of_birth,omitempty"`
@@ -542,8 +545,11 @@ func (x *GetCustomerResponse) GetCustomer() *Customer {
 }
 
 type ListCustomersRequest struct {
-	Search   string `json:"search,omitempty"`
-	Tier     string `json:"tier,omitempty"`
+	// Filters customers by name, email, or phone.
+	Search string `json:"search,omitempty"`
+	// Filters by loyalty tier.
+	Tier string `json:"tier,omitempty"`
+	// Filters by customer tag.
 	Tag      string `json:"tag,omitempty"`
 	Page     int64  `json:"page,omitempty"`
 	PageSize int64  `json:"page_size,omitempty"`
@@ -717,8 +723,9 @@ func (x *ListCustomersResponse) GetPageSize() int64 {
 }
 
 type UpdateCustomerBody struct {
-	FirstName   string          `json:"first_name,omitempty"`
-	LastName    string          `json:"last_name,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
+	LastName  string `json:"last_name,omitempty"`
+	// Not yet enforced server-side; clients may send "".
 	Email       string          `json:"email,omitempty"`
 	Phone       string          `json:"phone,omitempty"`
 	DateOfBirth string          `json:"date_of_birth,omitempty"`

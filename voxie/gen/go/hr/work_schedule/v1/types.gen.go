@@ -6,19 +6,32 @@ import (
 	"strconv"
 )
 
+// WorkSchedulePayload is a recurring staff work schedule.
 type WorkSchedulePayload struct {
-	Id                       int64    `json:"id,omitempty"`
-	OwnerId                  int64    `json:"owner_id,omitempty"`
-	Name                     string   `json:"name,omitempty"`
-	WorkingDays              []string `json:"working_days,omitempty"`
-	StartTime                string   `json:"start_time,omitempty"`
-	EndTime                  string   `json:"end_time,omitempty"`
-	BreakMinutes             int32    `json:"break_minutes,omitempty"`
-	ContractedHoursPerWeek   float64  `json:"contracted_hours_per_week,omitempty"`
-	DailyOtThresholdMinutes  int32    `json:"daily_ot_threshold_minutes,omitempty"`
-	WeeklyOtThresholdMinutes int32    `json:"weekly_ot_threshold_minutes,omitempty"`
-	CreatedAt                int64    `json:"created_at,omitempty"`
-	UpdatedAt                int64    `json:"updated_at,omitempty"`
+	// Unique identifier for the work schedule.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this schedule belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Display name of the schedule (e.g. "Standard 9-5").
+	Name string `json:"name,omitempty"`
+	// Days of the week this schedule applies to (e.g. ["monday", "tuesday"]).
+	WorkingDays []string `json:"working_days,omitempty"`
+	// Shift start time in HH:MM 24-hour format.
+	StartTime string `json:"start_time,omitempty"`
+	// Shift end time in HH:MM 24-hour format.
+	EndTime string `json:"end_time,omitempty"`
+	// Duration of the daily break in minutes.
+	BreakMinutes int32 `json:"break_minutes,omitempty"`
+	// Total contracted hours per week (e.g. 40.0).
+	ContractedHoursPerWeek float64 `json:"contracted_hours_per_week,omitempty"`
+	// Daily overtime threshold in minutes; hours beyond this count as OT.
+	DailyOtThresholdMinutes int32 `json:"daily_ot_threshold_minutes,omitempty"`
+	// Weekly overtime threshold in minutes; hours beyond this count as OT.
+	WeeklyOtThresholdMinutes int32 `json:"weekly_ot_threshold_minutes,omitempty"`
+	// Unix timestamp when this schedule was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this schedule was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *WorkSchedulePayload) MarshalJSON() ([]byte, error) {
@@ -177,7 +190,9 @@ func (x *WorkSchedulePayload) GetUpdatedAt() int64 {
 }
 
 type ListWorkSchedulesRequest struct {
-	Limit  int32  `json:"limit,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// offset is the number of records to skip, for paging through the list.
 	Offset *int32 `json:"offset,omitempty"`
 }
 
@@ -201,9 +216,17 @@ func (x *ListWorkSchedulesRequest) GetOffset() int32 {
 	return *x.Offset
 }
 
+// ListWorkSchedulesResponse lists work schedules for the tenant.
+//
+// Read by Flow to size a member's workload bar against the hours they are
+// actually contracted for, resolved through Employee.work_schedule_id. Before
+// this had an RPC, Flow hardcoded 40 hours for everyone, which reads a
+// part-timer as under-loaded and a four-day week as a shortfall.
 type ListWorkSchedulesResponse struct {
+	// All work schedules for the tenant.
 	Schedules []*WorkSchedulePayload `json:"schedules,omitempty"`
-	Total     int32                  `json:"total,omitempty"`
+	// total is the total number of schedules for the tenant, for pagination math.
+	Total int32 `json:"total,omitempty"`
 }
 
 func (x *ListWorkSchedulesResponse) GetSchedules() []*WorkSchedulePayload {
@@ -223,14 +246,22 @@ func (x *ListWorkSchedulesResponse) GetTotal() int32 {
 }
 
 type CreateWorkScheduleRequest struct {
-	Name                     string   `json:"name,omitempty"`
-	WorkingDays              []string `json:"working_days,omitempty"`
-	StartTime                string   `json:"start_time,omitempty"`
-	EndTime                  string   `json:"end_time,omitempty"`
-	BreakMinutes             *int32   `json:"break_minutes,omitempty"`
-	ContractedHoursPerWeek   float64  `json:"contracted_hours_per_week,omitempty"`
-	DailyOtThresholdMinutes  *int32   `json:"daily_ot_threshold_minutes,omitempty"`
-	WeeklyOtThresholdMinutes *int32   `json:"weekly_ot_threshold_minutes,omitempty"`
+	// Display name of the schedule.
+	Name string `json:"name,omitempty"`
+	// Days of the week this schedule applies to.
+	WorkingDays []string `json:"working_days,omitempty"`
+	// Shift start time in HH:MM 24-hour format.
+	StartTime string `json:"start_time,omitempty"`
+	// Shift end time in HH:MM 24-hour format.
+	EndTime string `json:"end_time,omitempty"`
+	// Duration of the daily break in minutes.
+	BreakMinutes *int32 `json:"break_minutes,omitempty"`
+	// Total contracted hours per week.
+	ContractedHoursPerWeek float64 `json:"contracted_hours_per_week,omitempty"`
+	// Daily overtime threshold in minutes.
+	DailyOtThresholdMinutes *int32 `json:"daily_ot_threshold_minutes,omitempty"`
+	// Weekly overtime threshold in minutes.
+	WeeklyOtThresholdMinutes *int32 `json:"weekly_ot_threshold_minutes,omitempty"`
 }
 
 func (x *CreateWorkScheduleRequest) GetName() string {
@@ -310,6 +341,7 @@ func (x *CreateWorkScheduleRequest) GetWeeklyOtThresholdMinutes() int32 {
 }
 
 type CreateWorkScheduleResponse struct {
+	// The newly created work schedule.
 	Schedule *WorkSchedulePayload `json:"schedule,omitempty"`
 }
 
@@ -322,14 +354,22 @@ func (x *CreateWorkScheduleResponse) GetSchedule() *WorkSchedulePayload {
 }
 
 type UpdateWorkScheduleBody struct {
-	Name                     *string  `json:"name,omitempty"`
-	WorkingDays              []string `json:"working_days,omitempty"`
-	StartTime                *string  `json:"start_time,omitempty"`
-	EndTime                  *string  `json:"end_time,omitempty"`
-	BreakMinutes             *int32   `json:"break_minutes,omitempty"`
-	ContractedHoursPerWeek   *float64 `json:"contracted_hours_per_week,omitempty"`
-	DailyOtThresholdMinutes  *int32   `json:"daily_ot_threshold_minutes,omitempty"`
-	WeeklyOtThresholdMinutes *int32   `json:"weekly_ot_threshold_minutes,omitempty"`
+	// New name; absent to keep current.
+	Name *string `json:"name,omitempty"`
+	// New working days; if provided, replaces all existing days.
+	WorkingDays []string `json:"working_days,omitempty"`
+	// New start time; absent to keep current.
+	StartTime *string `json:"start_time,omitempty"`
+	// New end time; absent to keep current.
+	EndTime *string `json:"end_time,omitempty"`
+	// New break duration in minutes; absent to keep current.
+	BreakMinutes *int32 `json:"break_minutes,omitempty"`
+	// New contracted hours per week; absent to keep current.
+	ContractedHoursPerWeek *float64 `json:"contracted_hours_per_week,omitempty"`
+	// New daily OT threshold; absent to keep current.
+	DailyOtThresholdMinutes *int32 `json:"daily_ot_threshold_minutes,omitempty"`
+	// New weekly OT threshold; absent to keep current.
+	WeeklyOtThresholdMinutes *int32 `json:"weekly_ot_threshold_minutes,omitempty"`
 }
 
 func (x *UpdateWorkScheduleBody) GetName() string {
@@ -425,7 +465,9 @@ func (x *UpdateWorkScheduleBody) GetWeeklyOtThresholdMinutes() int32 {
 }
 
 type UpdateWorkScheduleRequest struct {
-	Id   int64                   `json:"id,omitempty"`
+	// ID of the schedule to update.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable work schedule fields bound from the HTTP payload.
 	Body *UpdateWorkScheduleBody `json:"body,omitempty"`
 }
 
@@ -475,6 +517,7 @@ func (x *UpdateWorkScheduleRequest) GetBody() *UpdateWorkScheduleBody {
 }
 
 type UpdateWorkScheduleResponse struct {
+	// The updated work schedule.
 	Schedule *WorkSchedulePayload `json:"schedule,omitempty"`
 }
 

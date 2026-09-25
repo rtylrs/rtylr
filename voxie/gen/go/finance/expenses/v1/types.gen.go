@@ -6,23 +6,40 @@ import (
 	"strconv"
 )
 
+// Expense is a recorded business expense.
 type Expense struct {
-	Id              int64   `json:"id,omitempty"`
-	OwnerId         int64   `json:"owner_id,omitempty"`
-	CategoryId      *int64  `json:"category_id,omitempty"`
-	Amount          float64 `json:"amount,omitempty"`
-	Currency        string  `json:"currency,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	Vendor          string  `json:"vendor,omitempty"`
-	ReceiptUrl      string  `json:"receipt_url,omitempty"`
-	PaymentMethod   string  `json:"payment_method,omitempty"`
-	IsTaxDeductible bool    `json:"is_tax_deductible,omitempty"`
-	TaxAmount       float64 `json:"tax_amount,omitempty"`
-	Notes           string  `json:"notes,omitempty"`
-	ExpenseDate     string  `json:"expense_date,omitempty"`
-	Status          string  `json:"status,omitempty"`
-	CreatedAt       string  `json:"created_at,omitempty"`
-	UpdatedAt       string  `json:"updated_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// category_id is the category id value for this contract.
+	CategoryId *int64 `json:"category_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// vendor is the vendor value for this contract.
+	Vendor string `json:"vendor,omitempty"`
+	// receipt_url is the receipt url value for this contract.
+	ReceiptUrl string `json:"receipt_url,omitempty"`
+	// payment_method is the canonical payment method for accounting.
+	PaymentMethod string `json:"payment_method,omitempty"`
+	// is_tax_deductible indicates whether the expense is tax deductible.
+	IsTaxDeductible bool `json:"is_tax_deductible,omitempty"`
+	// tax_amount is the tax amount recorded for the expense.
+	TaxAmount float64 `json:"tax_amount,omitempty"`
+	// notes contains accounting notes for the expense.
+	Notes string `json:"notes,omitempty"`
+	// expense_date is the expense date value for this contract.
+	ExpenseDate string `json:"expense_date,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Expense) MarshalJSON() ([]byte, error) {
@@ -209,11 +226,17 @@ func (x *Expense) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// ExpenseCategory groups expenses for reporting.
 type ExpenseCategory struct {
-	Id        int64  `json:"id,omitempty"`
-	OwnerId   int64  `json:"owner_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Color     string `json:"color,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
+	// created_at is when the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
@@ -297,17 +320,28 @@ func (x *ExpenseCategory) GetCreatedAt() string {
 }
 
 type CreateExpenseRequest struct {
-	CategoryId      *int64  `json:"category_id,omitempty"`
-	Amount          float64 `json:"amount,omitempty"`
-	Currency        string  `json:"currency,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	Vendor          string  `json:"vendor,omitempty"`
-	ReceiptUrl      string  `json:"receipt_url,omitempty"`
-	PaymentMethod   string  `json:"payment_method,omitempty"`
-	IsTaxDeductible bool    `json:"is_tax_deductible,omitempty"`
-	TaxAmount       float64 `json:"tax_amount,omitempty"`
-	Notes           string  `json:"notes,omitempty"`
-	ExpenseDate     string  `json:"expense_date,omitempty"`
+	// category_id is the category id value for this contract.
+	CategoryId *int64 `json:"category_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// vendor is the vendor value for this contract.
+	Vendor string `json:"vendor,omitempty"`
+	// receipt_url is the receipt url value for this contract.
+	ReceiptUrl string `json:"receipt_url,omitempty"`
+	// payment_method is the canonical payment method for accounting.
+	PaymentMethod string `json:"payment_method,omitempty"`
+	// is_tax_deductible indicates whether the expense is tax deductible.
+	IsTaxDeductible bool `json:"is_tax_deductible,omitempty"`
+	// tax_amount is the tax amount recorded for the expense.
+	TaxAmount float64 `json:"tax_amount,omitempty"`
+	// notes contains accounting notes for the expense.
+	Notes string `json:"notes,omitempty"`
+	// expense_date is the expense date value for this contract.
+	ExpenseDate string `json:"expense_date,omitempty"`
 }
 
 func (m *CreateExpenseRequest) MarshalJSON() ([]byte, error) {
@@ -435,8 +469,10 @@ func (x *CreateExpenseRequest) GetExpenseDate() string {
 }
 
 type CreateExpenseResponse struct {
-	ExpenseId int64  `json:"expense_id,omitempty"`
-	Message   string `json:"message,omitempty"`
+	// expense_id is the expense id value for this contract.
+	ExpenseId int64 `json:"expense_id,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (m *CreateExpenseResponse) MarshalJSON() ([]byte, error) {
@@ -485,6 +521,7 @@ func (x *CreateExpenseResponse) GetMessage() string {
 }
 
 type DeleteExpenseRequest struct {
+	// id is the unique identifier for the expense.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -526,6 +563,7 @@ func (x *DeleteExpenseRequest) GetId() int64 {
 }
 
 type DeleteExpenseResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -538,6 +576,7 @@ func (x *DeleteExpenseResponse) GetMessage() string {
 }
 
 type GetExpenseRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -579,6 +618,7 @@ func (x *GetExpenseRequest) GetId() int64 {
 }
 
 type GetExpenseResponse struct {
+	// expense is the expense value for this contract.
 	Expense *Expense `json:"expense,omitempty"`
 }
 
@@ -594,6 +634,7 @@ type ListExpenseCategoriesRequest struct {
 }
 
 type ListExpenseCategoriesResponse struct {
+	// categories is the categories value for this contract.
 	Categories []*ExpenseCategory `json:"categories,omitempty"`
 }
 
@@ -627,6 +668,7 @@ func (x *ListExpensesRequest) GetPageSize() int64 {
 }
 
 type ListExpensesResponse struct {
+	// expenses is the expenses value for this contract.
 	Expenses []*Expense `json:"expenses,omitempty"`
 	Page     int64      `json:"page,omitempty"`
 	PageSize int64      `json:"page_size,omitempty"`
@@ -666,17 +708,28 @@ func (x *ListExpensesResponse) GetHasMore() bool {
 }
 
 type UpdateExpenseBody struct {
-	CategoryId      *int64  `json:"category_id,omitempty"`
-	Amount          float64 `json:"amount,omitempty"`
-	Currency        string  `json:"currency,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	Vendor          string  `json:"vendor,omitempty"`
-	ReceiptUrl      string  `json:"receipt_url,omitempty"`
-	PaymentMethod   string  `json:"payment_method,omitempty"`
-	IsTaxDeductible bool    `json:"is_tax_deductible,omitempty"`
-	TaxAmount       float64 `json:"tax_amount,omitempty"`
-	Notes           string  `json:"notes,omitempty"`
-	ExpenseDate     string  `json:"expense_date,omitempty"`
+	// category_id is the category id value for this contract.
+	CategoryId *int64 `json:"category_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// vendor is the vendor value for this contract.
+	Vendor string `json:"vendor,omitempty"`
+	// receipt_url is the receipt url value for this contract.
+	ReceiptUrl string `json:"receipt_url,omitempty"`
+	// payment_method is the canonical payment method for accounting.
+	PaymentMethod string `json:"payment_method,omitempty"`
+	// is_tax_deductible indicates whether the expense is tax deductible.
+	IsTaxDeductible bool `json:"is_tax_deductible,omitempty"`
+	// tax_amount is the tax amount recorded for the expense.
+	TaxAmount float64 `json:"tax_amount,omitempty"`
+	// notes contains accounting notes for the expense.
+	Notes string `json:"notes,omitempty"`
+	// expense_date is the expense date value for this contract.
+	ExpenseDate string `json:"expense_date,omitempty"`
 }
 
 func (m *UpdateExpenseBody) MarshalJSON() ([]byte, error) {
@@ -804,7 +857,9 @@ func (x *UpdateExpenseBody) GetExpenseDate() string {
 }
 
 type UpdateExpenseRequest struct {
-	Id   int64              `json:"id,omitempty"`
+	// id is the unique identifier for the expense.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable expense fields bound from the HTTP payload.
 	Body *UpdateExpenseBody `json:"body,omitempty"`
 }
 
@@ -854,6 +909,7 @@ func (x *UpdateExpenseRequest) GetBody() *UpdateExpenseBody {
 }
 
 type UpdateExpenseResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -866,6 +922,7 @@ func (x *UpdateExpenseResponse) GetMessage() string {
 }
 
 type UpdateExpenseStatusBody struct {
+	// status is the current lifecycle state - "pending", "approved", or "rejected".
 	Status string `json:"status,omitempty"`
 }
 
@@ -878,7 +935,9 @@ func (x *UpdateExpenseStatusBody) GetStatus() string {
 }
 
 type UpdateExpenseStatusRequest struct {
-	Id   int64                    `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries status update fields bound from the HTTP payload.
 	Body *UpdateExpenseStatusBody `json:"body,omitempty"`
 }
 
@@ -928,6 +987,7 @@ func (x *UpdateExpenseStatusRequest) GetBody() *UpdateExpenseStatusBody {
 }
 
 type UpdateExpenseStatusResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

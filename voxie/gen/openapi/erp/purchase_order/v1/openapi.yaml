@@ -12,31 +12,46 @@ paths:
             parameters:
                 - name: status
                   in: query
-                  required: true
+                  description: Filters purchase orders by lifecycle state.
+                  required: false
                   schema:
                     type: string
                     description: Filters purchase orders by lifecycle state.
                 - name: page
                   in: query
-                  required: true
+                  description: The 1-based page number.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The 1-based page number.
                 - name: page_size
                   in: query
-                  required: true
+                  description: The number of rows to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The number of rows to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.purchase_order.v1.ListPurchaseOrdersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - PurchaseOrderService
@@ -49,12 +64,24 @@ paths:
                             $ref: '#/components/schemas/erp.purchase_order.v1.CreatePurchaseOrderRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.purchase_order.v1.CreatePurchaseOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/purchase-order/v1/purchase-orders/{id}:
         get:
             tags:
@@ -66,15 +93,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.purchase_order.v1.GetPurchaseOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/purchase-order/v1/purchase-orders/{id}/status:
         patch:
             tags:
@@ -86,7 +127,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -96,12 +139,24 @@ paths:
                                 - $ref: '#/components/schemas/erp.purchase_order.v1.UpdatePurchaseOrderStatusBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/purchase-order/v1/purchase-orders/{id}/approve:
         post:
             tags:
@@ -113,21 +168,35 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/erp.purchase_order.v1.ApprovePurchaseOrderRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.purchase_order.v1.ApprovePurchaseOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.purchase_order.v1.ListPurchaseOrdersRequest:
@@ -176,12 +245,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 supplier_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 po_number:
                     type: string
@@ -205,6 +277,7 @@ components:
                     type: string
                 created_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 created_at:
                     type: string
@@ -235,12 +308,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 purchase_order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity_ordered:
                     type: number
@@ -268,6 +344,7 @@ components:
                 supplier_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 po_number:
                     type: string
@@ -297,6 +374,7 @@ components:
                 product_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity_ordered:
                     type: number
@@ -315,6 +393,7 @@ components:
             properties:
                 purchase_order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -328,6 +407,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -345,6 +425,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -379,6 +460,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -389,3 +471,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: PurchaseOrderService
+      description: PurchaseOrderService defines ERP purchase order endpoints.

@@ -10,12 +10,24 @@ paths:
             summary: getStats
             operationId: ConsoleAdminService_getStats
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.GetStatsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/users:
         get:
             tags:
@@ -25,13 +37,13 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: offset
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
@@ -43,21 +55,33 @@ paths:
                     format: int64
                 - name: email
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: name
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.ListUsersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ConsoleAdminService
@@ -70,12 +94,24 @@ paths:
                             $ref: '#/components/schemas/console.admin.v1.CreateUserRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.CreateUserResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/users/{id}:
         get:
             tags:
@@ -87,15 +123,28 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.GetUserResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - ConsoleAdminService
@@ -106,21 +155,39 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/console.admin.v1.UpdateUserRequest'
-                required: true
+                            type: object
+                            properties:
+                                full_name:
+                                    type: string
+                                email:
+                                    type: string
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.UpdateUserResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ConsoleAdminService
@@ -131,15 +198,28 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.DeleteUserResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/users/{id}/ban:
         post:
             tags:
@@ -151,21 +231,39 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/console.admin.v1.BanUserRequest'
+                            type: object
+                            properties:
+                                reason:
+                                    type: string
+                            required:
+                                - reason
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.BanUserResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/users/{id}/unban:
         post:
             tags:
@@ -177,21 +275,34 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/console.admin.v1.UnbanUserRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.UnbanUserResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/users/{id}/set-console-admin:
         post:
             tags:
@@ -203,21 +314,39 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/console.admin.v1.SetConsoleAdminRequest'
+                            type: object
+                            properties:
+                                is_console_admin:
+                                    type: boolean
+                            required:
+                                - is_console_admin
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.SetConsoleAdminResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/users/{user_id}/subscription:
         get:
             tags:
@@ -229,15 +358,28 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.GetUserSubscriptionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/businesses:
         get:
             tags:
@@ -247,13 +389,13 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: offset
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
@@ -265,7 +407,7 @@ paths:
                     format: int64
                 - name: name
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: owner_id
@@ -275,12 +417,24 @@ paths:
                     type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.ListBusinessesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/businesses/{id}:
         put:
             tags:
@@ -292,21 +446,39 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/console.admin.v1.UpdateBusinessRequest'
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                            required:
+                                - name
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.UpdateBusinessResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ConsoleAdminService
@@ -317,15 +489,28 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.DeleteBusinessResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/internal-onboarding/business-owner:
         post:
             tags:
@@ -339,12 +524,24 @@ paths:
                             $ref: '#/components/schemas/console.admin.v1.CreateBusinessOwnerRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.CreateBusinessOwnerResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/subscriptions:
         get:
             tags:
@@ -354,28 +551,40 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: offset
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: status
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.ListSubscriptionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/subscriptions/upsert:
         post:
             tags:
@@ -389,12 +598,24 @@ paths:
                             $ref: '#/components/schemas/console.admin.v1.UpsertSubscriptionRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.UpsertSubscriptionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/subscriptions/{id}:
         delete:
             tags:
@@ -406,15 +627,28 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.DeleteSubscriptionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/plans:
         get:
             tags:
@@ -422,12 +656,24 @@ paths:
             summary: listPlans
             operationId: ConsoleAdminService_listPlans
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.ListPlansResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /console/admin/v1/console/plans/{id}:
         put:
             tags:
@@ -439,21 +685,45 @@ paths:
                   in: path
                   required: true
                   schema:
-                    type: string
+                    exclusiveMinimum: 0
+                    type: integer
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/console.admin.v1.UpdatePlanRequest'
-                required: true
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                price_per_seat_cents:
+                                    type: integer
+                                    format: int32
+                                annual_price_per_seat_cents:
+                                    type: integer
+                                    format: int32
+                                is_active:
+                                    type: boolean
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/console.admin.v1.UpdatePlanResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         console.admin.v1.GetStatsRequest:
@@ -1079,3 +1349,12 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ConsoleAdminService

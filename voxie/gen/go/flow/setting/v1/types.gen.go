@@ -5,12 +5,13 @@ type GetUserSettingsRequest struct {
 }
 
 type GetUserSettingsResponse struct {
-	TaskAssigned       bool    `json:"task_assigned,omitempty"`
-	TaskComments       bool    `json:"task_comments,omitempty"`
-	Mentions           bool    `json:"mentions,omitempty"`
-	StatusChanges      bool    `json:"status_changes,omitempty"`
-	WeeklyDigest       bool    `json:"weekly_digest,omitempty"`
-	EmailNotifications bool    `json:"email_notifications,omitempty"`
+	TaskAssigned       bool `json:"task_assigned,omitempty"`
+	TaskComments       bool `json:"task_comments,omitempty"`
+	Mentions           bool `json:"mentions,omitempty"`
+	StatusChanges      bool `json:"status_changes,omitempty"`
+	WeeklyDigest       bool `json:"weekly_digest,omitempty"`
+	EmailNotifications bool `json:"email_notifications,omitempty"`
+	// JSON-encoded per-user Flow sidebar layout and visibility preferences.
 	SidebarPreferences *string `json:"sidebar_preferences,omitempty"`
 }
 
@@ -75,12 +76,25 @@ func (x *GetUserSettingsResponse) GetSidebarPreferences() string {
 }
 
 type UpdateUserSettingsRequest struct {
-	TaskAssigned       *bool   `json:"task_assigned,omitempty"`
-	TaskComments       *bool   `json:"task_comments,omitempty"`
-	Mentions           *bool   `json:"mentions,omitempty"`
-	StatusChanges      *bool   `json:"status_changes,omitempty"`
-	WeeklyDigest       *bool   `json:"weekly_digest,omitempty"`
-	EmailNotifications *bool   `json:"email_notifications,omitempty"`
+	// Notify the user when a task is assigned to them. Omit to preserve the
+	// stored preference; send false to turn the notification off.
+	TaskAssigned *bool `json:"task_assigned,omitempty"`
+	// Notify the user about comments on their tasks. Omit to preserve the
+	// stored preference; send false to turn the notification off.
+	TaskComments *bool `json:"task_comments,omitempty"`
+	// Notify the user when they are mentioned. Omit to preserve the stored
+	// preference; send false to turn the notification off.
+	Mentions *bool `json:"mentions,omitempty"`
+	// Notify the user when a task status changes. Omit to preserve the stored
+	// preference; send false to turn the notification off.
+	StatusChanges *bool `json:"status_changes,omitempty"`
+	// Send the user the weekly digest email. Omit to preserve the stored
+	// preference; send false to turn the digest off.
+	WeeklyDigest *bool `json:"weekly_digest,omitempty"`
+	// Master switch for this user's Flow email notifications. Omit to preserve
+	// the stored preference; send false to turn all of them off.
+	EmailNotifications *bool `json:"email_notifications,omitempty"`
+	// JSON-encoded per-user Flow sidebar layout and visibility preferences.
 	SidebarPreferences *string `json:"sidebar_preferences,omitempty"`
 }
 

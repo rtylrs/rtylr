@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface AccessServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** AccessService defines POS location access endpoints. */
 export class AccessServiceClient {
 private baseUrl: string;
 private options: AccessServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getMyLocations(req: GetMyLocationsRequest): Promise<GetMyLocationsResponse> {
+/** Returns the locations assigned to the current staff member. */
+async getMyLocations(req: GetMyLocationsRequest, opts?: RequestOptions): Promise<GetMyLocationsResponse> {
 const violations = validateGetMyLocationsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/access/v1/my-locations";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,9 +133,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetMyLocationsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getMemberLocations(req: GetMemberLocationsRequest): Promise<GetMemberLocationsResponse> {
+/** Returns the locations assigned to a given staff member. */
+async getMemberLocations(req: GetMemberLocationsRequest, opts?: RequestOptions): Promise<GetMemberLocationsResponse> {
 const violations = validateGetMemberLocationsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/access/v1/member-locations";
 const query = new URLSearchParams();
 if (req.userId !== undefined) {
@@ -104,7 +146,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -116,9 +159,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetMemberLocationsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLocationRoster(req: GetLocationRosterRequest): Promise<GetLocationRosterResponse> {
+/** Returns the staff roster for a given location. */
+async getLocationRoster(req: GetLocationRosterRequest, opts?: RequestOptions): Promise<GetLocationRosterResponse> {
 const violations = validateGetLocationRosterRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/access/v1/location-roster";
 const query = new URLSearchParams();
 if (req.locationId !== undefined) {
@@ -128,7 +172,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -140,14 +185,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetLocationRosterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async assignLocation(req: AssignLocationRequest): Promise<AssignLocationResponse> {
+/** Assigns a staff member to a location. */
+async assignLocation(req: AssignLocationRequest, opts?: RequestOptions): Promise<AssignLocationResponse> {
 const violations = validateAssignLocationRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/access/v1/assign";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAssignLocationRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -159,14 +206,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAssignLocationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async removeLocation(req: RemoveLocationRequest): Promise<RemoveLocationResponse> {
+/** Removes a staff member's location assignment. */
+async removeLocation(req: RemoveLocationRequest, opts?: RequestOptions): Promise<RemoveLocationResponse> {
 const violations = validateRemoveLocationRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/access/v1/remove";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeRemoveLocationRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

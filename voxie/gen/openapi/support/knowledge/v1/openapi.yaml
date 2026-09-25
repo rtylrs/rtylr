@@ -12,23 +12,35 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/support.knowledge.v1.ListArticlesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - KnowledgeService
@@ -41,12 +53,24 @@ paths:
                             $ref: '#/components/schemas/support.knowledge.v1.CreateArticleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/support.knowledge.v1.CreateArticleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /support/knowledge/v1/articles/{id}:
         put:
             tags:
@@ -58,21 +82,52 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/support.knowledge.v1.UpdateArticleRequest'
+                            type: object
+                            properties:
+                                title:
+                                    type: string
+                                slug:
+                                    type: string
+                                body:
+                                    type: string
+                                category:
+                                    type: string
+                                is_published:
+                                    type: boolean
+                            required:
+                                - title
+                                - slug
+                                - body
+                                - category
+                                - is_published
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/support.knowledge.v1.UpdateArticleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - KnowledgeService
@@ -83,15 +138,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/support.knowledge.v1.DeleteArticleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         support.knowledge.v1.ListArticlesRequest:
@@ -132,9 +201,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 title:
                     type: string
@@ -188,6 +259,7 @@ components:
             properties:
                 article_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -200,6 +272,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 title:
                     type: string
@@ -231,6 +304,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -241,3 +315,12 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: KnowledgeService

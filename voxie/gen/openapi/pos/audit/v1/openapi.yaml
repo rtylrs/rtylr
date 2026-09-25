@@ -13,19 +13,20 @@ paths:
             parameters:
                 - name: action
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: entity_type
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: employee_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: start_date
                   in: query
@@ -39,24 +40,38 @@ paths:
                     type: string
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum records to return. Defaults to 50 and is capped by the server.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum records to return. Defaults to 50 and is capped by the server.
                 - name: cursor
                   in: query
-                  required: true
+                  description: Opaque continuation token from a previous response.
+                  required: false
                   schema:
                     type: string
                     description: Opaque continuation token from a previous response.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.audit.v1.ListAuditResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - AuditService
@@ -70,12 +85,24 @@ paths:
                             $ref: '#/components/schemas/pos.audit.v1.CreateAuditRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.audit.v1.CreateAuditResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.audit.v1.ListAuditRequest:
@@ -87,6 +114,7 @@ components:
                     type: string
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 start_date:
                     type: string
@@ -124,18 +152,23 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 terminal_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 action:
                     type: string
@@ -143,6 +176,7 @@ components:
                     type: string
                 entity_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 details:
                     type: string
@@ -166,14 +200,17 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 terminal_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 action:
                     type: string
@@ -182,6 +219,7 @@ components:
                 entity_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 details:
                     type: string
@@ -201,9 +239,20 @@ components:
             properties:
                 audit_log_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
             required:
                 - audit_log_id
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: AuditService
+      description: AuditService defines POS audit log endpoints.

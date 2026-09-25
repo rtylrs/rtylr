@@ -16,10 +16,37 @@ import (
 	"time"
 )
 
+func writeJSON(w http.ResponseWriter, status int, value any) {
+	data, err := json.Marshal(value)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, _ = w.Write(append(data, '\n'))
+}
+
 func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func requestBodyLimit(limit int64) int64 {
+	if limit <= 0 {
+		return 8 << 20
+	}
+	return limit
+}
+
+func writeBodyError(w http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeJSONError(w, http.StatusRequestEntityTooLarge, "request body too large")
+		return
+	}
+	writeJSONError(w, http.StatusBadRequest, "invalid request body")
 }
 
 func writeHandlerError(w http.ResponseWriter, err error) {
@@ -30,7 +57,12 @@ func writeHandlerError(w http.ResponseWriter, err error) {
 			status = candidate
 		}
 	}
-	writeJSONError(w, status, "internal server error")
+	message := "internal server error"
+	var public interface{ PublicMessage() string }
+	if errors.As(err, &public) && public.PublicMessage() != "" {
+		message = public.PublicMessage()
+	}
+	writeJSONError(w, status, message)
 }
 
 func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
@@ -62,6 +94,25 @@ func parseBool(s string) (bool, error) {
 		return false, nil
 	}
 	return false, fmt.Errorf("must be true or false")
+}
+
+func hasAuthScheme(value, scheme string) bool {
+	if len(value) <= len(scheme)+1 || value[len(scheme)] != ' ' {
+		return false
+	}
+	for i := 0; i < len(scheme); i++ {
+		a, b := value[i], scheme[i]
+		if a >= 'A' && a <= 'Z' {
+			a += 'a' - 'A'
+		}
+		if b >= 'A' && b <= 'Z' {
+			b += 'a' - 'A'
+		}
+		if a != b {
+			return false
+		}
+	}
+	return true
 }
 
 func validHeaderFormat(value, format string) bool {
@@ -100,6 +151,37 @@ func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
 	return metadata, ok
 }
 
+type httpRequestContextKey struct{}
+
+func withHTTPRequest(r *http.Request) context.Context {
+	return context.WithValue(r.Context(), httpRequestContextKey{}, r)
+}
+
+type responseControl struct {
+	status int
+	header http.Header
+}
+
+type responseControlKey struct{}
+
+func SetResponseStatus(ctx context.Context, status int) {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok && status >= 200 && status <= 299 {
+		control.status = status
+	}
+}
+
+func ResponseHeader(ctx context.Context) http.Header {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok {
+		return control.header
+	}
+	return http.Header{}
+}
+
+func HTTPRequestFromContext(ctx context.Context) (*http.Request, bool) {
+	r, ok := ctx.Value(httpRequestContextKey{}).(*http.Request)
+	return r, ok
+}
+
 func RequestIDFromContext(ctx context.Context) (string, bool) {
 	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
 	return requestID, ok && requestID != ""
@@ -120,12 +202,13 @@ type RequestObserver interface {
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux                *http.ServeMux
-	middlewares        []Middleware
-	requestIDHeader    string
-	requestIDGenerator RequestIDGenerator
-	authorizer         Authorizer
-	observer           RequestObserver
+	mux                 *http.ServeMux
+	middlewares         []Middleware
+	requestIDHeader     string
+	requestIDGenerator  RequestIDGenerator
+	authorizer          Authorizer
+	observer            RequestObserver
+	maxRequestBodyBytes int64
 }
 
 // WithMux supports the options-first registration form.
@@ -153,6 +236,9 @@ func WithAuthorizer(authorizer Authorizer) ServerOption {
 func WithRequestObserver(observer RequestObserver) ServerOption {
 	return func(o *serverOptions) { o.observer = observer }
 }
+func WithMaxRequestBodyBytes(limit int64) ServerOption {
+	return func(o *serverOptions) { o.maxRequestBodyBytes = limit }
+}
 
 func defaultRequestIDGenerator() string {
 	var value [16]byte
@@ -163,6 +249,21 @@ func defaultRequestIDGenerator() string {
 }
 
 func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	if o.authorizer != nil {
+		next := handler
+		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if err := o.authorizer(r.Context(), metadata, r); err != nil {
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+				}
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 	for i := len(o.middlewares) - 1; i >= 0; i-- {
 		if o.middlewares[i] != nil {
 			handler = o.middlewares[i](handler)
@@ -178,17 +279,6 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 			if requestID != "" {
 				w.Header().Set(o.requestIDHeader, requestID)
 				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
-			}
-		}
-		if o.authorizer != nil {
-			if err := o.authorizer(ctx, metadata, r); err != nil {
-				var statusErr interface{ HTTPStatusCode() int }
-				if errors.As(err, &statusErr) {
-					writeHandlerError(w, err)
-				} else {
-					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
-				}
-				return
 			}
 		}
 		if o.observer == nil {
@@ -232,15 +322,23 @@ func (w *statusResponseWriter) Flush() {
 	}
 }
 
+// ProjectService is business-scoped: every operation resolves the caller's
+// business from auth. Delete is a recycle-bin archive; permanent deletion
+// happens by retention policy or through purgeProject.
 type ProjectServiceServer interface {
 	GetProject(ctx context.Context, req *GetProjectRequest) (*GetProjectResponse, error)
 	ListProjects(ctx context.Context, req *ListProjectsRequest) (*ListProjectsResponse, error)
 	CreateProject(ctx context.Context, req *CreateProjectRequest) (*CreateProjectResponse, error)
 	UpdateProject(ctx context.Context, req *UpdateProjectRequest) (*UpdateProjectResponse, error)
+	// archiveProject moves the project to the recycle bin. It is reversible via
+	// restoreProject until purge_at passes.
 	ArchiveProject(ctx context.Context, req *ArchiveProjectRequest) (*ArchiveProjectResponse, error)
 	SetProjectVisibility(ctx context.Context, req *SetProjectVisibilityRequest) (*SetProjectVisibilityResponse, error)
 	ListArchivedProjects(ctx context.Context, req *ListArchivedProjectsRequest) (*ListArchivedProjectsResponse, error)
 	RestoreProject(ctx context.Context, req *RestoreProjectRequest) (*RestoreProjectResponse, error)
+	// purgeProject immediately and irreversibly deletes an archived project and
+	// everything inside it, including attachment files. Server-gated to the
+	// project creator and business admins.
 	PurgeProject(ctx context.Context, req *PurgeProjectRequest) (*PurgeProjectResponse, error)
 	ListProjectColumns(ctx context.Context, req *ListProjectColumnsRequest) (*ListProjectColumnsResponse, error)
 	CreateProjectColumn(ctx context.Context, req *CreateProjectColumnRequest) (*CreateProjectColumnResponse, error)
@@ -253,6 +351,9 @@ type ProjectServiceServer interface {
 	UpdateProjectMemberRole(ctx context.Context, req *UpdateProjectMemberRoleRequest) (*UpdateProjectMemberRoleResponse, error)
 	InviteProjectMember(ctx context.Context, req *InviteProjectMemberRequest) (*InviteProjectMemberResponse, error)
 	TransferProjectOwnership(ctx context.Context, req *TransferProjectOwnershipRequest) (*TransferProjectOwnershipResponse, error)
+	// getProjectLabourCost returns the labour cost of billable logged time on a
+	// project. Requires admin on the project: it exposes aggregate spend, and
+	// the aggregate is derived from HR rates that must not leak through Flow.
 	GetProjectLabourCost(ctx context.Context, req *GetProjectLabourCostRequest) (*GetProjectLabourCostResponse, error)
 }
 
@@ -298,17 +399,22 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetProject(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetProject(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "getProject", HTTPMethod: "GET", Route: "/flow/project/v2/projects/{id}", AuthSchemes: nil}))
 	mux.Handle("GET /flow/project/v2/projects", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProjectsRequest)
@@ -352,47 +458,57 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListProjects(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListProjects(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "listProjects", HTTPMethod: "GET", Route: "/flow/project/v2/projects", AuthSchemes: nil}))
 	mux.Handle("POST /flow/project/v2/projects", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateProjectRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateProject(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateProject(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "createProject", HTTPMethod: "POST", Route: "/flow/project/v2/projects", AuthSchemes: nil}))
 	mux.Handle("PUT /flow/project/v2/projects/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateProjectRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
@@ -404,17 +520,22 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateProject(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateProject(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "updateProject", HTTPMethod: "PUT", Route: "/flow/project/v2/projects/{id}", AuthSchemes: nil}))
 	mux.Handle("DELETE /flow/project/v2/projects/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ArchiveProjectRequest)
@@ -426,40 +547,50 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ArchiveProject(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ArchiveProject(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "archiveProject", HTTPMethod: "DELETE", Route: "/flow/project/v2/projects/{id}", AuthSchemes: nil}))
 	mux.Handle("PUT /flow/project/v2/projects/visibility", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(SetProjectVisibilityRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.SetProjectVisibility(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.SetProjectVisibility(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "setProjectVisibility", HTTPMethod: "PUT", Route: "/flow/project/v2/projects/visibility", AuthSchemes: nil}))
 	mux.Handle("GET /flow/project/v2/projects/archived", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListArchivedProjectsRequest)
@@ -483,40 +614,50 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListArchivedProjects(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListArchivedProjects(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "listArchivedProjects", HTTPMethod: "GET", Route: "/flow/project/v2/projects/archived", AuthSchemes: nil}))
 	mux.Handle("PUT /flow/project/v2/projects/archived/restore", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(RestoreProjectRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.RestoreProject(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.RestoreProject(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "restoreProject", HTTPMethod: "PUT", Route: "/flow/project/v2/projects/archived/restore", AuthSchemes: nil}))
 	mux.Handle("DELETE /flow/project/v2/projects/purged/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PurgeProjectRequest)
@@ -528,17 +669,22 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.PurgeProject(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.PurgeProject(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "purgeProject", HTTPMethod: "DELETE", Route: "/flow/project/v2/projects/purged/{id}", AuthSchemes: nil}))
 	mux.Handle("GET /flow/project/v2/projects/columns", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProjectColumnsRequest)
@@ -579,47 +725,57 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListProjectColumns(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListProjectColumns(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "listProjectColumns", HTTPMethod: "GET", Route: "/flow/project/v2/projects/columns", AuthSchemes: nil}))
 	mux.Handle("POST /flow/project/v2/projects/columns", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateProjectColumnRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateProjectColumn(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateProjectColumn(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "createProjectColumn", HTTPMethod: "POST", Route: "/flow/project/v2/projects/columns", AuthSchemes: nil}))
 	mux.Handle("PUT /flow/project/v2/projects/columns/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateProjectColumnRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
@@ -631,17 +787,22 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateProjectColumn(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateProjectColumn(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "updateProjectColumn", HTTPMethod: "PUT", Route: "/flow/project/v2/projects/columns/{id}", AuthSchemes: nil}))
 	mux.Handle("DELETE /flow/project/v2/projects/columns/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteProjectColumnRequest)
@@ -653,40 +814,50 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.DeleteProjectColumn(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.DeleteProjectColumn(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "deleteProjectColumn", HTTPMethod: "DELETE", Route: "/flow/project/v2/projects/columns/{id}", AuthSchemes: nil}))
 	mux.Handle("PUT /flow/project/v2/projects/columns/move", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(MoveTaskToColumnRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.MoveTaskToColumn(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.MoveTaskToColumn(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "moveTaskToColumn", HTTPMethod: "PUT", Route: "/flow/project/v2/projects/columns/move", AuthSchemes: nil}))
 	mux.Handle("GET /flow/project/v2/projects/members", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProjectMembersRequest)
@@ -727,40 +898,50 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListProjectMembers(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListProjectMembers(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "listProjectMembers", HTTPMethod: "GET", Route: "/flow/project/v2/projects/members", AuthSchemes: nil}))
 	mux.Handle("POST /flow/project/v2/projects/members", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(AddProjectMemberRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.AddProjectMember(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.AddProjectMember(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "addProjectMember", HTTPMethod: "POST", Route: "/flow/project/v2/projects/members", AuthSchemes: nil}))
 	mux.Handle("DELETE /flow/project/v2/projects/members", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(RemoveProjectMemberRequest)
@@ -784,86 +965,106 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.RemoveProjectMember(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.RemoveProjectMember(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "removeProjectMember", HTTPMethod: "DELETE", Route: "/flow/project/v2/projects/members", AuthSchemes: nil}))
 	mux.Handle("PUT /flow/project/v2/projects/members/role", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateProjectMemberRoleRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateProjectMemberRole(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateProjectMemberRole(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "updateProjectMemberRole", HTTPMethod: "PUT", Route: "/flow/project/v2/projects/members/role", AuthSchemes: nil}))
 	mux.Handle("POST /flow/project/v2/projects/members/invite", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(InviteProjectMemberRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.InviteProjectMember(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.InviteProjectMember(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "inviteProjectMember", HTTPMethod: "POST", Route: "/flow/project/v2/projects/members/invite", AuthSchemes: nil}))
 	mux.Handle("PUT /flow/project/v2/projects/transfer", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(TransferProjectOwnershipRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.TransferProjectOwnership(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.TransferProjectOwnership(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "transferProjectOwnership", HTTPMethod: "PUT", Route: "/flow/project/v2/projects/transfer", AuthSchemes: nil}))
 	mux.Handle("GET /flow/project/v2/projects/{id}/labour-cost", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetProjectLabourCostRequest)
@@ -875,17 +1076,22 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetProjectLabourCost(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetProjectLabourCost(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "getProjectLabourCost", HTTPMethod: "GET", Route: "/flow/project/v2/projects/{id}/labour-cost", AuthSchemes: nil}))
 	return nil
 }

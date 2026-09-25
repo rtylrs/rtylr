@@ -356,7 +356,9 @@ func (x *DeleteBrandResponse) GetMessage() string {
 }
 
 type ListBrandsRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of brands to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of brands to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 

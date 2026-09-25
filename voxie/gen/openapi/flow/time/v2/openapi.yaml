@@ -12,26 +12,43 @@ paths:
             parameters:
                 - name: date
                   in: query
+                  description: date is the day to read, as YYYY-MM-DD.
                   required: true
                   schema:
                     type: string
                     description: date is the day to read, as YYYY-MM-DD.
                 - name: employee_id
                   in: query
+                  description: |-
+                    employee_id reads another person's day, which requires manage team time.
+                    Omitted, it reads the caller's own.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         employee_id reads another person's day, which requires manage team time.
                         Omitted, it reads the caller's own.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.GetWorkDayResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - TimeService
@@ -44,12 +61,24 @@ paths:
                             $ref: '#/components/schemas/flow.time.v2.UpsertWorkDayRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.UpsertWorkDayResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/time/v2/work-days/range:
         get:
             tags:
@@ -59,44 +88,62 @@ paths:
             parameters:
                 - name: from
                   in: query
+                  description: from_date is the inclusive start of the range, as YYYY-MM-DD.
                   required: true
                   schema:
                     type: string
                     description: from_date is the inclusive start of the range, as YYYY-MM-DD.
                 - name: to
                   in: query
+                  description: to_date is the inclusive end of the range, as YYYY-MM-DD.
                   required: true
                   schema:
                     type: string
                     description: to_date is the inclusive end of the range, as YYYY-MM-DD.
                 - name: employee_id
                   in: query
+                  description: employee_id lists another person's days.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id lists another person's days.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.ListWorkDaysResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/time/v2/work-days/team:
         get:
             tags:
@@ -110,37 +157,53 @@ paths:
             parameters:
                 - name: from
                   in: query
+                  description: from_date is the inclusive start of the range, as YYYY-MM-DD.
                   required: true
                   schema:
                     type: string
                     description: from_date is the inclusive start of the range, as YYYY-MM-DD.
                 - name: to
                   in: query
+                  description: to_date is the inclusive end of the range, as YYYY-MM-DD.
                   required: true
                   schema:
                     type: string
                     description: to_date is the inclusive end of the range, as YYYY-MM-DD.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.ListTeamWorkDaysResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/time/v2/work-days/{work_day_id}/lines:
         post:
             tags:
@@ -150,23 +213,73 @@ paths:
             parameters:
                 - name: work_day_id
                   in: path
+                  description: work_day_id is the day to add the line to.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: work_day_id is the day to add the line to.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.time.v2.CreateWorkDayLineRequest'
+                            type: object
+                            properties:
+                                client_key:
+                                    type: string
+                                    description: client_key makes the create idempotent across an offline retry.
+                                duration_minutes:
+                                    exclusiveMinimum: 0
+                                    type: integer
+                                    format: int32
+                                    description: duration_minutes is the time spent.
+                                description:
+                                    type: string
+                                    description: description is what was done.
+                                project_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                task_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_type_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_mode:
+                                    type: string
+                                    description: work_mode overrides the day's mode for this line only.
+                                is_billable:
+                                    type: boolean
+                            required:
+                                - client_key
+                                - duration_minutes
+                                - description
+                                - is_billable
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.CreateWorkDayLineResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/time/v2/work-days/lines/{id}:
         delete:
             tags:
@@ -176,17 +289,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the line to remove.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the line to remove.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.DeleteWorkDayLineResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         patch:
             tags:
                 - TimeService
@@ -195,23 +324,66 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the line to change.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the line to change.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.time.v2.UpdateWorkDayLineRequest'
+                            type: object
+                            properties:
+                                duration_minutes:
+                                    exclusiveMinimum: 0
+                                    type: integer
+                                    format: int32
+                                description:
+                                    type: string
+                                project_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                task_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_type_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_mode:
+                                    type: string
+                                is_billable:
+                                    type: boolean
+                            required:
+                                - duration_minutes
+                                - description
+                                - is_billable
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.UpdateWorkDayLineResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/time/v2/work-types:
         get:
             tags:
@@ -221,17 +393,30 @@ paths:
             parameters:
                 - name: include_archived
                   in: query
-                  required: true
+                  description: include_archived returns archived nodes too, for editing the tree.
+                  required: false
                   schema:
                     type: boolean
                     description: include_archived returns archived nodes too, for editing the tree.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.ListWorkTypesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - TimeService
@@ -244,12 +429,24 @@ paths:
                             $ref: '#/components/schemas/flow.time.v2.CreateWorkTypeRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.CreateWorkTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/time/v2/work-types/{id}:
         put:
             tags:
@@ -261,21 +458,59 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.time.v2.UpdateWorkTypeRequest'
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                description:
+                                    type: string
+                                    description: description is shown to employees as the task description once picked.
+                                parent_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                hr_category_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                sort_order:
+                                    type: integer
+                                    format: int32
+                                archived:
+                                    type: boolean
+                            required:
+                                - name
+                                - description
+                                - sort_order
+                                - archived
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.UpdateWorkTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - TimeService
@@ -286,15 +521,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.time.v2.DeleteWorkTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.time.v2.GetWorkDayRequest:
@@ -305,6 +554,7 @@ components:
                     description: date is the day to read, as YYYY-MM-DD.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         employee_id reads another person's day, which requires manage team time.
@@ -330,14 +580,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id is the person the day belongs to.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         user_id is the employee's auth user id, populated when the caller already
@@ -388,12 +641,14 @@ components:
                         blocked submission produces invented lines rather than honest ones.
                 logged_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         logged_by is the user who recorded the day, which differs from employee_id
                         when a manager fills it in on someone's behalf.
                 approved_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: approved_by is the approver, once the day has been approved.
                 approved_at:
@@ -401,6 +656,7 @@ components:
                     description: approved_at is when it was approved.
                 reopened_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: reopened_by is the manager who reopened an approved day.
                 reopened_at:
@@ -433,24 +689,29 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 work_day_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: work_day_id is the day this line belongs to.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         project_id is the project the work was for. A line may have a project and no
                         task, for work that is not tracked as one.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task the work was for.
                 work_type_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: work_type_id is the classification node, at either level of the tree.
                 work_mode:
@@ -476,6 +737,7 @@ components:
                         offline retry idempotent, so a field worker syncing twice does not log twice.
                 logged_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: logged_by is who recorded the line.
                 created_at:
@@ -521,6 +783,7 @@ components:
                     description: break_minutes is unpaid break time.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id records the day on someone else's behalf.
             required:
@@ -547,6 +810,7 @@ components:
                     description: to_date is the inclusive end of the range, as YYYY-MM-DD.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id lists another person's days.
                 page:
@@ -654,6 +918,7 @@ components:
                 work_day_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: work_day_id is the day to add the line to.
                 client_key:
@@ -669,12 +934,15 @@ components:
                     description: description is what was done.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 work_type_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 work_mode:
                     type: string
@@ -701,6 +969,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the line to change.
                 duration_minutes:
@@ -711,12 +980,15 @@ components:
                     type: string
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 work_type_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 work_mode:
                     type: string
@@ -741,6 +1013,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the line to remove.
             required:
@@ -775,10 +1048,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 parent_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         parent_id is the parent node, or null for a top-level type. The tree is
@@ -795,6 +1070,7 @@ components:
                         employee types for what they actually did.
                 hr_category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 sort_order:
                     type: integer
@@ -828,10 +1104,12 @@ components:
                     description: description is shown to employees as the task description once picked.
                 parent_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: parent_id nests this node under a top-level type.
                 hr_category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: hr_category_id maps the node onto an HR payroll category.
                 sort_order:
@@ -855,6 +1133,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -863,9 +1142,11 @@ components:
                     description: description is shown to employees as the task description once picked.
                 parent_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 hr_category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 sort_order:
                     type: integer
@@ -892,6 +1173,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -903,3 +1185,18 @@ components:
                     description: message is a human-readable result message.
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TimeService
+      description: |-
+        TimeService is Flow's daily time logging: a work day per person per date, the
+        lines of work inside it, and the work-type tree those lines are classified by.
+
+        Lines persist as HR time entries, so Flow and payroll read the same rows rather
+        than reconciling two stores. Approval lives in a separate service.

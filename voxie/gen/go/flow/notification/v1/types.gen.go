@@ -8,13 +8,15 @@ import (
 )
 
 type Notification struct {
-	Id            int64  `json:"id,omitempty"`
-	Type          string `json:"type,omitempty"`
-	Title         string `json:"title,omitempty"`
-	Description   string `json:"description,omitempty"`
-	TaskId        string `json:"task_id,omitempty"`
-	TaskTitle     string `json:"task_title,omitempty"`
-	ActorId       *int64 `json:"actor_id,omitempty"`
+	Id          int64  `json:"id,omitempty"`
+	Type        string `json:"type,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	TaskId      string `json:"task_id,omitempty"`
+	TaskTitle   string `json:"task_title,omitempty"`
+	// The user whose action caused this notification, when the source recorded one.
+	ActorId *int64 `json:"actor_id,omitempty"`
+	// Display name resolved from the acting user's current profile.
 	ActorName     string `json:"actor_name,omitempty"`
 	ActorInitials string `json:"actor_initials,omitempty"`
 	Project       string `json:"project,omitempty"`
@@ -174,9 +176,13 @@ func (x *Notification) GetTimestamp() string {
 }
 
 type ListNotificationsRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 

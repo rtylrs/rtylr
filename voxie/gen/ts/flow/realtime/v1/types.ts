@@ -20,6 +20,7 @@ return violations;
 }
 
 export interface IssueWebSocketTicketResponse {
+/** Short-lived, single-use ticket accepted by the Flow WebSocket handshake. */
 ticket?: string | undefined;
 }
 

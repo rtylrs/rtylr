@@ -11,7 +11,24 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
+
+type UnexpectedStatusError struct {
+	StatusCode int
+	Header     http.Header
+	Body       []byte
+}
+
+func (e *UnexpectedStatusError) Error() string {
+	return fmt.Sprintf("unexpected status %d: %s", e.StatusCode, e.Body)
+}
+
+var defaultHTTPClient = func() *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = 30 * time.Second
+	return &http.Client{Transport: transport}
+}()
 
 const defaultMaxResponseBodyBytes int64 = 8 << 20
 const defaultMaxSSELineBytes = 1 << 20
@@ -35,6 +52,24 @@ func readResponseBody(body io.Reader, limit int64) ([]byte, error) {
 	return data, nil
 }
 
+type CallOption func(*http.Request)
+
+func WithHeader(name, value string) CallOption {
+	return func(r *http.Request) { r.Header.Set(name, value) }
+}
+
+func WithRequestEditor(edit func(*http.Request)) CallOption {
+	return func(r *http.Request) { edit(r) }
+}
+
+func applyCallOptions(r *http.Request, opts []CallOption) {
+	for _, opt := range opts {
+		if opt != nil {
+			opt(r)
+		}
+	}
+}
+
 type NotificationServiceClient struct {
 	BaseURL              string
 	HTTPClient           *http.Client
@@ -44,10 +79,13 @@ type NotificationServiceClient struct {
 }
 
 func NewNotificationServiceClient(baseURL string) *NotificationServiceClient {
-	return &NotificationServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
+	for len(baseURL) > 0 && baseURL[len(baseURL)-1] == '/' {
+		baseURL = baseURL[:len(baseURL)-1]
+	}
+	return &NotificationServiceClient{BaseURL: baseURL, HTTPClient: defaultHTTPClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
 }
 
-func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *ListNotificationsRequest) (*ListNotificationsResponse, error) {
+func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *ListNotificationsRequest, opts ...CallOption) (*ListNotificationsResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -69,6 +107,7 @@ func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -80,16 +119,16 @@ func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(ListNotificationsResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *NotificationServiceClient) MarkNotificationRead(ctx context.Context, req *MarkNotificationReadRequest) (*MarkNotificationReadResponse, error) {
+func (c *NotificationServiceClient) MarkNotificationRead(ctx context.Context, req *MarkNotificationReadRequest, opts ...CallOption) (*MarkNotificationReadResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -109,6 +148,7 @@ func (c *NotificationServiceClient) MarkNotificationRead(ctx context.Context, re
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -120,16 +160,16 @@ func (c *NotificationServiceClient) MarkNotificationRead(ctx context.Context, re
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(MarkNotificationReadResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *NotificationServiceClient) MarkAllNotificationsRead(ctx context.Context, req *MarkAllNotificationsReadRequest) (*MarkAllNotificationsReadResponse, error) {
+func (c *NotificationServiceClient) MarkAllNotificationsRead(ctx context.Context, req *MarkAllNotificationsReadRequest, opts ...CallOption) (*MarkAllNotificationsReadResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -148,6 +188,7 @@ func (c *NotificationServiceClient) MarkAllNotificationsRead(ctx context.Context
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -159,10 +200,10 @@ func (c *NotificationServiceClient) MarkAllNotificationsRead(ctx context.Context
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(MarkAllNotificationsReadResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil

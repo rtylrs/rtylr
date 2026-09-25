@@ -8,13 +8,16 @@ import (
 )
 
 type UpdatePermissionsRequest struct {
-	UserId         int64                            `json:"user_id,omitempty"`
-	Apps           []string                         `json:"apps,omitempty"`
-	Role           *string                          `json:"role,omitempty"`
-	FullName       *string                          `json:"full_name,omitempty"`
-	DashRole       *string                          `json:"dash_role,omitempty"`
+	UserId   int64    `json:"user_id,omitempty"`
+	Apps     []string `json:"apps,omitempty"`
+	Role     *string  `json:"role,omitempty"`
+	FullName *string  `json:"full_name,omitempty"`
+	// Independent Dash role assignment.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Independent application role assignments.
 	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
-	GroupIds       []int64                          `json:"group_ids,omitempty"`
+	// Groups that provide inherited access.
+	GroupIds []int64 `json:"group_ids,omitempty"`
 }
 
 func (m *UpdatePermissionsRequest) MarshalJSON() ([]byte, error) {
@@ -131,6 +134,7 @@ func (x *UpdatePermissionsRequest) GetGroupIds() []int64 {
 }
 
 type UpdatePermissionsResponse struct {
+	// Effective access after the update.
 	EffectiveAccess *hub_user_v1.EffectiveAccess `json:"effective_access,omitempty"`
 }
 

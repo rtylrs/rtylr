@@ -8,6 +8,8 @@ import (
 )
 
 type ConfigPayload struct {
+	// Identifies the business that owns this config. Serialized as a string
+	// in the legacy payload.
 	OwnerId                   string   `json:"owner_id,omitempty"`
 	SiteName                  string   `json:"site_name,omitempty"`
 	LogoUrl                   string   `json:"logo_url,omitempty"`
@@ -299,6 +301,8 @@ func (x *ConfigPayload) GetSlug() string {
 }
 
 type CreateConfigRequest struct {
+	// Accepted for legacy compatibility; the server derives the owning
+	// business from the authenticated user.
 	Owner       string `json:"owner,omitempty"`
 	Key         string `json:"key,omitempty"`
 	Value       string `json:"value,omitempty"`
@@ -338,6 +342,7 @@ func (x *CreateConfigRequest) GetDescription() string {
 }
 
 type CreateConfigResponse struct {
+	// Identifies the created config.
 	ConfigId int64  `json:"config_id,omitempty"`
 	Message  string `json:"message,omitempty"`
 }
@@ -391,6 +396,7 @@ type GetConfigRequest struct {
 }
 
 type GetConfigResponse struct {
+	// business is declared in hub.business.v1 - a cross-package reference.
 	Business    *hub_business_v1.Business `json:"business,omitempty"`
 	Maintenance bool                      `json:"maintenance,omitempty"`
 }
@@ -478,6 +484,7 @@ func (x *GetIndustriesResponse) GetGroups() []*IndustryGroup {
 }
 
 type UpdateConfigRequest struct {
+	// Absent means unchanged.
 	SiteName                  *string `json:"site_name,omitempty"`
 	LogoUrl                   *string `json:"logo_url,omitempty"`
 	FaviconUrl                *string `json:"favicon_url,omitempty"`

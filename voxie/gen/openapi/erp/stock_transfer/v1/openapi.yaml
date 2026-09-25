@@ -12,23 +12,35 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.stock_transfer.v1.ListStockTransfersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - StockTransferService
@@ -41,12 +53,24 @@ paths:
                             $ref: '#/components/schemas/erp.stock_transfer.v1.CreateStockTransferRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.stock_transfer.v1.CreateStockTransferResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/stock-transfer/v1/stock-transfers/{id}/status:
         patch:
             tags:
@@ -58,21 +82,41 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/erp.stock_transfer.v1.UpdateStockTransferStatusRequest'
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.stock_transfer.v1.UpdateStockTransferStatusBody'
+                            required:
+                                - body
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.stock_transfer.v1.UpdateStockTransferStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.stock_transfer.v1.ListStockTransfersRequest:
@@ -112,15 +156,19 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 from_warehouse_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 to_warehouse_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 status:
                     type: string
@@ -149,12 +197,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 transfer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity:
                     type: number
@@ -173,10 +224,12 @@ components:
                 from_warehouse_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 to_warehouse_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 notes:
                     type: string
@@ -196,6 +249,7 @@ components:
                 product_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity:
                     exclusiveMinimum: 0
@@ -209,6 +263,7 @@ components:
             properties:
                 transfer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -221,6 +276,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -242,3 +298,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: StockTransferService
+      description: StockTransferService defines ERP stock transfer endpoints.

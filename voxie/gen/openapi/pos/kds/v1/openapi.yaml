@@ -11,12 +11,24 @@ paths:
             description: Returns active kitchen display orders.
             operationId: KDSService_listKDSOrders
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.kds.v1.ListKDSOrdersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/kds/v1/{order_id}/items/{item_id}:
         put:
             tags:
@@ -27,16 +39,24 @@ paths:
             parameters:
                 - name: order_id
                   in: path
+                  description: order_id is the unique identifier for the order.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: order_id is the unique identifier for the order.
                 - name: item_id
                   in: path
+                  description: item_id is the unique identifier for the order item.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: item_id is the unique identifier for the order item.
             requestBody:
                 content:
                     application/json:
@@ -46,12 +66,24 @@ paths:
                             description: body carries the new KDS item status bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.kds.v1.UpdateKDSItemStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.kds.v1.ListKDSOrdersRequest:
@@ -70,6 +102,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_number:
                     type: string
@@ -80,6 +113,7 @@ components:
                     description: status is the current lifecycle state.
                 table_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 customer_name:
                     type: string
@@ -108,9 +142,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -136,11 +172,13 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: order_id is the unique identifier for the order.
                 item_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: item_id is the unique identifier for the order item.
                 body:
@@ -166,3 +204,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: KDSService
+      description: KDSService defines POS kitchen display endpoints.

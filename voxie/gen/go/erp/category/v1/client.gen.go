@@ -11,7 +11,24 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
+
+type UnexpectedStatusError struct {
+	StatusCode int
+	Header     http.Header
+	Body       []byte
+}
+
+func (e *UnexpectedStatusError) Error() string {
+	return fmt.Sprintf("unexpected status %d: %s", e.StatusCode, e.Body)
+}
+
+var defaultHTTPClient = func() *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = 30 * time.Second
+	return &http.Client{Transport: transport}
+}()
 
 const defaultMaxResponseBodyBytes int64 = 8 << 20
 const defaultMaxSSELineBytes = 1 << 20
@@ -35,6 +52,24 @@ func readResponseBody(body io.Reader, limit int64) ([]byte, error) {
 	return data, nil
 }
 
+type CallOption func(*http.Request)
+
+func WithHeader(name, value string) CallOption {
+	return func(r *http.Request) { r.Header.Set(name, value) }
+}
+
+func WithRequestEditor(edit func(*http.Request)) CallOption {
+	return func(r *http.Request) { edit(r) }
+}
+
+func applyCallOptions(r *http.Request, opts []CallOption) {
+	for _, opt := range opts {
+		if opt != nil {
+			opt(r)
+		}
+	}
+}
+
 type CategoryServiceClient struct {
 	BaseURL              string
 	HTTPClient           *http.Client
@@ -44,10 +79,13 @@ type CategoryServiceClient struct {
 }
 
 func NewCategoryServiceClient(baseURL string) *CategoryServiceClient {
-	return &CategoryServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
+	for len(baseURL) > 0 && baseURL[len(baseURL)-1] == '/' {
+		baseURL = baseURL[:len(baseURL)-1]
+	}
+	return &CategoryServiceClient{BaseURL: baseURL, HTTPClient: defaultHTTPClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
 }
 
-func (c *CategoryServiceClient) ListCategories(ctx context.Context, req *ListCategoriesRequest) (*ListCategoriesResponse, error) {
+func (c *CategoryServiceClient) ListCategories(ctx context.Context, req *ListCategoriesRequest, opts ...CallOption) (*ListCategoriesResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -67,6 +105,7 @@ func (c *CategoryServiceClient) ListCategories(ctx context.Context, req *ListCat
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -78,16 +117,16 @@ func (c *CategoryServiceClient) ListCategories(ctx context.Context, req *ListCat
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(ListCategoriesResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *CategoryServiceClient) CreateCategory(ctx context.Context, req *CreateCategoryRequest) (*CreateCategoryResponse, error) {
+func (c *CategoryServiceClient) CreateCategory(ctx context.Context, req *CreateCategoryRequest, opts ...CallOption) (*CreateCategoryResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -106,6 +145,7 @@ func (c *CategoryServiceClient) CreateCategory(ctx context.Context, req *CreateC
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -117,16 +157,16 @@ func (c *CategoryServiceClient) CreateCategory(ctx context.Context, req *CreateC
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(CreateCategoryResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *CategoryServiceClient) UpdateCategory(ctx context.Context, req *UpdateCategoryRequest) (*UpdateCategoryResponse, error) {
+func (c *CategoryServiceClient) UpdateCategory(ctx context.Context, req *UpdateCategoryRequest, opts ...CallOption) (*UpdateCategoryResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -146,6 +186,7 @@ func (c *CategoryServiceClient) UpdateCategory(ctx context.Context, req *UpdateC
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -157,16 +198,16 @@ func (c *CategoryServiceClient) UpdateCategory(ctx context.Context, req *UpdateC
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(UpdateCategoryResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *CategoryServiceClient) DeleteCategory(ctx context.Context, req *DeleteCategoryRequest) (*DeleteCategoryResponse, error) {
+func (c *CategoryServiceClient) DeleteCategory(ctx context.Context, req *DeleteCategoryRequest, opts ...CallOption) (*DeleteCategoryResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {
 			return nil, fmt.Errorf("validate request: %w", err)
@@ -185,6 +226,7 @@ func (c *CategoryServiceClient) DeleteCategory(ctx context.Context, req *DeleteC
 	for k, v := range c.Headers {
 		httpReq.Header.Set(k, v)
 	}
+	applyCallOptions(httpReq, opts)
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
@@ -196,10 +238,10 @@ func (c *CategoryServiceClient) DeleteCategory(ctx context.Context, req *DeleteC
 		if bodyErr != nil {
 			return nil, bodyErr
 		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+		return nil, &UnexpectedStatusError{StatusCode: resp.StatusCode, Header: resp.Header, Body: respBody}
 	}
 	result := new(DeleteCategoryResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil && err != io.EOF {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil

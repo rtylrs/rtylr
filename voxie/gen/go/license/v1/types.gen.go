@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 )
 
+// LicenseState is the public, secret-free status used by admin notices.
 type LicenseState struct {
 	Mode       string  `json:"mode,omitempty"`
 	Valid      bool    `json:"valid,omitempty"`

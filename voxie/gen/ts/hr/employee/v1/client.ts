@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface EmployeeServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** EmployeeService defines HR employee endpoints. */
 export class EmployeeServiceClient {
 private baseUrl: string;
 private options: EmployeeServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listEmployees(req: ListEmployeesRequest): Promise<ListEmployeesResponse> {
+/** ListEmployees returns employees with optional filters. */
+async listEmployees(req: ListEmployeesRequest, opts?: RequestOptions): Promise<ListEmployeesResponse> {
 const violations = validateListEmployeesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employee/v1/employees";
 const query = new URLSearchParams();
 if (req.departmentId !== undefined) {
@@ -95,7 +135,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -107,14 +148,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListEmployeesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createEmployee(req: CreateEmployeeRequest): Promise<CreateEmployeeResponse> {
+/** CreateEmployee creates a new employee. */
+async createEmployee(req: CreateEmployeeRequest, opts?: RequestOptions): Promise<CreateEmployeeResponse> {
 const violations = validateCreateEmployeeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employee/v1/employees";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateEmployeeRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -126,15 +169,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateEmployeeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateEmployee(req: UpdateEmployeeRequest): Promise<UpdateEmployeeResponse> {
+/** UpdateEmployee updates an existing employee. */
+async updateEmployee(req: UpdateEmployeeRequest, opts?: RequestOptions): Promise<UpdateEmployeeResponse> {
 const violations = validateUpdateEmployeeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employee/v1/employees/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateEmployeeRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -146,14 +191,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateEmployeeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async inviteEmployee(req: InviteEmployeeRequest): Promise<InviteEmployeeResponse> {
+/** InviteEmployee sends an employee invitation. */
+async inviteEmployee(req: InviteEmployeeRequest, opts?: RequestOptions): Promise<InviteEmployeeResponse> {
 const violations = validateInviteEmployeeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employee/v1/employees/invite";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeInviteEmployeeRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -165,14 +212,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeInviteEmployeeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async acceptInvite(req: AcceptInviteRequest): Promise<AcceptInviteResponse> {
+/** AcceptInvite accepts an employee invitation. */
+async acceptInvite(req: AcceptInviteRequest, opts?: RequestOptions): Promise<AcceptInviteResponse> {
 const violations = validateAcceptInviteRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employee/v1/employees/invite/accept";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAcceptInviteRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

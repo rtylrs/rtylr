@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface AuthServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** AuthService defines the public authentication endpoints. */
 export class AuthServiceClient {
 private baseUrl: string;
 private options: AuthServiceClientOptions;
@@ -71,14 +110,16 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async register(req: RegisterRequest): Promise<RegisterResponse> {
+/** Register creates a new owner account and optional first business. */
+async register(req: RegisterRequest, opts?: RequestOptions): Promise<RegisterResponse> {
 const violations = validateRegisterRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/register";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeRegisterRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -90,14 +131,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRegisterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async login(req: LoginRequest): Promise<LoginResponse> {
+/** Login authenticates an email and password pair. */
+async login(req: LoginRequest, opts?: RequestOptions): Promise<LoginResponse> {
 const violations = validateLoginRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/login";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeLoginRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -109,14 +152,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeLoginResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async googleAuth(req: GoogleAuthRequest): Promise<GoogleAuthResponse> {
+/** GoogleAuth completes social authentication with an OAuth code. */
+async googleAuth(req: GoogleAuthRequest, opts?: RequestOptions): Promise<GoogleAuthResponse> {
 const violations = validateGoogleAuthRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/register/google";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeGoogleAuthRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -128,14 +173,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGoogleAuthResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async resetPassword(req: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+/** ResetPassword starts a password reset flow. */
+async resetPassword(req: ResetPasswordRequest, opts?: RequestOptions): Promise<ResetPasswordResponse> {
 const violations = validateResetPasswordRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/password-reset/request";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeResetPasswordRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -147,14 +194,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeResetPasswordResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async resetPasswordConfirm(req: ResetPasswordConfirmRequest): Promise<ResetPasswordConfirmResponse> {
+/** ResetPasswordConfirm completes a password reset flow. */
+async resetPasswordConfirm(req: ResetPasswordConfirmRequest, opts?: RequestOptions): Promise<ResetPasswordConfirmResponse> {
 const violations = validateResetPasswordConfirmRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/password-reset/confirm";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeResetPasswordConfirmRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -166,14 +215,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeResetPasswordConfirmResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async verifyEmail(req: VerifyEmailRequest): Promise<VerifyEmailResponse> {
+/** VerifyEmail verifies an account email using a token. */
+async verifyEmail(req: VerifyEmailRequest, opts?: RequestOptions): Promise<VerifyEmailResponse> {
 const violations = validateVerifyEmailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/verify-email";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeVerifyEmailRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -185,14 +236,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeVerifyEmailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async resendVerification(req: ResendVerificationRequest): Promise<ResendVerificationResponse> {
+/** ResendVerification sends a fresh email verification message. */
+async resendVerification(req: ResendVerificationRequest, opts?: RequestOptions): Promise<ResendVerificationResponse> {
 const violations = validateResendVerificationRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/resend-verification";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeResendVerificationRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -204,14 +257,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeResendVerificationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async inviteAccept(req: InviteAcceptRequest): Promise<InviteAcceptResponse> {
+/** InviteAccept lets an invited user activate their account. */
+async inviteAccept(req: InviteAcceptRequest, opts?: RequestOptions): Promise<InviteAcceptResponse> {
 const violations = validateInviteAcceptRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/invite/accept";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeInviteAcceptRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -223,9 +278,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeInviteAcceptResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async checkEmailExists(req: CheckEmailExistsRequest): Promise<CheckEmailExistsResponse> {
+/** CheckEmailExists probes whether an email is already registered. */
+async checkEmailExists(req: CheckEmailExistsRequest, opts?: RequestOptions): Promise<CheckEmailExistsResponse> {
 const violations = validateCheckEmailExistsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/email-exists";
 const query = new URLSearchParams();
 if (req.email !== undefined) {
@@ -235,7 +291,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -247,9 +304,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCheckEmailExistsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async socialAuthorize(req: SocialAuthorizeRequest): Promise<SocialAuthorizeResponse> {
+/** SocialAuthorize returns the WorkOS-hosted consent URL for a provider. */
+async socialAuthorize(req: SocialAuthorizeRequest, opts?: RequestOptions): Promise<SocialAuthorizeResponse> {
 const violations = validateSocialAuthorizeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/common/auth/v1/social/authorize";
 const query = new URLSearchParams();
 if (req.provider !== undefined) {
@@ -259,7 +317,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

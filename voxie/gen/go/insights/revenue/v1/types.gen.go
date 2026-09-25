@@ -2,9 +2,12 @@
 package v1
 
 type RevenueOverview struct {
-	Total  float64         `json:"total,omitempty"`
-	Change float64         `json:"change,omitempty"`
-	Trend  []*RevenuePoint `json:"trend,omitempty"`
+	// total is the total number of matching records.
+	Total float64 `json:"total,omitempty"`
+	// change is the change value for this contract.
+	Change float64 `json:"change,omitempty"`
+	// trend is the trend value for this contract.
+	Trend []*RevenuePoint `json:"trend,omitempty"`
 }
 
 func (x *RevenueOverview) GetTotal() float64 {
@@ -32,7 +35,9 @@ func (x *RevenueOverview) GetTrend() []*RevenuePoint {
 }
 
 type RevenuePoint struct {
-	Date   string  `json:"date,omitempty"`
+	// date is the date value for this contract.
+	Date string `json:"date,omitempty"`
+	// amount is the amount value for this contract.
 	Amount float64 `json:"amount,omitempty"`
 }
 
@@ -53,8 +58,11 @@ func (x *RevenuePoint) GetAmount() float64 {
 }
 
 type RevenueByApp struct {
-	App        string  `json:"app,omitempty"`
-	Amount     float64 `json:"amount,omitempty"`
+	// app is the app value for this contract.
+	App string `json:"app,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// percentage is the percentage value for this contract.
 	Percentage float64 `json:"percentage,omitempty"`
 }
 
@@ -83,10 +91,14 @@ func (x *RevenueByApp) GetPercentage() float64 {
 }
 
 type RevenueComparison struct {
-	Period   string  `json:"period,omitempty"`
-	Current  float64 `json:"current,omitempty"`
+	// period is the period value for this contract.
+	Period string `json:"period,omitempty"`
+	// current is the current value for this contract.
+	Current float64 `json:"current,omitempty"`
+	// previous is the previous value for this contract.
 	Previous float64 `json:"previous,omitempty"`
-	Change   float64 `json:"change,omitempty"`
+	// change is the change value for this contract.
+	Change float64 `json:"change,omitempty"`
 }
 
 func (x *RevenueComparison) GetPeriod() string {
@@ -122,6 +134,7 @@ func (x *RevenueComparison) GetChange() float64 {
 }
 
 type GetRevenueOverviewRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -134,6 +147,7 @@ func (x *GetRevenueOverviewRequest) GetPeriod() string {
 }
 
 type GetRevenueOverviewResponse struct {
+	// overview is the overview value for this contract.
 	Overview *RevenueOverview `json:"overview,omitempty"`
 }
 
@@ -146,6 +160,7 @@ func (x *GetRevenueOverviewResponse) GetOverview() *RevenueOverview {
 }
 
 type GetRevenueByAppRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -158,6 +173,7 @@ func (x *GetRevenueByAppRequest) GetPeriod() string {
 }
 
 type GetRevenueByAppResponse struct {
+	// apps is the apps value for this contract.
 	Apps []*RevenueByApp `json:"apps,omitempty"`
 }
 
@@ -170,7 +186,10 @@ func (x *GetRevenueByAppResponse) GetApps() []*RevenueByApp {
 }
 
 type GetRevenueComparisonRequest struct {
-	Period    string `json:"period,omitempty"`
+	// period is the period value for this contract.
+	Period string `json:"period,omitempty"`
+	// compare_to is the compare to value for this contract.
+	// previous_period, same_period_last_year
 	CompareTo string `json:"compare_to,omitempty"`
 }
 
@@ -191,6 +210,7 @@ func (x *GetRevenueComparisonRequest) GetCompareTo() string {
 }
 
 type GetRevenueComparisonResponse struct {
+	// comparisons is the comparisons value for this contract.
 	Comparisons []*RevenueComparison `json:"comparisons,omitempty"`
 }
 

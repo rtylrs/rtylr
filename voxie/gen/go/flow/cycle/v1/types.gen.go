@@ -123,10 +123,14 @@ func (x *Cycle) GetCompleted() int32 {
 
 type ListCyclesRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
-	Page        int32  `json:"page,omitempty"`
-	Limit       int32  `json:"limit,omitempty"`
-	SortBy      string `json:"sort_by,omitempty"`
-	SortDir     string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (x *ListCyclesRequest) GetWorkspaceId() string {

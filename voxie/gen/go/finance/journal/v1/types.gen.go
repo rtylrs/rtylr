@@ -13,8 +13,10 @@ type JournalEntry struct {
 	Date        string         `json:"date,omitempty"`
 	Description string         `json:"description,omitempty"`
 	Lines       []*JournalLine `json:"lines,omitempty"`
-	Status      string         `json:"status,omitempty"`
-	CreatedAt   string         `json:"created_at,omitempty"`
+	// draft, posted
+	Status string `json:"status,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *JournalEntry) MarshalJSON() ([]byte, error) {
@@ -275,12 +277,18 @@ func (x *GetJournalEntryResponse) GetEntry() *JournalEntry {
 }
 
 type ListJournalEntriesRequest struct {
-	Page     int32  `json:"page,omitempty"`
-	Limit    int32  `json:"limit,omitempty"`
-	SortBy   string `json:"sort_by,omitempty"`
-	SortDir  string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
+	// The inclusive start date filter.
 	FromDate string `json:"from_date,omitempty"`
-	ToDate   string `json:"to_date,omitempty"`
+	// The inclusive end date filter.
+	ToDate string `json:"to_date,omitempty"`
 }
 
 func (x *ListJournalEntriesRequest) GetPage() int32 {

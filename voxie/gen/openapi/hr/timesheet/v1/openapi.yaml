@@ -12,16 +12,28 @@ paths:
             parameters:
                 - name: week_start
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.timesheet.v1.ListTimesheetsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.timesheet.v1.ListTimesheetsRequest:
@@ -67,3 +79,12 @@ components:
                 - regular_hours
                 - overtime_hours
             description: TimesheetEntry is a weekly hours summary for a staff member.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TimesheetService

@@ -7,14 +7,23 @@ import (
 	"strconv"
 )
 
+// View is a saved filter/sort preset. Business-shared in v2: every member of
+// the caller's business can list and use saved views, matching v1's
+// workspace-sharing semantics, with a per-view visibility toggle: see
+// `visibility` below.
 type View struct {
-	Id         int64  `json:"id,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Icon       string `json:"icon,omitempty"`
-	Filters    string `json:"filters,omitempty"`
-	GroupBy    string `json:"group_by,omitempty"`
-	SortBy     string `json:"sort_by,omitempty"`
-	SortDir    string `json:"sort_dir,omitempty"`
+	Id   int64  `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Icon string `json:"icon,omitempty"`
+	// JSON-encoded filter criteria for this saved view.
+	Filters string `json:"filters,omitempty"`
+	GroupBy string `json:"group_by,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
+	// visibility is "shared" (every colleague in the business can use this view)
+	// or "private" (only its creator). Empty means "shared", which is how every
+	// view behaved before this field existed, so an older client keeps its
+	// current reach rather than silently making views private.
 	Visibility string `json:"visibility,omitempty"`
 }
 
@@ -112,7 +121,9 @@ func (x *View) GetVisibility() string {
 }
 
 type ListViewsRequest struct {
-	Page  int32 `json:"page,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
 	Limit int32 `json:"limit,omitempty"`
 }
 
@@ -154,12 +165,17 @@ func (x *ListViewsResponse) GetPagination() *common_pagination_v1.PaginationResp
 }
 
 type CreateViewRequest struct {
-	Name       string `json:"name,omitempty"`
-	Icon       string `json:"icon,omitempty"`
-	Filters    string `json:"filters,omitempty"`
-	GroupBy    string `json:"group_by,omitempty"`
-	SortBy     string `json:"sort_by,omitempty"`
-	SortDir    string `json:"sort_dir,omitempty"`
+	Name string `json:"name,omitempty"`
+	Icon string `json:"icon,omitempty"`
+	// JSON-encoded filter criteria for this saved view.
+	Filters string `json:"filters,omitempty"`
+	GroupBy string `json:"group_by,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
+	// visibility is "shared" (every colleague in the business can use this view)
+	// or "private" (only its creator). Empty means "shared", which is how every
+	// view behaved before this field existed, so an older client keeps its
+	// current reach rather than silently making views private.
 	Visibility string `json:"visibility,omitempty"`
 }
 
@@ -232,13 +248,18 @@ func (x *CreateViewResponse) GetView() *View {
 }
 
 type UpdateViewRequest struct {
-	Id         int64  `json:"id,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Icon       string `json:"icon,omitempty"`
-	Filters    string `json:"filters,omitempty"`
-	GroupBy    string `json:"group_by,omitempty"`
-	SortBy     string `json:"sort_by,omitempty"`
-	SortDir    string `json:"sort_dir,omitempty"`
+	Id   int64  `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Icon string `json:"icon,omitempty"`
+	// JSON-encoded filter criteria for this saved view.
+	Filters string `json:"filters,omitempty"`
+	GroupBy string `json:"group_by,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
+	// visibility is "shared" (every colleague in the business can use this view)
+	// or "private" (only its creator). Empty means "shared", which is how every
+	// view behaved before this field existed, so an older client keeps its
+	// current reach rather than silently making views private.
 	Visibility string `json:"visibility,omitempty"`
 }
 

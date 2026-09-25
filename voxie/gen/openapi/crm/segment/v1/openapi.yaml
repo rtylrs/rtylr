@@ -11,12 +11,24 @@ paths:
             description: Returns all segments for the active business.
             operationId: SegmentService_listSegments
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.segment.v1.ListSegmentsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - SegmentService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/crm.segment.v1.CreateSegmentRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.segment.v1.CreateSegmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/segment/v1/segments/{id}:
         get:
             tags:
@@ -48,15 +72,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.segment.v1.GetSegmentDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - SegmentService
@@ -68,7 +106,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -78,12 +118,24 @@ paths:
                                 - $ref: '#/components/schemas/crm.segment.v1.UpdateSegmentBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.segment.v1.UpdateSegmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - SegmentService
@@ -95,15 +147,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.segment.v1.DeleteSegmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/segment/v1/segments/{segment_id}/customers:
         get:
             tags:
@@ -116,7 +182,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: page
                   in: query
@@ -124,6 +192,7 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: page_size
                   in: query
@@ -131,14 +200,27 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.segment.v1.GetSegmentCustomersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         crm.segment.v1.ListSegmentsRequest:
@@ -157,9 +239,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -170,6 +254,7 @@ components:
                     description: JSON filter definition for this segment.
                 customer_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 last_calculated_at:
                     type: string
@@ -205,6 +290,7 @@ components:
             properties:
                 segment_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -217,6 +303,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -242,9 +329,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 first_name:
                     type: string
@@ -266,12 +355,14 @@ components:
                     type: string
                 loyalty_points:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 total_spent:
                     type: number
                     format: double
                 visit_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 last_visit_at:
                     type: string
@@ -322,14 +413,17 @@ components:
                 segment_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - segment_id
@@ -348,12 +442,15 @@ components:
                         second lookup.
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - customers
@@ -366,6 +463,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -399,6 +497,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -409,3 +508,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SegmentService
+      description: SegmentService defines CRM segment endpoints.

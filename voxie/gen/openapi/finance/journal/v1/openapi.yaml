@@ -12,49 +12,67 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
                 - name: from_date
                   in: query
-                  required: true
+                  description: The inclusive start date filter.
+                  required: false
                   schema:
                     type: string
                     description: The inclusive start date filter.
                 - name: to_date
                   in: query
-                  required: true
+                  description: The inclusive end date filter.
+                  required: false
                   schema:
                     type: string
                     description: The inclusive end date filter.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.journal.v1.ListJournalEntriesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - JournalService
@@ -67,12 +85,24 @@ paths:
                             $ref: '#/components/schemas/finance.journal.v1.CreateJournalEntryRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.journal.v1.CreateJournalEntryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/journal/v1/entries/{id}:
         get:
             tags:
@@ -84,15 +114,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.journal.v1.GetJournalEntryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         finance.journal.v1.ListJournalEntriesRequest:
@@ -143,6 +187,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 number:
                     type: string
@@ -173,6 +218,7 @@ components:
             properties:
                 account_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 account_name:
                     type: string
@@ -253,6 +299,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -264,3 +311,13 @@ components:
                         - $ref: '#/components/schemas/finance.journal.v1.JournalEntry'
             required:
                 - entry
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: JournalService
+      description: JournalService defines journal entry endpoints.

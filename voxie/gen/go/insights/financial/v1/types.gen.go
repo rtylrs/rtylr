@@ -2,10 +2,14 @@
 package v1
 
 type ExpenseAnalytics struct {
-	Total      float64              `json:"total,omitempty"`
-	Change     float64              `json:"change,omitempty"`
+	// total is the total number of matching records.
+	Total float64 `json:"total,omitempty"`
+	// change is the change value for this contract.
+	Change float64 `json:"change,omitempty"`
+	// by_category is the by category value for this contract.
 	ByCategory []*ExpenseByCategory `json:"by_category,omitempty"`
-	Trend      []*ExpensePoint      `json:"trend,omitempty"`
+	// trend is the trend value for this contract.
+	Trend []*ExpensePoint `json:"trend,omitempty"`
 }
 
 func (x *ExpenseAnalytics) GetTotal() float64 {
@@ -41,10 +45,15 @@ func (x *ExpenseAnalytics) GetTrend() []*ExpensePoint {
 }
 
 type ExpenseByCategory struct {
-	Category    string  `json:"category,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Percentage  float64 `json:"percentage,omitempty"`
-	Budget      float64 `json:"budget,omitempty"`
+	// category is the category value for this contract.
+	Category string `json:"category,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// percentage is the percentage value for this contract.
+	Percentage float64 `json:"percentage,omitempty"`
+	// budget is the budget value for this contract.
+	Budget float64 `json:"budget,omitempty"`
+	// utilization is the utilization value for this contract.
 	Utilization float64 `json:"utilization,omitempty"`
 }
 
@@ -89,7 +98,9 @@ func (x *ExpenseByCategory) GetUtilization() float64 {
 }
 
 type ExpensePoint struct {
-	Date   string  `json:"date,omitempty"`
+	// date is the date value for this contract.
+	Date string `json:"date,omitempty"`
+	// amount is the amount value for this contract.
 	Amount float64 `json:"amount,omitempty"`
 }
 
@@ -110,8 +121,12 @@ func (x *ExpensePoint) GetAmount() float64 {
 }
 
 type InvoiceAgingBucket struct {
-	Bucket string  `json:"bucket,omitempty"`
-	Count  int32   `json:"count,omitempty"`
+	// bucket is the bucket value for this contract.
+	// current, 1-30, 31-60, 61-90, 90+
+	Bucket string `json:"bucket,omitempty"`
+	// count is the count value for this contract.
+	Count int32 `json:"count,omitempty"`
+	// amount is the amount value for this contract.
 	Amount float64 `json:"amount,omitempty"`
 }
 
@@ -140,8 +155,10 @@ func (x *InvoiceAgingBucket) GetAmount() float64 {
 }
 
 type InvoiceAging struct {
-	TotalOutstanding float64               `json:"total_outstanding,omitempty"`
-	Buckets          []*InvoiceAgingBucket `json:"buckets,omitempty"`
+	// total_outstanding is the total outstanding value for this contract.
+	TotalOutstanding float64 `json:"total_outstanding,omitempty"`
+	// buckets is the buckets value for this contract.
+	Buckets []*InvoiceAgingBucket `json:"buckets,omitempty"`
 }
 
 func (x *InvoiceAging) GetTotalOutstanding() float64 {
@@ -161,10 +178,14 @@ func (x *InvoiceAging) GetBuckets() []*InvoiceAgingBucket {
 }
 
 type CashFlowAnalytics struct {
-	Inflows  float64          `json:"inflows,omitempty"`
-	Outflows float64          `json:"outflows,omitempty"`
-	Net      float64          `json:"net,omitempty"`
-	Trend    []*CashFlowPoint `json:"trend,omitempty"`
+	// inflows is the inflows value for this contract.
+	Inflows float64 `json:"inflows,omitempty"`
+	// outflows is the outflows value for this contract.
+	Outflows float64 `json:"outflows,omitempty"`
+	// net is the net value for this contract.
+	Net float64 `json:"net,omitempty"`
+	// trend is the trend value for this contract.
+	Trend []*CashFlowPoint `json:"trend,omitempty"`
 }
 
 func (x *CashFlowAnalytics) GetInflows() float64 {
@@ -200,10 +221,14 @@ func (x *CashFlowAnalytics) GetTrend() []*CashFlowPoint {
 }
 
 type CashFlowPoint struct {
-	Date    string  `json:"date,omitempty"`
-	Inflow  float64 `json:"inflow,omitempty"`
+	// date is the date value for this contract.
+	Date string `json:"date,omitempty"`
+	// inflow is the inflow value for this contract.
+	Inflow float64 `json:"inflow,omitempty"`
+	// outflow is the outflow value for this contract.
 	Outflow float64 `json:"outflow,omitempty"`
-	Net     float64 `json:"net,omitempty"`
+	// net is the net value for this contract.
+	Net float64 `json:"net,omitempty"`
 }
 
 func (x *CashFlowPoint) GetDate() string {
@@ -239,6 +264,7 @@ func (x *CashFlowPoint) GetNet() float64 {
 }
 
 type GetCashFlowAnalyticsRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -251,6 +277,7 @@ func (x *GetCashFlowAnalyticsRequest) GetPeriod() string {
 }
 
 type GetCashFlowAnalyticsResponse struct {
+	// analytics is the analytics value for this contract.
 	Analytics *CashFlowAnalytics `json:"analytics,omitempty"`
 }
 
@@ -263,6 +290,7 @@ func (x *GetCashFlowAnalyticsResponse) GetAnalytics() *CashFlowAnalytics {
 }
 
 type GetExpenseAnalyticsRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -275,6 +303,7 @@ func (x *GetExpenseAnalyticsRequest) GetPeriod() string {
 }
 
 type GetExpenseAnalyticsResponse struct {
+	// analytics is the analytics value for this contract.
 	Analytics *ExpenseAnalytics `json:"analytics,omitempty"`
 }
 
@@ -290,6 +319,7 @@ type GetInvoiceAgingRequest struct {
 }
 
 type GetInvoiceAgingResponse struct {
+	// aging is the aging value for this contract.
 	Aging *InvoiceAging `json:"aging,omitempty"`
 }
 

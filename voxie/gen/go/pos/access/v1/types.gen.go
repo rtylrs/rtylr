@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// MyLocation is a location entry for the current staff member.
 type MyLocation struct {
 	LocationId int64  `json:"location_id,omitempty"`
 	Name       string `json:"name,omitempty"`
@@ -74,12 +75,17 @@ func (x *MyLocation) GetPhone() string {
 	return x.Phone
 }
 
+// RosterEntry is a staff member entry within a location roster.
 type RosterEntry struct {
-	UserId    int64  `json:"user_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	HasPin    bool   `json:"has_pin,omitempty"`
-	IsManager bool   `json:"is_manager,omitempty"`
-	PosRole   string `json:"pos_role,omitempty"`
+	// user_id identifies the staff member.
+	UserId int64  `json:"user_id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	// has_pin tells the terminal whether the staff member can sign in with a PIN.
+	HasPin bool `json:"has_pin,omitempty"`
+	// is_manager tells whether this staff member can manage POS access.
+	IsManager bool `json:"is_manager,omitempty"`
+	// pos_role is the POS-specific role label.
+	PosRole string `json:"pos_role,omitempty"`
 }
 
 func (m *RosterEntry) MarshalJSON() ([]byte, error) {
@@ -151,12 +157,18 @@ func (x *RosterEntry) GetPosRole() string {
 	return x.PosRole
 }
 
+// MemberLocationEntry is a location assignment for a staff member.
 type MemberLocationEntry struct {
-	Id                 int64 `json:"id,omitempty"`
-	LocationId         int64 `json:"location_id,omitempty"`
-	CanManagePosUsers  bool  `json:"can_manage_pos_users,omitempty"`
-	CanManageTerminals bool  `json:"can_manage_terminals,omitempty"`
-	CanViewReports     bool  `json:"can_view_reports,omitempty"`
+	// id is the unique assignment identifier.
+	Id int64 `json:"id,omitempty"`
+	// location_id identifies the assigned location.
+	LocationId int64 `json:"location_id,omitempty"`
+	// can_manage_pos_users controls POS staff management.
+	CanManagePosUsers bool `json:"can_manage_pos_users,omitempty"`
+	// can_manage_terminals controls terminal management.
+	CanManageTerminals bool `json:"can_manage_terminals,omitempty"`
+	// can_view_reports controls POS reporting access.
+	CanViewReports bool `json:"can_view_reports,omitempty"`
 }
 
 func (m *MemberLocationEntry) MarshalJSON() ([]byte, error) {
@@ -239,6 +251,7 @@ func (x *MemberLocationEntry) GetCanViewReports() bool {
 }
 
 type AssignLocationRequest struct {
+	// user_id identifies the user associated with this request.
 	UserId             *int64 `json:"user_id,omitempty"`
 	LocationId         *int64 `json:"location_id,omitempty"`
 	CanManagePosUsers  bool   `json:"can_manage_pos_users,omitempty"`

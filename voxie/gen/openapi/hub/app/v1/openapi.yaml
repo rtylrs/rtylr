@@ -11,12 +11,24 @@ paths:
             description: Returns installed apps for the active business.
             operationId: AppService_listApps
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.app.v1.ListAppsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/app/v1/addons:
         get:
             tags:
@@ -25,12 +37,24 @@ paths:
             description: Returns available addons.
             operationId: AppService_listAddons
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.app.v1.ListAddonsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/app/v1/addons/{addon_id}/status:
         get:
             tags:
@@ -45,12 +69,24 @@ paths:
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.app.v1.AddonStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/app/v1/addons/{addon_id}/enable:
         patch:
             tags:
@@ -68,15 +104,27 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.app.v1.EnableAddonRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.app.v1.EnableAddonResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/app/v1/addons/{addon_id}/disable:
         patch:
             tags:
@@ -94,15 +142,27 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.app.v1.DisableAddonRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.app.v1.DisableAddonResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.app.v1.ListAppsRequest:
@@ -218,3 +278,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: AppService
+      description: AppService defines hub app and addon endpoints.

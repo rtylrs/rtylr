@@ -2,12 +2,14 @@
 
 export interface TaxConfig {
 id?: string | undefined;
+/** Identifies the tenant that owns the resource. */
 ownerId?: string | undefined;
 name?: string | undefined;
 rate?: number | undefined;
 type?: string | undefined;
 isDefault?: boolean | undefined;
 isActive?: boolean | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -53,10 +55,12 @@ return violations;
 
 export interface ExpenseCategoryDetail {
 id?: string | undefined;
+/** Identifies the tenant that owns the resource. */
 ownerId?: string | undefined;
 name?: string | undefined;
 color?: string | undefined;
 icon?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -95,7 +99,9 @@ return violations;
 }
 
 export interface GetPLReportRequest {
+/** The reporting period label. */
 period?: string | undefined;
+/** The report anchor date. */
 date: string;
 }
 
@@ -170,7 +176,9 @@ return violations;
 }
 
 export interface GetTaxReportRequest {
+/** The reporting period label. */
 period?: string | undefined;
+/** The report anchor date. */
 date: string;
 }
 

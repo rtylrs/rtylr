@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface FinancialServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** FinancialService defines insights financial analytics endpoints. */
 export class FinancialServiceClient {
 private baseUrl: string;
 private options: FinancialServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getCashFlowAnalytics(req: GetCashFlowAnalyticsRequest): Promise<GetCashFlowAnalyticsResponse> {
+/** Returns cash flow analytics for a period. */
+async getCashFlowAnalytics(req: GetCashFlowAnalyticsRequest, opts?: RequestOptions): Promise<GetCashFlowAnalyticsResponse> {
 const violations = validateGetCashFlowAnalyticsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/financial/v1/cash-flow";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -83,7 +123,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,9 +136,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetCashFlowAnalyticsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getExpenseAnalytics(req: GetExpenseAnalyticsRequest): Promise<GetExpenseAnalyticsResponse> {
+/** Returns expense analytics for a period. */
+async getExpenseAnalytics(req: GetExpenseAnalyticsRequest, opts?: RequestOptions): Promise<GetExpenseAnalyticsResponse> {
 const violations = validateGetExpenseAnalyticsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/financial/v1/expenses";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -107,7 +149,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -119,16 +162,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetExpenseAnalyticsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getInvoiceAging(req: GetInvoiceAgingRequest): Promise<GetInvoiceAgingResponse> {
+/** Returns invoice aging analysis. */
+async getInvoiceAging(req: GetInvoiceAgingRequest, opts?: RequestOptions): Promise<GetInvoiceAgingResponse> {
 const violations = validateGetInvoiceAgingRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/financial/v1/invoice-aging";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+// Renamed from TaxConfig to avoid a name collision with the distinct
+// finance.report.v1.TaxConfig - onk message names are unique across the
+// whole schema tree, unlike proto's per-package scoping.
 type TaxConfig struct {
 	Id          int64   `json:"id,omitempty"`
 	OwnerId     int64   `json:"owner_id,omitempty"`
@@ -186,9 +189,13 @@ func (x *UpdateTaxConfigResponse) GetMessage() string {
 	return x.Message
 }
 
+// Renamed from GetPLReportRequest to avoid a name collision with the
+// distinct finance.report.v1.GetPLReportRequest.
 type GetPLReportRequest struct {
 }
 
+// Renamed from GetPLReportResponse to avoid a name collision with the
+// distinct finance.report.v1.GetPLReportResponse.
 type GetPLReportResponse struct {
 	TotalRevenue  float64 `json:"total_revenue,omitempty"`
 	TotalExpenses float64 `json:"total_expenses,omitempty"`

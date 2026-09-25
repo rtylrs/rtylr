@@ -160,6 +160,7 @@ export interface GetOverviewResponse {
 unmatchedBankTxns?: (UnmatchedBankTransaction)[] | undefined;
 unmatchedInvoices?: (UnmatchedInvoice)[] | undefined;
 suggestions?: (MatchSuggestion)[] | undefined;
+/** Overview lists are bounded previews; true means more matching records exist. */
 bankTxnsTruncated?: boolean | undefined;
 invoicesTruncated?: boolean | undefined;
 expensesTruncated?: boolean | undefined;

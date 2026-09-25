@@ -13,41 +13,58 @@ paths:
             parameters:
                 - name: search
                   in: query
-                  required: true
+                  description: Filters customers by name, email, or phone.
+                  required: false
                   schema:
                     type: string
                     description: Filters customers by name, email, or phone.
                 - name: tier
                   in: query
-                  required: true
+                  description: Filters by loyalty tier.
+                  required: false
                   schema:
                     type: string
                     description: Filters by loyalty tier.
                 - name: tag
                   in: query
-                  required: true
+                  description: Filters by customer tag.
+                  required: false
                   schema:
                     type: string
                     description: Filters by customer tag.
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.customer.v1.ListCustomersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - CustomerService
@@ -61,12 +78,24 @@ paths:
                             $ref: '#/components/schemas/crm.customer.v1.CreateCustomerRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.customer.v1.CreateCustomerResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/customer/v1/customers/{id}:
         get:
             tags:
@@ -79,15 +108,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.customer.v1.GetCustomerResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - CustomerService
@@ -99,7 +142,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -109,12 +154,24 @@ paths:
                                 - $ref: '#/components/schemas/crm.customer.v1.UpdateCustomerBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.customer.v1.UpdateCustomerResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - CustomerService
@@ -126,15 +183,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.customer.v1.DeleteCustomerResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         crm.customer.v1.ListCustomersRequest:
@@ -151,9 +222,11 @@ components:
                     description: Filters by customer tag.
                 page:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - search
@@ -170,12 +243,15 @@ components:
                         $ref: '#/components/schemas/crm.customer.v1.Customer'
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - customers
@@ -187,9 +263,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 first_name:
                     type: string
@@ -211,12 +289,14 @@ components:
                     type: string
                 loyalty_points:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 total_spent:
                     type: number
                     format: double
                 visit_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 last_visit_at:
                     type: string
@@ -311,6 +391,7 @@ components:
             properties:
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -323,6 +404,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -340,6 +422,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -407,6 +490,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -417,3 +501,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CustomerService
+      description: CustomerService defines CRM customer endpoints.

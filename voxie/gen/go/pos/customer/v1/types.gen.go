@@ -6,12 +6,17 @@ import (
 	"strconv"
 )
 
+// Customer is a lightweight customer record for POS lookups. Named
+// distinctly from crm.customer.v1's Customer (a genuine cross-directory
+// name collision - see crm/segment/v1/models.onk which references the
+// unqualified "Customer" name expecting the full crm.customer.v1 record).
 type Customer struct {
 	Id        int64  `json:"id,omitempty"`
 	FirstName string `json:"first_name,omitempty"`
 	LastName  string `json:"last_name,omitempty"`
-	Email     string `json:"email,omitempty"`
-	Phone     string `json:"phone,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	Phone string `json:"phone,omitempty"`
 }
 
 func (m *Customer) MarshalJSON() ([]byte, error) {

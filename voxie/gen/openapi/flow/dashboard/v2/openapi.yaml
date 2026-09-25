@@ -10,12 +10,24 @@ paths:
             summary: getFlowDashboard
             operationId: DashboardService_getFlowDashboard
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.dashboard.v2.GetFlowDashboardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.dashboard.v2.GetFlowDashboardRequest:
@@ -25,18 +37,22 @@ components:
             properties:
                 open_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: open_tasks is the open tasks value for this contract.
                 in_progress_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: in_progress_tasks is the in progress tasks value for this contract.
                 completed_this_week:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: completed_this_week is the completed this week value for this contract.
                 overdue_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: overdue_tasks is the overdue tasks value for this contract.
                 my_tasks:
@@ -58,6 +74,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 title:
@@ -99,3 +116,16 @@ components:
                 task.v1 and task.v2 in circulation a plain-name reference became ambiguous,
                 and the dashboard never needed most of those fields anyway. Deliberately
                 local to this package.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: DashboardService
+      description: |-
+        DashboardService aggregates business-wide counts for the caller. The
+        workspace parameter is gone; there is exactly one scope, the caller's
+        business, resolved from auth.

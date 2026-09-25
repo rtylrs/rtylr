@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Settings holds CRM-wide messaging defaults for a business.
 type Settings struct {
 	Id             int64  `json:"id,omitempty"`
 	OwnerId        int64  `json:"owner_id,omitempty"`

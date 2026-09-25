@@ -7,14 +7,16 @@ import (
 )
 
 type TaxConfig struct {
-	Id        int64   `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Identifies the tenant that owns the resource.
 	OwnerId   int64   `json:"owner_id,omitempty"`
 	Name      string  `json:"name,omitempty"`
 	Rate      float64 `json:"rate,omitempty"`
 	Type      string  `json:"type,omitempty"`
 	IsDefault bool    `json:"is_default,omitempty"`
 	IsActive  bool    `json:"is_active,omitempty"`
-	CreatedAt string  `json:"created_at,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *TaxConfig) MarshalJSON() ([]byte, error) {
@@ -121,11 +123,13 @@ func (x *TaxConfig) GetCreatedAt() string {
 }
 
 type ExpenseCategoryDetail struct {
-	Id        int64  `json:"id,omitempty"`
-	OwnerId   int64  `json:"owner_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Color     string `json:"color,omitempty"`
-	Icon      string `json:"icon,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Identifies the tenant that owns the resource.
+	OwnerId int64  `json:"owner_id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Color   string `json:"color,omitempty"`
+	Icon    string `json:"icon,omitempty"`
+	// When the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
@@ -217,8 +221,10 @@ func (x *ExpenseCategoryDetail) GetCreatedAt() string {
 }
 
 type GetPLReportRequest struct {
+	// The reporting period label.
 	Period string `json:"period,omitempty"`
-	Date   string `json:"date,omitempty"`
+	// The report anchor date.
+	Date string `json:"date,omitempty"`
 }
 
 func (x *GetPLReportRequest) GetPeriod() string {
@@ -304,8 +310,10 @@ func (x *GetPLReportResponse) GetMarginPct() float64 {
 }
 
 type GetTaxReportRequest struct {
+	// The reporting period label.
 	Period string `json:"period,omitempty"`
-	Date   string `json:"date,omitempty"`
+	// The report anchor date.
+	Date string `json:"date,omitempty"`
 }
 
 func (x *GetTaxReportRequest) GetPeriod() string {

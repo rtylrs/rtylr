@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/hr.location.v1.CreateLocationRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.location.v1.CreateLocationResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/location/v1/locations/{id}:
         put:
             tags:
@@ -33,10 +45,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: ID of the location to update.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: ID of the location to update.
             requestBody:
                 content:
                     application/json:
@@ -45,12 +61,24 @@ paths:
                                 - $ref: '#/components/schemas/hr.location.v1.UpdateLocationBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.location.v1.UpdateLocationResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.location.v1.CreateLocationRequest:
@@ -85,10 +113,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the location.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this location belongs to.
                 name:
@@ -105,10 +135,12 @@ components:
                     description: Whether this location is currently active and assignable.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this location was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this location was last updated.
                 slug:
@@ -132,6 +164,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the location to update.
                 body:
@@ -168,3 +201,13 @@ components:
                     description: The updated location.
             required:
                 - location
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LocationService
+      description: LocationService defines HR location endpoints.

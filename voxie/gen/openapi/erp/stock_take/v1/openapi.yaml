@@ -12,23 +12,35 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.stock_take.v1.ListStockTakesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - StockTakeService
@@ -41,12 +53,24 @@ paths:
                             $ref: '#/components/schemas/erp.stock_take.v1.CreateStockTakeRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.stock_take.v1.CreateStockTakeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/stock-take/v1/stock-takes/{id}:
         put:
             tags:
@@ -58,21 +82,41 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeRequest'
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeBody'
+                            required:
+                                - body
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.stock_take.v1.ListStockTakesRequest:
@@ -112,12 +156,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 warehouse_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 status:
                     type: string
@@ -148,12 +195,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 stock_take_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 expected_qty:
                     type: number
@@ -180,6 +230,7 @@ components:
                 warehouse_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 notes:
                     type: string
@@ -196,6 +247,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 expected_qty:
                     type: number
@@ -212,6 +264,7 @@ components:
             properties:
                 stock_take_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -224,6 +277,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -251,6 +305,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 expected_qty:
                     type: number
@@ -269,3 +324,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: StockTakeService
+      description: StockTakeService defines ERP stock take endpoints.

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface ReportServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** ReportService defines finance reporting endpoints. */
 export class ReportServiceClient {
 private baseUrl: string;
 private options: ReportServiceClientOptions;
@@ -71,9 +110,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getPLReport(req: GetPLReportRequest): Promise<GetPLReportResponse> {
+async getPLReport(req: GetPLReportRequest, opts?: RequestOptions): Promise<GetPLReportResponse> {
 const violations = validateGetPLReportRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/report/v1/pl";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -86,7 +125,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -98,9 +138,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetPLReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTaxReport(req: GetTaxReportRequest): Promise<GetTaxReportResponse> {
+async getTaxReport(req: GetTaxReportRequest, opts?: RequestOptions): Promise<GetTaxReportResponse> {
 const violations = validateGetTaxReportRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/report/v1/tax";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -113,7 +153,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -125,16 +166,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetTaxReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listExpenseCategoryDetails(req: ListExpenseCategoryDetailsRequest): Promise<ListExpenseCategoryDetailsResponse> {
+async listExpenseCategoryDetails(req: ListExpenseCategoryDetailsRequest, opts?: RequestOptions): Promise<ListExpenseCategoryDetailsResponse> {
 const violations = validateListExpenseCategoryDetailsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/report/v1/expense-categories";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -146,14 +188,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListExpenseCategoryDetailsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createExpenseCategoryDetail(req: CreateExpenseCategoryDetailRequest): Promise<CreateExpenseCategoryDetailResponse> {
+async createExpenseCategoryDetail(req: CreateExpenseCategoryDetailRequest, opts?: RequestOptions): Promise<CreateExpenseCategoryDetailResponse> {
 const violations = validateCreateExpenseCategoryDetailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/report/v1/expense-categories";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateExpenseCategoryDetailRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -165,16 +208,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateExpenseCategoryDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listTaxConfig(req: ListTaxConfigRequest): Promise<ListTaxConfigResponse> {
+async listTaxConfig(req: ListTaxConfigRequest, opts?: RequestOptions): Promise<ListTaxConfigResponse> {
 const violations = validateListTaxConfigRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/report/v1/tax-config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -186,14 +230,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListTaxConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTaxConfig(req: CreateTaxConfigRequest): Promise<CreateTaxConfigResponse> {
+async createTaxConfig(req: CreateTaxConfigRequest, opts?: RequestOptions): Promise<CreateTaxConfigResponse> {
 const violations = validateCreateTaxConfigRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/report/v1/tax-config";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateTaxConfigRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

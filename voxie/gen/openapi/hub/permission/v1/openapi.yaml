@@ -11,12 +11,24 @@ paths:
             description: Returns the permission matrix.
             operationId: PermissionService_getPermissions
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.GetPermissionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/roles:
         get:
             tags:
@@ -27,12 +39,14 @@ paths:
             parameters:
                 - name: app_id
                   in: query
+                  description: Restrict results to one application.
                   required: false
                   schema:
                     type: string
                     description: Restrict results to one application.
                 - name: page
                   in: query
+                  description: One-based result page.
                   required: false
                   schema:
                     type: integer
@@ -40,18 +54,31 @@ paths:
                     description: One-based result page.
                 - name: page_size
                   in: query
+                  description: Maximum number of roles returned per page.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum number of roles returned per page.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.ListRolesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - PermissionService
@@ -65,12 +92,24 @@ paths:
                             $ref: '#/components/schemas/hub.permission.v1.CreateRoleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.CreateRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/roles/{id}:
         get:
             tags:
@@ -83,15 +122,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.GetRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - PermissionService
@@ -103,7 +156,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -113,12 +168,24 @@ paths:
                                 - $ref: '#/components/schemas/hub.permission.v1.UpdateRoleBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.UpdateRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - PermissionService
@@ -130,15 +197,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.DeleteRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/roles/{id}/clone:
         post:
             tags:
@@ -151,21 +232,43 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.permission.v1.CloneRoleRequest'
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                description:
+                                    type: string
+                            required:
+                                - name
+                                - description
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.CloneRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/roles/{id}/archive:
         post:
             tags:
@@ -178,21 +281,40 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.permission.v1.ArchiveRoleRequest'
+                            type: object
+                            properties:
+                                reason:
+                                    type: string
+                            required:
+                                - reason
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.ArchiveRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/role-assignments:
         get:
             tags:
@@ -203,19 +325,23 @@ paths:
             parameters:
                 - name: role_id
                   in: query
+                  description: Restrict results to one role.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Restrict results to one role.
                 - name: app_id
                   in: query
+                  description: Restrict results to one application.
                   required: false
                   schema:
                     type: string
                     description: Restrict results to one application.
                 - name: page
                   in: query
+                  description: One-based result page.
                   required: false
                   schema:
                     type: integer
@@ -223,18 +349,31 @@ paths:
                     description: One-based result page.
                 - name: page_size
                   in: query
+                  description: Maximum number of assignments returned per page.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum number of assignments returned per page.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.ListRoleAssignmentsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - PermissionService
@@ -248,12 +387,24 @@ paths:
                             $ref: '#/components/schemas/hub.permission.v1.AssignRoleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.AssignRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/role-assignments/{id}:
         delete:
             tags:
@@ -266,15 +417,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.RemoveRoleAssignmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/roles/{id}/preview:
         post:
             tags:
@@ -287,21 +452,42 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.permission.v1.PreviewPermissionImpactRequest'
+                            type: object
+                            properties:
+                                permissions:
+                                    type: array
+                                    items:
+                                        type: string
+                            required:
+                                - permissions
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.PreviewPermissionImpactResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/roles/audit:
         get:
             tags:
@@ -315,6 +501,7 @@ paths:
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: page
                   in: query
@@ -329,12 +516,24 @@ paths:
                     type: integer
                     format: int32
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.ListRoleAuditResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/permission/v1/matrix:
         patch:
             tags:
@@ -349,12 +548,24 @@ paths:
                             $ref: '#/components/schemas/hub.permission.v1.UpdatePermissionMatrixRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.permission.v1.UpdatePermissionMatrixResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.permission.v1.GetPermissionsRequest:
@@ -432,6 +643,7 @@ components:
                     description: Effective page size.
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Total number of matching roles.
                 next_page:
@@ -448,6 +660,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Stable identifier of the role within the business.
                 name:
@@ -473,6 +686,7 @@ components:
                     description: Relative authority level used for delegation checks.
                 parent_role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Optional role from which this role inherits or was derived.
                 scope_rules:
@@ -491,6 +705,7 @@ components:
                     description: Lifecycle state of the role.
                 version:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Monotonically increasing version used for cache and audit coordination.
                 member_count:
@@ -536,6 +751,7 @@ components:
                     description: Relative authority level used for delegation checks.
                 parent_role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Optional source role for inheritance or cloning semantics.
                 scope_rules:
@@ -567,6 +783,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -589,6 +806,7 @@ components:
                     format: int32
                 parent_role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 scope_rules:
                     type: array
@@ -619,6 +837,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -635,6 +854,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -652,6 +872,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -675,6 +896,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reason:
                     type: string
@@ -694,6 +916,7 @@ components:
             properties:
                 role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Restrict results to one role.
                 app_id:
@@ -725,6 +948,7 @@ components:
                     description: Effective page size.
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Total number of matching assignments.
                 next_page:
@@ -741,10 +965,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Stable identifier of the assignment.
                 role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Role being assigned.
                 app_id:
@@ -752,10 +978,12 @@ components:
                     description: Application in which the assignment is effective.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: User receiving the assignment, when directly assigned.
                 group_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Group receiving the assignment, when group assigned.
                 status:
@@ -790,6 +1018,7 @@ components:
                 role_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Role to assign.
                 app_id:
@@ -797,10 +1026,12 @@ components:
                     description: Application in which the assignment is effective.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: User receiving the assignment, when directly assigned.
                 group_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Group receiving the assignment, when group assigned.
                 is_primary:
@@ -830,6 +1061,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -846,6 +1078,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 permissions:
                     type: array
@@ -880,6 +1113,7 @@ components:
             properties:
                 role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page:
                     type: integer
@@ -902,6 +1136,7 @@ components:
                     format: int32
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 next_page:
                     type: integer
@@ -916,6 +1151,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Stable identifier of the audit event.
                 action:
@@ -926,18 +1162,22 @@ components:
                     description: Application affected by the event.
                 role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Role affected by the event, when applicable.
                 actor_user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: User who performed the action, when available.
                 target_user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Direct user target, when applicable.
                 target_group_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Group target, when applicable.
                 before_json:
@@ -980,3 +1220,13 @@ components:
                     type: boolean
             required:
                 - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: PermissionService
+      description: PermissionService defines hub permission and role endpoints.

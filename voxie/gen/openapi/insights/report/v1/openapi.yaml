@@ -13,43 +13,60 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: page is the current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: page is the current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: limit is the maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: limit is the maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: sort_by is the field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: sort_by is the field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: sort_dir is the sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: sort_dir is the sort direction ("asc" or "desc").
                 - name: type
                   in: query
-                  required: true
+                  description: type is the type value for this contract.
+                  required: false
                   schema:
                     type: string
                     description: type is the type value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.ListReportTemplatesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ReportService
@@ -63,12 +80,24 @@ paths:
                             $ref: '#/components/schemas/insights.report.v1.CreateReportTemplateRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.CreateReportTemplateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/report/v1/templates/{id}:
         get:
             tags:
@@ -79,17 +108,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.GetReportTemplateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/report/v1/scheduled:
         get:
             tags:
@@ -100,37 +145,53 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: page is the current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: page is the current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: limit is the maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: limit is the maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: sort_by is the field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: sort_by is the field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: sort_dir is the sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: sort_dir is the sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.ListScheduledReportsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ReportService
@@ -144,12 +205,24 @@ paths:
                             $ref: '#/components/schemas/insights.report.v1.CreateScheduledReportRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.CreateScheduledReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/report/v1/scheduled/{id}:
         put:
             tags:
@@ -160,23 +233,62 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the scheduled report identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the scheduled report identifier.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/insights.report.v1.UpdateScheduledReportRequest'
+                            type: object
+                            properties:
+                                template_slug:
+                                    type: string
+                                    description: template_slug is the template slug (e.g. revenue-monthly).
+                                frequency:
+                                    type: string
+                                    description: frequency is the delivery frequency (daily, weekly, monthly).
+                                channel:
+                                    type: string
+                                    description: channel is the delivery channel (email, slack).
+                                recipient_email:
+                                    type: string
+                                    format: email
+                                    description: recipient_email is the delivery recipient.
+                                is_active:
+                                    type: boolean
+                                    description: is_active toggles whether the schedule is active.
+                            required:
+                                - template_slug
+                                - frequency
+                                - channel
+                                - recipient_email
+                                - is_active
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.UpdateScheduledReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ReportService
@@ -186,17 +298,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the scheduled report identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the scheduled report identifier.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.DeleteScheduledReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/report/v1/reports/revenue/generate:
         post:
             tags:
@@ -211,12 +339,24 @@ paths:
                             $ref: '#/components/schemas/insights.report.v1.GenerateRevenueReportRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.GenerateRevenueReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/report/v1/reports/revenue/export:
         get:
             tags:
@@ -227,23 +367,37 @@ paths:
             parameters:
                 - name: from
                   in: query
-                  required: true
+                  description: from_date is the inclusive start date (YYYY-MM-DD).
+                  required: false
                   schema:
                     type: string
                     description: from_date is the inclusive start date (YYYY-MM-DD).
                 - name: to
                   in: query
-                  required: true
+                  description: to_date is the inclusive end date (YYYY-MM-DD).
+                  required: false
                   schema:
                     type: string
                     description: to_date is the inclusive end date (YYYY-MM-DD).
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.report.v1.ExportRevenueReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         insights.report.v1.ListReportTemplatesRequest:
@@ -292,6 +446,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 name:
@@ -401,6 +556,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -456,10 +612,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 template_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: template_id is the template id value for this contract.
                 template_name:
@@ -539,6 +697,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the scheduled report identifier.
                 template_slug:
@@ -579,6 +738,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the scheduled report identifier.
             required:
@@ -665,8 +825,19 @@ components:
                     description: date is the revenue date (YYYY-MM-DD).
                 amount_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: amount_minor_units is the revenue amount in minor units.
             required:
                 - date
                 - amount_minor_units
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReportService
+      description: ReportService defines insights report template endpoints.

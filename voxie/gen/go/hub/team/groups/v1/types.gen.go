@@ -87,15 +87,18 @@ func (x *GroupSummary) GetColor() string {
 }
 
 type Group struct {
-	Id                  int64                 `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Identifies the owner of the group.
 	OwnerId             int64                 `json:"owner_id,omitempty"`
 	Name                string                `json:"name,omitempty"`
 	Description         string                `json:"description,omitempty"`
 	Color               string                `json:"color,omitempty"`
 	ResourcePermissions []*ResourcePermission `json:"resource_permissions,omitempty"`
 	MemberCount         int32                 `json:"member_count,omitempty"`
-	CreatedAt           string                `json:"created_at,omitempty"`
-	UpdatedAt           string                `json:"updated_at,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// When the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Group) MarshalJSON() ([]byte, error) {
@@ -210,10 +213,13 @@ func (x *Group) GetUpdatedAt() string {
 }
 
 type GroupMember struct {
-	UserId   int64  `json:"user_id,omitempty"`
+	// Identifies the member user.
+	UserId int64 `json:"user_id,omitempty"`
+	// Email address used for lookup or contact.
 	Email    string `json:"email,omitempty"`
 	FullName string `json:"full_name,omitempty"`
-	AddedAt  string `json:"added_at,omitempty"`
+	// When the member was added to the group.
+	AddedAt string `json:"added_at,omitempty"`
 }
 
 func (m *GroupMember) MarshalJSON() ([]byte, error) {
@@ -277,17 +283,22 @@ func (x *GroupMember) GetAddedAt() string {
 	return x.AddedAt
 }
 
+// GroupDetail mirrors Group with the member list flattened alongside it
+// (the legacy payload embeds the group fields at the top level).
 type GroupDetail struct {
-	Id                  int64                 `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Identifies the owner of the group.
 	OwnerId             int64                 `json:"owner_id,omitempty"`
 	Name                string                `json:"name,omitempty"`
 	Description         string                `json:"description,omitempty"`
 	Color               string                `json:"color,omitempty"`
 	ResourcePermissions []*ResourcePermission `json:"resource_permissions,omitempty"`
 	MemberCount         int32                 `json:"member_count,omitempty"`
-	CreatedAt           string                `json:"created_at,omitempty"`
-	UpdatedAt           string                `json:"updated_at,omitempty"`
-	Members             []*GroupMember        `json:"members,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// When the record was last updated.
+	UpdatedAt string         `json:"updated_at,omitempty"`
+	Members   []*GroupMember `json:"members,omitempty"`
 }
 
 func (m *GroupDetail) MarshalJSON() ([]byte, error) {
@@ -737,6 +748,7 @@ func (x *AddGroupMembersRequest) GetUserIds() []int64 {
 }
 
 type AddGroupMembersResponse struct {
+	// Number of members added.
 	Added   int32  `json:"added,omitempty"`
 	Message string `json:"message,omitempty"`
 }

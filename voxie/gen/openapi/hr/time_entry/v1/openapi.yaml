@@ -13,13 +13,18 @@ paths:
             parameters:
                 - name: employee_id
                   in: query
+                  description: Filter by employee; absent to include all employees.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 - name: date
                   in: query
+                  description: |-
+                    Filter by exact date; absent to include all dates. Ignored when from_date
+                    or to_date is supplied.
                   required: false
                   schema:
                     type: string
@@ -28,6 +33,9 @@ paths:
                         or to_date is supplied.
                 - name: from_date
                   in: query
+                  description: |-
+                    Include entries dated on or after this day (ISO-8601, e.g. "2026-04-01");
+                    absent to leave the range open at the start.
                   required: false
                   schema:
                     type: string
@@ -36,6 +44,9 @@ paths:
                         absent to leave the range open at the start.
                 - name: to_date
                   in: query
+                  description: |-
+                    Include entries dated on or before this day; absent to leave the range
+                    open at the end.
                   required: false
                   schema:
                     type: string
@@ -44,15 +55,22 @@ paths:
                         open at the end.
                 - name: project_id
                   in: query
+                  description: |-
+                    Filter by the Flow project the time was logged against; absent to include
+                    all projects and entries with no project.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Filter by the Flow project the time was logged against; absent to include
                         all projects and entries with no project.
                 - name: is_billable
                   in: query
+                  description: |-
+                    Filter by billability; absent to include both billable and non-billable
+                    time.
                   required: false
                   schema:
                     type: boolean
@@ -61,6 +79,9 @@ paths:
                         time.
                 - name: status
                   in: query
+                  description: |-
+                    Filter by workflow status (draft | submitted | approved | rejected);
+                    absent to include all statuses.
                   required: false
                   schema:
                     type: string
@@ -69,25 +90,39 @@ paths:
                         absent to include all statuses.
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum number of records to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of records to skip for pagination.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.time_entry.v1.ListTimeEntriesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - TimeEntryService
@@ -101,12 +136,24 @@ paths:
                             $ref: '#/components/schemas/hr.time_entry.v1.CreateTimeEntryRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.time_entry.v1.CreateTimeEntryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/time-entry/v1/timesheets:
         get:
             tags:
@@ -117,24 +164,39 @@ paths:
             parameters:
                 - name: employee_id
                   in: query
+                  description: Filter by employee; absent to include all employees.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 - name: status
                   in: query
+                  description: Filter by status; absent to include all statuses.
                   required: false
                   schema:
                     type: string
                     description: Filter by status; absent to include all statuses.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.time_entry.v1.ListTimesheetsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - TimeEntryService
@@ -148,12 +210,24 @@ paths:
                             $ref: '#/components/schemas/hr.time_entry.v1.SubmitTimesheetRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.time_entry.v1.SubmitTimesheetResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/time-entry/v1/timesheets/{id}/approve:
         patch:
             tags:
@@ -164,10 +238,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: ID of the timesheet being reviewed.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: ID of the timesheet being reviewed.
             requestBody:
                 content:
                     application/json:
@@ -177,12 +255,24 @@ paths:
                             description: body carries approval decision fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.time_entry.v1.ApproveTimesheetResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/time-entry/v1/time-entries/mark-invoiced:
         patch:
             tags:
@@ -201,12 +291,24 @@ paths:
                             description: body carries the batch fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.time_entry.v1.MarkTimeEntriesInvoicedResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.time_entry.v1.ListTimeEntriesRequest:
@@ -214,6 +316,7 @@ components:
             properties:
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 date:
@@ -233,6 +336,7 @@ components:
                         open at the end.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Filter by the Flow project the time was logged against; absent to include
@@ -292,26 +396,32 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the time entry.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this entry belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee who logged the time.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Associated project; absent if not project-based.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Associated task; absent if not task-level tracking.
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Time category for reporting; absent if uncategorised.
                 date:
@@ -341,6 +451,7 @@ components:
                     description: Reason the entry was rejected; absent unless status is rejected.
                 approved_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee ID of the approver; absent if not yet approved.
                 source:
@@ -348,10 +459,12 @@ components:
                     description: How the entry was created (manual | timer | flow_import).
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -373,18 +486,22 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee who logged the time.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Associated project; absent if not project-based.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Associated task; absent if not task-level tracking.
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Time category for reporting; absent if uncategorised.
                 date:
@@ -431,6 +548,7 @@ components:
             properties:
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 status:
@@ -466,14 +584,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the timesheet.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this timesheet belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee this timesheet is for.
                 period_start:
@@ -491,6 +612,7 @@ components:
                     description: Current step in a multi-level approval chain.
                 submitted_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when the timesheet was submitted; absent if still in draft.
                 total_minutes:
@@ -504,10 +626,12 @@ components:
                     description: Individual time entries within this timesheet.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -529,6 +653,7 @@ components:
                 timesheet_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the timesheet to submit for approval.
             required:
@@ -547,6 +672,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the timesheet being reviewed.
                 body:
@@ -580,6 +706,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID kept for route symmetry with approveTimesheet; unused by the handler.
                 body:
@@ -600,6 +727,7 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                     minItems: 1
                     description: |-
@@ -609,6 +737,7 @@ components:
                 invoice_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: invoice_id is the finance invoice that settles them.
             required:
@@ -635,3 +764,13 @@ components:
                 MarkTimeEntriesInvoicedResponse reports how the batch landed, so a caller
                 can tell "all marked" from "some were already invoiced" without a second
                 read.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TimeEntryService
+      description: TimeEntryService defines HR time entry and timesheet endpoints.

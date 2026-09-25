@@ -10,12 +10,24 @@ paths:
             summary: getMySubscription
             operationId: SubscriptionService_getMySubscription
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.subscription.v1.GetMySubscriptionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - SubscriptionService
@@ -28,12 +40,24 @@ paths:
                             $ref: '#/components/schemas/hub.subscription.v1.UpsertSubscriptionRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.subscription.v1.UpsertSubscriptionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/subscription/v1/plans:
         get:
             tags:
@@ -41,12 +65,24 @@ paths:
             summary: listPlans
             operationId: SubscriptionService_listPlans
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.subscription.v1.ListPlansResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/subscription/v1/billing:
         get:
             tags:
@@ -54,12 +90,24 @@ paths:
             summary: getBillingDetail
             operationId: SubscriptionService_getBillingDetail
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.subscription.v1.GetBillingDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/subscription/v1/billing/history:
         get:
             tags:
@@ -67,12 +115,24 @@ paths:
             summary: getBillingHistory
             operationId: SubscriptionService_getBillingHistory
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.subscription.v1.GetBillingHistoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/subscription/v1/checkout:
         post:
             tags:
@@ -86,12 +146,24 @@ paths:
                             $ref: '#/components/schemas/hub.subscription.v1.CreateCheckoutRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.subscription.v1.CreateCheckoutResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.subscription.v1.GetMySubscriptionRequest:
@@ -109,6 +181,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 plan_name:
                     type: string
@@ -174,6 +247,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -429,3 +503,12 @@ components:
                     type: string
             required:
                 - checkout_url
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SubscriptionService

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface CampaignServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** CampaignService defines CRM campaign endpoints. */
 export class CampaignServiceClient {
 private baseUrl: string;
 private options: CampaignServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listCampaigns(req: ListCampaignsRequest): Promise<ListCampaignsResponse> {
+/** Returns campaigns for the active business. */
+async listCampaigns(req: ListCampaignsRequest, opts?: RequestOptions): Promise<ListCampaignsResponse> {
 const violations = validateListCampaignsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaign/v1/campaigns";
 const query = new URLSearchParams();
 if (req.status !== undefined) {
@@ -89,7 +129,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -101,14 +142,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListCampaignsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createCampaign(req: CreateCampaignRequest): Promise<CreateCampaignResponse> {
+/** Creates a new marketing campaign. */
+async createCampaign(req: CreateCampaignRequest, opts?: RequestOptions): Promise<CreateCampaignResponse> {
 const violations = validateCreateCampaignRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaign/v1/campaigns";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateCampaignRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -120,9 +163,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateCampaignResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCampaignDetail(req: GetCampaignDetailRequest): Promise<GetCampaignDetailResponse> {
+/** Returns a campaign and its stats. */
+async getCampaignDetail(req: GetCampaignDetailRequest, opts?: RequestOptions): Promise<GetCampaignDetailResponse> {
 const violations = validateGetCampaignDetailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaign/v1/campaigns/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -130,7 +174,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -142,9 +187,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetCampaignDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCampaignStats(req: GetCampaignStatsRequest): Promise<GetCampaignStatsResponse> {
+/** Returns stats for a single campaign. */
+async getCampaignStats(req: GetCampaignStatsRequest, opts?: RequestOptions): Promise<GetCampaignStatsResponse> {
 const violations = validateGetCampaignStatsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaign/v1/campaigns/stats";
 const query = new URLSearchParams();
 if (req.campaignId !== undefined) {
@@ -154,7 +200,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -166,15 +213,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetCampaignStatsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateCampaign(req: UpdateCampaignRequest): Promise<UpdateCampaignResponse> {
+/** Updates campaign fields. */
+async updateCampaign(req: UpdateCampaignRequest, opts?: RequestOptions): Promise<UpdateCampaignResponse> {
 const violations = validateUpdateCampaignRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaign/v1/campaigns/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateCampaignRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -186,15 +235,20 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateCampaignResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateCampaignStatus(req: UpdateCampaignStatusRequest): Promise<UpdateCampaignStatusResponse> {
+/**
+ * Changes the campaign lifecycle status. The id is taken from the path;
+ * only the status travels in the body (matches PUT /crm/campaigns/{id}/status).
+ */
+async updateCampaignStatus(req: UpdateCampaignStatusRequest, opts?: RequestOptions): Promise<UpdateCampaignStatusResponse> {
 const violations = validateUpdateCampaignStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaign/v1/campaigns/{id}/status";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateCampaignStatusRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

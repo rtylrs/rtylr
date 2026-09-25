@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface UserServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** UserService defines hub user profile endpoints. */
 export class UserServiceClient {
 private baseUrl: string;
 private options: UserServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getMe(req: GetMeRequest): Promise<GetMeResponse> {
+/** Returns the authenticated user profile. */
+async getMe(req: GetMeRequest, opts?: RequestOptions): Promise<GetMeResponse> {
 const violations = validateGetMeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/user/v1/users/me";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetMeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateProfile(req: UpdateProfileRequest): Promise<UpdateProfileResponse> {
+/** Updates the authenticated user profile. */
+async updateProfile(req: UpdateProfileRequest, opts?: RequestOptions): Promise<UpdateProfileResponse> {
 const violations = validateUpdateProfileRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/user/v1/users/me";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateProfileRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,14 +154,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateProfileResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+/** Changes the authenticated user password. */
+async changePassword(req: ChangePasswordRequest, opts?: RequestOptions): Promise<ChangePasswordResponse> {
 const violations = validateChangePasswordRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/user/v1/users/password";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeChangePasswordRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -130,14 +175,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeChangePasswordResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async switchBusiness(req: SwitchBusinessRequest): Promise<SwitchBusinessResponse> {
+/** Issues a fresh JWT scoped to the selected business. */
+async switchBusiness(req: SwitchBusinessRequest, opts?: RequestOptions): Promise<SwitchBusinessResponse> {
 const violations = validateSwitchBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/user/v1/users/switch-business";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSwitchBusinessRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

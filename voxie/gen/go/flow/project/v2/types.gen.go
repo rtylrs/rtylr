@@ -7,28 +7,68 @@ import (
 	"strconv"
 )
 
+// Project is a business-scoped container of tasks. The workspace layer is
+// gone in v2: every project belongs directly to the caller's business,
+// resolved server-side from auth, and no request carries a tenant or
+// workspace identifier.
 type Project struct {
-	Id               int64   `json:"id,omitempty"`
-	OwnerId          int64   `json:"owner_id,omitempty"`
-	Name             string  `json:"name,omitempty"`
-	Description      string  `json:"description,omitempty"`
-	Icon             string  `json:"icon,omitempty"`
-	Color            string  `json:"color,omitempty"`
-	Status           string  `json:"status,omitempty"`
-	Visibility       string  `json:"visibility,omitempty"`
-	IsPersonal       bool    `json:"is_personal,omitempty"`
-	StartDate        string  `json:"start_date,omitempty"`
-	DueDate          string  `json:"due_date,omitempty"`
-	CreatedBy        int64   `json:"created_by,omitempty"`
-	CreatedAt        string  `json:"created_at,omitempty"`
-	UpdatedAt        string  `json:"updated_at,omitempty"`
-	TaskCount        int32   `json:"task_count,omitempty"`
-	CompletedCount   int32   `json:"completed_count,omitempty"`
-	MemberCount      int32   `json:"member_count,omitempty"`
-	Code             string  `json:"code,omitempty"`
-	ArchivedAt       *string `json:"archived_at,omitempty"`
-	PurgeAt          *string `json:"purge_at,omitempty"`
-	VisibleViaReport bool    `json:"visible_via_report,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id is the user who created the project. Not the tenant: the
+	// business is implicit from the caller's auth context.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// visibility controls discoverability. "private" (default) limits the
+	// project to its creator and members; "public" additionally exposes the
+	// fields of this message on the owner's profile to business colleagues.
+	// Public never grants task access by itself.
+	Visibility string `json:"visibility,omitempty"`
+	// is_personal marks the caller's auto-provisioned My Tasks bucket. The
+	// bucket is hidden from shared lists and exempt from manager-visibility
+	// policies unless its owner explicitly shares it.
+	IsPersonal bool `json:"is_personal,omitempty"`
+	// start_date is the start date value for this contract.
+	StartDate string `json:"start_date,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// created_by is the created by value for this contract.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
+	// Total task count for this project. Display projection, ignored on writes.
+	TaskCount int32 `json:"task_count,omitempty"`
+	// Number of tasks with status="done". Display projection, ignored on writes.
+	CompletedCount int32 `json:"completed_count,omitempty"`
+	// Count of project members, for the "+N" avatar stack. Display projection, ignored on writes.
+	MemberCount int32 `json:"member_count,omitempty"`
+	// Short project code used to build Task.identifier (e.g. "FLW" -> "FLW-42").
+	Code string `json:"code,omitempty"`
+	// archived_at is when the project moved to the recycle bin. Empty while active.
+	ArchivedAt *string `json:"archived_at,omitempty"`
+	// purge_at is when the recycle bin will permanently delete this project and
+	// everything inside it. Stamped at archive time from the business's
+	// retention setting; later retention changes affect future archives only.
+	PurgeAt *string `json:"purge_at,omitempty"`
+	// visible_via_report is true when the caller can see this project ONLY
+	// because they manage someone involved in it (the dept-manager proxy), and
+	// not because they created it, own it, or are a member.
+	//
+	// It exists so a client can group these separately without asking per
+	// project why each one is visible. It is a per-caller projection, not a
+	// property of the project: the same project is false for its own members and
+	// true for their manager. Never persist it.
+	VisibleViaReport bool `json:"visible_via_report,omitempty"`
 }
 
 func (m *Project) MarshalJSON() ([]byte, error) {
@@ -257,12 +297,19 @@ func (x *Project) GetVisibleViaReport() bool {
 }
 
 type ProjectColumn struct {
-	Id        int64  `json:"id,omitempty"`
-	ProjectId int64  `json:"project_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Color     string `json:"color,omitempty"`
-	SortOrder int32  `json:"sort_order,omitempty"`
+	// id is the unique identifier for the column.
+	Id int64 `json:"id,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId int64 `json:"project_id,omitempty"`
+	// name is the column name.
+	Name string `json:"name,omitempty"`
+	// color is the column color.
+	Color string `json:"color,omitempty"`
+	// sort_order is the column sort order.
+	SortOrder int32 `json:"sort_order,omitempty"`
+	// created_at is when the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
 	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
@@ -362,14 +409,22 @@ func (x *ProjectColumn) GetUpdatedAt() string {
 }
 
 type ProjectMember struct {
-	Id        int64  `json:"id,omitempty"`
-	ProjectId int64  `json:"project_id,omitempty"`
-	UserId    int64  `json:"user_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Email     string `json:"email,omitempty"`
-	Role      string `json:"role,omitempty"`
-	AddedBy   int64  `json:"added_by,omitempty"`
-	AddedAt   string `json:"added_at,omitempty"`
+	// id is the unique identifier for the membership record.
+	Id int64 `json:"id,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId int64 `json:"project_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// name is the member display name.
+	Name string `json:"name,omitempty"`
+	// email is the member email address.
+	Email string `json:"email,omitempty"`
+	// role is the role value for this contract.
+	Role string `json:"role,omitempty"`
+	// added_by is the user id of the inviter, if any.
+	AddedBy int64 `json:"added_by,omitempty"`
+	// added_at is when the member joined the project.
+	AddedAt string `json:"added_at,omitempty"`
 }
 
 func (m *ProjectMember) MarshalJSON() ([]byte, error) {
@@ -496,6 +551,7 @@ func (x *ProjectMember) GetAddedAt() string {
 }
 
 type GetProjectRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -537,6 +593,7 @@ func (x *GetProjectRequest) GetId() int64 {
 }
 
 type GetProjectResponse struct {
+	// project is the project value for this contract.
 	Project *Project `json:"project,omitempty"`
 }
 
@@ -549,7 +606,9 @@ func (x *GetProjectResponse) GetProject() *Project {
 }
 
 type SetProjectVisibilityRequest struct {
-	Id         int64  `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// visibility is the target visibility: "private" or "public".
 	Visibility string `json:"visibility,omitempty"`
 }
 
@@ -599,6 +658,7 @@ func (x *SetProjectVisibilityRequest) GetVisibility() string {
 }
 
 type SetProjectVisibilityResponse struct {
+	// project is the updated project.
 	Project *Project `json:"project,omitempty"`
 }
 
@@ -611,13 +671,22 @@ func (x *SetProjectVisibilityResponse) GetProject() *Project {
 }
 
 type ListProjectsRequest struct {
-	Status     string `json:"status,omitempty"`
+	// status filters by lifecycle state ("active", "archived", "completed").
+	// Empty returns active projects only, matching the sidebar's default view.
+	Status string `json:"status,omitempty"`
+	// visibility filters by "private" or "public". Empty returns both kinds
+	// the caller can reach.
 	Visibility string `json:"visibility,omitempty"`
-	Q          string `json:"q,omitempty"`
-	Page       int32  `json:"page,omitempty"`
-	Limit      int32  `json:"limit,omitempty"`
-	SortBy     string `json:"sort_by,omitempty"`
-	SortDir    string `json:"sort_dir,omitempty"`
+	// q narrows results by name substring. Empty disables the filter.
+	Q string `json:"q,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (x *ListProjectsRequest) GetStatus() string {
@@ -677,6 +746,7 @@ func (x *ListProjectsRequest) GetSortDir() string {
 }
 
 type ListProjectsResponse struct {
+	// projects is the projects value for this contract.
 	Projects   []*Project                               `json:"projects,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -698,13 +768,22 @@ func (x *ListProjectsResponse) GetPagination() *common_pagination_v1.PaginationR
 }
 
 type CreateProjectRequest struct {
-	Name        string `json:"name,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
 	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-	Color       string `json:"color,omitempty"`
-	Visibility  string `json:"visibility,omitempty"`
-	StartDate   string `json:"start_date,omitempty"`
-	DueDate     string `json:"due_date,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
+	// visibility is the initial exposure. Empty means "private", which is also
+	// the schema default; public makes the project metadata-discoverable via
+	// profiles but grants no access by itself.
+	Visibility string `json:"visibility,omitempty"`
+	// start_date is an optional start date; an empty value leaves it unset.
+	StartDate string `json:"start_date,omitempty"`
+	// due_date is an optional due date; an empty value leaves it unset.
+	DueDate string `json:"due_date,omitempty"`
 }
 
 func (x *CreateProjectRequest) GetName() string {
@@ -764,6 +843,7 @@ func (x *CreateProjectRequest) GetDueDate() string {
 }
 
 type CreateProjectResponse struct {
+	// project is the project value for this contract.
 	Project *Project `json:"project,omitempty"`
 }
 
@@ -776,13 +856,23 @@ func (x *CreateProjectResponse) GetProject() *Project {
 }
 
 type UpdateProjectBody struct {
-	Name        string `json:"name,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
 	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-	Color       string `json:"color,omitempty"`
-	Status      string `json:"status,omitempty"`
-	StartDate   string `json:"start_date,omitempty"`
-	DueDate     string `json:"due_date,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// start_date is an optional start date; an empty value leaves it unset,
+	// matching CreateProjectRequest - a project created with no dates (a
+	// documented, valid state there) could otherwise never be saved again.
+	StartDate string `json:"start_date,omitempty"`
+	// due_date is an optional due date; an empty value leaves it unset, for
+	// the same reason as start_date above.
+	DueDate string `json:"due_date,omitempty"`
 }
 
 func (x *UpdateProjectBody) GetName() string {
@@ -842,7 +932,9 @@ func (x *UpdateProjectBody) GetDueDate() string {
 }
 
 type UpdateProjectRequest struct {
-	Id   int64              `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable project fields bound from the HTTP payload.
 	Body *UpdateProjectBody `json:"body,omitempty"`
 }
 
@@ -892,6 +984,7 @@ func (x *UpdateProjectRequest) GetBody() *UpdateProjectBody {
 }
 
 type UpdateProjectResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -904,6 +997,7 @@ func (x *UpdateProjectResponse) GetMessage() string {
 }
 
 type ArchiveProjectRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -945,6 +1039,9 @@ func (x *ArchiveProjectRequest) GetId() int64 {
 }
 
 type ArchiveProjectResponse struct {
+	// project is the archived project, carrying archived_at and the purge_at
+	// deadline computed from the business's retention setting. Clients should
+	// surface purge_at wherever they show the archive confirmation.
 	Project *Project `json:"project,omitempty"`
 }
 
@@ -957,7 +1054,9 @@ func (x *ArchiveProjectResponse) GetProject() *Project {
 }
 
 type ListArchivedProjectsRequest struct {
-	Page  int32 `json:"page,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
 	Limit int32 `json:"limit,omitempty"`
 }
 
@@ -978,6 +1077,8 @@ func (x *ListArchivedProjectsRequest) GetLimit() int32 {
 }
 
 type ListArchivedProjectsResponse struct {
+	// projects lists the caller's visible projects currently sitting in the
+	// recycle bin, ordered by soonest purge_at first.
 	Projects   []*Project                               `json:"projects,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -999,6 +1100,7 @@ func (x *ListArchivedProjectsResponse) GetPagination() *common_pagination_v1.Pag
 }
 
 type RestoreProjectRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1040,6 +1142,7 @@ func (x *RestoreProjectRequest) GetId() int64 {
 }
 
 type RestoreProjectResponse struct {
+	// project is the restored project with cleared archive timestamps.
 	Project *Project `json:"project,omitempty"`
 }
 
@@ -1052,6 +1155,7 @@ func (x *RestoreProjectResponse) GetProject() *Project {
 }
 
 type PurgeProjectRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1093,6 +1197,7 @@ func (x *PurgeProjectRequest) GetId() int64 {
 }
 
 type PurgeProjectResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1105,11 +1210,16 @@ func (x *PurgeProjectResponse) GetMessage() string {
 }
 
 type ListProjectColumnsRequest struct {
+	// project_id is the project id value for this contract.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	Page      int32  `json:"page,omitempty"`
-	Limit     int32  `json:"limit,omitempty"`
-	SortBy    string `json:"sort_by,omitempty"`
-	SortDir   string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListProjectColumnsRequest) MarshalJSON() ([]byte, error) {
@@ -1189,6 +1299,7 @@ func (x *ListProjectColumnsRequest) GetSortDir() string {
 }
 
 type ListProjectColumnsResponse struct {
+	// columns is the project columns for this contract.
 	Columns    []*ProjectColumn                         `json:"columns,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -1210,10 +1321,14 @@ func (x *ListProjectColumnsResponse) GetPagination() *common_pagination_v1.Pagin
 }
 
 type CreateProjectColumnRequest struct {
+	// project_id is the project id value for this contract.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Color     string `json:"color,omitempty"`
-	SortOrder int32  `json:"sort_order,omitempty"`
+	// name is the column name.
+	Name string `json:"name,omitempty"`
+	// color is the column color.
+	Color string `json:"color,omitempty"`
+	// sort_order is the column sort order.
+	SortOrder int32 `json:"sort_order,omitempty"`
 }
 
 func (m *CreateProjectColumnRequest) MarshalJSON() ([]byte, error) {
@@ -1285,6 +1400,7 @@ func (x *CreateProjectColumnRequest) GetSortOrder() int32 {
 }
 
 type CreateProjectColumnResponse struct {
+	// column is the created column.
 	Column *ProjectColumn `json:"column,omitempty"`
 }
 
@@ -1297,10 +1413,14 @@ func (x *CreateProjectColumnResponse) GetColumn() *ProjectColumn {
 }
 
 type UpdateProjectColumnRequest struct {
-	Id        int64  `json:"id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Color     string `json:"color,omitempty"`
-	SortOrder int32  `json:"sort_order,omitempty"`
+	// id is the column identifier.
+	Id int64 `json:"id,omitempty"`
+	// name is the column name.
+	Name string `json:"name,omitempty"`
+	// color is the column color.
+	Color string `json:"color,omitempty"`
+	// sort_order is the column sort order.
+	SortOrder int32 `json:"sort_order,omitempty"`
 }
 
 func (m *UpdateProjectColumnRequest) MarshalJSON() ([]byte, error) {
@@ -1365,6 +1485,7 @@ func (x *UpdateProjectColumnRequest) GetSortOrder() int32 {
 }
 
 type UpdateProjectColumnResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1377,6 +1498,7 @@ func (x *UpdateProjectColumnResponse) GetMessage() string {
 }
 
 type DeleteProjectColumnRequest struct {
+	// id is the column identifier.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1418,6 +1540,7 @@ func (x *DeleteProjectColumnRequest) GetId() int64 {
 }
 
 type DeleteProjectColumnResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1430,8 +1553,10 @@ func (x *DeleteProjectColumnResponse) GetMessage() string {
 }
 
 type MoveTaskToColumnRequest struct {
-	TaskId   *int64 `json:"task_id,omitempty"`
-	ColumnId int64  `json:"column_id,omitempty"`
+	// task_id is the task identifier.
+	TaskId *int64 `json:"task_id,omitempty"`
+	// column_id is the destination column identifier.
+	ColumnId int64 `json:"column_id,omitempty"`
 }
 
 func (m *MoveTaskToColumnRequest) MarshalJSON() ([]byte, error) {
@@ -1497,6 +1622,7 @@ func (x *MoveTaskToColumnRequest) GetColumnId() int64 {
 }
 
 type MoveTaskToColumnResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1509,11 +1635,16 @@ func (x *MoveTaskToColumnResponse) GetMessage() string {
 }
 
 type ListProjectMembersRequest struct {
+	// project_id is the project id value for this contract.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	Page      int32  `json:"page,omitempty"`
-	Limit     int32  `json:"limit,omitempty"`
-	SortBy    string `json:"sort_by,omitempty"`
-	SortDir   string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListProjectMembersRequest) MarshalJSON() ([]byte, error) {
@@ -1593,6 +1724,7 @@ func (x *ListProjectMembersRequest) GetSortDir() string {
 }
 
 type ListProjectMembersResponse struct {
+	// members is the project members for this contract.
 	Members    []*ProjectMember                         `json:"members,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -1614,9 +1746,12 @@ func (x *ListProjectMembersResponse) GetPagination() *common_pagination_v1.Pagin
 }
 
 type AddProjectMemberRequest struct {
+	// project_id is the project id value for this contract.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	UserId    *int64 `json:"user_id,omitempty"`
-	Role      string `json:"role,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId *int64 `json:"user_id,omitempty"`
+	// role is the role value for this contract.
+	Role string `json:"role,omitempty"`
 }
 
 func (m *AddProjectMemberRequest) MarshalJSON() ([]byte, error) {
@@ -1697,6 +1832,7 @@ func (x *AddProjectMemberRequest) GetRole() string {
 }
 
 type AddProjectMemberResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1709,8 +1845,10 @@ func (x *AddProjectMemberResponse) GetMessage() string {
 }
 
 type RemoveProjectMemberRequest struct {
+	// project_id is the project id value for this contract.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	UserId    *int64 `json:"user_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId *int64 `json:"user_id,omitempty"`
 }
 
 func (m *RemoveProjectMemberRequest) MarshalJSON() ([]byte, error) {
@@ -1783,6 +1921,7 @@ func (x *RemoveProjectMemberRequest) GetUserId() int64 {
 }
 
 type RemoveProjectMemberResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1795,9 +1934,12 @@ func (x *RemoveProjectMemberResponse) GetMessage() string {
 }
 
 type UpdateProjectMemberRoleRequest struct {
+	// project_id is the project id value for this contract.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	UserId    *int64 `json:"user_id,omitempty"`
-	Role      string `json:"role,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId *int64 `json:"user_id,omitempty"`
+	// role is the role value for this contract.
+	Role string `json:"role,omitempty"`
 }
 
 func (m *UpdateProjectMemberRoleRequest) MarshalJSON() ([]byte, error) {
@@ -1878,6 +2020,7 @@ func (x *UpdateProjectMemberRoleRequest) GetRole() string {
 }
 
 type UpdateProjectMemberRoleResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1890,9 +2033,12 @@ func (x *UpdateProjectMemberRoleResponse) GetMessage() string {
 }
 
 type InviteProjectMemberRequest struct {
+	// project_id is the project id value for this contract.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	Email     string `json:"email,omitempty"`
-	Role      string `json:"role,omitempty"`
+	// email is the invitee email address.
+	Email string `json:"email,omitempty"`
+	// role is the role value for this contract.
+	Role string `json:"role,omitempty"`
 }
 
 func (m *InviteProjectMemberRequest) MarshalJSON() ([]byte, error) {
@@ -1956,6 +2102,7 @@ func (x *InviteProjectMemberRequest) GetRole() string {
 }
 
 type InviteProjectMemberResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1968,7 +2115,9 @@ func (x *InviteProjectMemberResponse) GetMessage() string {
 }
 
 type TransferProjectOwnershipRequest struct {
-	ProjectId  *int64 `json:"project_id,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// new_owner_id is the new owner user id.
 	NewOwnerId *int64 `json:"new_owner_id,omitempty"`
 }
 
@@ -2042,6 +2191,7 @@ func (x *TransferProjectOwnershipRequest) GetNewOwnerId() int64 {
 }
 
 type TransferProjectOwnershipResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -2054,10 +2204,21 @@ func (x *TransferProjectOwnershipResponse) GetMessage() string {
 }
 
 type ProjectLabourCost struct {
-	ProjectId             int64 `json:"project_id,omitempty"`
-	CostMinorUnits        int64 `json:"cost_minor_units,omitempty"`
-	CostedMinutes         int64 `json:"costed_minutes,omitempty"`
-	UncostedMinutes       int64 `json:"uncosted_minutes,omitempty"`
+	// project_id is the project the cost was computed for.
+	ProjectId int64 `json:"project_id,omitempty"`
+	// cost_minor_units is the labour cost of billable logged time in the
+	// smallest unit of the business currency, so no rounding happens before
+	// the caller sees it.
+	CostMinorUnits int64 `json:"cost_minor_units,omitempty"`
+	// costed_minutes is billable logged time whose contributor had a rate on
+	// record; it is the time included in cost_minor_units.
+	CostedMinutes int64 `json:"costed_minutes,omitempty"`
+	// uncosted_minutes is billable logged time whose contributor has no rate
+	// on record. A total with uncosted_minutes above zero understates true
+	// labour cost and must be labelled as partial where it is displayed.
+	UncostedMinutes int64 `json:"uncosted_minutes,omitempty"`
+	// uncosted_employee_count is how many distinct contributors have no rate
+	// on record.
 	UncostedEmployeeCount int32 `json:"uncosted_employee_count,omitempty"`
 }
 
@@ -2161,6 +2322,7 @@ func (x *ProjectLabourCost) GetUncostedEmployeeCount() int32 {
 }
 
 type GetProjectLabourCostRequest struct {
+	// id is the Flow project id path parameter.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -2202,6 +2364,7 @@ func (x *GetProjectLabourCostRequest) GetId() int64 {
 }
 
 type GetProjectLabourCostResponse struct {
+	// cost is the aggregate for the requested project.
 	Cost *ProjectLabourCost `json:"cost,omitempty"`
 }
 

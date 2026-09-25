@@ -12,23 +12,35 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: offset
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.memory.v1.ListChatsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/memory/v1/chats/{session_id}/messages:
         get:
             tags:
@@ -42,12 +54,24 @@ paths:
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.memory.v1.GetChatMessagesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/memory/v1/chats/{session_id}:
         put:
             tags:
@@ -64,15 +88,32 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.memory.v1.RenameChatRequest'
+                            type: object
+                            properties:
+                                title:
+                                    type: string
+                            required:
+                                - title
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.memory.v1.RenameChatResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - MemoryService
@@ -85,12 +126,24 @@ paths:
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.memory.v1.DeleteChatResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/memory/v1/chats/{session_id}/pin:
         put:
             tags:
@@ -107,15 +160,32 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.memory.v1.PinChatRequest'
+                            type: object
+                            properties:
+                                pinned:
+                                    type: boolean
+                            required:
+                                - pinned
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.memory.v1.PinChatResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.memory.v1.ListChatsRequest:
@@ -245,3 +315,12 @@ components:
                     type: boolean
             required:
                 - updated
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: MemoryService

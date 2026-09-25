@@ -6,19 +6,32 @@ import (
 	"strconv"
 )
 
+// OvertimeRequestPayload is a single employee's request to work overtime.
 type OvertimeRequestPayload struct {
-	Id                   *int64   `json:"id,omitempty"`
-	OwnerId              int64    `json:"owner_id,omitempty"`
-	EmployeeId           int64    `json:"employee_id,omitempty"`
-	Date                 string   `json:"date,omitempty"`
-	PlannedExtraMinutes  int32    `json:"planned_extra_minutes,omitempty"`
-	Reason               string   `json:"reason,omitempty"`
-	Status               string   `json:"status,omitempty"`
-	CurrentApprovalLevel int32    `json:"current_approval_level,omitempty"`
-	ApprovedBy           *int64   `json:"approved_by,omitempty"`
-	MultiplierApplied    *float64 `json:"multiplier_applied,omitempty"`
-	CreatedAt            int64    `json:"created_at,omitempty"`
-	UpdatedAt            int64    `json:"updated_at,omitempty"`
+	// Unique identifier for the overtime request.
+	Id *int64 `json:"id,omitempty"`
+	// Tenant owner this request belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee requesting overtime.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Date the overtime is planned for (ISO-8601 date).
+	Date string `json:"date,omitempty"`
+	// Number of extra minutes planned beyond the regular shift.
+	PlannedExtraMinutes int32 `json:"planned_extra_minutes,omitempty"`
+	// Justification for the overtime work.
+	Reason string `json:"reason,omitempty"`
+	// Workflow status (pending | approved | rejected | cancelled).
+	Status string `json:"status,omitempty"`
+	// Current step in a multi-level approval chain.
+	CurrentApprovalLevel int32 `json:"current_approval_level,omitempty"`
+	// Employee ID of the approver; absent if not yet approved.
+	ApprovedBy *int64 `json:"approved_by,omitempty"`
+	// Pay multiplier applied to the overtime hours (e.g. 1.5); absent if not yet calculated.
+	MultiplierApplied *float64 `json:"multiplier_applied,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *OvertimeRequestPayload) MarshalJSON() ([]byte, error) {
@@ -215,8 +228,10 @@ func (x *OvertimeRequestPayload) GetUpdatedAt() int64 {
 }
 
 type ListOvertimeRequestsRequest struct {
-	EmployeeId *int64  `json:"employee_id,omitempty"`
-	Status     *string `json:"status,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by status; absent to include all statuses.
+	Status *string `json:"status,omitempty"`
 }
 
 func (m *ListOvertimeRequestsRequest) MarshalJSON() ([]byte, error) {
@@ -276,10 +291,14 @@ func (x *ListOvertimeRequestsRequest) GetStatus() string {
 }
 
 type ListOvertimeRequestsResponse struct {
+	// Page of overtime requests matching the filters.
 	Requests []*OvertimeRequestPayload `json:"requests,omitempty"`
-	Total    int64                     `json:"total,omitempty"`
-	Limit    int32                     `json:"limit,omitempty"`
-	Offset   int32                     `json:"offset,omitempty"`
+	// Total number of matching overtime requests across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListOvertimeRequestsResponse) GetRequests() []*OvertimeRequestPayload {
@@ -315,10 +334,14 @@ func (x *ListOvertimeRequestsResponse) GetOffset() int32 {
 }
 
 type CreateOvertimeRequestRequest struct {
-	EmployeeId          *int64 `json:"employee_id,omitempty"`
-	Date                string `json:"date,omitempty"`
+	// Employee requesting overtime.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Date the overtime is planned for (ISO-8601 date).
+	Date string `json:"date,omitempty"`
+	// Number of extra minutes planned beyond the regular shift.
 	PlannedExtraMinutes *int32 `json:"planned_extra_minutes,omitempty"`
-	Reason              string `json:"reason,omitempty"`
+	// Justification for the overtime work.
+	Reason string `json:"reason,omitempty"`
 }
 
 func (m *CreateOvertimeRequestRequest) MarshalJSON() ([]byte, error) {
@@ -394,6 +417,7 @@ func (x *CreateOvertimeRequestRequest) GetReason() string {
 }
 
 type CreateOvertimeRequestResponse struct {
+	// The newly created overtime request.
 	Request *OvertimeRequestPayload `json:"request,omitempty"`
 }
 
@@ -405,10 +429,14 @@ func (x *CreateOvertimeRequestResponse) GetRequest() *OvertimeRequestPayload {
 	return x.Request
 }
 
+// ApproveOvertimeBody carries approval decision fields bound from the HTTP payload.
 type ApproveOvertimeBody struct {
-	Approved          bool     `json:"approved,omitempty"`
+	// True to approve, false to reject.
+	Approved bool `json:"approved,omitempty"`
+	// Pay multiplier to apply (e.g. 1.5); absent to use the default rate.
 	MultiplierApplied *float64 `json:"multiplier_applied,omitempty"`
-	RejectionReason   *string  `json:"rejection_reason,omitempty"`
+	// Reason for rejection; absent if approving.
+	RejectionReason *string `json:"rejection_reason,omitempty"`
 }
 
 func (x *ApproveOvertimeBody) GetApproved() bool {
@@ -444,6 +472,7 @@ func (x *ApproveOvertimeBody) GetRejectionReason() string {
 }
 
 type ApproveOvertimeRequest struct {
+	// ID of the overtime request being reviewed.
 	OvertimeRequestId int64                `json:"overtime_request_id,omitempty"`
 	Body              *ApproveOvertimeBody `json:"body,omitempty"`
 }
@@ -494,6 +523,7 @@ func (x *ApproveOvertimeRequest) GetBody() *ApproveOvertimeBody {
 }
 
 type ApproveOvertimeResponse struct {
+	// Whether the approval action was processed.
 	Success bool `json:"success,omitempty"`
 }
 

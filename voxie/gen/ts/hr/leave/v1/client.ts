@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface LeaveServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** LeaveService defines HR leave endpoints. */
 export class LeaveServiceClient {
 private baseUrl: string;
 private options: LeaveServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listLeaveRequests(req: ListLeaveRequestsRequest): Promise<ListLeaveRequestsResponse> {
+/** ListLeaveRequests returns leave requests with optional filters. */
+async listLeaveRequests(req: ListLeaveRequestsRequest, opts?: RequestOptions): Promise<ListLeaveRequestsResponse> {
 const violations = validateListLeaveRequestsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/requests";
 const query = new URLSearchParams();
 if (req.employeeId !== undefined) {
@@ -98,7 +138,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -110,14 +151,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListLeaveRequestsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createLeaveRequest(req: CreateLeaveRequestRequest): Promise<CreateLeaveRequestResponse> {
+/** CreateLeaveRequest submits a leave request. */
+async createLeaveRequest(req: CreateLeaveRequestRequest, opts?: RequestOptions): Promise<CreateLeaveRequestResponse> {
 const violations = validateCreateLeaveRequestRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/requests";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateLeaveRequestRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -129,15 +172,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateLeaveRequestResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async approveLeave(req: ApproveLeaveRequest): Promise<ApproveLeaveResponse> {
+/** ApproveLeave approves a leave request. */
+async approveLeave(req: ApproveLeaveRequest, opts?: RequestOptions): Promise<ApproveLeaveResponse> {
 const violations = validateApproveLeaveRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/requests/{request_id}/approve";
 path = path.replace("{request_id}", encodeURIComponent(String(req.requestId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeApproveLeaveRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -149,15 +194,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeApproveLeaveResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async cancelLeaveRequest(req: CancelLeaveRequestRequest): Promise<CancelLeaveResponse> {
+/** CancelLeaveRequest withdraws the caller's own pending leave request. */
+async cancelLeaveRequest(req: CancelLeaveRequestRequest, opts?: RequestOptions): Promise<CancelLeaveResponse> {
 const violations = validateCancelLeaveRequestRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/requests/{request_id}/cancel";
 path = path.replace("{request_id}", encodeURIComponent(String(req.requestId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCancelLeaveRequestRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -169,16 +216,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCancelLeaveResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listLeaveTypes(req: ListLeaveTypesRequest): Promise<ListLeaveTypesResponse> {
+/** ListLeaveTypes returns configured leave types. */
+async listLeaveTypes(req: ListLeaveTypesRequest, opts?: RequestOptions): Promise<ListLeaveTypesResponse> {
 const violations = validateListLeaveTypesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/types";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -190,14 +239,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListLeaveTypesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createLeaveType(req: CreateLeaveTypeRequest): Promise<CreateLeaveTypeResponse> {
+/** CreateLeaveType creates a leave type. */
+async createLeaveType(req: CreateLeaveTypeRequest, opts?: RequestOptions): Promise<CreateLeaveTypeResponse> {
 const violations = validateCreateLeaveTypeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/types";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateLeaveTypeRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -209,15 +260,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateLeaveTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateLeaveType(req: UpdateLeaveTypeRequest): Promise<UpdateLeaveTypeResponse> {
+/** UpdateLeaveType updates an existing leave type. */
+async updateLeaveType(req: UpdateLeaveTypeRequest, opts?: RequestOptions): Promise<UpdateLeaveTypeResponse> {
 const violations = validateUpdateLeaveTypeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/types/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateLeaveTypeRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -229,9 +282,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateLeaveTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listLeaveBalances(req: ListLeaveBalancesRequest): Promise<ListLeaveBalancesResponse> {
+/** ListLeaveBalances returns leave balances with optional filters. */
+async listLeaveBalances(req: ListLeaveBalancesRequest, opts?: RequestOptions): Promise<ListLeaveBalancesResponse> {
 const violations = validateListLeaveBalancesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/v1/balances";
 const query = new URLSearchParams();
 if (req.employeeId !== undefined) {
@@ -244,7 +298,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

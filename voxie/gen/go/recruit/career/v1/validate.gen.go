@@ -2,9 +2,16 @@
 package v1
 
 import (
-	"errors"
 	"strings"
 )
+
+type ValidationErrors struct {
+	Violations []string
+}
+
+func (e *ValidationErrors) Error() string { return strings.Join(e.Violations, "; ") }
+
+func (e *ValidationErrors) ViolationList() []string { return e.Violations }
 
 func (m *RecruitCareer) Validate() error {
 	if m == nil {
@@ -12,7 +19,7 @@ func (m *RecruitCareer) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -23,7 +30,7 @@ func (m *Submission) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -34,7 +41,7 @@ func (m *ListSubmissionsRequest) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -50,12 +57,28 @@ func (m *ListSubmissionsResponse) Validate() error {
 		}
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
 
 func (m *UpdateSubmissionStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return &ValidationErrors{Violations: violations}
+	}
+	return nil
+}
+
+func (m *UpdateSubmissionStatusBody) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -68,27 +91,11 @@ func (m *UpdateSubmissionStatusRequest) Validate() error {
 			violations = append(violations, "id must be greater than 0")
 		}
 	}
-	if m.Body != nil {
-		if err := m.Body.Validate(); err != nil {
-			violations = append(violations, "body: "+err.Error())
-		}
-	}
-	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
-	}
-	return nil
-}
-
-func (m *UpdateSubmissionStatusBody) Validate() error {
-	if m == nil {
-		return nil
-	}
-	var violations []string
 	if m.Status == "" {
 		violations = append(violations, "status is required")
 	}
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }
@@ -99,7 +106,7 @@ func (m *UpdateSubmissionStatusResponse) Validate() error {
 	}
 	var violations []string
 	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
+		return &ValidationErrors{Violations: violations}
 	}
 	return nil
 }

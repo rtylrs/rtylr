@@ -13,17 +13,30 @@ paths:
             parameters:
                 - name: branch_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.floor.v1.ListFloorsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - FloorService
@@ -37,12 +50,24 @@ paths:
                             $ref: '#/components/schemas/pos.floor.v1.CreateFloorRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.floor.v1.CreateFloorResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/floor/v1/floors/{id}:
         put:
             tags:
@@ -53,10 +78,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the floor.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the floor.
             requestBody:
                 content:
                     application/json:
@@ -66,12 +95,24 @@ paths:
                             description: body carries updatable floor fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.floor.v1.UpdateFloorResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - FloorService
@@ -81,17 +122,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the floor.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the floor.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.floor.v1.DeleteFloorResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.floor.v1.ListFloorsRequest:
@@ -99,6 +156,7 @@ components:
             properties:
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - branch_id
@@ -116,12 +174,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -148,6 +209,7 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -164,6 +226,7 @@ components:
             properties:
                 floor_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -176,6 +239,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the floor.
                 body:
@@ -210,6 +274,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the floor.
             required:
@@ -221,3 +286,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: FloorService
+      description: FloorService defines POS floor plan endpoints.

@@ -13,25 +13,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: offset
                   in: query
+                  description: offset is the number of records to skip, for paging through the feed.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: offset is the number of records to skip, for paging through the feed.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.activity.v1.ListActivityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.activity.v1.ListActivityRequest:
@@ -66,9 +80,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 app:
                     type: string
@@ -76,6 +92,7 @@ components:
                     type: string
                 entity_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 action:
                     type: string
@@ -83,6 +100,7 @@ components:
                     type: string
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 user_name:
                     type: string
@@ -100,3 +118,13 @@ components:
                 - user_id
                 - user_name
                 - created_at
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ActivityService
+      description: ActivityService defines hub activity feed endpoints.

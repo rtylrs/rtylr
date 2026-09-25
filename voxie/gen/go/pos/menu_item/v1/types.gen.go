@@ -6,24 +6,41 @@ import (
 	"strconv"
 )
 
+// MenuItem is a sellable item on the POS menu.
 type MenuItem struct {
-	Id          int64    `json:"id,omitempty"`
-	OwnerId     int64    `json:"owner_id,omitempty"`
-	CategoryId  int64    `json:"category_id,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Sku         string   `json:"sku,omitempty"`
-	SalePrice   float64  `json:"sale_price,omitempty"`
-	IsActive    bool     `json:"is_active,omitempty"`
-	CreatedAt   string   `json:"created_at,omitempty"`
-	UpdatedAt   string   `json:"updated_at,omitempty"`
-	ImageUrl    string   `json:"image_url,omitempty"`
-	Category    string   `json:"category,omitempty"`
-	Barcode     string   `json:"barcode,omitempty"`
-	Description string   `json:"description,omitempty"`
-	TaxRate     float64  `json:"tax_rate,omitempty"`
-	Stock       float64  `json:"stock,omitempty"`
-	ProductId   *int64   `json:"product_id,omitempty"`
-	UnitCost    *float64 `json:"unit_cost,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId    int64   `json:"owner_id,omitempty"`
+	CategoryId int64   `json:"category_id,omitempty"`
+	Name       string  `json:"name,omitempty"`
+	Sku        string  `json:"sku,omitempty"`
+	SalePrice  float64 `json:"sale_price,omitempty"`
+	IsActive   bool    `json:"is_active,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
+	// Public storefront image for the menu item.
+	ImageUrl string `json:"image_url,omitempty"`
+	// Display category name for the menu item.
+	Category string `json:"category,omitempty"`
+	// Scanned barcode value for the menu item.
+	Barcode string `json:"barcode,omitempty"`
+	// Customer-facing menu item description.
+	Description string `json:"description,omitempty"`
+	// Sale tax rate for the menu item.
+	TaxRate float64 `json:"tax_rate,omitempty"`
+	// Current tracked stock quantity for the menu item.
+	Stock float64 `json:"stock,omitempty"`
+	// product_id is the ERP product this item is sold from; absent for items
+	// that are not stocked as a single product. When it is absent, cost and
+	// ERP-side stock for this item are unknown rather than zero. The server
+	// must verify the referenced product belongs to the caller's business.
+	ProductId *int64 `json:"product_id,omitempty"`
+	// unit_cost is the cost of one unit at the time of the read, copied from
+	// the linked ERP product. Absent when product_id is absent. Reported for
+	// display and margin only: the authoritative value is the ERP product's.
+	UnitCost *float64 `json:"unit_cost,omitempty"`
 }
 
 func (m *MenuItem) MarshalJSON() ([]byte, error) {
@@ -329,6 +346,7 @@ func (x *ListMenuItemsResponse) GetItems() []*MenuItem {
 
 type ListPublicMenuItemsRequest struct {
 	BusinessId int64 `json:"business_id,omitempty"`
+	// Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
 	LocationId int64 `json:"location_id,omitempty"`
 }
 
@@ -400,10 +418,14 @@ func (x *ListPublicMenuItemsResponse) GetItems() []*MenuItem {
 }
 
 type UpdateMenuItemBody struct {
-	Name      string  `json:"name,omitempty"`
+	// Display name for the menu item.
+	Name string `json:"name,omitempty"`
+	// Sell price for the menu item.
 	SalePrice float64 `json:"sale_price,omitempty"`
-	IsActive  bool    `json:"is_active,omitempty"`
-	Stock     float64 `json:"stock,omitempty"`
+	// Controls whether the item can be sold.
+	IsActive bool `json:"is_active,omitempty"`
+	// Current tracked stock quantity for the menu item.
+	Stock float64 `json:"stock,omitempty"`
 }
 
 func (x *UpdateMenuItemBody) GetName() string {
@@ -439,7 +461,9 @@ func (x *UpdateMenuItemBody) GetStock() float64 {
 }
 
 type UpdateMenuItemRequest struct {
-	Id   int64               `json:"id,omitempty"`
+	// id is the unique identifier for the menu item.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable menu item fields bound from the HTTP payload.
 	Body *UpdateMenuItemBody `json:"body,omitempty"`
 }
 

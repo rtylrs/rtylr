@@ -8,12 +8,18 @@ import (
 )
 
 type CustomerAnalytics struct {
-	Total            int32                  `json:"total,omitempty"`
-	NewThisPeriod    int32                  `json:"new_this_period,omitempty"`
-	RetentionRate    float64                `json:"retention_rate,omitempty"`
-	AvgLifetimeValue float64                `json:"avg_lifetime_value,omitempty"`
-	ChurnRate        float64                `json:"churn_rate,omitempty"`
-	Growth           []*CustomerGrowthPoint `json:"growth,omitempty"`
+	// total is the total number of matching records.
+	Total int32 `json:"total,omitempty"`
+	// new_this_period is the new this period value for this contract.
+	NewThisPeriod int32 `json:"new_this_period,omitempty"`
+	// retention_rate is the retention rate value for this contract.
+	RetentionRate float64 `json:"retention_rate,omitempty"`
+	// avg_lifetime_value is the avg lifetime value value for this contract.
+	AvgLifetimeValue float64 `json:"avg_lifetime_value,omitempty"`
+	// churn_rate is the churn rate value for this contract.
+	ChurnRate float64 `json:"churn_rate,omitempty"`
+	// growth is the growth value for this contract.
+	Growth []*CustomerGrowthPoint `json:"growth,omitempty"`
 }
 
 func (x *CustomerAnalytics) GetTotal() int32 {
@@ -65,9 +71,12 @@ func (x *CustomerAnalytics) GetGrowth() []*CustomerGrowthPoint {
 }
 
 type CustomerGrowthPoint struct {
-	Date         string `json:"date,omitempty"`
-	NewCustomers int32  `json:"new_customers,omitempty"`
-	Total        int32  `json:"total,omitempty"`
+	// date is the date value for this contract.
+	Date string `json:"date,omitempty"`
+	// new_customers is the new customers value for this contract.
+	NewCustomers int32 `json:"new_customers,omitempty"`
+	// total is the total number of matching records.
+	Total int32 `json:"total,omitempty"`
 }
 
 func (x *CustomerGrowthPoint) GetDate() string {
@@ -95,11 +104,16 @@ func (x *CustomerGrowthPoint) GetTotal() int32 {
 }
 
 type TopCustomerEntry struct {
-	Id          int64   `json:"id,omitempty"`
-	Name        string  `json:"name,omitempty"`
-	TotalSpent  float64 `json:"total_spent,omitempty"`
-	OrderCount  int32   `json:"order_count,omitempty"`
-	LastOrderAt string  `json:"last_order_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// total_spent is the total spent value for this contract.
+	TotalSpent float64 `json:"total_spent,omitempty"`
+	// order_count is the order count value for this contract.
+	OrderCount int32 `json:"order_count,omitempty"`
+	// last_order_at is the last order at value for this contract.
+	LastOrderAt string `json:"last_order_at,omitempty"`
 }
 
 func (m *TopCustomerEntry) MarshalJSON() ([]byte, error) {
@@ -172,9 +186,12 @@ func (x *TopCustomerEntry) GetLastOrderAt() string {
 }
 
 type ChurnAnalysis struct {
-	ChurnRate    float64        `json:"churn_rate,omitempty"`
-	ChurnedCount int32          `json:"churned_count,omitempty"`
-	Reasons      []*ChurnReason `json:"reasons,omitempty"`
+	// churn_rate is the churn rate value for this contract.
+	ChurnRate float64 `json:"churn_rate,omitempty"`
+	// churned_count is the churned count value for this contract.
+	ChurnedCount int32 `json:"churned_count,omitempty"`
+	// reasons is the reasons value for this contract.
+	Reasons []*ChurnReason `json:"reasons,omitempty"`
 }
 
 func (x *ChurnAnalysis) GetChurnRate() float64 {
@@ -202,8 +219,11 @@ func (x *ChurnAnalysis) GetReasons() []*ChurnReason {
 }
 
 type ChurnReason struct {
-	Reason     string  `json:"reason,omitempty"`
-	Count      int32   `json:"count,omitempty"`
+	// reason is the reason value for this contract.
+	Reason string `json:"reason,omitempty"`
+	// count is the count value for this contract.
+	Count int32 `json:"count,omitempty"`
+	// percentage is the percentage value for this contract.
 	Percentage float64 `json:"percentage,omitempty"`
 }
 
@@ -232,8 +252,11 @@ func (x *ChurnReason) GetPercentage() float64 {
 }
 
 type LTVAnalysis struct {
-	Average  float64       `json:"average,omitempty"`
-	Median   float64       `json:"median,omitempty"`
+	// average is the average value for this contract.
+	Average float64 `json:"average,omitempty"`
+	// median is the median value for this contract.
+	Median float64 `json:"median,omitempty"`
+	// segments is the segments value for this contract.
 	Segments []*LTVSegment `json:"segments,omitempty"`
 }
 
@@ -262,9 +285,12 @@ func (x *LTVAnalysis) GetSegments() []*LTVSegment {
 }
 
 type LTVSegment struct {
-	Segment       string  `json:"segment,omitempty"`
-	AvgLtv        float64 `json:"avg_ltv,omitempty"`
-	CustomerCount int32   `json:"customer_count,omitempty"`
+	// segment is the segment value for this contract.
+	Segment string `json:"segment,omitempty"`
+	// avg_ltv is the avg ltv value for this contract.
+	AvgLtv float64 `json:"avg_ltv,omitempty"`
+	// customer_count is the customer count value for this contract.
+	CustomerCount int32 `json:"customer_count,omitempty"`
 }
 
 func (x *LTVSegment) GetSegment() string {
@@ -292,6 +318,7 @@ func (x *LTVSegment) GetCustomerCount() int32 {
 }
 
 type GetCustomerAnalyticsRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -304,6 +331,7 @@ func (x *GetCustomerAnalyticsRequest) GetPeriod() string {
 }
 
 type GetCustomerAnalyticsResponse struct {
+	// analytics is the analytics value for this contract.
 	Analytics *CustomerAnalytics `json:"analytics,omitempty"`
 }
 
@@ -316,6 +344,7 @@ func (x *GetCustomerAnalyticsResponse) GetAnalytics() *CustomerAnalytics {
 }
 
 type GetChurnAnalysisRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -328,6 +357,7 @@ func (x *GetChurnAnalysisRequest) GetPeriod() string {
 }
 
 type GetChurnAnalysisResponse struct {
+	// analysis is the analysis value for this contract.
 	Analysis *ChurnAnalysis `json:"analysis,omitempty"`
 }
 
@@ -343,6 +373,7 @@ type GetLTVAnalysisRequest struct {
 }
 
 type GetLTVAnalysisResponse struct {
+	// analysis is the analysis value for this contract.
 	Analysis *LTVAnalysis `json:"analysis,omitempty"`
 }
 
@@ -355,11 +386,16 @@ func (x *GetLTVAnalysisResponse) GetAnalysis() *LTVAnalysis {
 }
 
 type GetTopCustomersRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// page is the current result page.
+	Page int32 `json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// sort_by is the sort field (total_spent, order_count).
+	SortBy string `json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
-	Period  string `json:"period,omitempty"`
+	// period is the period value for this contract.
+	Period string `json:"period,omitempty"`
 }
 
 func (x *GetTopCustomersRequest) GetPage() int32 {
@@ -403,7 +439,9 @@ func (x *GetTopCustomersRequest) GetPeriod() string {
 }
 
 type GetTopCustomersResponse struct {
-	Customers  []*TopCustomerEntry                      `json:"customers,omitempty"`
+	// customers is the customers value for this contract.
+	Customers []*TopCustomerEntry `json:"customers,omitempty"`
+	// pagination is the pagination value for this contract.
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 

@@ -2,6 +2,10 @@
 import * as hub_business_v1 from "../../business/v1/types.js";
 
 export interface ConfigPayload {
+/**
+ * Identifies the business that owns this config. Serialized as a string
+ * in the legacy payload.
+ */
 ownerId?: string | undefined;
 siteName?: string | undefined;
 logoUrl?: string | undefined;
@@ -149,6 +153,10 @@ return violations;
 }
 
 export interface CreateConfigRequest {
+/**
+ * Accepted for legacy compatibility; the server derives the owning
+ * business from the authenticated user.
+ */
 owner?: string | undefined;
 key: string;
 value: string;
@@ -186,6 +194,7 @@ return violations;
 }
 
 export interface CreateConfigResponse {
+/** Identifies the created config. */
 configId?: string | undefined;
 message?: string | undefined;
 }
@@ -232,6 +241,7 @@ return violations;
 }
 
 export interface GetConfigResponse {
+/** business is declared in hub.business.v1 - a cross-package reference. */
 business?: hub_business_v1.Business | undefined;
 maintenance?: boolean | undefined;
 }
@@ -362,6 +372,7 @@ return violations;
 }
 
 export interface UpdateConfigRequest {
+/** Absent means unchanged. */
 siteName?: string | undefined;
 logoUrl?: string | undefined;
 faviconUrl?: string | undefined;

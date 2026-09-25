@@ -12,23 +12,35 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.recurring_invoice.v1.ListRecurringInvoicesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - RecurringInvoiceService
@@ -41,12 +53,24 @@ paths:
                             $ref: '#/components/schemas/finance.recurring_invoice.v1.CreateRecurringInvoiceRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.recurring_invoice.v1.CreateRecurringInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/recurring-invoice/v1/recurring-invoices/{id}:
         get:
             tags:
@@ -58,15 +82,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.recurring_invoice.v1.GetRecurringInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - RecurringInvoiceService
@@ -75,23 +113,46 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: The recurring invoice to update.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: The recurring invoice to update.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest'
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/finance.recurring_invoice.v1.UpdateRecurringInvoiceBody'
+                                    description: Carries updatable recurring invoice fields bound from the HTTP payload.
+                            required:
+                                - body
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.recurring_invoice.v1.UpdateRecurringInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/recurring-invoice/v1/recurring-invoices/{id}/pause:
         patch:
             tags:
@@ -101,23 +162,39 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: The recurring invoice to pause.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: The recurring invoice to pause.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/finance.recurring_invoice.v1.PauseRecurringInvoiceRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.recurring_invoice.v1.PauseRecurringInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/recurring-invoice/v1/recurring-invoices/{id}/resume:
         patch:
             tags:
@@ -127,23 +204,39 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: The recurring invoice to resume.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: The recurring invoice to resume.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/finance.recurring_invoice.v1.ResumeRecurringInvoiceRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.recurring_invoice.v1.ResumeRecurringInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         finance.recurring_invoice.v1.ListRecurringInvoicesRequest:
@@ -184,13 +277,16 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The business owner for this recurring invoice.
                 template_invoice_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The invoice used as the recurring invoice template.
                 frequency:
@@ -221,6 +317,7 @@ components:
                 template_invoice_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The invoice used as the recurring invoice template.
                 frequency:
@@ -245,6 +342,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The recurring invoice that was created.
                 message:
@@ -259,6 +357,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -276,6 +375,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The recurring invoice to update.
                 body:
@@ -290,6 +390,7 @@ components:
             properties:
                 template_invoice_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The invoice used as the recurring invoice template.
                 frequency:
@@ -322,6 +423,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The recurring invoice to pause.
             required:
@@ -340,6 +442,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: The recurring invoice to resume.
             required:
@@ -352,3 +455,13 @@ components:
                     description: The backend confirmation message.
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: RecurringInvoiceService
+      description: RecurringInvoiceService defines recurring invoice endpoints.

@@ -14,21 +14,40 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/pos.orders.holds.v1.HoldOrderRequest'
+                            type: object
+                            properties:
+                                reason:
+                                    type: string
+                            required:
+                                - reason
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.holds.v1.HoldOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/orders/holds/v1/orders/held:
         get:
             tags:
@@ -36,12 +55,24 @@ paths:
             summary: listHeldOrders
             operationId: OrderHoldService_listHeldOrders
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.holds.v1.ListHeldOrdersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.orders.holds.v1.HoldOrderRequest:
@@ -50,6 +81,7 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reason:
                     type: string
@@ -79,19 +111,24 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 session_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 table_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_number:
                     type: string
@@ -102,11 +139,13 @@ components:
                     description: status is the current lifecycle state.
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 customer_name:
                     type: string
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 subtotal:
                     type: number
@@ -177,12 +216,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 menu_item_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -229,3 +271,12 @@ components:
                 - notes
                 - status
                 - created_at
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OrderHoldService

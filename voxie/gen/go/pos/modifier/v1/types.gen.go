@@ -6,15 +6,19 @@ import (
 	"strconv"
 )
 
+// Modifier is a customization option that can be attached to a menu item.
 type Modifier struct {
-	Id         int64   `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
 	OwnerId    int64   `json:"owner_id,omitempty"`
 	Name       string  `json:"name,omitempty"`
 	PriceDelta float64 `json:"price_delta,omitempty"`
 	GroupName  string  `json:"group_name,omitempty"`
 	IsRequired bool    `json:"is_required,omitempty"`
-	CreatedAt  string  `json:"created_at,omitempty"`
-	UpdatedAt  string  `json:"updated_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Modifier) MarshalJSON() ([]byte, error) {
@@ -210,6 +214,7 @@ func (x *CreateModifierResponse) GetMessage() string {
 }
 
 type DeleteModifierRequest struct {
+	// id is the unique identifier for the modifier.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -317,7 +322,9 @@ func (x *UpdateModifierBody) GetIsRequired() bool {
 }
 
 type UpdateModifierRequest struct {
-	Id   int64               `json:"id,omitempty"`
+	// id is the unique identifier for the modifier.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable modifier fields bound from the HTTP payload.
 	Body *UpdateModifierBody `json:"body,omitempty"`
 }
 

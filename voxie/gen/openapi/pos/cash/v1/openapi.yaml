@@ -17,14 +17,27 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.cash.v1.ListCashMovementsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/cash/v1/drop:
         post:
             tags:
@@ -39,12 +52,24 @@ paths:
                             $ref: '#/components/schemas/pos.cash.v1.CashDropRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.cash.v1.CashDropResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/cash/v1/pickup:
         post:
             tags:
@@ -59,12 +84,24 @@ paths:
                             $ref: '#/components/schemas/pos.cash.v1.CashPickupRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.cash.v1.CashPickupResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/cash/v1/adjust:
         post:
             tags:
@@ -79,12 +116,24 @@ paths:
                             $ref: '#/components/schemas/pos.cash.v1.CashAdjustRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.cash.v1.CashAdjustResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.cash.v1.ListCashMovementsRequest:
@@ -93,6 +142,7 @@ components:
                 session_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - session_id
@@ -110,21 +160,27 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 terminal_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 session_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 type:
                     type: string
@@ -135,6 +191,7 @@ components:
                     type: string
                 approved_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 created_at:
                     type: string
@@ -155,18 +212,22 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 terminal_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 session_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 amount:
                     exclusiveMinimum: 0
@@ -186,6 +247,7 @@ components:
             properties:
                 movement_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -198,18 +260,22 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 terminal_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 session_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 amount:
                     exclusiveMinimum: 0
@@ -229,6 +295,7 @@ components:
             properties:
                 movement_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -241,18 +308,22 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 terminal_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 session_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 amount:
                     exclusiveMinimum: 0
@@ -272,9 +343,20 @@ components:
             properties:
                 movement_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
             required:
                 - movement_id
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CashService
+      description: CashService defines POS cash drawer movement endpoints.

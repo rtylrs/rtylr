@@ -2,11 +2,17 @@
 import * as common_pagination_v1 from "../../../common/pagination/v1/types.js";
 
 export interface CustomerAnalytics {
+/** total is the total number of matching records. */
 total?: number | undefined;
+/** new_this_period is the new this period value for this contract. */
 newThisPeriod?: number | undefined;
+/** retention_rate is the retention rate value for this contract. */
 retentionRate?: number | undefined;
+/** avg_lifetime_value is the avg lifetime value value for this contract. */
 avgLifetimeValue?: number | undefined;
+/** churn_rate is the churn rate value for this contract. */
 churnRate?: number | undefined;
+/** growth is the growth value for this contract. */
 growth?: (CustomerGrowthPoint)[] | undefined;
 }
 
@@ -46,8 +52,11 @@ return violations;
 }
 
 export interface CustomerGrowthPoint {
+/** date is the date value for this contract. */
 date?: string | undefined;
+/** new_customers is the new customers value for this contract. */
 newCustomers?: number | undefined;
+/** total is the total number of matching records. */
 total?: number | undefined;
 }
 
@@ -77,10 +86,15 @@ return violations;
 }
 
 export interface TopCustomerEntry {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** name is the name value for this contract. */
 name?: string | undefined;
+/** total_spent is the total spent value for this contract. */
 totalSpent?: number | undefined;
+/** order_count is the order count value for this contract. */
 orderCount?: number | undefined;
+/** last_order_at is the last order at value for this contract. */
 lastOrderAt?: string | undefined;
 }
 
@@ -116,8 +130,11 @@ return violations;
 }
 
 export interface ChurnAnalysis {
+/** churn_rate is the churn rate value for this contract. */
 churnRate?: number | undefined;
+/** churned_count is the churned count value for this contract. */
 churnedCount?: number | undefined;
+/** reasons is the reasons value for this contract. */
 reasons?: (ChurnReason)[] | undefined;
 }
 
@@ -148,8 +165,11 @@ return violations;
 }
 
 export interface ChurnReason {
+/** reason is the reason value for this contract. */
 reason?: string | undefined;
+/** count is the count value for this contract. */
 count?: number | undefined;
+/** percentage is the percentage value for this contract. */
 percentage?: number | undefined;
 }
 
@@ -179,8 +199,11 @@ return violations;
 }
 
 export interface LTVAnalysis {
+/** average is the average value for this contract. */
 average?: number | undefined;
+/** median is the median value for this contract. */
 median?: number | undefined;
+/** segments is the segments value for this contract. */
 segments?: (LTVSegment)[] | undefined;
 }
 
@@ -211,8 +234,11 @@ return violations;
 }
 
 export interface LTVSegment {
+/** segment is the segment value for this contract. */
 segment?: string | undefined;
+/** avg_ltv is the avg ltv value for this contract. */
 avgLtv?: number | undefined;
+/** customer_count is the customer count value for this contract. */
 customerCount?: number | undefined;
 }
 
@@ -242,6 +268,7 @@ return violations;
 }
 
 export interface GetCustomerAnalyticsRequest {
+/** period is the period value for this contract. */
 period?: string | undefined;
 }
 
@@ -265,6 +292,7 @@ return violations;
 }
 
 export interface GetCustomerAnalyticsResponse {
+/** analytics is the analytics value for this contract. */
 analytics?: CustomerAnalytics | undefined;
 }
 
@@ -289,6 +317,7 @@ return violations;
 }
 
 export interface GetChurnAnalysisRequest {
+/** period is the period value for this contract. */
 period?: string | undefined;
 }
 
@@ -312,6 +341,7 @@ return violations;
 }
 
 export interface GetChurnAnalysisResponse {
+/** analysis is the analysis value for this contract. */
 analysis?: ChurnAnalysis | undefined;
 }
 
@@ -355,6 +385,7 @@ return violations;
 }
 
 export interface GetLTVAnalysisResponse {
+/** analysis is the analysis value for this contract. */
 analysis?: LTVAnalysis | undefined;
 }
 
@@ -379,10 +410,15 @@ return violations;
 }
 
 export interface GetTopCustomersRequest {
+/** page is the current result page. */
 page?: number | undefined;
+/** limit is the maximum number of records to return. */
 limit?: number | undefined;
+/** sort_by is the sort field (total_spent, order_count). */
 sortBy?: string | undefined;
+/** sort_dir is the sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
+/** period is the period value for this contract. */
 period?: string | undefined;
 }
 
@@ -418,7 +454,9 @@ return violations;
 }
 
 export interface GetTopCustomersResponse {
+/** customers is the customers value for this contract. */
 customers?: (TopCustomerEntry)[] | undefined;
+/** pagination is the pagination value for this contract. */
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
 

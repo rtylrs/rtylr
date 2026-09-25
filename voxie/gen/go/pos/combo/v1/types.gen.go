@@ -6,16 +6,20 @@ import (
 	"strconv"
 )
 
+// Combo is a bundled set of menu items sold as a single offering.
 type Combo struct {
-	Id          int64   `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
 	OwnerId     int64   `json:"owner_id,omitempty"`
 	Name        string  `json:"name,omitempty"`
 	Description string  `json:"description,omitempty"`
 	Price       float64 `json:"price,omitempty"`
 	Items       string  `json:"items,omitempty"`
 	IsActive    bool    `json:"is_active,omitempty"`
-	CreatedAt   string  `json:"created_at,omitempty"`
-	UpdatedAt   string  `json:"updated_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Combo) MarshalJSON() ([]byte, error) {
@@ -276,7 +280,9 @@ func (x *UpdateComboBody) GetIsActive() bool {
 }
 
 type UpdateComboRequest struct {
-	Id   int64            `json:"id,omitempty"`
+	// id is the unique identifier for the combo.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable combo fields bound from the HTTP payload.
 	Body *UpdateComboBody `json:"body,omitempty"`
 }
 
@@ -338,6 +344,7 @@ func (x *UpdateComboResponse) GetMessage() string {
 }
 
 type DeleteComboRequest struct {
+	// id is the unique identifier for the combo.
 	Id int64 `json:"id,omitempty"`
 }
 

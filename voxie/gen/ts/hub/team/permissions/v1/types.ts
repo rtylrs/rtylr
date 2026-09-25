@@ -6,8 +6,11 @@ userId?: string | undefined;
 apps?: (string)[] | undefined;
 role?: string | undefined;
 fullName?: string | undefined;
+/** Independent Dash role assignment. */
 dashRole?: string | undefined;
+/** Independent application role assignments. */
 appAssignments?: (hub_user_v1.AppRoleAssignment)[] | undefined;
+/** Groups that provide inherited access. */
 groupIds?: (string)[] | undefined;
 }
 
@@ -51,6 +54,7 @@ return violations;
 }
 
 export interface UpdatePermissionsResponse {
+/** Effective access after the update. */
 effectiveAccess?: hub_user_v1.EffectiveAccess | undefined;
 }
 

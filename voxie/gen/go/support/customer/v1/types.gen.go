@@ -7,11 +7,17 @@ import (
 )
 
 type Customer struct {
-	Id           int64  `json:"id,omitempty"`
-	BusinessId   int64  `json:"business_id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Email        string `json:"email,omitempty"`
-	Phone        string `json:"phone,omitempty"`
+	Id         int64  `json:"id,omitempty"`
+	BusinessId int64  `json:"business_id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Email      string `json:"email,omitempty"`
+	Phone      string `json:"phone,omitempty"`
+	// customer_id is the CRM customer this support record refers to; absent
+	// when the party has not been matched to one. It is nullable because
+	// support conversations arrive by email from people who may not be
+	// customers yet: matching on email alone is not reliable enough to assert
+	// the link, so the server sets it only on a confident match or when a human
+	// confirms one.
 	CustomerId   *int64 `json:"customer_id,omitempty"`
 	TotalTickets int32  `json:"total_tickets,omitempty"`
 	LastTicketAt string `json:"last_ticket_at,omitempty"`

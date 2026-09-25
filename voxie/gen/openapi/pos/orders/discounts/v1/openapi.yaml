@@ -14,21 +14,48 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/pos.orders.discounts.v1.DiscountOrderRequest'
+                            type: object
+                            properties:
+                                discount_type:
+                                    type: string
+                                discount_value:
+                                    type: number
+                                    minimum: 0
+                                    format: double
+                                reason:
+                                    type: string
+                            required:
+                                - discount_type
+                                - discount_value
+                                - reason
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.discounts.v1.DiscountOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.orders.discounts.v1.DiscountOrderRequest:
@@ -37,6 +64,7 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 discount_type:
                     type: string
@@ -58,3 +86,12 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OrderDiscountService

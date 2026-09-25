@@ -10,12 +10,24 @@ paths:
             summary: getLicenseState
             operationId: LicenseService_getLicenseState
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/license.v1.GetLicenseStateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         license.v1.GetLicenseStateRequest:
@@ -45,3 +57,13 @@ components:
                 - valid
                 - status
             description: LicenseState is the public, secret-free status used by admin notices.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LicenseService
+      description: LicenseService exposes the public self-host license status endpoint.

@@ -6,18 +6,26 @@ import (
 	"strconv"
 )
 
+// Staff is an HR staff member record.
 type Staff struct {
-	Id                    int64   `json:"id,omitempty"`
-	OwnerId               int64   `json:"owner_id,omitempty"`
-	UserId                int64   `json:"user_id,omitempty"`
-	DepartmentId          int64   `json:"department_id,omitempty"`
-	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
-	FirstName             string  `json:"first_name,omitempty"`
-	LastName              string  `json:"last_name,omitempty"`
-	Email                 string  `json:"email,omitempty"`
-	Phone                 string  `json:"phone,omitempty"`
-	Role                  string  `json:"role,omitempty"`
-	EmploymentType        string  `json:"employment_type,omitempty"`
+	Id           int64 `json:"id,omitempty"`
+	OwnerId      int64 `json:"owner_id,omitempty"`
+	UserId       int64 `json:"user_id,omitempty"`
+	DepartmentId int64 `json:"department_id,omitempty"`
+	// manager_staff_id is this person's direct manager, as a STAFF id (not a
+	// user id). Zero means no direct line, which is the common case: a
+	// department manager is resolved separately from hr_departments.
+	//
+	// Flow's dept-manager visibility proxy unions this with the department
+	// relationship, so setting it widens what that manager can see.
+	ManagerStaffId int64  `json:"manager_staff_id,omitempty"`
+	FirstName      string `json:"first_name,omitempty"`
+	LastName       string `json:"last_name,omitempty"`
+	Email          string `json:"email,omitempty"`
+	Phone          string `json:"phone,omitempty"`
+	Role           string `json:"role,omitempty"`
+	EmploymentType string `json:"employment_type,omitempty"`
+	// The current lifecycle state.
 	Status                string  `json:"status,omitempty"`
 	Salary                float64 `json:"salary,omitempty"`
 	HourlyRate            float64 `json:"hourly_rate,omitempty"`
@@ -29,10 +37,21 @@ type Staff struct {
 	EmergencyContactPhone string  `json:"emergency_contact_phone,omitempty"`
 	Apps                  string  `json:"apps,omitempty"`
 	Notes                 string  `json:"notes,omitempty"`
-	PhotoUrl              string  `json:"photo_url,omitempty"`
-	Bio                   string  `json:"bio,omitempty"`
-	CreatedAt             string  `json:"created_at,omitempty"`
-	UpdatedAt             string  `json:"updated_at,omitempty"`
+	// A URL to the staff member's profile photo. Optional and unset by default:
+	// consumers fall back to the hub account avatar, which is what Flow's profile
+	// screen already does.
+	PhotoUrl string `json:"photo_url,omitempty"`
+	// A short self-description shown on a profile screen.
+	//
+	// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+	// person and must never be rendered as an "About" section; a dead write path
+	// in the HR app mapped bio onto notes, and that mapping was wrong. See
+	// tryrtylr/rtylr#875.
+	Bio string `json:"bio,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// When the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Staff) MarshalJSON() ([]byte, error) {
@@ -315,7 +334,8 @@ func (x *Staff) GetUpdatedAt() string {
 type ListStaffRequest struct {
 	Search       string `json:"search,omitempty"`
 	DepartmentId string `json:"department_id,omitempty"`
-	Status       string `json:"status,omitempty"`
+	// The current lifecycle state.
+	Status string `json:"status,omitempty"`
 }
 
 func (x *ListStaffRequest) GetSearch() string {
@@ -355,28 +375,47 @@ func (x *ListStaffResponse) GetStaff() []*Staff {
 }
 
 type CreateStaffRequest struct {
-	UserId                *int64  `json:"user_id,omitempty"`
-	DepartmentId          *int64  `json:"department_id,omitempty"`
-	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
-	FirstName             string  `json:"first_name,omitempty"`
-	LastName              string  `json:"last_name,omitempty"`
-	Email                 string  `json:"email,omitempty"`
-	Phone                 string  `json:"phone,omitempty"`
-	Role                  string  `json:"role,omitempty"`
-	EmploymentType        string  `json:"employment_type,omitempty"`
-	Status                string  `json:"status,omitempty"`
-	Salary                float64 `json:"salary,omitempty"`
-	HourlyRate            float64 `json:"hourly_rate,omitempty"`
-	OvertimeRate          float64 `json:"overtime_rate,omitempty"`
-	StartDate             string  `json:"start_date,omitempty"`
-	EndDate               string  `json:"end_date,omitempty"`
-	Address               string  `json:"address,omitempty"`
-	EmergencyContactName  string  `json:"emergency_contact_name,omitempty"`
-	EmergencyContactPhone string  `json:"emergency_contact_phone,omitempty"`
-	Apps                  string  `json:"apps,omitempty"`
-	Notes                 string  `json:"notes,omitempty"`
-	PhotoUrl              string  `json:"photo_url,omitempty"`
-	Bio                   string  `json:"bio,omitempty"`
+	UserId       *int64 `json:"user_id,omitempty"`
+	DepartmentId *int64 `json:"department_id,omitempty"`
+	// Optional, unlike department_id: most staff have no explicit manager, and
+	// @required @gt(0) would force callers to invent one.
+	ManagerStaffId int64  `json:"manager_staff_id,omitempty"`
+	FirstName      string `json:"first_name,omitempty"`
+	LastName       string `json:"last_name,omitempty"`
+	Email          string `json:"email,omitempty"`
+	Phone          string `json:"phone,omitempty"`
+	Role           string `json:"role,omitempty"`
+	EmploymentType string `json:"employment_type,omitempty"`
+	// The current lifecycle state.
+	Status       string  `json:"status,omitempty"`
+	Salary       float64 `json:"salary,omitempty"`
+	HourlyRate   float64 `json:"hourly_rate,omitempty"`
+	OvertimeRate float64 `json:"overtime_rate,omitempty"`
+	StartDate    string  `json:"start_date,omitempty"`
+	// Empty for anyone still employed, which is why this is not @required.
+	// Requiring it made every update to an active employee invalid, and the
+	// rejection happened client side, so the write vanished with no error.
+	EndDate string `json:"end_date,omitempty"`
+	Address string `json:"address,omitempty"`
+	// Optional HR detail. Not every record has next of kin on file, and
+	// blocking an unrelated field update over it is not the way to collect it.
+	EmergencyContactName  string `json:"emergency_contact_name,omitempty"`
+	EmergencyContactPhone string `json:"emergency_contact_phone,omitempty"`
+	// App access, empty meaning none. Optional for the same reason: a caller
+	// changing one field should not have to assert app access to do it.
+	Apps  string `json:"apps,omitempty"`
+	Notes string `json:"notes,omitempty"`
+	// A URL to the staff member's profile photo. Optional and unset by default:
+	// consumers fall back to the hub account avatar, which is what Flow's profile
+	// screen already does.
+	PhotoUrl string `json:"photo_url,omitempty"`
+	// A short self-description shown on a profile screen.
+	//
+	// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+	// person and must never be rendered as an "About" section; a dead write path
+	// in the HR app mapped bio onto notes, and that mapping was wrong. See
+	// tryrtylr/rtylr#875.
+	Bio string `json:"bio,omitempty"`
 }
 
 func (m *CreateStaffRequest) MarshalJSON() ([]byte, error) {
@@ -713,26 +752,44 @@ func (x *GetStaffResponse) GetStaff() *Staff {
 }
 
 type UpdateStaffBody struct {
-	DepartmentId          *int64  `json:"department_id,omitempty"`
-	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
-	FirstName             string  `json:"first_name,omitempty"`
-	LastName              string  `json:"last_name,omitempty"`
-	Email                 string  `json:"email,omitempty"`
-	Phone                 string  `json:"phone,omitempty"`
-	Role                  string  `json:"role,omitempty"`
-	EmploymentType        string  `json:"employment_type,omitempty"`
-	Status                string  `json:"status,omitempty"`
-	Salary                float64 `json:"salary,omitempty"`
-	HourlyRate            float64 `json:"hourly_rate,omitempty"`
-	OvertimeRate          float64 `json:"overtime_rate,omitempty"`
-	EndDate               string  `json:"end_date,omitempty"`
-	Address               string  `json:"address,omitempty"`
-	EmergencyContactName  string  `json:"emergency_contact_name,omitempty"`
-	EmergencyContactPhone string  `json:"emergency_contact_phone,omitempty"`
-	Apps                  string  `json:"apps,omitempty"`
-	Notes                 string  `json:"notes,omitempty"`
-	PhotoUrl              string  `json:"photo_url,omitempty"`
-	Bio                   string  `json:"bio,omitempty"`
+	DepartmentId *int64 `json:"department_id,omitempty"`
+	// Optional for the same reason as on create. Zero clears the reporting line.
+	ManagerStaffId int64  `json:"manager_staff_id,omitempty"`
+	FirstName      string `json:"first_name,omitempty"`
+	LastName       string `json:"last_name,omitempty"`
+	Email          string `json:"email,omitempty"`
+	Phone          string `json:"phone,omitempty"`
+	Role           string `json:"role,omitempty"`
+	EmploymentType string `json:"employment_type,omitempty"`
+	// The current lifecycle state.
+	Status       string  `json:"status,omitempty"`
+	Salary       float64 `json:"salary,omitempty"`
+	HourlyRate   float64 `json:"hourly_rate,omitempty"`
+	OvertimeRate float64 `json:"overtime_rate,omitempty"`
+	// Empty for anyone still employed, which is why this is not @required.
+	// Requiring it made every update to an active employee invalid, and the
+	// rejection happened client side, so the write vanished with no error.
+	EndDate string `json:"end_date,omitempty"`
+	Address string `json:"address,omitempty"`
+	// Optional HR detail. Not every record has next of kin on file, and
+	// blocking an unrelated field update over it is not the way to collect it.
+	EmergencyContactName  string `json:"emergency_contact_name,omitempty"`
+	EmergencyContactPhone string `json:"emergency_contact_phone,omitempty"`
+	// App access, empty meaning none. Optional for the same reason: a caller
+	// changing one field should not have to assert app access to do it.
+	Apps  string `json:"apps,omitempty"`
+	Notes string `json:"notes,omitempty"`
+	// A URL to the staff member's profile photo. Optional and unset by default:
+	// consumers fall back to the hub account avatar, which is what Flow's profile
+	// screen already does.
+	PhotoUrl string `json:"photo_url,omitempty"`
+	// A short self-description shown on a profile screen.
+	//
+	// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+	// person and must never be rendered as an "About" section; a dead write path
+	// in the HR app mapped bio onto notes, and that mapping was wrong. See
+	// tryrtylr/rtylr#875.
+	Bio string `json:"bio,omitempty"`
 }
 
 func (m *UpdateStaffBody) MarshalJSON() ([]byte, error) {
@@ -1176,6 +1233,11 @@ func (x *ClockOutResponse) GetSuccess() bool {
 	return x.Success
 }
 
+// DirectoryStaffEntry is the deliberately minimal projection of Staff shown
+// in the company-wide directory. It never carries salary, hourly_rate,
+// overtime_rate, address, or emergency_contact_* - those stay HR-admin-only
+// regardless of caller, enforced here at the contract level rather than
+// relying solely on runtime field-zeroing.
 type DirectoryStaffEntry struct {
 	Id             int64  `json:"id,omitempty"`
 	FirstName      string `json:"first_name,omitempty"`
@@ -1183,9 +1245,10 @@ type DirectoryStaffEntry struct {
 	DepartmentId   int64  `json:"department_id,omitempty"`
 	Role           string `json:"role,omitempty"`
 	EmploymentType string `json:"employment_type,omitempty"`
-	Status         string `json:"status,omitempty"`
-	Email          string `json:"email,omitempty"`
-	Phone          string `json:"phone,omitempty"`
+	// The current lifecycle state.
+	Status string `json:"status,omitempty"`
+	Email  string `json:"email,omitempty"`
+	Phone  string `json:"phone,omitempty"`
 }
 
 func (m *DirectoryStaffEntry) MarshalJSON() ([]byte, error) {

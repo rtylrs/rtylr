@@ -23,24 +23,26 @@ type Product struct {
 	ReorderQuantity   float64 `json:"reorder_quantity,omitempty"`
 	IsActive          bool    `json:"is_active,omitempty"`
 	TrackInventory    bool    `json:"track_inventory,omitempty"`
-	CreatedAt         string  `json:"created_at,omitempty"`
-	UpdatedAt         string  `json:"updated_at,omitempty"`
-	BusinessId        int64   `json:"business_id,omitempty"`
-	BrandId           int64   `json:"brand_id,omitempty"`
-	CompareAtPrice    float64 `json:"compare_at_price,omitempty"`
-	TaxRate           float64 `json:"tax_rate,omitempty"`
-	Currency          string  `json:"currency,omitempty"`
-	Weight            float64 `json:"weight,omitempty"`
-	WeightUnit        string  `json:"weight_unit,omitempty"`
-	Length            float64 `json:"length,omitempty"`
-	Width             float64 `json:"width,omitempty"`
-	Height            float64 `json:"height,omitempty"`
-	DimensionUnit     string  `json:"dimension_unit,omitempty"`
-	CountryOfOrigin   string  `json:"country_of_origin,omitempty"`
-	HsCode            string  `json:"hs_code,omitempty"`
-	AllowBackorder    bool    `json:"allow_backorder,omitempty"`
-	LeadTimeDays      int32   `json:"lead_time_days,omitempty"`
-	ImageUrl          string  `json:"image_url,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// When the record was last updated.
+	UpdatedAt       string  `json:"updated_at,omitempty"`
+	BusinessId      int64   `json:"business_id,omitempty"`
+	BrandId         int64   `json:"brand_id,omitempty"`
+	CompareAtPrice  float64 `json:"compare_at_price,omitempty"`
+	TaxRate         float64 `json:"tax_rate,omitempty"`
+	Currency        string  `json:"currency,omitempty"`
+	Weight          float64 `json:"weight,omitempty"`
+	WeightUnit      string  `json:"weight_unit,omitempty"`
+	Length          float64 `json:"length,omitempty"`
+	Width           float64 `json:"width,omitempty"`
+	Height          float64 `json:"height,omitempty"`
+	DimensionUnit   string  `json:"dimension_unit,omitempty"`
+	CountryOfOrigin string  `json:"country_of_origin,omitempty"`
+	HsCode          string  `json:"hs_code,omitempty"`
+	AllowBackorder  bool    `json:"allow_backorder,omitempty"`
+	LeadTimeDays    int32   `json:"lead_time_days,omitempty"`
+	ImageUrl        string  `json:"image_url,omitempty"`
 }
 
 func (m *Product) MarshalJSON() ([]byte, error) {
@@ -1252,10 +1254,14 @@ func (x *ReorderSuggestion) GetConfidence() string {
 }
 
 type ListProductsRequest struct {
-	Search     string `json:"search,omitempty"`
-	CategoryId int64  `json:"category_id,omitempty"`
-	Limit      int64  `json:"limit,omitempty"`
-	Offset     int64  `json:"offset,omitempty"`
+	// Filters products by name or SKU.
+	Search string `json:"search,omitempty"`
+	// Filters products by category.
+	CategoryId int64 `json:"category_id,omitempty"`
+	// The maximum number of products to return.
+	Limit int64 `json:"limit,omitempty"`
+	// The number of records to skip.
+	Offset int64 `json:"offset,omitempty"`
 }
 
 func (m *ListProductsRequest) MarshalJSON() ([]byte, error) {
@@ -1381,22 +1387,24 @@ type CreateProductRequest struct {
 	ReorderQuantity   float64 `json:"reorder_quantity,omitempty"`
 	IsActive          bool    `json:"is_active,omitempty"`
 	TrackInventory    bool    `json:"track_inventory,omitempty"`
-	StockQuantity     float64 `json:"stock_quantity,omitempty"`
-	BrandId           int64   `json:"brand_id,omitempty"`
-	CompareAtPrice    float64 `json:"compare_at_price,omitempty"`
-	TaxRate           float64 `json:"tax_rate,omitempty"`
-	Currency          string  `json:"currency,omitempty"`
-	Weight            float64 `json:"weight,omitempty"`
-	WeightUnit        string  `json:"weight_unit,omitempty"`
-	Length            float64 `json:"length,omitempty"`
-	Width             float64 `json:"width,omitempty"`
-	Height            float64 `json:"height,omitempty"`
-	DimensionUnit     string  `json:"dimension_unit,omitempty"`
-	CountryOfOrigin   string  `json:"country_of_origin,omitempty"`
-	HsCode            string  `json:"hs_code,omitempty"`
-	AllowBackorder    bool    `json:"allow_backorder,omitempty"`
-	LeadTimeDays      int32   `json:"lead_time_days,omitempty"`
-	ImageUrl          string  `json:"image_url,omitempty"`
+	// The opening tracked quantity for this product.
+	StockQuantity float64 `json:"stock_quantity,omitempty"`
+	// Links the product to a brand when present.
+	BrandId         int64   `json:"brand_id,omitempty"`
+	CompareAtPrice  float64 `json:"compare_at_price,omitempty"`
+	TaxRate         float64 `json:"tax_rate,omitempty"`
+	Currency        string  `json:"currency,omitempty"`
+	Weight          float64 `json:"weight,omitempty"`
+	WeightUnit      string  `json:"weight_unit,omitempty"`
+	Length          float64 `json:"length,omitempty"`
+	Width           float64 `json:"width,omitempty"`
+	Height          float64 `json:"height,omitempty"`
+	DimensionUnit   string  `json:"dimension_unit,omitempty"`
+	CountryOfOrigin string  `json:"country_of_origin,omitempty"`
+	HsCode          string  `json:"hs_code,omitempty"`
+	AllowBackorder  bool    `json:"allow_backorder,omitempty"`
+	LeadTimeDays    int32   `json:"lead_time_days,omitempty"`
+	ImageUrl        string  `json:"image_url,omitempty"`
 }
 
 func (m *CreateProductRequest) MarshalJSON() ([]byte, error) {
@@ -1695,8 +1703,9 @@ func (x *CreateProductRequest) GetImageUrl() string {
 }
 
 type CreateProductResponse struct {
-	ProductId int64  `json:"product_id,omitempty"`
-	Message   string `json:"message,omitempty"`
+	ProductId int64 `json:"product_id,omitempty"`
+	// A human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (m *CreateProductResponse) MarshalJSON() ([]byte, error) {
@@ -1941,22 +1950,24 @@ type UpdateProductBody struct {
 	ReorderQuantity   float64 `json:"reorder_quantity,omitempty"`
 	IsActive          bool    `json:"is_active,omitempty"`
 	TrackInventory    bool    `json:"track_inventory,omitempty"`
-	StockQuantity     float64 `json:"stock_quantity,omitempty"`
-	BrandId           int64   `json:"brand_id,omitempty"`
-	CompareAtPrice    float64 `json:"compare_at_price,omitempty"`
-	TaxRate           float64 `json:"tax_rate,omitempty"`
-	Currency          string  `json:"currency,omitempty"`
-	Weight            float64 `json:"weight,omitempty"`
-	WeightUnit        string  `json:"weight_unit,omitempty"`
-	Length            float64 `json:"length,omitempty"`
-	Width             float64 `json:"width,omitempty"`
-	Height            float64 `json:"height,omitempty"`
-	DimensionUnit     string  `json:"dimension_unit,omitempty"`
-	CountryOfOrigin   string  `json:"country_of_origin,omitempty"`
-	HsCode            string  `json:"hs_code,omitempty"`
-	AllowBackorder    bool    `json:"allow_backorder,omitempty"`
-	LeadTimeDays      int32   `json:"lead_time_days,omitempty"`
-	ImageUrl          string  `json:"image_url,omitempty"`
+	// The tracked quantity to store for this product.
+	StockQuantity float64 `json:"stock_quantity,omitempty"`
+	// Links the product to a brand when present.
+	BrandId         int64   `json:"brand_id,omitempty"`
+	CompareAtPrice  float64 `json:"compare_at_price,omitempty"`
+	TaxRate         float64 `json:"tax_rate,omitempty"`
+	Currency        string  `json:"currency,omitempty"`
+	Weight          float64 `json:"weight,omitempty"`
+	WeightUnit      string  `json:"weight_unit,omitempty"`
+	Length          float64 `json:"length,omitempty"`
+	Width           float64 `json:"width,omitempty"`
+	Height          float64 `json:"height,omitempty"`
+	DimensionUnit   string  `json:"dimension_unit,omitempty"`
+	CountryOfOrigin string  `json:"country_of_origin,omitempty"`
+	HsCode          string  `json:"hs_code,omitempty"`
+	AllowBackorder  bool    `json:"allow_backorder,omitempty"`
+	LeadTimeDays    int32   `json:"lead_time_days,omitempty"`
+	ImageUrl        string  `json:"image_url,omitempty"`
 }
 
 func (m *UpdateProductBody) MarshalJSON() ([]byte, error) {
@@ -2448,7 +2459,9 @@ func (x *GetDashboardResponse) GetTopCategories() []*DashboardTopCategory {
 }
 
 type ListReorderSuggestionsRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of reorder suggestions to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of reorder suggestions to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 
@@ -2518,8 +2531,10 @@ func (x *ListReorderSuggestionsResponse) GetTotal() int64 {
 
 type ListExpiringItemsRequest struct {
 	DaysAhead int32 `json:"days_ahead,omitempty"`
-	Limit     int64 `json:"limit,omitempty"`
-	Offset    int64 `json:"offset,omitempty"`
+	// Maximum number of expiring items to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of expiring items to skip.
+	Offset int64 `json:"offset,omitempty"`
 }
 
 func (x *ListExpiringItemsRequest) GetDaysAhead() int32 {

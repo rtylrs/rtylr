@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/common.oauth.v1.IssueRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.oauth.v1.IssueResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/oauth/v1/token:
         post:
             tags:
@@ -36,12 +48,24 @@ paths:
                             $ref: '#/components/schemas/common.oauth.v1.TokenRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.oauth.v1.TokenResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/oauth/v1/revoke:
         post:
             tags:
@@ -55,12 +79,24 @@ paths:
                             $ref: '#/components/schemas/common.oauth.v1.RevokeRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.oauth.v1.RevokeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/oauth/v1/me:
         get:
             tags:
@@ -68,12 +104,24 @@ paths:
             summary: me
             operationId: OauthService_me
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.oauth.v1.MeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         common.oauth.v1.IssueRequest:
@@ -178,9 +226,11 @@ components:
             properties:
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 role:
                     type: string
@@ -232,6 +282,7 @@ components:
                     description: Whether the user has the Dash Admin override.
                 authorization_version:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Monotonic authorization version for cache refresh.
             required:
@@ -333,3 +384,13 @@ components:
             required:
                 - scope_type
                 - scope_id
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OauthService
+      description: OauthService defines OAuth authorization endpoints.

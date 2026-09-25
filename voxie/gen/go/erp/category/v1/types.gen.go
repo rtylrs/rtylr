@@ -310,7 +310,9 @@ func (x *DeleteCategoryResponse) GetMessage() string {
 }
 
 type ListCategoriesRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of categories to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of categories to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 

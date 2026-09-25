@@ -11,12 +11,24 @@ paths:
             description: GetHRDashboard returns the HR dashboard summary.
             operationId: DashboardService_getHRDashboard
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.dashboard.v1.GetHRDashboardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/dashboard/v1/dashboard/widgets:
         get:
             tags:
@@ -25,12 +37,24 @@ paths:
             description: GetDashboardWidgets returns widget layout and preloaded data.
             operationId: DashboardService_getDashboardWidgets
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.dashboard.v1.GetDashboardWidgetsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - DashboardService
@@ -44,12 +68,24 @@ paths:
                             $ref: '#/components/schemas/hr.dashboard.v1.UpdateDashboardWidgetsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.dashboard.v1.UpdateDashboardWidgetsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.dashboard.v1.GetHRDashboardRequest:
@@ -67,18 +103,22 @@ components:
             properties:
                 total_staff:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: total_staff is the total staff value for this contract.
                 on_shift_today:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: on_shift_today is the on shift today value for this contract.
                 pending_time_off:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: pending_time_off is the pending time off value for this contract.
                 payroll_draft:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: payroll_draft is the payroll draft value for this contract.
             required:
@@ -109,14 +149,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the widget.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this widget belongs to.
                 role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Role that owns this widget layout.
                 widget_type:
@@ -144,10 +187,12 @@ components:
                     description: Widget-specific configuration serialised as JSON.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this widget was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this widget was last updated.
             required:
@@ -196,3 +241,13 @@ components:
                     description: success indicates whether the operation completed.
             required:
                 - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: DashboardService
+      description: DashboardService defines HR dashboard endpoints.

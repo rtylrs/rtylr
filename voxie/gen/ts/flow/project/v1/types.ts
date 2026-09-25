@@ -2,22 +2,39 @@
 import * as common_pagination_v1 from "../../../common/pagination/v1/types.js";
 
 export interface Project {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** owner_id identifies the tenant that owns the resource. */
 ownerId?: string | undefined;
+/** name is the name value for this contract. */
 name?: string | undefined;
+/** description is the description value for this contract. */
 description?: string | undefined;
+/** icon is the icon value for this contract. */
 icon?: string | undefined;
+/** color is the color value for this contract. */
 color?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
+/** start_date is the start date value for this contract. */
 startDate?: string | undefined;
+/** due_date is the due date value for this contract. */
 dueDate?: string | undefined;
+/** created_by is the created by value for this contract. */
 createdBy?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
+/** updated_at is when the record was last updated. */
 updatedAt?: string | undefined;
+/** Total task count for this project. Display projection, ignored on writes. */
 taskCount?: number | undefined;
+/** Number of tasks with status="done". Display projection, ignored on writes. */
 completedCount?: number | undefined;
+/** Count of project members, for the "+N" avatar stack. Display projection, ignored on writes. */
 memberCount?: number | undefined;
+/** Short project code used to build Task.identifier (e.g. "FLW" -> "FLW-42"). */
 code?: string | undefined;
 }
 
@@ -89,13 +106,21 @@ return violations;
 }
 
 export interface ProjectColumn {
+/** id is the unique identifier for the column. */
 id?: string | undefined;
+/** project_id is the project id value for this contract. */
 projectId?: string | undefined;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** name is the column name. */
 name?: string | undefined;
+/** color is the column color. */
 color?: string | undefined;
+/** sort_order is the column sort order. */
 sortOrder?: number | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
+/** updated_at is when the record was last updated. */
 updatedAt?: string | undefined;
 }
 
@@ -140,13 +165,21 @@ return violations;
 }
 
 export interface ProjectMember {
+/** id is the unique identifier for the membership record. */
 id?: string | undefined;
+/** project_id is the project id value for this contract. */
 projectId?: string | undefined;
+/** user_id identifies the user associated with this request. */
 userId?: string | undefined;
+/** name is the member display name. */
 name?: string | undefined;
+/** email is the member email address. */
 email?: string | undefined;
+/** role is the role value for this contract. */
 role?: string | undefined;
+/** added_by is the user id of the inviter, if any. */
 addedBy?: string | undefined;
+/** added_at is when the member joined the project. */
 addedAt?: string | undefined;
 }
 
@@ -191,10 +224,15 @@ return violations;
 }
 
 export interface ListProjectsRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -230,6 +268,7 @@ return violations;
 }
 
 export interface ListProjectsResponse {
+/** projects is the projects value for this contract. */
 projects?: (Project)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -259,12 +298,19 @@ return violations;
 }
 
 export interface CreateProjectRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** name is the name value for this contract. */
 name: string;
+/** description is the description value for this contract. */
 description: string;
+/** icon is the icon value for this contract. */
 icon: string;
+/** color is the color value for this contract. */
 color: string;
+/** start_date is an optional start date; an empty value leaves it unset. */
 startDate?: string | undefined;
+/** due_date is an optional due date; an empty value leaves it unset. */
 dueDate?: string | undefined;
 }
 
@@ -312,6 +358,7 @@ return violations;
 }
 
 export interface CreateProjectResponse {
+/** project is the project value for this contract. */
 project?: Project | undefined;
 }
 
@@ -336,12 +383,19 @@ return violations;
 }
 
 export interface UpdateProjectBody {
+/** name is the name value for this contract. */
 name: string;
+/** description is the description value for this contract. */
 description: string;
+/** icon is the icon value for this contract. */
 icon: string;
+/** color is the color value for this contract. */
 color: string;
+/** status is the current lifecycle state. */
 status: string;
+/** start_date is the start date value for this contract. */
 startDate: string;
+/** due_date is the due date value for this contract. */
 dueDate: string;
 }
 
@@ -390,7 +444,9 @@ return violations;
 }
 
 export interface UpdateProjectRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** body carries updatable project fields bound from the HTTP payload. */
 body?: UpdateProjectBody | undefined;
 }
 
@@ -419,6 +475,7 @@ return violations;
 }
 
 export interface UpdateProjectResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -442,6 +499,7 @@ return violations;
 }
 
 export interface DeleteProjectRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
 }
 
@@ -466,6 +524,7 @@ return violations;
 }
 
 export interface DeleteProjectResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -489,10 +548,15 @@ return violations;
 }
 
 export interface ListProjectColumnsRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -530,6 +594,7 @@ return violations;
 }
 
 export interface ListProjectColumnsResponse {
+/** columns is the project columns for this contract. */
 columns?: (ProjectColumn)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -559,10 +624,15 @@ return violations;
 }
 
 export interface CreateProjectColumnRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** name is the column name. */
 name: string;
+/** color is the column color. */
 color?: string | undefined;
+/** sort_order is the column sort order. */
 sortOrder?: number | undefined;
 }
 
@@ -601,6 +671,7 @@ return violations;
 }
 
 export interface CreateProjectColumnResponse {
+/** column is the created column. */
 column?: ProjectColumn | undefined;
 }
 
@@ -625,9 +696,13 @@ return violations;
 }
 
 export interface UpdateProjectColumnRequest {
+/** id is the column identifier. */
 id?: string | undefined;
+/** name is the column name. */
 name: string;
+/** color is the column color. */
 color?: string | undefined;
+/** sort_order is the column sort order. */
 sortOrder?: number | undefined;
 }
 
@@ -662,6 +737,7 @@ return violations;
 }
 
 export interface UpdateProjectColumnResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -685,6 +761,7 @@ return violations;
 }
 
 export interface DeleteProjectColumnRequest {
+/** id is the column identifier. */
 id?: string | undefined;
 }
 
@@ -709,6 +786,7 @@ return violations;
 }
 
 export interface DeleteProjectColumnResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -732,7 +810,9 @@ return violations;
 }
 
 export interface MoveTaskToColumnRequest {
+/** task_id is the task identifier. */
 taskId: string;
+/** column_id is the destination column identifier. */
 columnId?: string | undefined;
 }
 
@@ -761,6 +841,7 @@ return violations;
 }
 
 export interface MoveTaskToColumnResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -784,10 +865,15 @@ return violations;
 }
 
 export interface ListProjectMembersRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -825,6 +911,7 @@ return violations;
 }
 
 export interface ListProjectMembersResponse {
+/** members is the project members for this contract. */
 members?: (ProjectMember)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -854,8 +941,11 @@ return violations;
 }
 
 export interface AddProjectMemberRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** user_id identifies the user associated with this request. */
 userId: string;
+/** role is the role value for this contract. */
 role?: string | undefined;
 }
 
@@ -889,6 +979,7 @@ return violations;
 }
 
 export interface AddProjectMemberResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -912,7 +1003,9 @@ return violations;
 }
 
 export interface RemoveProjectMemberRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** user_id identifies the user associated with this request. */
 userId: string;
 }
 
@@ -943,6 +1036,7 @@ return violations;
 }
 
 export interface RemoveProjectMemberResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -966,8 +1060,11 @@ return violations;
 }
 
 export interface UpdateProjectMemberRoleRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** user_id identifies the user associated with this request. */
 userId: string;
+/** role is the role value for this contract. */
 role: string;
 }
 
@@ -1002,6 +1099,7 @@ return violations;
 }
 
 export interface UpdateProjectMemberRoleResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1025,8 +1123,11 @@ return violations;
 }
 
 export interface InviteProjectMemberRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** email is the invitee email address. */
 email: string;
+/** role is the role value for this contract. */
 role?: string | undefined;
 }
 
@@ -1059,6 +1160,7 @@ return violations;
 }
 
 export interface InviteProjectMemberResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1082,7 +1184,9 @@ return violations;
 }
 
 export interface TransferProjectOwnershipRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** new_owner_id is the new owner user id. */
 newOwnerId: string;
 }
 
@@ -1113,6 +1217,7 @@ return violations;
 }
 
 export interface TransferProjectOwnershipResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1136,7 +1241,9 @@ return violations;
 }
 
 export interface MoveProjectRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** workspace_id is the destination workspace id. */
 workspaceId: string;
 }
 
@@ -1167,6 +1274,7 @@ return violations;
 }
 
 export interface MoveProjectResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1189,11 +1297,37 @@ if (v.message !== undefined && v.message !== null && !(typeof v.message === "str
 return violations;
 }
 
+/**
+ * ProjectLabourCost is the live labour cost of one project over all logged
+ * time. It reports aggregate money only and deliberately carries no
+ * per-person rows: hourly rates stay inside HR. Cost covers billable time;
+ * time whose contributor has no rate on record is reported separately as
+ * uncosted rather than silently folded in as zero-cost work.
+ */
 export interface ProjectLabourCost {
+/** project_id is the project the cost was computed for. */
 projectId?: string | undefined;
+/**
+ * cost_minor_units is the labour cost of billable logged time in the
+ * smallest unit of the business currency, so no rounding happens before
+ * the caller sees it.
+ */
 costMinorUnits?: string | undefined;
+/**
+ * costed_minutes is billable logged time whose contributor had a rate on
+ * record; it is the time included in cost_minor_units.
+ */
 costedMinutes?: string | undefined;
+/**
+ * uncosted_minutes is billable logged time whose contributor has no rate
+ * on record. A total with uncosted_minutes above zero understates true
+ * labour cost and must be labelled as partial where it is displayed.
+ */
 uncostedMinutes?: string | undefined;
+/**
+ * uncosted_employee_count is how many distinct contributors have no rate
+ * on record.
+ */
 uncostedEmployeeCount?: number | undefined;
 }
 
@@ -1228,7 +1362,12 @@ if (v.uncostedEmployeeCount !== undefined && v.uncostedEmployeeCount !== null &&
 return violations;
 }
 
+/**
+ * GetProjectLabourCostRequest asks for one project's labour cost. The id is
+ * the Flow project id taken from the path.
+ */
 export interface GetProjectLabourCostRequest {
+/** id is the Flow project id path parameter. */
 id?: string | undefined;
 }
 
@@ -1251,7 +1390,9 @@ if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|
 return violations;
 }
 
+/** GetProjectLabourCostResponse returns the project's live cost aggregate. */
 export interface GetProjectLabourCostResponse {
+/** cost is the aggregate for the requested project. */
 cost?: ProjectLabourCost | undefined;
 }
 

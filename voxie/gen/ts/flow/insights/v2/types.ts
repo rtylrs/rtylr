@@ -212,6 +212,11 @@ if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) viola
 return violations;
 }
 
+/**
+ * RoadmapProject is one project row on the timeline view. v2 drops the
+ * workspace field; visibility filtering (which projects a caller sees named
+ * here) is applied server-side per the business's policy.
+ */
 export interface RoadmapProject {
 id?: string | undefined;
 name?: string | undefined;
@@ -338,9 +343,13 @@ return violations;
 }
 
 export interface GetTeamWorkloadRequest {
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -402,9 +411,13 @@ return violations;
 }
 
 export interface GetRoadmapRequest {
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 

@@ -6,20 +6,34 @@ import (
 	"strconv"
 )
 
+// ApprovalChainLevelPayload is a single level within an approval chain pipeline.
 type ApprovalChainLevelPayload struct {
-	Id                 int64    `json:"id,omitempty"`
-	OwnerId            int64    `json:"owner_id,omitempty"`
-	ChainId            int64    `json:"chain_id,omitempty"`
-	LevelOrder         int32    `json:"level_order,omitempty"`
-	ApproverType       string   `json:"approver_type,omitempty"`
-	ApproverRoleId     *int64   `json:"approver_role_id,omitempty"`
-	ApproverEmployeeId *int64   `json:"approver_employee_id,omitempty"`
-	ThresholdMinValue  *float64 `json:"threshold_min_value,omitempty"`
-	ThresholdMaxValue  *float64 `json:"threshold_max_value,omitempty"`
-	TimeoutDays        int32    `json:"timeout_days,omitempty"`
-	TimeoutAction      string   `json:"timeout_action,omitempty"`
-	CreatedAt          int64    `json:"created_at,omitempty"`
-	UpdatedAt          int64    `json:"updated_at,omitempty"`
+	// Unique identifier for this approval level.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this level belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Parent approval chain this level is part of.
+	ChainId int64 `json:"chain_id,omitempty"`
+	// Position in the approval sequence (1 = first approver).
+	LevelOrder int32 `json:"level_order,omitempty"`
+	// Type of approver (direct_manager | dept_head | hr_admin | role | specific_person).
+	ApproverType string `json:"approver_type,omitempty"`
+	// Role that can approve at this level; absent unless approver_type is role.
+	ApproverRoleId *int64 `json:"approver_role_id,omitempty"`
+	// Specific employee who approves; absent unless approver_type is specific_person.
+	ApproverEmployeeId *int64 `json:"approver_employee_id,omitempty"`
+	// Minimum value that triggers this level; absent if no lower bound.
+	ThresholdMinValue *float64 `json:"threshold_min_value,omitempty"`
+	// Maximum value that triggers this level; absent if no upper bound.
+	ThresholdMaxValue *float64 `json:"threshold_max_value,omitempty"`
+	// Days before the level times out and the timeout_action fires.
+	TimeoutDays int32 `json:"timeout_days,omitempty"`
+	// What happens on timeout (escalate | auto_approve | do_nothing).
+	TimeoutAction string `json:"timeout_action,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ApprovalChainLevelPayload) MarshalJSON() ([]byte, error) {
@@ -237,15 +251,24 @@ func (x *ApprovalChainLevelPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ApprovalChainPayload is the ordered approval pipeline for a request type.
 type ApprovalChainPayload struct {
-	Id                int64                        `json:"id,omitempty"`
-	OwnerId           int64                        `json:"owner_id,omitempty"`
-	RequestType       string                       `json:"request_type,omitempty"`
-	Name              string                       `json:"name,omitempty"`
-	DelegationEnabled bool                         `json:"delegation_enabled,omitempty"`
-	Levels            []*ApprovalChainLevelPayload `json:"levels,omitempty"`
-	CreatedAt         int64                        `json:"created_at,omitempty"`
-	UpdatedAt         int64                        `json:"updated_at,omitempty"`
+	// Unique identifier for the approval chain.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this chain belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
+	RequestType string `json:"request_type,omitempty"`
+	// Human-readable name for the chain.
+	Name string `json:"name,omitempty"`
+	// Whether approvers can delegate their approval authority.
+	DelegationEnabled bool `json:"delegation_enabled,omitempty"`
+	// Ordered levels that make up the approval pipeline.
+	Levels []*ApprovalChainLevelPayload `json:"levels,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ApprovalChainPayload) MarshalJSON() ([]byte, error) {
@@ -372,11 +395,16 @@ func (x *ApprovalChainPayload) GetUpdatedAt() int64 {
 }
 
 type UpsertApprovalChainRequest struct {
-	Id                *int64                       `json:"id,omitempty"`
-	RequestType       string                       `json:"request_type,omitempty"`
-	Name              string                       `json:"name,omitempty"`
-	DelegationEnabled bool                         `json:"delegation_enabled,omitempty"`
-	Levels            []*ApprovalChainLevelPayload `json:"levels,omitempty"`
+	// Chain ID for update; absent (zero) to create a new chain.
+	Id *int64 `json:"id,omitempty"`
+	// Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
+	RequestType string `json:"request_type,omitempty"`
+	// Human-readable name for the chain.
+	Name string `json:"name,omitempty"`
+	// Whether approvers can delegate their approval authority.
+	DelegationEnabled bool `json:"delegation_enabled,omitempty"`
+	// Ordered levels to set on the chain; replaces all existing levels.
+	Levels []*ApprovalChainLevelPayload `json:"levels,omitempty"`
 }
 
 func (m *UpsertApprovalChainRequest) MarshalJSON() ([]byte, error) {
@@ -456,6 +484,7 @@ func (x *UpsertApprovalChainRequest) GetLevels() []*ApprovalChainLevelPayload {
 }
 
 type UpsertApprovalChainResponse struct {
+	// The created or updated approval chain.
 	Chain *ApprovalChainPayload `json:"chain,omitempty"`
 }
 

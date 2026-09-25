@@ -171,12 +171,19 @@ return violations;
 }
 
 export interface BenefitEnrollment {
+/** id is the enrollment record's unique identifier. */
 id?: string | undefined;
+/** owner_id is the business that owns the underlying BenefitPlan. */
 ownerId?: string | undefined;
+/** employee_id is the enrolled employee; always resolved from auth context, never client-supplied. */
 employeeId?: string | undefined;
+/** plan_id references the BenefitPlan this enrollment is for. */
 planId?: string | undefined;
+/** status is the enrollment lifecycle state (active | cancelled). */
 status?: string | undefined;
+/** enrolled_at is when the employee enrolled, in ISO-8601 format. */
 enrolledAt?: string | undefined;
+/** cancelled_at is when the enrollment was cancelled, in ISO-8601 format; absent while the enrollment is active. */
 cancelledAt?: string | undefined;
 }
 
@@ -218,6 +225,7 @@ return violations;
 }
 
 export interface EnrollInBenefitRequest {
+/** plan_id is the BenefitPlan to enroll in. The employee is resolved from auth context, not client-supplied. */
 planId: string;
 }
 
@@ -242,6 +250,7 @@ return violations;
 }
 
 export interface EnrollInBenefitResponse {
+/** enrollment is the created BenefitEnrollment record. */
 enrollment?: BenefitEnrollment | undefined;
 }
 
@@ -266,9 +275,13 @@ return violations;
 }
 
 export interface ListMyBenefitEnrollmentsRequest {
+/** page is the current result page. */
 page?: number | undefined;
+/** limit is the maximum number of records to return. */
 limit?: number | undefined;
+/** sort_by is the field to sort results by. */
 sortBy?: string | undefined;
+/** sort_dir is the sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -301,6 +314,7 @@ return violations;
 }
 
 export interface ListMyBenefitEnrollmentsResponse {
+/** enrollments are the caller's own BenefitEnrollment records. */
 enrollments?: (BenefitEnrollment)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }

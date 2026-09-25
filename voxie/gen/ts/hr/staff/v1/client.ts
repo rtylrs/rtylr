@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface StaffServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** StaffService defines HR staff endpoints. */
 export class StaffServiceClient {
 private baseUrl: string;
 private options: StaffServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listStaff(req: ListStaffRequest): Promise<ListStaffResponse> {
+/** Returns staff members with optional filters. */
+async listStaff(req: ListStaffRequest, opts?: RequestOptions): Promise<ListStaffResponse> {
 const violations = validateListStaffRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff";
 const query = new URLSearchParams();
 if (req.search !== undefined) {
@@ -89,7 +129,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -101,14 +142,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createStaff(req: CreateStaffRequest): Promise<CreateStaffResponse> {
+/** Creates a new staff member. */
+async createStaff(req: CreateStaffRequest, opts?: RequestOptions): Promise<CreateStaffResponse> {
 const violations = validateCreateStaffRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateStaffRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -120,9 +163,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getStaff(req: GetStaffRequest): Promise<GetStaffResponse> {
+/** Returns a staff member by ID. */
+async getStaff(req: GetStaffRequest, opts?: RequestOptions): Promise<GetStaffResponse> {
 const violations = validateGetStaffRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -130,7 +174,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -142,15 +187,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateStaff(req: UpdateStaffRequest): Promise<UpdateStaffResponse> {
+/** Updates an existing staff member. */
+async updateStaff(req: UpdateStaffRequest, opts?: RequestOptions): Promise<UpdateStaffResponse> {
 const violations = validateUpdateStaffRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateStaffRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -162,9 +209,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteStaff(req: DeleteStaffRequest): Promise<DeleteStaffResponse> {
+/** Removes a staff member by ID. */
+async deleteStaff(req: DeleteStaffRequest, opts?: RequestOptions): Promise<DeleteStaffResponse> {
 const violations = validateDeleteStaffRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -172,7 +220,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -184,14 +233,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async clockIn(req: ClockInRequest): Promise<ClockInResponse> {
+/** Records a staff clock-in event. */
+async clockIn(req: ClockInRequest, opts?: RequestOptions): Promise<ClockInResponse> {
 const violations = validateClockInRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff/clock-in";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeClockInRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -203,14 +254,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeClockInResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async clockOut(req: ClockOutRequest): Promise<ClockOutResponse> {
+/** Records a staff clock-out event. */
+async clockOut(req: ClockOutRequest, opts?: RequestOptions): Promise<ClockOutResponse> {
 const violations = validateClockOutRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff/clock-out";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeClockOutRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -222,9 +275,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeClockOutResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listStaffDirectory(req: ListStaffDirectoryRequest): Promise<ListStaffDirectoryResponse> {
+/**
+ * Returns the paginated, business-wide staff directory. Gated by both
+ * the business's directory_enabled config flag and the caller's
+ * view_directory permission; distinct from listStaff, which serves
+ * HR's own admin screens with the full Staff shape.
+ */
+async listStaffDirectory(req: ListStaffDirectoryRequest, opts?: RequestOptions): Promise<ListStaffDirectoryResponse> {
 const violations = validateListStaffDirectoryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/v1/staff/directory";
 const query = new URLSearchParams();
 if (req.page !== undefined) {
@@ -237,7 +296,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

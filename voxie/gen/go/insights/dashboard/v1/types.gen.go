@@ -7,12 +7,18 @@ import (
 )
 
 type WorkloadEntry struct {
-	UserId          int64 `json:"user_id,omitempty"`
-	OpenTasks       int64 `json:"open_tasks,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// open_tasks is the open tasks value for this contract.
+	OpenTasks int64 `json:"open_tasks,omitempty"`
+	// in_progress_tasks is the in progress tasks value for this contract.
 	InProgressTasks int64 `json:"in_progress_tasks,omitempty"`
-	CompletedTasks  int64 `json:"completed_tasks,omitempty"`
-	OverdueTasks    int64 `json:"overdue_tasks,omitempty"`
-	TotalActive     int64 `json:"total_active,omitempty"`
+	// completed_tasks is the completed tasks value for this contract.
+	CompletedTasks int64 `json:"completed_tasks,omitempty"`
+	// overdue_tasks is the overdue tasks value for this contract.
+	OverdueTasks int64 `json:"overdue_tasks,omitempty"`
+	// total_active is the total active value for this contract.
+	TotalActive int64 `json:"total_active,omitempty"`
 }
 
 func (m *WorkloadEntry) MarshalJSON() ([]byte, error) {
@@ -143,14 +149,22 @@ func (x *WorkloadEntry) GetTotalActive() int64 {
 }
 
 type RoadmapProject struct {
-	ProjectId       int64   `json:"project_id,omitempty"`
-	ProjectName     string  `json:"project_name,omitempty"`
-	Status          string  `json:"status,omitempty"`
-	TotalTasks      int64   `json:"total_tasks,omitempty"`
-	CompletedTasks  int64   `json:"completed_tasks,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId int64 `json:"project_id,omitempty"`
+	// project_name is the project name value for this contract.
+	ProjectName string `json:"project_name,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// total_tasks is the total tasks value for this contract.
+	TotalTasks int64 `json:"total_tasks,omitempty"`
+	// completed_tasks is the completed tasks value for this contract.
+	CompletedTasks int64 `json:"completed_tasks,omitempty"`
+	// progress_percent is the progress percent value for this contract.
 	ProgressPercent float64 `json:"progress_percent,omitempty"`
-	StartDate       string  `json:"start_date,omitempty"`
-	DueDate         string  `json:"due_date,omitempty"`
+	// start_date is the start date value for this contract.
+	StartDate string `json:"start_date,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
 }
 
 func (m *RoadmapProject) MarshalJSON() ([]byte, error) {
@@ -267,7 +281,9 @@ func (x *RoadmapProject) GetDueDate() string {
 }
 
 type InsightsMetricCard struct {
-	Value    int64   `json:"value,omitempty"`
+	// value is the headline metric value.
+	Value int64 `json:"value,omitempty"`
+	// delta_pct is the period-over-period change percentage.
 	DeltaPct float64 `json:"delta_pct,omitempty"`
 }
 
@@ -317,7 +333,9 @@ func (x *InsightsMetricCard) GetDeltaPct() float64 {
 }
 
 type InsightsPctCard struct {
-	Value    float64 `json:"value,omitempty"`
+	// value is the percentage metric value.
+	Value float64 `json:"value,omitempty"`
+	// delta_pct is the period-over-period change percentage.
 	DeltaPct float64 `json:"delta_pct,omitempty"`
 }
 
@@ -341,13 +359,20 @@ type GetInsightsRequest struct {
 }
 
 type GetInsightsResponse struct {
-	TotalTasks       int64   `json:"total_tasks,omitempty"`
-	CompletedTasks   int64   `json:"completed_tasks,omitempty"`
-	InProgressTasks  int64   `json:"in_progress_tasks,omitempty"`
-	OverdueTasks     int64   `json:"overdue_tasks,omitempty"`
+	// total_tasks is the total tasks value for this contract.
+	TotalTasks int64 `json:"total_tasks,omitempty"`
+	// completed_tasks is the completed tasks value for this contract.
+	CompletedTasks int64 `json:"completed_tasks,omitempty"`
+	// in_progress_tasks is the in progress tasks value for this contract.
+	InProgressTasks int64 `json:"in_progress_tasks,omitempty"`
+	// overdue_tasks is the overdue tasks value for this contract.
+	OverdueTasks int64 `json:"overdue_tasks,omitempty"`
+	// avg_cycle_time_days is the avg cycle time days value for this contract.
 	AvgCycleTimeDays float64 `json:"avg_cycle_time_days,omitempty"`
-	Velocity         int64   `json:"velocity,omitempty"`
-	VelocityChange   int64   `json:"velocity_change,omitempty"`
+	// velocity is the velocity value for this contract.
+	Velocity int64 `json:"velocity,omitempty"`
+	// velocity_change is the velocity change value for this contract.
+	VelocityChange int64 `json:"velocity_change,omitempty"`
 }
 
 func (m *GetInsightsResponse) MarshalJSON() ([]byte, error) {
@@ -489,6 +514,7 @@ type GetRoadmapRequest struct {
 }
 
 type GetRoadmapResponse struct {
+	// projects is the projects value for this contract.
 	Projects []*RoadmapProject `json:"projects,omitempty"`
 }
 
@@ -504,6 +530,7 @@ type GetWorkloadRequest struct {
 }
 
 type GetWorkloadResponse struct {
+	// workload is the workload value for this contract.
 	Workload []*WorkloadEntry `json:"workload,omitempty"`
 }
 
@@ -519,10 +546,14 @@ type GetDashboardSummaryRequest struct {
 }
 
 type GetDashboardSummaryResponse struct {
-	Revenue   *InsightsMetricCard `json:"revenue,omitempty"`
+	// revenue is MTD revenue in minor units with delta.
+	Revenue *InsightsMetricCard `json:"revenue,omitempty"`
+	// customers is MTD customer count with delta.
 	Customers *InsightsMetricCard `json:"customers,omitempty"`
-	Orders    *InsightsMetricCard `json:"orders,omitempty"`
-	Margin    *InsightsPctCard    `json:"margin,omitempty"`
+	// orders is MTD order count with delta.
+	Orders *InsightsMetricCard `json:"orders,omitempty"`
+	// margin is MTD margin percentage with delta.
+	Margin *InsightsPctCard `json:"margin,omitempty"`
 }
 
 func (x *GetDashboardSummaryResponse) GetRevenue() *InsightsMetricCard {

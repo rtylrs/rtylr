@@ -4,6 +4,7 @@ import * as common_pagination_v1 from "../../../common/pagination/v1/types.js";
 export interface ApiKey {
 id?: string | undefined;
 name?: string | undefined;
+/** First 8 chars shown */
 keyPrefix?: string | undefined;
 scopes?: (string)[] | undefined;
 createdAt?: string | undefined;
@@ -301,17 +302,39 @@ if (v.keys !== undefined && v.keys !== null) for (const item of v.keys) violatio
 return violations;
 }
 
+/** WebhookDelivery is one attempt to deliver one event to one registration. */
 export interface WebhookDelivery {
 id?: string | undefined;
 webhookId?: string | undefined;
 eventId?: string | undefined;
+/** event_type is the event this delivery carries, for example "order_created". */
 eventType?: string | undefined;
+/**
+ * status is one of pending, delivering, delivered, failed or dead. A dead
+ * delivery has exhausted its attempts and will not be retried.
+ */
 status?: string | undefined;
+/** attempts is how many times delivery has been tried. */
 attempts?: number | undefined;
+/** max_attempts is the cap after which a failing delivery is dead-lettered. */
 maxAttempts?: number | undefined;
+/**
+ * response_status is the HTTP status the endpoint answered. Zero when the
+ * request never got a response, such as a timeout or a refused connection.
+ */
 responseStatus?: number | undefined;
+/**
+ * last_error is why the most recent attempt failed. It includes a short
+ * excerpt of the endpoint's own response body when it sent one, which is
+ * usually the fastest way for the owner to see what their endpoint said.
+ */
 lastError?: string | undefined;
+/**
+ * next_attempt_at is when a retryable delivery will be tried again. Empty
+ * for one that is delivered or dead.
+ */
 nextAttemptAt?: string | undefined;
+/** delivered_at is when the endpoint accepted the event. Empty until then. */
 deliveredAt?: string | undefined;
 createdAt?: string | undefined;
 }
@@ -369,7 +392,15 @@ return violations;
 }
 
 export interface ListWebhookDeliveriesRequest {
+/**
+ * webhook_id narrows to one registration. Omit for every registration in
+ * the business.
+ */
 webhookId?: string | undefined;
+/**
+ * status narrows to one status. "dead" is the one worth watching, since
+ * those events will never arrive without intervention.
+ */
 status?: string | undefined;
 page?: number | undefined;
 limit?: number | undefined;

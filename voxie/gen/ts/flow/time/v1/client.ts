@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,34 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface TimeServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/**
+ * TimeService is Flow's daily time logging: a work day per person per date, the
+ * lines of work inside it, and the work-type tree those lines are classified by.
+ *
+ * Lines persist as HR time entries, so Flow and payroll read the same rows rather
+ * than reconciling two stores. Approval lives in a separate service.
+ */
 export class TimeServiceClient {
 private baseUrl: string;
 private options: TimeServiceClientOptions;
@@ -71,9 +116,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getWorkDay(req: GetWorkDayRequest): Promise<GetWorkDayResponse> {
+async getWorkDay(req: GetWorkDayRequest, opts?: RequestOptions): Promise<GetWorkDayResponse> {
 const violations = validateGetWorkDayRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-days";
 const query = new URLSearchParams();
 if (req.date !== undefined) {
@@ -86,7 +131,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -98,14 +144,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetWorkDayResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertWorkDay(req: UpsertWorkDayRequest): Promise<UpsertWorkDayResponse> {
+async upsertWorkDay(req: UpsertWorkDayRequest, opts?: RequestOptions): Promise<UpsertWorkDayResponse> {
 const violations = validateUpsertWorkDayRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-days";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpsertWorkDayRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -117,9 +164,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpsertWorkDayResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listWorkDays(req: ListWorkDaysRequest): Promise<ListWorkDaysResponse> {
+async listWorkDays(req: ListWorkDaysRequest, opts?: RequestOptions): Promise<ListWorkDaysResponse> {
 const violations = validateListWorkDaysRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-days/range";
 const query = new URLSearchParams();
 if (req.fromDate !== undefined) {
@@ -141,7 +188,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -153,9 +201,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListWorkDaysResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listWorkDaysForWorkspace(req: ListWorkDaysForWorkspaceRequest): Promise<ListWorkDaysForWorkspaceResponse> {
+async listWorkDaysForWorkspace(req: ListWorkDaysForWorkspaceRequest, opts?: RequestOptions): Promise<ListWorkDaysForWorkspaceResponse> {
 const violations = validateListWorkDaysForWorkspaceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-days/team";
 const query = new URLSearchParams();
 if (req.workspaceId !== undefined) {
@@ -177,7 +225,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -189,15 +238,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListWorkDaysForWorkspaceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createWorkDayLine(req: CreateWorkDayLineRequest): Promise<CreateWorkDayLineResponse> {
+async createWorkDayLine(req: CreateWorkDayLineRequest, opts?: RequestOptions): Promise<CreateWorkDayLineResponse> {
 const violations = validateCreateWorkDayLineRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-days/{work_day_id}/lines";
 path = path.replace("{work_day_id}", encodeURIComponent(String(req.workDayId)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateWorkDayLineRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -209,15 +259,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateWorkDayLineResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateWorkDayLine(req: UpdateWorkDayLineRequest): Promise<UpdateWorkDayLineResponse> {
+async updateWorkDayLine(req: UpdateWorkDayLineRequest, opts?: RequestOptions): Promise<UpdateWorkDayLineResponse> {
 const violations = validateUpdateWorkDayLineRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-days/lines/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateWorkDayLineRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -229,9 +280,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateWorkDayLineResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteWorkDayLine(req: DeleteWorkDayLineRequest): Promise<DeleteWorkDayLineResponse> {
+async deleteWorkDayLine(req: DeleteWorkDayLineRequest, opts?: RequestOptions): Promise<DeleteWorkDayLineResponse> {
 const violations = validateDeleteWorkDayLineRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-days/lines/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -239,7 +290,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -251,9 +303,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteWorkDayLineResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listWorkTypes(req: ListWorkTypesRequest): Promise<ListWorkTypesResponse> {
+async listWorkTypes(req: ListWorkTypesRequest, opts?: RequestOptions): Promise<ListWorkTypesResponse> {
 const violations = validateListWorkTypesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-types";
 const query = new URLSearchParams();
 if (req.includeArchived !== undefined) {
@@ -263,7 +315,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -275,14 +328,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListWorkTypesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createWorkType(req: CreateWorkTypeRequest): Promise<CreateWorkTypeResponse> {
+async createWorkType(req: CreateWorkTypeRequest, opts?: RequestOptions): Promise<CreateWorkTypeResponse> {
 const violations = validateCreateWorkTypeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-types";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateWorkTypeRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -294,15 +348,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateWorkTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateWorkType(req: UpdateWorkTypeRequest): Promise<UpdateWorkTypeResponse> {
+async updateWorkType(req: UpdateWorkTypeRequest, opts?: RequestOptions): Promise<UpdateWorkTypeResponse> {
 const violations = validateUpdateWorkTypeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-types/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateWorkTypeRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -314,9 +369,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateWorkTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteWorkType(req: DeleteWorkTypeRequest): Promise<DeleteWorkTypeResponse> {
+async deleteWorkType(req: DeleteWorkTypeRequest, opts?: RequestOptions): Promise<DeleteWorkTypeResponse> {
 const violations = validateDeleteWorkTypeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/time/v1/work-types/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -324,7 +379,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,32 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface RecruitCareerServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/**
+ * RecruitCareerService defines the read surface for recruit submissions and
+ * the status transition endpoint. Create/update of careers and sections stay
+ * on legacy routes until that migration happens.
+ */
 export class RecruitCareerServiceClient {
 private baseUrl: string;
 private options: RecruitCareerServiceClientOptions;
@@ -71,9 +114,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listSubmissions(req: ListSubmissionsRequest): Promise<ListSubmissionsResponse> {
+/** Returns one page of submissions for this business. */
+async listSubmissions(req: ListSubmissionsRequest, opts?: RequestOptions): Promise<ListSubmissionsResponse> {
 const violations = validateListSubmissionsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/recruit/career/v1/submissions";
 const query = new URLSearchParams();
 if (req.page !== undefined) {
@@ -86,7 +130,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -98,14 +143,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListSubmissionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateSubmissionStatus(req: UpdateSubmissionStatusRequest): Promise<UpdateSubmissionStatusResponse> {
+/** Advances a candidate through the hiring funnel. */
+async updateSubmissionStatus(req: UpdateSubmissionStatusRequest, opts?: RequestOptions): Promise<UpdateSubmissionStatusResponse> {
 const violations = validateUpdateSubmissionStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/recruit/career/v1/submissions/status";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateSubmissionStatusRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

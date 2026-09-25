@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/flow.realtime.v1.IssueWebSocketTicketRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.realtime.v1.IssueWebSocketTicketResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.realtime.v1.IssueWebSocketTicketRequest:
@@ -35,3 +47,13 @@ components:
                     description: Short-lived, single-use ticket accepted by the Flow WebSocket handshake.
             required:
                 - ticket
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: RealtimeService
+      description: RealtimeService defines the authenticated preflight for Flow WebSocket connections.

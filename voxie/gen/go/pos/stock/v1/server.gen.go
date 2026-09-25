@@ -16,10 +16,37 @@ import (
 	"time"
 )
 
+func writeJSON(w http.ResponseWriter, status int, value any) {
+	data, err := json.Marshal(value)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, _ = w.Write(append(data, '\n'))
+}
+
 func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func requestBodyLimit(limit int64) int64 {
+	if limit <= 0 {
+		return 8 << 20
+	}
+	return limit
+}
+
+func writeBodyError(w http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeJSONError(w, http.StatusRequestEntityTooLarge, "request body too large")
+		return
+	}
+	writeJSONError(w, http.StatusBadRequest, "invalid request body")
 }
 
 func writeHandlerError(w http.ResponseWriter, err error) {
@@ -30,7 +57,12 @@ func writeHandlerError(w http.ResponseWriter, err error) {
 			status = candidate
 		}
 	}
-	writeJSONError(w, status, "internal server error")
+	message := "internal server error"
+	var public interface{ PublicMessage() string }
+	if errors.As(err, &public) && public.PublicMessage() != "" {
+		message = public.PublicMessage()
+	}
+	writeJSONError(w, status, message)
 }
 
 func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
@@ -62,6 +94,25 @@ func parseBool(s string) (bool, error) {
 		return false, nil
 	}
 	return false, fmt.Errorf("must be true or false")
+}
+
+func hasAuthScheme(value, scheme string) bool {
+	if len(value) <= len(scheme)+1 || value[len(scheme)] != ' ' {
+		return false
+	}
+	for i := 0; i < len(scheme); i++ {
+		a, b := value[i], scheme[i]
+		if a >= 'A' && a <= 'Z' {
+			a += 'a' - 'A'
+		}
+		if b >= 'A' && b <= 'Z' {
+			b += 'a' - 'A'
+		}
+		if a != b {
+			return false
+		}
+	}
+	return true
 }
 
 func validHeaderFormat(value, format string) bool {
@@ -100,6 +151,37 @@ func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
 	return metadata, ok
 }
 
+type httpRequestContextKey struct{}
+
+func withHTTPRequest(r *http.Request) context.Context {
+	return context.WithValue(r.Context(), httpRequestContextKey{}, r)
+}
+
+type responseControl struct {
+	status int
+	header http.Header
+}
+
+type responseControlKey struct{}
+
+func SetResponseStatus(ctx context.Context, status int) {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok && status >= 200 && status <= 299 {
+		control.status = status
+	}
+}
+
+func ResponseHeader(ctx context.Context) http.Header {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok {
+		return control.header
+	}
+	return http.Header{}
+}
+
+func HTTPRequestFromContext(ctx context.Context) (*http.Request, bool) {
+	r, ok := ctx.Value(httpRequestContextKey{}).(*http.Request)
+	return r, ok
+}
+
 func RequestIDFromContext(ctx context.Context) (string, bool) {
 	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
 	return requestID, ok && requestID != ""
@@ -120,12 +202,13 @@ type RequestObserver interface {
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux                *http.ServeMux
-	middlewares        []Middleware
-	requestIDHeader    string
-	requestIDGenerator RequestIDGenerator
-	authorizer         Authorizer
-	observer           RequestObserver
+	mux                 *http.ServeMux
+	middlewares         []Middleware
+	requestIDHeader     string
+	requestIDGenerator  RequestIDGenerator
+	authorizer          Authorizer
+	observer            RequestObserver
+	maxRequestBodyBytes int64
 }
 
 // WithMux supports the options-first registration form.
@@ -153,6 +236,9 @@ func WithAuthorizer(authorizer Authorizer) ServerOption {
 func WithRequestObserver(observer RequestObserver) ServerOption {
 	return func(o *serverOptions) { o.observer = observer }
 }
+func WithMaxRequestBodyBytes(limit int64) ServerOption {
+	return func(o *serverOptions) { o.maxRequestBodyBytes = limit }
+}
 
 func defaultRequestIDGenerator() string {
 	var value [16]byte
@@ -163,6 +249,21 @@ func defaultRequestIDGenerator() string {
 }
 
 func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	if o.authorizer != nil {
+		next := handler
+		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if err := o.authorizer(r.Context(), metadata, r); err != nil {
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+				}
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 	for i := len(o.middlewares) - 1; i >= 0; i-- {
 		if o.middlewares[i] != nil {
 			handler = o.middlewares[i](handler)
@@ -178,17 +279,6 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 			if requestID != "" {
 				w.Header().Set(o.requestIDHeader, requestID)
 				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
-			}
-		}
-		if o.authorizer != nil {
-			if err := o.authorizer(ctx, metadata, r); err != nil {
-				var statusErr interface{ HTTPStatusCode() int }
-				if errors.As(err, &statusErr) {
-					writeHandlerError(w, err)
-				} else {
-					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
-				}
-				return
 			}
 		}
 		if o.observer == nil {
@@ -232,13 +322,21 @@ func (w *statusResponseWriter) Flush() {
 	}
 }
 
+// StockService defines POS inventory and stock movement endpoints.
 type StockServiceServer interface {
+	// Returns stock movements, optionally filtered by branch and product.
 	ListStockMovements(ctx context.Context, req *ListStockMovementsRequest) (*ListStockMovementsResponse, error)
+	// Records a stock receipt.
 	ReceiveStock(ctx context.Context, req *ReceiveStockRequest) (*ReceiveStockResponse, error)
+	// Records a manual stock adjustment.
 	AdjustStock(ctx context.Context, req *AdjustStockRequest) (*AdjustStockResponse, error)
+	// Records wasted stock.
 	WasteStock(ctx context.Context, req *WasteStockRequest) (*WasteStockResponse, error)
+	// Transfers stock between branches.
 	TransferStock(ctx context.Context, req *TransferStockRequest) (*TransferStockResponse, error)
+	// Returns branch inventory levels.
 	ListInventory(ctx context.Context, req *ListInventoryRequest) (*ListInventoryResponse, error)
+	// Returns branch inventory items at or below their reorder point.
 	LowStock(ctx context.Context, req *LowStockRequest) (*LowStockResponse, error)
 }
 
@@ -296,109 +394,134 @@ func RegisterStockServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListStockMovements(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListStockMovements(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "StockService", Method: "listStockMovements", HTTPMethod: "GET", Route: "/pos/stock/v1/movements", AuthSchemes: nil}))
 	mux.Handle("POST /pos/stock/v1/receive", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ReceiveStockRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ReceiveStock(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ReceiveStock(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "StockService", Method: "receiveStock", HTTPMethod: "POST", Route: "/pos/stock/v1/receive", AuthSchemes: nil}))
 	mux.Handle("POST /pos/stock/v1/adjust", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(AdjustStockRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.AdjustStock(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.AdjustStock(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "StockService", Method: "adjustStock", HTTPMethod: "POST", Route: "/pos/stock/v1/adjust", AuthSchemes: nil}))
 	mux.Handle("POST /pos/stock/v1/waste", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(WasteStockRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.WasteStock(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.WasteStock(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "StockService", Method: "wasteStock", HTTPMethod: "POST", Route: "/pos/stock/v1/waste", AuthSchemes: nil}))
 	mux.Handle("POST /pos/stock/v1/transfer", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(TransferStockRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.TransferStock(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.TransferStock(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "StockService", Method: "transferStock", HTTPMethod: "POST", Route: "/pos/stock/v1/transfer", AuthSchemes: nil}))
 	mux.Handle("GET /pos/stock/v1/inventory", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListInventoryRequest)
@@ -413,17 +536,22 @@ func RegisterStockServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListInventory(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListInventory(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "StockService", Method: "listInventory", HTTPMethod: "GET", Route: "/pos/stock/v1/inventory", AuthSchemes: nil}))
 	mux.Handle("GET /pos/stock/v1/low-stock", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(LowStockRequest)
@@ -438,17 +566,22 @@ func RegisterStockServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.LowStock(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.LowStock(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "StockService", Method: "lowStock", HTTPMethod: "GET", Route: "/pos/stock/v1/low-stock", AuthSchemes: nil}))
 	return nil
 }

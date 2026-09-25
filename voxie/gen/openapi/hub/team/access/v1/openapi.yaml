@@ -11,12 +11,24 @@ paths:
             description: Returns pending access requests for the business.
             operationId: AccessService_listAccessRequests
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.team.access.v1.ListAccessRequestsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - AccessService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/hub.team.access.v1.RequestAccessRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.team.access.v1.RequestAccessResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/team/access/v1/requests/{id}/approve:
         post:
             tags:
@@ -48,21 +72,59 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.team.access.v1.ApproveAccessRequestRequest'
+                            type: object
+                            properties:
+                                user_id:
+                                    exclusiveMinimum: 0
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                    description: Identifies the user being granted access.
+                                app:
+                                    type: string
+                                role_ids:
+                                    type: array
+                                    items:
+                                        type: string
+                                    description: Approved normalized role identifiers.
+                                scopes:
+                                    type: array
+                                    items:
+                                        $ref: '#/components/schemas/hub.user.v1.RoleScope'
+                                    description: Approved resource scopes.
+                            required:
+                                - user_id
+                                - app
+                                - role_ids
+                                - scopes
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.team.access.v1.ApproveAccessRequestResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.team.access.v1.RequestAccessRequest:
@@ -122,9 +184,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifies the user who requested access.
                 app:
@@ -147,6 +211,7 @@ components:
                     description: Current request lifecycle status.
                 approver_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: User who approved the request, when approved.
                 approved_at:
@@ -175,10 +240,12 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifies the user being granted access.
                 app:
@@ -206,3 +273,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: AccessService
+      description: AccessService defines hub team access request endpoints.

@@ -20,10 +20,15 @@ return violations;
 }
 
 export interface GetFinanceDashboardResponse {
+/** total_revenue_mtd is the total revenue month-to-date value for this contract. */
 totalRevenueMtd?: number | undefined;
+/** total_receivable is the total receivable value for this contract. */
 totalReceivable?: number | undefined;
+/** overdue_amount is the overdue amount value for this contract. */
 overdueAmount?: number | undefined;
+/** total_expenses_mtd is the total expenses mtd value for this contract. */
 totalExpensesMtd?: number | undefined;
+/** net_profit_mtd is the net profit mtd value for this contract. */
 netProfitMtd?: number | undefined;
 }
 

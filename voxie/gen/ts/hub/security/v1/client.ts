@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface SecurityServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** SecurityService defines hub security endpoints. */
 export class SecurityServiceClient {
 private baseUrl: string;
 private options: SecurityServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getSecurityState(req: GetSecurityStateRequest): Promise<GetSecurityStateResponse> {
+/** Returns the current security settings. */
+async getSecurityState(req: GetSecurityStateRequest, opts?: RequestOptions): Promise<GetSecurityStateResponse> {
 const violations = validateGetSecurityStateRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/state";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,9 +133,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetSecurityStateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async loginHistory(req: LoginHistoryRequest): Promise<LoginHistoryResponse> {
+/** Returns paginated login events for the authenticated user. */
+async loginHistory(req: LoginHistoryRequest, opts?: RequestOptions): Promise<LoginHistoryResponse> {
 const violations = validateLoginHistoryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/login-history";
 const query = new URLSearchParams();
 if (req.page !== undefined) {
@@ -107,7 +149,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -119,14 +162,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeLoginHistoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async invalidateSessions(req: InvalidateSessionsRequest): Promise<InvalidateSessionsResponse> {
+/** Revokes all active sessions. */
+async invalidateSessions(req: InvalidateSessionsRequest, opts?: RequestOptions): Promise<InvalidateSessionsResponse> {
 const violations = validateInvalidateSessionsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/invalidate-sessions";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeInvalidateSessionsRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -138,14 +183,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeInvalidateSessionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async update2FA(req: Update2FARequest): Promise<Update2FAResponse> {
+/** Toggles two-factor authentication. */
+async update2FA(req: Update2FARequest, opts?: RequestOptions): Promise<Update2FAResponse> {
 const violations = validateUpdate2FARequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/2fa";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdate2FARequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -157,14 +204,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdate2FAResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async beginMFAEnrollment(req: BeginMFAEnrollmentRequest): Promise<BeginMFAEnrollmentResponse> {
+/** Starts a TOTP enrollment and returns the secret once. */
+async beginMFAEnrollment(req: BeginMFAEnrollmentRequest, opts?: RequestOptions): Promise<BeginMFAEnrollmentResponse> {
 const violations = validateBeginMFAEnrollmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/mfa/enroll";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBeginMFAEnrollmentRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -176,14 +225,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeBeginMFAEnrollmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async completeMFAEnrollment(req: CompleteMFAEnrollmentRequest): Promise<CompleteMFAEnrollmentResponse> {
+/** Confirms a TOTP enrollment and issues one-time recovery codes. */
+async completeMFAEnrollment(req: CompleteMFAEnrollmentRequest, opts?: RequestOptions): Promise<CompleteMFAEnrollmentResponse> {
 const violations = validateCompleteMFAEnrollmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/mfa/enroll/confirm";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCompleteMFAEnrollmentRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -195,14 +246,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCompleteMFAEnrollmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async verifyMFA(req: VerifyMFARequest): Promise<VerifyMFAResponse> {
+/** Verifies a TOTP code for the current authenticated session. */
+async verifyMFA(req: VerifyMFARequest, opts?: RequestOptions): Promise<VerifyMFAResponse> {
 const violations = validateVerifyMFARequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/mfa/verify";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeVerifyMFARequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -214,14 +267,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeVerifyMFAResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async useMFARecoveryCode(req: UseMFARecoveryCodeRequest): Promise<UseMFARecoveryCodeResponse> {
+/** Consumes one recovery code for the current authenticated session. */
+async useMFARecoveryCode(req: UseMFARecoveryCodeRequest, opts?: RequestOptions): Promise<UseMFARecoveryCodeResponse> {
 const violations = validateUseMFARecoveryCodeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/security/v1/mfa/recovery";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUseMFARecoveryCodeRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

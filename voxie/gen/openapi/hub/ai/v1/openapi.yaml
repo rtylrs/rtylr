@@ -10,12 +10,24 @@ paths:
             summary: getAiUsage
             operationId: AiService_getAiUsage
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.ai.v1.GetAiUsageResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/ai/v1/quota-settings:
         get:
             tags:
@@ -23,12 +35,24 @@ paths:
             summary: getAiQuotaSettings
             operationId: AiService_getAiQuotaSettings
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.ai.v1.GetAiQuotaSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - AiService
@@ -41,12 +65,24 @@ paths:
                             $ref: '#/components/schemas/hub.ai.v1.UpdateAiQuotaSettingsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.ai.v1.UpdateAiQuotaSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.ai.v1.GetAiUsageRequest:
@@ -68,15 +104,19 @@ components:
                     type: string
                 allowance_tokens:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 used_tokens:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 remaining_tokens:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 overage_tokens:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 allow_overage:
                     type: boolean
@@ -126,3 +166,12 @@ components:
                         - $ref: '#/components/schemas/hub.ai.v1.AiQuotaSettings'
             required:
                 - settings
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: AiService

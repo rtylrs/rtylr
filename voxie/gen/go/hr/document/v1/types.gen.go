@@ -130,6 +130,7 @@ func (x *Document) GetCreatedAt() string {
 	return x.CreatedAt
 }
 
+// EmployeeDocumentPayload is an employee document record.
 type EmployeeDocumentPayload struct {
 	Id           int64   `json:"id,omitempty"`
 	OwnerId      int64   `json:"owner_id,omitempty"`

@@ -6,16 +6,26 @@ import (
 	"strconv"
 )
 
+// Account is a chart-of-accounts ledger account.
 type Account struct {
-	Id        int64   `json:"id,omitempty"`
-	OwnerId   int64   `json:"owner_id,omitempty"`
-	Name      string  `json:"name,omitempty"`
-	Type      string  `json:"type,omitempty"`
-	Currency  string  `json:"currency,omitempty"`
-	Balance   float64 `json:"balance,omitempty"`
-	IsActive  bool    `json:"is_active,omitempty"`
-	CreatedAt string  `json:"created_at,omitempty"`
-	Code      string  `json:"code,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// type is the type value for this contract.
+	Type string `json:"type,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// balance is the balance value for this contract.
+	Balance float64 `json:"balance,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive bool `json:"is_active,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// code is the optional account code/number.
+	Code string `json:"code,omitempty"`
 }
 
 func (m *Account) MarshalJSON() ([]byte, error) {
@@ -129,6 +139,7 @@ func (x *Account) GetCode() string {
 	return x.Code
 }
 
+// ChartOfAccountsNode is a node in the hierarchical chart of accounts.
 type ChartOfAccountsNode struct {
 	Id       int64                  `json:"id,omitempty"`
 	Name     string                 `json:"name,omitempty"`
@@ -207,12 +218,18 @@ func (x *ChartOfAccountsNode) GetChildren() []*ChartOfAccountsNode {
 }
 
 type CreateAccountRequest struct {
-	Name     string   `json:"name,omitempty"`
-	Type     string   `json:"type,omitempty"`
-	Currency string   `json:"currency,omitempty"`
-	Balance  *float64 `json:"balance,omitempty"`
-	IsActive bool     `json:"is_active,omitempty"`
-	Code     string   `json:"code,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// type is the type value for this contract.
+	Type string `json:"type,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// balance is the balance value for this contract.
+	Balance *float64 `json:"balance,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive bool `json:"is_active,omitempty"`
+	// code is the optional account code/number.
+	Code string `json:"code,omitempty"`
 }
 
 func (x *CreateAccountRequest) GetName() string {
@@ -268,7 +285,9 @@ func (x *CreateAccountRequest) GetCode() string {
 }
 
 type CreateAccountResponse struct {
-	Id      int64  `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -407,6 +426,7 @@ func (x *ListAccountsRequest) GetPageSize() int64 {
 }
 
 type ListAccountsResponse struct {
+	// accounts is the accounts value for this contract.
 	Accounts []*Account `json:"accounts,omitempty"`
 	Page     int64      `json:"page,omitempty"`
 	PageSize int64      `json:"page_size,omitempty"`
@@ -451,7 +471,8 @@ type UpdateAccountBody struct {
 	Currency string  `json:"currency,omitempty"`
 	Balance  float64 `json:"balance,omitempty"`
 	IsActive bool    `json:"is_active,omitempty"`
-	Code     string  `json:"code,omitempty"`
+	// code is the optional account code/number.
+	Code string `json:"code,omitempty"`
 }
 
 func (x *UpdateAccountBody) GetName() string {

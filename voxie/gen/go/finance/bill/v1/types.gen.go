@@ -6,19 +6,39 @@ import (
 	"strconv"
 )
 
+// Bill is an accounts-payable bill owed to a supplier.
 type Bill struct {
-	Id              int64   `json:"id,omitempty"`
-	OwnerId         int64   `json:"owner_id,omitempty"`
-	SupplierId      *int64  `json:"supplier_id,omitempty"`
-	SupplierName    string  `json:"supplier_name,omitempty"`
-	PurchaseOrderId *int64  `json:"purchase_order_id,omitempty"`
-	Amount          float64 `json:"amount,omitempty"`
-	Currency        string  `json:"currency,omitempty"`
-	DueDate         string  `json:"due_date,omitempty"`
-	Status          string  `json:"status,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	CreatedAt       string  `json:"created_at,omitempty"`
-	UpdatedAt       string  `json:"updated_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// supplier_id is the ERP supplier this bill is owed to; absent on bills
+	// entered before suppliers were linked, and on one-off bills for a party
+	// with no supplier record. Callers must not invent a value: a bill with no
+	// known supplier records none.
+	SupplierId *int64 `json:"supplier_id,omitempty"`
+	// supplier_name is the supplier's name as it stood when the bill was
+	// entered, so a bill list reads correctly without a second request and a
+	// renamed supplier does not rewrite history. Required: every bill records
+	// who it is owed to, by reference or by snapshot.
+	SupplierName string `json:"supplier_name,omitempty"`
+	// purchase_order_id is the ERP purchase order this bill settles; absent for
+	// bills that did not originate from a purchase order.
+	PurchaseOrderId *int64 `json:"purchase_order_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Bill) MarshalJSON() ([]byte, error) {
@@ -191,14 +211,28 @@ func (x *Bill) GetUpdatedAt() string {
 }
 
 type CreateBillRequest struct {
-	SupplierId      *int64  `json:"supplier_id,omitempty"`
-	SupplierName    string  `json:"supplier_name,omitempty"`
-	PurchaseOrderId *int64  `json:"purchase_order_id,omitempty"`
-	Amount          float64 `json:"amount,omitempty"`
-	Currency        string  `json:"currency,omitempty"`
-	DueDate         string  `json:"due_date,omitempty"`
-	Status          string  `json:"status,omitempty"`
-	Description     string  `json:"description,omitempty"`
+	// supplier_id is the ERP supplier this bill is owed to. Optional: supply it
+	// from ERP's supplier list when the party has a record, and omit it for a
+	// one-off bill. Callers must never send a derived or placeholder value.
+	SupplierId *int64 `json:"supplier_id,omitempty"`
+	// supplier_name is the vendor name as typed or picked at entry time. It is
+	// the display snapshot for the bill and must always be present even when
+	// supplier_id is set, so history survives a later rename.
+	SupplierName string `json:"supplier_name,omitempty"`
+	// purchase_order_id links this bill to the ERP purchase order it settles;
+	// absent when the bill did not originate from a purchase order. The server
+	// must verify the referenced order belongs to the caller's business.
+	PurchaseOrderId *int64 `json:"purchase_order_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
 }
 
 func (m *CreateBillRequest) MarshalJSON() ([]byte, error) {
@@ -319,7 +353,9 @@ func (x *CreateBillRequest) GetDescription() string {
 }
 
 type CreateBillResponse struct {
-	Id      int64  `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -475,7 +511,11 @@ func (x *GetBillResponse) GetBill() *Bill {
 }
 
 type ListBillsRequest struct {
-	SupplierId      *int64 `json:"supplier_id,omitempty"`
+	// supplier_id filters to one ERP supplier's bills; absent to include all.
+	// Absent supplier links are excluded when this filter is supplied.
+	SupplierId *int64 `json:"supplier_id,omitempty"`
+	// purchase_order_id filters to bills settling one purchase order; absent
+	// to include all.
 	PurchaseOrderId *int64 `json:"purchase_order_id,omitempty"`
 	Page            int64  `json:"page,omitempty"`
 	PageSize        int64  `json:"page_size,omitempty"`
@@ -567,6 +607,7 @@ func (x *ListBillsRequest) GetPageSize() int64 {
 }
 
 type ListBillsResponse struct {
+	// bills is the bills value for this contract.
 	Bills    []*Bill `json:"bills,omitempty"`
 	Page     int64   `json:"page,omitempty"`
 	PageSize int64   `json:"page_size,omitempty"`
@@ -606,14 +647,24 @@ func (x *ListBillsResponse) GetHasMore() bool {
 }
 
 type UpdateBillBody struct {
-	SupplierId      *int64  `json:"supplier_id,omitempty"`
-	SupplierName    string  `json:"supplier_name,omitempty"`
-	PurchaseOrderId *int64  `json:"purchase_order_id,omitempty"`
-	Amount          float64 `json:"amount,omitempty"`
-	Currency        string  `json:"currency,omitempty"`
-	DueDate         string  `json:"due_date,omitempty"`
-	Status          string  `json:"status,omitempty"`
-	Description     string  `json:"description,omitempty"`
+	// supplier_id is the ERP supplier this bill is owed to; absent keeps the
+	// stored value, and a one-off bill may clear it by sending nothing here.
+	SupplierId *int64 `json:"supplier_id,omitempty"`
+	// supplier_name replaces the vendor snapshot; absent means unchanged.
+	SupplierName string `json:"supplier_name,omitempty"`
+	// purchase_order_id re-links this bill to an ERP purchase order; absent
+	// keeps the stored link.
+	PurchaseOrderId *int64 `json:"purchase_order_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
 }
 
 func (m *UpdateBillBody) MarshalJSON() ([]byte, error) {
@@ -734,7 +785,9 @@ func (x *UpdateBillBody) GetDescription() string {
 }
 
 type UpdateBillRequest struct {
-	Id   int64           `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable bill fields bound from the HTTP payload.
 	Body *UpdateBillBody `json:"body,omitempty"`
 }
 
@@ -784,6 +837,7 @@ func (x *UpdateBillRequest) GetBody() *UpdateBillBody {
 }
 
 type UpdateBillResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

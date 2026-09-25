@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// TopCustomer is a customer ranked by spend for dashboard summaries.
 type TopCustomer struct {
 	Id            int64   `json:"id,omitempty"`
 	FirstName     string  `json:"first_name,omitempty"`

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface MembersServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** MembersService defines hub team member endpoints. */
 export class MembersServiceClient {
 private baseUrl: string;
 private options: MembersServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listTeam(req: ListTeamRequest): Promise<ListTeamResponse> {
+/** Returns team members for the active business. */
+async listTeam(req: ListTeamRequest, opts?: RequestOptions): Promise<ListTeamResponse> {
 const violations = validateListTeamRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/members/v1/members";
 const query = new URLSearchParams();
 if (req.page !== undefined) {
@@ -86,7 +126,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -98,9 +139,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListTeamResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getMember(req: GetMemberRequest): Promise<GetMemberResponse> {
+/** Returns a single team member by ID. */
+async getMember(req: GetMemberRequest, opts?: RequestOptions): Promise<GetMemberResponse> {
 const violations = validateGetMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/members/v1/members/{user_id}";
 path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
 const query = new URLSearchParams();
@@ -108,7 +150,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -120,9 +163,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async removeMember(req: RemoveMemberRequest): Promise<RemoveMemberResponse> {
+/** Removes a member from the team. */
+async removeMember(req: RemoveMemberRequest, opts?: RequestOptions): Promise<RemoveMemberResponse> {
 const violations = validateRemoveMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/members/v1/members/{user_id}";
 path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
 const query = new URLSearchParams();
@@ -130,7 +174,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

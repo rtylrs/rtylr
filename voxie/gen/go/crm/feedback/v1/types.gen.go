@@ -6,15 +6,19 @@ import (
 	"strconv"
 )
 
+// Feedback is a single NPS score or written review from a customer.
 type Feedback struct {
-	Id           int64  `json:"id,omitempty"`
-	OwnerId      int64  `json:"owner_id,omitempty"`
-	CustomerId   int64  `json:"customer_id,omitempty"`
-	Type         string `json:"type,omitempty"`
-	Score        int32  `json:"score,omitempty"`
-	Comment      string `json:"comment,omitempty"`
-	Source       string `json:"source,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
+	Id         int64 `json:"id,omitempty"`
+	OwnerId    int64 `json:"owner_id,omitempty"`
+	CustomerId int64 `json:"customer_id,omitempty"`
+	// "nps" or "review" — score's scale and meaning depend on this.
+	Type string `json:"type,omitempty"`
+	// NPS score (0-10) when type is "nps"; star rating (1-5) when type is "review".
+	Score     int32  `json:"score,omitempty"`
+	Comment   string `json:"comment,omitempty"`
+	Source    string `json:"source,omitempty"`
+	CreatedAt string `json:"created_at,omitempty"`
+	// Display name of the customer this feedback belongs to.
 	CustomerName string `json:"customer_name,omitempty"`
 }
 

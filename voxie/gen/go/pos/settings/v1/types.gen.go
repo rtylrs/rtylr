@@ -6,16 +6,26 @@ import (
 	"strconv"
 )
 
+// POSFeatureSettings controls which business-specific POS modules are visible.
 type POSFeatureSettings struct {
-	Tables         bool `json:"tables,omitempty"`
+	// tables enables table and floor service workflows.
+	Tables bool `json:"tables,omitempty"`
+	// kitchen_display enables KDS and kitchen preparation workflows.
 	KitchenDisplay bool `json:"kitchen_display,omitempty"`
-	Modifiers      bool `json:"modifiers,omitempty"`
-	Combos         bool `json:"combos,omitempty"`
-	Tips           bool `json:"tips,omitempty"`
-	GiftCards      bool `json:"gift_cards,omitempty"`
-	Customers      bool `json:"customers,omitempty"`
-	Inventory      bool `json:"inventory,omitempty"`
-	CashDrawer     bool `json:"cash_drawer,omitempty"`
+	// modifiers enables product modifier workflows.
+	Modifiers bool `json:"modifiers,omitempty"`
+	// combos enables bundle/combo workflows.
+	Combos bool `json:"combos,omitempty"`
+	// tips enables tipping during payment.
+	Tips bool `json:"tips,omitempty"`
+	// gift_cards enables gift card selling and redemption.
+	GiftCards bool `json:"gift_cards,omitempty"`
+	// customers enables customer lookup and customer assignment.
+	Customers bool `json:"customers,omitempty"`
+	// inventory enables stock/inventory surfaces.
+	Inventory bool `json:"inventory,omitempty"`
+	// cash_drawer enables cash drawer actions and cash movement surfaces.
+	CashDrawer bool `json:"cash_drawer,omitempty"`
 }
 
 func (x *POSFeatureSettings) GetTables() bool {
@@ -90,15 +100,23 @@ func (x *POSFeatureSettings) GetCashDrawer() bool {
 	return x.CashDrawer
 }
 
+// POSBusinessSettings stores business-wide POS experience settings.
 type POSBusinessSettings struct {
-	Id              int64               `json:"id,omitempty"`
-	BusinessId      int64               `json:"business_id,omitempty"`
-	BusinessProfile string              `json:"business_profile,omitempty"`
-	Theme           string              `json:"theme,omitempty"`
-	Features        *POSFeatureSettings `json:"features,omitempty"`
-	ReceiptFooter   string              `json:"receipt_footer,omitempty"`
-	CreatedAt       string              `json:"created_at,omitempty"`
-	UpdatedAt       string              `json:"updated_at,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// business_id is the business id these settings belong to.
+	BusinessId int64 `json:"business_id,omitempty"`
+	// business_profile is one of retail, restaurant, or quick_service.
+	BusinessProfile string `json:"business_profile,omitempty"`
+	// theme is the default POS theme for this business.
+	Theme string `json:"theme,omitempty"`
+	// features are the business-specific POS modules to expose.
+	Features *POSFeatureSettings `json:"features,omitempty"`
+	// receipt_footer is the default footer printed on receipts.
+	ReceiptFooter string `json:"receipt_footer,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *POSBusinessSettings) MarshalJSON() ([]byte, error) {
@@ -204,9 +222,11 @@ func (x *POSBusinessSettings) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// GetPOSSettingsRequest reads the current business POS settings.
 type GetPOSSettingsRequest struct {
 }
 
+// GetPOSSettingsResponse returns the current business POS settings.
 type GetPOSSettingsResponse struct {
 	Settings *POSBusinessSettings `json:"settings,omitempty"`
 }
@@ -219,11 +239,16 @@ func (x *GetPOSSettingsResponse) GetSettings() *POSBusinessSettings {
 	return x.Settings
 }
 
+// UpdatePOSSettingsRequest updates the current business POS settings.
 type UpdatePOSSettingsRequest struct {
-	BusinessProfile string              `json:"business_profile,omitempty"`
-	Theme           string              `json:"theme,omitempty"`
-	Features        *POSFeatureSettings `json:"features,omitempty"`
-	ReceiptFooter   string              `json:"receipt_footer,omitempty"`
+	// business_profile is one of retail, restaurant, or quick_service.
+	BusinessProfile string `json:"business_profile,omitempty"`
+	// theme is the default POS theme for this business.
+	Theme string `json:"theme,omitempty"`
+	// features are the business-specific POS modules to expose.
+	Features *POSFeatureSettings `json:"features,omitempty"`
+	// receipt_footer is the default footer printed on receipts.
+	ReceiptFooter string `json:"receipt_footer,omitempty"`
 }
 
 func (x *UpdatePOSSettingsRequest) GetBusinessProfile() string {
@@ -258,6 +283,7 @@ func (x *UpdatePOSSettingsRequest) GetReceiptFooter() string {
 	return x.ReceiptFooter
 }
 
+// UpdatePOSSettingsResponse returns the saved POS settings.
 type UpdatePOSSettingsResponse struct {
 	Settings *POSBusinessSettings `json:"settings,omitempty"`
 	Message  string               `json:"message,omitempty"`

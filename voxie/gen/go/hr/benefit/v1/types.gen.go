@@ -253,12 +253,19 @@ func (x *ListBenefitsResponse) GetPlans() []*BenefitPlan {
 }
 
 type BenefitEnrollment struct {
-	Id          int64   `json:"id,omitempty"`
-	OwnerId     int64   `json:"owner_id,omitempty"`
-	EmployeeId  int64   `json:"employee_id,omitempty"`
-	PlanId      int64   `json:"plan_id,omitempty"`
-	Status      string  `json:"status,omitempty"`
-	EnrolledAt  string  `json:"enrolled_at,omitempty"`
+	// id is the enrollment record's unique identifier.
+	Id int64 `json:"id,omitempty"`
+	// owner_id is the business that owns the underlying BenefitPlan.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// employee_id is the enrolled employee; always resolved from auth context, never client-supplied.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// plan_id references the BenefitPlan this enrollment is for.
+	PlanId int64 `json:"plan_id,omitempty"`
+	// status is the enrollment lifecycle state (active | cancelled).
+	Status string `json:"status,omitempty"`
+	// enrolled_at is when the employee enrolled, in ISO-8601 format.
+	EnrolledAt string `json:"enrolled_at,omitempty"`
+	// cancelled_at is when the enrollment was cancelled, in ISO-8601 format; absent while the enrollment is active.
 	CancelledAt *string `json:"cancelled_at,omitempty"`
 }
 
@@ -382,6 +389,7 @@ func (x *BenefitEnrollment) GetCancelledAt() string {
 }
 
 type EnrollInBenefitRequest struct {
+	// plan_id is the BenefitPlan to enroll in. The employee is resolved from auth context, not client-supplied.
 	PlanId *int64 `json:"plan_id,omitempty"`
 }
 
@@ -430,6 +438,7 @@ func (x *EnrollInBenefitRequest) GetPlanId() int64 {
 }
 
 type EnrollInBenefitResponse struct {
+	// enrollment is the created BenefitEnrollment record.
 	Enrollment *BenefitEnrollment `json:"enrollment,omitempty"`
 }
 
@@ -442,9 +451,13 @@ func (x *EnrollInBenefitResponse) GetEnrollment() *BenefitEnrollment {
 }
 
 type ListMyBenefitEnrollmentsRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// page is the current result page.
+	Page int32 `json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// sort_by is the field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -481,6 +494,7 @@ func (x *ListMyBenefitEnrollmentsRequest) GetSortDir() string {
 }
 
 type ListMyBenefitEnrollmentsResponse struct {
+	// enrollments are the caller's own BenefitEnrollment records.
 	Enrollments []*BenefitEnrollment                     `json:"enrollments,omitempty"`
 	Pagination  *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }

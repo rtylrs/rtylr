@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface DeveloperServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** DeveloperService defines hub developer API endpoints. */
 export class DeveloperServiceClient {
 private baseUrl: string;
 private options: DeveloperServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listApiKeys(req: ListApiKeysRequest): Promise<ListApiKeysResponse> {
+/** Returns API keys for the active business. */
+async listApiKeys(req: ListApiKeysRequest, opts?: RequestOptions): Promise<ListApiKeysResponse> {
 const violations = validateListApiKeysRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/api-keys";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListApiKeysResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createApiKey(req: CreateApiKeyRequest): Promise<CreateApiKeyResponse> {
+/** Creates a new API key. */
+async createApiKey(req: CreateApiKeyRequest, opts?: RequestOptions): Promise<CreateApiKeyResponse> {
 const violations = validateCreateApiKeyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/api-keys";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateApiKeyRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,14 +154,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateApiKeyResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async revokeApiKey(req: RevokeApiKeyRequest): Promise<RevokeApiKeyResponse> {
+/** Revokes an existing API key. */
+async revokeApiKey(req: RevokeApiKeyRequest, opts?: RequestOptions): Promise<RevokeApiKeyResponse> {
 const violations = validateRevokeApiKeyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/api-keys/revoke";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeRevokeApiKeyRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -130,16 +175,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRevokeApiKeyResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listWebhooks(req: ListWebhooksRequest): Promise<ListWebhooksResponse> {
+/** Returns configured webhooks. */
+async listWebhooks(req: ListWebhooksRequest, opts?: RequestOptions): Promise<ListWebhooksResponse> {
 const violations = validateListWebhooksRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/webhooks";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -151,14 +198,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListWebhooksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createWebhook(req: CreateWebhookRequest): Promise<CreateWebhookResponse> {
+/** Registers a new webhook endpoint. */
+async createWebhook(req: CreateWebhookRequest, opts?: RequestOptions): Promise<CreateWebhookResponse> {
 const violations = validateCreateWebhookRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/webhooks";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateWebhookRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -170,15 +219,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateWebhookResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateWebhook(req: UpdateWebhookRequest): Promise<UpdateWebhookResponse> {
+/** Updates an existing webhook. */
+async updateWebhook(req: UpdateWebhookRequest, opts?: RequestOptions): Promise<UpdateWebhookResponse> {
 const violations = validateUpdateWebhookRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/webhooks/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateWebhookRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -190,9 +241,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateWebhookResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteWebhook(req: DeleteWebhookRequest): Promise<DeleteWebhookResponse> {
+/** Removes a webhook by ID. */
+async deleteWebhook(req: DeleteWebhookRequest, opts?: RequestOptions): Promise<DeleteWebhookResponse> {
 const violations = validateDeleteWebhookRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/webhooks/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -200,7 +252,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -212,9 +265,20 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteWebhookResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listWebhookDeliveries(req: ListWebhookDeliveriesRequest): Promise<ListWebhookDeliveriesResponse> {
+/**
+ * Returns delivery attempts for the business's webhooks, most recent first.
+ *
+ * A registration whose endpoint has started failing is otherwise invisible
+ * to the tenant who owns it: deliveries retry, exhaust their attempts and
+ * are dead-lettered with nothing surfacing. Filter on status to find those.
+ *
+ * Literal path segment rather than a parameter, so it does not collide with
+ * the /webhooks/{id} routes above. Adding a GET /webhooks/{id} later would
+ * make this ambiguous.
+ */
+async listWebhookDeliveries(req: ListWebhookDeliveriesRequest, opts?: RequestOptions): Promise<ListWebhookDeliveriesResponse> {
 const violations = validateListWebhookDeliveriesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/developer/v1/webhooks/deliveries";
 const query = new URLSearchParams();
 if (req.webhookId !== undefined) {
@@ -233,7 +297,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

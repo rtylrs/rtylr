@@ -239,6 +239,9 @@ func (x *TeamMemberWorkload) GetTasks() []*TeamTaskSummary {
 	return x.Tasks
 }
 
+// RoadmapProject is one project row on the timeline view. v2 drops the
+// workspace field; visibility filtering (which projects a caller sees named
+// here) is applied server-side per the business's policy.
 type RoadmapProject struct {
 	Id          string `json:"id,omitempty"`
 	Name        string `json:"name,omitempty"`
@@ -393,9 +396,13 @@ func (x *GetInsightsResponse) GetDoneTasks() int32 {
 }
 
 type GetTeamWorkloadRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -453,9 +460,13 @@ func (x *GetTeamWorkloadResponse) GetPagination() *common_pagination_v1.Paginati
 }
 
 type GetRoadmapRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 

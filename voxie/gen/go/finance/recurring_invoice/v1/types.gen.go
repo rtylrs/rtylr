@@ -7,14 +7,20 @@ import (
 )
 
 type RecurringInvoice struct {
-	Id                int64   `json:"id,omitempty"`
-	OwnerId           int64   `json:"owner_id,omitempty"`
-	TemplateInvoiceId int64   `json:"template_invoice_id,omitempty"`
-	Frequency         string  `json:"frequency,omitempty"`
-	NextInvoiceDate   string  `json:"next_invoice_date,omitempty"`
-	EndDate           *string `json:"end_date,omitempty"`
-	IsActive          bool    `json:"is_active,omitempty"`
-	CreatedAt         string  `json:"created_at,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// The business owner for this recurring invoice.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// The invoice used as the recurring invoice template.
+	TemplateInvoiceId int64 `json:"template_invoice_id,omitempty"`
+	// How often the recurring invoice should be generated.
+	Frequency string `json:"frequency,omitempty"`
+	// The next generation date.
+	NextInvoiceDate string `json:"next_invoice_date,omitempty"`
+	// When recurring generation should stop; absent when open-ended.
+	EndDate  *string `json:"end_date,omitempty"`
+	IsActive bool    `json:"is_active,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *RecurringInvoice) MarshalJSON() ([]byte, error) {
@@ -135,11 +141,16 @@ func (x *RecurringInvoice) GetCreatedAt() string {
 }
 
 type CreateRecurringInvoiceRequest struct {
-	TemplateInvoiceId *int64  `json:"template_invoice_id,omitempty"`
-	Frequency         string  `json:"frequency,omitempty"`
-	NextInvoiceDate   string  `json:"next_invoice_date,omitempty"`
-	EndDate           *string `json:"end_date,omitempty"`
-	IsActive          *bool   `json:"is_active,omitempty"`
+	// The invoice used as the recurring invoice template.
+	TemplateInvoiceId *int64 `json:"template_invoice_id,omitempty"`
+	// How often the recurring invoice should be generated.
+	Frequency string `json:"frequency,omitempty"`
+	// The next generation date, formatted as YYYY-MM-DD.
+	NextInvoiceDate string `json:"next_invoice_date,omitempty"`
+	// When recurring generation should stop; absent when open-ended.
+	EndDate *string `json:"end_date,omitempty"`
+	// Whether the recurring invoice should start active.
+	IsActive *bool `json:"is_active,omitempty"`
 }
 
 func (m *CreateRecurringInvoiceRequest) MarshalJSON() ([]byte, error) {
@@ -227,7 +238,9 @@ func (x *CreateRecurringInvoiceRequest) GetIsActive() bool {
 }
 
 type CreateRecurringInvoiceResponse struct {
-	Id      int64  `json:"id,omitempty"`
+	// The recurring invoice that was created.
+	Id int64 `json:"id,omitempty"`
+	// The backend confirmation message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -351,6 +364,7 @@ func (x *ListRecurringInvoicesRequest) GetPageSize() int64 {
 }
 
 type ListRecurringInvoicesResponse struct {
+	// The full set of recurring invoices for the owner.
 	RecurringInvoices []*RecurringInvoice `json:"recurring_invoices,omitempty"`
 	Page              int64               `json:"page,omitempty"`
 	PageSize          int64               `json:"page_size,omitempty"`
@@ -390,6 +404,7 @@ func (x *ListRecurringInvoicesResponse) GetHasMore() bool {
 }
 
 type PauseRecurringInvoiceRequest struct {
+	// The recurring invoice to pause.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -431,6 +446,7 @@ func (x *PauseRecurringInvoiceRequest) GetId() int64 {
 }
 
 type PauseRecurringInvoiceResponse struct {
+	// The backend confirmation message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -443,6 +459,7 @@ func (x *PauseRecurringInvoiceResponse) GetMessage() string {
 }
 
 type ResumeRecurringInvoiceRequest struct {
+	// The recurring invoice to resume.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -484,6 +501,7 @@ func (x *ResumeRecurringInvoiceRequest) GetId() int64 {
 }
 
 type ResumeRecurringInvoiceResponse struct {
+	// The backend confirmation message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -496,11 +514,16 @@ func (x *ResumeRecurringInvoiceResponse) GetMessage() string {
 }
 
 type UpdateRecurringInvoiceBody struct {
-	TemplateInvoiceId *int64  `json:"template_invoice_id,omitempty"`
-	Frequency         string  `json:"frequency,omitempty"`
-	NextInvoiceDate   string  `json:"next_invoice_date,omitempty"`
-	EndDate           *string `json:"end_date,omitempty"`
-	IsActive          *bool   `json:"is_active,omitempty"`
+	// The invoice used as the recurring invoice template.
+	TemplateInvoiceId *int64 `json:"template_invoice_id,omitempty"`
+	// How often the recurring invoice should be generated.
+	Frequency string `json:"frequency,omitempty"`
+	// The next generation date, formatted as YYYY-MM-DD.
+	NextInvoiceDate string `json:"next_invoice_date,omitempty"`
+	// When recurring generation should stop; absent when open-ended.
+	EndDate *string `json:"end_date,omitempty"`
+	// Whether the recurring invoice is active.
+	IsActive *bool `json:"is_active,omitempty"`
 }
 
 func (m *UpdateRecurringInvoiceBody) MarshalJSON() ([]byte, error) {
@@ -588,7 +611,9 @@ func (x *UpdateRecurringInvoiceBody) GetIsActive() bool {
 }
 
 type UpdateRecurringInvoiceRequest struct {
-	Id   int64                       `json:"id,omitempty"`
+	// The recurring invoice to update.
+	Id int64 `json:"id,omitempty"`
+	// Carries updatable recurring invoice fields bound from the HTTP payload.
 	Body *UpdateRecurringInvoiceBody `json:"body,omitempty"`
 }
 
@@ -638,6 +663,7 @@ func (x *UpdateRecurringInvoiceRequest) GetBody() *UpdateRecurringInvoiceBody {
 }
 
 type UpdateRecurringInvoiceResponse struct {
+	// The backend confirmation message.
 	Message string `json:"message,omitempty"`
 }
 

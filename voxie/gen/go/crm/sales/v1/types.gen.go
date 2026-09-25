@@ -6,17 +6,39 @@ import (
 	"strconv"
 )
 
+// Contract is a signed sales agreement: the plan a customer bought, what it
+// costs monthly, and who signed. This domain contracts the read surface that
+// other apps need; create/update stay on CRM's legacy surface until that
+// migration happens.
+//
+// A contract is "signed" when signed_at is present. Unsigned drafts exist so
+// sales can stage terms before signature, and callers must treat the two
+// states differently.
 type Contract struct {
-	Id           int64   `json:"id,omitempty"`
-	LeadId       *int64  `json:"lead_id,omitempty"`
-	Plan         string  `json:"plan,omitempty"`
-	Mrr          string  `json:"mrr,omitempty"`
-	Seats        int32   `json:"seats,omitempty"`
-	SignedAt     *string `json:"signed_at,omitempty"`
-	SignedByName string  `json:"signed_by_name,omitempty"`
-	Notes        string  `json:"notes,omitempty"`
-	CreatedAt    int64   `json:"created_at,omitempty"`
-	UpdatedAt    int64   `json:"updated_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// lead_id is the CRM lead this contract closes; absent for contracts
+	// recorded without a lead.
+	LeadId *int64 `json:"lead_id,omitempty"`
+	// plan is what was bought, as CRM displays it (e.g. "pro", "enterprise").
+	Plan string `json:"plan,omitempty"`
+	// mrr is monthly recurring revenue as a decimal string, because money
+	// crosses the wire as text to avoid float drift. Currency is the
+	// business's reporting currency.
+	Mrr string `json:"mrr,omitempty"`
+	// seats is how many users the contract covers.
+	Seats int32 `json:"seats,omitempty"`
+	// signed_at is when the customer signed (ISO-8601); absent on unsigned
+	// drafts. Presence of this field is what makes a contract billable.
+	SignedAt *string `json:"signed_at,omitempty"`
+	// signed_by_name is the customer-side signer as written at signature time.
+	SignedByName string `json:"signed_by_name,omitempty"`
+	// notes are free-text sales notes; not for invoice prefill.
+	Notes string `json:"notes,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *Contract) MarshalJSON() ([]byte, error) {
@@ -169,9 +191,16 @@ func (x *Contract) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ListContractsRequest selects contracts for this business. Filters combine
+// with AND. The response is always a page: follow offset until total is
+// reached.
 type ListContractsRequest struct {
+	// signed filters to contracts whose signing is complete when true, or
+	// incomplete when false; absent to include both.
 	Signed *bool `json:"signed,omitempty"`
-	Limit  int32 `json:"limit,omitempty"`
+	// Maximum number of records to return, capped by the server.
+	Limit int32 `json:"limit,omitempty"`
+	// Number of records to skip for pagination.
 	Offset int32 `json:"offset,omitempty"`
 }
 
@@ -203,11 +232,17 @@ func (x *ListContractsRequest) GetOffset() int32 {
 	return x.Offset
 }
 
+// ListContractsResponse returns one page of contracts with paging echoes,
+// matching the rest of this module's list surfaces.
 type ListContractsResponse struct {
+	// contracts is the page of contracts matching the filters.
 	Contracts []*Contract `json:"contracts,omitempty"`
-	Total     int64       `json:"total,omitempty"`
-	Limit     int32       `json:"limit,omitempty"`
-	Offset    int32       `json:"offset,omitempty"`
+	// total is the number of contracts across all pages.
+	Total int64 `json:"total,omitempty"`
+	// limit echoes the applied page size.
+	Limit int32 `json:"limit,omitempty"`
+	// offset echoes the applied skip.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListContractsResponse) GetContracts() []*Contract {
@@ -242,7 +277,9 @@ func (x *ListContractsResponse) GetOffset() int32 {
 	return x.Offset
 }
 
+// GetContractRequest selects one contract by id.
 type GetContractRequest struct {
+	// id is the contract id path parameter.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -283,7 +320,10 @@ func (x *GetContractRequest) GetId() int64 {
 	return x.Id
 }
 
+// GetContractResponse returns the requested contract, or a 404 error when it
+// does not exist in the caller's business.
 type GetContractResponse struct {
+	// contract is the full record.
 	Contract *Contract `json:"contract,omitempty"`
 }
 
@@ -295,14 +335,24 @@ func (x *GetContractResponse) GetContract() *Contract {
 	return x.Contract
 }
 
+// CreateContractRequest stages a new contract from a won lead. Signing can
+// happen now or later via update.
 type CreateContractRequest struct {
-	LeadId       *int64  `json:"lead_id,omitempty"`
-	Plan         string  `json:"plan,omitempty"`
-	Mrr          string  `json:"mrr,omitempty"`
-	Seats        int32   `json:"seats,omitempty"`
-	SignedAt     *string `json:"signed_at,omitempty"`
-	SignedByName string  `json:"signed_by_name,omitempty"`
-	Notes        string  `json:"notes,omitempty"`
+	// lead_id links the contract to its winning lead.
+	LeadId *int64 `json:"lead_id,omitempty"`
+	// plan is what was bought, as CRM displays it.
+	Plan string `json:"plan,omitempty"`
+	// mrr is monthly recurring revenue as a decimal string.
+	Mrr string `json:"mrr,omitempty"`
+	// seats is how many users the contract covers.
+	Seats int32 `json:"seats,omitempty"`
+	// signed_at completes the signature at creation time; absent means an
+	// unsigned draft.
+	SignedAt *string `json:"signed_at,omitempty"`
+	// signed_by_name names the customer-side signer.
+	SignedByName string `json:"signed_by_name,omitempty"`
+	// notes are free-text sales notes.
+	Notes string `json:"notes,omitempty"`
 }
 
 func (m *CreateContractRequest) MarshalJSON() ([]byte, error) {
@@ -401,7 +451,9 @@ func (x *CreateContractRequest) GetNotes() string {
 	return x.Notes
 }
 
+// CreateContractResponse returns the newly staged contract.
 type CreateContractResponse struct {
+	// contract is the record as stored.
 	Contract *Contract `json:"contract,omitempty"`
 }
 
@@ -413,8 +465,12 @@ func (x *CreateContractResponse) GetContract() *Contract {
 	return x.Contract
 }
 
+// UpdateContractRequest amends an existing contract. Fields left absent keep
+// their current values, except status-bearing fields which replace outright.
 type UpdateContractRequest struct {
-	Id   int64               `json:"id,omitempty"`
+	// id is the contract id path parameter.
+	Id int64 `json:"id,omitempty"`
+	// body carries the amendable fields bound from the HTTP payload.
 	Body *UpdateContractBody `json:"body,omitempty"`
 }
 
@@ -463,13 +519,22 @@ func (x *UpdateContractRequest) GetBody() *UpdateContractBody {
 	return x.Body
 }
 
+// UpdateContractBody is the amendable surface of a contract.
 type UpdateContractBody struct {
-	Plan         string  `json:"plan,omitempty"`
-	Mrr          string  `json:"mrr,omitempty"`
-	Seats        int32   `json:"seats,omitempty"`
-	SignedAt     *string `json:"signed_at,omitempty"`
-	SignedByName string  `json:"signed_by_name,omitempty"`
-	Notes        string  `json:"notes,omitempty"`
+	// plan replaces what the contract says was bought.
+	Plan string `json:"plan,omitempty"`
+	// mrr replaces monthly recurring revenue (decimal string).
+	Mrr string `json:"mrr,omitempty"`
+	// seats replaces the covered user count.
+	Seats int32 `json:"seats,omitempty"`
+	// signed_at records the signature; setting it on an unsigned draft makes
+	// the contract billable. Already-signed contracts keep their original
+	// timestamp unless explicitly replaced here.
+	SignedAt *string `json:"signed_at,omitempty"`
+	// signed_by_name replaces the customer-side signer.
+	SignedByName string `json:"signed_by_name,omitempty"`
+	// notes replace the free-text sales notes.
+	Notes string `json:"notes,omitempty"`
 }
 
 func (x *UpdateContractBody) GetPlan() string {
@@ -524,7 +589,9 @@ func (x *UpdateContractBody) GetNotes() string {
 	return x.Notes
 }
 
+// UpdateContractResponse returns the amended contract.
 type UpdateContractResponse struct {
+	// contract is the record after amendment.
 	Contract *Contract `json:"contract,omitempty"`
 }
 

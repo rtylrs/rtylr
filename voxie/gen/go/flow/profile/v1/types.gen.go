@@ -6,13 +6,26 @@ import (
 	"strconv"
 )
 
+// Profile is the public face of a business member inside Flow: identity plus
+// the projects they chose to make discoverable. It backs the in-app profile
+// page opened from avatars, comment authors and member pickers.
 type Profile struct {
-	UserId         int64             `json:"user_id,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	Email          string            `json:"email,omitempty"`
-	Initials       string            `json:"initials,omitempty"`
-	RoleTitle      string            `json:"role_title,omitempty"`
-	Bio            string            `json:"bio,omitempty"`
+	// user_id is the profile's subject.
+	UserId int64 `json:"user_id,omitempty"`
+	// name is the display name.
+	Name string `json:"name,omitempty"`
+	// email is the account email. Business members already share a roster;
+	// this echoes it for contact actions.
+	Email string `json:"email,omitempty"`
+	// initials are two-letter uppercase initials derived from name.
+	Initials string `json:"initials,omitempty"`
+	// role_title is the person's business role or job title, when set.
+	RoleTitle string `json:"role_title,omitempty"`
+	// bio is what the person says about themselves. Empty if unset.
+	Bio string `json:"bio,omitempty"`
+	// public_projects lists the subject's PUBLIC projects - metadata only.
+	// Private projects never appear here regardless of caller; opening any of
+	// them still requires membership or a bypass role.
 	PublicProjects []*ProfileProject `json:"public_projects,omitempty"`
 }
 
@@ -101,15 +114,25 @@ func (x *Profile) GetPublicProjects() []*ProfileProject {
 	return x.PublicProjects
 }
 
+// ProfileProject is the metadata card for one public project. Deliberately
+// carries no task-level fields: public means "discoverable", not "openable".
 type ProfileProject struct {
-	Id             int64  `json:"id,omitempty"`
-	Name           string `json:"name,omitempty"`
-	Icon           string `json:"icon,omitempty"`
-	Color          string `json:"color,omitempty"`
-	Description    string `json:"description,omitempty"`
-	Status         string `json:"status,omitempty"`
-	TaskCount      int32  `json:"task_count,omitempty"`
-	CompletedCount int32  `json:"completed_count,omitempty"`
+	// id is the project identifier.
+	Id int64 `json:"id,omitempty"`
+	// name is the project display name.
+	Name string `json:"name,omitempty"`
+	// icon is the project icon.
+	Icon string `json:"icon,omitempty"`
+	// color is the project color hex.
+	Color string `json:"color,omitempty"`
+	// description is the short project description.
+	Description string `json:"description,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// task_count is the total task count. Display projection.
+	TaskCount int32 `json:"task_count,omitempty"`
+	// completed_count is the done task count. Display projection.
+	CompletedCount int32 `json:"completed_count,omitempty"`
 }
 
 func (m *ProfileProject) MarshalJSON() ([]byte, error) {
@@ -206,6 +229,7 @@ func (x *ProfileProject) GetCompletedCount() int32 {
 }
 
 type GetProfileRequest struct {
+	// user_id is the profile's subject.
 	UserId int64 `json:"user_id,omitempty"`
 }
 

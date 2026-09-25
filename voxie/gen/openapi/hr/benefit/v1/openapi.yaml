@@ -10,12 +10,24 @@ paths:
             summary: listBenefits
             operationId: BenefitService_listBenefits
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.benefit.v1.ListBenefitsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - BenefitService
@@ -28,12 +40,24 @@ paths:
                             $ref: '#/components/schemas/hr.benefit.v1.CreateBenefitRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.benefit.v1.CreateBenefitResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/benefit/v1/benefits/enrollments:
         post:
             tags:
@@ -48,12 +72,24 @@ paths:
                             $ref: '#/components/schemas/hr.benefit.v1.EnrollInBenefitRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.benefit.v1.EnrollInBenefitResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/benefit/v1/benefits/enrollments/mine:
         get:
             tags:
@@ -64,37 +100,53 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: page is the current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: page is the current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: limit is the maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: limit is the maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: sort_by is the field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: sort_by is the field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: sort_dir is the sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: sort_dir is the sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.benefit.v1.ListMyBenefitEnrollmentsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.benefit.v1.ListBenefitsRequest:
@@ -113,9 +165,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -172,6 +226,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -183,6 +238,7 @@ components:
             properties:
                 plan_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: plan_id is the BenefitPlan to enroll in. The employee is resolved from auth context, not client-supplied.
             required:
@@ -201,18 +257,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the enrollment record's unique identifier.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id is the business that owns the underlying BenefitPlan.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id is the enrolled employee; always resolved from auth context, never client-supplied.
                 plan_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: plan_id references the BenefitPlan this enrollment is for.
                 status:
@@ -300,3 +360,12 @@ components:
                 - has_next
                 - has_prev
             description: Standard pagination response metadata.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: BenefitService

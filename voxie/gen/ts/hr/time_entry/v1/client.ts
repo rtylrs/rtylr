@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface TimeEntryServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** TimeEntryService defines HR time entry and timesheet endpoints. */
 export class TimeEntryServiceClient {
 private baseUrl: string;
 private options: TimeEntryServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listTimeEntries(req: ListTimeEntriesRequest): Promise<ListTimeEntriesResponse> {
+/** Returns time entries with optional filters. */
+async listTimeEntries(req: ListTimeEntriesRequest, opts?: RequestOptions): Promise<ListTimeEntriesResponse> {
 const violations = validateListTimeEntriesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entry/v1/time-entries";
 const query = new URLSearchParams();
 if (req.employeeId !== undefined) {
@@ -107,7 +147,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -119,14 +160,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListTimeEntriesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTimeEntry(req: CreateTimeEntryRequest): Promise<CreateTimeEntryResponse> {
+/** Creates a new time entry. */
+async createTimeEntry(req: CreateTimeEntryRequest, opts?: RequestOptions): Promise<CreateTimeEntryResponse> {
 const violations = validateCreateTimeEntryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entry/v1/time-entries";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateTimeEntryRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -138,9 +181,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateTimeEntryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listTimesheets(req: ListTimesheetsRequest): Promise<ListTimesheetsResponse> {
+/** Returns timesheets with optional filters. */
+async listTimesheets(req: ListTimesheetsRequest, opts?: RequestOptions): Promise<ListTimesheetsResponse> {
 const violations = validateListTimesheetsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entry/v1/timesheets";
 const query = new URLSearchParams();
 if (req.employeeId !== undefined) {
@@ -153,7 +197,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -165,14 +210,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListTimesheetsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async submitTimesheet(req: SubmitTimesheetRequest): Promise<SubmitTimesheetResponse> {
+/** Submits a timesheet for approval. */
+async submitTimesheet(req: SubmitTimesheetRequest, opts?: RequestOptions): Promise<SubmitTimesheetResponse> {
 const violations = validateSubmitTimesheetRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entry/v1/timesheets";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSubmitTimesheetRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -184,15 +231,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeSubmitTimesheetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async approveTimesheet(req: ApproveTimesheetRequest): Promise<ApproveTimesheetResponse> {
+/** Approves a submitted timesheet. */
+async approveTimesheet(req: ApproveTimesheetRequest, opts?: RequestOptions): Promise<ApproveTimesheetResponse> {
 const violations = validateApproveTimesheetRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entry/v1/timesheets/{id}/approve";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeApproveTimesheetRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -204,14 +253,19 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeApproveTimesheetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async markTimeEntriesInvoiced(req: MarkTimeEntriesInvoicedRequest): Promise<MarkTimeEntriesInvoicedResponse> {
+/**
+ * Records that one finance invoice bills the listed time entries, so
+ * unbilled-billable queries stop offering hours that have been invoiced.
+ */
+async markTimeEntriesInvoiced(req: MarkTimeEntriesInvoicedRequest, opts?: RequestOptions): Promise<MarkTimeEntriesInvoicedResponse> {
 const violations = validateMarkTimeEntriesInvoicedRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entry/v1/time-entries/mark-invoiced";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeMarkTimeEntriesInvoicedRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

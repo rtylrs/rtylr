@@ -122,21 +122,24 @@ func (x *PurchaseOrderItem) GetTotalCost() float64 {
 }
 
 type PurchaseOrder struct {
-	Id               int64                `json:"id,omitempty"`
-	OwnerId          int64                `json:"owner_id,omitempty"`
-	SupplierId       int64                `json:"supplier_id,omitempty"`
-	PoNumber         string               `json:"po_number,omitempty"`
-	Status           string               `json:"status,omitempty"`
-	Subtotal         float64              `json:"subtotal,omitempty"`
-	TaxAmount        float64              `json:"tax_amount,omitempty"`
-	Total            float64              `json:"total,omitempty"`
-	ExpectedDelivery *string              `json:"expected_delivery,omitempty"`
-	ReceivedAt       *string              `json:"received_at,omitempty"`
-	Notes            string               `json:"notes,omitempty"`
-	CreatedBy        int64                `json:"created_by,omitempty"`
-	CreatedAt        string               `json:"created_at,omitempty"`
-	UpdatedAt        string               `json:"updated_at,omitempty"`
-	Items            []*PurchaseOrderItem `json:"items,omitempty"`
+	Id         int64  `json:"id,omitempty"`
+	OwnerId    int64  `json:"owner_id,omitempty"`
+	SupplierId int64  `json:"supplier_id,omitempty"`
+	PoNumber   string `json:"po_number,omitempty"`
+	// Current lifecycle state.
+	Status           string  `json:"status,omitempty"`
+	Subtotal         float64 `json:"subtotal,omitempty"`
+	TaxAmount        float64 `json:"tax_amount,omitempty"`
+	Total            float64 `json:"total,omitempty"`
+	ExpectedDelivery *string `json:"expected_delivery,omitempty"`
+	ReceivedAt       *string `json:"received_at,omitempty"`
+	Notes            string  `json:"notes,omitempty"`
+	CreatedBy        int64   `json:"created_by,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// When the record was last updated.
+	UpdatedAt string               `json:"updated_at,omitempty"`
+	Items     []*PurchaseOrderItem `json:"items,omitempty"`
 }
 
 func (m *PurchaseOrder) MarshalJSON() ([]byte, error) {
@@ -393,9 +396,12 @@ func (x *CreatePurchaseOrderItemRequest) GetUnitCost() float64 {
 }
 
 type ListPurchaseOrdersRequest struct {
-	Status   string `json:"status,omitempty"`
-	Page     int32  `json:"page,omitempty"`
-	PageSize int32  `json:"page_size,omitempty"`
+	// Filters purchase orders by lifecycle state.
+	Status string `json:"status,omitempty"`
+	// The 1-based page number.
+	Page int32 `json:"page,omitempty"`
+	// The number of rows to return.
+	PageSize int32 `json:"page_size,omitempty"`
 }
 
 func (x *ListPurchaseOrdersRequest) GetStatus() string {
@@ -424,9 +430,12 @@ func (x *ListPurchaseOrdersRequest) GetPageSize() int32 {
 
 type ListPurchaseOrdersResponse struct {
 	PurchaseOrders []*PurchaseOrder `json:"purchase_orders,omitempty"`
-	HasMore        bool             `json:"has_more,omitempty"`
-	Page           int32            `json:"page,omitempty"`
-	PageSize       int32            `json:"page_size,omitempty"`
+	// True when another page is available.
+	HasMore bool `json:"has_more,omitempty"`
+	// The returned 1-based page number.
+	Page int32 `json:"page,omitempty"`
+	// The returned page size.
+	PageSize int32 `json:"page_size,omitempty"`
 }
 
 func (x *ListPurchaseOrdersResponse) GetPurchaseOrders() []*PurchaseOrder {
@@ -555,8 +564,9 @@ func (x *CreatePurchaseOrderRequest) GetItems() []*CreatePurchaseOrderItemReques
 }
 
 type CreatePurchaseOrderResponse struct {
-	PurchaseOrderId int64  `json:"purchase_order_id,omitempty"`
-	Message         string `json:"message,omitempty"`
+	PurchaseOrderId int64 `json:"purchase_order_id,omitempty"`
+	// A human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (m *CreatePurchaseOrderResponse) MarshalJSON() ([]byte, error) {
@@ -658,8 +668,10 @@ func (x *GetPurchaseOrderResponse) GetPurchaseOrder() *PurchaseOrder {
 }
 
 type UpdatePurchaseOrderStatusBody struct {
-	Status string               `json:"status,omitempty"`
-	Items  []*PurchaseOrderItem `json:"items,omitempty"`
+	// Current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// Per-line quantities submitted by the receiving operator.
+	Items []*PurchaseOrderItem `json:"items,omitempty"`
 }
 
 func (x *UpdatePurchaseOrderStatusBody) GetStatus() string {

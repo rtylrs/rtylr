@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface AppServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** AppService defines hub app and addon endpoints. */
 export class AppServiceClient {
 private baseUrl: string;
 private options: AppServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listApps(req: ListAppsRequest): Promise<ListAppsResponse> {
+/** Returns installed apps for the active business. */
+async listApps(req: ListAppsRequest, opts?: RequestOptions): Promise<ListAppsResponse> {
 const violations = validateListAppsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/app/v1/apps";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,16 +133,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListAppsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listAddons(req: ListAddonsRequest): Promise<ListAddonsResponse> {
+/** Returns available addons. */
+async listAddons(req: ListAddonsRequest, opts?: RequestOptions): Promise<ListAddonsResponse> {
 const violations = validateListAddonsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/app/v1/addons";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -113,9 +156,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListAddonsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async addonStatus(req: AddonStatusRequest): Promise<AddonStatusResponse> {
+/** Returns the enabled state of an addon. */
+async addonStatus(req: AddonStatusRequest, opts?: RequestOptions): Promise<AddonStatusResponse> {
 const violations = validateAddonStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/app/v1/addons/{addon_id}/status";
 path = path.replace("{addon_id}", encodeURIComponent(String(req.addonId)));
 const query = new URLSearchParams();
@@ -123,7 +167,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -135,15 +180,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAddonStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async enableAddon(req: EnableAddonRequest): Promise<EnableAddonResponse> {
+/** Enables an addon for the active business. */
+async enableAddon(req: EnableAddonRequest, opts?: RequestOptions): Promise<EnableAddonResponse> {
 const violations = validateEnableAddonRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/app/v1/addons/{addon_id}/enable";
 path = path.replace("{addon_id}", encodeURIComponent(String(req.addonId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeEnableAddonRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -155,15 +202,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeEnableAddonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async disableAddon(req: DisableAddonRequest): Promise<DisableAddonResponse> {
+/** Disables an addon for the active business. */
+async disableAddon(req: DisableAddonRequest, opts?: RequestOptions): Promise<DisableAddonResponse> {
 const violations = validateDisableAddonRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/app/v1/addons/{addon_id}/disable";
 path = path.replace("{addon_id}", encodeURIComponent(String(req.addonId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeDisableAddonRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

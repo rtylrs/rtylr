@@ -13,17 +13,30 @@ paths:
             parameters:
                 - name: period
                   in: query
-                  required: true
+                  description: period is the period value for this contract.
+                  required: false
                   schema:
                     type: string
                     description: period is the period value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.revenue.v1.GetRevenueOverviewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/revenue/v1/by-app:
         get:
             tags:
@@ -34,17 +47,30 @@ paths:
             parameters:
                 - name: period
                   in: query
-                  required: true
+                  description: period is the period value for this contract.
+                  required: false
                   schema:
                     type: string
                     description: period is the period value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.revenue.v1.GetRevenueByAppResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/revenue/v1/comparison:
         get:
             tags:
@@ -55,12 +81,16 @@ paths:
             parameters:
                 - name: period
                   in: query
-                  required: true
+                  description: period is the period value for this contract.
+                  required: false
                   schema:
                     type: string
                     description: period is the period value for this contract.
                 - name: compare_to
                   in: query
+                  description: |-
+                    compare_to is the compare to value for this contract.
+                    previous_period, same_period_last_year
                   required: true
                   schema:
                     type: string
@@ -68,12 +98,24 @@ paths:
                         compare_to is the compare to value for this contract.
                         previous_period, same_period_last_year
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.revenue.v1.GetRevenueComparisonResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         insights.revenue.v1.GetRevenueOverviewRequest:
@@ -209,3 +251,13 @@ components:
                 - current
                 - previous
                 - change
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: RevenueService
+      description: RevenueService defines insights revenue analytics endpoints.

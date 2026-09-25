@@ -16,12 +16,24 @@ paths:
                             $ref: '#/components/schemas/hub.caret.v1.ListCaretToolsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.caret.v1.ListCaretToolsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.caret.v1.ListCaretToolsRequest:
@@ -66,3 +78,12 @@ components:
                 - category
                 - requires_approval
                 - scope
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CaretService

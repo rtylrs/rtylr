@@ -6,12 +6,15 @@ import (
 	"strconv"
 )
 
+// Notification is a single hub notification entry.
 type Notification struct {
-	Id        int64  `json:"id,omitempty"`
-	Title     string `json:"title,omitempty"`
-	Body      string `json:"body,omitempty"`
-	Type      string `json:"type,omitempty"`
-	Read      bool   `json:"read,omitempty"`
+	Id    int64  `json:"id,omitempty"`
+	Title string `json:"title,omitempty"`
+	Body  string `json:"body,omitempty"`
+	// info, warning, success, error
+	Type string `json:"type,omitempty"`
+	Read bool   `json:"read,omitempty"`
+	// When the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
 	Link      string `json:"link,omitempty"`
 }
@@ -102,7 +105,9 @@ func (x *Notification) GetLink() string {
 }
 
 type ListNotificationsRequest struct {
-	Limit  int32  `json:"limit,omitempty"`
+	// Maximum records to return. Defaults to 50 and is capped by the server.
+	Limit int32 `json:"limit,omitempty"`
+	// Opaque continuation token from a previous response.
 	Cursor string `json:"cursor,omitempty"`
 }
 

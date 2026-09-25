@@ -10,12 +10,24 @@ paths:
             summary: listReviews
             operationId: ReviewService_listReviews
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.review.v1.ListReviewsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ReviewService
@@ -28,12 +40,24 @@ paths:
                             $ref: '#/components/schemas/hr.review.v1.CreateReviewRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.review.v1.CreateReviewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.review.v1.ListReviewsRequest:
@@ -52,15 +76,19 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reviewer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 period:
                     type: string
@@ -103,9 +131,11 @@ components:
             properties:
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reviewer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 period:
                     type: string
@@ -140,9 +170,19 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
             required:
                 - id
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReviewService

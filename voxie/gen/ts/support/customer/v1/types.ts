@@ -6,6 +6,14 @@ businessId?: string | undefined;
 name?: string | undefined;
 email?: string | undefined;
 phone?: string | undefined;
+/**
+ * customer_id is the CRM customer this support record refers to; absent
+ * when the party has not been matched to one. It is nullable because
+ * support conversations arrive by email from people who may not be
+ * customers yet: matching on email alone is not reliable enough to assert
+ * the link, so the server sets it only on a confident match or when a human
+ * confirms one.
+ */
 customerId?: string | undefined;
 totalTickets?: number | undefined;
 lastTicketAt?: string | undefined;

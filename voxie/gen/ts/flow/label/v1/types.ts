@@ -2,10 +2,15 @@
 import * as common_pagination_v1 from "../../../common/pagination/v1/types.js";
 
 export interface Label {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** name is the name value for this contract. */
 name?: string | undefined;
+/** color is the color value for this contract. */
 color?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -41,10 +46,15 @@ return violations;
 }
 
 export interface ListLabelsRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -80,6 +90,7 @@ return violations;
 }
 
 export interface ListLabelsResponse {
+/** labels is the labels value for this contract. */
 labels?: (Label)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -109,8 +120,11 @@ return violations;
 }
 
 export interface CreateLabelRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** name is the name value for this contract. */
 name: string;
+/** color is the color value for this contract. */
 color: string;
 }
 
@@ -144,6 +158,7 @@ return violations;
 }
 
 export interface CreateLabelResponse {
+/** label is the label value for this contract. */
 label?: Label | undefined;
 }
 
@@ -168,8 +183,11 @@ return violations;
 }
 
 export interface UpdateLabelRequest {
+/** id is the label identifier. */
 id?: string | undefined;
+/** name is the label name. */
 name: string;
+/** color is the label color. */
 color: string;
 }
 
@@ -202,6 +220,7 @@ return violations;
 }
 
 export interface UpdateLabelResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -225,6 +244,7 @@ return violations;
 }
 
 export interface DeleteLabelRequest {
+/** id is the label identifier. */
 id?: string | undefined;
 }
 
@@ -249,6 +269,7 @@ return violations;
 }
 
 export interface DeleteLabelResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 

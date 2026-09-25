@@ -6,10 +6,14 @@ import (
 	"strconv"
 )
 
+// GiftCard is a stored-value card that can be issued to and redeemed by a customer.
 type GiftCard struct {
-	Id             int64   `json:"id,omitempty"`
-	OwnerId        int64   `json:"owner_id,omitempty"`
-	BusinessId     int64   `json:"business_id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// business_id identifies the active business.
+	BusinessId int64 `json:"business_id,omitempty"`
+	// customer_id identifies the linked customer when present.
 	CustomerId     int64   `json:"customer_id,omitempty"`
 	Code           string  `json:"code,omitempty"`
 	InitialAmount  float64 `json:"initial_amount,omitempty"`
@@ -18,8 +22,10 @@ type GiftCard struct {
 	CustomerEmail  string  `json:"customer_email,omitempty"`
 	IsActive       bool    `json:"is_active,omitempty"`
 	ExpiresAt      string  `json:"expires_at,omitempty"`
-	CreatedAt      string  `json:"created_at,omitempty"`
-	UpdatedAt      string  `json:"updated_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *GiftCard) MarshalJSON() ([]byte, error) {
@@ -186,7 +192,9 @@ func (x *GiftCard) GetUpdatedAt() string {
 }
 
 type CreateGiftCardRequest struct {
-	Code          string   `json:"code,omitempty"`
+	Code string `json:"code,omitempty"`
+	// paid_order_id must identify a paid POS order for this business. The
+	// server uses it as the tender reference for the liability entry.
 	PaidOrderId   *int64   `json:"paid_order_id,omitempty"`
 	InitialAmount *float64 `json:"initial_amount,omitempty"`
 	CustomerName  string   `json:"customer_name,omitempty"`
@@ -372,7 +380,8 @@ func (x *ListGiftCardsResponse) GetGiftCards() []*GiftCard {
 }
 
 type RedeemGiftCardRequest struct {
-	Code    string   `json:"code,omitempty"`
+	Code string `json:"code,omitempty"`
+	// order_id identifies the POS order receiving this gift-card tender.
 	OrderId *int64   `json:"order_id,omitempty"`
 	Amount  *float64 `json:"amount,omitempty"`
 }

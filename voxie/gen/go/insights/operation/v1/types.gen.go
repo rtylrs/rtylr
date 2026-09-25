@@ -7,13 +7,20 @@ import (
 )
 
 type UtilizationMetrics struct {
-	AvgUtilization float64             `json:"avg_utilization,omitempty"`
-	TotalStaff     int32               `json:"total_staff,omitempty"`
-	ActiveToday    int32               `json:"active_today,omitempty"`
-	TotalHours     float64             `json:"total_hours,omitempty"`
-	AvailableHours float64             `json:"available_hours,omitempty"`
-	OvertimeHours  float64             `json:"overtime_hours,omitempty"`
-	ByStaff        []*StaffUtilization `json:"by_staff,omitempty"`
+	// avg_utilization is the avg utilization value for this contract.
+	AvgUtilization float64 `json:"avg_utilization,omitempty"`
+	// total_staff is the total staff value for this contract.
+	TotalStaff int32 `json:"total_staff,omitempty"`
+	// active_today is the active today value for this contract.
+	ActiveToday int32 `json:"active_today,omitempty"`
+	// total_hours is the total hours value for this contract.
+	TotalHours float64 `json:"total_hours,omitempty"`
+	// available_hours is the available hours capacity for the period.
+	AvailableHours float64 `json:"available_hours,omitempty"`
+	// overtime_hours is the overtime hours value for this contract.
+	OvertimeHours float64 `json:"overtime_hours,omitempty"`
+	// by_staff is the by staff value for this contract.
+	ByStaff []*StaffUtilization `json:"by_staff,omitempty"`
 }
 
 func (x *UtilizationMetrics) GetAvgUtilization() float64 {
@@ -73,11 +80,16 @@ func (x *UtilizationMetrics) GetByStaff() []*StaffUtilization {
 }
 
 type StaffUtilization struct {
-	StaffId        int64   `json:"staff_id,omitempty"`
-	Name           string  `json:"name,omitempty"`
-	HoursWorked    float64 `json:"hours_worked,omitempty"`
+	// staff_id is the staff id value for this contract.
+	StaffId int64 `json:"staff_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// hours_worked is the hours worked value for this contract.
+	HoursWorked float64 `json:"hours_worked,omitempty"`
+	// hours_scheduled is the hours scheduled value for this contract.
 	HoursScheduled float64 `json:"hours_scheduled,omitempty"`
-	Utilization    float64 `json:"utilization,omitempty"`
+	// utilization is the utilization value for this contract.
+	Utilization float64 `json:"utilization,omitempty"`
 }
 
 func (m *StaffUtilization) MarshalJSON() ([]byte, error) {
@@ -150,11 +162,16 @@ func (x *StaffUtilization) GetUtilization() float64 {
 }
 
 type ShiftMetrics struct {
-	TotalShifts  int32          `json:"total_shifts,omitempty"`
-	Covered      int32          `json:"covered,omitempty"`
-	Missed       int32          `json:"missed,omitempty"`
-	CoverageRate float64        `json:"coverage_rate,omitempty"`
-	ByDay        []*ShiftsByDay `json:"by_day,omitempty"`
+	// total_shifts is the total shifts value for this contract.
+	TotalShifts int32 `json:"total_shifts,omitempty"`
+	// covered is the covered value for this contract.
+	Covered int32 `json:"covered,omitempty"`
+	// missed is the missed value for this contract.
+	Missed int32 `json:"missed,omitempty"`
+	// coverage_rate is the coverage rate value for this contract.
+	CoverageRate float64 `json:"coverage_rate,omitempty"`
+	// by_day is the by day value for this contract.
+	ByDay []*ShiftsByDay `json:"by_day,omitempty"`
 }
 
 func (x *ShiftMetrics) GetTotalShifts() int32 {
@@ -198,9 +215,12 @@ func (x *ShiftMetrics) GetByDay() []*ShiftsByDay {
 }
 
 type ShiftsByDay struct {
-	Day       string `json:"day,omitempty"`
-	Scheduled int32  `json:"scheduled,omitempty"`
-	Completed int32  `json:"completed,omitempty"`
+	// day is the day value for this contract.
+	Day string `json:"day,omitempty"`
+	// scheduled is the scheduled value for this contract.
+	Scheduled int32 `json:"scheduled,omitempty"`
+	// completed is the completed value for this contract.
+	Completed int32 `json:"completed,omitempty"`
 }
 
 func (x *ShiftsByDay) GetDay() string {
@@ -228,11 +248,16 @@ func (x *ShiftsByDay) GetCompleted() int32 {
 }
 
 type TimeOffMetrics struct {
-	TotalRequests int32            `json:"total_requests,omitempty"`
-	Approved      int32            `json:"approved,omitempty"`
-	Pending       int32            `json:"pending,omitempty"`
-	Rejected      int32            `json:"rejected,omitempty"`
-	ByType        []*TimeOffByType `json:"by_type,omitempty"`
+	// total_requests is the total requests value for this contract.
+	TotalRequests int32 `json:"total_requests,omitempty"`
+	// approved is the approved value for this contract.
+	Approved int32 `json:"approved,omitempty"`
+	// pending is the pending value for this contract.
+	Pending int32 `json:"pending,omitempty"`
+	// rejected is the rejected value for this contract.
+	Rejected int32 `json:"rejected,omitempty"`
+	// by_type is the by type value for this contract.
+	ByType []*TimeOffByType `json:"by_type,omitempty"`
 }
 
 func (x *TimeOffMetrics) GetTotalRequests() int32 {
@@ -276,9 +301,12 @@ func (x *TimeOffMetrics) GetByType() []*TimeOffByType {
 }
 
 type TimeOffByType struct {
-	Type     string `json:"type,omitempty"`
-	Days     int32  `json:"days,omitempty"`
-	Requests int32  `json:"requests,omitempty"`
+	// type is the type value for this contract.
+	Type string `json:"type,omitempty"`
+	// days is the days value for this contract.
+	Days int32 `json:"days,omitempty"`
+	// requests is the requests value for this contract.
+	Requests int32 `json:"requests,omitempty"`
 }
 
 func (x *TimeOffByType) GetType() string {
@@ -306,11 +334,16 @@ func (x *TimeOffByType) GetRequests() int32 {
 }
 
 type HeadcountMetrics struct {
-	Current            int32             `json:"current,omitempty"`
-	HiredThisPeriod    int32             `json:"hired_this_period,omitempty"`
-	DepartedThisPeriod int32             `json:"departed_this_period,omitempty"`
-	TurnoverRate       float64           `json:"turnover_rate,omitempty"`
-	Trend              []*HeadcountPoint `json:"trend,omitempty"`
+	// current is the current value for this contract.
+	Current int32 `json:"current,omitempty"`
+	// hired_this_period is the hired this period value for this contract.
+	HiredThisPeriod int32 `json:"hired_this_period,omitempty"`
+	// departed_this_period is the departed this period value for this contract.
+	DepartedThisPeriod int32 `json:"departed_this_period,omitempty"`
+	// turnover_rate is the turnover rate value for this contract.
+	TurnoverRate float64 `json:"turnover_rate,omitempty"`
+	// trend is the trend value for this contract.
+	Trend []*HeadcountPoint `json:"trend,omitempty"`
 }
 
 func (x *HeadcountMetrics) GetCurrent() int32 {
@@ -354,8 +387,10 @@ func (x *HeadcountMetrics) GetTrend() []*HeadcountPoint {
 }
 
 type HeadcountPoint struct {
-	Date  string `json:"date,omitempty"`
-	Count int32  `json:"count,omitempty"`
+	// date is the date value for this contract.
+	Date string `json:"date,omitempty"`
+	// count is the count value for this contract.
+	Count int32 `json:"count,omitempty"`
 }
 
 func (x *HeadcountPoint) GetDate() string {
@@ -375,6 +410,7 @@ func (x *HeadcountPoint) GetCount() int32 {
 }
 
 type GetHeadcountMetricsRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -387,6 +423,7 @@ func (x *GetHeadcountMetricsRequest) GetPeriod() string {
 }
 
 type GetHeadcountMetricsResponse struct {
+	// metrics is the metrics value for this contract.
 	Metrics *HeadcountMetrics `json:"metrics,omitempty"`
 }
 
@@ -402,9 +439,13 @@ type GetOperationsSummaryRequest struct {
 }
 
 type GetOperationsSummaryResponse struct {
-	ActiveStaff       int64 `json:"active_staff,omitempty"`
-	ShiftsThisWeek    int64 `json:"shifts_this_week,omitempty"`
-	PendingTimeOff    int64 `json:"pending_time_off,omitempty"`
+	// active_staff is the active staff count.
+	ActiveStaff int64 `json:"active_staff,omitempty"`
+	// shifts_this_week is the scheduled shift count this week.
+	ShiftsThisWeek int64 `json:"shifts_this_week,omitempty"`
+	// pending_time_off is the pending time-off request count.
+	PendingTimeOff int64 `json:"pending_time_off,omitempty"`
+	// open_leave_requests is the open leave request count.
 	OpenLeaveRequests int64 `json:"open_leave_requests,omitempty"`
 }
 
@@ -500,6 +541,7 @@ func (x *GetOperationsSummaryResponse) GetOpenLeaveRequests() int64 {
 }
 
 type GetShiftMetricsRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -512,6 +554,7 @@ func (x *GetShiftMetricsRequest) GetPeriod() string {
 }
 
 type GetShiftMetricsResponse struct {
+	// metrics is the metrics value for this contract.
 	Metrics *ShiftMetrics `json:"metrics,omitempty"`
 }
 
@@ -524,6 +567,7 @@ func (x *GetShiftMetricsResponse) GetMetrics() *ShiftMetrics {
 }
 
 type GetTimeOffMetricsRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -536,6 +580,7 @@ func (x *GetTimeOffMetricsRequest) GetPeriod() string {
 }
 
 type GetTimeOffMetricsResponse struct {
+	// metrics is the metrics value for this contract.
 	Metrics *TimeOffMetrics `json:"metrics,omitempty"`
 }
 
@@ -548,6 +593,7 @@ func (x *GetTimeOffMetricsResponse) GetMetrics() *TimeOffMetrics {
 }
 
 type GetUtilizationRequest struct {
+	// period is the period value for this contract.
 	Period string `json:"period,omitempty"`
 }
 
@@ -560,6 +606,7 @@ func (x *GetUtilizationRequest) GetPeriod() string {
 }
 
 type GetUtilizationResponse struct {
+	// metrics is the metrics value for this contract.
 	Metrics *UtilizationMetrics `json:"metrics,omitempty"`
 }
 

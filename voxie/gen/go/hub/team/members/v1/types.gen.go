@@ -9,16 +9,21 @@ import (
 )
 
 type StaffUserPayload struct {
-	Id              int64                            `json:"id,omitempty"`
-	Email           string                           `json:"email,omitempty"`
-	FullName        string                           `json:"full_name,omitempty"`
-	CreatedAt       string                           `json:"created_at,omitempty"`
-	Apps            []string                         `json:"apps,omitempty"`
-	Role            string                           `json:"role,omitempty"`
-	IsActive        bool                             `json:"is_active,omitempty"`
-	DashRole        *string                          `json:"dash_role,omitempty"`
-	AppAssignments  []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
-	EffectiveAccess *hub_user_v1.EffectiveAccess     `json:"effective_access,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Email address used for lookup or contact.
+	Email    string `json:"email,omitempty"`
+	FullName string `json:"full_name,omitempty"`
+	// When the record was created.
+	CreatedAt string   `json:"created_at,omitempty"`
+	Apps      []string `json:"apps,omitempty"`
+	Role      string   `json:"role,omitempty"`
+	IsActive  bool     `json:"is_active,omitempty"`
+	// Independent Dash role assignment.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Independent application role assignments.
+	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
+	// Server-resolved effective access.
+	EffectiveAccess *hub_user_v1.EffectiveAccess `json:"effective_access,omitempty"`
 }
 
 func (m *StaffUserPayload) MarshalJSON() ([]byte, error) {
@@ -135,17 +140,23 @@ func (x *StaffUserPayload) GetEffectiveAccess() *hub_user_v1.EffectiveAccess {
 }
 
 type StaffUserWithGroups struct {
-	Id              int64                              `json:"id,omitempty"`
-	Email           string                             `json:"email,omitempty"`
-	FullName        string                             `json:"full_name,omitempty"`
-	CreatedAt       string                             `json:"created_at,omitempty"`
-	Apps            []string                           `json:"apps,omitempty"`
-	Role            string                             `json:"role,omitempty"`
-	IsActive        bool                               `json:"is_active,omitempty"`
-	DashRole        *string                            `json:"dash_role,omitempty"`
-	AppAssignments  []*hub_user_v1.AppRoleAssignment   `json:"app_assignments,omitempty"`
-	EffectiveAccess *hub_user_v1.EffectiveAccess       `json:"effective_access,omitempty"`
-	Groups          []*hub_team_groups_v1.GroupSummary `json:"groups,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Email address used for lookup or contact.
+	Email    string `json:"email,omitempty"`
+	FullName string `json:"full_name,omitempty"`
+	// When the record was created.
+	CreatedAt string   `json:"created_at,omitempty"`
+	Apps      []string `json:"apps,omitempty"`
+	Role      string   `json:"role,omitempty"`
+	IsActive  bool     `json:"is_active,omitempty"`
+	// Independent Dash role assignment.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Independent application role assignments.
+	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
+	// Server-resolved effective access.
+	EffectiveAccess *hub_user_v1.EffectiveAccess `json:"effective_access,omitempty"`
+	// Groups the staff user belongs to.
+	Groups []*hub_team_groups_v1.GroupSummary `json:"groups,omitempty"`
 }
 
 func (m *StaffUserWithGroups) MarshalJSON() ([]byte, error) {
@@ -270,7 +281,9 @@ func (x *StaffUserWithGroups) GetGroups() []*hub_team_groups_v1.GroupSummary {
 }
 
 type ListTeamRequest struct {
-	Page     int32 `json:"page,omitempty"`
+	// page is the 1-based result page to return; defaults to 1.
+	Page int32 `json:"page,omitempty"`
+	// page_size is the maximum number of members per page; server caps at 500.
 	PageSize int32 `json:"page_size,omitempty"`
 }
 
@@ -292,7 +305,8 @@ func (x *ListTeamRequest) GetPageSize() int32 {
 
 type ListTeamResponse struct {
 	Users []*StaffUserPayload `json:"users,omitempty"`
-	Total int32               `json:"total,omitempty"`
+	// total is the total number of members across all pages, for pagination math.
+	Total int32 `json:"total,omitempty"`
 }
 
 func (x *ListTeamResponse) GetUsers() []*StaffUserPayload {
@@ -312,6 +326,7 @@ func (x *ListTeamResponse) GetTotal() int32 {
 }
 
 type GetMemberRequest struct {
+	// Identifies the member to fetch.
 	UserId int64 `json:"user_id,omitempty"`
 }
 

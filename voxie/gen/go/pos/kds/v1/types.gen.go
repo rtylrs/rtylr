@@ -6,13 +6,15 @@ import (
 	"strconv"
 )
 
+// KDSItem is a single line item on a kitchen display order.
 type KDSItem struct {
 	Id       int64   `json:"id,omitempty"`
 	OrderId  int64   `json:"order_id,omitempty"`
 	Name     string  `json:"name,omitempty"`
 	Quantity float64 `json:"quantity,omitempty"`
 	Notes    string  `json:"notes,omitempty"`
-	Status   string  `json:"status,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
 }
 
 func (m *KDSItem) MarshalJSON() ([]byte, error) {
@@ -102,16 +104,19 @@ func (x *KDSItem) GetStatus() string {
 	return x.Status
 }
 
+// KDSOrder is an order shown on the kitchen display.
 type KDSOrder struct {
-	Id           int64      `json:"id,omitempty"`
-	OrderNumber  string     `json:"order_number,omitempty"`
-	Type         string     `json:"type,omitempty"`
-	Status       string     `json:"status,omitempty"`
-	TableId      int64      `json:"table_id,omitempty"`
-	CustomerName string     `json:"customer_name,omitempty"`
-	KitchenNotes string     `json:"kitchen_notes,omitempty"`
-	CreatedAt    string     `json:"created_at,omitempty"`
-	Items        []*KDSItem `json:"items,omitempty"`
+	Id          int64  `json:"id,omitempty"`
+	OrderNumber string `json:"order_number,omitempty"`
+	Type        string `json:"type,omitempty"`
+	// status is the current lifecycle state.
+	Status       string `json:"status,omitempty"`
+	TableId      int64  `json:"table_id,omitempty"`
+	CustomerName string `json:"customer_name,omitempty"`
+	KitchenNotes string `json:"kitchen_notes,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string     `json:"created_at,omitempty"`
+	Items     []*KDSItem `json:"items,omitempty"`
 }
 
 func (m *KDSOrder) MarshalJSON() ([]byte, error) {
@@ -241,6 +246,7 @@ func (x *ListKDSOrdersResponse) GetOrders() []*KDSOrder {
 }
 
 type UpdateKDSItemByIDBody struct {
+	// status is the current lifecycle state.
 	Status string `json:"status,omitempty"`
 }
 
@@ -253,8 +259,10 @@ func (x *UpdateKDSItemByIDBody) GetStatus() string {
 }
 
 type UpdateKDSItemByIDRequest struct {
-	ItemId int64                  `json:"item_id,omitempty"`
-	Body   *UpdateKDSItemByIDBody `json:"body,omitempty"`
+	// item_id is the unique identifier for the order item.
+	ItemId int64 `json:"item_id,omitempty"`
+	// body carries the new KDS item status bound from the HTTP payload.
+	Body *UpdateKDSItemByIDBody `json:"body,omitempty"`
 }
 
 func (m *UpdateKDSItemByIDRequest) MarshalJSON() ([]byte, error) {
@@ -315,6 +323,7 @@ func (x *UpdateKDSItemByIDResponse) GetMessage() string {
 }
 
 type UpdateKDSItemStatusBody struct {
+	// status is the current lifecycle state.
 	Status string `json:"status,omitempty"`
 }
 
@@ -327,9 +336,12 @@ func (x *UpdateKDSItemStatusBody) GetStatus() string {
 }
 
 type UpdateKDSItemStatusRequest struct {
-	OrderId int64                    `json:"order_id,omitempty"`
-	ItemId  int64                    `json:"item_id,omitempty"`
-	Body    *UpdateKDSItemStatusBody `json:"body,omitempty"`
+	// order_id is the unique identifier for the order.
+	OrderId int64 `json:"order_id,omitempty"`
+	// item_id is the unique identifier for the order item.
+	ItemId int64 `json:"item_id,omitempty"`
+	// body carries the new KDS item status bound from the HTTP payload.
+	Body *UpdateKDSItemStatusBody `json:"body,omitempty"`
 }
 
 func (m *UpdateKDSItemStatusRequest) MarshalJSON() ([]byte, error) {

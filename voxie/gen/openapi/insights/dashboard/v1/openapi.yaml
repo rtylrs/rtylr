@@ -11,12 +11,24 @@ paths:
             description: Returns high-level insights summary.
             operationId: DashboardService_getInsights
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.dashboard.v1.GetInsightsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/dashboard/v1/roadmap:
         get:
             tags:
@@ -25,12 +37,24 @@ paths:
             description: Returns the product roadmap view.
             operationId: DashboardService_getRoadmap
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.dashboard.v1.GetRoadmapResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/dashboard/v1/workload:
         get:
             tags:
@@ -39,12 +63,24 @@ paths:
             description: Returns team workload metrics.
             operationId: DashboardService_getWorkload
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.dashboard.v1.GetWorkloadResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/dashboard/v1/summary:
         get:
             tags:
@@ -53,12 +89,24 @@ paths:
             description: Returns MTD headline KPI cards for the insights home dashboard.
             operationId: DashboardService_getDashboardSummary
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.dashboard.v1.GetDashboardSummaryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         insights.dashboard.v1.GetInsightsRequest:
@@ -68,18 +116,22 @@ components:
             properties:
                 total_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: total_tasks is the total tasks value for this contract.
                 completed_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: completed_tasks is the completed tasks value for this contract.
                 in_progress_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: in_progress_tasks is the in progress tasks value for this contract.
                 overdue_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: overdue_tasks is the overdue tasks value for this contract.
                 avg_cycle_time_days:
@@ -88,10 +140,12 @@ components:
                     description: avg_cycle_time_days is the avg cycle time days value for this contract.
                 velocity:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: velocity is the velocity value for this contract.
                 velocity_change:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: velocity_change is the velocity change value for this contract.
             required:
@@ -119,6 +173,7 @@ components:
             properties:
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 project_name:
@@ -129,10 +184,12 @@ components:
                     description: status is the current lifecycle state.
                 total_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: total_tasks is the total tasks value for this contract.
                 completed_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: completed_tasks is the completed tasks value for this contract.
                 progress_percent:
@@ -171,26 +228,32 @@ components:
             properties:
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 open_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: open_tasks is the open tasks value for this contract.
                 in_progress_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: in_progress_tasks is the in progress tasks value for this contract.
                 completed_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: completed_tasks is the completed tasks value for this contract.
                 overdue_tasks:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: overdue_tasks is the overdue tasks value for this contract.
                 total_active:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: total_active is the total active value for this contract.
             required:
@@ -231,6 +294,7 @@ components:
             properties:
                 value:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: value is the headline metric value.
                 delta_pct:
@@ -254,3 +318,13 @@ components:
             required:
                 - value
                 - delta_pct
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: DashboardService
+      description: DashboardService defines insights dashboard endpoints.

@@ -12,12 +12,12 @@ paths:
             parameters:
                 - name: type
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: source
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: min_score
@@ -34,23 +34,35 @@ paths:
                     format: int32
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.feedback.v1.ListFeedbackResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - FeedbackService
@@ -63,12 +75,24 @@ paths:
                             $ref: '#/components/schemas/crm.feedback.v1.CreateFeedbackRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.feedback.v1.CreateFeedbackResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         crm.feedback.v1.ListFeedbackRequest:
@@ -121,12 +145,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 type:
                     type: string
@@ -160,6 +187,7 @@ components:
             properties:
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 type:
                     type: string
@@ -181,9 +209,19 @@ components:
             properties:
                 feedback_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
             required:
                 - feedback_id
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: FeedbackService

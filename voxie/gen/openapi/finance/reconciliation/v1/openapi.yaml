@@ -10,12 +10,24 @@ paths:
             summary: getOverview
             operationId: ReconciliationService_getOverview
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.reconciliation.v1.GetOverviewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/reconciliation/v1/reconciliation/match:
         post:
             tags:
@@ -29,12 +41,24 @@ paths:
                             $ref: '#/components/schemas/finance.reconciliation.v1.MatchRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.reconciliation.v1.MatchResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         finance.reconciliation.v1.GetOverviewRequest:
@@ -77,12 +101,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 bank_account_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 amount_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 currency:
                     type: string
@@ -105,6 +132,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 invoice_number:
                     type: string
@@ -112,6 +140,7 @@ components:
                     type: string
                 amount_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 currency:
                     type: string
@@ -132,14 +161,17 @@ components:
             properties:
                 bank_feed_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 target_type:
                     type: string
                 target_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 amount_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 days_apart:
                     type: integer
@@ -159,11 +191,13 @@ components:
             properties:
                 bank_feed_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 target_type:
                     type: string
                 target_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - bank_feed_id
@@ -174,9 +208,19 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
             required:
                 - id
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReconciliationService

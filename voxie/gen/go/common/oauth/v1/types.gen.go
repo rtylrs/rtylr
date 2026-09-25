@@ -7,12 +7,19 @@ import (
 	"strconv"
 )
 
+// IssueRequest creates an OAuth authorization redirect for the signed-in user.
 type IssueRequest struct {
-	ClientId            string `json:"client_id,omitempty"`
-	RedirectUri         string `json:"redirect_uri,omitempty"`
-	Scope               string `json:"scope,omitempty"`
-	State               string `json:"state,omitempty"`
-	CodeChallenge       string `json:"code_challenge,omitempty"`
+	// client_id identifies the OAuth client requesting authorization.
+	ClientId string `json:"client_id,omitempty"`
+	// redirect_uri is the callback URI that receives the authorization code.
+	RedirectUri string `json:"redirect_uri,omitempty"`
+	// scope contains the requested OAuth scopes.
+	Scope string `json:"scope,omitempty"`
+	// state is echoed back to the redirect URI.
+	State string `json:"state,omitempty"`
+	// code_challenge is the PKCE challenge for the authorization code.
+	CodeChallenge string `json:"code_challenge,omitempty"`
+	// code_challenge_method is the PKCE challenge method.
 	CodeChallengeMethod string `json:"code_challenge_method,omitempty"`
 }
 
@@ -64,7 +71,9 @@ func (x *IssueRequest) GetCodeChallengeMethod() string {
 	return x.CodeChallengeMethod
 }
 
+// IssueResponse returns the authorization redirect URL.
 type IssueResponse struct {
+	// redirect_url is the URL the browser should navigate to.
 	RedirectUrl string `json:"redirect_url,omitempty"`
 }
 
@@ -209,9 +218,10 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	UserId          int64                        `json:"user_id,omitempty"`
-	BusinessId      int64                        `json:"business_id,omitempty"`
-	Role            string                       `json:"role,omitempty"`
+	UserId     int64  `json:"user_id,omitempty"`
+	BusinessId int64  `json:"business_id,omitempty"`
+	Role       string `json:"role,omitempty"`
+	// Server-resolved authorization for the active business.
 	EffectiveAccess *hub_user_v1.EffectiveAccess `json:"effective_access,omitempty"`
 }
 

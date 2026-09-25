@@ -8,7 +8,9 @@ title?: string | undefined;
 description?: string | undefined;
 taskId?: string | undefined;
 taskTitle?: string | undefined;
+/** The user whose action caused this notification, when the source recorded one. */
 actorId?: string | undefined;
+/** Display name resolved from the acting user's current profile. */
 actorName?: string | undefined;
 actorInitials?: string | undefined;
 project?: string | undefined;
@@ -73,9 +75,13 @@ return violations;
 }
 
 export interface ListNotificationsRequest {
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 

@@ -7,10 +7,27 @@ import (
 	"strconv"
 )
 
+// TimeService is Flow's daily time logging: a work day per person per date, the
+// lines of work inside it, and the work-type tree those lines are classified by.
+//
+// Lines persist as HR time entries, so Flow and payroll read the same rows rather
+// than reconciling two stores. Approval lives in a separate service.
+// WorkType is one node of the two-level work classification a business admin
+// maintains, for example Development with a Code review child. Entries point at
+// either level; hr_category_id maps the node onto HR's payroll category so one
+// entry serves both project reporting and payroll.
 type WorkType struct {
-	Id           int64  `json:"id,omitempty"`
-	ParentId     *int64 `json:"parent_id,omitempty"`
-	Name         string `json:"name,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// parent_id is the parent node, or null for a top-level type. The tree is
+	// exactly two levels deep.
+	ParentId *int64 `json:"parent_id,omitempty"`
+	// name is the display name of this work type.
+	Name string `json:"name,omitempty"`
+	// description is a business-authored explanation of what this work type
+	// covers, shown to employees as a read-only "Task Description" once they
+	// pick the type in Log Hours - distinct from the free-text description an
+	// employee types for what they actually did.
 	Description  string `json:"description,omitempty"`
 	HrCategoryId *int64 `json:"hr_category_id,omitempty"`
 	SortOrder    int32  `json:"sort_order,omitempty"`
@@ -136,27 +153,57 @@ func (x *WorkType) GetArchived() bool {
 	return x.Archived
 }
 
+// WorkDay is one person's working day: the mode, the clock, and the state of its
+// approval. The individual pieces of work are its lines.
 type WorkDay struct {
-	Id             int64   `json:"id,omitempty"`
-	EmployeeId     int64   `json:"employee_id,omitempty"`
-	UserId         *int64  `json:"user_id,omitempty"`
-	Date           string  `json:"date,omitempty"`
-	Timezone       string  `json:"timezone,omitempty"`
-	WorkMode       string  `json:"work_mode,omitempty"`
-	StartTime      *string `json:"start_time,omitempty"`
-	EndTime        *string `json:"end_time,omitempty"`
-	BreakMinutes   int32   `json:"break_minutes,omitempty"`
-	Status         string  `json:"status,omitempty"`
-	ClockedMinutes int32   `json:"clocked_minutes,omitempty"`
-	LoggedMinutes  int32   `json:"logged_minutes,omitempty"`
-	GapMinutes     int32   `json:"gap_minutes,omitempty"`
-	LoggedBy       *int64  `json:"logged_by,omitempty"`
-	ApprovedBy     *int64  `json:"approved_by,omitempty"`
-	ApprovedAt     *string `json:"approved_at,omitempty"`
-	ReopenedBy     *int64  `json:"reopened_by,omitempty"`
-	ReopenedAt     *string `json:"reopened_at,omitempty"`
-	CreatedAt      string  `json:"created_at,omitempty"`
-	UpdatedAt      string  `json:"updated_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// employee_id is the person the day belongs to.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// user_id is the employee's auth user id, populated when the caller already
+	// resolved it (the team view, which resolves against the business roster).
+	// Callers reading their own day already know their own identity and get
+	// this unset.
+	UserId *int64 `json:"user_id,omitempty"`
+	// date is the calendar day in the person's own timezone, as YYYY-MM-DD.
+	Date string `json:"date,omitempty"`
+	// timezone is the IANA zone the day was recorded in. Stored per record because
+	// a travelling worker's day boundary is their own, not the team's.
+	Timezone string `json:"timezone,omitempty"`
+	// work_mode is one of onsite, remote or hybrid. It is the day's default and a
+	// line may override it.
+	WorkMode string `json:"work_mode,omitempty"`
+	// start_time is the local start of the day as HH:MM, or null for a day that
+	// records only its lines.
+	StartTime *string `json:"start_time,omitempty"`
+	// end_time is the local end of the day as HH:MM.
+	EndTime *string `json:"end_time,omitempty"`
+	// break_minutes is unpaid break time, subtracted from the clocked total.
+	BreakMinutes int32 `json:"break_minutes,omitempty"`
+	// status is one of draft, submitted, approved, rejected or reopened.
+	Status string `json:"status,omitempty"`
+	// clocked_minutes is end minus start minus breaks, or zero when unclocked.
+	ClockedMinutes int32 `json:"clocked_minutes,omitempty"`
+	// logged_minutes is the sum of this day's lines.
+	LoggedMinutes int32 `json:"logged_minutes,omitempty"`
+	// gap_minutes is clocked minus logged. It is reported, never enforced: a
+	// blocked submission produces invented lines rather than honest ones.
+	GapMinutes int32 `json:"gap_minutes,omitempty"`
+	// logged_by is the user who recorded the day, which differs from employee_id
+	// when a manager fills it in on someone's behalf.
+	LoggedBy *int64 `json:"logged_by,omitempty"`
+	// approved_by is the approver, once the day has been approved.
+	ApprovedBy *int64 `json:"approved_by,omitempty"`
+	// approved_at is when it was approved.
+	ApprovedAt *string `json:"approved_at,omitempty"`
+	// reopened_by is the manager who reopened an approved day.
+	ReopenedBy *int64 `json:"reopened_by,omitempty"`
+	// reopened_at is when it was reopened.
+	ReopenedAt *string `json:"reopened_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last changed.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *WorkDay) MarshalJSON() ([]byte, error) {
@@ -442,21 +489,39 @@ func (x *WorkDay) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// WorkDayLine is one piece of work inside a day. It is persisted as an HR time
+// entry, so payroll and Flow read the same rows.
 type WorkDayLine struct {
-	Id              int64   `json:"id,omitempty"`
-	WorkDayId       int64   `json:"work_day_id,omitempty"`
-	ProjectId       *int64  `json:"project_id,omitempty"`
-	TaskId          *int64  `json:"task_id,omitempty"`
-	WorkTypeId      *int64  `json:"work_type_id,omitempty"`
-	WorkMode        *string `json:"work_mode,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
-	IsBillable      bool    `json:"is_billable,omitempty"`
-	Status          string  `json:"status,omitempty"`
-	ClientKey       string  `json:"client_key,omitempty"`
-	LoggedBy        *int64  `json:"logged_by,omitempty"`
-	CreatedAt       string  `json:"created_at,omitempty"`
-	UpdatedAt       string  `json:"updated_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// work_day_id is the day this line belongs to.
+	WorkDayId int64 `json:"work_day_id,omitempty"`
+	// project_id is the project the work was for. A line may have a project and no
+	// task, for work that is not tracked as one.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// task_id is the task the work was for.
+	TaskId *int64 `json:"task_id,omitempty"`
+	// work_type_id is the classification node, at either level of the tree.
+	WorkTypeId *int64 `json:"work_type_id,omitempty"`
+	// work_mode overrides the day's mode for this line only. Null means inherit.
+	WorkMode *string `json:"work_mode,omitempty"`
+	// description is what was done.
+	Description string `json:"description,omitempty"`
+	// duration_minutes is the time spent.
+	DurationMinutes int32 `json:"duration_minutes,omitempty"`
+	// is_billable marks the line as chargeable, defaulted from the work type.
+	IsBillable bool `json:"is_billable,omitempty"`
+	// status mirrors the day's approval state for this line.
+	Status string `json:"status,omitempty"`
+	// client_key is generated by the client before the line is sent. It makes an
+	// offline retry idempotent, so a field worker syncing twice does not log twice.
+	ClientKey string `json:"client_key,omitempty"`
+	// logged_by is who recorded the line.
+	LoggedBy *int64 `json:"logged_by,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last changed.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *WorkDayLine) MarshalJSON() ([]byte, error) {
@@ -683,7 +748,10 @@ func (x *WorkDayLine) GetUpdatedAt() string {
 }
 
 type GetWorkDayRequest struct {
-	Date       string `json:"date,omitempty"`
+	// date is the day to read, as YYYY-MM-DD.
+	Date string `json:"date,omitempty"`
+	// employee_id reads another person's day, which requires manage team time.
+	// Omitted, it reads the caller's own.
 	EmployeeId *int64 `json:"employee_id,omitempty"`
 }
 
@@ -740,8 +808,10 @@ func (x *GetWorkDayRequest) GetEmployeeId() int64 {
 }
 
 type GetWorkDayResponse struct {
-	WorkDay *WorkDay       `json:"work_day,omitempty"`
-	Lines   []*WorkDayLine `json:"lines,omitempty"`
+	// work_day is null when nothing has been recorded for that date yet.
+	WorkDay *WorkDay `json:"work_day,omitempty"`
+	// lines are the day's pieces of work.
+	Lines []*WorkDayLine `json:"lines,omitempty"`
 }
 
 func (x *GetWorkDayResponse) GetWorkDay() *WorkDay {
@@ -761,13 +831,20 @@ func (x *GetWorkDayResponse) GetLines() []*WorkDayLine {
 }
 
 type UpsertWorkDayRequest struct {
-	Date         string  `json:"date,omitempty"`
-	Timezone     string  `json:"timezone,omitempty"`
-	WorkMode     string  `json:"work_mode,omitempty"`
-	StartTime    *string `json:"start_time,omitempty"`
-	EndTime      *string `json:"end_time,omitempty"`
-	BreakMinutes int32   `json:"break_minutes,omitempty"`
-	EmployeeId   *int64  `json:"employee_id,omitempty"`
+	// date is the day being recorded, as YYYY-MM-DD.
+	Date string `json:"date,omitempty"`
+	// timezone is the IANA zone of the person recording it.
+	Timezone string `json:"timezone,omitempty"`
+	// work_mode is one of onsite, remote or hybrid.
+	WorkMode string `json:"work_mode,omitempty"`
+	// start_time is the local start as HH:MM.
+	StartTime *string `json:"start_time,omitempty"`
+	// end_time is the local end as HH:MM.
+	EndTime *string `json:"end_time,omitempty"`
+	// break_minutes is unpaid break time.
+	BreakMinutes int32 `json:"break_minutes,omitempty"`
+	// employee_id records the day on someone else's behalf.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
 }
 
 func (m *UpsertWorkDayRequest) MarshalJSON() ([]byte, error) {
@@ -883,11 +960,16 @@ func (x *UpsertWorkDayResponse) GetWorkDay() *WorkDay {
 }
 
 type ListWorkDaysRequest struct {
-	FromDate   string `json:"from_date,omitempty"`
-	ToDate     string `json:"to_date,omitempty"`
+	// from_date is the inclusive start of the range, as YYYY-MM-DD.
+	FromDate string `json:"from_date,omitempty"`
+	// to_date is the inclusive end of the range, as YYYY-MM-DD.
+	ToDate string `json:"to_date,omitempty"`
+	// employee_id lists another person's days.
 	EmployeeId *int64 `json:"employee_id,omitempty"`
-	Page       int32  `json:"page,omitempty"`
-	Limit      int32  `json:"limit,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
 }
 
 func (m *ListWorkDaysRequest) MarshalJSON() ([]byte, error) {
@@ -987,11 +1069,19 @@ func (x *ListWorkDaysResponse) GetPagination() *common_pagination_v1.PaginationR
 	return x.Pagination
 }
 
+// ListTeamWorkDaysRequest replaces v1's workspace-scoped team listing. The
+// roster is the caller's business team; who may see whose days is decided by
+// the business's configured visibility policy, evaluated server-side before
+// any rows are read.
 type ListTeamWorkDaysRequest struct {
+	// from_date is the inclusive start of the range, as YYYY-MM-DD.
 	FromDate string `json:"from_date,omitempty"`
-	ToDate   string `json:"to_date,omitempty"`
-	Page     int32  `json:"page,omitempty"`
-	Limit    int32  `json:"limit,omitempty"`
+	// to_date is the inclusive end of the range, as YYYY-MM-DD.
+	ToDate string `json:"to_date,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
 }
 
 func (x *ListTeamWorkDaysRequest) GetFromDate() string {
@@ -1048,15 +1138,20 @@ func (x *ListTeamWorkDaysResponse) GetPagination() *common_pagination_v1.Paginat
 }
 
 type CreateWorkDayLineRequest struct {
-	WorkDayId       int64   `json:"work_day_id,omitempty"`
-	ClientKey       string  `json:"client_key,omitempty"`
-	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	ProjectId       *int64  `json:"project_id,omitempty"`
-	TaskId          *int64  `json:"task_id,omitempty"`
-	WorkTypeId      *int64  `json:"work_type_id,omitempty"`
-	WorkMode        *string `json:"work_mode,omitempty"`
-	IsBillable      bool    `json:"is_billable,omitempty"`
+	// work_day_id is the day to add the line to.
+	WorkDayId int64 `json:"work_day_id,omitempty"`
+	// client_key makes the create idempotent across an offline retry.
+	ClientKey string `json:"client_key,omitempty"`
+	// duration_minutes is the time spent.
+	DurationMinutes *int32 `json:"duration_minutes,omitempty"`
+	// description is what was done.
+	Description string `json:"description,omitempty"`
+	ProjectId   *int64 `json:"project_id,omitempty"`
+	TaskId      *int64 `json:"task_id,omitempty"`
+	WorkTypeId  *int64 `json:"work_type_id,omitempty"`
+	// work_mode overrides the day's mode for this line only.
+	WorkMode   *string `json:"work_mode,omitempty"`
+	IsBillable bool    `json:"is_billable,omitempty"`
 }
 
 func (m *CreateWorkDayLineRequest) MarshalJSON() ([]byte, error) {
@@ -1232,6 +1327,7 @@ func (x *CreateWorkDayLineResponse) GetLine() *WorkDayLine {
 }
 
 type UpdateWorkDayLineRequest struct {
+	// id is the line to change.
 	Id              int64   `json:"id,omitempty"`
 	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
 	Description     string  `json:"description,omitempty"`
@@ -1407,6 +1503,7 @@ func (x *UpdateWorkDayLineResponse) GetLine() *WorkDayLine {
 }
 
 type DeleteWorkDayLineRequest struct {
+	// id is the line to remove.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1448,6 +1545,7 @@ func (x *DeleteWorkDayLineRequest) GetId() int64 {
 }
 
 type DeleteWorkDayLineResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1460,6 +1558,7 @@ func (x *DeleteWorkDayLineResponse) GetMessage() string {
 }
 
 type ListWorkTypesRequest struct {
+	// include_archived returns archived nodes too, for editing the tree.
 	IncludeArchived bool `json:"include_archived,omitempty"`
 }
 
@@ -1484,9 +1583,13 @@ func (x *ListWorkTypesResponse) GetWorkTypes() []*WorkType {
 }
 
 type CreateWorkTypeRequest struct {
-	Name         string `json:"name,omitempty"`
-	Description  string `json:"description,omitempty"`
-	ParentId     *int64 `json:"parent_id,omitempty"`
+	// name is the display name.
+	Name string `json:"name,omitempty"`
+	// description is shown to employees as the task description once picked.
+	Description string `json:"description,omitempty"`
+	// parent_id nests this node under a top-level type.
+	ParentId *int64 `json:"parent_id,omitempty"`
+	// hr_category_id maps the node onto an HR payroll category.
 	HrCategoryId *int64 `json:"hr_category_id,omitempty"`
 	SortOrder    int32  `json:"sort_order,omitempty"`
 }
@@ -1597,8 +1700,9 @@ func (x *CreateWorkTypeResponse) GetWorkType() *WorkType {
 }
 
 type UpdateWorkTypeRequest struct {
-	Id           int64  `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
+	Id   int64  `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	// description is shown to employees as the task description once picked.
 	Description  string `json:"description,omitempty"`
 	ParentId     *int64 `json:"parent_id,omitempty"`
 	HrCategoryId *int64 `json:"hr_category_id,omitempty"`
@@ -1779,6 +1883,7 @@ func (x *DeleteWorkTypeRequest) GetId() int64 {
 }
 
 type DeleteWorkTypeResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

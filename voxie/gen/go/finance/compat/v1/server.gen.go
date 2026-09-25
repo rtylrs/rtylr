@@ -16,10 +16,37 @@ import (
 	"time"
 )
 
+func writeJSON(w http.ResponseWriter, status int, value any) {
+	data, err := json.Marshal(value)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, _ = w.Write(append(data, '\n'))
+}
+
 func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func requestBodyLimit(limit int64) int64 {
+	if limit <= 0 {
+		return 8 << 20
+	}
+	return limit
+}
+
+func writeBodyError(w http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeJSONError(w, http.StatusRequestEntityTooLarge, "request body too large")
+		return
+	}
+	writeJSONError(w, http.StatusBadRequest, "invalid request body")
 }
 
 func writeHandlerError(w http.ResponseWriter, err error) {
@@ -30,7 +57,12 @@ func writeHandlerError(w http.ResponseWriter, err error) {
 			status = candidate
 		}
 	}
-	writeJSONError(w, status, "internal server error")
+	message := "internal server error"
+	var public interface{ PublicMessage() string }
+	if errors.As(err, &public) && public.PublicMessage() != "" {
+		message = public.PublicMessage()
+	}
+	writeJSONError(w, status, message)
 }
 
 func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
@@ -62,6 +94,25 @@ func parseBool(s string) (bool, error) {
 		return false, nil
 	}
 	return false, fmt.Errorf("must be true or false")
+}
+
+func hasAuthScheme(value, scheme string) bool {
+	if len(value) <= len(scheme)+1 || value[len(scheme)] != ' ' {
+		return false
+	}
+	for i := 0; i < len(scheme); i++ {
+		a, b := value[i], scheme[i]
+		if a >= 'A' && a <= 'Z' {
+			a += 'a' - 'A'
+		}
+		if b >= 'A' && b <= 'Z' {
+			b += 'a' - 'A'
+		}
+		if a != b {
+			return false
+		}
+	}
+	return true
 }
 
 func validHeaderFormat(value, format string) bool {
@@ -100,6 +151,37 @@ func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
 	return metadata, ok
 }
 
+type httpRequestContextKey struct{}
+
+func withHTTPRequest(r *http.Request) context.Context {
+	return context.WithValue(r.Context(), httpRequestContextKey{}, r)
+}
+
+type responseControl struct {
+	status int
+	header http.Header
+}
+
+type responseControlKey struct{}
+
+func SetResponseStatus(ctx context.Context, status int) {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok && status >= 200 && status <= 299 {
+		control.status = status
+	}
+}
+
+func ResponseHeader(ctx context.Context) http.Header {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok {
+		return control.header
+	}
+	return http.Header{}
+}
+
+func HTTPRequestFromContext(ctx context.Context) (*http.Request, bool) {
+	r, ok := ctx.Value(httpRequestContextKey{}).(*http.Request)
+	return r, ok
+}
+
 func RequestIDFromContext(ctx context.Context) (string, bool) {
 	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
 	return requestID, ok && requestID != ""
@@ -120,12 +202,13 @@ type RequestObserver interface {
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux                *http.ServeMux
-	middlewares        []Middleware
-	requestIDHeader    string
-	requestIDGenerator RequestIDGenerator
-	authorizer         Authorizer
-	observer           RequestObserver
+	mux                 *http.ServeMux
+	middlewares         []Middleware
+	requestIDHeader     string
+	requestIDGenerator  RequestIDGenerator
+	authorizer          Authorizer
+	observer            RequestObserver
+	maxRequestBodyBytes int64
 }
 
 // WithMux supports the options-first registration form.
@@ -153,6 +236,9 @@ func WithAuthorizer(authorizer Authorizer) ServerOption {
 func WithRequestObserver(observer RequestObserver) ServerOption {
 	return func(o *serverOptions) { o.observer = observer }
 }
+func WithMaxRequestBodyBytes(limit int64) ServerOption {
+	return func(o *serverOptions) { o.maxRequestBodyBytes = limit }
+}
 
 func defaultRequestIDGenerator() string {
 	var value [16]byte
@@ -163,6 +249,21 @@ func defaultRequestIDGenerator() string {
 }
 
 func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	if o.authorizer != nil {
+		next := handler
+		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if err := o.authorizer(r.Context(), metadata, r); err != nil {
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+				}
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 	for i := len(o.middlewares) - 1; i >= 0; i-- {
 		if o.middlewares[i] != nil {
 			handler = o.middlewares[i](handler)
@@ -178,17 +279,6 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 			if requestID != "" {
 				w.Header().Set(o.requestIDHeader, requestID)
 				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
-			}
-		}
-		if o.authorizer != nil {
-			if err := o.authorizer(ctx, metadata, r); err != nil {
-				var statusErr interface{ HTTPStatusCode() int }
-				if errors.As(err, &statusErr) {
-					writeHandlerError(w, err)
-				} else {
-					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
-				}
-				return
 			}
 		}
 		if o.observer == nil {
@@ -232,6 +322,9 @@ func (w *statusResponseWriter) Flush() {
 	}
 }
 
+// Typed compatibility surface for finance routes that predate the canonical
+// finance.* service packages. It preserves their deployed wire paths while
+// moving app transport to generated OneKit clients.
 type CompatibilityServiceServer interface {
 	GetDashboard(ctx context.Context, req *EmptyRequest) (*JsonResponse, error)
 	ListInvoices(ctx context.Context, req *PageRequest) (*JsonResponse, error)
@@ -313,17 +406,22 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetDashboard(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetDashboard(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getDashboard", HTTPMethod: "GET", Route: "/finance/dashboard", AuthSchemes: nil}))
 	mux.Handle("GET /finance/invoices", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -390,17 +488,22 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListInvoices(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListInvoices(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listInvoices", HTTPMethod: "GET", Route: "/finance/invoices", AuthSchemes: nil}))
 	mux.Handle("GET /finance/invoices/detail", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(IdQueryRequest)
@@ -411,109 +514,134 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetInvoice(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetInvoice(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getInvoice", HTTPMethod: "GET", Route: "/finance/invoices/detail", AuthSchemes: nil}))
 	mux.Handle("POST /finance/invoices", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateInvoice(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateInvoice(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createInvoice", HTTPMethod: "POST", Route: "/finance/invoices", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/invoices", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateInvoice(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateInvoice(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateInvoice", HTTPMethod: "PUT", Route: "/finance/invoices", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/invoices/status", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateInvoiceStatus(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateInvoiceStatus(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateInvoiceStatus", HTTPMethod: "PUT", Route: "/finance/invoices/status", AuthSchemes: nil}))
 	mux.Handle("POST /finance/invoices/payment", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.RecordPayment(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.RecordPayment(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "recordPayment", HTTPMethod: "POST", Route: "/finance/invoices/payment", AuthSchemes: nil}))
 	mux.Handle("GET /finance/expenses", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -580,143 +708,178 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListExpenses(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListExpenses(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listExpenses", HTTPMethod: "GET", Route: "/finance/expenses", AuthSchemes: nil}))
 	mux.Handle("POST /finance/expenses", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateExpense(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateExpense(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createExpense", HTTPMethod: "POST", Route: "/finance/expenses", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/expenses", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateExpense(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateExpense(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateExpense", HTTPMethod: "PUT", Route: "/finance/expenses", AuthSchemes: nil}))
 	mux.Handle("GET /finance/expense-categories", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListExpenseCategories(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListExpenseCategories(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listExpenseCategories", HTTPMethod: "GET", Route: "/finance/expense-categories", AuthSchemes: nil}))
 	mux.Handle("POST /finance/expense-categories", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateExpenseCategory(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateExpenseCategory(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createExpenseCategory", HTTPMethod: "POST", Route: "/finance/expense-categories", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/expense-categories/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PathBodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		req.Id = r.PathValue("id")
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateExpenseCategory(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateExpenseCategory(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateExpenseCategory", HTTPMethod: "PUT", Route: "/finance/expense-categories/{id}", AuthSchemes: nil}))
 	mux.Handle("DELETE /finance/expense-categories/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PathRequest)
 		req.Id = r.PathValue("id")
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.DeleteExpenseCategory(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.DeleteExpenseCategory(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "deleteExpenseCategory", HTTPMethod: "DELETE", Route: "/finance/expense-categories/{id}", AuthSchemes: nil}))
 	mux.Handle("GET /finance/report/v1/pl", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ReportRequest)
@@ -732,95 +895,120 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetPL(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetPL(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getPL", HTTPMethod: "GET", Route: "/finance/report/v1/pl", AuthSchemes: nil}))
 	mux.Handle("GET /finance/tax/config", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListTaxConfig(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListTaxConfig(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listTaxConfig", HTTPMethod: "GET", Route: "/finance/tax/config", AuthSchemes: nil}))
 	mux.Handle("POST /finance/tax/config", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateTaxConfig(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateTaxConfig(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createTaxConfig", HTTPMethod: "POST", Route: "/finance/tax/config", AuthSchemes: nil}))
 	mux.Handle("GET /finance/tax/report", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetTaxReport(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetTaxReport(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getTaxReport", HTTPMethod: "GET", Route: "/finance/tax/report", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/tax", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateTaxConfig(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateTaxConfig(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateTaxConfig", HTTPMethod: "PUT", Route: "/finance/tax", AuthSchemes: nil}))
 	mux.Handle("GET /finance/recurring-invoices", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -887,87 +1075,107 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListRecurringInvoices(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListRecurringInvoices(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listRecurringInvoices", HTTPMethod: "GET", Route: "/finance/recurring-invoices", AuthSchemes: nil}))
 	mux.Handle("POST /finance/recurring-invoices", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateRecurringInvoice(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateRecurringInvoice(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createRecurringInvoice", HTTPMethod: "POST", Route: "/finance/recurring-invoices", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/recurring-invoices", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateRecurringInvoice(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateRecurringInvoice(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateRecurringInvoice", HTTPMethod: "PUT", Route: "/finance/recurring-invoices", AuthSchemes: nil}))
 	mux.Handle("POST /finance/recurring-invoices/{id}/trigger", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PathBodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		req.Id = r.PathValue("id")
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.TriggerRecurringInvoice(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.TriggerRecurringInvoice(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "triggerRecurringInvoice", HTTPMethod: "POST", Route: "/finance/recurring-invoices/{id}/trigger", AuthSchemes: nil}))
 	mux.Handle("GET /finance/quotes", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -1034,80 +1242,100 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListQuotes(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListQuotes(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listQuotes", HTTPMethod: "GET", Route: "/finance/quotes", AuthSchemes: nil}))
 	mux.Handle("POST /finance/quotes", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateQuote(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateQuote(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createQuote", HTTPMethod: "POST", Route: "/finance/quotes", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/quotes", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateQuote(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateQuote(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateQuote", HTTPMethod: "PUT", Route: "/finance/quotes", AuthSchemes: nil}))
 	mux.Handle("DELETE /finance/quotes/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PathRequest)
 		req.Id = r.PathValue("id")
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.DeleteQuote(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.DeleteQuote(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "deleteQuote", HTTPMethod: "DELETE", Route: "/finance/quotes/{id}", AuthSchemes: nil}))
 	mux.Handle("GET /finance/bills", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -1174,63 +1402,78 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListBills(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListBills(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listBills", HTTPMethod: "GET", Route: "/finance/bills", AuthSchemes: nil}))
 	mux.Handle("POST /finance/bills", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateBill(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateBill(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createBill", HTTPMethod: "POST", Route: "/finance/bills", AuthSchemes: nil}))
 	mux.Handle("PUT /finance/bills", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.UpdateBill(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.UpdateBill(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "updateBill", HTTPMethod: "PUT", Route: "/finance/bills", AuthSchemes: nil}))
 	mux.Handle("GET /finance/bank-accounts", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -1297,102 +1540,127 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListBankAccounts(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListBankAccounts(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listBankAccounts", HTTPMethod: "GET", Route: "/finance/bank-accounts", AuthSchemes: nil}))
 	mux.Handle("POST /finance/bank-accounts", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateBankAccount(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateBankAccount(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createBankAccount", HTTPMethod: "POST", Route: "/finance/bank-accounts", AuthSchemes: nil}))
 	mux.Handle("GET /finance/reconciliation", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetReconciliation(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetReconciliation(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getReconciliation", HTTPMethod: "GET", Route: "/finance/reconciliation", AuthSchemes: nil}))
 	mux.Handle("POST /finance/reconciliation/match", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.MatchTransaction(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.MatchTransaction(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "matchTransaction", HTTPMethod: "POST", Route: "/finance/reconciliation/match", AuthSchemes: nil}))
 	mux.Handle("POST /finance/reconcile/match", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.MatchReconcile(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.MatchReconcile(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "matchReconcile", HTTPMethod: "POST", Route: "/finance/reconcile/match", AuthSchemes: nil}))
 	mux.Handle("GET /finance/bank-feeds", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BankFeedRequest)
@@ -1403,49 +1671,64 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListBankFeeds(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListBankFeeds(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listBankFeeds", HTTPMethod: "GET", Route: "/finance/bank-feeds", AuthSchemes: nil}))
 	mux.Handle("GET /finance/balance-sheet", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetBalanceSheet(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetBalanceSheet(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getBalanceSheet", HTTPMethod: "GET", Route: "/finance/balance-sheet", AuthSchemes: nil}))
 	mux.Handle("GET /finance/cash-flow", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(EmptyRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetCashFlow(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetCashFlow(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getCashFlow", HTTPMethod: "GET", Route: "/finance/cash-flow", AuthSchemes: nil}))
 	mux.Handle("GET /finance/accounts", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -1512,40 +1795,50 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.ListAccounts(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.ListAccounts(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "listAccounts", HTTPMethod: "GET", Route: "/finance/accounts", AuthSchemes: nil}))
 	mux.Handle("POST /finance/accounts", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateAccount(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateAccount(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createAccount", HTTPMethod: "POST", Route: "/finance/accounts", AuthSchemes: nil}))
 	mux.Handle("GET /finance/journal", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(PageRequest)
@@ -1612,40 +1905,50 @@ func RegisterCompatibilityServiceServer(first any, rest ...any) error {
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.GetJournal(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.GetJournal(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "getJournal", HTTPMethod: "GET", Route: "/finance/journal", AuthSchemes: nil}))
 	mux.Handle("POST /finance/journal", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BodyRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.CreateJournalEntry(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.CreateJournalEntry(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "CompatibilityService", Method: "createJournalEntry", HTTPMethod: "POST", Route: "/finance/journal", AuthSchemes: nil}))
 	return nil
 }

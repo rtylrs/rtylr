@@ -426,8 +426,10 @@ func (x *DeleteVariantResponse) GetMessage() string {
 
 type ListVariantsRequest struct {
 	ProductId int64 `json:"product_id,omitempty"`
-	Limit     int64 `json:"limit,omitempty"`
-	Offset    int64 `json:"offset,omitempty"`
+	// Maximum number of variants to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of variants to skip.
+	Offset int64 `json:"offset,omitempty"`
 }
 
 func (m *ListVariantsRequest) MarshalJSON() ([]byte, error) {

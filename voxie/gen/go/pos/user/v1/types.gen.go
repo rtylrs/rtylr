@@ -6,19 +6,22 @@ import (
 	"strconv"
 )
 
+// POSUser is a POS roster operator.
 type POSUser struct {
-	Id               int64                        `json:"id,omitempty"`
-	BusinessId       int64                        `json:"business_id,omitempty"`
-	LocationId       int64                        `json:"location_id,omitempty"`
-	Name             string                       `json:"name,omitempty"`
-	Role             string                       `json:"role,omitempty"`
-	IsActive         bool                         `json:"is_active,omitempty"`
-	MaxDiscountPct   float64                      `json:"max_discount_pct,omitempty"`
-	CanVoid          bool                         `json:"can_void,omitempty"`
-	CanRefund        bool                         `json:"can_refund,omitempty"`
-	CanOpenDrawer    bool                         `json:"can_open_drawer,omitempty"`
-	CanApplyDiscount bool                         `json:"can_apply_discount,omitempty"`
-	RoleManagement   *RoleManagementManagedInDash `json:"role_management,omitempty"`
+	Id         int64  `json:"id,omitempty"`
+	BusinessId int64  `json:"business_id,omitempty"`
+	LocationId int64  `json:"location_id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	// role is the role value for this contract.
+	Role             string  `json:"role,omitempty"`
+	IsActive         bool    `json:"is_active,omitempty"`
+	MaxDiscountPct   float64 `json:"max_discount_pct,omitempty"`
+	CanVoid          bool    `json:"can_void,omitempty"`
+	CanRefund        bool    `json:"can_refund,omitempty"`
+	CanOpenDrawer    bool    `json:"can_open_drawer,omitempty"`
+	CanApplyDiscount bool    `json:"can_apply_discount,omitempty"`
+	// role_management identifies the authoritative Dash control-plane surface.
+	RoleManagement *RoleManagementManagedInDash `json:"role_management,omitempty"`
 }
 
 func (m *POSUser) MarshalJSON() ([]byte, error) {
@@ -166,6 +169,8 @@ func (x *POSUser) GetRoleManagement() *RoleManagementManagedInDash {
 	return x.RoleManagement
 }
 
+// RoleManagementManagedInDash explains that POS role and capability changes
+// must be completed in Dash.
 type RoleManagementManagedInDash struct {
 	Code    string `json:"code,omitempty"`
 	DashUrl string `json:"dash_url,omitempty"`
@@ -241,9 +246,10 @@ func (x *ListPOSUsersResponse) GetUsers() []*POSUser {
 }
 
 type CreatePOSUserRequest struct {
-	UserId     *int64  `json:"user_id,omitempty"`
-	LocationId *int64  `json:"location_id,omitempty"`
-	Name       string  `json:"name,omitempty"`
+	UserId     *int64 `json:"user_id,omitempty"`
+	LocationId *int64 `json:"location_id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	// pin is the pin value for this contract.
 	Pin        string  `json:"pin,omitempty"`
 	HourlyRate float64 `json:"hourly_rate,omitempty"`
 }
@@ -392,8 +398,9 @@ func (x *CreatePOSUserResponse) GetRoleManagement() *RoleManagementManagedInDash
 }
 
 type UpdatePOSUserRequest struct {
-	Id         *int64  `json:"id,omitempty"`
-	Name       string  `json:"name,omitempty"`
+	Id   *int64 `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Optional replacement PIN. Omit it to preserve the current PIN.
 	Pin        string  `json:"pin,omitempty"`
 	IsActive   bool    `json:"is_active,omitempty"`
 	HourlyRate float64 `json:"hourly_rate,omitempty"`
@@ -557,9 +564,12 @@ func (x *DeactivatePOSUserResponse) GetSuccess() bool {
 }
 
 type VerifyPOSUserPINRequest struct {
+	// location_id is the POS location where the operator is signing in.
 	LocationId *int64 `json:"location_id,omitempty"`
-	UserId     *int64 `json:"user_id,omitempty"`
-	Pin        string `json:"pin,omitempty"`
+	// user_id is the hub user id of the roster operator.
+	UserId *int64 `json:"user_id,omitempty"`
+	// pin is the operator PIN. Sensitive: do not log this field.
+	Pin string `json:"pin,omitempty"`
 }
 
 func (m *VerifyPOSUserPINRequest) MarshalJSON() ([]byte, error) {
@@ -640,16 +650,26 @@ func (x *VerifyPOSUserPINRequest) GetPin() string {
 }
 
 type VerifyPOSUserPINResponse struct {
-	UserId               int64                        `json:"user_id,omitempty"`
-	PosUserId            int64                        `json:"pos_user_id,omitempty"`
-	LocationId           int64                        `json:"location_id,omitempty"`
-	Role                 string                       `json:"role,omitempty"`
-	DisplayName          string                       `json:"display_name,omitempty"`
-	CanVoid              bool                         `json:"can_void,omitempty"`
-	CanRefund            bool                         `json:"can_refund,omitempty"`
-	CanOpenDrawer        bool                         `json:"can_open_drawer,omitempty"`
-	CanApplyDiscount     bool                         `json:"can_apply_discount,omitempty"`
-	MaxDiscountPct       float64                      `json:"max_discount_pct,omitempty"`
+	// user_id is the hub user id for the verified operator.
+	UserId int64 `json:"user_id,omitempty"`
+	// pos_user_id is the POS roster row id.
+	PosUserId int64 `json:"pos_user_id,omitempty"`
+	// location_id is the location where the operator signed in.
+	LocationId int64 `json:"location_id,omitempty"`
+	// role is the operator role at this location.
+	Role string `json:"role,omitempty"`
+	// display_name is the operator name shown on receipts and session UI.
+	DisplayName string `json:"display_name,omitempty"`
+	// can_void grants void permission for this session.
+	CanVoid bool `json:"can_void,omitempty"`
+	// can_refund grants refund permission for this session.
+	CanRefund bool `json:"can_refund,omitempty"`
+	// can_open_drawer grants cash drawer access for this session.
+	CanOpenDrawer bool `json:"can_open_drawer,omitempty"`
+	// can_apply_discount grants discount permission for this session.
+	CanApplyDiscount bool    `json:"can_apply_discount,omitempty"`
+	MaxDiscountPct   float64 `json:"max_discount_pct,omitempty"`
+	// authorization_version changes whenever Dash authorization changes.
 	AuthorizationVersion int64                        `json:"authorization_version,omitempty"`
 	RoleManagement       *RoleManagementManagedInDash `json:"role_management,omitempty"`
 }
@@ -813,7 +833,8 @@ type SetPINRequest struct {
 	UserId     *int64 `json:"user_id,omitempty"`
 	LocationId *int64 `json:"location_id,omitempty"`
 	Name       string `json:"name,omitempty"`
-	Pin        string `json:"pin,omitempty"`
+	// pin is the pin value for this contract. Sensitive: do not log this field.
+	Pin string `json:"pin,omitempty"`
 }
 
 func (m *SetPINRequest) MarshalJSON() ([]byte, error) {

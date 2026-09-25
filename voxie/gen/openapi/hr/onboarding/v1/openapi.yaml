@@ -13,17 +13,30 @@ paths:
             parameters:
                 - name: trigger_type
                   in: query
+                  description: Filter by trigger type; absent to include all types.
                   required: false
                   schema:
                     type: string
                     description: Filter by trigger type; absent to include all types.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.ListChecklistTemplatesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - OnboardingService
@@ -37,12 +50,24 @@ paths:
                             $ref: '#/components/schemas/hr.onboarding.v1.CreateChecklistTemplateRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.CreateChecklistTemplateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/onboarding/v1/templates/{role_id}:
         put:
             tags:
@@ -53,10 +78,14 @@ paths:
             parameters:
                 - name: role_id
                   in: path
+                  description: role_id is the checklist template role identifier from the path.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: role_id is the checklist template role identifier from the path.
             requestBody:
                 content:
                     application/json:
@@ -65,12 +94,24 @@ paths:
                                 - $ref: '#/components/schemas/hr.onboarding.v1.UpdateChecklistTemplateBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.UpdateChecklistTemplateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/onboarding/v1/templates/{role_id}/items:
         post:
             tags:
@@ -81,23 +122,58 @@ paths:
             parameters:
                 - name: role_id
                   in: path
+                  description: role_id is the checklist template role identifier from the path.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: role_id is the checklist template role identifier from the path.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hr.onboarding.v1.AddItemToChecklistTemplateRequest'
+                            type: object
+                            properties:
+                                title:
+                                    type: string
+                                    description: title is the checklist item title.
+                                description:
+                                    type: string
+                                    description: description is the optional supporting text for the checklist item.
+                                assignee_role:
+                                    type: string
+                                    description: assignee_role is the role responsible for completing this item.
+                                due_offset_days:
+                                    type: integer
+                                    format: int32
+                                    description: due_offset_days is the number of days after trigger date by which this item is due.
+                                requires_attachment:
+                                    type: boolean
+                                    description: requires_attachment indicates whether completion needs an uploaded attachment.
+                            required:
+                                - title
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.AddItemToChecklistTemplateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/onboarding/v1/checklists:
         get:
             tags:
@@ -108,14 +184,17 @@ paths:
             parameters:
                 - name: employee_id
                   in: query
+                  description: employee_id is the employee whose checklists should be listed.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id is the employee whose checklists should be listed.
                 - name: limit
                   in: query
+                  description: limit is the maximum number of checklists to return.
                   required: false
                   schema:
                     type: integer
@@ -123,18 +202,31 @@ paths:
                     description: limit is the maximum number of checklists to return.
                 - name: offset
                   in: query
+                  description: offset is the number of checklists to skip before returning results.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: offset is the number of checklists to skip before returning results.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.ListEmployeeChecklistsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/onboarding/v1/employees/{employee_id}:
         get:
             tags:
@@ -145,17 +237,33 @@ paths:
             parameters:
                 - name: employee_id
                   in: path
+                  description: employee_id is the employee whose checklist should be fetched.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: employee_id is the employee whose checklist should be fetched.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.GetEmployeeChecklistResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/onboarding/v1/checklists/trigger:
         post:
             tags:
@@ -170,12 +278,24 @@ paths:
                             $ref: '#/components/schemas/hr.onboarding.v1.TriggerChecklistRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.TriggerChecklistResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/onboarding/v1/checklists/items/complete:
         post:
             tags:
@@ -190,12 +310,24 @@ paths:
                             $ref: '#/components/schemas/hr.onboarding.v1.CompleteChecklistItemRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.onboarding.v1.CompleteChecklistItemResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.onboarding.v1.ListChecklistTemplatesRequest:
@@ -234,10 +366,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the template.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this template belongs to.
                 name:
@@ -248,6 +382,7 @@ components:
                     description: Event that triggers this checklist (onboarding | offboarding).
                 role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Role this template applies to; absent if it applies to all roles.
                 items:
@@ -257,10 +392,12 @@ components:
                     description: Items included in this template.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -277,14 +414,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the checklist item.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this item belongs to.
                 template_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Template this item belongs to.
                 title:
@@ -305,10 +445,12 @@ components:
                     description: Whether the assignee must upload an attachment to complete this item.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -334,6 +476,7 @@ components:
                     description: trigger_type is the event that triggers this checklist (onboarding | offboarding).
                 role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Role this template applies to; absent if it applies to all roles.
             required:
@@ -353,6 +496,7 @@ components:
                 role_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: role_id is the checklist template role identifier from the path.
                 body:
@@ -387,6 +531,7 @@ components:
                 role_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: role_id is the checklist template role identifier from the path.
                 title:
@@ -423,6 +568,7 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id is the employee whose checklists should be listed.
                 limit:
@@ -465,22 +611,27 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the employee checklist.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this checklist belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee this checklist was triggered for.
                 template_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Template this checklist was created from.
                 triggered_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this checklist was triggered.
                 items:
@@ -490,10 +641,12 @@ components:
                     description: Individual items in this employee's checklist.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -511,22 +664,27 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the employee checklist item.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this item belongs to.
                 employee_checklist_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Parent employee checklist this item belongs to.
                 checklist_item_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Original template item this was created from.
                 assigned_to_employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee assigned to complete this item.
                 due_date:
@@ -537,6 +695,7 @@ components:
                     description: Completion status (incomplete | in_progress | complete).
                 completed_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when the item was completed; absent if not yet complete.
                 attachment_url:
@@ -544,10 +703,12 @@ components:
                     description: URL of the uploaded attachment; absent if none provided.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -567,6 +728,7 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id is the employee whose checklist should be fetched.
             required:
@@ -586,11 +748,13 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee to trigger the checklist for.
                 template_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: template_id identifies the checklist template to trigger.
                 trigger_date:
@@ -625,3 +789,13 @@ components:
                     description: success indicates the checklist item was marked complete.
             required:
                 - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OnboardingService
+      description: OnboardingService defines HR onboarding checklist endpoints.

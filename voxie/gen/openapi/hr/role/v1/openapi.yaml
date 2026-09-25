@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/hr.role.v1.CreateRoleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.role.v1.CreateRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/role/v1/roles/{id}:
         put:
             tags:
@@ -33,10 +45,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: ID of the role to update.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: ID of the role to update.
             requestBody:
                 content:
                     application/json:
@@ -46,12 +62,24 @@ paths:
                             description: body carries updatable role fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.role.v1.UpdateRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/role/v1/roles/assign:
         post:
             tags:
@@ -66,12 +94,24 @@ paths:
                             $ref: '#/components/schemas/hr.role.v1.AssignRoleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.role.v1.AssignRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.role.v1.CreateRoleRequest:
@@ -120,10 +160,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the role.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this role belongs to.
                 name:
@@ -139,10 +181,12 @@ components:
                     description: Full set of permissions attached to this role.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this role was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this role was last updated.
             required:
@@ -160,6 +204,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the role to update.
                 body:
@@ -198,11 +243,13 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the employee to assign the role to.
                 role_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the role to assign.
             required:
@@ -216,3 +263,13 @@ components:
                     description: Whether the role was assigned successfully.
             required:
                 - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: RoleService
+      description: RoleService defines HR role endpoints.

@@ -5,6 +5,7 @@ type IssueWebSocketTicketRequest struct {
 }
 
 type IssueWebSocketTicketResponse struct {
+	// Short-lived, single-use ticket accepted by the Flow WebSocket handshake.
 	Ticket string `json:"ticket,omitempty"`
 }
 

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,11 +74,25 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface WorkspaceServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
 export class WorkspaceServiceClient {
@@ -71,9 +109,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listWorkspaces(req: ListWorkspacesRequest): Promise<ListWorkspacesResponse> {
+async listWorkspaces(req: ListWorkspacesRequest, opts?: RequestOptions): Promise<ListWorkspacesResponse> {
 const violations = validateListWorkspacesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces";
 const query = new URLSearchParams();
 if (req.page !== undefined) {
@@ -92,7 +130,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -104,14 +143,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListWorkspacesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createWorkspace(req: CreateWorkspaceRequest): Promise<CreateWorkspaceResponse> {
+async createWorkspace(req: CreateWorkspaceRequest, opts?: RequestOptions): Promise<CreateWorkspaceResponse> {
 const violations = validateCreateWorkspaceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateWorkspaceRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -123,15 +163,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateWorkspaceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateWorkspace(req: UpdateWorkspaceRequest): Promise<UpdateWorkspaceResponse> {
+async updateWorkspace(req: UpdateWorkspaceRequest, opts?: RequestOptions): Promise<UpdateWorkspaceResponse> {
 const violations = validateUpdateWorkspaceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateWorkspaceRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -143,9 +184,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateWorkspaceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteWorkspace(req: DeleteWorkspaceRequest): Promise<DeleteWorkspaceResponse> {
+async deleteWorkspace(req: DeleteWorkspaceRequest, opts?: RequestOptions): Promise<DeleteWorkspaceResponse> {
 const violations = validateDeleteWorkspaceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -153,7 +194,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -165,9 +207,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteWorkspaceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listWorkspaceMembers(req: ListWorkspaceMembersRequest): Promise<ListWorkspaceMembersResponse> {
+async listWorkspaceMembers(req: ListWorkspaceMembersRequest, opts?: RequestOptions): Promise<ListWorkspaceMembersResponse> {
 const violations = validateListWorkspaceMembersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces/members";
 const query = new URLSearchParams();
 if (req.workspaceId !== undefined) {
@@ -189,7 +231,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -201,14 +244,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListWorkspaceMembersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async addWorkspaceMember(req: AddWorkspaceMemberRequest): Promise<AddWorkspaceMemberResponse> {
+async addWorkspaceMember(req: AddWorkspaceMemberRequest, opts?: RequestOptions): Promise<AddWorkspaceMemberResponse> {
 const violations = validateAddWorkspaceMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces/members";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAddWorkspaceMemberRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -220,9 +264,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAddWorkspaceMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async removeWorkspaceMember(req: RemoveWorkspaceMemberRequest): Promise<RemoveWorkspaceMemberResponse> {
+async removeWorkspaceMember(req: RemoveWorkspaceMemberRequest, opts?: RequestOptions): Promise<RemoveWorkspaceMemberResponse> {
 const violations = validateRemoveWorkspaceMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces/members";
 const query = new URLSearchParams();
 if (req.workspaceId !== undefined) {
@@ -235,7 +279,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -247,14 +292,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRemoveWorkspaceMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateWorkspaceMemberRole(req: UpdateWorkspaceMemberRoleRequest): Promise<UpdateWorkspaceMemberRoleResponse> {
+async updateWorkspaceMemberRole(req: UpdateWorkspaceMemberRoleRequest, opts?: RequestOptions): Promise<UpdateWorkspaceMemberRoleResponse> {
 const violations = validateUpdateWorkspaceMemberRoleRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/workspace/v1/workspaces/members/role";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateWorkspaceMemberRoleRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

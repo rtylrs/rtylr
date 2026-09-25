@@ -2,40 +2,92 @@
 import * as common_pagination_v1 from "../../../common/pagination/v1/types.js";
 
 export interface Task {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** project_id is the project id value for this contract. */
 projectId?: string | undefined;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** owner_id identifies the tenant that owns the resource. */
 ownerId?: string | undefined;
+/** parent_task_id is the parent task id value for this contract. */
 parentTaskId?: string | undefined;
+/** title is the title value for this contract. */
 title?: string | undefined;
+/** description is the description value for this contract. */
 description?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
+/** priority is the priority value for this contract. */
 priority?: string | undefined;
+/** assignee_id is the assignee id value for this contract. */
 assigneeId?: string | undefined;
+/** reporter_id is the reporter id value for this contract. */
 reporterId?: string | undefined;
+/** due_date is the due date value for this contract. */
 dueDate?: string | undefined;
+/** start_date is the start date value for this contract. */
 startDate?: string | undefined;
+/** completed_at is the completed at value for this contract. */
 completedAt?: string | undefined;
+/** estimated_hours is the estimated hours value for this contract. */
 estimatedHours?: number | undefined;
+/** actual_hours is the actual hours value for this contract. */
 actualHours?: number | undefined;
+/** sort_order is the sort order value for this contract. */
 sortOrder?: string | undefined;
+/** labels is the labels value for this contract. */
 labels?: (string)[] | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
+/** updated_at is when the record was last updated. */
 updatedAt?: string | undefined;
+/**
+ * Human-readable identifier like "FLOW-42" (project code + sequence).
+ * Display projection populated by the backend on list/detail reads; safe
+ * to leave at zero value on writes.
+ */
 identifier?: string | undefined;
+/** Project name (denormalised from flow_projects.name) for list views. */
 projectName?: string | undefined;
+/** Project color hex for inline badges on cross-project lists. */
 projectColor?: string | undefined;
+/** Assignee display name. Empty if unassigned. */
 assigneeName?: string | undefined;
+/** Two-letter uppercase initials derived from assignee_name. Empty if unassigned. */
 assigneeInitials?: string | undefined;
+/** Number of direct subtasks. Powers the "N subtasks" pill on task rows. */
 subtaskCount?: number | undefined;
+/** Section bucket within a project (e.g. "Backlog", "Sprint 5"). Empty if unbucketed. */
 sectionId?: string | undefined;
+/** Cycle (sprint) this task belongs to, if any. */
 cycleId?: string | undefined;
+/** Milestone this task rolls up to, if any. */
 milestoneId?: string | undefined;
+/**
+ * Whether the task is archived. Archived tasks are excluded from default
+ * list and board views but stay readable by id. Absent means false, as
+ * with every other non-nullable scalar in this message.
+ */
 archived?: boolean | undefined;
+/**
+ * Quick effort estimate in minutes. Null when no estimate is set. The
+ * write path treats 0 as a clear, so a stored 0 does not occur.
+ */
 effortMinutes?: number | undefined;
+/** Free-text blocker label. Empty if nothing is blocking. */
 waitingOn?: string | undefined;
+/** One-line decision log. Empty if none recorded. */
 decisionNote?: string | undefined;
+/**
+ * Whether the *calling* user has pinned this task to their Today view.
+ * Resolved per request from flow_task_focus_pins; never a shared task flag.
+ */
 focusPin?: boolean | undefined;
+/**
+ * Task ids this task depends on. Read-only projection; write through the
+ * addTaskDependency / removeTaskDependency RPCs.
+ */
 dependencies?: (string)[] | undefined;
 }
 
@@ -161,14 +213,23 @@ return violations;
 }
 
 export interface TaskComment {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
+/** user_id identifies the user associated with this request. */
 userId?: string | undefined;
+/** Display name resolved from the comment author's current profile. */
 actorName?: string | undefined;
+/** Two-letter initials resolved from the comment author's current profile. */
 actorInitials?: string | undefined;
+/** content is the content value for this contract. */
 content?: string | undefined;
+/** is_edited is the is edited value for this contract. */
 isEdited?: boolean | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
+/** updated_at is when the record was last updated. */
 updatedAt?: string | undefined;
 }
 
@@ -216,14 +277,23 @@ return violations;
 }
 
 export interface TaskActivity {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
+/** user_id identifies the user associated with this request. */
 userId?: string | undefined;
+/** Display name resolved from the activity author's current profile. */
 actorName?: string | undefined;
+/** Two-letter initials resolved from the activity author's current profile. */
 actorInitials?: string | undefined;
+/** action is the action value for this contract. */
 action?: string | undefined;
+/** old_value is the old value value for this contract. */
 oldValue?: string | undefined;
+/** new_value is the new value value for this contract. */
 newValue?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -271,11 +341,17 @@ return violations;
 }
 
 export interface TaskPayloadCompact {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** title is the title value for this contract. */
 title?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
+/** priority is the priority value for this contract. */
 priority?: string | undefined;
+/** due_date is the due date value for this contract. */
 dueDate?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -314,12 +390,19 @@ return violations;
 }
 
 export interface Attachment {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
+/** name is the name value for this contract. */
 name?: string | undefined;
+/** url is the url value for this contract. */
 url?: string | undefined;
+/** size is the size value for this contract. */
 size?: string | undefined;
+/** uploaded_by is the uploaded by value for this contract. */
 uploadedBy?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -361,12 +444,19 @@ return violations;
 }
 
 export interface TimeLog {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
+/** user_id identifies the user associated with this request. */
 userId?: string | undefined;
+/** duration_minutes is the duration minutes value for this contract. */
 durationMinutes?: string | undefined;
+/** description is the description value for this contract. */
 description?: string | undefined;
+/** logged_at is the logged at value for this contract. */
 loggedAt?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -408,14 +498,31 @@ return violations;
 }
 
 export interface ListTasksRequest {
+/**
+ * project_id is the project id value for this contract.
+ * NOTE: the original proto enforced a message-level "exactly one of
+ * project_id, workspace_id required" constraint via
+ * (buf.validate.message).oneof - onk has no decorator for this
+ * cross-field constraint, so both fields are translated as plain
+ * optional fields with no equivalent validation. Flagged for manual
+ * follow-up.
+ */
 projectId?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
+/** assignee_id is the assignee id value for this contract. */
 assigneeId?: string | undefined;
+/** priority is the priority value for this contract. */
 priority?: string | undefined;
+/** workspace_id filters tasks by workspace when project_id is absent. */
 workspaceId?: string | undefined;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -463,6 +570,7 @@ return violations;
 }
 
 export interface ListTasksResponse {
+/** tasks is the tasks value for this contract. */
 tasks?: (Task)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -492,9 +600,13 @@ return violations;
 }
 
 export interface GetMyTasksRequest {
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -527,6 +639,7 @@ return violations;
 }
 
 export interface GetMyTasksResponse {
+/** tasks is the tasks value for this contract. */
 tasks?: (Task)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -604,9 +717,13 @@ return violations;
 export interface SearchTasksRequest {
 q?: string | undefined;
 workspaceId: string;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -675,16 +792,27 @@ return violations;
 }
 
 export interface CreateTaskRequest {
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** parent_task_id is the parent task id value for this contract. */
 parentTaskId?: string | undefined;
+/** title is the title value for this contract. */
 title: string;
+/** description is the description value for this contract. */
 description: string;
+/** priority is the priority value for this contract. */
 priority: string;
+/** assignee_id is the assignee id value for this contract. */
 assigneeId?: string | undefined;
+/** due_date is the due date value for this contract. */
 dueDate: string;
+/** start_date is the start date value for this contract. */
 startDate: string;
+/** estimated_hours is the estimated hours value for this contract. */
 estimatedHours?: number | undefined;
+/** labels is the labels value for this contract. */
 labels?: (string)[] | undefined;
 }
 
@@ -748,6 +876,7 @@ return violations;
 }
 
 export interface CreateTaskResponse {
+/** task is the task value for this contract. */
 task?: Task | undefined;
 }
 
@@ -772,6 +901,7 @@ return violations;
 }
 
 export interface GetTaskDetailRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
 }
 
@@ -796,9 +926,13 @@ return violations;
 }
 
 export interface GetTaskDetailResponse {
+/** task is the task value for this contract. */
 task?: Task | undefined;
+/** subtasks is the subtasks value for this contract. */
 subtasks?: (Task)[] | undefined;
+/** comments is the comments value for this contract. */
 comments?: (TaskComment)[] | undefined;
+/** activity is the activity value for this contract. */
 activity?: (TaskActivity)[] | undefined;
 }
 
@@ -835,19 +969,63 @@ return violations;
 }
 
 export interface UpdateTaskBody {
+/**
+ * Every field here is optional on purpose. This is a partial update: the
+ * client sends only what changed, and the repository preserves omitted
+ * columns with COALESCE(?, col). Marking a field @required here rejects a
+ * single-field patch with a 400 before the handler ever runs, which is
+ * exactly the defect this contract previously had.
+ *
+ * title is the title value for this contract.
+ */
 title?: string | undefined;
+/** description is the description value for this contract. */
 description?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
+/** priority is the priority value for this contract. */
 priority?: string | undefined;
+/** assignee_id is the assignee id value for this contract. */
 assigneeId?: string | undefined;
+/** due_date is the due date value for this contract. */
 dueDate?: string | undefined;
+/** start_date is the start date value for this contract. */
 startDate?: string | undefined;
+/**
+ * labels is the labels value for this contract. Absent leaves labels
+ * untouched; @min_items is deliberately absent because requiring one label
+ * made every task without labels permanently unupdatable.
+ */
 labels?: (string)[] | undefined;
+/**
+ * Updated archived status; absent to keep current value. True archives the
+ * task, false restores it.
+ */
 archived?: boolean | undefined;
+/**
+ * Quick effort estimate in minutes for the effort chips. Absent leaves the
+ * value untouched; 0 clears it. Zero minutes is meaningless as a stored
+ * value, so it is safe as the clear sentinel, and it keeps this field out
+ * of the COALESCE ambiguity that makes description impossible to clear.
+ */
 effortMinutes?: number | undefined;
+/**
+ * Estimated hours. Absent leaves untouched; 0 clears. Same sentinel rule as
+ * effort_minutes.
+ */
 estimatedHours?: number | undefined;
+/**
+ * Free-text blocker label: person, team or approval. Absent leaves
+ * untouched; empty string clears.
+ */
 waitingOn?: string | undefined;
+/** One-line decision log. Absent leaves untouched; empty string clears. */
 decisionNote?: string | undefined;
+/**
+ * Pin this task into the caller's own Today view. Absent leaves untouched;
+ * true pins, false unpins. Per-caller, not per-task: Today is a personal
+ * view, so this writes flow_task_focus_pins rather than a task column.
+ */
 focusPin?: boolean | undefined;
 }
 
@@ -910,7 +1088,9 @@ return violations;
 }
 
 export interface UpdateTaskRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** body carries updatable task fields bound from the HTTP payload. */
 body?: UpdateTaskBody | undefined;
 }
 
@@ -939,6 +1119,7 @@ return violations;
 }
 
 export interface UpdateTaskResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -962,6 +1143,7 @@ return violations;
 }
 
 export interface UpdateTaskStatusBody {
+/** status is the current lifecycle state. */
 status: string;
 }
 
@@ -986,7 +1168,9 @@ return violations;
 }
 
 export interface UpdateTaskStatusRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** body carries the new task status bound from the HTTP payload. */
 body?: UpdateTaskStatusBody | undefined;
 }
 
@@ -1015,6 +1199,7 @@ return violations;
 }
 
 export interface UpdateTaskStatusResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1038,6 +1223,7 @@ return violations;
 }
 
 export interface DeleteTaskRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
 }
 
@@ -1062,6 +1248,7 @@ return violations;
 }
 
 export interface DeleteTaskResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1085,15 +1272,25 @@ return violations;
 }
 
 export interface CreateSubtaskRequest {
+/** parent_task_id is the parent task id value for this contract. */
 parentTaskId: string;
+/** project_id is the project id value for this contract. */
 projectId: string;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** title is the title value for this contract. */
 title: string;
+/** description is the description value for this contract. */
 description: string;
+/** priority is the priority value for this contract. */
 priority: string;
+/** assignee_id is the assignee id value for this contract. */
 assigneeId?: string | undefined;
+/** due_date is the due date value for this contract. */
 dueDate: string;
+/** start_date is the start date value for this contract. */
 startDate: string;
+/** estimated_hours is the estimated hours value for this contract. */
 estimatedHours?: number | undefined;
 }
 
@@ -1155,7 +1352,9 @@ return violations;
 }
 
 export interface CreateSubtaskResponse {
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1182,10 +1381,15 @@ return violations;
 }
 
 export interface GetSubtasksRequest {
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -1222,6 +1426,7 @@ return violations;
 }
 
 export interface GetSubtasksResponse {
+/** subtasks is the subtasks value for this contract. */
 subtasks?: (TaskPayloadCompact)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -1251,7 +1456,9 @@ return violations;
 }
 
 export interface AddCommentRequest {
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
+/** content is the content value for this contract. */
 content: string;
 }
 
@@ -1280,6 +1487,7 @@ return violations;
 }
 
 export interface AddCommentResponse {
+/** comment is the comment value for this contract. */
 comment?: TaskComment | undefined;
 }
 
@@ -1304,6 +1512,7 @@ return violations;
 }
 
 export interface DeleteCommentRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
 }
 
@@ -1328,6 +1537,7 @@ return violations;
 }
 
 export interface DeleteCommentResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1351,6 +1561,7 @@ return violations;
 }
 
 export interface GetTaskActivityRequest {
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
 }
 
@@ -1375,6 +1586,7 @@ return violations;
 }
 
 export interface GetTaskActivityResponse {
+/** activity is the activity value for this contract. */
 activity?: (TaskActivity)[] | undefined;
 }
 
@@ -1399,9 +1611,13 @@ return violations;
 }
 
 export interface CreateAttachmentRequest {
+/** task_id identifies the task the attachment belongs to. */
 taskId?: string | undefined;
+/** name is the name value for this contract. */
 name: string;
+/** url is the url value for this contract. */
 url: string;
+/** size is the size value for this contract. */
 size: string;
 }
 
@@ -1439,7 +1655,9 @@ return violations;
 }
 
 export interface CreateAttachmentResponse {
+/** attachment_id is the attachment id value for this contract. */
 attachmentId?: string | undefined;
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1466,6 +1684,7 @@ return violations;
 }
 
 export interface GetAttachmentsRequest {
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
 }
 
@@ -1490,6 +1709,7 @@ return violations;
 }
 
 export interface GetAttachmentsResponse {
+/** attachments is the attachments value for this contract. */
 attachments?: (Attachment)[] | undefined;
 }
 
@@ -1514,6 +1734,7 @@ return violations;
 }
 
 export interface DeleteAttachmentRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
 }
 
@@ -1538,6 +1759,7 @@ return violations;
 }
 
 export interface DeleteAttachmentResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1561,8 +1783,11 @@ return violations;
 }
 
 export interface CreateTimeLogRequest {
+/** duration_minutes is the duration minutes value for this contract. */
 durationMinutes: string;
+/** description is the description value for this contract. */
 description: string;
+/** task_id identifies the task the time log belongs to. */
 taskId?: string | undefined;
 }
 
@@ -1596,7 +1821,9 @@ return violations;
 }
 
 export interface CreateTimeLogResponse {
+/** time_log_id is the time log id value for this contract. */
 timeLogId?: string | undefined;
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1623,6 +1850,7 @@ return violations;
 }
 
 export interface GetTimeLogsRequest {
+/** task_id is the task id value for this contract. */
 taskId?: string | undefined;
 }
 
@@ -1647,6 +1875,7 @@ return violations;
 }
 
 export interface GetTimeLogsResponse {
+/** time_logs is the time logs value for this contract. */
 timeLogs?: (TimeLog)[] | undefined;
 }
 
@@ -1671,6 +1900,7 @@ return violations;
 }
 
 export interface DeleteTimeLogRequest {
+/** id is the time log identifier. */
 id?: string | undefined;
 }
 
@@ -1695,6 +1925,7 @@ return violations;
 }
 
 export interface DeleteTimeLogResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1718,6 +1949,7 @@ return violations;
 }
 
 export interface AddTaskDependencyBody {
+/** depends_on_task_id is the task this task is blocked by. */
 dependsOnTaskId?: string | undefined;
 }
 
@@ -1742,7 +1974,9 @@ return violations;
 }
 
 export interface AddTaskDependencyRequest {
+/** task_id is the task gaining the dependency. */
 taskId?: string | undefined;
+/** body carries the dependency target bound from the HTTP payload. */
 body?: AddTaskDependencyBody | undefined;
 }
 
@@ -1771,6 +2005,7 @@ return violations;
 }
 
 export interface AddTaskDependencyResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1794,7 +2029,9 @@ return violations;
 }
 
 export interface RemoveTaskDependencyRequest {
+/** task_id is the task losing the dependency. */
 taskId?: string | undefined;
+/** depends_on_task_id is the dependency being removed. */
 dependsOnTaskId?: string | undefined;
 }
 
@@ -1823,6 +2060,7 @@ return violations;
 }
 
 export interface RemoveTaskDependencyResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 

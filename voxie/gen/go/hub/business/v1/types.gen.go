@@ -6,21 +6,26 @@ import (
 	"strconv"
 )
 
+// Business is a merchant's top-level business entity.
 type Business struct {
-	Id        int64  `json:"id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Type      string `json:"type,omitempty"`
-	LogoUrl   string `json:"logo_url,omitempty"`
-	Address   string `json:"address,omitempty"`
-	Phone     string `json:"phone,omitempty"`
-	Email     string `json:"email,omitempty"`
-	Website   string `json:"website,omitempty"`
-	Timezone  string `json:"timezone,omitempty"`
-	Currency  string `json:"currency,omitempty"`
-	Country   string `json:"country,omitempty"`
-	Plan      string `json:"plan,omitempty"`
+	Id   int64  `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	// restaurant, retail, services, etc.
+	Type    string `json:"type,omitempty"`
+	LogoUrl string `json:"logo_url,omitempty"`
+	Address string `json:"address,omitempty"`
+	Phone   string `json:"phone,omitempty"`
+	// Email address used for lookup or contact.
+	Email    string `json:"email,omitempty"`
+	Website  string `json:"website,omitempty"`
+	Timezone string `json:"timezone,omitempty"`
+	Currency string `json:"currency,omitempty"`
+	Country  string `json:"country,omitempty"`
+	Plan     string `json:"plan,omitempty"`
+	// When the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
-	Slug      string `json:"slug,omitempty"`
+	// URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+	Slug string `json:"slug,omitempty"`
 }
 
 func (m *Business) MarshalJSON() ([]byte, error) {
@@ -164,13 +169,16 @@ func (x *Business) GetSlug() string {
 	return x.Slug
 }
 
+// BusinessEntry is a compact business row for ownership listings.
 type BusinessEntry struct {
-	Id       int64  `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	LogoUrl  string `json:"logo_url,omitempty"`
-	ParentId int64  `json:"parent_id,omitempty"`
-	IsActive bool   `json:"is_active,omitempty"`
-	IsOwned  bool   `json:"is_owned,omitempty"`
+	Id      int64  `json:"id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	LogoUrl string `json:"logo_url,omitempty"`
+	// Identifies the parent business, zero for top-level businesses.
+	ParentId int64 `json:"parent_id,omitempty"`
+	IsActive bool  `json:"is_active,omitempty"`
+	// True when the current user owns the business; false for team access.
+	IsOwned bool `json:"is_owned,omitempty"`
 }
 
 func (m *BusinessEntry) MarshalJSON() ([]byte, error) {
@@ -260,6 +268,7 @@ func (x *BusinessEntry) GetIsOwned() bool {
 	return x.IsOwned
 }
 
+// PublicLocation is a location entry for public menu surfaces.
 type PublicLocation struct {
 	Id       int64  `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
@@ -346,6 +355,7 @@ func (x *PublicLocation) GetIsActive() bool {
 	return x.IsActive
 }
 
+// PublicBusinessSummary resolves a public slug into a business summary.
 type PublicBusinessSummary struct {
 	Id       int64  `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
@@ -441,6 +451,7 @@ func (x *PublicBusinessSummary) GetTimezone() string {
 	return x.Timezone
 }
 
+// PublicBusinessProfile is public-safe business branding for anonymous menu surfaces.
 type PublicBusinessProfile struct {
 	Id       int64  `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
@@ -670,6 +681,7 @@ func (x *CreateSubBusinessResponse) GetId() int64 {
 }
 
 type OnboardBusinessRequest struct {
+	// The first business name created during owner onboarding.
 	Name string `json:"name,omitempty"`
 }
 
@@ -682,6 +694,7 @@ func (x *OnboardBusinessRequest) GetName() string {
 }
 
 type OnboardBusinessResponse struct {
+	// A fresh JWT carrying the new business_id.
 	Token string `json:"token,omitempty"`
 }
 
@@ -1043,8 +1056,9 @@ func (x *RenameBusinessResponse) GetBusiness() *Business {
 }
 
 type SetLogoRequest struct {
-	BusinessId int64  `json:"business_id,omitempty"`
-	LogoUrl    string `json:"logo_url,omitempty"`
+	BusinessId int64 `json:"business_id,omitempty"`
+	// Public URL of an already-uploaded asset (see @voxire/api uploadAsset).
+	LogoUrl string `json:"logo_url,omitempty"`
 }
 
 func (m *SetLogoRequest) MarshalJSON() ([]byte, error) {

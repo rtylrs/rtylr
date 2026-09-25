@@ -227,7 +227,9 @@ return violations;
 }
 
 export interface ListCategoriesRequest {
+/** Maximum number of categories to return. */
 limit?: number | undefined;
+/** Number of categories to skip. */
 offset?: number | undefined;
 }
 

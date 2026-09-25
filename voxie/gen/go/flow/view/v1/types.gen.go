@@ -8,14 +8,19 @@ import (
 )
 
 type View struct {
-	Id         int64  `json:"id,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Icon       string `json:"icon,omitempty"`
+	Id   int64  `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Icon string `json:"icon,omitempty"`
+	// visibility is "shared" (every colleague in the business can use this view)
+	// or "private" (only its creator). Empty on create means "shared", which is
+	// how every view behaved before this field existed, so an older client keeps
+	// its current behaviour rather than silently making views private.
 	Visibility string `json:"visibility,omitempty"`
-	Filters    string `json:"filters,omitempty"`
-	GroupBy    string `json:"group_by,omitempty"`
-	SortBy     string `json:"sort_by,omitempty"`
-	SortDir    string `json:"sort_dir,omitempty"`
+	// JSON-encoded filter criteria for this saved view.
+	Filters string `json:"filters,omitempty"`
+	GroupBy string `json:"group_by,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *View) MarshalJSON() ([]byte, error) {
@@ -113,10 +118,14 @@ func (x *View) GetSortDir() string {
 
 type ListViewsRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
-	Page        int32  `json:"page,omitempty"`
-	Limit       int32  `json:"limit,omitempty"`
-	SortBy      string `json:"sort_by,omitempty"`
-	SortDir     string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (x *ListViewsRequest) GetWorkspaceId() string {
@@ -184,11 +193,16 @@ type CreateViewRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Icon        string `json:"icon,omitempty"`
-	Visibility  string `json:"visibility,omitempty"`
-	Filters     string `json:"filters,omitempty"`
-	GroupBy     string `json:"group_by,omitempty"`
-	SortBy      string `json:"sort_by,omitempty"`
-	SortDir     string `json:"sort_dir,omitempty"`
+	// visibility is "shared" (every colleague in the business can use this view)
+	// or "private" (only its creator). Empty on create means "shared", which is
+	// how every view behaved before this field existed, so an older client keeps
+	// its current behaviour rather than silently making views private.
+	Visibility string `json:"visibility,omitempty"`
+	// JSON-encoded filter criteria for this saved view.
+	Filters string `json:"filters,omitempty"`
+	GroupBy string `json:"group_by,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (x *CreateViewRequest) GetWorkspaceId() string {
@@ -268,14 +282,19 @@ func (x *CreateViewResponse) GetView() *View {
 }
 
 type UpdateViewRequest struct {
-	Id         int64  `json:"id,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Icon       string `json:"icon,omitempty"`
+	Id   int64  `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Icon string `json:"icon,omitempty"`
+	// visibility is "shared" (every colleague in the business can use this view)
+	// or "private" (only its creator). Empty on create means "shared", which is
+	// how every view behaved before this field existed, so an older client keeps
+	// its current behaviour rather than silently making views private.
 	Visibility string `json:"visibility,omitempty"`
-	Filters    string `json:"filters,omitempty"`
-	GroupBy    string `json:"group_by,omitempty"`
-	SortBy     string `json:"sort_by,omitempty"`
-	SortDir    string `json:"sort_dir,omitempty"`
+	// JSON-encoded filter criteria for this saved view.
+	Filters string `json:"filters,omitempty"`
+	GroupBy string `json:"group_by,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *UpdateViewRequest) MarshalJSON() ([]byte, error) {

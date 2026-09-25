@@ -11,12 +11,24 @@ paths:
             description: ListPayrollRuns returns payroll runs.
             operationId: RunsService_listPayrollRuns
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ListPayrollRunsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/employees/payroll/runs/v1/runs/trigger:
         post:
             tags:
@@ -31,12 +43,24 @@ paths:
                             $ref: '#/components/schemas/hr.employees.payroll.runs.v1.TriggerPayrollRunRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employees.payroll.runs.v1.TriggerPayrollRunResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/employees/payroll/runs/v1/runs/{id}/approve:
         patch:
             tags:
@@ -47,23 +71,39 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: ID of the payroll run to approve.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: ID of the payroll run to approve.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ApprovePayrollRunRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ApprovePayrollRunResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/employees/payroll/runs/v1/runs/export:
         post:
             tags:
@@ -78,12 +118,24 @@ paths:
                             $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ExportPayrollRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ExportPayrollResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.employees.payroll.runs.v1.ListPayrollRunsRequest:
@@ -118,10 +170,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the payroll run.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this run belongs to.
                 period_start:
@@ -135,14 +189,17 @@ components:
                     description: Workflow status (draft | in_review | approved | exported).
                 created_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee who initiated the payroll run.
                 approved_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee who approved the run; absent if not yet approved.
                 exported_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when the run was exported; absent if not yet exported.
                 total_gross:
@@ -160,10 +217,12 @@ components:
                     description: Individual payroll entries included in this run.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -184,18 +243,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the payroll entry.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this entry belongs to.
                 payroll_run_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Payroll run this entry is part of.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee this entry compensates.
                 base_pay:
@@ -228,10 +291,12 @@ components:
                     description: Total overtime hours worked in the period.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -276,6 +341,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the payroll run to approve.
             required:
@@ -295,6 +361,7 @@ components:
                 run_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the payroll run to export.
             required:
@@ -307,3 +374,13 @@ components:
                     description: Unique identifier for the generated export batch.
             required:
                 - batch_id
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: RunsService
+      description: RunsService defines HR payroll run endpoints.

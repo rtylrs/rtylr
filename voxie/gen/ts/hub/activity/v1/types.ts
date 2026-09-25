@@ -10,6 +10,7 @@ action?: string | undefined;
 description?: string | undefined;
 userId?: string | undefined;
 userName?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -60,7 +61,9 @@ return violations;
 }
 
 export interface ListActivityRequest {
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** offset is the number of records to skip, for paging through the feed. */
 offset?: number | undefined;
 }
 
@@ -88,6 +91,7 @@ return violations;
 
 export interface ListActivityResponse {
 activities?: (ActivityEntry)[] | undefined;
+/** total is the total number of matching activity entries, for pagination math. */
 total?: number | undefined;
 }
 

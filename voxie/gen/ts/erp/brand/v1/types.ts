@@ -242,7 +242,9 @@ return violations;
 }
 
 export interface ListBrandsRequest {
+/** Maximum number of brands to return. */
 limit?: number | undefined;
+/** Number of brands to skip. */
 offset?: number | undefined;
 }
 

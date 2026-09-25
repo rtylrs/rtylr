@@ -54,9 +54,13 @@ return violations;
 
 export interface ListCyclesRequest {
 workspaceId?: string | undefined;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 

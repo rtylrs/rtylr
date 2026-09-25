@@ -17,7 +17,9 @@ lowStockThreshold?: number | undefined;
 reorderQuantity?: number | undefined;
 isActive?: boolean | undefined;
 trackInventory?: boolean | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
+/** When the record was last updated. */
 updatedAt?: string | undefined;
 businessId?: string | undefined;
 brandId?: string | undefined;
@@ -563,9 +565,13 @@ return violations;
 }
 
 export interface ListProductsRequest {
+/** Filters products by name or SKU. */
 search?: string | undefined;
+/** Filters products by category. */
 categoryId?: string | undefined;
+/** The maximum number of products to return. */
 limit?: number | undefined;
+/** The number of records to skip. */
 offset?: number | undefined;
 }
 
@@ -651,7 +657,9 @@ lowStockThreshold?: number | undefined;
 reorderQuantity?: number | undefined;
 isActive?: boolean | undefined;
 trackInventory?: boolean | undefined;
+/** The opening tracked quantity for this product. */
 stockQuantity?: number | undefined;
+/** Links the product to a brand when present. */
 brandId?: string | undefined;
 compareAtPrice?: number | undefined;
 taxRate?: number | undefined;
@@ -795,6 +803,7 @@ return violations;
 
 export interface CreateProductResponse {
 productId?: string | undefined;
+/** A human-readable result message. */
 message?: string | undefined;
 }
 
@@ -1026,7 +1035,9 @@ lowStockThreshold?: number | undefined;
 reorderQuantity?: number | undefined;
 isActive?: boolean | undefined;
 trackInventory?: boolean | undefined;
+/** The tracked quantity to store for this product. */
 stockQuantity?: number | undefined;
+/** Links the product to a brand when present. */
 brandId?: string | undefined;
 compareAtPrice?: number | undefined;
 taxRate?: number | undefined;
@@ -1341,7 +1352,9 @@ return violations;
 }
 
 export interface ListReorderSuggestionsRequest {
+/** Maximum number of reorder suggestions to return. */
 limit?: number | undefined;
+/** Number of reorder suggestions to skip. */
 offset?: number | undefined;
 }
 
@@ -1409,7 +1422,9 @@ return violations;
 
 export interface ListExpiringItemsRequest {
 daysAhead?: number | undefined;
+/** Maximum number of expiring items to return. */
 limit?: number | undefined;
+/** Number of expiring items to skip. */
 offset?: number | undefined;
 }
 

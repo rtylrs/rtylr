@@ -11,12 +11,24 @@ paths:
             description: Returns menu items for the active business.
             operationId: MenuItemService_listMenuItems
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.menu_item.v1.ListMenuItemsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - MenuItemService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/pos.menu_item.v1.CreateMenuItemRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.menu_item.v1.CreateMenuItemResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/menu-item/v1/menu-items/public:
         get:
             tags:
@@ -46,25 +70,40 @@ paths:
             parameters:
                 - name: business_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: location_id
                   in: query
-                  required: true
+                  description: Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.menu_item.v1.ListPublicMenuItemsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/menu-item/v1/menu-items/{id}:
         put:
             tags:
@@ -75,10 +114,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the menu item.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the menu item.
             requestBody:
                 content:
                     application/json:
@@ -88,12 +131,24 @@ paths:
                             description: body carries updatable menu item fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.menu_item.v1.UpdateMenuItemResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.menu_item.v1.ListMenuItemsRequest:
@@ -112,13 +167,16 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -157,6 +215,7 @@ components:
                     description: Current tracked stock quantity for the menu item.
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         product_id is the ERP product this item is sold from; absent for items
@@ -193,9 +252,11 @@ components:
                 business_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
             required:
@@ -230,6 +291,7 @@ components:
             properties:
                 item_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -242,6 +304,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the menu item.
                 body:
@@ -282,3 +345,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: MenuItemService
+      description: MenuItemService defines POS menu item endpoints.

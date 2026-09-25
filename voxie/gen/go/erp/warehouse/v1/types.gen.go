@@ -374,7 +374,9 @@ func (x *DeleteWarehouseResponse) GetMessage() string {
 }
 
 type ListWarehousesRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of warehouses to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of warehouses to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 

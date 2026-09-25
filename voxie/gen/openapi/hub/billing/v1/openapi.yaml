@@ -11,12 +11,24 @@ paths:
             description: Returns billing summary for the active business.
             operationId: BillingService_getBillingSummary
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.billing.v1.GetBillingSummaryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/billing/v1/invoices:
         get:
             tags:
@@ -25,12 +37,24 @@ paths:
             description: Returns billing invoices.
             operationId: BillingService_listInvoices
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.billing.v1.ListInvoicesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.billing.v1.GetBillingSummaryRequest:
@@ -80,6 +104,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 amount:
                     type: number
@@ -99,3 +124,13 @@ components:
                 - status
                 - issued_at
                 - paid_at
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: BillingService
+      description: BillingService defines hub billing endpoints.

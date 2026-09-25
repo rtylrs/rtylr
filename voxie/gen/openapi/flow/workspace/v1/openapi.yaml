@@ -12,37 +12,53 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.ListWorkspacesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - WorkspaceService
@@ -55,12 +71,24 @@ paths:
                             $ref: '#/components/schemas/flow.workspace.v1.CreateWorkspaceRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.CreateWorkspaceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/workspace/v1/workspaces/{id}:
         put:
             tags:
@@ -70,10 +98,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
@@ -83,12 +115,24 @@ paths:
                             description: body carries updatable workspace fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.UpdateWorkspaceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - WorkspaceService
@@ -97,17 +141,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.DeleteWorkspaceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/workspace/v1/workspaces/members:
         get:
             tags:
@@ -117,45 +177,63 @@ paths:
             parameters:
                 - name: workspace_id
                   in: query
+                  description: workspace_id is the workspace id value for this contract.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.ListWorkspaceMembersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - WorkspaceService
@@ -168,12 +246,24 @@ paths:
                             $ref: '#/components/schemas/flow.workspace.v1.AddWorkspaceMemberRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.AddWorkspaceMemberResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - WorkspaceService
@@ -182,27 +272,43 @@ paths:
             parameters:
                 - name: workspace_id
                   in: query
+                  description: workspace_id is the workspace id value for this contract.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 - name: user_id
                   in: query
+                  description: user_id identifies the user associated with this request.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.RemoveWorkspaceMemberResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/workspace/v1/workspaces/members/role:
         put:
             tags:
@@ -216,12 +322,24 @@ paths:
                             $ref: '#/components/schemas/flow.workspace.v1.UpdateWorkspaceMemberRoleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.workspace.v1.UpdateWorkspaceMemberRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.workspace.v1.ListWorkspacesRequest:
@@ -265,10 +383,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 name:
@@ -288,6 +408,7 @@ components:
                     description: is_default is the is default value for this contract.
                 created_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: created_by is the created by value for this contract.
                 created_at:
@@ -386,6 +507,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -429,6 +551,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -447,6 +570,7 @@ components:
                 workspace_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 page:
@@ -488,14 +612,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the membership record.
                 workspace_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 name:
@@ -509,6 +636,7 @@ components:
                     description: role is the role value for this contract.
                 invited_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: invited_by is the user id of the inviter, if any.
                 joined_at:
@@ -529,11 +657,13 @@ components:
                 workspace_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 role:
@@ -557,11 +687,13 @@ components:
                 workspace_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
             required:
@@ -581,11 +713,13 @@ components:
                 workspace_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: workspace_id is the workspace id value for this contract.
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 role:
@@ -603,3 +737,12 @@ components:
                     description: message is a human-readable result message.
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: WorkspaceService

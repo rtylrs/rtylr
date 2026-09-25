@@ -11,12 +11,24 @@ paths:
             description: Returns the loyalty program configuration for the active business.
             operationId: LoyaltyService_getLoyaltyConfig
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.loyalty.v1.GetLoyaltyConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - LoyaltyService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/pos.loyalty.v1.UpdateLoyaltyConfigRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.loyalty.v1.UpdateLoyaltyConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/loyalty/v1/transactions:
         get:
             tags:
@@ -46,17 +70,30 @@ paths:
             parameters:
                 - name: customer_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.loyalty.v1.ListLoyaltyTransactionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/loyalty/v1/earn:
         post:
             tags:
@@ -71,12 +108,24 @@ paths:
                             $ref: '#/components/schemas/pos.loyalty.v1.EarnPointsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.loyalty.v1.EarnPointsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/loyalty/v1/redeem:
         post:
             tags:
@@ -91,12 +140,24 @@ paths:
                             $ref: '#/components/schemas/pos.loyalty.v1.RedeemPointsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.loyalty.v1.RedeemPointsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/loyalty/v1/balance:
         get:
             tags:
@@ -111,14 +172,27 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.loyalty.v1.GetLoyaltyBalanceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.loyalty.v1.GetLoyaltyConfigRequest:
@@ -136,9 +210,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: business_id identifies the active business.
                 is_enabled:
@@ -202,6 +278,7 @@ components:
             properties:
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - customer_id
@@ -219,17 +296,21 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: business_id identifies the active business.
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: customer_id identifies the linked customer when present.
                 order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 type:
                     type: string
@@ -261,10 +342,12 @@ components:
                 customer_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 points:
                     exclusiveMinimum: 0
@@ -279,6 +362,7 @@ components:
             properties:
                 transaction_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -291,6 +375,7 @@ components:
                 customer_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 points:
                     exclusiveMinimum: 0
@@ -304,6 +389,7 @@ components:
             properties:
                 transaction_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -316,6 +402,7 @@ components:
                 customer_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - customer_id
@@ -324,6 +411,7 @@ components:
             properties:
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 balance:
                     type: integer
@@ -331,3 +419,13 @@ components:
             required:
                 - customer_id
                 - balance
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LoyaltyService
+      description: LoyaltyService defines POS loyalty program endpoints.

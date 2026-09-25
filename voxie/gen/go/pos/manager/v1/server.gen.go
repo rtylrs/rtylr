@@ -16,10 +16,37 @@ import (
 	"time"
 )
 
+func writeJSON(w http.ResponseWriter, status int, value any) {
+	data, err := json.Marshal(value)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, _ = w.Write(append(data, '\n'))
+}
+
 func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func requestBodyLimit(limit int64) int64 {
+	if limit <= 0 {
+		return 8 << 20
+	}
+	return limit
+}
+
+func writeBodyError(w http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeJSONError(w, http.StatusRequestEntityTooLarge, "request body too large")
+		return
+	}
+	writeJSONError(w, http.StatusBadRequest, "invalid request body")
 }
 
 func writeHandlerError(w http.ResponseWriter, err error) {
@@ -30,7 +57,12 @@ func writeHandlerError(w http.ResponseWriter, err error) {
 			status = candidate
 		}
 	}
-	writeJSONError(w, status, "internal server error")
+	message := "internal server error"
+	var public interface{ PublicMessage() string }
+	if errors.As(err, &public) && public.PublicMessage() != "" {
+		message = public.PublicMessage()
+	}
+	writeJSONError(w, status, message)
 }
 
 func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
@@ -62,6 +94,25 @@ func parseBool(s string) (bool, error) {
 		return false, nil
 	}
 	return false, fmt.Errorf("must be true or false")
+}
+
+func hasAuthScheme(value, scheme string) bool {
+	if len(value) <= len(scheme)+1 || value[len(scheme)] != ' ' {
+		return false
+	}
+	for i := 0; i < len(scheme); i++ {
+		a, b := value[i], scheme[i]
+		if a >= 'A' && a <= 'Z' {
+			a += 'a' - 'A'
+		}
+		if b >= 'A' && b <= 'Z' {
+			b += 'a' - 'A'
+		}
+		if a != b {
+			return false
+		}
+	}
+	return true
 }
 
 func validHeaderFormat(value, format string) bool {
@@ -100,6 +151,37 @@ func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
 	return metadata, ok
 }
 
+type httpRequestContextKey struct{}
+
+func withHTTPRequest(r *http.Request) context.Context {
+	return context.WithValue(r.Context(), httpRequestContextKey{}, r)
+}
+
+type responseControl struct {
+	status int
+	header http.Header
+}
+
+type responseControlKey struct{}
+
+func SetResponseStatus(ctx context.Context, status int) {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok && status >= 200 && status <= 299 {
+		control.status = status
+	}
+}
+
+func ResponseHeader(ctx context.Context) http.Header {
+	if control, ok := ctx.Value(responseControlKey{}).(*responseControl); ok {
+		return control.header
+	}
+	return http.Header{}
+}
+
+func HTTPRequestFromContext(ctx context.Context) (*http.Request, bool) {
+	r, ok := ctx.Value(httpRequestContextKey{}).(*http.Request)
+	return r, ok
+}
+
 func RequestIDFromContext(ctx context.Context) (string, bool) {
 	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
 	return requestID, ok && requestID != ""
@@ -120,12 +202,13 @@ type RequestObserver interface {
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux                *http.ServeMux
-	middlewares        []Middleware
-	requestIDHeader    string
-	requestIDGenerator RequestIDGenerator
-	authorizer         Authorizer
-	observer           RequestObserver
+	mux                 *http.ServeMux
+	middlewares         []Middleware
+	requestIDHeader     string
+	requestIDGenerator  RequestIDGenerator
+	authorizer          Authorizer
+	observer            RequestObserver
+	maxRequestBodyBytes int64
 }
 
 // WithMux supports the options-first registration form.
@@ -153,6 +236,9 @@ func WithAuthorizer(authorizer Authorizer) ServerOption {
 func WithRequestObserver(observer RequestObserver) ServerOption {
 	return func(o *serverOptions) { o.observer = observer }
 }
+func WithMaxRequestBodyBytes(limit int64) ServerOption {
+	return func(o *serverOptions) { o.maxRequestBodyBytes = limit }
+}
 
 func defaultRequestIDGenerator() string {
 	var value [16]byte
@@ -163,6 +249,21 @@ func defaultRequestIDGenerator() string {
 }
 
 func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	if o.authorizer != nil {
+		next := handler
+		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if err := o.authorizer(r.Context(), metadata, r); err != nil {
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
+				}
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 	for i := len(o.middlewares) - 1; i >= 0; i-- {
 		if o.middlewares[i] != nil {
 			handler = o.middlewares[i](handler)
@@ -178,17 +279,6 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 			if requestID != "" {
 				w.Header().Set(o.requestIDHeader, requestID)
 				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
-			}
-		}
-		if o.authorizer != nil {
-			if err := o.authorizer(ctx, metadata, r); err != nil {
-				var statusErr interface{ HTTPStatusCode() int }
-				if errors.As(err, &statusErr) {
-					writeHandlerError(w, err)
-				} else {
-					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
-				}
-				return
 			}
 		}
 		if o.observer == nil {
@@ -232,7 +322,9 @@ func (w *statusResponseWriter) Flush() {
 	}
 }
 
+// ManagerService defines POS manager override endpoints.
 type ManagerServiceServer interface {
+	// Verifies a manager PIN and returns the associated staff member.
 	VerifyPIN(ctx context.Context, req *VerifyPINRequest) (*VerifyPINResponse, error)
 }
 
@@ -271,25 +363,30 @@ func RegisterManagerServiceServer(first any, rest ...any) error {
 	mux.Handle("POST /pos/manager/v1/verify", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(VerifyPINRequest)
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, requestBodyLimit(o.maxRequestBodyBytes))
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				writeBodyError(w, err)
 				return
 			}
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
+				var list interface{ ViolationList() []string }
+				if errors.As(err, &list) {
+					writeJSON(w, http.StatusBadRequest, map[string]any{"message": err.Error(), "violations": list.ViolationList()})
+					return
+				}
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		resp, err := srv.VerifyPIN(r.Context(), req)
+		control := &responseControl{status: http.StatusOK, header: w.Header()}
+		resp, err := srv.VerifyPIN(context.WithValue(withHTTPRequest(r), responseControlKey{}, control), req)
 		if err != nil {
 			writeHandlerError(w, err)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, control.status, resp)
 	}), RequestMetadata{Service: "ManagerService", Method: "verifyPIN", HTTPMethod: "POST", Route: "/pos/manager/v1/verify", AuthSchemes: nil}))
 	return nil
 }

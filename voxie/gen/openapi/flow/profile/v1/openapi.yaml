@@ -12,17 +12,33 @@ paths:
             parameters:
                 - name: user_id
                   in: path
+                  description: user_id is the profile's subject.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: user_id is the profile's subject.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.profile.v1.GetProfileResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.profile.v1.GetProfileRequest:
@@ -31,6 +47,7 @@ components:
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id is the profile's subject.
             required:
@@ -48,6 +65,7 @@ components:
             properties:
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id is the profile's subject.
                 name:
@@ -92,6 +110,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the project identifier.
                 name:
@@ -129,3 +148,15 @@ components:
             description: |-
                 ProfileProject is the metadata card for one public project. Deliberately
                 carries no task-level fields: public means "discoverable", not "openable".
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ProfileService
+      description: |-
+        ProfileService exposes business-member profiles with public-project
+        discoverability. Only callers inside the same business can read a profile.

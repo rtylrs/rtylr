@@ -11,12 +11,24 @@ paths:
             description: Returns CRM summary metrics for the active business.
             operationId: DashboardService_getDashboard
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.dashboard.v1.GetDashboardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         crm.dashboard.v1.GetDashboardRequest:
@@ -26,12 +38,15 @@ components:
             properties:
                 total_customers:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 new_this_month:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 active_loyalty_members:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 top_customers:
                     type: array
@@ -47,6 +62,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 first_name:
                     type: string
@@ -59,6 +75,7 @@ components:
                     format: double
                 loyalty_points:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 loyalty_tier:
                     type: string
@@ -71,3 +88,13 @@ components:
                 - loyalty_points
                 - loyalty_tier
             description: TopCustomer is a customer ranked by spend for dashboard summaries.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: DashboardService
+      description: DashboardService defines the CRM dashboard endpoint.

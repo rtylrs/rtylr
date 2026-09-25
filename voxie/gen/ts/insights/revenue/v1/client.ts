@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface RevenueServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** RevenueService defines insights revenue analytics endpoints. */
 export class RevenueServiceClient {
 private baseUrl: string;
 private options: RevenueServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getRevenueOverview(req: GetRevenueOverviewRequest): Promise<GetRevenueOverviewResponse> {
+/** Returns revenue overview for a period. */
+async getRevenueOverview(req: GetRevenueOverviewRequest, opts?: RequestOptions): Promise<GetRevenueOverviewResponse> {
 const violations = validateGetRevenueOverviewRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/revenue/v1/overview";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -83,7 +123,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,9 +136,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetRevenueOverviewResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getRevenueByApp(req: GetRevenueByAppRequest): Promise<GetRevenueByAppResponse> {
+/** Returns revenue broken down by app. */
+async getRevenueByApp(req: GetRevenueByAppRequest, opts?: RequestOptions): Promise<GetRevenueByAppResponse> {
 const violations = validateGetRevenueByAppRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/revenue/v1/by-app";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -107,7 +149,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -119,9 +162,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetRevenueByAppResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getRevenueComparison(req: GetRevenueComparisonRequest): Promise<GetRevenueComparisonResponse> {
+/** Compares revenue across periods. */
+async getRevenueComparison(req: GetRevenueComparisonRequest, opts?: RequestOptions): Promise<GetRevenueComparisonResponse> {
 const violations = validateGetRevenueComparisonRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/revenue/v1/comparison";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -134,7 +178,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

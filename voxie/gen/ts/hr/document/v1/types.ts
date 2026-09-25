@@ -51,6 +51,7 @@ if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt ==
 return violations;
 }
 
+/** EmployeeDocumentPayload is an employee document record. */
 export interface EmployeeDocumentPayload {
 id?: string | undefined;
 ownerId?: string | undefined;

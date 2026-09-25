@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface GroupsServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** GroupsService defines hub team group endpoints. */
 export class GroupsServiceClient {
 private baseUrl: string;
 private options: GroupsServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listGroups(req: ListGroupsRequest): Promise<ListGroupsResponse> {
+/** Returns groups for the active business. */
+async listGroups(req: ListGroupsRequest, opts?: RequestOptions): Promise<ListGroupsResponse> {
 const violations = validateListGroupsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/groups";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListGroupsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createGroup(req: CreateGroupRequest): Promise<CreateGroupResponse> {
+/** Creates a new group. */
+async createGroup(req: CreateGroupRequest, opts?: RequestOptions): Promise<CreateGroupResponse> {
 const violations = validateCreateGroupRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/groups";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateGroupRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,9 +154,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateGroupResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getGroupDetail(req: GetGroupDetailRequest): Promise<GetGroupDetailResponse> {
+/** Returns a group with its members. */
+async getGroupDetail(req: GetGroupDetailRequest, opts?: RequestOptions): Promise<GetGroupDetailResponse> {
 const violations = validateGetGroupDetailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/groups/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -121,7 +165,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -133,15 +178,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetGroupDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateGroup(req: UpdateGroupRequest): Promise<UpdateGroupResponse> {
+/** Updates an existing group. */
+async updateGroup(req: UpdateGroupRequest, opts?: RequestOptions): Promise<UpdateGroupResponse> {
 const violations = validateUpdateGroupRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/groups/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateGroupRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -153,9 +200,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateGroupResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteGroup(req: DeleteGroupRequest): Promise<DeleteGroupResponse> {
+/** Deletes a group. */
+async deleteGroup(req: DeleteGroupRequest, opts?: RequestOptions): Promise<DeleteGroupResponse> {
 const violations = validateDeleteGroupRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/groups/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -163,7 +211,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -175,15 +224,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteGroupResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async addGroupMembers(req: AddGroupMembersRequest): Promise<AddGroupMembersResponse> {
+/** Adds users to a group. */
+async addGroupMembers(req: AddGroupMembersRequest, opts?: RequestOptions): Promise<AddGroupMembersResponse> {
 const violations = validateAddGroupMembersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/groups/{id}/members";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAddGroupMembersRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -195,9 +246,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAddGroupMembersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async removeGroupMember(req: RemoveGroupMemberRequest): Promise<RemoveGroupMemberResponse> {
+/** Removes a user from a group. */
+async removeGroupMember(req: RemoveGroupMemberRequest, opts?: RequestOptions): Promise<RemoveGroupMemberResponse> {
 const violations = validateRemoveGroupMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/groups/{id}/members/{user_id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
@@ -206,7 +258,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -218,9 +271,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRemoveGroupMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getUserGroups(req: GetUserGroupsRequest): Promise<GetUserGroupsResponse> {
+/** Returns the groups a user belongs to. */
+async getUserGroups(req: GetUserGroupsRequest, opts?: RequestOptions): Promise<GetUserGroupsResponse> {
 const violations = validateGetUserGroupsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/team/groups/v1/users/{user_id}/groups";
 path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
 const query = new URLSearchParams();
@@ -228,7 +282,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

@@ -194,7 +194,9 @@ return violations;
 }
 
 export interface ListWarehousesRequest {
+/** Maximum number of warehouses to return. */
 limit?: number | undefined;
+/** Number of warehouses to skip. */
 offset?: number | undefined;
 }
 

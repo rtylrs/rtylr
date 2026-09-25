@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface LoyaltyServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** LoyaltyService defines CRM loyalty program endpoints. */
 export class LoyaltyServiceClient {
 private baseUrl: string;
 private options: LoyaltyServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getLoyaltyConfig(req: GetLoyaltyConfigRequest): Promise<GetLoyaltyConfigResponse> {
+/** Returns the loyalty program configuration. */
+async getLoyaltyConfig(req: GetLoyaltyConfigRequest, opts?: RequestOptions): Promise<GetLoyaltyConfigResponse> {
 const violations = validateGetLoyaltyConfigRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetLoyaltyConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateLoyaltyConfig(req: UpdateLoyaltyConfigRequest): Promise<UpdateLoyaltyConfigResponse> {
+/** Updates the loyalty program configuration. */
+async updateLoyaltyConfig(req: UpdateLoyaltyConfigRequest, opts?: RequestOptions): Promise<UpdateLoyaltyConfigResponse> {
 const violations = validateUpdateLoyaltyConfigRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/config";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateLoyaltyConfigRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,16 +154,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateLoyaltyConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listLoyaltyTiers(req: ListLoyaltyTiersRequest): Promise<ListLoyaltyTiersResponse> {
+/** Returns all loyalty tiers. */
+async listLoyaltyTiers(req: ListLoyaltyTiersRequest, opts?: RequestOptions): Promise<ListLoyaltyTiersResponse> {
 const violations = validateListLoyaltyTiersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/tiers";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -132,14 +177,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListLoyaltyTiersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createLoyaltyTier(req: CreateLoyaltyTierRequest): Promise<CreateLoyaltyTierResponse> {
+/** Creates a new loyalty tier. */
+async createLoyaltyTier(req: CreateLoyaltyTierRequest, opts?: RequestOptions): Promise<CreateLoyaltyTierResponse> {
 const violations = validateCreateLoyaltyTierRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/tiers";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateLoyaltyTierRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -151,15 +198,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateLoyaltyTierResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateLoyaltyTier(req: UpdateLoyaltyTierRequest): Promise<UpdateLoyaltyTierResponse> {
+/** Updates an existing loyalty tier. */
+async updateLoyaltyTier(req: UpdateLoyaltyTierRequest, opts?: RequestOptions): Promise<UpdateLoyaltyTierResponse> {
 const violations = validateUpdateLoyaltyTierRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/tiers/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateLoyaltyTierRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -171,9 +220,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateLoyaltyTierResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listLoyaltyTransactions(req: ListLoyaltyTransactionsRequest): Promise<ListLoyaltyTransactionsResponse> {
+/** Returns paginated loyalty transactions. */
+async listLoyaltyTransactions(req: ListLoyaltyTransactionsRequest, opts?: RequestOptions): Promise<ListLoyaltyTransactionsResponse> {
 const violations = validateListLoyaltyTransactionsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/transactions";
 const query = new URLSearchParams();
 if (req.customerId !== undefined) {
@@ -189,7 +239,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -201,14 +252,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListLoyaltyTransactionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async awardPoints(req: AwardPointsRequest): Promise<AwardPointsResponse> {
+/** Awards loyalty points to a customer. */
+async awardPoints(req: AwardPointsRequest, opts?: RequestOptions): Promise<AwardPointsResponse> {
 const violations = validateAwardPointsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/award";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAwardPointsRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -220,14 +273,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAwardPointsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async redeemPoints(req: RedeemPointsRequest): Promise<RedeemPointsResponse> {
+/** Redeems loyalty points for a customer. */
+async redeemPoints(req: RedeemPointsRequest, opts?: RequestOptions): Promise<RedeemPointsResponse> {
 const violations = validateRedeemPointsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/v1/redeem";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeRedeemPointsRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

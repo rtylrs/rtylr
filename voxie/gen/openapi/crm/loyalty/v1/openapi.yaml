@@ -11,12 +11,24 @@ paths:
             description: Returns the loyalty program configuration.
             operationId: LoyaltyService_getLoyaltyConfig
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.GetLoyaltyConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         patch:
             tags:
                 - LoyaltyService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyConfigRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/loyalty/v1/tiers:
         get:
             tags:
@@ -44,12 +68,24 @@ paths:
             description: Returns all loyalty tiers.
             operationId: LoyaltyService_listLoyaltyTiers
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.ListLoyaltyTiersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - LoyaltyService
@@ -63,12 +99,24 @@ paths:
                             $ref: '#/components/schemas/crm.loyalty.v1.CreateLoyaltyTierRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.CreateLoyaltyTierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/loyalty/v1/tiers/{id}:
         put:
             tags:
@@ -81,7 +129,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -91,12 +141,24 @@ paths:
                                 - $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyTierBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyTierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/loyalty/v1/transactions:
         get:
             tags:
@@ -107,30 +169,46 @@ paths:
             parameters:
                 - name: customer_id
                   in: query
-                  required: true
+                  description: Filters transactions for a single customer.
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filters transactions for a single customer.
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.ListLoyaltyTransactionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/loyalty/v1/award:
         post:
             tags:
@@ -145,12 +223,24 @@ paths:
                             $ref: '#/components/schemas/crm.loyalty.v1.AwardPointsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.AwardPointsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/loyalty/v1/redeem:
         post:
             tags:
@@ -165,12 +255,24 @@ paths:
                             $ref: '#/components/schemas/crm.loyalty.v1.RedeemPointsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.loyalty.v1.RedeemPointsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         crm.loyalty.v1.GetLoyaltyConfigRequest:
@@ -188,9 +290,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 is_enabled:
                     type: boolean
@@ -202,15 +306,19 @@ components:
                     format: double
                 bronze_min:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 silver_min:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 gold_min:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 platinum_min:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 bronze_discount_pct:
                     type: number
@@ -226,6 +334,7 @@ components:
                     format: double
                 points_expiry_days:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 updated_at:
                     type: string
@@ -262,18 +371,22 @@ components:
                 bronze_min:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 silver_min:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 gold_min:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 platinum_min:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 bronze_discount_pct:
                     exclusiveMinimum: 0
@@ -294,6 +407,7 @@ components:
                 points_expiry_days:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - is_enabled
@@ -331,14 +445,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
                 min_points:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 discount_pct:
                     type: number
@@ -347,6 +464,7 @@ components:
                     type: string
                 sort_order:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 created_at:
                     type: string
@@ -371,6 +489,7 @@ components:
                 min_points:
                     type: string
                     minimum: 0
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Points threshold at which this tier starts applying. Zero is valid and
@@ -384,6 +503,7 @@ components:
                 sort_order:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - name
@@ -396,6 +516,7 @@ components:
             properties:
                 tier_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -408,6 +529,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -423,6 +545,7 @@ components:
                 min_points:
                     type: string
                     minimum: 0
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Points threshold at which this tier starts applying. Zero is valid and
@@ -436,6 +559,7 @@ components:
                 sort_order:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - name
@@ -455,13 +579,16 @@ components:
             properties:
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filters transactions for a single customer.
                 page:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - customer_id
@@ -476,12 +603,15 @@ components:
                         $ref: '#/components/schemas/crm.loyalty.v1.LoyaltyTransaction'
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - transactions
@@ -493,28 +623,35 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 type:
                     type: string
                 points:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 balance_before:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 balance_after:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 description:
                     type: string
                 reference_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reference_type:
                     type: string
@@ -538,15 +675,18 @@ components:
                 customer_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 points:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 description:
                     type: string
                 reference_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reference_type:
                     type: string
@@ -568,15 +708,18 @@ components:
                 customer_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 points:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 description:
                     type: string
                 reference_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reference_type:
                     type: string
@@ -592,3 +735,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LoyaltyService
+      description: LoyaltyService defines CRM loyalty program endpoints.

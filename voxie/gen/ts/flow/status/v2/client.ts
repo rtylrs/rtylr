@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,33 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface StatusServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/**
+ * StatusService manages per-project custom statuses.
+ *
+ * Board columns stay independent of statuses. T4 of the proposal preserves
+ * today's decoupling, so nothing here reads or writes flow_project_columns.
+ */
 export class StatusServiceClient {
 private baseUrl: string;
 private options: StatusServiceClientOptions;
@@ -71,9 +115,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listStatuses(req: ListStatusesRequest): Promise<ListStatusesResponse> {
+/** Returns one project's status set in sort order, empty when unconfigured. */
+async listStatuses(req: ListStatusesRequest, opts?: RequestOptions): Promise<ListStatusesResponse> {
 const violations = validateListStatusesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/status/v2/statuses";
 const query = new URLSearchParams();
 if (req.projectId !== undefined) {
@@ -83,7 +128,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,14 +141,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListStatusesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createStatus(req: CreateStatusRequest): Promise<CreateStatusResponse> {
+/** Creates a status in a project's set. */
+async createStatus(req: CreateStatusRequest, opts?: RequestOptions): Promise<CreateStatusResponse> {
 const violations = validateCreateStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/status/v2/statuses";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateStatusRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -114,15 +162,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateStatus(req: UpdateStatusRequest): Promise<UpdateStatusResponse> {
+/** Replaces a status. */
+async updateStatus(req: UpdateStatusRequest, opts?: RequestOptions): Promise<UpdateStatusResponse> {
 const violations = validateUpdateStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/status/v2/statuses/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateStatusRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -134,9 +184,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteStatus(req: DeleteStatusRequest): Promise<DeleteStatusResponse> {
+/** Deletes a status, moving its tasks back to their built-in string status. */
+async deleteStatus(req: DeleteStatusRequest, opts?: RequestOptions): Promise<DeleteStatusResponse> {
 const violations = validateDeleteStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/status/v2/statuses/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -144,7 +195,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -156,14 +208,21 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async setTaskStatus(req: SetTaskStatusRequest): Promise<SetTaskStatusResponse> {
+/**
+ * Applies a custom status to a task, or clears it with status_id zero.
+ *
+ * Lives here rather than on the task service, mirroring setTaskLabels in
+ * flow.label.v2: the capability that owns the concept owns the setter.
+ */
+async setTaskStatus(req: SetTaskStatusRequest, opts?: RequestOptions): Promise<SetTaskStatusResponse> {
 const violations = validateSetTaskStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/status/v2/tasks/status";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSetTaskStatusRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

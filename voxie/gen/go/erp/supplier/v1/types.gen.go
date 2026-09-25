@@ -6,21 +6,36 @@ import (
 	"strconv"
 )
 
+// Supplier is a business's registered supplier record.
 type Supplier struct {
-	Id           int64  `json:"id,omitempty"`
-	OwnerId      int64  `json:"owner_id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Email        string `json:"email,omitempty"`
-	Phone        string `json:"phone,omitempty"`
-	Address      string `json:"address,omitempty"`
-	City         string `json:"city,omitempty"`
-	Country      string `json:"country,omitempty"`
-	TaxId        string `json:"tax_id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	// phone is the phone value for this contract.
+	Phone string `json:"phone,omitempty"`
+	// address is the address value for this contract.
+	Address string `json:"address,omitempty"`
+	// city is the city value for this contract.
+	City string `json:"city,omitempty"`
+	// country is the country value for this contract.
+	Country string `json:"country,omitempty"`
+	// tax_id is the tax id value for this contract.
+	TaxId string `json:"tax_id,omitempty"`
+	// payment_terms is the payment terms value for this contract.
 	PaymentTerms string `json:"payment_terms,omitempty"`
-	Notes        string `json:"notes,omitempty"`
-	IsActive     bool   `json:"is_active,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	UpdatedAt    string `json:"updated_at,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive bool `json:"is_active,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Supplier) MarshalJSON() ([]byte, error) {
@@ -175,16 +190,26 @@ func (x *Supplier) GetUpdatedAt() string {
 }
 
 type CreateSupplierRequest struct {
-	Name         string `json:"name,omitempty"`
-	Email        string `json:"email,omitempty"`
-	Phone        string `json:"phone,omitempty"`
-	Address      string `json:"address,omitempty"`
-	City         string `json:"city,omitempty"`
-	Country      string `json:"country,omitempty"`
-	TaxId        string `json:"tax_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	// phone is the phone value for this contract.
+	Phone string `json:"phone,omitempty"`
+	// address is the address value for this contract.
+	Address string `json:"address,omitempty"`
+	// city is the city value for this contract.
+	City string `json:"city,omitempty"`
+	// country is the country value for this contract.
+	Country string `json:"country,omitempty"`
+	// tax_id is the tax id value for this contract.
+	TaxId string `json:"tax_id,omitempty"`
+	// payment_terms is the payment terms value for this contract.
 	PaymentTerms string `json:"payment_terms,omitempty"`
-	Notes        string `json:"notes,omitempty"`
-	IsActive     bool   `json:"is_active,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive bool `json:"is_active,omitempty"`
 }
 
 func (x *CreateSupplierRequest) GetName() string {
@@ -268,8 +293,10 @@ func (x *CreateSupplierRequest) GetIsActive() bool {
 }
 
 type CreateSupplierResponse struct {
-	SupplierId int64  `json:"supplier_id,omitempty"`
-	Message    string `json:"message,omitempty"`
+	// supplier_id is the supplier id value for this contract.
+	SupplierId int64 `json:"supplier_id,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (m *CreateSupplierResponse) MarshalJSON() ([]byte, error) {
@@ -371,7 +398,9 @@ func (x *DeleteSupplierResponse) GetMessage() string {
 }
 
 type ListSuppliersRequest struct {
-	Page     int32 `json:"page,omitempty"`
+	// page is the 1-based page number.
+	Page int32 `json:"page,omitempty"`
+	// page_size is the number of rows to return.
 	PageSize int32 `json:"page_size,omitempty"`
 }
 
@@ -392,10 +421,14 @@ func (x *ListSuppliersRequest) GetPageSize() int32 {
 }
 
 type ListSuppliersResponse struct {
+	// suppliers is the suppliers value for this contract.
 	Suppliers []*Supplier `json:"suppliers,omitempty"`
-	HasMore   bool        `json:"has_more,omitempty"`
-	Page      int32       `json:"page,omitempty"`
-	PageSize  int32       `json:"page_size,omitempty"`
+	// has_more is true when another page is available.
+	HasMore bool `json:"has_more,omitempty"`
+	// page is the returned 1-based page number.
+	Page int32 `json:"page,omitempty"`
+	// page_size is the returned page size.
+	PageSize int32 `json:"page_size,omitempty"`
 }
 
 func (x *ListSuppliersResponse) GetSuppliers() []*Supplier {
@@ -431,16 +464,26 @@ func (x *ListSuppliersResponse) GetPageSize() int32 {
 }
 
 type UpdateSupplierBody struct {
-	Name         string `json:"name,omitempty"`
-	Email        string `json:"email,omitempty"`
-	Phone        string `json:"phone,omitempty"`
-	Address      string `json:"address,omitempty"`
-	City         string `json:"city,omitempty"`
-	Country      string `json:"country,omitempty"`
-	TaxId        string `json:"tax_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	// phone is the phone value for this contract.
+	Phone string `json:"phone,omitempty"`
+	// address is the address value for this contract.
+	Address string `json:"address,omitempty"`
+	// city is the city value for this contract.
+	City string `json:"city,omitempty"`
+	// country is the country value for this contract.
+	Country string `json:"country,omitempty"`
+	// tax_id is the tax id value for this contract.
+	TaxId string `json:"tax_id,omitempty"`
+	// payment_terms is the payment terms value for this contract.
 	PaymentTerms string `json:"payment_terms,omitempty"`
-	Notes        string `json:"notes,omitempty"`
-	IsActive     bool   `json:"is_active,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive bool `json:"is_active,omitempty"`
 }
 
 func (x *UpdateSupplierBody) GetName() string {
@@ -524,7 +567,9 @@ func (x *UpdateSupplierBody) GetIsActive() bool {
 }
 
 type UpdateSupplierRequest struct {
-	Id   int64               `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable supplier fields bound from the HTTP payload.
 	Body *UpdateSupplierBody `json:"body,omitempty"`
 }
 
@@ -574,6 +619,7 @@ func (x *UpdateSupplierRequest) GetBody() *UpdateSupplierBody {
 }
 
 type UpdateSupplierResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

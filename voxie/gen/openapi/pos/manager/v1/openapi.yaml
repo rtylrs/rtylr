@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/pos.manager.v1.VerifyPINRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.manager.v1.VerifyPINResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.manager.v1.VerifyPINRequest:
@@ -39,6 +51,7 @@ components:
                     type: boolean
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -46,3 +59,13 @@ components:
                 - valid
                 - staff_id
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ManagerService
+      description: ManagerService defines POS manager override endpoints.

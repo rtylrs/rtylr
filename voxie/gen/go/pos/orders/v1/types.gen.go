@@ -19,8 +19,10 @@ type OrderItem struct {
 	TaxRate        float64 `json:"tax_rate,omitempty"`
 	Total          float64 `json:"total,omitempty"`
 	Notes          string  `json:"notes,omitempty"`
-	Status         string  `json:"status,omitempty"`
-	CreatedAt      string  `json:"created_at,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *OrderItem) MarshalJSON() ([]byte, error) {
@@ -185,31 +187,35 @@ func (x *OrderItem) GetCreatedAt() string {
 }
 
 type Order struct {
-	Id             int64        `json:"id,omitempty"`
-	OwnerId        int64        `json:"owner_id,omitempty"`
-	SessionId      int64        `json:"session_id,omitempty"`
-	TableId        int64        `json:"table_id,omitempty"`
-	LocationId     int64        `json:"location_id,omitempty"`
-	OrderNumber    string       `json:"order_number,omitempty"`
-	Type           string       `json:"type,omitempty"`
-	Status         string       `json:"status,omitempty"`
-	CustomerId     int64        `json:"customer_id,omitempty"`
-	CustomerName   string       `json:"customer_name,omitempty"`
-	StaffId        int64        `json:"staff_id,omitempty"`
-	Subtotal       float64      `json:"subtotal,omitempty"`
-	DiscountAmount float64      `json:"discount_amount,omitempty"`
-	TaxAmount      float64      `json:"tax_amount,omitempty"`
-	Total          float64      `json:"total,omitempty"`
-	PaymentMethod  string       `json:"payment_method,omitempty"`
-	PaymentStatus  string       `json:"payment_status,omitempty"`
-	AmountPaid     float64      `json:"amount_paid,omitempty"`
-	ChangeDue      float64      `json:"change_due,omitempty"`
-	Notes          string       `json:"notes,omitempty"`
-	KitchenNotes   string       `json:"kitchen_notes,omitempty"`
-	CreatedAt      string       `json:"created_at,omitempty"`
-	UpdatedAt      string       `json:"updated_at,omitempty"`
-	PaidAt         string       `json:"paid_at,omitempty"`
-	Items          []*OrderItem `json:"items,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId     int64  `json:"owner_id,omitempty"`
+	SessionId   int64  `json:"session_id,omitempty"`
+	TableId     int64  `json:"table_id,omitempty"`
+	LocationId  int64  `json:"location_id,omitempty"`
+	OrderNumber string `json:"order_number,omitempty"`
+	Type        string `json:"type,omitempty"`
+	// status is the current lifecycle state.
+	Status         string  `json:"status,omitempty"`
+	CustomerId     int64   `json:"customer_id,omitempty"`
+	CustomerName   string  `json:"customer_name,omitempty"`
+	StaffId        int64   `json:"staff_id,omitempty"`
+	Subtotal       float64 `json:"subtotal,omitempty"`
+	DiscountAmount float64 `json:"discount_amount,omitempty"`
+	TaxAmount      float64 `json:"tax_amount,omitempty"`
+	Total          float64 `json:"total,omitempty"`
+	PaymentMethod  string  `json:"payment_method,omitempty"`
+	PaymentStatus  string  `json:"payment_status,omitempty"`
+	AmountPaid     float64 `json:"amount_paid,omitempty"`
+	ChangeDue      float64 `json:"change_due,omitempty"`
+	Notes          string  `json:"notes,omitempty"`
+	KitchenNotes   string  `json:"kitchen_notes,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string       `json:"updated_at,omitempty"`
+	PaidAt    string       `json:"paid_at,omitempty"`
+	Items     []*OrderItem `json:"items,omitempty"`
 }
 
 func (m *Order) MarshalJSON() ([]byte, error) {
@@ -1030,6 +1036,7 @@ type CreatePublicOrderResponse struct {
 	OrderId     int64  `json:"order_id,omitempty"`
 	OrderNumber string `json:"order_number,omitempty"`
 	Status      string `json:"status,omitempty"`
+	// Opaque credential required to retrieve this order's public status.
 	PublicToken string `json:"public_token,omitempty"`
 }
 
@@ -1148,8 +1155,13 @@ func (x *GetOrderDetailResponse) GetOrder() *Order {
 }
 
 type GetPublicOrderStatusRequest struct {
-	OrderId     int64  `json:"order_id,omitempty"`
-	BusinessId  *int64 `json:"business_id,omitempty"`
+	OrderId int64 `json:"order_id,omitempty"`
+	// business_id scopes the lookup to the business the order belongs to,
+	// preventing cross-tenant order enumeration on this anonymous endpoint.
+	BusinessId *int64 `json:"business_id,omitempty"`
+	// Single-use? No: this credential is scoped to this order and is safe to
+	// present repeatedly for status polling. It must never be replaced by the
+	// sequential order ID alone.
 	PublicToken string `json:"public_token,omitempty"`
 }
 
@@ -1284,12 +1296,16 @@ func (x *GetPublicOrderStatusResponse) GetStatus() string {
 
 type ListOrdersRequest struct {
 	SessionId *int64 `json:"session_id,omitempty"`
-	Status    string `json:"status,omitempty"`
-	DateFrom  string `json:"date_from,omitempty"`
-	DateTo    string `json:"date_to,omitempty"`
-	Search    string `json:"search,omitempty"`
-	Page      int64  `json:"page,omitempty"`
-	PageSize  int64  `json:"page_size,omitempty"`
+	// status is the current lifecycle state.
+	Status   string `json:"status,omitempty"`
+	DateFrom string `json:"date_from,omitempty"`
+	DateTo   string `json:"date_to,omitempty"`
+	// search filters orders by order number, customer, or matching text.
+	Search string `json:"search,omitempty"`
+	// page is the one-based page number to return.
+	Page int64 `json:"page,omitempty"`
+	// page_size is the maximum number of orders to return.
+	PageSize int64 `json:"page_size,omitempty"`
 }
 
 func (m *ListOrdersRequest) MarshalJSON() ([]byte, error) {
@@ -1385,11 +1401,15 @@ func (x *ListOrdersRequest) GetPageSize() int64 {
 }
 
 type ListOrdersResponse struct {
-	Orders   []*Order `json:"orders,omitempty"`
-	Total    int64    `json:"total,omitempty"`
-	HasMore  bool     `json:"has_more,omitempty"`
-	Page     int64    `json:"page,omitempty"`
-	PageSize int64    `json:"page_size,omitempty"`
+	Orders []*Order `json:"orders,omitempty"`
+	// total is the total number of matching records.
+	Total int64 `json:"total,omitempty"`
+	// has_more indicates another page is available.
+	HasMore bool `json:"has_more,omitempty"`
+	// page is the one-based page number returned.
+	Page int64 `json:"page,omitempty"`
+	// page_size is the page size returned.
+	PageSize int64 `json:"page_size,omitempty"`
 }
 
 func (x *ListOrdersResponse) GetOrders() []*Order {
@@ -1565,6 +1585,7 @@ func (x *TransferTableResponse) GetSuccess() bool {
 }
 
 type UpdateOrderStatusBody struct {
+	// status is the current lifecycle state.
 	Status string `json:"status,omitempty"`
 }
 
@@ -1577,8 +1598,9 @@ func (x *UpdateOrderStatusBody) GetStatus() string {
 }
 
 type UpdateOrderStatusRequest struct {
-	OrderId int64                  `json:"order_id,omitempty"`
-	Body    *UpdateOrderStatusBody `json:"body,omitempty"`
+	OrderId int64 `json:"order_id,omitempty"`
+	// body carries the new order status bound from the HTTP payload.
+	Body *UpdateOrderStatusBody `json:"body,omitempty"`
 }
 
 func (m *UpdateOrderStatusRequest) MarshalJSON() ([]byte, error) {

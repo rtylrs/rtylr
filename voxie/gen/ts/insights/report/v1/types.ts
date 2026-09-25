@@ -2,12 +2,25 @@
 import * as common_pagination_v1 from "../../../common/pagination/v1/types.js";
 
 export interface ReportTemplate {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** name is the name value for this contract. */
 name?: string | undefined;
+/** description is the description value for this contract. */
 description?: string | undefined;
+/**
+ * type is the type value for this contract.
+ * revenue, customers, products, operations, financial
+ */
 type?: string | undefined;
+/** metrics is the metrics value for this contract. */
 metrics?: (string)[] | undefined;
+/**
+ * format is the format value for this contract.
+ * pdf, csv, xlsx
+ */
 format?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -49,15 +62,28 @@ return violations;
 }
 
 export interface ScheduledReport {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** template_id is the template id value for this contract. */
 templateId?: string | undefined;
+/** template_name is the template name value for this contract. */
 templateName?: string | undefined;
+/**
+ * frequency is the frequency value for this contract.
+ * daily, weekly, monthly
+ */
 frequency?: string | undefined;
+/** recipient_email is the recipient email value for this contract. */
 recipientEmail?: string | undefined;
+/** channel is the delivery channel (email, slack). */
 channel?: string | undefined;
+/** is_active is the is active value for this contract. */
 isActive?: boolean | undefined;
+/** last_sent_at is the last sent at value for this contract. */
 lastSentAt?: string | undefined;
+/** next_send_at is the next send at value for this contract. */
 nextSendAt?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -108,10 +134,15 @@ return violations;
 }
 
 export interface ListReportTemplatesRequest {
+/** page is the current result page. */
 page?: number | undefined;
+/** limit is the maximum number of records to return. */
 limit?: number | undefined;
+/** sort_by is the field to sort results by. */
 sortBy?: string | undefined;
+/** sort_dir is the sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
+/** type is the type value for this contract. */
 type?: string | undefined;
 }
 
@@ -147,7 +178,9 @@ return violations;
 }
 
 export interface ListReportTemplatesResponse {
+/** templates is the templates value for this contract. */
 templates?: (ReportTemplate)[] | undefined;
+/** pagination is the pagination value for this contract. */
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
 
@@ -176,10 +209,15 @@ return violations;
 }
 
 export interface CreateReportTemplateRequest {
+/** name is the name value for this contract. */
 name: string;
+/** description is the description value for this contract. */
 description: string;
+/** type is the type value for this contract. */
 type: string;
+/** metrics is the metrics value for this contract. */
 metrics?: (string)[] | undefined;
+/** format is the format value for this contract. */
 format: string;
 }
 
@@ -220,6 +258,7 @@ return violations;
 }
 
 export interface CreateReportTemplateResponse {
+/** template is the template value for this contract. */
 template?: ReportTemplate | undefined;
 }
 
@@ -244,6 +283,7 @@ return violations;
 }
 
 export interface GetReportTemplateRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
 }
 
@@ -268,6 +308,7 @@ return violations;
 }
 
 export interface GetReportTemplateResponse {
+/** template is the template value for this contract. */
 template?: ReportTemplate | undefined;
 }
 
@@ -292,9 +333,13 @@ return violations;
 }
 
 export interface ListScheduledReportsRequest {
+/** page is the current result page. */
 page?: number | undefined;
+/** limit is the maximum number of records to return. */
 limit?: number | undefined;
+/** sort_by is the field to sort results by. */
 sortBy?: string | undefined;
+/** sort_dir is the sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -327,7 +372,9 @@ return violations;
 }
 
 export interface ListScheduledReportsResponse {
+/** reports is the reports value for this contract. */
 reports?: (ScheduledReport)[] | undefined;
+/** pagination is the pagination value for this contract. */
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
 
@@ -356,10 +403,15 @@ return violations;
 }
 
 export interface CreateScheduledReportRequest {
+/** template_slug is the template slug (e.g. revenue-monthly). */
 templateSlug: string;
+/** frequency is the delivery frequency (daily, weekly, monthly). */
 frequency: string;
+/** channel is the delivery channel (email, slack). */
 channel: string;
+/** recipient_email is the delivery recipient. */
 recipientEmail: string;
+/** is_active toggles whether the schedule is active. */
 isActive?: boolean | undefined;
 }
 
@@ -394,12 +446,13 @@ if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "str
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
 if (v.recipientEmail !== undefined && v.recipientEmail !== null && !(typeof v.recipientEmail === "string")) violations.push("recipient_email has invalid type");
 if (!(v.recipientEmail !== undefined && v.recipientEmail !== null) || v.recipientEmail === "") violations.push("recipient_email is required");
-if (v.recipientEmail !== undefined && v.recipientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
+if (v.recipientEmail !== undefined && v.recipientEmail !== null && v.recipientEmail !== "" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
 if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
 export interface CreateScheduledReportResponse {
+/** report is the report value for this contract. */
 report?: ScheduledReport | undefined;
 }
 
@@ -424,11 +477,17 @@ return violations;
 }
 
 export interface UpdateScheduledReportRequest {
+/** id is the scheduled report identifier. */
 id?: string | undefined;
+/** template_slug is the template slug (e.g. revenue-monthly). */
 templateSlug: string;
+/** frequency is the delivery frequency (daily, weekly, monthly). */
 frequency: string;
+/** channel is the delivery channel (email, slack). */
 channel: string;
+/** recipient_email is the delivery recipient. */
 recipientEmail: string;
+/** is_active toggles whether the schedule is active. */
 isActive?: boolean | undefined;
 }
 
@@ -467,12 +526,13 @@ if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "str
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
 if (v.recipientEmail !== undefined && v.recipientEmail !== null && !(typeof v.recipientEmail === "string")) violations.push("recipient_email has invalid type");
 if (!(v.recipientEmail !== undefined && v.recipientEmail !== null) || v.recipientEmail === "") violations.push("recipient_email is required");
-if (v.recipientEmail !== undefined && v.recipientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
+if (v.recipientEmail !== undefined && v.recipientEmail !== null && v.recipientEmail !== "" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
 if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
 export interface UpdateScheduledReportResponse {
+/** report is the updated scheduled report. */
 report?: ScheduledReport | undefined;
 }
 
@@ -497,6 +557,7 @@ return violations;
 }
 
 export interface DeleteScheduledReportRequest {
+/** id is the scheduled report identifier. */
 id?: string | undefined;
 }
 
@@ -521,6 +582,7 @@ return violations;
 }
 
 export interface DeleteScheduledReportResponse {
+/** deleted confirms the schedule was removed. */
 deleted?: boolean | undefined;
 }
 
@@ -544,8 +606,11 @@ return violations;
 }
 
 export interface GenerateRevenueReportRequest {
+/** from_date is the inclusive start date (YYYY-MM-DD). */
 fromDate?: string | undefined;
+/** to_date is the inclusive end date (YYYY-MM-DD). */
 toDate?: string | undefined;
+/** format is the export format (csv, pdf). */
 format?: string | undefined;
 }
 
@@ -575,8 +640,11 @@ return violations;
 }
 
 export interface GenerateRevenueReportResponse {
+/** report_id is the queued report identifier. */
 reportId?: string | undefined;
+/** url is the download URL when ready. */
 url?: string | undefined;
+/** status is the queue status. */
 status?: string | undefined;
 }
 
@@ -606,7 +674,9 @@ return violations;
 }
 
 export interface ExportRevenueReportRequest {
+/** from_date is the inclusive start date (YYYY-MM-DD). */
 fromDate?: string | undefined;
+/** to_date is the inclusive end date (YYYY-MM-DD). */
 toDate?: string | undefined;
 }
 
@@ -633,7 +703,9 @@ return violations;
 }
 
 export interface ExportRevenueRow {
+/** date is the revenue date (YYYY-MM-DD). */
 date?: string | undefined;
+/** amount_minor_units is the revenue amount in minor units. */
 amountMinorUnits?: string | undefined;
 }
 
@@ -660,9 +732,13 @@ return violations;
 }
 
 export interface ExportRevenueReportResponse {
+/** filename is the suggested download filename. */
 filename?: string | undefined;
+/** content_type is the MIME type for the export payload. */
 contentType?: string | undefined;
+/** csv is the CSV document body. */
 csv?: string | undefined;
+/** rows is the structured export rows. */
 rows?: (ExportRevenueRow)[] | undefined;
 }
 

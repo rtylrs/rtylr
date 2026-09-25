@@ -19,15 +19,31 @@ const violations: string[] = [];
 return violations;
 }
 
+/**
+ * DashboardTask is the compact task shape the dashboard's my-tasks widget
+ * renders. v1 reused the fat Task message from the task domain; with both
+ * task.v1 and task.v2 in circulation a plain-name reference became ambiguous,
+ * and the dashboard never needed most of those fields anyway. Deliberately
+ * local to this package.
+ */
 export interface DashboardTask {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** title is the title value for this contract. */
 title?: string | undefined;
+/** status is the current lifecycle state. */
 status?: string | undefined;
+/** priority is the priority value for this contract. */
 priority?: string | undefined;
+/** due_date is the due date value for this contract. */
 dueDate?: string | undefined;
+/** project_name is the denormalised project display name. */
 projectName?: string | undefined;
+/** project_color is the project color hex for inline badges. */
 projectColor?: string | undefined;
+/** assignee_name is the assignee display name. Empty if unassigned. */
 assigneeName?: string | undefined;
+/** assignee_initials are two-letter uppercase initials. Empty if unassigned. */
 assigneeInitials?: string | undefined;
 }
 
@@ -75,10 +91,19 @@ return violations;
 }
 
 export interface GetFlowDashboardResponse {
+/** open_tasks is the open tasks value for this contract. */
 openTasks?: string | undefined;
+/** in_progress_tasks is the in progress tasks value for this contract. */
 inProgressTasks?: string | undefined;
+/** completed_this_week is the completed this week value for this contract. */
 completedThisWeek?: string | undefined;
+/** overdue_tasks is the overdue tasks value for this contract. */
 overdueTasks?: string | undefined;
+/**
+ * my_tasks lists tasks assigned to the caller across their visible
+ * projects. With workspaces gone there is exactly one scope, so v1's
+ * workspace-scoped my-tasks concern dissolves.
+ */
 myTasks?: (DashboardTask)[] | undefined;
 }
 

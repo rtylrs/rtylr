@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,32 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface CompatibilityServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/**
+ * Typed compatibility surface for finance routes that predate the canonical
+ * finance.* service packages. It preserves their deployed wire paths while
+ * moving app transport to generated OneKit clients.
+ */
 export class CompatibilityServiceClient {
 private baseUrl: string;
 private options: CompatibilityServiceClientOptions;
@@ -71,16 +114,17 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getDashboard(req: EmptyRequest): Promise<JsonResponse> {
+async getDashboard(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/dashboard";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,9 +136,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listInvoices(req: PageRequest): Promise<JsonResponse> {
+async listInvoices(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -128,7 +172,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -140,9 +185,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getInvoice(req: IdQueryRequest): Promise<JsonResponse> {
+async getInvoice(req: IdQueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateIdQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/detail";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -152,7 +197,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -164,14 +210,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createInvoice(req: BodyRequest): Promise<JsonResponse> {
+async createInvoice(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -183,14 +230,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateInvoice(req: BodyRequest): Promise<JsonResponse> {
+async updateInvoice(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -202,14 +250,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateInvoiceStatus(req: BodyRequest): Promise<JsonResponse> {
+async updateInvoiceStatus(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/status";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -221,14 +270,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async recordPayment(req: BodyRequest): Promise<JsonResponse> {
+async recordPayment(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/payment";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -240,9 +290,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listExpenses(req: PageRequest): Promise<JsonResponse> {
+async listExpenses(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/expenses";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -276,7 +326,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -288,14 +339,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createExpense(req: BodyRequest): Promise<JsonResponse> {
+async createExpense(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/expenses";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -307,14 +359,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateExpense(req: BodyRequest): Promise<JsonResponse> {
+async updateExpense(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/expenses";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -326,16 +379,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listExpenseCategories(req: EmptyRequest): Promise<JsonResponse> {
+async listExpenseCategories(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/expense-categories";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -347,14 +401,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createExpenseCategory(req: BodyRequest): Promise<JsonResponse> {
+async createExpenseCategory(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/expense-categories";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -366,15 +421,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateExpenseCategory(req: PathBodyRequest): Promise<JsonResponse> {
+async updateExpenseCategory(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/expense-categories/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -386,9 +442,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteExpenseCategory(req: PathRequest): Promise<JsonResponse> {
+async deleteExpenseCategory(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/expense-categories/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -396,7 +452,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -408,9 +465,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPL(req: ReportRequest): Promise<JsonResponse> {
+async getPL(req: ReportRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateReportRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/report/v1/pl";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -423,7 +480,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -435,16 +493,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listTaxConfig(req: EmptyRequest): Promise<JsonResponse> {
+async listTaxConfig(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/tax/config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -456,14 +515,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTaxConfig(req: BodyRequest): Promise<JsonResponse> {
+async createTaxConfig(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/tax/config";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -475,16 +535,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTaxReport(req: EmptyRequest): Promise<JsonResponse> {
+async getTaxReport(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/tax/report";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -496,14 +557,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateTaxConfig(req: BodyRequest): Promise<JsonResponse> {
+async updateTaxConfig(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/tax";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -515,9 +577,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listRecurringInvoices(req: PageRequest): Promise<JsonResponse> {
+async listRecurringInvoices(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/recurring-invoices";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -551,7 +613,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -563,14 +626,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createRecurringInvoice(req: BodyRequest): Promise<JsonResponse> {
+async createRecurringInvoice(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/recurring-invoices";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -582,14 +646,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateRecurringInvoice(req: BodyRequest): Promise<JsonResponse> {
+async updateRecurringInvoice(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/recurring-invoices";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -601,15 +666,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async triggerRecurringInvoice(req: PathBodyRequest): Promise<JsonResponse> {
+async triggerRecurringInvoice(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/recurring-invoices/{id}/trigger";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -621,9 +687,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listQuotes(req: PageRequest): Promise<JsonResponse> {
+async listQuotes(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/quotes";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -657,7 +723,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -669,14 +736,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createQuote(req: BodyRequest): Promise<JsonResponse> {
+async createQuote(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/quotes";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -688,14 +756,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateQuote(req: BodyRequest): Promise<JsonResponse> {
+async updateQuote(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/quotes";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -707,9 +776,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteQuote(req: PathRequest): Promise<JsonResponse> {
+async deleteQuote(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/quotes/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -717,7 +786,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -729,9 +799,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listBills(req: PageRequest): Promise<JsonResponse> {
+async listBills(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/bills";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -765,7 +835,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -777,14 +848,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createBill(req: BodyRequest): Promise<JsonResponse> {
+async createBill(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/bills";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -796,14 +868,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateBill(req: BodyRequest): Promise<JsonResponse> {
+async updateBill(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/bills";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -815,9 +888,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listBankAccounts(req: PageRequest): Promise<JsonResponse> {
+async listBankAccounts(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/bank-accounts";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -851,7 +924,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -863,14 +937,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createBankAccount(req: BodyRequest): Promise<JsonResponse> {
+async createBankAccount(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/bank-accounts";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -882,16 +957,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getReconciliation(req: EmptyRequest): Promise<JsonResponse> {
+async getReconciliation(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/reconciliation";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -903,14 +979,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async matchTransaction(req: BodyRequest): Promise<JsonResponse> {
+async matchTransaction(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/reconciliation/match";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -922,14 +999,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async matchReconcile(req: BodyRequest): Promise<JsonResponse> {
+async matchReconcile(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/reconcile/match";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -941,9 +1019,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listBankFeeds(req: BankFeedRequest): Promise<JsonResponse> {
+async listBankFeeds(req: BankFeedRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBankFeedRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/bank-feeds";
 const query = new URLSearchParams();
 if (req.accountId !== undefined) {
@@ -953,7 +1031,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -965,16 +1044,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getBalanceSheet(req: EmptyRequest): Promise<JsonResponse> {
+async getBalanceSheet(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/balance-sheet";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -986,16 +1066,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCashFlow(req: EmptyRequest): Promise<JsonResponse> {
+async getCashFlow(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/cash-flow";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1007,9 +1088,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listAccounts(req: PageRequest): Promise<JsonResponse> {
+async listAccounts(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/accounts";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1043,7 +1124,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1055,14 +1137,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createAccount(req: BodyRequest): Promise<JsonResponse> {
+async createAccount(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/accounts";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1074,9 +1157,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getJournal(req: PageRequest): Promise<JsonResponse> {
+async getJournal(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/journal";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1110,7 +1193,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1122,14 +1206,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createJournalEntry(req: BodyRequest): Promise<JsonResponse> {
+async createJournalEntry(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/journal";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

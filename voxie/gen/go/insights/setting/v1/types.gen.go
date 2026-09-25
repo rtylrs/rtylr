@@ -2,11 +2,17 @@
 package v1
 
 type InsightsSettings struct {
-	DefaultPeriod    string   `json:"default_period,omitempty"`
-	Currency         string   `json:"currency,omitempty"`
-	ComparePrevious  bool     `json:"compare_previous,omitempty"`
+	// default_period is the default period value for this contract.
+	// this_month, this_quarter, this_year
+	DefaultPeriod string `json:"default_period,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// compare_previous is the compare previous value for this contract.
+	ComparePrevious bool `json:"compare_previous,omitempty"`
+	// dashboard_widgets is the dashboard widgets value for this contract.
 	DashboardWidgets []string `json:"dashboard_widgets,omitempty"`
-	FavoriteReports  []string `json:"favorite_reports,omitempty"`
+	// favorite_reports is the favorite reports value for this contract.
+	FavoriteReports []string `json:"favorite_reports,omitempty"`
 }
 
 func (x *InsightsSettings) GetDefaultPeriod() string {
@@ -53,6 +59,7 @@ type GetInsightsSettingsRequest struct {
 }
 
 type GetInsightsSettingsResponse struct {
+	// settings is the settings value for this contract.
 	Settings *InsightsSettings `json:"settings,omitempty"`
 }
 
@@ -65,6 +72,7 @@ func (x *GetInsightsSettingsResponse) GetSettings() *InsightsSettings {
 }
 
 type UpdateInsightsSettingsRequest struct {
+	// settings is the settings value for this contract.
 	Settings *InsightsSettings `json:"settings,omitempty"`
 }
 
@@ -77,6 +85,7 @@ func (x *UpdateInsightsSettingsRequest) GetSettings() *InsightsSettings {
 }
 
 type UpdateInsightsSettingsResponse struct {
+	// settings is the settings value for this contract.
 	Settings *InsightsSettings `json:"settings,omitempty"`
 }
 

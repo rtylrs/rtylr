@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface ProductServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** ProductService defines insights product analytics endpoints. */
 export class ProductServiceClient {
 private baseUrl: string;
 private options: ProductServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getBestSellers(req: GetBestSellersRequest): Promise<GetBestSellersResponse> {
+/** Returns top-selling products. */
+async getBestSellers(req: GetBestSellersRequest, opts?: RequestOptions): Promise<GetBestSellersResponse> {
 const violations = validateGetBestSellersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/product/v1/best-sellers";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -83,7 +123,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,16 +136,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetBestSellersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCategoryPerformance(req: GetCategoryPerformanceRequest): Promise<GetCategoryPerformanceResponse> {
+/** Returns performance by category. */
+async getCategoryPerformance(req: GetCategoryPerformanceRequest, opts?: RequestOptions): Promise<GetCategoryPerformanceResponse> {
 const violations = validateGetCategoryPerformanceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/product/v1/categories";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -116,16 +159,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetCategoryPerformanceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getProductMargins(req: GetProductMarginsRequest): Promise<GetProductMarginsResponse> {
+/** Returns product margin analysis. */
+async getProductMargins(req: GetProductMarginsRequest, opts?: RequestOptions): Promise<GetProductMarginsResponse> {
 const violations = validateGetProductMarginsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/product/v1/margins";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -137,9 +182,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetProductMarginsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSlowMovers(req: GetSlowMoversRequest): Promise<GetSlowMoversResponse> {
+/** Returns slow-moving products. */
+async getSlowMovers(req: GetSlowMoversRequest, opts?: RequestOptions): Promise<GetSlowMoversResponse> {
 const violations = validateGetSlowMoversRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/product/v1/slow-movers";
 const query = new URLSearchParams();
 if (req.days !== undefined) {
@@ -149,7 +195,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -161,16 +208,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetSlowMoversResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getProductPerformance(req: GetProductPerformanceRequest): Promise<GetProductPerformanceResponse> {
+/** Returns aggregate product KPI counters. */
+async getProductPerformance(req: GetProductPerformanceRequest, opts?: RequestOptions): Promise<GetProductPerformanceResponse> {
 const violations = validateGetProductPerformanceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/product/v1/performance";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

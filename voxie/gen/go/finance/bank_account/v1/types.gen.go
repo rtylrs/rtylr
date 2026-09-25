@@ -7,16 +7,27 @@ import (
 	"strconv"
 )
 
+// BankAccount is a business's linked bank account.
 type BankAccount struct {
-	Id          int64   `json:"id,omitempty"`
-	Name        string  `json:"name,omitempty"`
-	BankName    string  `json:"bank_name,omitempty"`
-	AccountType string  `json:"account_type,omitempty"`
-	LastFour    string  `json:"last_four,omitempty"`
-	Balance     float64 `json:"balance,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	IsPrimary   bool    `json:"is_primary,omitempty"`
-	CreatedAt   string  `json:"created_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// bank_name is the bank name value for this contract.
+	BankName string `json:"bank_name,omitempty"`
+	// account_type is the account type value for this contract.
+	// checking, savings
+	AccountType string `json:"account_type,omitempty"`
+	// last_four is the last four value for this contract.
+	LastFour string `json:"last_four,omitempty"`
+	// balance is the balance value for this contract.
+	Balance float64 `json:"balance,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// is_primary is the is primary value for this contract.
+	IsPrimary bool `json:"is_primary,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *BankAccount) MarshalJSON() ([]byte, error) {
@@ -121,13 +132,20 @@ func (x *BankAccount) GetCreatedAt() string {
 }
 
 type CreateBankAccountRequest struct {
-	Name        string   `json:"name,omitempty"`
-	BankName    string   `json:"bank_name,omitempty"`
-	AccountType string   `json:"account_type,omitempty"`
-	LastFour    string   `json:"last_four,omitempty"`
-	Balance     *float64 `json:"balance,omitempty"`
-	Currency    string   `json:"currency,omitempty"`
-	IsPrimary   bool     `json:"is_primary,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// bank_name is the bank name value for this contract.
+	BankName string `json:"bank_name,omitempty"`
+	// account_type is the account type value for this contract.
+	AccountType string `json:"account_type,omitempty"`
+	// last_four is the last four value for this contract.
+	LastFour string `json:"last_four,omitempty"`
+	// balance is the balance value for this contract.
+	Balance *float64 `json:"balance,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// is_primary is the is primary value for this contract.
+	IsPrimary bool `json:"is_primary,omitempty"`
 }
 
 func (x *CreateBankAccountRequest) GetName() string {
@@ -191,6 +209,7 @@ func (x *CreateBankAccountRequest) GetIsPrimary() bool {
 }
 
 type CreateBankAccountResponse struct {
+	// account is the account value for this contract.
 	Account *BankAccount `json:"account,omitempty"`
 }
 
@@ -203,6 +222,7 @@ func (x *CreateBankAccountResponse) GetAccount() *BankAccount {
 }
 
 type GetBankAccountRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -244,6 +264,7 @@ func (x *GetBankAccountRequest) GetId() int64 {
 }
 
 type GetBankAccountResponse struct {
+	// account is the account value for this contract.
 	Account *BankAccount `json:"account,omitempty"`
 }
 
@@ -256,9 +277,13 @@ func (x *GetBankAccountResponse) GetAccount() *BankAccount {
 }
 
 type ListBankAccountsRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// page is the current result page.
+	Page int32 `json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// sort_by is the field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -295,7 +320,9 @@ func (x *ListBankAccountsRequest) GetSortDir() string {
 }
 
 type ListBankAccountsResponse struct {
-	Accounts   []*BankAccount                           `json:"accounts,omitempty"`
+	// accounts is the accounts value for this contract.
+	Accounts []*BankAccount `json:"accounts,omitempty"`
+	// pagination is the pagination value for this contract.
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 

@@ -40,6 +40,7 @@ export interface ActiveSession {
 id?: string | undefined;
 ip?: string | undefined;
 userAgent?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 isCurrent?: boolean | undefined;
 }
@@ -76,12 +77,15 @@ return violations;
 }
 
 export interface LoginEntry {
+/** Database identifier for this login event. */
 id?: string | undefined;
+/** Email address used for lookup or contact. */
 email?: string | undefined;
 method?: string | undefined;
 ip?: string | undefined;
 userAgent?: string | undefined;
 success?: boolean | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -166,7 +170,9 @@ return violations;
 }
 
 export interface LoginHistoryRequest {
+/** 1-based page number to return. */
 page?: number | undefined;
+/** Maximum number of login events to return in one page. */
 pageSize?: number | undefined;
 }
 
@@ -194,9 +200,13 @@ return violations;
 
 export interface LoginHistoryResponse {
 history?: (LoginEntry)[] | undefined;
+/** Total number of login events for the authenticated user. */
 total?: number | undefined;
+/** The 1-based page number returned. */
 page?: number | undefined;
+/** The number of login events requested per page after server limits. */
 pageSize?: number | undefined;
+/** Whether another page of login events is available. */
 hasMore?: boolean | undefined;
 }
 

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,11 +74,25 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface ConsoleAdminServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
 export class ConsoleAdminServiceClient {
@@ -71,16 +109,17 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getStats(req: GetStatsRequest): Promise<GetStatsResponse> {
+async getStats(req: GetStatsRequest, opts?: RequestOptions): Promise<GetStatsResponse> {
 const violations = validateGetStatsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/stats";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,9 +131,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetStatsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listUsers(req: ListUsersRequest): Promise<ListUsersResponse> {
+async listUsers(req: ListUsersRequest, opts?: RequestOptions): Promise<ListUsersResponse> {
 const violations = validateListUsersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -116,7 +155,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -128,9 +168,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListUsersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getUser(req: GetUserRequest): Promise<GetUserResponse> {
+async getUser(req: GetUserRequest, opts?: RequestOptions): Promise<GetUserResponse> {
 const violations = validateGetUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -138,7 +178,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -150,14 +191,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createUser(req: CreateUserRequest): Promise<CreateUserResponse> {
+async createUser(req: CreateUserRequest, opts?: RequestOptions): Promise<CreateUserResponse> {
 const violations = validateCreateUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateUserRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -169,15 +211,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateUser(req: UpdateUserRequest): Promise<UpdateUserResponse> {
+async updateUser(req: UpdateUserRequest, opts?: RequestOptions): Promise<UpdateUserResponse> {
 const violations = validateUpdateUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateUserRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -189,9 +232,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteUser(req: DeleteUserRequest): Promise<DeleteUserResponse> {
+async deleteUser(req: DeleteUserRequest, opts?: RequestOptions): Promise<DeleteUserResponse> {
 const violations = validateDeleteUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -199,7 +242,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -211,15 +255,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async banUser(req: BanUserRequest): Promise<BanUserResponse> {
+async banUser(req: BanUserRequest, opts?: RequestOptions): Promise<BanUserResponse> {
 const violations = validateBanUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users/{id}/ban";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBanUserRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -231,15 +276,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeBanUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async unbanUser(req: UnbanUserRequest): Promise<UnbanUserResponse> {
+async unbanUser(req: UnbanUserRequest, opts?: RequestOptions): Promise<UnbanUserResponse> {
 const violations = validateUnbanUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users/{id}/unban";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUnbanUserRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -251,15 +297,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUnbanUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async setConsoleAdmin(req: SetConsoleAdminRequest): Promise<SetConsoleAdminResponse> {
+async setConsoleAdmin(req: SetConsoleAdminRequest, opts?: RequestOptions): Promise<SetConsoleAdminResponse> {
 const violations = validateSetConsoleAdminRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users/{id}/set-console-admin";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSetConsoleAdminRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -271,9 +318,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeSetConsoleAdminResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getUserSubscription(req: GetUserSubscriptionRequest): Promise<GetUserSubscriptionResponse> {
+async getUserSubscription(req: GetUserSubscriptionRequest, opts?: RequestOptions): Promise<GetUserSubscriptionResponse> {
 const violations = validateGetUserSubscriptionRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/users/{user_id}/subscription";
 path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
 const query = new URLSearchParams();
@@ -281,7 +328,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -293,9 +341,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetUserSubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listBusinesses(req: ListBusinessesRequest): Promise<ListBusinessesResponse> {
+async listBusinesses(req: ListBusinessesRequest, opts?: RequestOptions): Promise<ListBusinessesResponse> {
 const violations = validateListBusinessesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/businesses";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -317,7 +365,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -329,15 +378,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListBusinessesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateBusiness(req: UpdateBusinessRequest): Promise<UpdateBusinessResponse> {
+async updateBusiness(req: UpdateBusinessRequest, opts?: RequestOptions): Promise<UpdateBusinessResponse> {
 const violations = validateUpdateBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/businesses/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateBusinessRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -349,9 +399,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteBusiness(req: DeleteBusinessRequest): Promise<DeleteBusinessResponse> {
+async deleteBusiness(req: DeleteBusinessRequest, opts?: RequestOptions): Promise<DeleteBusinessResponse> {
 const violations = validateDeleteBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/businesses/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -359,7 +409,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -371,14 +422,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createBusinessOwner(req: CreateBusinessOwnerRequest): Promise<CreateBusinessOwnerResponse> {
+async createBusinessOwner(req: CreateBusinessOwnerRequest, opts?: RequestOptions): Promise<CreateBusinessOwnerResponse> {
 const violations = validateCreateBusinessOwnerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/internal-onboarding/business-owner";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateBusinessOwnerRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -390,9 +442,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateBusinessOwnerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listSubscriptions(req: ListSubscriptionsRequest): Promise<ListSubscriptionsResponse> {
+async listSubscriptions(req: ListSubscriptionsRequest, opts?: RequestOptions): Promise<ListSubscriptionsResponse> {
 const violations = validateListSubscriptionsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/subscriptions";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -408,7 +460,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -420,14 +473,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListSubscriptionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertSubscription(req: UpsertSubscriptionRequest): Promise<UpsertSubscriptionResponse> {
+async upsertSubscription(req: UpsertSubscriptionRequest, opts?: RequestOptions): Promise<UpsertSubscriptionResponse> {
 const violations = validateUpsertSubscriptionRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/subscriptions/upsert";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpsertSubscriptionRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -439,9 +493,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpsertSubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteSubscription(req: DeleteSubscriptionRequest): Promise<DeleteSubscriptionResponse> {
+async deleteSubscription(req: DeleteSubscriptionRequest, opts?: RequestOptions): Promise<DeleteSubscriptionResponse> {
 const violations = validateDeleteSubscriptionRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/subscriptions/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -449,7 +503,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -461,16 +516,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteSubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listPlans(req: ListPlansRequest): Promise<ListPlansResponse> {
+async listPlans(req: ListPlansRequest, opts?: RequestOptions): Promise<ListPlansResponse> {
 const violations = validateListPlansRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/plans";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -482,15 +538,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListPlansResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updatePlan(req: UpdatePlanRequest): Promise<UpdatePlanResponse> {
+async updatePlan(req: UpdatePlanRequest, opts?: RequestOptions): Promise<UpdatePlanResponse> {
 const violations = validateUpdatePlanRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/console/admin/v1/console/plans/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdatePlanRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

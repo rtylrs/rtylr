@@ -2,17 +2,32 @@
 import * as common_pagination_v1 from "../../../common/pagination/v1/types.js";
 
 export interface Workspace {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** owner_id identifies the tenant that owns the resource. */
 ownerId?: string | undefined;
+/** name is the name value for this contract. */
 name?: string | undefined;
+/** description is the description value for this contract. */
 description?: string | undefined;
+/** icon is the icon value for this contract. */
 icon?: string | undefined;
+/** color is the color value for this contract. */
 color?: string | undefined;
+/** is_default is the is default value for this contract. */
 isDefault?: boolean | undefined;
+/** created_by is the created by value for this contract. */
 createdBy?: string | undefined;
+/** created_at is when the record was created. */
 createdAt?: string | undefined;
+/** updated_at is when the record was last updated. */
 updatedAt?: string | undefined;
+/**
+ * Count of members in this workspace, for sidebar / picker badges.
+ * Display projection populated on list reads.
+ */
 memberCount?: number | undefined;
+/** True when this is the caller's auto-created Personal workspace. */
 isPersonal?: boolean | undefined;
 }
 
@@ -69,13 +84,21 @@ return violations;
 }
 
 export interface WorkspaceMember {
+/** id is the unique identifier for the membership record. */
 id?: string | undefined;
+/** workspace_id is the workspace id value for this contract. */
 workspaceId?: string | undefined;
+/** user_id identifies the user associated with this request. */
 userId?: string | undefined;
+/** name is the member display name. */
 name?: string | undefined;
+/** email is the member email address. */
 email?: string | undefined;
+/** role is the role value for this contract. */
 role?: string | undefined;
+/** invited_by is the user id of the inviter, if any. */
 invitedBy?: string | undefined;
+/** joined_at is when the member joined the workspace. */
 joinedAt?: string | undefined;
 }
 
@@ -120,9 +143,13 @@ return violations;
 }
 
 export interface ListWorkspacesRequest {
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -155,6 +182,7 @@ return violations;
 }
 
 export interface ListWorkspacesResponse {
+/** workspaces is the workspaces value for this contract. */
 workspaces?: (Workspace)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -184,9 +212,13 @@ return violations;
 }
 
 export interface CreateWorkspaceRequest {
+/** name is the name value for this contract. */
 name: string;
+/** description is the description value for this contract. */
 description: string;
+/** icon is the icon value for this contract. */
 icon: string;
+/** color is the color value for this contract. */
 color: string;
 }
 
@@ -223,6 +255,7 @@ return violations;
 }
 
 export interface CreateWorkspaceResponse {
+/** workspace is the workspace value for this contract. */
 workspace?: Workspace | undefined;
 }
 
@@ -247,9 +280,13 @@ return violations;
 }
 
 export interface UpdateWorkspaceBody {
+/** name is the name value for this contract. */
 name: string;
+/** description is the description value for this contract. */
 description: string;
+/** icon is the icon value for this contract. */
 icon: string;
+/** color is the color value for this contract. */
 color: string;
 }
 
@@ -286,7 +323,9 @@ return violations;
 }
 
 export interface UpdateWorkspaceRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
+/** body carries updatable workspace fields bound from the HTTP payload. */
 body?: UpdateWorkspaceBody | undefined;
 }
 
@@ -315,6 +354,7 @@ return violations;
 }
 
 export interface UpdateWorkspaceResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -338,6 +378,7 @@ return violations;
 }
 
 export interface DeleteWorkspaceRequest {
+/** id is the unique identifier for the resource. */
 id?: string | undefined;
 }
 
@@ -362,6 +403,7 @@ return violations;
 }
 
 export interface DeleteWorkspaceResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -385,10 +427,15 @@ return violations;
 }
 
 export interface ListWorkspaceMembersRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
 }
 
@@ -426,6 +473,7 @@ return violations;
 }
 
 export interface ListWorkspaceMembersResponse {
+/** members is the workspace members for this contract. */
 members?: (WorkspaceMember)[] | undefined;
 pagination?: common_pagination_v1.PaginationResponse | undefined;
 }
@@ -455,8 +503,11 @@ return violations;
 }
 
 export interface AddWorkspaceMemberRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** user_id identifies the user associated with this request. */
 userId: string;
+/** role is the role value for this contract. */
 role: string;
 }
 
@@ -491,6 +542,7 @@ return violations;
 }
 
 export interface AddWorkspaceMemberResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -514,7 +566,9 @@ return violations;
 }
 
 export interface RemoveWorkspaceMemberRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** user_id identifies the user associated with this request. */
 userId: string;
 }
 
@@ -545,6 +599,7 @@ return violations;
 }
 
 export interface RemoveWorkspaceMemberResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 
@@ -568,8 +623,11 @@ return violations;
 }
 
 export interface UpdateWorkspaceMemberRoleRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
+/** user_id identifies the user associated with this request. */
 userId: string;
+/** role is the role value for this contract. */
 role: string;
 }
 
@@ -604,6 +662,7 @@ return violations;
 }
 
 export interface UpdateWorkspaceMemberRoleResponse {
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 

@@ -11,12 +11,24 @@ paths:
             description: Returns insights configuration.
             operationId: SettingService_getInsightsSettings
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.setting.v1.GetInsightsSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - SettingService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/insights.setting.v1.UpdateInsightsSettingsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.setting.v1.UpdateInsightsSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         insights.setting.v1.GetInsightsSettingsRequest:
@@ -97,3 +121,13 @@ components:
                     description: settings is the settings value for this contract.
             required:
                 - settings
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SettingService
+      description: SettingService defines insights settings endpoints.

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface InvoicesServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** InvoicesService defines finance invoice endpoints. */
 export class InvoicesServiceClient {
 private baseUrl: string;
 private options: InvoicesServiceClientOptions;
@@ -71,9 +110,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listInvoices(req: ListInvoicesRequest): Promise<ListInvoicesResponse> {
+async listInvoices(req: ListInvoicesRequest, opts?: RequestOptions): Promise<ListInvoicesResponse> {
 const violations = validateListInvoicesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices";
 const query = new URLSearchParams();
 if (req.status !== undefined) {
@@ -101,7 +140,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -113,9 +153,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListInvoicesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listBillableTimeEntries(req: ListBillableTimeEntriesRequest): Promise<ListBillableTimeEntriesResponse> {
+async listBillableTimeEntries(req: ListBillableTimeEntriesRequest, opts?: RequestOptions): Promise<ListBillableTimeEntriesResponse> {
 const violations = validateListBillableTimeEntriesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices/billable-time";
 const query = new URLSearchParams();
 if (req.page !== undefined) {
@@ -128,7 +168,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -140,14 +181,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListBillableTimeEntriesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createInvoice(req: CreateInvoiceRequest): Promise<CreateInvoiceResponse> {
+async createInvoice(req: CreateInvoiceRequest, opts?: RequestOptions): Promise<CreateInvoiceResponse> {
 const violations = validateCreateInvoiceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateInvoiceRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -159,9 +201,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getInvoice(req: GetInvoiceRequest): Promise<GetInvoiceResponse> {
+async getInvoice(req: GetInvoiceRequest, opts?: RequestOptions): Promise<GetInvoiceResponse> {
 const violations = validateGetInvoiceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -169,7 +211,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -181,15 +224,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateInvoice(req: UpdateInvoiceRequest): Promise<UpdateInvoiceResponse> {
+async updateInvoice(req: UpdateInvoiceRequest, opts?: RequestOptions): Promise<UpdateInvoiceResponse> {
 const violations = validateUpdateInvoiceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateInvoiceRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -201,15 +245,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateInvoiceStatus(req: UpdateInvoiceStatusRequest): Promise<UpdateInvoiceStatusResponse> {
+async updateInvoiceStatus(req: UpdateInvoiceStatusRequest, opts?: RequestOptions): Promise<UpdateInvoiceStatusResponse> {
 const violations = validateUpdateInvoiceStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices/{id}/status";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateInvoiceStatusRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -221,9 +266,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateInvoiceStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteInvoice(req: DeleteInvoiceRequest): Promise<DeleteInvoiceResponse> {
+async deleteInvoice(req: DeleteInvoiceRequest, opts?: RequestOptions): Promise<DeleteInvoiceResponse> {
 const violations = validateDeleteInvoiceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -231,7 +276,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -243,15 +289,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async sendInvoice(req: SendInvoiceRequest): Promise<SendInvoiceResponse> {
+async sendInvoice(req: SendInvoiceRequest, opts?: RequestOptions): Promise<SendInvoiceResponse> {
 const violations = validateSendInvoiceRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/finance/invoices/v1/invoices/{id}/send";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSendInvoiceRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

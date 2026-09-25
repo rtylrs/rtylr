@@ -10,12 +10,24 @@ paths:
             summary: getUserSettings
             operationId: SettingService_getUserSettings
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.setting.v1.GetUserSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - SettingService
@@ -28,12 +40,24 @@ paths:
                             $ref: '#/components/schemas/flow.setting.v1.UpdateUserSettingsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.setting.v1.UpdateUserSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.setting.v1.GetUserSettingsRequest:
@@ -101,3 +125,12 @@ components:
                     description: JSON-encoded per-user Flow sidebar layout and visibility preferences.
         flow.setting.v1.UpdateUserSettingsResponse:
             type: object
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SettingService

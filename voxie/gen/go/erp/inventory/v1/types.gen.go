@@ -294,6 +294,7 @@ func (x *AdjustInventoryRequest) GetNotes() string {
 }
 
 type AdjustInventoryResponse struct {
+	// A human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -306,7 +307,9 @@ func (x *AdjustInventoryResponse) GetMessage() string {
 }
 
 type GetInventoryReportRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of inventory rows to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of inventory rows to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 
@@ -384,7 +387,9 @@ func (x *GetInventoryReportResponse) GetTotal() int64 {
 }
 
 type GetLowStockRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of low-stock rows to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of low-stock rows to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 
@@ -462,7 +467,9 @@ func (x *GetLowStockResponse) GetTotal() int64 {
 }
 
 type GetValuationRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of valuation rows to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of valuation rows to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 

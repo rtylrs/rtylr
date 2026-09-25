@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,11 +74,25 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface FeatureServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
 export class FeatureServiceClient {
@@ -71,14 +109,15 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async resolveFeatures(req: ResolveFeaturesRequest): Promise<ResolveFeaturesResponse> {
+async resolveFeatures(req: ResolveFeaturesRequest, opts?: RequestOptions): Promise<ResolveFeaturesResponse> {
 const violations = validateResolveFeaturesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeResolveFeaturesRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -90,14 +129,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeResolveFeaturesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async resolveMyFeatures(req: ResolveMyFeaturesRequest): Promise<ResolveMyFeaturesResponse> {
+async resolveMyFeatures(req: ResolveMyFeaturesRequest, opts?: RequestOptions): Promise<ResolveMyFeaturesResponse> {
 const violations = validateResolveMyFeaturesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/me";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeResolveMyFeaturesRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -109,16 +149,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeResolveMyFeaturesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listFlags(req: ListFlagsRequest): Promise<ListFlagsResponse> {
+async listFlags(req: ListFlagsRequest, opts?: RequestOptions): Promise<ListFlagsResponse> {
 const violations = validateListFlagsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/flags";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -130,14 +171,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListFlagsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertFlag(req: UpsertFlagRequest): Promise<UpsertFlagResponse> {
+async upsertFlag(req: UpsertFlagRequest, opts?: RequestOptions): Promise<UpsertFlagResponse> {
 const violations = validateUpsertFlagRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/flags";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpsertFlagRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -149,9 +191,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpsertFlagResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteFlag(req: DeleteFlagRequest): Promise<DeleteFlagResponse> {
+async deleteFlag(req: DeleteFlagRequest, opts?: RequestOptions): Promise<DeleteFlagResponse> {
 const violations = validateDeleteFlagRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/flags/{key}";
 path = path.replace("{key}", encodeURIComponent(String(req.key)));
 const query = new URLSearchParams();
@@ -159,7 +201,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -171,9 +214,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteFlagResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listTargets(req: ListTargetsRequest): Promise<ListTargetsResponse> {
+async listTargets(req: ListTargetsRequest, opts?: RequestOptions): Promise<ListTargetsResponse> {
 const violations = validateListTargetsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/targets";
 const query = new URLSearchParams();
 if (req.featureKey !== undefined) {
@@ -183,7 +226,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -195,14 +239,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListTargetsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertTarget(req: UpsertTargetRequest): Promise<UpsertTargetResponse> {
+async upsertTarget(req: UpsertTargetRequest, opts?: RequestOptions): Promise<UpsertTargetResponse> {
 const violations = validateUpsertTargetRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/targets";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpsertTargetRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -214,9 +259,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpsertTargetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteTarget(req: DeleteTargetRequest): Promise<DeleteTargetResponse> {
+async deleteTarget(req: DeleteTargetRequest, opts?: RequestOptions): Promise<DeleteTargetResponse> {
 const violations = validateDeleteTargetRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/targets/{feature_key}/{owner_id}";
 path = path.replace("{feature_key}", encodeURIComponent(String(req.featureKey)));
 path = path.replace("{owner_id}", encodeURIComponent(String(req.ownerId)));
@@ -225,7 +270,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -237,9 +283,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteTargetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listRules(req: ListRulesRequest): Promise<ListRulesResponse> {
+async listRules(req: ListRulesRequest, opts?: RequestOptions): Promise<ListRulesResponse> {
 const violations = validateListRulesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/rules";
 const query = new URLSearchParams();
 if (req.featureKey !== undefined) {
@@ -249,7 +295,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -261,14 +308,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListRulesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createRule(req: CreateRuleRequest): Promise<CreateRuleResponse> {
+async createRule(req: CreateRuleRequest, opts?: RequestOptions): Promise<CreateRuleResponse> {
 const violations = validateCreateRuleRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/rules";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateRuleRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -280,14 +328,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateRuleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateRule(req: UpdateRuleRequest): Promise<UpdateRuleResponse> {
+async updateRule(req: UpdateRuleRequest, opts?: RequestOptions): Promise<UpdateRuleResponse> {
 const violations = validateUpdateRuleRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/rules";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateRuleRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -299,9 +348,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateRuleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteRule(req: DeleteRuleRequest): Promise<DeleteRuleResponse> {
+async deleteRule(req: DeleteRuleRequest, opts?: RequestOptions): Promise<DeleteRuleResponse> {
 const violations = validateDeleteRuleRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/feature/v1/features/admin/rules/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -309,7 +358,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

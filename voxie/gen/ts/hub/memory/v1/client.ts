@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,11 +74,25 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface MemoryServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
 export class MemoryServiceClient {
@@ -71,9 +109,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listChats(req: ListChatsRequest): Promise<ListChatsResponse> {
+async listChats(req: ListChatsRequest, opts?: RequestOptions): Promise<ListChatsResponse> {
 const violations = validateListChatsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/memory/v1/chats";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -86,7 +124,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -98,9 +137,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListChatsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getChatMessages(req: GetChatMessagesRequest): Promise<GetChatMessagesResponse> {
+async getChatMessages(req: GetChatMessagesRequest, opts?: RequestOptions): Promise<GetChatMessagesResponse> {
 const violations = validateGetChatMessagesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/memory/v1/chats/{session_id}/messages";
 path = path.replace("{session_id}", encodeURIComponent(String(req.sessionId)));
 const query = new URLSearchParams();
@@ -108,7 +147,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -120,9 +160,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetChatMessagesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteChat(req: DeleteChatRequest): Promise<DeleteChatResponse> {
+async deleteChat(req: DeleteChatRequest, opts?: RequestOptions): Promise<DeleteChatResponse> {
 const violations = validateDeleteChatRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/memory/v1/chats/{session_id}";
 path = path.replace("{session_id}", encodeURIComponent(String(req.sessionId)));
 const query = new URLSearchParams();
@@ -130,7 +170,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -142,15 +183,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteChatResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async renameChat(req: RenameChatRequest): Promise<RenameChatResponse> {
+async renameChat(req: RenameChatRequest, opts?: RequestOptions): Promise<RenameChatResponse> {
 const violations = validateRenameChatRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/memory/v1/chats/{session_id}";
 path = path.replace("{session_id}", encodeURIComponent(String(req.sessionId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeRenameChatRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -162,15 +204,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRenameChatResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async pinChat(req: PinChatRequest): Promise<PinChatResponse> {
+async pinChat(req: PinChatRequest, opts?: RequestOptions): Promise<PinChatResponse> {
 const violations = validatePinChatRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/memory/v1/chats/{session_id}/pin";
 path = path.replace("{session_id}", encodeURIComponent(String(req.sessionId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePinChatRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

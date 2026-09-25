@@ -17,12 +17,24 @@ paths:
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.customer.v1.SearchCustomersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.customer.v1.SearchCustomersRequest:
@@ -46,6 +58,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 first_name:
                     type: string
@@ -67,3 +80,13 @@ components:
                 distinctly from crm.customer.v1's Customer (a genuine cross-directory
                 name collision - see crm/segment/v1/models.onk which references the
                 unqualified "Customer" name expecting the full crm.customer.v1 record).
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CustomerService
+      description: CustomerService defines POS customer lookup endpoints.

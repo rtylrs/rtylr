@@ -13,21 +13,33 @@ paths:
             parameters:
                 - name: from
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: to
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.receipt.v1.ListReceiptsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/receipt/v1/receipts/{id}/email:
         post:
             tags:
@@ -38,23 +50,45 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the receipt.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the receipt.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/pos.receipt.v1.EmailReceiptRequest'
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    description: Recipient email address for the receipt.
+                            required:
+                                - email
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.receipt.v1.EmailReceiptResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.receipt.v1.ListReceiptsRequest:
@@ -81,6 +115,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_number:
                     type: string
@@ -107,6 +142,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the receipt.
                 email:
@@ -122,3 +158,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReceiptService
+      description: ReceiptService defines POS receipt endpoints.

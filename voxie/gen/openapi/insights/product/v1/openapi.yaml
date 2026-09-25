@@ -13,18 +13,31 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: limit is the maximum number of products to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: limit is the maximum number of products to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.product.v1.GetBestSellersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/product/v1/categories:
         get:
             tags:
@@ -33,12 +46,24 @@ paths:
             description: Returns performance by category.
             operationId: ProductService_getCategoryPerformance
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.product.v1.GetCategoryPerformanceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/product/v1/margins:
         get:
             tags:
@@ -47,12 +72,24 @@ paths:
             description: Returns product margin analysis.
             operationId: ProductService_getProductMargins
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.product.v1.GetProductMarginsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/product/v1/slow-movers:
         get:
             tags:
@@ -63,18 +100,31 @@ paths:
             parameters:
                 - name: days
                   in: query
-                  required: true
+                  description: days is the trailing sales window used to detect slow movers.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: days is the trailing sales window used to detect slow movers.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.product.v1.GetSlowMoversResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/product/v1/performance:
         get:
             tags:
@@ -83,12 +133,24 @@ paths:
             description: Returns aggregate product KPI counters.
             operationId: ProductService_getProductPerformance
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.product.v1.GetProductPerformanceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         insights.product.v1.GetBestSellersRequest:
@@ -115,6 +177,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: product_id is the product id value for this contract.
                 name:
@@ -126,6 +189,7 @@ components:
                     description: units_sold is the units sold value for this contract.
                 revenue_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: revenue_minor_units is the revenue minor units value for this contract.
             required:
@@ -150,6 +214,7 @@ components:
             properties:
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: category_id is the category id value for this contract.
                 category_name:
@@ -161,6 +226,7 @@ components:
                     description: units_sold is the units sold value for this contract.
                 revenue_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: revenue_minor_units is the revenue minor units value for this contract.
             required:
@@ -205,6 +271,7 @@ components:
                     description: upper_pct is the upper pct value for this contract.
                 product_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: product_count is the product count value for this contract.
             required:
@@ -217,6 +284,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: product_id is the ERP product.
                 name:
@@ -228,12 +296,14 @@ components:
                     description: units_sold is the quantity sold in the period.
                 revenue_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         revenue_minor_units is gross sales value in the smallest unit of the
                         reporting currency.
                 cost_minor_units:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         cost_minor_units is units_sold multiplied by the product's cost price,
@@ -268,6 +338,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: product_id is the product id value for this contract.
                 name:
@@ -288,14 +359,17 @@ components:
             properties:
                 total_skus:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: total_skus is the total SKU count.
                 active_skus:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: active_skus is the active SKU count.
                 out_of_stock:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: out_of_stock is the out-of-stock SKU count.
                 avg_margin_pct:
@@ -307,3 +381,13 @@ components:
                 - active_skus
                 - out_of_stock
                 - avg_margin_pct
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ProductService
+      description: ProductService defines insights product analytics endpoints.

@@ -12,23 +12,37 @@ paths:
             parameters:
                 - name: period
                   in: query
-                  required: true
+                  description: The reporting period label.
+                  required: false
                   schema:
                     type: string
                     description: The reporting period label.
                 - name: date
                   in: query
+                  description: The report anchor date.
                   required: true
                   schema:
                     type: string
                     description: The report anchor date.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.report.v1.GetPLReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/report/v1/tax:
         get:
             tags:
@@ -38,23 +52,37 @@ paths:
             parameters:
                 - name: period
                   in: query
-                  required: true
+                  description: The reporting period label.
+                  required: false
                   schema:
                     type: string
                     description: The reporting period label.
                 - name: date
                   in: query
+                  description: The report anchor date.
                   required: true
                   schema:
                     type: string
                     description: The report anchor date.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.report.v1.GetTaxReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/report/v1/expense-categories:
         get:
             tags:
@@ -62,12 +90,24 @@ paths:
             summary: listExpenseCategoryDetails
             operationId: ReportService_listExpenseCategoryDetails
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.report.v1.ListExpenseCategoryDetailsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ReportService
@@ -80,12 +120,24 @@ paths:
                             $ref: '#/components/schemas/finance.report.v1.CreateExpenseCategoryDetailRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.report.v1.CreateExpenseCategoryDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/report/v1/tax-config:
         get:
             tags:
@@ -93,12 +145,24 @@ paths:
             summary: listTaxConfig
             operationId: ReportService_listTaxConfig
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.report.v1.ListTaxConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ReportService
@@ -111,12 +175,24 @@ paths:
                             $ref: '#/components/schemas/finance.report.v1.CreateTaxConfigRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.report.v1.CreateTaxConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         finance.report.v1.GetPLReportRequest:
@@ -205,9 +281,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifies the tenant that owns the resource.
                 name:
@@ -263,9 +341,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifies the tenant that owns the resource.
                 name:
@@ -317,3 +397,13 @@ components:
                         - $ref: '#/components/schemas/finance.report.v1.TaxConfig'
             required:
                 - config
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReportService
+      description: ReportService defines finance reporting endpoints.

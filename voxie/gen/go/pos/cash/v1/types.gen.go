@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// CashMovement is a recorded cash drawer movement.
 type CashMovement struct {
 	Id         int64   `json:"id,omitempty"`
 	BusinessId int64   `json:"business_id,omitempty"`
@@ -17,7 +18,8 @@ type CashMovement struct {
 	Amount     float64 `json:"amount,omitempty"`
 	Reason     *string `json:"reason,omitempty"`
 	ApprovedBy *int64  `json:"approved_by,omitempty"`
-	CreatedAt  string  `json:"created_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *CashMovement) MarshalJSON() ([]byte, error) {

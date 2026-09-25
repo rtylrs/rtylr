@@ -6,17 +6,28 @@ import (
 	"strconv"
 )
 
+// ChecklistItemPayload is a single item within a checklist template.
 type ChecklistItemPayload struct {
-	Id                 int64  `json:"id,omitempty"`
-	OwnerId            int64  `json:"owner_id,omitempty"`
-	TemplateId         int64  `json:"template_id,omitempty"`
-	Title              string `json:"title,omitempty"`
-	Description        string `json:"description,omitempty"`
-	AssigneeRole       string `json:"assignee_role,omitempty"`
-	DueOffsetDays      int32  `json:"due_offset_days,omitempty"`
-	RequiresAttachment bool   `json:"requires_attachment,omitempty"`
-	CreatedAt          int64  `json:"created_at,omitempty"`
-	UpdatedAt          int64  `json:"updated_at,omitempty"`
+	// Unique identifier for the checklist item.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this item belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Template this item belongs to.
+	TemplateId int64 `json:"template_id,omitempty"`
+	// Short title describing the task.
+	Title string `json:"title,omitempty"`
+	// Detailed description of what needs to be done.
+	Description string `json:"description,omitempty"`
+	// Role responsible for completing this item (e.g. "hr_manager", "it_admin", "employee").
+	AssigneeRole string `json:"assignee_role,omitempty"`
+	// Number of days after trigger date by which this item is due.
+	DueOffsetDays int32 `json:"due_offset_days,omitempty"`
+	// Whether the assignee must upload an attachment to complete this item.
+	RequiresAttachment bool `json:"requires_attachment,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ChecklistItemPayload) MarshalJSON() ([]byte, error) {
@@ -168,15 +179,24 @@ func (x *ChecklistItemPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ChecklistTemplatePayload is a reusable onboarding/offboarding checklist definition.
 type ChecklistTemplatePayload struct {
-	Id          int64                   `json:"id,omitempty"`
-	OwnerId     int64                   `json:"owner_id,omitempty"`
-	Name        string                  `json:"name,omitempty"`
-	TriggerType string                  `json:"trigger_type,omitempty"`
-	RoleId      *int64                  `json:"role_id,omitempty"`
-	Items       []*ChecklistItemPayload `json:"items,omitempty"`
-	CreatedAt   int64                   `json:"created_at,omitempty"`
-	UpdatedAt   int64                   `json:"updated_at,omitempty"`
+	// Unique identifier for the template.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this template belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Human-readable name for the template (e.g. "Engineering Onboarding").
+	Name string `json:"name,omitempty"`
+	// Event that triggers this checklist (onboarding | offboarding).
+	TriggerType string `json:"trigger_type,omitempty"`
+	// Role this template applies to; absent if it applies to all roles.
+	RoleId *int64 `json:"role_id,omitempty"`
+	// Items included in this template.
+	Items []*ChecklistItemPayload `json:"items,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *ChecklistTemplatePayload) MarshalJSON() ([]byte, error) {
@@ -319,18 +339,30 @@ func (x *ChecklistTemplatePayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// EmployeeChecklistItemPayload is one instantiated checklist item assigned to an employee.
 type EmployeeChecklistItemPayload struct {
-	Id                   int64   `json:"id,omitempty"`
-	OwnerId              int64   `json:"owner_id,omitempty"`
-	EmployeeChecklistId  int64   `json:"employee_checklist_id,omitempty"`
-	ChecklistItemId      int64   `json:"checklist_item_id,omitempty"`
-	AssignedToEmployeeId int64   `json:"assigned_to_employee_id,omitempty"`
-	DueDate              string  `json:"due_date,omitempty"`
-	Status               string  `json:"status,omitempty"`
-	CompletedAt          *int64  `json:"completed_at,omitempty"`
-	AttachmentUrl        *string `json:"attachment_url,omitempty"`
-	CreatedAt            int64   `json:"created_at,omitempty"`
-	UpdatedAt            int64   `json:"updated_at,omitempty"`
+	// Unique identifier for the employee checklist item.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this item belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Parent employee checklist this item belongs to.
+	EmployeeChecklistId int64 `json:"employee_checklist_id,omitempty"`
+	// Original template item this was created from.
+	ChecklistItemId int64 `json:"checklist_item_id,omitempty"`
+	// Employee assigned to complete this item.
+	AssignedToEmployeeId int64 `json:"assigned_to_employee_id,omitempty"`
+	// Date by which this item should be completed (ISO-8601 date).
+	DueDate string `json:"due_date,omitempty"`
+	// Completion status (incomplete | in_progress | complete).
+	Status string `json:"status,omitempty"`
+	// Unix timestamp when the item was completed; absent if not yet complete.
+	CompletedAt *int64 `json:"completed_at,omitempty"`
+	// URL of the uploaded attachment; absent if none provided.
+	AttachmentUrl *string `json:"attachment_url,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *EmployeeChecklistItemPayload) MarshalJSON() ([]byte, error) {
@@ -531,15 +563,24 @@ func (x *EmployeeChecklistItemPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// EmployeeChecklistPayload is a checklist instantiated for a specific employee.
 type EmployeeChecklistPayload struct {
-	Id          int64                           `json:"id,omitempty"`
-	OwnerId     int64                           `json:"owner_id,omitempty"`
-	EmployeeId  int64                           `json:"employee_id,omitempty"`
-	TemplateId  int64                           `json:"template_id,omitempty"`
-	TriggeredAt int64                           `json:"triggered_at,omitempty"`
-	Items       []*EmployeeChecklistItemPayload `json:"items,omitempty"`
-	CreatedAt   int64                           `json:"created_at,omitempty"`
-	UpdatedAt   int64                           `json:"updated_at,omitempty"`
+	// Unique identifier for the employee checklist.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this checklist belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee this checklist was triggered for.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Template this checklist was created from.
+	TemplateId int64 `json:"template_id,omitempty"`
+	// Unix timestamp when this checklist was triggered.
+	TriggeredAt int64 `json:"triggered_at,omitempty"`
+	// Individual items in this employee's checklist.
+	Items []*EmployeeChecklistItemPayload `json:"items,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *EmployeeChecklistPayload) MarshalJSON() ([]byte, error) {
@@ -696,6 +737,7 @@ func (x *EmployeeChecklistPayload) GetUpdatedAt() int64 {
 }
 
 type ListChecklistTemplatesRequest struct {
+	// Filter by trigger type; absent to include all types.
 	TriggerType *string `json:"trigger_type,omitempty"`
 }
 
@@ -712,10 +754,14 @@ func (x *ListChecklistTemplatesRequest) GetTriggerType() string {
 }
 
 type ListChecklistTemplatesResponse struct {
+	// Page of checklist templates matching the filters.
 	Templates []*ChecklistTemplatePayload `json:"templates,omitempty"`
-	Total     int64                       `json:"total,omitempty"`
-	Limit     int32                       `json:"limit,omitempty"`
-	Offset    int32                       `json:"offset,omitempty"`
+	// Total number of matching templates across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListChecklistTemplatesResponse) GetTemplates() []*ChecklistTemplatePayload {
@@ -751,9 +797,12 @@ func (x *ListChecklistTemplatesResponse) GetOffset() int32 {
 }
 
 type CreateChecklistTemplateRequest struct {
-	Name        string  `json:"name,omitempty"`
+	// Human-readable name for the template.
+	Name string `json:"name,omitempty"`
+	// trigger_type is the event that triggers this checklist (onboarding | offboarding).
 	TriggerType *string `json:"trigger_type,omitempty"`
-	RoleId      *int64  `json:"role_id,omitempty"`
+	// Role this template applies to; absent if it applies to all roles.
+	RoleId *int64 `json:"role_id,omitempty"`
 }
 
 func (m *CreateChecklistTemplateRequest) MarshalJSON() ([]byte, error) {
@@ -821,6 +870,7 @@ func (x *CreateChecklistTemplateRequest) GetRoleId() int64 {
 }
 
 type CreateChecklistTemplateResponse struct {
+	// The newly created checklist template.
 	Template *ChecklistTemplatePayload `json:"template,omitempty"`
 }
 
@@ -832,8 +882,11 @@ func (x *CreateChecklistTemplateResponse) GetTemplate() *ChecklistTemplatePayloa
 	return x.Template
 }
 
+// UpdateChecklistTemplateBody carries updatable checklist template fields bound from the HTTP payload.
 type UpdateChecklistTemplateBody struct {
-	Name        string  `json:"name,omitempty"`
+	// name is the human-readable name for the template.
+	Name string `json:"name,omitempty"`
+	// trigger_type is the event that triggers this checklist (onboarding | offboarding).
 	TriggerType *string `json:"trigger_type,omitempty"`
 }
 
@@ -858,6 +911,7 @@ func (x *UpdateChecklistTemplateBody) GetTriggerType() string {
 }
 
 type UpdateChecklistTemplateRequest struct {
+	// role_id is the checklist template role identifier from the path.
 	RoleId int64                        `json:"role_id,omitempty"`
 	Body   *UpdateChecklistTemplateBody `json:"body,omitempty"`
 }
@@ -908,6 +962,7 @@ func (x *UpdateChecklistTemplateRequest) GetBody() *UpdateChecklistTemplateBody 
 }
 
 type UpdateChecklistTemplateResponse struct {
+	// success indicates the checklist template was updated.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -920,12 +975,18 @@ func (x *UpdateChecklistTemplateResponse) GetSuccess() bool {
 }
 
 type AddItemToChecklistTemplateRequest struct {
-	RoleId             int64   `json:"role_id,omitempty"`
-	Title              string  `json:"title,omitempty"`
-	Description        *string `json:"description,omitempty"`
-	AssigneeRole       *string `json:"assignee_role,omitempty"`
-	DueOffsetDays      *int32  `json:"due_offset_days,omitempty"`
-	RequiresAttachment *bool   `json:"requires_attachment,omitempty"`
+	// role_id is the checklist template role identifier from the path.
+	RoleId int64 `json:"role_id,omitempty"`
+	// title is the checklist item title.
+	Title string `json:"title,omitempty"`
+	// description is the optional supporting text for the checklist item.
+	Description *string `json:"description,omitempty"`
+	// assignee_role is the role responsible for completing this item.
+	AssigneeRole *string `json:"assignee_role,omitempty"`
+	// due_offset_days is the number of days after trigger date by which this item is due.
+	DueOffsetDays *int32 `json:"due_offset_days,omitempty"`
+	// requires_attachment indicates whether completion needs an uploaded attachment.
+	RequiresAttachment *bool `json:"requires_attachment,omitempty"`
 }
 
 func (m *AddItemToChecklistTemplateRequest) MarshalJSON() ([]byte, error) {
@@ -1022,6 +1083,7 @@ func (x *AddItemToChecklistTemplateRequest) GetRequiresAttachment() bool {
 }
 
 type AddItemToChecklistTemplateResponse struct {
+	// item is the checklist template item that was created.
 	Item *ChecklistItemPayload `json:"item,omitempty"`
 }
 
@@ -1034,9 +1096,12 @@ func (x *AddItemToChecklistTemplateResponse) GetItem() *ChecklistItemPayload {
 }
 
 type ListEmployeeChecklistsRequest struct {
+	// employee_id is the employee whose checklists should be listed.
 	EmployeeId *int64 `json:"employee_id,omitempty"`
-	Limit      *int32 `json:"limit,omitempty"`
-	Offset     *int32 `json:"offset,omitempty"`
+	// limit is the maximum number of checklists to return.
+	Limit *int32 `json:"limit,omitempty"`
+	// offset is the number of checklists to skip before returning results.
+	Offset *int32 `json:"offset,omitempty"`
 }
 
 func (m *ListEmployeeChecklistsRequest) MarshalJSON() ([]byte, error) {
@@ -1108,10 +1173,14 @@ func (x *ListEmployeeChecklistsRequest) GetOffset() int32 {
 }
 
 type ListEmployeeChecklistsResponse struct {
+	// Page of employee checklists matching the filters.
 	Checklists []*EmployeeChecklistPayload `json:"checklists,omitempty"`
-	Total      int64                       `json:"total,omitempty"`
-	Limit      int32                       `json:"limit,omitempty"`
-	Offset     int32                       `json:"offset,omitempty"`
+	// Total number of matching checklists across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListEmployeeChecklistsResponse) GetChecklists() []*EmployeeChecklistPayload {
@@ -1147,6 +1216,7 @@ func (x *ListEmployeeChecklistsResponse) GetOffset() int32 {
 }
 
 type GetEmployeeChecklistRequest struct {
+	// employee_id is the employee whose checklist should be fetched.
 	EmployeeId int64 `json:"employee_id,omitempty"`
 }
 
@@ -1188,6 +1258,7 @@ func (x *GetEmployeeChecklistRequest) GetEmployeeId() int64 {
 }
 
 type GetEmployeeChecklistResponse struct {
+	// checklist is the employee checklist returned for the path id.
 	Checklist *EmployeeChecklistPayload `json:"checklist,omitempty"`
 }
 
@@ -1200,8 +1271,11 @@ func (x *GetEmployeeChecklistResponse) GetChecklist() *EmployeeChecklistPayload 
 }
 
 type TriggerChecklistRequest struct {
-	EmployeeId  int64  `json:"employee_id,omitempty"`
-	TemplateId  *int64 `json:"template_id,omitempty"`
+	// Employee to trigger the checklist for.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// template_id identifies the checklist template to trigger.
+	TemplateId *int64 `json:"template_id,omitempty"`
+	// trigger_date is the date the checklist starts, formatted as YYYY-MM-DD.
 	TriggerDate string `json:"trigger_date,omitempty"`
 }
 
@@ -1276,6 +1350,7 @@ func (x *TriggerChecklistRequest) GetTriggerDate() string {
 }
 
 type TriggerChecklistResponse struct {
+	// The employee checklist that was created.
 	Checklist *EmployeeChecklistPayload `json:"checklist,omitempty"`
 }
 
@@ -1287,10 +1362,15 @@ func (x *TriggerChecklistResponse) GetChecklist() *EmployeeChecklistPayload {
 	return x.Checklist
 }
 
+// CompleteChecklistItemRequest has no fields in the source proto - the item
+// being completed is not identified anywhere on this message (no path
+// param, no body field). Carried over unchanged and flagged for manual
+// follow-up; this looks like an incomplete contract upstream.
 type CompleteChecklistItemRequest struct {
 }
 
 type CompleteChecklistItemResponse struct {
+	// success indicates the checklist item was marked complete.
 	Success bool `json:"success,omitempty"`
 }
 

@@ -12,23 +12,35 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.expenses.v1.ListExpensesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ExpensesService
@@ -41,12 +53,24 @@ paths:
                             $ref: '#/components/schemas/finance.expenses.v1.CreateExpenseRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.expenses.v1.CreateExpenseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/expenses/v1/expenses/{id}:
         get:
             tags:
@@ -56,17 +80,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.expenses.v1.GetExpenseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - ExpensesService
@@ -75,10 +115,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the expense.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the expense.
             requestBody:
                 content:
                     application/json:
@@ -88,12 +132,24 @@ paths:
                             description: body carries updatable expense fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.expenses.v1.UpdateExpenseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ExpensesService
@@ -102,17 +158,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the expense.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the expense.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.expenses.v1.DeleteExpenseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/expenses/v1/expenses/{id}/status:
         patch:
             tags:
@@ -122,10 +194,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
@@ -135,12 +211,24 @@ paths:
                             description: body carries status update fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.expenses.v1.UpdateExpenseStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/expenses/v1/categories:
         get:
             tags:
@@ -148,12 +236,24 @@ paths:
             summary: listExpenseCategories
             operationId: ExpensesService_listExpenseCategories
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.expenses.v1.ListExpenseCategoriesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         finance.expenses.v1.ListExpensesRequest:
@@ -194,14 +294,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: category_id is the category id value for this contract.
                 amount:
@@ -267,6 +370,7 @@ components:
             properties:
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: category_id is the category id value for this contract.
                 amount:
@@ -318,6 +422,7 @@ components:
             properties:
                 expense_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: expense_id is the expense id value for this contract.
                 message:
@@ -332,6 +437,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the expense.
                 body:
@@ -346,6 +452,7 @@ components:
             properties:
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: category_id is the category id value for this contract.
                 amount:
@@ -406,6 +513,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the expense.
             required:
@@ -424,6 +532,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -443,6 +552,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -485,10 +595,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 name:
@@ -507,3 +619,13 @@ components:
                 - color
                 - created_at
             description: ExpenseCategory groups expenses for reporting.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ExpensesService
+      description: ExpensesService defines expense tracking endpoints.

@@ -13,17 +13,30 @@ paths:
             parameters:
                 - name: period
                   in: query
-                  required: true
+                  description: period is the period value for this contract.
+                  required: false
                   schema:
                     type: string
                     description: period is the period value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.financial.v1.GetCashFlowAnalyticsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/financial/v1/expenses:
         get:
             tags:
@@ -34,17 +47,30 @@ paths:
             parameters:
                 - name: period
                   in: query
-                  required: true
+                  description: period is the period value for this contract.
+                  required: false
                   schema:
                     type: string
                     description: period is the period value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.financial.v1.GetExpenseAnalyticsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /insights/financial/v1/invoice-aging:
         get:
             tags:
@@ -53,12 +79,24 @@ paths:
             description: Returns invoice aging analysis.
             operationId: FinancialService_getInvoiceAging
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/insights.financial.v1.GetInvoiceAgingResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         insights.financial.v1.GetCashFlowAnalyticsRequest:
@@ -256,3 +294,13 @@ components:
                 - bucket
                 - count
                 - amount
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: FinancialService
+      description: FinancialService defines insights financial analytics endpoints.

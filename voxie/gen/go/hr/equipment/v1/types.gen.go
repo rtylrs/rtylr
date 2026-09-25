@@ -6,20 +6,34 @@ import (
 	"strconv"
 )
 
+// EquipmentRequestPayload is a request for equipment made on behalf of an employee.
 type EquipmentRequestPayload struct {
-	Id                   int64   `json:"id,omitempty"`
-	OwnerId              int64   `json:"owner_id,omitempty"`
-	EmployeeId           int64   `json:"employee_id,omitempty"`
-	EquipmentType        string  `json:"equipment_type,omitempty"`
-	Description          string  `json:"description,omitempty"`
-	Urgency              string  `json:"urgency,omitempty"`
-	NeededByDate         *string `json:"needed_by_date,omitempty"`
-	Status               string  `json:"status,omitempty"`
-	CurrentApprovalLevel int32   `json:"current_approval_level,omitempty"`
-	ApprovedBy           *int64  `json:"approved_by,omitempty"`
-	DeliveredAt          *int64  `json:"delivered_at,omitempty"`
-	CreatedAt            int64   `json:"created_at,omitempty"`
-	UpdatedAt            int64   `json:"updated_at,omitempty"`
+	// Unique identifier for the equipment request.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this request belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee who needs the equipment.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Category of equipment being requested (e.g. "laptop", "monitor", "desk").
+	EquipmentType string `json:"equipment_type,omitempty"`
+	// Free-text description of the specific equipment needed.
+	Description string `json:"description,omitempty"`
+	// Priority level (low | medium | high).
+	Urgency string `json:"urgency,omitempty"`
+	// Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
+	NeededByDate *string `json:"needed_by_date,omitempty"`
+	// Workflow status (pending | approved | ordered | delivered | rejected).
+	Status string `json:"status,omitempty"`
+	// Current step in a multi-level approval chain.
+	CurrentApprovalLevel int32 `json:"current_approval_level,omitempty"`
+	// Employee who approved the request; absent if not yet approved.
+	ApprovedBy *int64 `json:"approved_by,omitempty"`
+	// Unix timestamp when the equipment was delivered; absent if not yet delivered.
+	DeliveredAt *int64 `json:"delivered_at,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *EquipmentRequestPayload) MarshalJSON() ([]byte, error) {
@@ -233,17 +247,28 @@ func (x *EquipmentRequestPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// AssetPayload is a physical asset assigned to an employee.
 type AssetPayload struct {
-	Id           int64   `json:"id,omitempty"`
-	OwnerId      int64   `json:"owner_id,omitempty"`
-	EmployeeId   int64   `json:"employee_id,omitempty"`
-	Name         string  `json:"name,omitempty"`
+	// Unique identifier for the asset.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this asset belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee the asset is currently assigned to.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Human-readable name of the asset (e.g. "MacBook Pro 16-inch").
+	Name string `json:"name,omitempty"`
+	// Manufacturer serial number; absent if not tracked.
 	SerialNumber *string `json:"serial_number,omitempty"`
-	AssignedDate string  `json:"assigned_date,omitempty"`
+	// Date the asset was assigned to the employee (ISO-8601 date).
+	AssignedDate string `json:"assigned_date,omitempty"`
+	// Date the asset was returned; absent if still assigned (ISO-8601 date).
 	ReturnedDate *string `json:"returned_date,omitempty"`
-	Condition    string  `json:"condition,omitempty"`
-	CreatedAt    int64   `json:"created_at,omitempty"`
-	UpdatedAt    int64   `json:"updated_at,omitempty"`
+	// Physical condition of the asset (new | good | fair | damaged).
+	Condition string `json:"condition,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *AssetPayload) MarshalJSON() ([]byte, error) {
@@ -404,8 +429,10 @@ func (x *AssetPayload) GetUpdatedAt() int64 {
 }
 
 type ListAssetsRequest struct {
-	EmployeeId *int64  `json:"employee_id,omitempty"`
-	Condition  *string `json:"condition,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by condition; absent to include all conditions.
+	Condition *string `json:"condition,omitempty"`
 }
 
 func (m *ListAssetsRequest) MarshalJSON() ([]byte, error) {
@@ -465,10 +492,14 @@ func (x *ListAssetsRequest) GetCondition() string {
 }
 
 type ListAssetsResponse struct {
+	// Page of assets matching the filters.
 	Assets []*AssetPayload `json:"assets,omitempty"`
-	Total  int64           `json:"total,omitempty"`
-	Limit  int32           `json:"limit,omitempty"`
-	Offset int32           `json:"offset,omitempty"`
+	// Total number of matching assets across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListAssetsResponse) GetAssets() []*AssetPayload {
@@ -504,8 +535,10 @@ func (x *ListAssetsResponse) GetOffset() int32 {
 }
 
 type ListEquipmentRequestsRequest struct {
-	EmployeeId *int64  `json:"employee_id,omitempty"`
-	Status     *string `json:"status,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by status; absent to include all statuses.
+	Status *string `json:"status,omitempty"`
 }
 
 func (m *ListEquipmentRequestsRequest) MarshalJSON() ([]byte, error) {
@@ -565,10 +598,14 @@ func (x *ListEquipmentRequestsRequest) GetStatus() string {
 }
 
 type ListEquipmentRequestsResponse struct {
+	// Page of equipment requests matching the filters.
 	Requests []*EquipmentRequestPayload `json:"requests,omitempty"`
-	Total    int64                      `json:"total,omitempty"`
-	Limit    int32                      `json:"limit,omitempty"`
-	Offset   int32                      `json:"offset,omitempty"`
+	// Total number of matching equipment requests across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListEquipmentRequestsResponse) GetRequests() []*EquipmentRequestPayload {
@@ -604,11 +641,16 @@ func (x *ListEquipmentRequestsResponse) GetOffset() int32 {
 }
 
 type CreateEquipmentRequestRequest struct {
-	EmployeeId    *int64  `json:"employee_id,omitempty"`
-	EquipmentType string  `json:"equipment_type,omitempty"`
-	Description   string  `json:"description,omitempty"`
-	Urgency       string  `json:"urgency,omitempty"`
-	NeededByDate  *string `json:"needed_by_date,omitempty"`
+	// Employee who needs the equipment.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Category of equipment being requested.
+	EquipmentType string `json:"equipment_type,omitempty"`
+	// Free-text description of the specific equipment needed.
+	Description string `json:"description,omitempty"`
+	// Priority level (low | medium | high).
+	Urgency string `json:"urgency,omitempty"`
+	// Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
+	NeededByDate *string `json:"needed_by_date,omitempty"`
 }
 
 func (m *CreateEquipmentRequestRequest) MarshalJSON() ([]byte, error) {
@@ -692,6 +734,7 @@ func (x *CreateEquipmentRequestRequest) GetNeededByDate() string {
 }
 
 type CreateEquipmentRequestResponse struct {
+	// The newly created equipment request.
 	Request *EquipmentRequestPayload `json:"request,omitempty"`
 }
 
@@ -703,7 +746,9 @@ func (x *CreateEquipmentRequestResponse) GetRequest() *EquipmentRequestPayload {
 	return x.Request
 }
 
+// ApproveEquipmentBody carries approval decision fields bound from the HTTP payload.
 type ApproveEquipmentBody struct {
+	// True to approve, false to reject.
 	Approved bool `json:"approved,omitempty"`
 }
 
@@ -716,6 +761,7 @@ func (x *ApproveEquipmentBody) GetApproved() bool {
 }
 
 type ApproveEquipmentRequest struct {
+	// ID of the equipment request being reviewed.
 	EquipmentRequestId int64                 `json:"equipment_request_id,omitempty"`
 	Body               *ApproveEquipmentBody `json:"body,omitempty"`
 }
@@ -766,6 +812,7 @@ func (x *ApproveEquipmentRequest) GetBody() *ApproveEquipmentBody {
 }
 
 type ApproveEquipmentResponse struct {
+	// Whether the approval action was processed.
 	Success bool `json:"success,omitempty"`
 }
 

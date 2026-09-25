@@ -478,7 +478,7 @@ return out;
 export function validateCreateUserRequest(v: CreateUserRequest): string[] {
 const violations: string[] = [];
 if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
-if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.email !== undefined && v.email !== null && v.email !== "" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
 if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
 if (v.isConsoleAdmin !== undefined && v.isConsoleAdmin !== null && !(typeof v.isConsoleAdmin === "boolean")) violations.push("is_console_admin has invalid type");
@@ -1030,7 +1030,7 @@ return out;
 export function validateCreateBusinessOwnerRequest(v: CreateBusinessOwnerRequest): string[] {
 const violations: string[] = [];
 if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
-if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.email !== undefined && v.email !== null && v.email !== "" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
 if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
 if (v.businessName !== undefined && v.businessName !== null && !(typeof v.businessName === "string")) violations.push("business_name has invalid type");

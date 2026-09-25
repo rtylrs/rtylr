@@ -7,11 +7,13 @@ import (
 	"strconv"
 )
 
+// Segment is a saved customer filter used for targeted campaigns.
 type Segment struct {
-	Id               int64   `json:"id,omitempty"`
-	OwnerId          int64   `json:"owner_id,omitempty"`
-	Name             string  `json:"name,omitempty"`
-	Description      string  `json:"description,omitempty"`
+	Id          int64  `json:"id,omitempty"`
+	OwnerId     int64  `json:"owner_id,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	// JSON filter definition for this segment.
 	Filters          string  `json:"filters,omitempty"`
 	CustomerCount    int64   `json:"customer_count,omitempty"`
 	LastCalculatedAt *string `json:"last_calculated_at,omitempty"`
@@ -371,6 +373,9 @@ func (x *GetSegmentCustomersRequest) GetPageSize() int64 {
 }
 
 type GetSegmentCustomersResponse struct {
+	// Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
+	// projection) so consumers can render loyalty tier/points without a
+	// second lookup.
 	Customers []*crm_customer_v1.Customer `json:"customers,omitempty"`
 	Total     int64                       `json:"total,omitempty"`
 	Page      int64                       `json:"page,omitempty"`
@@ -500,7 +505,10 @@ func (x *GetSegmentDetailRequest) GetId() int64 {
 }
 
 type GetSegmentDetailResponse struct {
-	Segment   *Segment                    `json:"segment,omitempty"`
+	Segment *Segment `json:"segment,omitempty"`
+	// Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
+	// projection) so consumers can render loyalty tier/points without a
+	// second lookup.
 	Customers []*crm_customer_v1.Customer `json:"customers,omitempty"`
 }
 

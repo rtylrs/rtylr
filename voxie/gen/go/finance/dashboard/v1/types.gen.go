@@ -5,11 +5,16 @@ type GetFinanceDashboardRequest struct {
 }
 
 type GetFinanceDashboardResponse struct {
-	TotalRevenueMtd  float64 `json:"total_revenue_mtd,omitempty"`
-	TotalReceivable  float64 `json:"total_receivable,omitempty"`
-	OverdueAmount    float64 `json:"overdue_amount,omitempty"`
+	// total_revenue_mtd is the total revenue month-to-date value for this contract.
+	TotalRevenueMtd float64 `json:"total_revenue_mtd,omitempty"`
+	// total_receivable is the total receivable value for this contract.
+	TotalReceivable float64 `json:"total_receivable,omitempty"`
+	// overdue_amount is the overdue amount value for this contract.
+	OverdueAmount float64 `json:"overdue_amount,omitempty"`
+	// total_expenses_mtd is the total expenses mtd value for this contract.
 	TotalExpensesMtd float64 `json:"total_expenses_mtd,omitempty"`
-	NetProfitMtd     float64 `json:"net_profit_mtd,omitempty"`
+	// net_profit_mtd is the net profit mtd value for this contract.
+	NetProfitMtd float64 `json:"net_profit_mtd,omitempty"`
 }
 
 func (x *GetFinanceDashboardResponse) GetTotalRevenueMtd() float64 {

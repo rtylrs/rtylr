@@ -6,15 +6,24 @@ import (
 	"strconv"
 )
 
+// InvoiceItem is a single line item on an invoice.
 type InvoiceItem struct {
-	Description string  `json:"description,omitempty"`
-	Quantity    float64 `json:"quantity,omitempty"`
-	Unit        string  `json:"unit,omitempty"`
-	UnitPrice   float64 `json:"unit_price,omitempty"`
-	TaxRate     float64 `json:"tax_rate,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// quantity is the quantity value for this contract.
+	Quantity float64 `json:"quantity,omitempty"`
+	// unit is the unit value for this contract.
+	Unit string `json:"unit,omitempty"`
+	// unit_price is the unit price value for this contract.
+	UnitPrice float64 `json:"unit_price,omitempty"`
+	// tax_rate is the tax rate value for this contract.
+	TaxRate float64 `json:"tax_rate,omitempty"`
+	// discount_pct is the discount pct value for this contract.
 	DiscountPct float64 `json:"discount_pct,omitempty"`
-	SortOrder   int64   `json:"sort_order,omitempty"`
-	Total       float64 `json:"total,omitempty"`
+	// sort_order is the sort order value for this contract.
+	SortOrder int64 `json:"sort_order,omitempty"`
+	// total is the total number of matching records.
+	Total float64 `json:"total,omitempty"`
 }
 
 func (m *InvoiceItem) MarshalJSON() ([]byte, error) {
@@ -110,19 +119,32 @@ func (x *InvoiceItem) GetTotal() float64 {
 	return x.Total
 }
 
+// InvoiceSummary is a compact invoice row for list views.
 type InvoiceSummary struct {
-	Id            int64   `json:"id,omitempty"`
-	InvoiceNumber string  `json:"invoice_number,omitempty"`
-	ClientName    string  `json:"client_name,omitempty"`
-	Status        string  `json:"status,omitempty"`
-	IssueDate     string  `json:"issue_date,omitempty"`
-	DueDate       string  `json:"due_date,omitempty"`
-	PaidDate      string  `json:"paid_date,omitempty"`
-	Currency      string  `json:"currency,omitempty"`
-	Total         float64 `json:"total,omitempty"`
-	AmountPaid    float64 `json:"amount_paid,omitempty"`
-	AmountDue     float64 `json:"amount_due,omitempty"`
-	CreatedAt     string  `json:"created_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// invoice_number is the invoice number value for this contract.
+	InvoiceNumber string `json:"invoice_number,omitempty"`
+	// client_name is the client name value for this contract.
+	ClientName string `json:"client_name,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// issue_date is the issue date value for this contract.
+	IssueDate string `json:"issue_date,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// paid_date is the paid date value for this contract.
+	PaidDate string `json:"paid_date,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// total is the total number of matching records.
+	Total float64 `json:"total,omitempty"`
+	// amount_paid is the amount paid value for this contract.
+	AmountPaid float64 `json:"amount_paid,omitempty"`
+	// amount_due is the amount due value for this contract.
+	AmountDue float64 `json:"amount_due,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *InvoiceSummary) MarshalJSON() ([]byte, error) {
@@ -250,17 +272,29 @@ func (x *InvoiceSummary) GetCreatedAt() string {
 	return x.CreatedAt
 }
 
+// BillableTimeEntry is approved billable HR time that has not been linked to
+// a finance invoice yet.
 type BillableTimeEntry struct {
-	Id              int64  `json:"id,omitempty"`
-	EmployeeId      int64  `json:"employee_id,omitempty"`
-	ProjectId       *int64 `json:"project_id,omitempty"`
-	TaskId          *int64 `json:"task_id,omitempty"`
-	Date            string `json:"date,omitempty"`
-	DurationMinutes int64  `json:"duration_minutes,omitempty"`
-	Description     string `json:"description,omitempty"`
-	IsBillable      bool   `json:"is_billable,omitempty"`
-	Status          string `json:"status,omitempty"`
-	Source          string `json:"source,omitempty"`
+	// id is the unique identifier for the time entry.
+	Id int64 `json:"id,omitempty"`
+	// employee_id identifies the employee who logged the time.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// project_id identifies the optional Flow project.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// task_id identifies the optional Flow task.
+	TaskId *int64 `json:"task_id,omitempty"`
+	// date is the day on which the time was logged.
+	Date string `json:"date,omitempty"`
+	// duration_minutes is the approved billable duration.
+	DurationMinutes int64 `json:"duration_minutes,omitempty"`
+	// description is the time entry description.
+	Description string `json:"description,omitempty"`
+	// is_billable is always true for this response.
+	IsBillable bool `json:"is_billable,omitempty"`
+	// status is always approved for this response.
+	Status string `json:"status,omitempty"`
+	// source identifies the system that recorded the time.
+	Source string `json:"source,omitempty"`
 }
 
 func (m *BillableTimeEntry) MarshalJSON() ([]byte, error) {
@@ -426,34 +460,66 @@ func (x *BillableTimeEntry) GetSource() string {
 	return x.Source
 }
 
+// InvoiceDetail is the full invoice record.
 type InvoiceDetail struct {
-	Id             int64          `json:"id,omitempty"`
-	OwnerId        int64          `json:"owner_id,omitempty"`
-	CustomerId     *int64         `json:"customer_id,omitempty"`
-	InvoiceNumber  string         `json:"invoice_number,omitempty"`
-	ClientName     string         `json:"client_name,omitempty"`
-	ClientEmail    string         `json:"client_email,omitempty"`
-	ClientAddress  string         `json:"client_address,omitempty"`
-	ClientTaxId    string         `json:"client_tax_id,omitempty"`
-	Status         string         `json:"status,omitempty"`
-	IssueDate      string         `json:"issue_date,omitempty"`
-	DueDate        string         `json:"due_date,omitempty"`
-	PaidDate       string         `json:"paid_date,omitempty"`
-	Currency       string         `json:"currency,omitempty"`
-	Subtotal       float64        `json:"subtotal,omitempty"`
-	DiscountType   string         `json:"discount_type,omitempty"`
-	DiscountValue  float64        `json:"discount_value,omitempty"`
-	DiscountAmount float64        `json:"discount_amount,omitempty"`
-	TaxRate        float64        `json:"tax_rate,omitempty"`
-	TaxAmount      float64        `json:"tax_amount,omitempty"`
-	Total          float64        `json:"total,omitempty"`
-	AmountPaid     float64        `json:"amount_paid,omitempty"`
-	AmountDue      float64        `json:"amount_due,omitempty"`
-	Notes          string         `json:"notes,omitempty"`
-	Terms          string         `json:"terms,omitempty"`
-	CreatedAt      string         `json:"created_at,omitempty"`
-	UpdatedAt      string         `json:"updated_at,omitempty"`
-	Items          []*InvoiceItem `json:"items,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// customer_id links to the CRM customer this invoice was issued to; absent
+	// on invoices created before customers were linked, and on one-off invoices
+	// for a party that is not a customer record. The client_* fields stay the
+	// values printed on the document at issue time and are deliberately not
+	// re-derived from the customer record.
+	CustomerId *int64 `json:"customer_id,omitempty"`
+	// invoice_number is the invoice number value for this contract.
+	InvoiceNumber string `json:"invoice_number,omitempty"`
+	// client_name is the client name value for this contract.
+	ClientName string `json:"client_name,omitempty"`
+	// client_email is the client email value for this contract.
+	ClientEmail string `json:"client_email,omitempty"`
+	// client_address is the client address value for this contract.
+	ClientAddress string `json:"client_address,omitempty"`
+	// client_tax_id is the client tax id value for this contract.
+	ClientTaxId string `json:"client_tax_id,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// issue_date is the issue date value for this contract.
+	IssueDate string `json:"issue_date,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// paid_date is the paid date value for this contract.
+	PaidDate string `json:"paid_date,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// subtotal is the subtotal value for this contract.
+	Subtotal float64 `json:"subtotal,omitempty"`
+	// discount_type is the discount type value for this contract.
+	DiscountType string `json:"discount_type,omitempty"`
+	// discount_value is the discount value value for this contract.
+	DiscountValue float64 `json:"discount_value,omitempty"`
+	// discount_amount is the discount amount value for this contract.
+	DiscountAmount float64 `json:"discount_amount,omitempty"`
+	// tax_rate is the tax rate value for this contract.
+	TaxRate float64 `json:"tax_rate,omitempty"`
+	// tax_amount is the tax amount value for this contract.
+	TaxAmount float64 `json:"tax_amount,omitempty"`
+	// total is the total number of matching records.
+	Total float64 `json:"total,omitempty"`
+	// amount_paid is the amount paid value for this contract.
+	AmountPaid float64 `json:"amount_paid,omitempty"`
+	// amount_due is the amount due value for this contract.
+	AmountDue float64 `json:"amount_due,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
+	// terms is the terms value for this contract.
+	Terms string `json:"terms,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
+	// items is the items value for this contract.
+	Items []*InvoiceItem `json:"items,omitempty"`
 }
 
 func (m *InvoiceDetail) MarshalJSON() ([]byte, error) {
@@ -728,14 +794,22 @@ func (x *InvoiceDetail) GetItems() []*InvoiceItem {
 	return x.Items
 }
 
+// Payment is a recorded payment applied to an invoice.
 type Payment struct {
-	Id          int64   `json:"id,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	PaymentDate string  `json:"payment_date,omitempty"`
-	Method      string  `json:"method,omitempty"`
-	Reference   string  `json:"reference,omitempty"`
-	Notes       string  `json:"notes,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// payment_date is the payment date value for this contract.
+	PaymentDate string `json:"payment_date,omitempty"`
+	// method is the method value for this contract.
+	Method string `json:"method,omitempty"`
+	// reference is the reference value for this contract.
+	Reference string `json:"reference,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
 }
 
 func (m *Payment) MarshalJSON() ([]byte, error) {
@@ -823,15 +897,24 @@ func (x *Payment) GetNotes() string {
 	return x.Notes
 }
 
+// RecordPaymentResponsePayload describes a payment just recorded against an invoice.
 type RecordPaymentResponsePayload struct {
-	Id          int64   `json:"id,omitempty"`
-	InvoiceId   int64   `json:"invoice_id,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	PaymentDate string  `json:"payment_date,omitempty"`
-	Method      string  `json:"method,omitempty"`
-	Reference   string  `json:"reference,omitempty"`
-	Notes       string  `json:"notes,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// invoice_id is the invoice id value for this contract.
+	InvoiceId int64 `json:"invoice_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// payment_date is the payment date value for this contract.
+	PaymentDate string `json:"payment_date,omitempty"`
+	// method is the method value for this contract.
+	Method string `json:"method,omitempty"`
+	// reference is the reference value for this contract.
+	Reference string `json:"reference,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
 }
 
 func (m *RecordPaymentResponsePayload) MarshalJSON() ([]byte, error) {
@@ -938,20 +1021,39 @@ func (x *RecordPaymentResponsePayload) GetNotes() string {
 }
 
 type CreateInvoiceRequest struct {
-	ClientName    string         `json:"client_name,omitempty"`
-	ClientEmail   string         `json:"client_email,omitempty"`
-	ClientAddress string         `json:"client_address,omitempty"`
-	ClientTaxId   string         `json:"client_tax_id,omitempty"`
-	CustomerId    *int64         `json:"customer_id,omitempty"`
-	IssueDate     string         `json:"issue_date,omitempty"`
-	DueDate       string         `json:"due_date,omitempty"`
-	Currency      string         `json:"currency,omitempty"`
-	DiscountType  string         `json:"discount_type,omitempty"`
-	DiscountValue float64        `json:"discount_value,omitempty"`
-	TaxRate       float64        `json:"tax_rate,omitempty"`
-	Notes         string         `json:"notes,omitempty"`
-	Terms         string         `json:"terms,omitempty"`
-	Items         []*InvoiceItem `json:"items,omitempty"`
+	// client_name is the client name value for this contract.
+	ClientName string `json:"client_name,omitempty"`
+	// client_email is the client email value for this contract.
+	ClientEmail string `json:"client_email,omitempty"`
+	// client_address is the client address value for this contract.
+	ClientAddress string `json:"client_address,omitempty"`
+	// client_tax_id is the client tax id value for this contract.
+	ClientTaxId string `json:"client_tax_id,omitempty"`
+	// customer_id is the CRM customer to issue to. When supplied the server
+	// snapshots that customer's name, email, address and tax id onto the
+	// invoice and the client_* fields above may be omitted. When absent the
+	// server requires client_name and client_email, which is the existing
+	// behaviour. The server must verify the referenced customer belongs to
+	// the caller's business before accepting the link.
+	CustomerId *int64 `json:"customer_id,omitempty"`
+	// issue_date is the issue date value for this contract.
+	IssueDate string `json:"issue_date,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// discount_type is the discount type value for this contract.
+	DiscountType string `json:"discount_type,omitempty"`
+	// discount_value is the discount value value for this contract.
+	DiscountValue float64 `json:"discount_value,omitempty"`
+	// tax_rate is the tax rate value for this contract.
+	TaxRate float64 `json:"tax_rate,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
+	// terms is the terms value for this contract.
+	Terms string `json:"terms,omitempty"`
+	// items is the items value for this contract.
+	Items []*InvoiceItem `json:"items,omitempty"`
 }
 
 func (m *CreateInvoiceRequest) MarshalJSON() ([]byte, error) {
@@ -1103,6 +1205,7 @@ func (x *CreateInvoiceRequest) GetItems() []*InvoiceItem {
 }
 
 type CreateInvoiceResponse struct {
+	// invoice is the invoice value for this contract.
 	Invoice *InvoiceDetail `json:"invoice,omitempty"`
 }
 
@@ -1115,6 +1218,7 @@ func (x *CreateInvoiceResponse) GetInvoice() *InvoiceDetail {
 }
 
 type DeleteInvoiceRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1156,6 +1260,7 @@ func (x *DeleteInvoiceRequest) GetId() int64 {
 }
 
 type DeleteInvoiceResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1168,6 +1273,7 @@ func (x *DeleteInvoiceResponse) GetMessage() string {
 }
 
 type GetInvoiceRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1209,8 +1315,10 @@ func (x *GetInvoiceRequest) GetId() int64 {
 }
 
 type GetInvoiceResponse struct {
-	Invoice  *InvoiceDetail `json:"invoice,omitempty"`
-	Payments []*Payment     `json:"payments,omitempty"`
+	// invoice is the invoice value for this contract.
+	Invoice *InvoiceDetail `json:"invoice,omitempty"`
+	// payments is the payments value for this contract.
+	Payments []*Payment `json:"payments,omitempty"`
 }
 
 func (x *GetInvoiceResponse) GetInvoice() *InvoiceDetail {
@@ -1230,13 +1338,21 @@ func (x *GetInvoiceResponse) GetPayments() []*Payment {
 }
 
 type ListInvoicesRequest struct {
-	Status     string `json:"status,omitempty"`
-	Search     string `json:"search,omitempty"`
+	// status filters invoices by lifecycle state.
+	Status string `json:"status,omitempty"`
+	// search filters by customer or invoice number.
+	Search string `json:"search,omitempty"`
+	// customer_id filters by the linked CRM customer; absent to include
+	// invoices for all customers and invoices with no customer link.
 	CustomerId *int64 `json:"customer_id,omitempty"`
-	DateFrom   string `json:"date_from,omitempty"`
-	DateTo     string `json:"date_to,omitempty"`
-	Page       int64  `json:"page,omitempty"`
-	PageSize   int64  `json:"page_size,omitempty"`
+	// date_from is the inclusive start date filter.
+	DateFrom string `json:"date_from,omitempty"`
+	// date_to is the inclusive end date filter.
+	DateTo string `json:"date_to,omitempty"`
+	// page is the one-based page number to return.
+	Page int64 `json:"page,omitempty"`
+	// page_size is the maximum number of invoices to return.
+	PageSize int64 `json:"page_size,omitempty"`
 }
 
 func (m *ListInvoicesRequest) MarshalJSON() ([]byte, error) {
@@ -1332,10 +1448,14 @@ func (x *ListInvoicesRequest) GetPageSize() int64 {
 }
 
 type ListInvoicesResponse struct {
+	// invoices is the invoices value for this contract.
 	Invoices []*InvoiceSummary `json:"invoices,omitempty"`
-	Page     int64             `json:"page,omitempty"`
-	PageSize int64             `json:"page_size,omitempty"`
-	HasMore  bool              `json:"has_more,omitempty"`
+	// page is the current result page.
+	Page int64 `json:"page,omitempty"`
+	// page_size is the number of records requested per page.
+	PageSize int64 `json:"page_size,omitempty"`
+	// has_more indicates whether additional pages are available.
+	HasMore bool `json:"has_more,omitempty"`
 }
 
 func (x *ListInvoicesResponse) GetInvoices() []*InvoiceSummary {
@@ -1371,7 +1491,9 @@ func (x *ListInvoicesResponse) GetHasMore() bool {
 }
 
 type ListBillableTimeEntriesRequest struct {
-	Page     int64 `json:"page,omitempty"`
+	// page is the one-based page number to return.
+	Page int64 `json:"page,omitempty"`
+	// page_size is the maximum number of time entries to return.
 	PageSize int64 `json:"page_size,omitempty"`
 }
 
@@ -1392,12 +1514,18 @@ func (x *ListBillableTimeEntriesRequest) GetPageSize() int64 {
 }
 
 type ListBillableTimeEntriesResponse struct {
-	Entries      []*BillableTimeEntry `json:"entries,omitempty"`
-	Total        int64                `json:"total,omitempty"`
-	TotalMinutes int64                `json:"total_minutes,omitempty"`
-	Page         int64                `json:"page,omitempty"`
-	PageSize     int64                `json:"page_size,omitempty"`
-	HasMore      bool                 `json:"has_more,omitempty"`
+	// entries contains approved billable time not yet linked to an invoice.
+	Entries []*BillableTimeEntry `json:"entries,omitempty"`
+	// total is the number of matching time entries.
+	Total int64 `json:"total,omitempty"`
+	// total_minutes is the sum of matching entry durations.
+	TotalMinutes int64 `json:"total_minutes,omitempty"`
+	// page is the current result page.
+	Page int64 `json:"page,omitempty"`
+	// page_size is the number of records requested per page.
+	PageSize int64 `json:"page_size,omitempty"`
+	// has_more indicates whether additional pages are available.
+	HasMore bool `json:"has_more,omitempty"`
 }
 
 func (x *ListBillableTimeEntriesResponse) GetEntries() []*BillableTimeEntry {
@@ -1449,6 +1577,7 @@ func (x *ListBillableTimeEntriesResponse) GetHasMore() bool {
 }
 
 type SendInvoiceRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1490,6 +1619,7 @@ func (x *SendInvoiceRequest) GetId() int64 {
 }
 
 type SendInvoiceResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -1502,19 +1632,32 @@ func (x *SendInvoiceResponse) GetMessage() string {
 }
 
 type UpdateInvoiceBody struct {
-	ClientName    string         `json:"client_name,omitempty"`
-	ClientEmail   string         `json:"client_email,omitempty"`
-	ClientAddress string         `json:"client_address,omitempty"`
-	ClientTaxId   string         `json:"client_tax_id,omitempty"`
-	IssueDate     string         `json:"issue_date,omitempty"`
-	DueDate       string         `json:"due_date,omitempty"`
-	Currency      string         `json:"currency,omitempty"`
-	DiscountType  string         `json:"discount_type,omitempty"`
-	DiscountValue float64        `json:"discount_value,omitempty"`
-	TaxRate       float64        `json:"tax_rate,omitempty"`
-	Notes         string         `json:"notes,omitempty"`
-	Terms         string         `json:"terms,omitempty"`
-	Items         []*InvoiceItem `json:"items,omitempty"`
+	// client_name is the client name value for this contract.
+	ClientName string `json:"client_name,omitempty"`
+	// client_email is the client email value for this contract.
+	ClientEmail string `json:"client_email,omitempty"`
+	// client_address is the client address value for this contract.
+	ClientAddress string `json:"client_address,omitempty"`
+	// client_tax_id is the client tax id value for this contract.
+	ClientTaxId string `json:"client_tax_id,omitempty"`
+	// issue_date is the issue date value for this contract.
+	IssueDate string `json:"issue_date,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// discount_type is the discount type value for this contract.
+	DiscountType string `json:"discount_type,omitempty"`
+	// discount_value is the discount value value for this contract.
+	DiscountValue float64 `json:"discount_value,omitempty"`
+	// tax_rate is the tax rate value for this contract.
+	TaxRate float64 `json:"tax_rate,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
+	// terms is the terms value for this contract.
+	Terms string `json:"terms,omitempty"`
+	// items is the items value for this contract.
+	Items []*InvoiceItem `json:"items,omitempty"`
 }
 
 func (x *UpdateInvoiceBody) GetClientName() string {
@@ -1622,7 +1765,9 @@ func (x *UpdateInvoiceBody) GetItems() []*InvoiceItem {
 }
 
 type UpdateInvoiceRequest struct {
-	Id   int64              `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable invoice fields bound from the HTTP payload.
 	Body *UpdateInvoiceBody `json:"body,omitempty"`
 }
 
@@ -1672,6 +1817,7 @@ func (x *UpdateInvoiceRequest) GetBody() *UpdateInvoiceBody {
 }
 
 type UpdateInvoiceResponse struct {
+	// invoice is the invoice value for this contract.
 	Invoice *InvoiceDetail `json:"invoice,omitempty"`
 }
 
@@ -1684,6 +1830,7 @@ func (x *UpdateInvoiceResponse) GetInvoice() *InvoiceDetail {
 }
 
 type UpdateInvoiceStatusBody struct {
+	// status is the current lifecycle state.
 	Status string `json:"status,omitempty"`
 }
 
@@ -1696,7 +1843,9 @@ func (x *UpdateInvoiceStatusBody) GetStatus() string {
 }
 
 type UpdateInvoiceStatusRequest struct {
-	Id   int64                    `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries status update fields bound from the HTTP payload.
 	Body *UpdateInvoiceStatusBody `json:"body,omitempty"`
 }
 
@@ -1746,6 +1895,7 @@ func (x *UpdateInvoiceStatusRequest) GetBody() *UpdateInvoiceStatusBody {
 }
 
 type UpdateInvoiceStatusResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

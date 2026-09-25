@@ -213,7 +213,9 @@ return violations;
 
 export interface ListVariantsRequest {
 productId?: string | undefined;
+/** Maximum number of variants to return. */
 limit?: number | undefined;
+/** Number of variants to skip. */
 offset?: number | undefined;
 }
 

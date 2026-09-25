@@ -6,10 +6,14 @@ import (
 	"strconv"
 )
 
+// PermissionPayload is a single grantable permission on a role.
 type PermissionPayload struct {
-	Key       string `json:"key,omitempty"`
-	Label     string `json:"label,omitempty"`
-	IsGranted bool   `json:"is_granted,omitempty"`
+	// Machine-readable permission identifier (e.g. "hr.employees.create").
+	Key string `json:"key,omitempty"`
+	// Human-readable label shown in the UI.
+	Label string `json:"label,omitempty"`
+	// Whether this permission is currently granted.
+	IsGranted bool `json:"is_granted,omitempty"`
 }
 
 func (x *PermissionPayload) GetKey() string {
@@ -36,14 +40,22 @@ func (x *PermissionPayload) GetIsGranted() bool {
 	return x.IsGranted
 }
 
+// RolePayload is an HR role with its attached permission set.
 type RolePayload struct {
-	Id          int64                `json:"id,omitempty"`
-	OwnerId     int64                `json:"owner_id,omitempty"`
-	Name        string               `json:"name,omitempty"`
-	IsDefault   bool                 `json:"is_default,omitempty"`
+	// Unique identifier for the role.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this role belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Display name of the role.
+	Name string `json:"name,omitempty"`
+	// Whether this role is the tenant default assigned to new employees.
+	IsDefault bool `json:"is_default,omitempty"`
+	// Full set of permissions attached to this role.
 	Permissions []*PermissionPayload `json:"permissions,omitempty"`
-	CreatedAt   int64                `json:"created_at,omitempty"`
-	UpdatedAt   int64                `json:"updated_at,omitempty"`
+	// Unix timestamp when this role was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this role was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *RolePayload) MarshalJSON() ([]byte, error) {
@@ -161,7 +173,9 @@ func (x *RolePayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ListRolesResponse lists all roles for the tenant.
 type ListRolesResponse struct {
+	// All roles for the tenant.
 	Roles []*RolePayload `json:"roles,omitempty"`
 }
 
@@ -174,7 +188,9 @@ func (x *ListRolesResponse) GetRoles() []*RolePayload {
 }
 
 type CreateRoleRequest struct {
-	Name        string               `json:"name,omitempty"`
+	// Display name of the new role.
+	Name string `json:"name,omitempty"`
+	// Permissions to attach to the new role.
 	Permissions []*PermissionPayload `json:"permissions,omitempty"`
 }
 
@@ -195,6 +211,7 @@ func (x *CreateRoleRequest) GetPermissions() []*PermissionPayload {
 }
 
 type CreateRoleResponse struct {
+	// The newly created role.
 	Role *RolePayload `json:"role,omitempty"`
 }
 
@@ -207,7 +224,9 @@ func (x *CreateRoleResponse) GetRole() *RolePayload {
 }
 
 type UpdateRoleBody struct {
-	Name        *string              `json:"name,omitempty"`
+	// New name; absent to keep current.
+	Name *string `json:"name,omitempty"`
+	// New permission set; if provided, replaces all existing permissions.
 	Permissions []*PermissionPayload `json:"permissions,omitempty"`
 }
 
@@ -232,7 +251,9 @@ func (x *UpdateRoleBody) GetPermissions() []*PermissionPayload {
 }
 
 type UpdateRoleRequest struct {
-	Id   int64           `json:"id,omitempty"`
+	// ID of the role to update.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable role fields bound from the HTTP payload.
 	Body *UpdateRoleBody `json:"body,omitempty"`
 }
 
@@ -282,6 +303,7 @@ func (x *UpdateRoleRequest) GetBody() *UpdateRoleBody {
 }
 
 type UpdateRoleResponse struct {
+	// The updated role.
 	Role *RolePayload `json:"role,omitempty"`
 }
 
@@ -294,8 +316,10 @@ func (x *UpdateRoleResponse) GetRole() *RolePayload {
 }
 
 type AssignRoleRequest struct {
+	// ID of the employee to assign the role to.
 	EmployeeId *int64 `json:"employee_id,omitempty"`
-	RoleId     *int64 `json:"role_id,omitempty"`
+	// ID of the role to assign.
+	RoleId *int64 `json:"role_id,omitempty"`
 }
 
 func (m *AssignRoleRequest) MarshalJSON() ([]byte, error) {
@@ -368,6 +392,7 @@ func (x *AssignRoleRequest) GetRoleId() int64 {
 }
 
 type AssignRoleResponse struct {
+	// Whether the role was assigned successfully.
 	Success bool `json:"success,omitempty"`
 }
 

@@ -12,25 +12,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of warehouses to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Maximum number of warehouses to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of warehouses to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Number of warehouses to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.warehouse.v1.ListWarehousesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - WarehouseService
@@ -43,12 +57,24 @@ paths:
                             $ref: '#/components/schemas/erp.warehouse.v1.CreateWarehouseRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.warehouse.v1.CreateWarehouseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/warehouse/v1/warehouses/{id}:
         put:
             tags:
@@ -60,21 +86,41 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseRequest'
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseBody'
+                            required:
+                                - body
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - WarehouseService
@@ -85,15 +131,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.warehouse.v1.DeleteWarehouseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.warehouse.v1.ListWarehousesRequest:
@@ -139,9 +199,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -155,6 +217,7 @@ components:
                     type: string
                 capacity:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 is_default:
                     type: boolean
@@ -192,6 +255,7 @@ components:
                     type: string
                 capacity:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 is_default:
                     type: boolean
@@ -211,6 +275,7 @@ components:
             properties:
                 warehouse_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -223,6 +288,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -245,6 +311,7 @@ components:
                     type: string
                 capacity:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 is_default:
                     type: boolean
@@ -272,6 +339,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -282,3 +350,12 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: WarehouseService

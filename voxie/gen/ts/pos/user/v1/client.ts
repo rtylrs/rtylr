@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface UserServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** UserService defines POS roster operator endpoints. */
 export class UserServiceClient {
 private baseUrl: string;
 private options: UserServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listPOSUsers(req: ListPOSUsersRequest): Promise<ListPOSUsersResponse> {
+/** Returns POS roster operators for a location. */
+async listPOSUsers(req: ListPOSUsersRequest, opts?: RequestOptions): Promise<ListPOSUsersResponse> {
 const violations = validateListPOSUsersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/user/v1/users";
 const query = new URLSearchParams();
 if (req.locationId !== undefined) {
@@ -83,7 +123,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,14 +136,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListPOSUsersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createPOSUser(req: CreatePOSUserRequest): Promise<CreatePOSUserResponse> {
+/** Creates a new POS roster operator. */
+async createPOSUser(req: CreatePOSUserRequest, opts?: RequestOptions): Promise<CreatePOSUserResponse> {
 const violations = validateCreatePOSUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/user/v1/users";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreatePOSUserRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -114,14 +157,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreatePOSUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updatePOSUser(req: UpdatePOSUserRequest): Promise<UpdatePOSUserResponse> {
+/** Updates an existing POS roster operator. */
+async updatePOSUser(req: UpdatePOSUserRequest, opts?: RequestOptions): Promise<UpdatePOSUserResponse> {
 const violations = validateUpdatePOSUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/user/v1/users/update";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdatePOSUserRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -133,14 +178,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdatePOSUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deactivatePOSUser(req: DeactivatePOSUserRequest): Promise<DeactivatePOSUserResponse> {
+/** Deactivates a POS roster operator. */
+async deactivatePOSUser(req: DeactivatePOSUserRequest, opts?: RequestOptions): Promise<DeactivatePOSUserResponse> {
 const violations = validateDeactivatePOSUserRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/user/v1/users/deactivate";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeDeactivatePOSUserRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -152,14 +199,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeactivatePOSUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async verifyPOSUserPIN(req: VerifyPOSUserPINRequest): Promise<VerifyPOSUserPINResponse> {
+/** Verifies an operator PIN for terminal sign-in. */
+async verifyPOSUserPIN(req: VerifyPOSUserPINRequest, opts?: RequestOptions): Promise<VerifyPOSUserPINResponse> {
 const violations = validateVerifyPOSUserPINRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/user/v1/users/verify-pin";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeVerifyPOSUserPINRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -171,14 +220,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeVerifyPOSUserPINResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async setPIN(req: SetPINRequest): Promise<SetPINResponse> {
+/** Sets or resets an operator PIN. */
+async setPIN(req: SetPINRequest, opts?: RequestOptions): Promise<SetPINResponse> {
 const violations = validateSetPINRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/user/v1/users/set-pin";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSetPINRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,32 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface CompatibilityServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/**
+ * Typed OneKit compatibility surface for CRM routes that predate the
+ * canonical crm.* service packages. It keeps their existing wire paths while
+ * removing Axios/safe from app code.
+ */
 export class CompatibilityServiceClient {
 private baseUrl: string;
 private options: CompatibilityServiceClientOptions;
@@ -71,16 +114,17 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getDashboard(req: EmptyRequest): Promise<JsonResponse> {
+async getDashboard(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/dashboard";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,9 +136,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listCustomers(req: CustomerListRequest): Promise<JsonResponse> {
+async listCustomers(req: CustomerListRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateCustomerListRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers";
 const query = new URLSearchParams();
 if (req.search !== undefined) {
@@ -122,7 +166,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -134,9 +179,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCustomer(req: IdQueryRequest): Promise<JsonResponse> {
+async getCustomer(req: IdQueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateIdQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers/detail";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -146,7 +191,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -158,9 +204,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCustomerFull(req: IdQueryRequest): Promise<JsonResponse> {
+async getCustomerFull(req: IdQueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateIdQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers/detail/full";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -170,7 +216,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -182,9 +229,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCustomerTimeline(req: CustomerTimelineRequest): Promise<JsonResponse> {
+async getCustomerTimeline(req: CustomerTimelineRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateCustomerTimelineRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers/timeline";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -203,7 +250,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -215,14 +263,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createCustomer(req: BodyRequest): Promise<JsonResponse> {
+async createCustomer(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -234,14 +283,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateCustomer(req: BodyRequest): Promise<JsonResponse> {
+async updateCustomer(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -253,14 +303,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async recordVisit(req: BodyRequest): Promise<JsonResponse> {
+async recordVisit(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers/record-visit";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -272,14 +323,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async importCustomers(req: BodyRequest): Promise<JsonResponse> {
+async importCustomers(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers/import";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -291,14 +343,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async mergeCustomers(req: BodyRequest): Promise<JsonResponse> {
+async mergeCustomers(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers/merge";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -310,9 +363,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async exportCustomer(req: ExportCustomerRequest): Promise<JsonResponse> {
+async exportCustomer(req: ExportCustomerRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateExportCustomerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customers/export";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -325,7 +378,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -337,14 +391,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async awardPoints(req: BodyRequest): Promise<JsonResponse> {
+async awardPoints(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/award";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -356,14 +411,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async redeemPoints(req: BodyRequest): Promise<JsonResponse> {
+async redeemPoints(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/redeem";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -375,16 +431,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLoyaltyConfig(req: EmptyRequest): Promise<JsonResponse> {
+async getLoyaltyConfig(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -396,14 +453,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateLoyaltyConfig(req: BodyRequest): Promise<JsonResponse> {
+async updateLoyaltyConfig(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/config";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -415,9 +473,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLoyaltyTransactions(req: LoyaltyTransactionsRequest): Promise<JsonResponse> {
+async getLoyaltyTransactions(req: LoyaltyTransactionsRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateLoyaltyTransactionsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/transactions";
 const query = new URLSearchParams();
 if (req.customerId !== undefined) {
@@ -433,7 +491,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -445,9 +504,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLoyaltyMembers(req: PageRequest): Promise<JsonResponse> {
+async getLoyaltyMembers(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/members";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -460,7 +519,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -472,16 +532,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLoyaltyRewards(req: EmptyRequest): Promise<JsonResponse> {
+async getLoyaltyRewards(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/rewards";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -493,14 +554,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertLoyaltyReward(req: BodyRequest): Promise<JsonResponse> {
+async upsertLoyaltyReward(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/rewards/upsert";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -512,16 +574,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLoyaltyTiers(req: EmptyRequest): Promise<JsonResponse> {
+async getLoyaltyTiers(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/tiers";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -533,14 +596,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createLoyaltyTier(req: BodyRequest): Promise<JsonResponse> {
+async createLoyaltyTier(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/tiers";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -552,14 +616,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateLoyaltyTier(req: BodyRequest): Promise<JsonResponse> {
+async updateLoyaltyTier(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/loyalty/tiers";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -571,16 +636,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listSegments(req: EmptyRequest): Promise<JsonResponse> {
+async listSegments(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segments";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -592,9 +658,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSegment(req: IdQueryRequest): Promise<JsonResponse> {
+async getSegment(req: IdQueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateIdQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segments/detail";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -604,7 +670,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -616,9 +683,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSegmentCustomers(req: SegmentCustomersRequest): Promise<JsonResponse> {
+async getSegmentCustomers(req: SegmentCustomersRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateSegmentCustomersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segments/customers";
 const query = new URLSearchParams();
 if (req.segmentId !== undefined) {
@@ -628,7 +695,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -640,14 +708,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createSegment(req: BodyRequest): Promise<JsonResponse> {
+async createSegment(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segments";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -659,14 +728,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateSegment(req: BodyRequest): Promise<JsonResponse> {
+async updateSegment(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segments";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -678,9 +748,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listCampaigns(req: PageRequest): Promise<JsonResponse> {
+async listCampaigns(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaigns";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -693,7 +763,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -705,9 +776,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCampaign(req: IdQueryRequest): Promise<JsonResponse> {
+async getCampaign(req: IdQueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateIdQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaigns/detail";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -717,7 +788,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -729,9 +801,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCampaignStats(req: CampaignStatsRequest): Promise<JsonResponse> {
+async getCampaignStats(req: CampaignStatsRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateCampaignStatsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaigns/stats";
 const query = new URLSearchParams();
 if (req.campaignId !== undefined) {
@@ -741,7 +813,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -753,14 +826,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createCampaign(req: BodyRequest): Promise<JsonResponse> {
+async createCampaign(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaigns";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -772,15 +846,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateCampaign(req: PathBodyRequest): Promise<JsonResponse> {
+async updateCampaign(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaigns/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -792,15 +867,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateCampaignStatus(req: PathBodyRequest): Promise<JsonResponse> {
+async updateCampaignStatus(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaigns/{id}/status";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -812,9 +888,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteCampaign(req: PathRequest): Promise<JsonResponse> {
+async deleteCampaign(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/campaigns/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -822,7 +898,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -834,16 +911,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listAutomations(req: EmptyRequest): Promise<JsonResponse> {
+async listAutomations(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/automations";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -855,9 +933,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getAutomation(req: PathRequest): Promise<JsonResponse> {
+async getAutomation(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/automations/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -865,7 +943,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -877,14 +956,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createAutomation(req: BodyRequest): Promise<JsonResponse> {
+async createAutomation(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/automations";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -896,15 +976,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateAutomation(req: PathBodyRequest): Promise<JsonResponse> {
+async updateAutomation(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/automations/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -916,9 +997,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteAutomation(req: PathRequest): Promise<JsonResponse> {
+async deleteAutomation(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/automations/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -926,7 +1007,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -938,16 +1020,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listTemplates(req: EmptyRequest): Promise<JsonResponse> {
+async listTemplates(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/templates";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -959,14 +1042,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTemplate(req: BodyRequest): Promise<JsonResponse> {
+async createTemplate(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/templates";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -978,16 +1062,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listFeedback(req: EmptyRequest): Promise<JsonResponse> {
+async listFeedback(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/feedback";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -999,16 +1084,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSettings(req: EmptyRequest): Promise<JsonResponse> {
+async getSettings(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/settings";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1020,14 +1106,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateSettings(req: BodyRequest): Promise<JsonResponse> {
+async updateSettings(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/settings";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1039,16 +1126,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSalesPipeline(req: EmptyRequest): Promise<JsonResponse> {
+async getSalesPipeline(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/pipeline";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1060,9 +1148,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listLeads(req: PageRequest): Promise<JsonResponse> {
+async listLeads(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/leads";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -1075,7 +1163,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1087,9 +1176,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLead(req: PathRequest): Promise<JsonResponse> {
+async getLead(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/leads/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1097,7 +1186,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1109,14 +1199,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createLead(req: BodyRequest): Promise<JsonResponse> {
+async createLead(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/leads";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1128,15 +1219,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateLead(req: PathBodyRequest): Promise<JsonResponse> {
+async updateLead(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/leads/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1148,9 +1240,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteLead(req: PathRequest): Promise<JsonResponse> {
+async deleteLead(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/leads/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1158,7 +1250,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1170,9 +1263,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listTouchpoints(req: PathRequest): Promise<JsonResponse> {
+async listTouchpoints(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/leads/{id}/touchpoints";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1180,7 +1273,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1192,14 +1286,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTouchpoint(req: BodyRequest): Promise<JsonResponse> {
+async createTouchpoint(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/touchpoints";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1211,9 +1306,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteTouchpoint(req: PathRequest): Promise<JsonResponse> {
+async deleteTouchpoint(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/touchpoints/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1221,7 +1316,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1233,9 +1329,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listContacts(req: ContactsRequest): Promise<JsonResponse> {
+async listContacts(req: ContactsRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateContactsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contacts";
 const query = new URLSearchParams();
 if (req.leadId !== undefined) {
@@ -1254,7 +1350,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1266,14 +1363,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createContact(req: BodyRequest): Promise<JsonResponse> {
+async createContact(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contacts";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1285,15 +1383,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateContact(req: PathBodyRequest): Promise<JsonResponse> {
+async updateContact(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contacts/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1305,9 +1404,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteContact(req: PathRequest): Promise<JsonResponse> {
+async deleteContact(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contacts/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1315,7 +1414,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1327,9 +1427,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listContracts(req: PageRequest): Promise<JsonResponse> {
+async listContracts(req: PageRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePageRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contracts";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -1342,7 +1442,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1354,9 +1455,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getContract(req: PathRequest): Promise<JsonResponse> {
+async getContract(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contracts/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1364,7 +1465,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1376,14 +1478,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createContract(req: BodyRequest): Promise<JsonResponse> {
+async createContract(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contracts";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1395,15 +1498,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateContract(req: PathBodyRequest): Promise<JsonResponse> {
+async updateContract(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/sales/contracts/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

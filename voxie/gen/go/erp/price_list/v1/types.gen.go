@@ -192,7 +192,9 @@ func (x *CreatePriceListResponse) GetMessage() string {
 }
 
 type ListPriceListsRequest struct {
-	Limit  int64 `json:"limit,omitempty"`
+	// Maximum number of price lists to return.
+	Limit int64 `json:"limit,omitempty"`
+	// Number of price lists to skip.
 	Offset int64 `json:"offset,omitempty"`
 }
 

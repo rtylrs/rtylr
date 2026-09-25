@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// AuditLog is a recorded POS audit event.
 type AuditLog struct {
 	Id         int64   `json:"id,omitempty"`
 	BusinessId int64   `json:"business_id,omitempty"`
@@ -17,7 +18,8 @@ type AuditLog struct {
 	EntityId   *int64  `json:"entity_id,omitempty"`
 	Details    *string `json:"details,omitempty"`
 	IpAddress  *string `json:"ip_address,omitempty"`
-	CreatedAt  string  `json:"created_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *AuditLog) MarshalJSON() ([]byte, error) {
@@ -427,8 +429,10 @@ type ListAuditRequest struct {
 	EmployeeId int64  `json:"employee_id,omitempty"`
 	StartDate  string `json:"start_date,omitempty"`
 	EndDate    string `json:"end_date,omitempty"`
-	Limit      int32  `json:"limit,omitempty"`
-	Cursor     string `json:"cursor,omitempty"`
+	// Maximum records to return. Defaults to 50 and is capped by the server.
+	Limit int32 `json:"limit,omitempty"`
+	// Opaque continuation token from a previous response.
+	Cursor string `json:"cursor,omitempty"`
 }
 
 func (m *ListAuditRequest) MarshalJSON() ([]byte, error) {

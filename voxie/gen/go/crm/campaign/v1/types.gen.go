@@ -6,12 +6,15 @@ import (
 	"strconv"
 )
 
+// Campaign is a marketing campaign sent to a segment or the full customer base.
 type Campaign struct {
-	Id             int64   `json:"id,omitempty"`
-	OwnerId        int64   `json:"owner_id,omitempty"`
-	Name           string  `json:"name,omitempty"`
-	Description    string  `json:"description,omitempty"`
-	Channel        string  `json:"channel,omitempty"`
+	Id          int64  `json:"id,omitempty"`
+	OwnerId     int64  `json:"owner_id,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Delivery channel, e.g. "email" or "sms".
+	Channel string `json:"channel,omitempty"`
+	// Current lifecycle state.
 	Status         string  `json:"status,omitempty"`
 	SegmentId      *int64  `json:"segment_id,omitempty"`
 	Subject        string  `json:"subject,omitempty"`
@@ -285,6 +288,7 @@ func (x *Campaign) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// CampaignStats holds delivery and engagement counters for a campaign.
 type CampaignStats struct {
 	CampaignId     int64 `json:"campaign_id,omitempty"`
 	AudienceCount  int64 `json:"audience_count,omitempty"`
@@ -460,12 +464,19 @@ func (x *CampaignStats) GetFailedCount() int64 {
 }
 
 type CreateCampaignRequest struct {
-	Name        string  `json:"name,omitempty"`
-	Description string  `json:"description,omitempty"`
-	Channel     string  `json:"channel,omitempty"`
-	SegmentId   *int64  `json:"segment_id,omitempty"`
-	Subject     string  `json:"subject,omitempty"`
-	Content     string  `json:"content,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Free-text summary. Optional: the server does not require it, and a
+	// campaign entered without one is valid.
+	Description string `json:"description,omitempty"`
+	Channel     string `json:"channel,omitempty"`
+	SegmentId   *int64 `json:"segment_id,omitempty"`
+	// Subject line. Optional because it is channel-specific: an SMS campaign has
+	// no subject, so requiring it made that channel impossible to save.
+	Subject string `json:"subject,omitempty"`
+	Content string `json:"content,omitempty"`
+	// Absent for a draft or an immediate send. A draft has no scheduled time, so
+	// requiring one forced callers to invent a value, and the server already
+	// treats an empty scheduled_at as "not scheduled".
 	ScheduledAt *string `json:"scheduled_at,omitempty"`
 }
 
@@ -678,6 +689,8 @@ func (x *GetCampaignDetailResponse) GetStats() *CampaignStats {
 }
 
 type GetCampaignStatsRequest struct {
+	// The live route is GET /campaigns/stats?campaign_id=... (query param,
+	// not a path segment).
 	CampaignId *int64 `json:"campaign_id,omitempty"`
 }
 
@@ -738,6 +751,7 @@ func (x *GetCampaignStatsResponse) GetStats() *CampaignStats {
 }
 
 type ListCampaignsRequest struct {
+	// Filters campaigns by lifecycle state.
 	Status string `json:"status,omitempty"`
 	Limit  int64  `json:"limit,omitempty"`
 	Offset int64  `json:"offset,omitempty"`
@@ -895,12 +909,19 @@ func (x *ListCampaignsResponse) GetOffset() int64 {
 }
 
 type UpdateCampaignBody struct {
-	Name        string  `json:"name,omitempty"`
-	Description string  `json:"description,omitempty"`
-	Channel     string  `json:"channel,omitempty"`
-	SegmentId   *int64  `json:"segment_id,omitempty"`
-	Subject     string  `json:"subject,omitempty"`
-	Content     string  `json:"content,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Free-text summary. Optional: the server does not require it, and a
+	// campaign entered without one is valid.
+	Description string `json:"description,omitempty"`
+	Channel     string `json:"channel,omitempty"`
+	SegmentId   *int64 `json:"segment_id,omitempty"`
+	// Subject line. Optional because it is channel-specific: an SMS campaign has
+	// no subject, so requiring it made that channel impossible to save.
+	Subject string `json:"subject,omitempty"`
+	Content string `json:"content,omitempty"`
+	// Absent for a draft or an immediate send. A draft has no scheduled time, so
+	// requiring one forced callers to invent a value, and the server already
+	// treats an empty scheduled_at as "not scheduled".
 	ScheduledAt *string `json:"scheduled_at,omitempty"`
 }
 

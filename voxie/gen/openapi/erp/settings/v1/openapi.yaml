@@ -10,12 +10,24 @@ paths:
             summary: getErpSettings
             operationId: SettingsService_getErpSettings
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.settings.v1.GetErpSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - SettingsService
@@ -28,12 +40,24 @@ paths:
                             $ref: '#/components/schemas/erp.settings.v1.UpdateErpSettingsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.settings.v1.UpdateErpSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.settings.v1.GetErpSettingsRequest:
@@ -51,9 +75,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 currency:
                     type: string
@@ -69,6 +95,7 @@ components:
                 default_warehouse_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 notify_on_low_stock:
                     type: boolean
@@ -107,6 +134,7 @@ components:
                 default_warehouse_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 notify_on_low_stock:
                     type: boolean
@@ -130,3 +158,13 @@ components:
             required:
                 - settings
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SettingsService
+      description: SettingsService defines tenant-scoped ERP business settings endpoints.

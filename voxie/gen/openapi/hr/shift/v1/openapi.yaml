@@ -13,32 +13,39 @@ paths:
             parameters:
                 - name: location_id
                   in: query
+                  description: Filter by location; absent to include all locations.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by location; absent to include all locations.
                 - name: staff_id
                   in: query
+                  description: Filter to one staff member's attendance rows; absent to include all.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter to one staff member's attendance rows; absent to include all.
                 - name: date
                   in: query
+                  description: Filter attendance rows to a single date (ISO-8601); absent to include all.
                   required: false
                   schema:
                     type: string
                     description: Filter attendance rows to a single date (ISO-8601); absent to include all.
                 - name: kind
                   in: query
+                  description: Restrict to one record kind (template | attendance); absent returns both.
                   required: false
                   schema:
                     type: string
                     description: Restrict to one record kind (template | attendance); absent returns both.
                 - name: limit
                   in: query
+                  description: Page size; absent applies the server default.
                   required: false
                   schema:
                     type: integer
@@ -46,18 +53,31 @@ paths:
                     description: Page size; absent applies the server default.
                 - name: offset
                   in: query
+                  description: Offset for pagination; absent starts at the first page.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: Offset for pagination; absent starts at the first page.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.ListShiftsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - ShiftService
@@ -71,12 +91,24 @@ paths:
                             $ref: '#/components/schemas/hr.shift.v1.UpdateShiftRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.UpdateShiftResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ShiftService
@@ -90,12 +122,24 @@ paths:
                             $ref: '#/components/schemas/hr.shift.v1.CreateShiftRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.CreateShiftResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ShiftService
@@ -103,12 +147,24 @@ paths:
             description: Deletes a shift.
             operationId: ShiftService_deleteShift
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.DeleteShiftResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/shift/v1/assignments:
         post:
             tags:
@@ -123,12 +179,24 @@ paths:
                             $ref: '#/components/schemas/hr.shift.v1.CreateShiftAssignmentRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.CreateShiftAssignmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/shift/v1/roster/{location_id}:
         get:
             tags:
@@ -139,23 +207,40 @@ paths:
             parameters:
                 - name: location_id
                   in: path
+                  description: Location to fetch the roster for.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: Location to fetch the roster for.
                 - name: week_start
                   in: query
+                  description: Monday of the week to retrieve (ISO-8601 date).
                   required: true
                   schema:
                     type: string
                     description: Monday of the week to retrieve (ISO-8601 date).
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.GetRosterResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/shift/v1/roster/publish:
         post:
             tags:
@@ -170,12 +255,24 @@ paths:
                             $ref: '#/components/schemas/hr.shift.v1.PublishRosterRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.PublishRosterResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/shift/v1/availability:
         get:
             tags:
@@ -186,15 +283,22 @@ paths:
             parameters:
                 - name: staff_id
                   in: query
+                  description: |-
+                    Filter to one staff member; absent returns entries for every staff member
+                    in the tenant, which is what the weekly roster grid loads in one call.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Filter to one staff member; absent returns entries for every staff member
                         in the tenant, which is what the weekly roster grid loads in one call.
                 - name: day_of_week
                   in: query
+                  description: |-
+                    Filter recurring patterns to one weekday, 0 = Monday through 6 = Sunday;
+                    absent includes every weekday.
                   required: false
                   schema:
                     type: integer
@@ -204,6 +308,9 @@ paths:
                         absent includes every weekday.
                 - name: date_from
                   in: query
+                  description: |-
+                    Inclusive start of a date range matched against specific_date (ISO-8601);
+                    absent leaves the range open at the start.
                   required: false
                   schema:
                     type: string
@@ -212,6 +319,9 @@ paths:
                         absent leaves the range open at the start.
                 - name: date_to
                   in: query
+                  description: |-
+                    Inclusive end of a date range matched against specific_date (ISO-8601);
+                    absent leaves the range open at the end.
                   required: false
                   schema:
                     type: string
@@ -220,6 +330,7 @@ paths:
                         absent leaves the range open at the end.
                 - name: limit
                   in: query
+                  description: Page size; absent applies the server default.
                   required: false
                   schema:
                     type: integer
@@ -227,18 +338,31 @@ paths:
                     description: Page size; absent applies the server default.
                 - name: offset
                   in: query
+                  description: Offset for pagination; absent starts at the first page.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: Offset for pagination; absent starts at the first page.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.ListAvailabilityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ShiftService
@@ -252,12 +376,24 @@ paths:
                             $ref: '#/components/schemas/hr.shift.v1.SetAvailabilityRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.SetAvailabilityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/shift/v1/availability/{id}:
         delete:
             tags:
@@ -268,17 +404,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: Identifier of the availability entry to delete.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: Identifier of the availability entry to delete.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.shift.v1.DeleteAvailabilityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.shift.v1.ListShiftsRequest:
@@ -286,10 +438,12 @@ components:
             properties:
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by location; absent to include all locations.
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter to one staff member's attendance rows; absent to include all.
                 date:
@@ -336,14 +490,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the shift row.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this shift belongs to.
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Location where this shift takes place. Zero on attendance rows, which have
@@ -364,10 +521,12 @@ components:
                     description: Hex colour code used to render this shift on the roster (e.g. "#4CAF50").
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Staff member whose worked shift this is; absent on template rows.
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Department the staff member worked under; absent when not tracked.
                 date:
@@ -382,10 +541,12 @@ components:
                     description: Lifecycle state (scheduled | in_progress | completed | absent | cancelled).
                 clock_in_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when the staff member clocked in; absent until clock-in.
                 clock_out_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when the staff member clocked out; absent until clock-out.
                 hours_worked:
@@ -401,10 +562,12 @@ components:
                     description: Free-text note attached to this shift.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -428,6 +591,7 @@ components:
             properties:
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Location where this shift takes place; required for a template row.
                 name:
@@ -444,10 +608,12 @@ components:
                     description: Hex colour code for roster display; defaults server-side when absent.
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Staff member this attendance row belongs to; required for an attendance row.
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Department the staff member worked under.
                 date:
@@ -486,10 +652,12 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifier of the shift row to update.
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: New location for a template row.
                 name:
@@ -506,6 +674,7 @@ components:
                     description: New hex colour code for roster display.
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: New department for an attendance row.
                 date:
@@ -541,6 +710,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifier of the shift row to delete.
             required:
@@ -559,11 +729,13 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee to assign.
                 shift_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Shift template to assign.
                 date:
@@ -606,18 +778,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the assignment.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this assignment belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee assigned to the shift.
                 shift_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Shift template being assigned.
                 date:
@@ -628,10 +804,12 @@ components:
                     description: Assignment status (scheduled | worked | missed | swapped).
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -650,6 +828,7 @@ components:
                 location_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Location to fetch the roster for.
                 week_start:
@@ -679,6 +858,7 @@ components:
             properties:
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Location to publish the roster for. Optional, and currently not used to
@@ -702,6 +882,7 @@ components:
             properties:
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Filter to one staff member; absent returns entries for every staff member
@@ -766,16 +947,19 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the availability entry.
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Staff member whose availability this is. Matches ShiftPayload.staff_id, not
                         the older ShiftAssignmentPayload.employee_id in this same package.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this entry belongs to.
                 day_of_week:
@@ -810,10 +994,12 @@ components:
                         false value is dropped from the response body. Read an absent key as false.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this entry was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this entry was last updated.
             required:
@@ -841,11 +1027,13 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Entry to replace; absent creates the entry or upserts it by natural key.
                 staff_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Staff member this availability is for.
                 day_of_week:
@@ -904,6 +1092,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifier of the availability entry to delete.
             required:
@@ -916,3 +1105,13 @@ components:
                     description: Whether the availability entry was deleted.
             required:
                 - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ShiftService
+      description: ShiftService defines HR shift and roster endpoints.

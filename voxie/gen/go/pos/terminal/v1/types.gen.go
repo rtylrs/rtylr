@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Terminal is a registered POS terminal device.
 type Terminal struct {
 	Id         int64   `json:"id,omitempty"`
 	BusinessId int64   `json:"business_id,omitempty"`
@@ -14,7 +15,8 @@ type Terminal struct {
 	DeviceId   *string `json:"device_id,omitempty"`
 	IsActive   bool    `json:"is_active,omitempty"`
 	LastSeenAt *string `json:"last_seen_at,omitempty"`
-	CreatedAt  string  `json:"created_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *Terminal) MarshalJSON() ([]byte, error) {
@@ -345,7 +347,8 @@ func (x *UpdateTerminalBody) GetIsActive() bool {
 }
 
 type UpdateTerminalRequest struct {
-	Id   int64               `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable terminal fields bound from the HTTP payload.
 	Body *UpdateTerminalBody `json:"body,omitempty"`
 }
 

@@ -9,16 +9,30 @@ import (
 type GetFlowDashboardRequest struct {
 }
 
+// DashboardTask is the compact task shape the dashboard's my-tasks widget
+// renders. v1 reused the fat Task message from the task domain; with both
+// task.v1 and task.v2 in circulation a plain-name reference became ambiguous,
+// and the dashboard never needed most of those fields anyway. Deliberately
+// local to this package.
 type DashboardTask struct {
-	Id               int64   `json:"id,omitempty"`
-	Title            string  `json:"title,omitempty"`
-	Status           string  `json:"status,omitempty"`
-	Priority         string  `json:"priority,omitempty"`
-	DueDate          *string `json:"due_date,omitempty"`
-	ProjectName      string  `json:"project_name,omitempty"`
-	ProjectColor     string  `json:"project_color,omitempty"`
-	AssigneeName     string  `json:"assignee_name,omitempty"`
-	AssigneeInitials string  `json:"assignee_initials,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// title is the title value for this contract.
+	Title string `json:"title,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// priority is the priority value for this contract.
+	Priority string `json:"priority,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate *string `json:"due_date,omitempty"`
+	// project_name is the denormalised project display name.
+	ProjectName string `json:"project_name,omitempty"`
+	// project_color is the project color hex for inline badges.
+	ProjectColor string `json:"project_color,omitempty"`
+	// assignee_name is the assignee display name. Empty if unassigned.
+	AssigneeName string `json:"assignee_name,omitempty"`
+	// assignee_initials are two-letter uppercase initials. Empty if unassigned.
+	AssigneeInitials string `json:"assignee_initials,omitempty"`
 }
 
 func (m *DashboardTask) MarshalJSON() ([]byte, error) {
@@ -127,11 +141,18 @@ func (x *DashboardTask) GetAssigneeInitials() string {
 }
 
 type GetFlowDashboardResponse struct {
-	OpenTasks         int64            `json:"open_tasks,omitempty"`
-	InProgressTasks   int64            `json:"in_progress_tasks,omitempty"`
-	CompletedThisWeek int64            `json:"completed_this_week,omitempty"`
-	OverdueTasks      int64            `json:"overdue_tasks,omitempty"`
-	MyTasks           []*DashboardTask `json:"my_tasks,omitempty"`
+	// open_tasks is the open tasks value for this contract.
+	OpenTasks int64 `json:"open_tasks,omitempty"`
+	// in_progress_tasks is the in progress tasks value for this contract.
+	InProgressTasks int64 `json:"in_progress_tasks,omitempty"`
+	// completed_this_week is the completed this week value for this contract.
+	CompletedThisWeek int64 `json:"completed_this_week,omitempty"`
+	// overdue_tasks is the overdue tasks value for this contract.
+	OverdueTasks int64 `json:"overdue_tasks,omitempty"`
+	// my_tasks lists tasks assigned to the caller across their visible
+	// projects. With workspaces gone there is exactly one scope, so v1's
+	// workspace-scoped my-tasks concern dissolves.
+	MyTasks []*DashboardTask `json:"my_tasks,omitempty"`
 }
 
 func (m *GetFlowDashboardResponse) MarshalJSON() ([]byte, error) {

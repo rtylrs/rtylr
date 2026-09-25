@@ -6,19 +6,32 @@ import (
 	"strconv"
 )
 
+// LeaveTypePayload defines a category of leave employees can request.
 type LeaveTypePayload struct {
-	Id                             int64   `json:"id,omitempty"`
-	OwnerId                        int64   `json:"owner_id,omitempty"`
-	Name                           string  `json:"name,omitempty"`
-	IsPaid                         bool    `json:"is_paid,omitempty"`
-	RequiresApproval               bool    `json:"requires_approval,omitempty"`
-	AccrualRule                    *string `json:"accrual_rule,omitempty"`
-	MaxCarryoverDays               int32   `json:"max_carryover_days,omitempty"`
-	MinNoticeDays                  int32   `json:"min_notice_days,omitempty"`
-	RequiresDocumentationAfterDays *int32  `json:"requires_documentation_after_days,omitempty"`
-	IsActive                       bool    `json:"is_active,omitempty"`
-	CreatedAt                      int64   `json:"created_at,omitempty"`
-	UpdatedAt                      int64   `json:"updated_at,omitempty"`
+	// Unique identifier for the leave type.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this leave type belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Human-readable name (e.g. "Annual Leave", "Sick Leave").
+	Name string `json:"name,omitempty"`
+	// Whether days taken under this type are paid.
+	IsPaid bool `json:"is_paid,omitempty"`
+	// Whether leave requests of this type require manager approval.
+	RequiresApproval bool `json:"requires_approval,omitempty"`
+	// Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed.
+	AccrualRule *string `json:"accrual_rule,omitempty"`
+	// Maximum unused days that may carry over to the next year.
+	MaxCarryoverDays int32 `json:"max_carryover_days,omitempty"`
+	// Minimum calendar days of notice required before the leave starts.
+	MinNoticeDays int32 `json:"min_notice_days,omitempty"`
+	// Number of consecutive days after which supporting documentation is required; absent if never required.
+	RequiresDocumentationAfterDays *int32 `json:"requires_documentation_after_days,omitempty"`
+	// Whether this leave type is currently available for new requests.
+	IsActive bool `json:"is_active,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *LeaveTypePayload) MarshalJSON() ([]byte, error) {
@@ -184,20 +197,34 @@ func (x *LeaveTypePayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// LeaveRequestPayload is a single employee's request for time off.
 type LeaveRequestPayload struct {
-	Id                   int64   `json:"id,omitempty"`
-	OwnerId              int64   `json:"owner_id,omitempty"`
-	EmployeeId           int64   `json:"employee_id,omitempty"`
-	LeaveTypeId          int64   `json:"leave_type_id,omitempty"`
-	StartDate            string  `json:"start_date,omitempty"`
-	EndDate              string  `json:"end_date,omitempty"`
-	TotalDays            float64 `json:"total_days,omitempty"`
-	Notes                *string `json:"notes,omitempty"`
-	Status               string  `json:"status,omitempty"`
-	CurrentApprovalLevel int32   `json:"current_approval_level,omitempty"`
-	RejectionReason      *string `json:"rejection_reason,omitempty"`
-	CreatedAt            int64   `json:"created_at,omitempty"`
-	UpdatedAt            int64   `json:"updated_at,omitempty"`
+	// Unique identifier for the leave request.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this request belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee who is requesting leave.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Leave type being requested.
+	LeaveTypeId int64 `json:"leave_type_id,omitempty"`
+	// First day of leave (ISO-8601 date).
+	StartDate string `json:"start_date,omitempty"`
+	// Last day of leave (ISO-8601 date).
+	EndDate string `json:"end_date,omitempty"`
+	// Total number of working days requested (may be fractional for half-days).
+	TotalDays float64 `json:"total_days,omitempty"`
+	// Additional context from the employee; absent if none provided.
+	Notes *string `json:"notes,omitempty"`
+	// Workflow status (pending | approved | rejected | cancelled).
+	Status string `json:"status,omitempty"`
+	// Current step in a multi-level approval chain.
+	CurrentApprovalLevel int32 `json:"current_approval_level,omitempty"`
+	// Reason the request was rejected; absent unless status is rejected.
+	RejectionReason *string `json:"rejection_reason,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *LeaveRequestPayload) MarshalJSON() ([]byte, error) {
@@ -391,18 +418,30 @@ func (x *LeaveRequestPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// LeaveBalancePayload tracks an employee's remaining entitlement for a leave type and year.
 type LeaveBalancePayload struct {
-	Id            int64   `json:"id,omitempty"`
-	OwnerId       int64   `json:"owner_id,omitempty"`
-	EmployeeId    int64   `json:"employee_id,omitempty"`
-	LeaveTypeId   int64   `json:"leave_type_id,omitempty"`
-	Year          int32   `json:"year,omitempty"`
-	EntitledDays  float64 `json:"entitled_days,omitempty"`
-	UsedDays      float64 `json:"used_days,omitempty"`
-	PendingDays   float64 `json:"pending_days,omitempty"`
+	// Unique identifier for the balance record.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this balance belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee this balance is for.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Leave type this balance tracks.
+	LeaveTypeId int64 `json:"leave_type_id,omitempty"`
+	// Calendar year this balance applies to.
+	Year int32 `json:"year,omitempty"`
+	// Total entitled days for the year (including carryover).
+	EntitledDays float64 `json:"entitled_days,omitempty"`
+	// Days already consumed by approved requests.
+	UsedDays float64 `json:"used_days,omitempty"`
+	// Days reserved by pending (not yet approved) requests.
+	PendingDays float64 `json:"pending_days,omitempty"`
+	// Days still available (entitled - used - pending).
 	RemainingDays float64 `json:"remaining_days,omitempty"`
-	CreatedAt     int64   `json:"created_at,omitempty"`
-	UpdatedAt     int64   `json:"updated_at,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *LeaveBalancePayload) MarshalJSON() ([]byte, error) {
@@ -573,12 +612,21 @@ func (x *LeaveBalancePayload) GetUpdatedAt() int64 {
 }
 
 type ListLeaveRequestsRequest struct {
-	EmployeeId *int64  `json:"employee_id,omitempty"`
-	Status     *string `json:"status,omitempty"`
-	FromDate   *string `json:"from_date,omitempty"`
-	ToDate     *string `json:"to_date,omitempty"`
-	Limit      int32   `json:"limit,omitempty"`
-	Offset     int32   `json:"offset,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by status; absent to include all statuses.
+	Status *string `json:"status,omitempty"`
+	// Include requests overlapping this day or later (ISO-8601 date); absent
+	// to leave the range open at the start. A request overlaps when it starts
+	// on or before to_date and ends on or after from_date.
+	FromDate *string `json:"from_date,omitempty"`
+	// Include requests overlapping this day or earlier (ISO-8601 date); absent
+	// to leave the range open at the end.
+	ToDate *string `json:"to_date,omitempty"`
+	// Maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// Number of records to skip for pagination.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (m *ListLeaveRequestsRequest) MarshalJSON() ([]byte, error) {
@@ -678,10 +726,14 @@ func (x *ListLeaveRequestsRequest) GetOffset() int32 {
 }
 
 type ListLeaveRequestsResponse struct {
+	// Page of leave requests matching the filters.
 	Requests []*LeaveRequestPayload `json:"requests,omitempty"`
-	Total    int64                  `json:"total,omitempty"`
-	Limit    int32                  `json:"limit,omitempty"`
-	Offset   int32                  `json:"offset,omitempty"`
+	// Total number of matching leave requests across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListLeaveRequestsResponse) GetRequests() []*LeaveRequestPayload {
@@ -717,12 +769,18 @@ func (x *ListLeaveRequestsResponse) GetOffset() int32 {
 }
 
 type CreateLeaveRequestRequest struct {
-	EmployeeId  *int64   `json:"employee_id,omitempty"`
-	LeaveTypeId *int64   `json:"leave_type_id,omitempty"`
-	StartDate   string   `json:"start_date,omitempty"`
-	EndDate     string   `json:"end_date,omitempty"`
-	TotalDays   *float64 `json:"total_days,omitempty"`
-	Notes       *string  `json:"notes,omitempty"`
+	// Employee requesting leave.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Leave type being requested.
+	LeaveTypeId *int64 `json:"leave_type_id,omitempty"`
+	// First day of leave (ISO-8601 date).
+	StartDate string `json:"start_date,omitempty"`
+	// Last day of leave (ISO-8601 date).
+	EndDate string `json:"end_date,omitempty"`
+	// Total number of working days requested.
+	TotalDays *float64 `json:"total_days,omitempty"`
+	// Additional context from the employee; absent if none provided.
+	Notes *string `json:"notes,omitempty"`
 }
 
 func (m *CreateLeaveRequestRequest) MarshalJSON() ([]byte, error) {
@@ -835,6 +893,7 @@ func (x *CreateLeaveRequestRequest) GetNotes() string {
 }
 
 type CreateLeaveRequestResponse struct {
+	// The newly created leave request.
 	Request *LeaveRequestPayload `json:"request,omitempty"`
 }
 
@@ -846,8 +905,11 @@ func (x *CreateLeaveRequestResponse) GetRequest() *LeaveRequestPayload {
 	return x.Request
 }
 
+// ApproveLeaveBody carries approval decision fields bound from the HTTP payload.
 type ApproveLeaveBody struct {
-	Approved        bool    `json:"approved,omitempty"`
+	// True to approve, false to reject.
+	Approved bool `json:"approved,omitempty"`
+	// Reason for rejection; absent if approving.
 	RejectionReason *string `json:"rejection_reason,omitempty"`
 }
 
@@ -872,6 +934,7 @@ func (x *ApproveLeaveBody) GetRejectionReason() string {
 }
 
 type ApproveLeaveRequest struct {
+	// request_id is the leave request being reviewed.
 	RequestId int64             `json:"request_id,omitempty"`
 	Body      *ApproveLeaveBody `json:"body,omitempty"`
 }
@@ -922,6 +985,7 @@ func (x *ApproveLeaveRequest) GetBody() *ApproveLeaveBody {
 }
 
 type ApproveLeaveResponse struct {
+	// Whether the approval action was processed.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -934,6 +998,9 @@ func (x *ApproveLeaveResponse) GetSuccess() bool {
 }
 
 type CancelLeaveRequestRequest struct {
+	// request_id is the leave request being withdrawn. Only the request's own
+	// subject may cancel it, and only while it is still pending - the leave
+	// approval permission grants no override here.
 	RequestId int64 `json:"request_id,omitempty"`
 }
 
@@ -975,6 +1042,7 @@ func (x *CancelLeaveRequestRequest) GetRequestId() int64 {
 }
 
 type CancelLeaveResponse struct {
+	// Whether the request was still pending and is now canceled.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -990,10 +1058,14 @@ type ListLeaveTypesRequest struct {
 }
 
 type ListLeaveTypesResponse struct {
+	// All leave types configured for the tenant.
 	LeaveTypes []*LeaveTypePayload `json:"leave_types,omitempty"`
-	Total      int64               `json:"total,omitempty"`
-	Limit      int32               `json:"limit,omitempty"`
-	Offset     int32               `json:"offset,omitempty"`
+	// Total number of leave types.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListLeaveTypesResponse) GetLeaveTypes() []*LeaveTypePayload {
@@ -1029,13 +1101,20 @@ func (x *ListLeaveTypesResponse) GetOffset() int32 {
 }
 
 type CreateLeaveTypeRequest struct {
-	Name                           string  `json:"name,omitempty"`
-	IsPaid                         bool    `json:"is_paid,omitempty"`
-	RequiresApproval               bool    `json:"requires_approval,omitempty"`
-	AccrualRule                    *string `json:"accrual_rule,omitempty"`
-	MaxCarryoverDays               *int32  `json:"max_carryover_days,omitempty"`
-	MinNoticeDays                  *int32  `json:"min_notice_days,omitempty"`
-	RequiresDocumentationAfterDays *int32  `json:"requires_documentation_after_days,omitempty"`
+	// Human-readable name (e.g. "Annual Leave", "Sick Leave").
+	Name string `json:"name,omitempty"`
+	// Whether days taken under this type are paid.
+	IsPaid bool `json:"is_paid,omitempty"`
+	// Whether leave requests of this type require manager approval.
+	RequiresApproval bool `json:"requires_approval,omitempty"`
+	// Accrual rule; absent if entitlement is fixed.
+	AccrualRule *string `json:"accrual_rule,omitempty"`
+	// Maximum unused days that may carry over to the next year.
+	MaxCarryoverDays *int32 `json:"max_carryover_days,omitempty"`
+	// Minimum calendar days of notice required.
+	MinNoticeDays *int32 `json:"min_notice_days,omitempty"`
+	// Consecutive days after which documentation is required; absent if never.
+	RequiresDocumentationAfterDays *int32 `json:"requires_documentation_after_days,omitempty"`
 }
 
 func (x *CreateLeaveTypeRequest) GetName() string {
@@ -1111,6 +1190,7 @@ func (x *CreateLeaveTypeRequest) GetRequiresDocumentationAfterDays() int32 {
 }
 
 type CreateLeaveTypeResponse struct {
+	// The newly created leave type.
 	LeaveType *LeaveTypePayload `json:"leave_type,omitempty"`
 }
 
@@ -1122,15 +1202,24 @@ func (x *CreateLeaveTypeResponse) GetLeaveType() *LeaveTypePayload {
 	return x.LeaveType
 }
 
+// UpdateLeaveTypeBody carries updatable leave type fields bound from the HTTP payload.
 type UpdateLeaveTypeBody struct {
-	Name                           *string `json:"name,omitempty"`
-	IsPaid                         *bool   `json:"is_paid,omitempty"`
-	RequiresApproval               *bool   `json:"requires_approval,omitempty"`
-	AccrualRule                    *string `json:"accrual_rule,omitempty"`
-	MaxCarryoverDays               *int32  `json:"max_carryover_days,omitempty"`
-	MinNoticeDays                  *int32  `json:"min_notice_days,omitempty"`
-	RequiresDocumentationAfterDays *int32  `json:"requires_documentation_after_days,omitempty"`
-	IsActive                       *bool   `json:"is_active,omitempty"`
+	// Updated name; absent to keep current value.
+	Name *string `json:"name,omitempty"`
+	// Updated paid status; absent to keep current value.
+	IsPaid *bool `json:"is_paid,omitempty"`
+	// Updated approval requirement; absent to keep current value.
+	RequiresApproval *bool `json:"requires_approval,omitempty"`
+	// Updated accrual rule; absent to keep current value.
+	AccrualRule *string `json:"accrual_rule,omitempty"`
+	// Updated max carryover days; absent to keep current value.
+	MaxCarryoverDays *int32 `json:"max_carryover_days,omitempty"`
+	// Updated min notice days; absent to keep current value.
+	MinNoticeDays *int32 `json:"min_notice_days,omitempty"`
+	// Updated documentation threshold; absent to keep current value.
+	RequiresDocumentationAfterDays *int32 `json:"requires_documentation_after_days,omitempty"`
+	// Updated active status; absent to keep current value.
+	IsActive *bool `json:"is_active,omitempty"`
 }
 
 func (x *UpdateLeaveTypeBody) GetName() string {
@@ -1230,6 +1319,7 @@ func (x *UpdateLeaveTypeBody) GetIsActive() bool {
 }
 
 type UpdateLeaveTypeRequest struct {
+	// ID of the leave type to update.
 	Id   int64                `json:"id,omitempty"`
 	Body *UpdateLeaveTypeBody `json:"body,omitempty"`
 }
@@ -1280,6 +1370,7 @@ func (x *UpdateLeaveTypeRequest) GetBody() *UpdateLeaveTypeBody {
 }
 
 type UpdateLeaveTypeResponse struct {
+	// The updated leave type.
 	LeaveType *LeaveTypePayload `json:"leave_type,omitempty"`
 }
 
@@ -1292,8 +1383,10 @@ func (x *UpdateLeaveTypeResponse) GetLeaveType() *LeaveTypePayload {
 }
 
 type ListLeaveBalancesRequest struct {
+	// Filter by employee; absent to include all employees.
 	EmployeeId *int64 `json:"employee_id,omitempty"`
-	Year       *int32 `json:"year,omitempty"`
+	// Filter by year; absent to return current year.
+	Year *int32 `json:"year,omitempty"`
 }
 
 func (m *ListLeaveBalancesRequest) MarshalJSON() ([]byte, error) {
@@ -1353,10 +1446,14 @@ func (x *ListLeaveBalancesRequest) GetYear() int32 {
 }
 
 type ListLeaveBalancesResponse struct {
+	// Leave balances matching the filters.
 	Balances []*LeaveBalancePayload `json:"balances,omitempty"`
-	Total    int64                  `json:"total,omitempty"`
-	Limit    int32                  `json:"limit,omitempty"`
-	Offset   int32                  `json:"offset,omitempty"`
+	// Total number of matching balances across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListLeaveBalancesResponse) GetBalances() []*LeaveBalancePayload {

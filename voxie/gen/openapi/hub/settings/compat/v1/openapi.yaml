@@ -17,12 +17,24 @@ paths:
                                 - $ref: '#/components/schemas/hub.settings.compat.v1.TestEmailBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.settings.compat.v1.TestEmailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.settings.compat.v1.TestEmailRequest:
@@ -48,3 +60,13 @@ components:
                 - port
                 - username
         hub.settings.compat.v1.TestEmailResponse: {}
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CompatibilityService
+      description: Compatibility contract for the SMTP connection test used by Dash.

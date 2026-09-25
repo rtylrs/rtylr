@@ -6,13 +6,20 @@ import (
 	"strconv"
 )
 
+// SetupWizardStepPayload is a single step in the HR setup wizard.
 type SetupWizardStepPayload struct {
-	Id          int64  `json:"id,omitempty"`
-	OwnerId     int64  `json:"owner_id,omitempty"`
-	StepKey     string `json:"step_key,omitempty"`
+	// Unique identifier for the setup step record.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this step belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Which setup step this represents (company_profile | work_schedule | leave_policy | org_structure | locations | roles_permissions | payroll | notifications | employees).
+	StepKey string `json:"step_key,omitempty"`
+	// Unix timestamp when this step was completed; absent if not yet completed.
 	CompletedAt *int64 `json:"completed_at,omitempty"`
-	CreatedAt   int64  `json:"created_at,omitempty"`
-	UpdatedAt   int64  `json:"updated_at,omitempty"`
+	// Unix timestamp when this step record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this step record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *SetupWizardStepPayload) MarshalJSON() ([]byte, error) {
@@ -139,19 +146,38 @@ func (x *SetupWizardStepPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// HRCompanyConfigPayload is the tenant-wide HR configuration set during setup.
 type HRCompanyConfigPayload struct {
-	Id                int64    `json:"id,omitempty"`
-	OwnerId           int64    `json:"owner_id,omitempty"`
-	TimeTrackingModel string   `json:"time_tracking_model,omitempty"`
-	TimesheetPeriod   string   `json:"timesheet_period,omitempty"`
-	PayrollPeriod     string   `json:"payroll_period,omitempty"`
-	PayrollGrossModel string   `json:"payroll_gross_model,omitempty"`
-	SetupCompletedAt  *int64   `json:"setup_completed_at,omitempty"`
-	CreatedAt         int64    `json:"created_at,omitempty"`
-	UpdatedAt         int64    `json:"updated_at,omitempty"`
-	ClockInMethods    []string `json:"clock_in_methods,omitempty"`
-	SubscribedApps    []string `json:"subscribed_apps,omitempty"`
-	DirectoryEnabled  bool     `json:"directory_enabled,omitempty"`
+	// Unique identifier for the config record.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this config belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// How time is tracked (time_logging | attendance | both).
+	TimeTrackingModel string `json:"time_tracking_model,omitempty"`
+	// Period for timesheet submission (weekly | biweekly | monthly).
+	TimesheetPeriod string `json:"timesheet_period,omitempty"`
+	// Period for payroll runs (weekly | biweekly | monthly).
+	PayrollPeriod string `json:"payroll_period,omitempty"`
+	// How gross pay is calculated (hourly | salary | both).
+	PayrollGrossModel string `json:"payroll_gross_model,omitempty"`
+	// Unix timestamp when the full setup wizard was completed; absent if still in progress.
+	SetupCompletedAt *int64 `json:"setup_completed_at,omitempty"`
+	// Unix timestamp when this config was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this config was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
+	// Enabled clock-in methods for attendance tracking
+	// (values: "app", "pin", "gps", "kiosk"). Empty defaults to ["app"].
+	ClockInMethods []string `json:"clock_in_methods,omitempty"`
+	// App IDs this tenant is subscribed to (values: "flow", "finance",
+	// "erp", "crm", "pos", "hr"). Drives cross-app UI affordances such as
+	// the "Import from Flow" button on HR timesheets.
+	SubscribedApps []string `json:"subscribed_apps,omitempty"`
+	// Whether the company-wide staff directory is visible to employees
+	// outside HR (e.g. Flow's Directory screen). Defaults to false: the
+	// business owner must opt in before any employee's role/department/
+	// contact info is exposed beyond HR's own admin screens.
+	DirectoryEnabled bool `json:"directory_enabled,omitempty"`
 }
 
 func (m *HRCompanyConfigPayload) MarshalJSON() ([]byte, error) {
@@ -326,10 +352,14 @@ func (x *HRCompanyConfigPayload) GetDirectoryEnabled() bool {
 	return x.DirectoryEnabled
 }
 
+// GetSetupStatusResponse summarises setup wizard progress and current HR configuration.
 type GetSetupStatusResponse struct {
-	Steps      []*SetupWizardStepPayload `json:"steps,omitempty"`
-	Config     *HRCompanyConfigPayload   `json:"config,omitempty"`
-	IsComplete bool                      `json:"is_complete,omitempty"`
+	// All wizard steps and their completion state.
+	Steps []*SetupWizardStepPayload `json:"steps,omitempty"`
+	// Current HR configuration for the tenant.
+	Config *HRCompanyConfigPayload `json:"config,omitempty"`
+	// Whether every setup step has been completed.
+	IsComplete bool `json:"is_complete,omitempty"`
 }
 
 func (x *GetSetupStatusResponse) GetSteps() []*SetupWizardStepPayload {
@@ -357,6 +387,7 @@ func (x *GetSetupStatusResponse) GetIsComplete() bool {
 }
 
 type CompleteSetupStepRequest struct {
+	// The step to mark as completed (must match a valid step_key).
 	StepKey string `json:"step_key,omitempty"`
 }
 
@@ -369,6 +400,7 @@ func (x *CompleteSetupStepRequest) GetStepKey() string {
 }
 
 type CompleteSetupStepResponse struct {
+	// The step after being marked complete.
 	Step *SetupWizardStepPayload `json:"step,omitempty"`
 }
 

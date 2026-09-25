@@ -12,25 +12,39 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: page is the 1-based page number.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: page is the 1-based page number.
                 - name: page_size
                   in: query
-                  required: true
+                  description: page_size is the number of rows to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: page_size is the number of rows to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.supplier.v1.ListSuppliersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - SupplierService
@@ -43,12 +57,24 @@ paths:
                             $ref: '#/components/schemas/erp.supplier.v1.CreateSupplierRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.supplier.v1.CreateSupplierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/supplier/v1/suppliers/{id}:
         put:
             tags:
@@ -58,23 +84,46 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/erp.supplier.v1.UpdateSupplierRequest'
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.supplier.v1.UpdateSupplierBody'
+                                    description: body carries updatable supplier fields bound from the HTTP payload.
+                            required:
+                                - body
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.supplier.v1.UpdateSupplierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - SupplierService
@@ -85,15 +134,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.supplier.v1.DeleteSupplierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.supplier.v1.ListSuppliersRequest:
@@ -139,10 +202,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 name:
@@ -247,6 +312,7 @@ components:
             properties:
                 supplier_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: supplier_id is the supplier id value for this contract.
                 message:
@@ -261,6 +327,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -329,6 +396,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -339,3 +407,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SupplierService
+      description: SupplierService defines ERP supplier endpoints.

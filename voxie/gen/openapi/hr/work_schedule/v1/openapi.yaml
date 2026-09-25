@@ -13,25 +13,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: offset
                   in: query
+                  description: offset is the number of records to skip, for paging through the list.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: offset is the number of records to skip, for paging through the list.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.work_schedule.v1.ListWorkSchedulesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - WorkScheduleService
@@ -45,12 +59,24 @@ paths:
                             $ref: '#/components/schemas/hr.work_schedule.v1.CreateWorkScheduleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.work_schedule.v1.CreateWorkScheduleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/work-schedule/v1/work-schedules/{id}:
         put:
             tags:
@@ -61,10 +87,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: ID of the schedule to update.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: ID of the schedule to update.
             requestBody:
                 content:
                     application/json:
@@ -74,12 +104,24 @@ paths:
                             description: body carries updatable work schedule fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.work_schedule.v1.UpdateWorkScheduleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.work_schedule.v1.ListWorkSchedulesRequest:
@@ -122,10 +164,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the work schedule.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this schedule belongs to.
                 name:
@@ -160,10 +204,12 @@ components:
                     description: Weekly overtime threshold in minutes; hours beyond this count as OT.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this schedule was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this schedule was last updated.
             required:
@@ -242,6 +288,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the schedule to update.
                 body:
@@ -296,3 +343,13 @@ components:
                     description: The updated work schedule.
             required:
                 - schedule
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: WorkScheduleService
+      description: WorkScheduleService defines HR work schedule endpoints.

@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface MenuServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** MenuService defines hub navigation menu endpoints. */
 export class MenuServiceClient {
 private baseUrl: string;
 private options: MenuServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listMenu(req: ListMenuRequest): Promise<ListMenuResponse> {
+/** Returns the navigation menu for the current user. */
+async listMenu(req: ListMenuRequest, opts?: RequestOptions): Promise<ListMenuResponse> {
 const violations = validateListMenuRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/menu/v1/menu";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListMenuResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateMenu(req: UpdateMenuRequest): Promise<UpdateMenuResponse> {
+/** Replaces the navigation menu items. */
+async updateMenu(req: UpdateMenuRequest, opts?: RequestOptions): Promise<UpdateMenuResponse> {
 const violations = validateUpdateMenuRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/menu/v1/menu";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateMenuRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,16 +154,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateMenuResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listMenuBanners(req: ListMenuBannersRequest): Promise<ListMenuBannersResponse> {
+/** Returns menu banners for the current business. */
+async listMenuBanners(req: ListMenuBannersRequest, opts?: RequestOptions): Promise<ListMenuBannersResponse> {
 const violations = validateListMenuBannersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/menu/v1/menu/banners";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -132,14 +177,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListMenuBannersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createMenuBanner(req: CreateMenuBannerRequest): Promise<CreateMenuBannerResponse> {
+/** Creates a menu banner for the current business. */
+async createMenuBanner(req: CreateMenuBannerRequest, opts?: RequestOptions): Promise<CreateMenuBannerResponse> {
 const violations = validateCreateMenuBannerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/menu/v1/menu/banners";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateMenuBannerRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -151,15 +198,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateMenuBannerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateMenuBanner(req: UpdateMenuBannerRequest): Promise<UpdateMenuBannerResponse> {
+/** Updates a menu banner for the current business. */
+async updateMenuBanner(req: UpdateMenuBannerRequest, opts?: RequestOptions): Promise<UpdateMenuBannerResponse> {
 const violations = validateUpdateMenuBannerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/menu/v1/menu/banners/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateMenuBannerRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -171,9 +220,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateMenuBannerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteMenuBanner(req: DeleteMenuBannerRequest): Promise<DeleteMenuBannerResponse> {
+/** Deletes a menu banner for the current business. */
+async deleteMenuBanner(req: DeleteMenuBannerRequest, opts?: RequestOptions): Promise<DeleteMenuBannerResponse> {
 const violations = validateDeleteMenuBannerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/menu/v1/menu/banners/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -181,7 +231,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

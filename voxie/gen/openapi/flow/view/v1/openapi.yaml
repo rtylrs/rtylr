@@ -12,42 +12,58 @@ paths:
             parameters:
                 - name: workspace_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.view.v1.ListViewsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ViewService
@@ -60,12 +76,24 @@ paths:
                             $ref: '#/components/schemas/flow.view.v1.CreateViewRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.view.v1.CreateViewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/view/v1/views/{id}:
         put:
             tags:
@@ -78,20 +106,62 @@ paths:
                   required: true
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.view.v1.UpdateViewRequest'
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                icon:
+                                    type: string
+                                visibility:
+                                    type: string
+                                    description: |-
+                                        visibility is "shared" (every colleague in the business can use this view)
+                                        or "private" (only its creator). Empty on create means "shared", which is
+                                        how every view behaved before this field existed, so an older client keeps
+                                        its current behaviour rather than silently making views private.
+                                filters:
+                                    type: string
+                                    description: JSON-encoded filter criteria for this saved view.
+                                group_by:
+                                    type: string
+                                sort_by:
+                                    type: string
+                                sort_dir:
+                                    type: string
+                            required:
+                                - name
+                                - icon
+                                - visibility
+                                - filters
+                                - group_by
+                                - sort_by
+                                - sort_dir
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.view.v1.UpdateViewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ViewService
@@ -103,14 +173,27 @@ paths:
                   required: true
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.view.v1.DeleteViewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.view.v1.ListViewsRequest:
@@ -156,6 +239,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -266,6 +350,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -303,8 +388,18 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
         flow.view.v1.DeleteViewResponse:
             type: object
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ViewService

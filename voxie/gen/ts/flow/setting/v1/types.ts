@@ -26,6 +26,7 @@ mentions?: boolean | undefined;
 statusChanges?: boolean | undefined;
 weeklyDigest?: boolean | undefined;
 emailNotifications?: boolean | undefined;
+/** JSON-encoded per-user Flow sidebar layout and visibility preferences. */
 sidebarPreferences?: string | undefined;
 }
 
@@ -67,12 +68,37 @@ return violations;
 }
 
 export interface UpdateUserSettingsRequest {
+/**
+ * Notify the user when a task is assigned to them. Omit to preserve the
+ * stored preference; send false to turn the notification off.
+ */
 taskAssigned?: boolean | undefined;
+/**
+ * Notify the user about comments on their tasks. Omit to preserve the
+ * stored preference; send false to turn the notification off.
+ */
 taskComments?: boolean | undefined;
+/**
+ * Notify the user when they are mentioned. Omit to preserve the stored
+ * preference; send false to turn the notification off.
+ */
 mentions?: boolean | undefined;
+/**
+ * Notify the user when a task status changes. Omit to preserve the stored
+ * preference; send false to turn the notification off.
+ */
 statusChanges?: boolean | undefined;
+/**
+ * Send the user the weekly digest email. Omit to preserve the stored
+ * preference; send false to turn the digest off.
+ */
 weeklyDigest?: boolean | undefined;
+/**
+ * Master switch for this user's Flow email notifications. Omit to preserve
+ * the stored preference; send false to turn all of them off.
+ */
 emailNotifications?: boolean | undefined;
+/** JSON-encoded per-user Flow sidebar layout and visibility preferences. */
 sidebarPreferences?: string | undefined;
 }
 

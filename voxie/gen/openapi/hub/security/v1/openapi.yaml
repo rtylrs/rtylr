@@ -11,12 +11,24 @@ paths:
             description: Returns the current security settings.
             operationId: SecurityService_getSecurityState
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.GetSecurityStateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/security/v1/login-history:
         get:
             tags:
@@ -27,25 +39,39 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: 1-based page number to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: 1-based page number to return.
                 - name: page_size
                   in: query
-                  required: true
+                  description: Maximum number of login events to return in one page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum number of login events to return in one page.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.LoginHistoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/security/v1/invalidate-sessions:
         post:
             tags:
@@ -60,12 +86,24 @@ paths:
                             $ref: '#/components/schemas/hub.security.v1.InvalidateSessionsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.InvalidateSessionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/security/v1/2fa:
         patch:
             tags:
@@ -80,12 +118,24 @@ paths:
                             $ref: '#/components/schemas/hub.security.v1.Update2FARequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.Update2FAResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/security/v1/mfa/enroll:
         post:
             tags:
@@ -100,12 +150,24 @@ paths:
                             $ref: '#/components/schemas/hub.security.v1.BeginMFAEnrollmentRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.BeginMFAEnrollmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/security/v1/mfa/enroll/confirm:
         post:
             tags:
@@ -120,12 +182,24 @@ paths:
                             $ref: '#/components/schemas/hub.security.v1.CompleteMFAEnrollmentRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.CompleteMFAEnrollmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/security/v1/mfa/verify:
         post:
             tags:
@@ -140,12 +214,24 @@ paths:
                             $ref: '#/components/schemas/hub.security.v1.VerifyMFARequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.VerifyMFAResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/security/v1/mfa/recovery:
         post:
             tags:
@@ -160,12 +246,24 @@ paths:
                             $ref: '#/components/schemas/hub.security.v1.UseMFARecoveryCodeRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.security.v1.UseMFARecoveryCodeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.security.v1.GetSecurityStateRequest:
@@ -263,6 +361,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Database identifier for this login event.
                 email:
@@ -369,3 +468,13 @@ components:
                     type: boolean
             required:
                 - verified
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SecurityService
+      description: SecurityService defines hub security endpoints.

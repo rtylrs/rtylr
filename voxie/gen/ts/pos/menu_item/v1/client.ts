@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface MenuItemServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** MenuItemService defines POS menu item endpoints. */
 export class MenuItemServiceClient {
 private baseUrl: string;
 private options: MenuItemServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listMenuItems(req: ListMenuItemsRequest): Promise<ListMenuItemsResponse> {
+/** Returns menu items for the active business. */
+async listMenuItems(req: ListMenuItemsRequest, opts?: RequestOptions): Promise<ListMenuItemsResponse> {
 const violations = validateListMenuItemsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/menu-item/v1/menu-items";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,9 +133,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListMenuItemsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listPublicMenuItems(req: ListPublicMenuItemsRequest): Promise<ListPublicMenuItemsResponse> {
+/** Returns menu items for anonymous public menu surfaces. */
+async listPublicMenuItems(req: ListPublicMenuItemsRequest, opts?: RequestOptions): Promise<ListPublicMenuItemsResponse> {
 const violations = validateListPublicMenuItemsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/menu-item/v1/menu-items/public";
 const query = new URLSearchParams();
 if (req.businessId !== undefined) {
@@ -107,7 +149,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -119,14 +162,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListPublicMenuItemsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createMenuItem(req: CreateMenuItemRequest): Promise<CreateMenuItemResponse> {
+/** Creates a new menu item. */
+async createMenuItem(req: CreateMenuItemRequest, opts?: RequestOptions): Promise<CreateMenuItemResponse> {
 const violations = validateCreateMenuItemRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/menu-item/v1/menu-items";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateMenuItemRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -138,15 +183,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateMenuItemResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateMenuItem(req: UpdateMenuItemRequest): Promise<UpdateMenuItemResponse> {
+/** Updates an existing menu item. */
+async updateMenuItem(req: UpdateMenuItemRequest, opts?: RequestOptions): Promise<UpdateMenuItemResponse> {
 const violations = validateUpdateMenuItemRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/menu-item/v1/menu-items/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateMenuItemRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

@@ -13,6 +13,9 @@ paths:
             parameters:
                 - name: signed
                   in: query
+                  description: |-
+                    signed filters to contracts whose signing is complete when true, or
+                    incomplete when false; absent to include both.
                   required: false
                   schema:
                     type: boolean
@@ -21,25 +24,39 @@ paths:
                         incomplete when false; absent to include both.
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of records to return, capped by the server.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum number of records to return, capped by the server.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of records to skip for pagination.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.sales.v1.ListContractsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ContractService
@@ -53,12 +70,24 @@ paths:
                             $ref: '#/components/schemas/crm.sales.v1.CreateContractRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.sales.v1.CreateContractResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/sales/v1/contracts/{id}:
         get:
             tags:
@@ -69,17 +98,32 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the contract id path parameter.
                   required: true
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the contract id path parameter.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.sales.v1.GetContractResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - ContractService
@@ -89,23 +133,48 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the contract id path parameter.
                   required: true
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the contract id path parameter.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/crm.sales.v1.UpdateContractRequest'
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/crm.sales.v1.UpdateContractBody'
+                                    description: body carries the amendable fields bound from the HTTP payload.
+                            required:
+                                - body
+                            description: |-
+                                UpdateContractRequest amends an existing contract. Fields left absent keep
+                                their current values, except status-bearing fields which replace outright.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.sales.v1.UpdateContractResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         crm.sales.v1.ListContractsRequest:
@@ -164,10 +233,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 lead_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         lead_id is the CRM lead this contract closes; absent for contracts
@@ -198,10 +269,12 @@ components:
                     description: notes are free-text sales notes; not for invoice prefill.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: created_at is when the record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: updated_at is when the record was last updated.
             required:
@@ -227,6 +300,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the contract id path parameter.
             required:
@@ -250,6 +324,7 @@ components:
                 lead_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: lead_id links the contract to its winning lead.
                 plan:
@@ -299,6 +374,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the contract id path parameter.
                 body:
@@ -353,3 +429,16 @@ components:
             required:
                 - contract
             description: UpdateContractResponse returns the amended contract.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ContractService
+      description: |-
+        ContractService defines CRM sales contract endpoints: the read surface
+        other apps need (Finance prefills invoices from signed contracts), plus
+        create/update so the legacy routes have a contract to migrate onto.

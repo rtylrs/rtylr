@@ -32,6 +32,7 @@ export interface PermissionRow {
 key?: string | undefined;
 category?: string | undefined;
 label?: string | undefined;
+/** role -> enabled */
 roleValues?: Record<string, boolean> | undefined;
 }
 
@@ -64,20 +65,35 @@ return violations;
 }
 
 export interface CustomRole {
+/** Stable identifier of the role within the business. */
 id?: string | undefined;
+/** Display name shown to administrators. */
 name?: string | undefined;
+/** Optional explanation of the role's intended use. */
 description?: string | undefined;
+/** Permission keys granted by this role. */
 permissions?: (string)[] | undefined;
+/** Application that owns the role and its permissions. */
 appId?: string | undefined;
+/** Optional application-specific role key. */
 roleKey?: string | undefined;
+/** Relative authority level used for delegation checks. */
 level?: number | undefined;
+/** Optional role from which this role inherits or was derived. */
 parentRoleId?: string | undefined;
+/** Scope rules limiting where the role applies. */
 scopeRules?: (string)[] | undefined;
+/** Whether the role is a seeded system role. */
 isSystem?: boolean | undefined;
+/** Whether the role is archived and unavailable for new assignments. */
 isArchived?: boolean | undefined;
+/** Lifecycle state of the role. */
 lifecycle?: string | undefined;
+/** Monotonically increasing version used for cache and audit coordination. */
 version?: string | undefined;
+/** Number of active members assigned to the role. */
 memberCount?: number | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -186,8 +202,11 @@ return violations;
 }
 
 export interface ListRolesRequest {
+/** Restrict results to one application. */
 appId?: string | undefined;
+/** One-based result page. */
 page?: number | undefined;
+/** Maximum number of roles returned per page. */
 pageSize?: number | undefined;
 }
 
@@ -217,10 +236,15 @@ return violations;
 }
 
 export interface ListRolesResponse {
+/** Roles visible in the requested page. */
 roles?: (CustomRole)[] | undefined;
+/** Current one-based page. */
 page?: number | undefined;
+/** Effective page size. */
 pageSize?: number | undefined;
+/** Total number of matching roles. */
 total?: string | undefined;
+/** Next page number, when more results remain. */
 nextPage?: number | undefined;
 }
 
@@ -257,13 +281,21 @@ return violations;
 }
 
 export interface CreateRoleRequest {
+/** Display name for the new role. */
 name: string;
+/** Optional explanation of the role's intended use. */
 description?: string | undefined;
+/** Application that owns the role. */
 appId?: string | undefined;
+/** Optional application-specific role key. */
 roleKey?: string | undefined;
+/** Relative authority level used for delegation checks. */
 level?: number | undefined;
+/** Optional source role for inheritance or cloning semantics. */
 parentRoleId?: string | undefined;
+/** Scope rules to apply to assignments of the role. */
 scopeRules?: (string)[] | undefined;
+/** Permission keys granted by the role. */
 permissions?: (string)[] | undefined;
 }
 
@@ -380,6 +412,7 @@ return violations;
 }
 
 export interface UpdateRoleBody {
+/** The role name. */
 name: string;
 description?: string | undefined;
 appId?: string | undefined;
@@ -642,15 +675,25 @@ return violations;
 }
 
 export interface RoleAssignment {
+/** Stable identifier of the assignment. */
 id?: string | undefined;
+/** Role being assigned. */
 roleId?: string | undefined;
+/** Application in which the assignment is effective. */
 appId?: string | undefined;
+/** User receiving the assignment, when directly assigned. */
 userId?: string | undefined;
+/** Group receiving the assignment, when group assigned. */
 groupId?: string | undefined;
+/** Lifecycle status of the assignment. */
 status?: string | undefined;
+/** Provenance of the assignment, such as explicit or group. */
 source?: string | undefined;
+/** Whether this is the user's primary role for the application. */
 isPrimary?: boolean | undefined;
+/** Scope values attached to this assignment. */
 scopes?: (string)[] | undefined;
+/** Time at which the assignment was granted. */
 grantedAt?: string | undefined;
 }
 
@@ -701,9 +744,13 @@ return violations;
 }
 
 export interface ListRoleAssignmentsRequest {
+/** Restrict results to one role. */
 roleId?: string | undefined;
+/** Restrict results to one application. */
 appId?: string | undefined;
+/** One-based result page. */
 page?: number | undefined;
+/** Maximum number of assignments returned per page. */
 pageSize?: number | undefined;
 }
 
@@ -736,10 +783,15 @@ return violations;
 }
 
 export interface ListRoleAssignmentsResponse {
+/** Assignments visible in the requested page. */
 assignments?: (RoleAssignment)[] | undefined;
+/** Current one-based page. */
 page?: number | undefined;
+/** Effective page size. */
 pageSize?: number | undefined;
+/** Total number of matching assignments. */
 total?: string | undefined;
+/** Next page number, when more results remain. */
 nextPage?: number | undefined;
 }
 
@@ -776,11 +828,17 @@ return violations;
 }
 
 export interface AssignRoleRequest {
+/** Role to assign. */
 roleId: string;
+/** Application in which the assignment is effective. */
 appId: string;
+/** User receiving the assignment, when directly assigned. */
 userId?: string | undefined;
+/** Group receiving the assignment, when group assigned. */
 groupId?: string | undefined;
+/** Whether this is the user's primary role for the application. */
 isPrimary?: boolean | undefined;
+/** Scope values attached to this assignment. */
 scopes?: (string)[] | undefined;
 }
 
@@ -921,8 +979,11 @@ return violations;
 }
 
 export interface PreviewPermissionImpactResponse {
+/** Permission keys added by the proposed change. */
 addedPermissions?: (string)[] | undefined;
+/** Permission keys removed by the proposed change. */
 removedPermissions?: (string)[] | undefined;
+/** Number of active members affected by the proposed change. */
 affectedMemberCount?: number | undefined;
 }
 
@@ -952,16 +1013,27 @@ return violations;
 }
 
 export interface RoleAuditEvent {
+/** Stable identifier of the audit event. */
 id?: string | undefined;
+/** Action recorded by the audit event. */
 action?: string | undefined;
+/** Application affected by the event. */
 appId?: string | undefined;
+/** Role affected by the event, when applicable. */
 roleId?: string | undefined;
+/** User who performed the action, when available. */
 actorUserId?: string | undefined;
+/** Direct user target, when applicable. */
 targetUserId?: string | undefined;
+/** Group target, when applicable. */
 targetGroupId?: string | undefined;
+/** Serialized state before the change. */
 beforeJson?: string | undefined;
+/** Serialized state after the change. */
 afterJson?: string | undefined;
+/** Reason supplied for the change. */
 reason?: string | undefined;
+/** Time at which the event was created. */
 createdAt?: string | undefined;
 }
 

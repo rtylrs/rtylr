@@ -8,18 +8,31 @@ import (
 )
 
 type Workspace struct {
-	Id          int64  `json:"id,omitempty"`
-	OwnerId     int64  `json:"owner_id,omitempty"`
-	Name        string `json:"name,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
 	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-	Color       string `json:"color,omitempty"`
-	IsDefault   bool   `json:"is_default,omitempty"`
-	CreatedBy   int64  `json:"created_by,omitempty"`
-	CreatedAt   string `json:"created_at,omitempty"`
-	UpdatedAt   string `json:"updated_at,omitempty"`
-	MemberCount int32  `json:"member_count,omitempty"`
-	IsPersonal  bool   `json:"is_personal,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
+	// is_default is the is default value for this contract.
+	IsDefault bool `json:"is_default,omitempty"`
+	// created_by is the created by value for this contract.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
+	// Count of members in this workspace, for sidebar / picker badges.
+	// Display projection populated on list reads.
+	MemberCount int32 `json:"member_count,omitempty"`
+	// True when this is the caller's auto-created Personal workspace.
+	IsPersonal bool `json:"is_personal,omitempty"`
 }
 
 func (m *Workspace) MarshalJSON() ([]byte, error) {
@@ -168,14 +181,22 @@ func (x *Workspace) GetIsPersonal() bool {
 }
 
 type WorkspaceMember struct {
-	Id          int64  `json:"id,omitempty"`
-	WorkspaceId int64  `json:"workspace_id,omitempty"`
-	UserId      int64  `json:"user_id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Email       string `json:"email,omitempty"`
-	Role        string `json:"role,omitempty"`
-	InvitedBy   int64  `json:"invited_by,omitempty"`
-	JoinedAt    string `json:"joined_at,omitempty"`
+	// id is the unique identifier for the membership record.
+	Id int64 `json:"id,omitempty"`
+	// workspace_id is the workspace id value for this contract.
+	WorkspaceId int64 `json:"workspace_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// name is the member display name.
+	Name string `json:"name,omitempty"`
+	// email is the member email address.
+	Email string `json:"email,omitempty"`
+	// role is the role value for this contract.
+	Role string `json:"role,omitempty"`
+	// invited_by is the user id of the inviter, if any.
+	InvitedBy int64 `json:"invited_by,omitempty"`
+	// joined_at is when the member joined the workspace.
+	JoinedAt string `json:"joined_at,omitempty"`
 }
 
 func (m *WorkspaceMember) MarshalJSON() ([]byte, error) {
@@ -302,9 +323,13 @@ func (x *WorkspaceMember) GetJoinedAt() string {
 }
 
 type ListWorkspacesRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -341,6 +366,7 @@ func (x *ListWorkspacesRequest) GetSortDir() string {
 }
 
 type ListWorkspacesResponse struct {
+	// workspaces is the workspaces value for this contract.
 	Workspaces []*Workspace                             `json:"workspaces,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -362,10 +388,14 @@ func (x *ListWorkspacesResponse) GetPagination() *common_pagination_v1.Paginatio
 }
 
 type CreateWorkspaceRequest struct {
-	Name        string `json:"name,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
 	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-	Color       string `json:"color,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
 }
 
 func (x *CreateWorkspaceRequest) GetName() string {
@@ -401,6 +431,7 @@ func (x *CreateWorkspaceRequest) GetColor() string {
 }
 
 type CreateWorkspaceResponse struct {
+	// workspace is the workspace value for this contract.
 	Workspace *Workspace `json:"workspace,omitempty"`
 }
 
@@ -413,10 +444,14 @@ func (x *CreateWorkspaceResponse) GetWorkspace() *Workspace {
 }
 
 type UpdateWorkspaceBody struct {
-	Name        string `json:"name,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
 	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-	Color       string `json:"color,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
 }
 
 func (x *UpdateWorkspaceBody) GetName() string {
@@ -452,7 +487,9 @@ func (x *UpdateWorkspaceBody) GetColor() string {
 }
 
 type UpdateWorkspaceRequest struct {
-	Id   int64                `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable workspace fields bound from the HTTP payload.
 	Body *UpdateWorkspaceBody `json:"body,omitempty"`
 }
 
@@ -502,6 +539,7 @@ func (x *UpdateWorkspaceRequest) GetBody() *UpdateWorkspaceBody {
 }
 
 type UpdateWorkspaceResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -514,6 +552,7 @@ func (x *UpdateWorkspaceResponse) GetMessage() string {
 }
 
 type DeleteWorkspaceRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -555,6 +594,7 @@ func (x *DeleteWorkspaceRequest) GetId() int64 {
 }
 
 type DeleteWorkspaceResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -567,11 +607,16 @@ func (x *DeleteWorkspaceResponse) GetMessage() string {
 }
 
 type ListWorkspaceMembersRequest struct {
+	// workspace_id is the workspace id value for this contract.
 	WorkspaceId *int64 `json:"workspace_id,omitempty"`
-	Page        int32  `json:"page,omitempty"`
-	Limit       int32  `json:"limit,omitempty"`
-	SortBy      string `json:"sort_by,omitempty"`
-	SortDir     string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListWorkspaceMembersRequest) MarshalJSON() ([]byte, error) {
@@ -651,6 +696,7 @@ func (x *ListWorkspaceMembersRequest) GetSortDir() string {
 }
 
 type ListWorkspaceMembersResponse struct {
+	// members is the workspace members for this contract.
 	Members    []*WorkspaceMember                       `json:"members,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -672,9 +718,12 @@ func (x *ListWorkspaceMembersResponse) GetPagination() *common_pagination_v1.Pag
 }
 
 type AddWorkspaceMemberRequest struct {
+	// workspace_id is the workspace id value for this contract.
 	WorkspaceId *int64 `json:"workspace_id,omitempty"`
-	UserId      *int64 `json:"user_id,omitempty"`
-	Role        string `json:"role,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId *int64 `json:"user_id,omitempty"`
+	// role is the role value for this contract.
+	Role string `json:"role,omitempty"`
 }
 
 func (m *AddWorkspaceMemberRequest) MarshalJSON() ([]byte, error) {
@@ -755,6 +804,7 @@ func (x *AddWorkspaceMemberRequest) GetRole() string {
 }
 
 type AddWorkspaceMemberResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -767,8 +817,10 @@ func (x *AddWorkspaceMemberResponse) GetMessage() string {
 }
 
 type RemoveWorkspaceMemberRequest struct {
+	// workspace_id is the workspace id value for this contract.
 	WorkspaceId *int64 `json:"workspace_id,omitempty"`
-	UserId      *int64 `json:"user_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId *int64 `json:"user_id,omitempty"`
 }
 
 func (m *RemoveWorkspaceMemberRequest) MarshalJSON() ([]byte, error) {
@@ -841,6 +893,7 @@ func (x *RemoveWorkspaceMemberRequest) GetUserId() int64 {
 }
 
 type RemoveWorkspaceMemberResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -853,9 +906,12 @@ func (x *RemoveWorkspaceMemberResponse) GetMessage() string {
 }
 
 type UpdateWorkspaceMemberRoleRequest struct {
+	// workspace_id is the workspace id value for this contract.
 	WorkspaceId *int64 `json:"workspace_id,omitempty"`
-	UserId      *int64 `json:"user_id,omitempty"`
-	Role        string `json:"role,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId *int64 `json:"user_id,omitempty"`
+	// role is the role value for this contract.
+	Role string `json:"role,omitempty"`
 }
 
 func (m *UpdateWorkspaceMemberRoleRequest) MarshalJSON() ([]byte, error) {
@@ -936,6 +992,7 @@ func (x *UpdateWorkspaceMemberRoleRequest) GetRole() string {
 }
 
 type UpdateWorkspaceMemberRoleResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

@@ -8,13 +8,22 @@ import (
 )
 
 type ReportTemplate struct {
-	Id          int64    `json:"id,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Type        string   `json:"type,omitempty"`
-	Metrics     []string `json:"metrics,omitempty"`
-	Format      string   `json:"format,omitempty"`
-	CreatedAt   string   `json:"created_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// type is the type value for this contract.
+	// revenue, customers, products, operations, financial
+	Type string `json:"type,omitempty"`
+	// metrics is the metrics value for this contract.
+	Metrics []string `json:"metrics,omitempty"`
+	// format is the format value for this contract.
+	// pdf, csv, xlsx
+	Format string `json:"format,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *ReportTemplate) MarshalJSON() ([]byte, error) {
@@ -103,16 +112,27 @@ func (x *ReportTemplate) GetCreatedAt() string {
 }
 
 type ScheduledReport struct {
-	Id             int64  `json:"id,omitempty"`
-	TemplateId     int64  `json:"template_id,omitempty"`
-	TemplateName   string `json:"template_name,omitempty"`
-	Frequency      string `json:"frequency,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// template_id is the template id value for this contract.
+	TemplateId int64 `json:"template_id,omitempty"`
+	// template_name is the template name value for this contract.
+	TemplateName string `json:"template_name,omitempty"`
+	// frequency is the frequency value for this contract.
+	// daily, weekly, monthly
+	Frequency string `json:"frequency,omitempty"`
+	// recipient_email is the recipient email value for this contract.
 	RecipientEmail string `json:"recipient_email,omitempty"`
-	Channel        string `json:"channel,omitempty"`
-	IsActive       bool   `json:"is_active,omitempty"`
-	LastSentAt     string `json:"last_sent_at,omitempty"`
-	NextSendAt     string `json:"next_send_at,omitempty"`
-	CreatedAt      string `json:"created_at,omitempty"`
+	// channel is the delivery channel (email, slack).
+	Channel string `json:"channel,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive bool `json:"is_active,omitempty"`
+	// last_sent_at is the last sent at value for this contract.
+	LastSentAt string `json:"last_sent_at,omitempty"`
+	// next_send_at is the next send at value for this contract.
+	NextSendAt string `json:"next_send_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *ScheduledReport) MarshalJSON() ([]byte, error) {
@@ -235,11 +255,16 @@ func (x *ScheduledReport) GetCreatedAt() string {
 }
 
 type ListReportTemplatesRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// page is the current result page.
+	Page int32 `json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// sort_by is the field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
-	Type    string `json:"type,omitempty"`
+	// type is the type value for this contract.
+	Type string `json:"type,omitempty"`
 }
 
 func (x *ListReportTemplatesRequest) GetPage() int32 {
@@ -283,7 +308,9 @@ func (x *ListReportTemplatesRequest) GetType() string {
 }
 
 type ListReportTemplatesResponse struct {
-	Templates  []*ReportTemplate                        `json:"templates,omitempty"`
+	// templates is the templates value for this contract.
+	Templates []*ReportTemplate `json:"templates,omitempty"`
+	// pagination is the pagination value for this contract.
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
@@ -304,11 +331,16 @@ func (x *ListReportTemplatesResponse) GetPagination() *common_pagination_v1.Pagi
 }
 
 type CreateReportTemplateRequest struct {
-	Name        string   `json:"name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Type        string   `json:"type,omitempty"`
-	Metrics     []string `json:"metrics,omitempty"`
-	Format      string   `json:"format,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// type is the type value for this contract.
+	Type string `json:"type,omitempty"`
+	// metrics is the metrics value for this contract.
+	Metrics []string `json:"metrics,omitempty"`
+	// format is the format value for this contract.
+	Format string `json:"format,omitempty"`
 }
 
 func (x *CreateReportTemplateRequest) GetName() string {
@@ -352,6 +384,7 @@ func (x *CreateReportTemplateRequest) GetFormat() string {
 }
 
 type CreateReportTemplateResponse struct {
+	// template is the template value for this contract.
 	Template *ReportTemplate `json:"template,omitempty"`
 }
 
@@ -364,6 +397,7 @@ func (x *CreateReportTemplateResponse) GetTemplate() *ReportTemplate {
 }
 
 type GetReportTemplateRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -405,6 +439,7 @@ func (x *GetReportTemplateRequest) GetId() int64 {
 }
 
 type GetReportTemplateResponse struct {
+	// template is the template value for this contract.
 	Template *ReportTemplate `json:"template,omitempty"`
 }
 
@@ -417,9 +452,13 @@ func (x *GetReportTemplateResponse) GetTemplate() *ReportTemplate {
 }
 
 type ListScheduledReportsRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// page is the current result page.
+	Page int32 `json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// sort_by is the field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -456,7 +495,9 @@ func (x *ListScheduledReportsRequest) GetSortDir() string {
 }
 
 type ListScheduledReportsResponse struct {
-	Reports    []*ScheduledReport                       `json:"reports,omitempty"`
+	// reports is the reports value for this contract.
+	Reports []*ScheduledReport `json:"reports,omitempty"`
+	// pagination is the pagination value for this contract.
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
@@ -477,11 +518,16 @@ func (x *ListScheduledReportsResponse) GetPagination() *common_pagination_v1.Pag
 }
 
 type CreateScheduledReportRequest struct {
-	TemplateSlug   string `json:"template_slug,omitempty"`
-	Frequency      string `json:"frequency,omitempty"`
-	Channel        string `json:"channel,omitempty"`
+	// template_slug is the template slug (e.g. revenue-monthly).
+	TemplateSlug string `json:"template_slug,omitempty"`
+	// frequency is the delivery frequency (daily, weekly, monthly).
+	Frequency string `json:"frequency,omitempty"`
+	// channel is the delivery channel (email, slack).
+	Channel string `json:"channel,omitempty"`
+	// recipient_email is the delivery recipient.
 	RecipientEmail string `json:"recipient_email,omitempty"`
-	IsActive       bool   `json:"is_active,omitempty"`
+	// is_active toggles whether the schedule is active.
+	IsActive bool `json:"is_active,omitempty"`
 }
 
 func (x *CreateScheduledReportRequest) GetTemplateSlug() string {
@@ -525,6 +571,7 @@ func (x *CreateScheduledReportRequest) GetIsActive() bool {
 }
 
 type CreateScheduledReportResponse struct {
+	// report is the report value for this contract.
 	Report *ScheduledReport `json:"report,omitempty"`
 }
 
@@ -537,12 +584,18 @@ func (x *CreateScheduledReportResponse) GetReport() *ScheduledReport {
 }
 
 type UpdateScheduledReportRequest struct {
-	Id             int64  `json:"id,omitempty"`
-	TemplateSlug   string `json:"template_slug,omitempty"`
-	Frequency      string `json:"frequency,omitempty"`
-	Channel        string `json:"channel,omitempty"`
+	// id is the scheduled report identifier.
+	Id int64 `json:"id,omitempty"`
+	// template_slug is the template slug (e.g. revenue-monthly).
+	TemplateSlug string `json:"template_slug,omitempty"`
+	// frequency is the delivery frequency (daily, weekly, monthly).
+	Frequency string `json:"frequency,omitempty"`
+	// channel is the delivery channel (email, slack).
+	Channel string `json:"channel,omitempty"`
+	// recipient_email is the delivery recipient.
 	RecipientEmail string `json:"recipient_email,omitempty"`
-	IsActive       bool   `json:"is_active,omitempty"`
+	// is_active toggles whether the schedule is active.
+	IsActive bool `json:"is_active,omitempty"`
 }
 
 func (m *UpdateScheduledReportRequest) MarshalJSON() ([]byte, error) {
@@ -623,6 +676,7 @@ func (x *UpdateScheduledReportRequest) GetIsActive() bool {
 }
 
 type UpdateScheduledReportResponse struct {
+	// report is the updated scheduled report.
 	Report *ScheduledReport `json:"report,omitempty"`
 }
 
@@ -635,6 +689,7 @@ func (x *UpdateScheduledReportResponse) GetReport() *ScheduledReport {
 }
 
 type DeleteScheduledReportRequest struct {
+	// id is the scheduled report identifier.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -676,6 +731,7 @@ func (x *DeleteScheduledReportRequest) GetId() int64 {
 }
 
 type DeleteScheduledReportResponse struct {
+	// deleted confirms the schedule was removed.
 	Deleted bool `json:"deleted,omitempty"`
 }
 
@@ -688,9 +744,12 @@ func (x *DeleteScheduledReportResponse) GetDeleted() bool {
 }
 
 type GenerateRevenueReportRequest struct {
+	// from_date is the inclusive start date (YYYY-MM-DD).
 	FromDate string `json:"from_date,omitempty"`
-	ToDate   string `json:"to_date,omitempty"`
-	Format   string `json:"format,omitempty"`
+	// to_date is the inclusive end date (YYYY-MM-DD).
+	ToDate string `json:"to_date,omitempty"`
+	// format is the export format (csv, pdf).
+	Format string `json:"format,omitempty"`
 }
 
 func (x *GenerateRevenueReportRequest) GetFromDate() string {
@@ -718,9 +777,12 @@ func (x *GenerateRevenueReportRequest) GetFormat() string {
 }
 
 type GenerateRevenueReportResponse struct {
+	// report_id is the queued report identifier.
 	ReportId string `json:"report_id,omitempty"`
-	Url      string `json:"url,omitempty"`
-	Status   string `json:"status,omitempty"`
+	// url is the download URL when ready.
+	Url string `json:"url,omitempty"`
+	// status is the queue status.
+	Status string `json:"status,omitempty"`
 }
 
 func (x *GenerateRevenueReportResponse) GetReportId() string {
@@ -748,8 +810,10 @@ func (x *GenerateRevenueReportResponse) GetStatus() string {
 }
 
 type ExportRevenueReportRequest struct {
+	// from_date is the inclusive start date (YYYY-MM-DD).
 	FromDate string `json:"from_date,omitempty"`
-	ToDate   string `json:"to_date,omitempty"`
+	// to_date is the inclusive end date (YYYY-MM-DD).
+	ToDate string `json:"to_date,omitempty"`
 }
 
 func (x *ExportRevenueReportRequest) GetFromDate() string {
@@ -769,8 +833,10 @@ func (x *ExportRevenueReportRequest) GetToDate() string {
 }
 
 type ExportRevenueRow struct {
-	Date             string `json:"date,omitempty"`
-	AmountMinorUnits int64  `json:"amount_minor_units,omitempty"`
+	// date is the revenue date (YYYY-MM-DD).
+	Date string `json:"date,omitempty"`
+	// amount_minor_units is the revenue amount in minor units.
+	AmountMinorUnits int64 `json:"amount_minor_units,omitempty"`
 }
 
 func (m *ExportRevenueRow) MarshalJSON() ([]byte, error) {
@@ -819,10 +885,14 @@ func (x *ExportRevenueRow) GetAmountMinorUnits() int64 {
 }
 
 type ExportRevenueReportResponse struct {
-	Filename    string              `json:"filename,omitempty"`
-	ContentType string              `json:"content_type,omitempty"`
-	Csv         string              `json:"csv,omitempty"`
-	Rows        []*ExportRevenueRow `json:"rows,omitempty"`
+	// filename is the suggested download filename.
+	Filename string `json:"filename,omitempty"`
+	// content_type is the MIME type for the export payload.
+	ContentType string `json:"content_type,omitempty"`
+	// csv is the CSV document body.
+	Csv string `json:"csv,omitempty"`
+	// rows is the structured export rows.
+	Rows []*ExportRevenueRow `json:"rows,omitempty"`
 }
 
 func (x *ExportRevenueReportResponse) GetFilename() string {

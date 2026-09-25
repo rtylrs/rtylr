@@ -3,16 +3,24 @@ import * as hub_user_v1 from "../../../user/v1/types.js";
 
 export interface AccessRequest {
 id?: string | undefined;
+/** Identifies the user who requested access. */
 userId?: string | undefined;
 app?: string | undefined;
+/** Requested normalized role identifiers. */
 roleIds?: (string)[] | undefined;
+/** Requested resource scopes. */
 scopes?: (hub_user_v1.RoleScope)[] | undefined;
+/** Optional business reason for the request. */
 reason?: string | undefined;
+/** Current request lifecycle status. */
 status?: string | undefined;
+/** User who approved the request, when approved. */
 approverId?: string | undefined;
+/** Approval timestamp, when approved. */
 approvedAt?: string | undefined;
 requesterName?: string | undefined;
 requesterEmail?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -71,8 +79,11 @@ return violations;
 
 export interface RequestAccessRequest {
 app: string;
+/** Requested normalized role identifiers. */
 roleIds?: (string)[] | undefined;
+/** Requested resource scopes. */
 scopes?: (hub_user_v1.RoleScope)[] | undefined;
+/** Optional business reason for the request. */
 reason?: string | undefined;
 }
 
@@ -174,9 +185,12 @@ return violations;
 
 export interface ApproveAccessRequestRequest {
 id?: string | undefined;
+/** Identifies the user being granted access. */
 userId: string;
 app: string;
+/** Approved normalized role identifiers. */
 roleIds?: (string)[] | undefined;
+/** Approved resource scopes. */
 scopes?: (hub_user_v1.RoleScope)[] | undefined;
 }
 

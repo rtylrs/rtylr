@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface OnboardingServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** OnboardingService defines HR onboarding checklist endpoints. */
 export class OnboardingServiceClient {
 private baseUrl: string;
 private options: OnboardingServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listChecklistTemplates(req: ListChecklistTemplatesRequest): Promise<ListChecklistTemplatesResponse> {
+/** ListChecklistTemplates returns checklist templates with optional filters. */
+async listChecklistTemplates(req: ListChecklistTemplatesRequest, opts?: RequestOptions): Promise<ListChecklistTemplatesResponse> {
 const violations = validateListChecklistTemplatesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/templates";
 const query = new URLSearchParams();
 if (req.triggerType !== undefined) {
@@ -83,7 +123,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,14 +136,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListChecklistTemplatesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createChecklistTemplate(req: CreateChecklistTemplateRequest): Promise<CreateChecklistTemplateResponse> {
+/** CreateChecklistTemplate creates a checklist template. */
+async createChecklistTemplate(req: CreateChecklistTemplateRequest, opts?: RequestOptions): Promise<CreateChecklistTemplateResponse> {
 const violations = validateCreateChecklistTemplateRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/templates";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateChecklistTemplateRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -114,15 +157,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateChecklistTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateChecklistTemplate(req: UpdateChecklistTemplateRequest): Promise<UpdateChecklistTemplateResponse> {
+/** UpdateChecklistTemplate updates a checklist template. */
+async updateChecklistTemplate(req: UpdateChecklistTemplateRequest, opts?: RequestOptions): Promise<UpdateChecklistTemplateResponse> {
 const violations = validateUpdateChecklistTemplateRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/templates/{role_id}";
 path = path.replace("{role_id}", encodeURIComponent(String(req.roleId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateChecklistTemplateRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -134,15 +179,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateChecklistTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async addItemToChecklistTemplate(req: AddItemToChecklistTemplateRequest): Promise<AddItemToChecklistTemplateResponse> {
+/** AddItemToChecklistTemplate adds an item to a checklist template. */
+async addItemToChecklistTemplate(req: AddItemToChecklistTemplateRequest, opts?: RequestOptions): Promise<AddItemToChecklistTemplateResponse> {
 const violations = validateAddItemToChecklistTemplateRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/templates/{role_id}/items";
 path = path.replace("{role_id}", encodeURIComponent(String(req.roleId)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAddItemToChecklistTemplateRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -154,9 +201,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAddItemToChecklistTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listEmployeeChecklists(req: ListEmployeeChecklistsRequest): Promise<ListEmployeeChecklistsResponse> {
+/** ListEmployeeChecklists returns employee checklists with optional filters. */
+async listEmployeeChecklists(req: ListEmployeeChecklistsRequest, opts?: RequestOptions): Promise<ListEmployeeChecklistsResponse> {
 const violations = validateListEmployeeChecklistsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/checklists";
 const query = new URLSearchParams();
 if (req.employeeId !== undefined) {
@@ -172,7 +220,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -184,9 +233,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListEmployeeChecklistsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getEmployeeChecklist(req: GetEmployeeChecklistRequest): Promise<GetEmployeeChecklistResponse> {
+/** GetEmployeeChecklist returns a single employee checklist. */
+async getEmployeeChecklist(req: GetEmployeeChecklistRequest, opts?: RequestOptions): Promise<GetEmployeeChecklistResponse> {
 const violations = validateGetEmployeeChecklistRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/employees/{employee_id}";
 path = path.replace("{employee_id}", encodeURIComponent(String(req.employeeId)));
 const query = new URLSearchParams();
@@ -194,7 +244,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -206,14 +257,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetEmployeeChecklistResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async triggerChecklist(req: TriggerChecklistRequest): Promise<TriggerChecklistResponse> {
+/** TriggerChecklist triggers onboarding for an employee. */
+async triggerChecklist(req: TriggerChecklistRequest, opts?: RequestOptions): Promise<TriggerChecklistResponse> {
 const violations = validateTriggerChecklistRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/checklists/trigger";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeTriggerChecklistRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -225,14 +278,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeTriggerChecklistResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async completeChecklistItem(req: CompleteChecklistItemRequest): Promise<CompleteChecklistItemResponse> {
+/** CompleteChecklistItem marks a checklist item complete. */
+async completeChecklistItem(req: CompleteChecklistItemRequest, opts?: RequestOptions): Promise<CompleteChecklistItemResponse> {
 const violations = validateCompleteChecklistItemRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/v1/checklists/items/complete";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCompleteChecklistItemRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

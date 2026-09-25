@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// ErpBusinessSettings stores tenant-level ERP defaults shared by operators.
 type ErpBusinessSettings struct {
 	Id                 int64    `json:"id,omitempty"`
 	BusinessId         int64    `json:"business_id,omitempty"`

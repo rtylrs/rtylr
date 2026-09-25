@@ -12,23 +12,67 @@ paths:
             parameters:
                 - name: invoice_id
                   in: path
+                  description: invoice_id is the invoice id value for this contract.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: invoice_id is the invoice id value for this contract.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/finance.invoices.payments.v1.RecordPaymentRequest'
+                            type: object
+                            properties:
+                                amount:
+                                    type: number
+                                    minimum: 0
+                                    format: double
+                                    description: amount is the amount value for this contract.
+                                currency:
+                                    type: string
+                                    description: currency is the currency value for this contract.
+                                payment_date:
+                                    type: string
+                                    description: payment_date is the payment date value for this contract.
+                                method:
+                                    type: string
+                                    description: method is the method value for this contract.
+                                reference:
+                                    type: string
+                                    description: reference is the reference value for this contract.
+                                notes:
+                                    type: string
+                                    description: notes is the notes value for this contract.
+                            required:
+                                - amount
+                                - currency
+                                - payment_date
+                                - method
+                                - reference
+                                - notes
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.payments.v1.RecordPaymentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         finance.invoices.payments.v1.RecordPaymentRequest:
@@ -37,6 +81,7 @@ components:
                 invoice_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: invoice_id is the invoice id value for this contract.
                 amount:
@@ -85,10 +130,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 invoice_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: invoice_id is the invoice id value for this contract.
                 amount:
@@ -120,3 +167,13 @@ components:
                 - reference
                 - notes
             description: RecordPaymentResponsePayload describes a payment just recorded against an invoice.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: InvoicePaymentService
+      description: InvoicePaymentService records payments against invoices.

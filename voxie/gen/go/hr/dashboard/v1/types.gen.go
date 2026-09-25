@@ -7,10 +7,14 @@ import (
 )
 
 type DashboardStats struct {
-	TotalStaff     int64 `json:"total_staff,omitempty"`
-	OnShiftToday   int64 `json:"on_shift_today,omitempty"`
+	// total_staff is the total staff value for this contract.
+	TotalStaff int64 `json:"total_staff,omitempty"`
+	// on_shift_today is the on shift today value for this contract.
+	OnShiftToday int64 `json:"on_shift_today,omitempty"`
+	// pending_time_off is the pending time off value for this contract.
 	PendingTimeOff int64 `json:"pending_time_off,omitempty"`
-	PayrollDraft   int64 `json:"payroll_draft,omitempty"`
+	// payroll_draft is the payroll draft value for this contract.
+	PayrollDraft int64 `json:"payroll_draft,omitempty"`
 }
 
 func (m *DashboardStats) MarshalJSON() ([]byte, error) {
@@ -104,18 +108,30 @@ func (x *DashboardStats) GetPayrollDraft() int64 {
 	return x.PayrollDraft
 }
 
+// DashboardWidgetPayload is a widget layout definition on the HR dashboard.
 type DashboardWidgetPayload struct {
-	Id         int64  `json:"id,omitempty"`
-	OwnerId    int64  `json:"owner_id,omitempty"`
-	RoleId     int64  `json:"role_id,omitempty"`
+	// Unique identifier for the widget.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this widget belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Role that owns this widget layout.
+	RoleId int64 `json:"role_id,omitempty"`
+	// Widget type identifier (e.g. headcount_chart, leave_summary).
 	WidgetType string `json:"widget_type,omitempty"`
-	PositionX  int32  `json:"position_x,omitempty"`
-	PositionY  int32  `json:"position_y,omitempty"`
-	Width      int32  `json:"width,omitempty"`
-	Height     int32  `json:"height,omitempty"`
-	Config     []byte `json:"config,omitempty"`
-	CreatedAt  int64  `json:"created_at,omitempty"`
-	UpdatedAt  int64  `json:"updated_at,omitempty"`
+	// Horizontal grid position.
+	PositionX int32 `json:"position_x,omitempty"`
+	// Vertical grid position.
+	PositionY int32 `json:"position_y,omitempty"`
+	// Widget width in grid units.
+	Width int32 `json:"width,omitempty"`
+	// Widget height in grid units.
+	Height int32 `json:"height,omitempty"`
+	// Widget-specific configuration serialised as JSON.
+	Config []byte `json:"config,omitempty"`
+	// Unix timestamp when this widget was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this widget was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *DashboardWidgetPayload) MarshalJSON() ([]byte, error) {
@@ -275,9 +291,12 @@ func (x *DashboardWidgetPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// DashboardDataPayload is pre-loaded widget data keyed by widget type.
 type DashboardDataPayload struct {
+	// Widget type this data corresponds to.
 	WidgetType string `json:"widget_type,omitempty"`
-	Data       []byte `json:"data,omitempty"`
+	// Serialised widget data as JSON.
+	Data []byte `json:"data,omitempty"`
 }
 
 func (x *DashboardDataPayload) GetWidgetType() string {
@@ -315,8 +334,10 @@ type GetDashboardWidgetsRequest struct {
 }
 
 type GetDashboardWidgetsResponse struct {
-	Widgets []*DashboardWidgetPayload        `json:"widgets,omitempty"`
-	Data    map[string]*DashboardDataPayload `json:"data,omitempty"`
+	// Widget layout definitions for the requesting user's dashboard.
+	Widgets []*DashboardWidgetPayload `json:"widgets,omitempty"`
+	// Pre-loaded data keyed by widget type.
+	Data map[string]*DashboardDataPayload `json:"data,omitempty"`
 }
 
 func (x *GetDashboardWidgetsResponse) GetWidgets() []*DashboardWidgetPayload {
@@ -336,6 +357,7 @@ func (x *GetDashboardWidgetsResponse) GetData() map[string]*DashboardDataPayload
 }
 
 type UpdateDashboardWidgetsRequest struct {
+	// Updated widget positions and sizes.
 	Widgets []*DashboardWidgetPayload `json:"widgets,omitempty"`
 }
 
@@ -348,6 +370,7 @@ func (x *UpdateDashboardWidgetsRequest) GetWidgets() []*DashboardWidgetPayload {
 }
 
 type UpdateDashboardWidgetsResponse struct {
+	// success indicates whether the operation completed.
 	Success bool `json:"success,omitempty"`
 }
 

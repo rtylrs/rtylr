@@ -4,14 +4,19 @@ import * as hub_team_groups_v1 from "../../groups/v1/types.js";
 
 export interface StaffUserPayload {
 id?: string | undefined;
+/** Email address used for lookup or contact. */
 email?: string | undefined;
 fullName?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 apps?: (string)[] | undefined;
 role?: string | undefined;
 isActive?: boolean | undefined;
+/** Independent Dash role assignment. */
 dashRole?: string | undefined;
+/** Independent application role assignments. */
 appAssignments?: (hub_user_v1.AppRoleAssignment)[] | undefined;
+/** Server-resolved effective access. */
 effectiveAccess?: hub_user_v1.EffectiveAccess | undefined;
 }
 
@@ -65,15 +70,21 @@ return violations;
 
 export interface StaffUserWithGroups {
 id?: string | undefined;
+/** Email address used for lookup or contact. */
 email?: string | undefined;
 fullName?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 apps?: (string)[] | undefined;
 role?: string | undefined;
 isActive?: boolean | undefined;
+/** Independent Dash role assignment. */
 dashRole?: string | undefined;
+/** Independent application role assignments. */
 appAssignments?: (hub_user_v1.AppRoleAssignment)[] | undefined;
+/** Server-resolved effective access. */
 effectiveAccess?: hub_user_v1.EffectiveAccess | undefined;
+/** Groups the staff user belongs to. */
 groups?: (hub_team_groups_v1.GroupSummary)[] | undefined;
 }
 
@@ -130,7 +141,9 @@ return violations;
 }
 
 export interface ListTeamRequest {
+/** page is the 1-based result page to return; defaults to 1. */
 page?: number | undefined;
+/** page_size is the maximum number of members per page; server caps at 500. */
 pageSize?: number | undefined;
 }
 
@@ -158,6 +171,7 @@ return violations;
 
 export interface ListTeamResponse {
 users?: (StaffUserPayload)[] | undefined;
+/** total is the total number of members across all pages, for pagination math. */
 total?: number | undefined;
 }
 
@@ -185,6 +199,7 @@ return violations;
 }
 
 export interface GetMemberRequest {
+/** Identifies the member to fetch. */
 userId?: string | undefined;
 }
 

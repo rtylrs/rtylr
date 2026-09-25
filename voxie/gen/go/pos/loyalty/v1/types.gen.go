@@ -6,15 +6,19 @@ import (
 	"strconv"
 )
 
+// LoyaltyConfig is the loyalty program configuration for a business.
 type LoyaltyConfig struct {
-	Id              int64   `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// business_id identifies the active business.
 	BusinessId      int64   `json:"business_id,omitempty"`
 	IsEnabled       bool    `json:"is_enabled,omitempty"`
 	PointsPerDollar float64 `json:"points_per_dollar,omitempty"`
 	RedemptionRate  float64 `json:"redemption_rate,omitempty"`
 	MinRedeemPoints int32   `json:"min_redeem_points,omitempty"`
-	CreatedAt       string  `json:"created_at,omitempty"`
-	UpdatedAt       string  `json:"updated_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *LoyaltyConfig) MarshalJSON() ([]byte, error) {
@@ -120,16 +124,20 @@ func (x *LoyaltyConfig) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// LoyaltyTransaction is a recorded loyalty points earn or redeem event.
 type LoyaltyTransaction struct {
-	Id           int64  `json:"id,omitempty"`
-	BusinessId   int64  `json:"business_id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// business_id identifies the active business.
+	BusinessId int64 `json:"business_id,omitempty"`
+	// customer_id identifies the linked customer when present.
 	CustomerId   int64  `json:"customer_id,omitempty"`
 	OrderId      int64  `json:"order_id,omitempty"`
 	Type         string `json:"type,omitempty"`
 	Points       int32  `json:"points,omitempty"`
 	BalanceAfter int32  `json:"balance_after,omitempty"`
 	Note         string `json:"note,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *LoyaltyTransaction) MarshalJSON() ([]byte, error) {

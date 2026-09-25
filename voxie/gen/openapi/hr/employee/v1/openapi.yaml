@@ -13,45 +13,64 @@ paths:
             parameters:
                 - name: department_id
                   in: query
+                  description: Filter by department; absent to include all departments.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by department; absent to include all departments.
                 - name: location_id
                   in: query
+                  description: Filter by location; absent to include all locations.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by location; absent to include all locations.
                 - name: status
                   in: query
+                  description: Filter by employment status; absent to include all statuses.
                   required: false
                   schema:
                     type: string
                     description: Filter by employment status; absent to include all statuses.
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum number of records to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of records to skip for pagination.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employee.v1.ListEmployeesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - EmployeeService
@@ -65,12 +84,24 @@ paths:
                             $ref: '#/components/schemas/hr.employee.v1.CreateEmployeeRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employee.v1.CreateEmployeeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/employee/v1/employees/{id}:
         put:
             tags:
@@ -81,10 +112,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the employee ID from the route.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the employee ID from the route.
             requestBody:
                 content:
                     application/json:
@@ -94,12 +129,24 @@ paths:
                             description: body carries updatable employee fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employee.v1.UpdateEmployeeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/employee/v1/employees/invite:
         post:
             tags:
@@ -114,12 +161,24 @@ paths:
                             $ref: '#/components/schemas/hr.employee.v1.InviteEmployeeRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employee.v1.InviteEmployeeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/employee/v1/employees/invite/accept:
         post:
             tags:
@@ -134,12 +193,24 @@ paths:
                             $ref: '#/components/schemas/hr.employee.v1.AcceptInviteRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.employee.v1.AcceptInviteResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.employee.v1.ListEmployeesRequest:
@@ -147,10 +218,12 @@ components:
             properties:
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by department; absent to include all departments.
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by location; absent to include all locations.
                 status:
@@ -197,26 +270,32 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the employee record.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this employee belongs to.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Linked user account ID.
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Department the employee is assigned to.
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Work location the employee reports to.
                 manager_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Direct manager; absent if top-level.
                 contract_type:
@@ -247,6 +326,7 @@ components:
                     description: ISO-4217 currency code for compensation (e.g. "USD").
                 work_schedule_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Assigned work schedule; absent if using department default.
                 account_creation_mode:
@@ -257,10 +337,12 @@ components:
                     description: Employee's job title or position name.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -283,18 +365,22 @@ components:
             properties:
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id links this employee record to an existing login account; zero leaves it unlinked.
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: department_id is the department assignment; zero leaves it unset.
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: location_id is the work location assignment; zero leaves it unset.
                 work_schedule_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: work_schedule_id is the work schedule assignment; zero leaves it unset.
                 first_name:
@@ -363,18 +449,23 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 manager_staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         manager_staff_id is this person's direct manager, as a STAFF id (not a
@@ -476,6 +567,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the employee ID from the route.
                 body:
@@ -490,18 +582,22 @@ components:
             properties:
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id links this employee record to an existing login account; zero leaves it unlinked.
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: department_id is the department assignment; zero leaves it unset.
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: location_id is the work location assignment; zero leaves it unset.
                 work_schedule_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: work_schedule_id is the work schedule assignment; zero leaves it unset.
                 first_name:
@@ -590,6 +686,7 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the employee to invite.
                 send_via:
@@ -606,6 +703,7 @@ components:
                     description: 'Sensitive: do not log this field. One-time invite token for the employee.'
                 expires_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when the invite expires.
             required:
@@ -631,3 +729,13 @@ components:
                     description: Whether the invite was accepted successfully.
             required:
                 - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: EmployeeService
+      description: EmployeeService defines HR employee endpoints.

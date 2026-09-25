@@ -11,12 +11,24 @@ paths:
             description: Returns gift cards for the active business.
             operationId: GiftCardService_listGiftCards
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.gift_card.v1.ListGiftCardsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - GiftCardService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/pos.gift_card.v1.CreateGiftCardRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.gift_card.v1.CreateGiftCardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/gift-card/v1/gift-cards/{code}/redeem:
         post:
             tags:
@@ -53,15 +77,41 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/pos.gift_card.v1.RedeemGiftCardRequest'
+                            type: object
+                            properties:
+                                order_id:
+                                    exclusiveMinimum: 0
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                    description: order_id identifies the POS order receiving this gift-card tender.
+                                amount:
+                                    exclusiveMinimum: 0
+                                    type: number
+                                    format: double
+                            required:
+                                - order_id
+                                - amount
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.gift_card.v1.RedeemGiftCardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/gift-card/v1/gift-cards/{code}:
         get:
             tags:
@@ -76,12 +126,24 @@ paths:
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.gift_card.v1.GetGiftCardByCodeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.gift_card.v1.ListGiftCardsRequest:
@@ -100,17 +162,21 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: business_id identifies the active business.
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: customer_id identifies the linked customer when present.
                 code:
@@ -158,6 +224,7 @@ components:
                 paid_order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         paid_order_id must identify a paid POS order for this business. The
@@ -185,6 +252,7 @@ components:
             properties:
                 gift_card_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -199,6 +267,7 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: order_id identifies the POS order receiving this gift-card tender.
                 amount:
@@ -235,3 +304,13 @@ components:
                         - $ref: '#/components/schemas/pos.gift_card.v1.GiftCard'
             required:
                 - gift_card
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: GiftCardService
+      description: GiftCardService defines POS gift card endpoints.

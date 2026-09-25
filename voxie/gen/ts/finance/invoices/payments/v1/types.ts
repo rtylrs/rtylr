@@ -2,12 +2,19 @@
 import * as finance_invoices_v1 from "../../v1/types.js";
 
 export interface RecordPaymentRequest {
+/** invoice_id is the invoice id value for this contract. */
 invoiceId?: string | undefined;
+/** amount is the amount value for this contract. */
 amount?: number | undefined;
+/** currency is the currency value for this contract. */
 currency: string;
+/** payment_date is the payment date value for this contract. */
 paymentDate: string;
+/** method is the method value for this contract. */
 method: string;
+/** reference is the reference value for this contract. */
 reference: string;
+/** notes is the notes value for this contract. */
 notes?: string | undefined;
 }
 
@@ -55,7 +62,9 @@ return violations;
 }
 
 export interface RecordPaymentResponse {
+/** payment is the payment value for this contract. */
 payment?: finance_invoices_v1.RecordPaymentResponsePayload | undefined;
+/** message is a human-readable result message. */
 message?: string | undefined;
 }
 

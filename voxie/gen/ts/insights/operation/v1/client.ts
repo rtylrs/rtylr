@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface OperationServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** OperationService defines insights operations analytics endpoints. */
 export class OperationServiceClient {
 private baseUrl: string;
 private options: OperationServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getHeadcountMetrics(req: GetHeadcountMetricsRequest): Promise<GetHeadcountMetricsResponse> {
+/** Returns headcount metrics for a period. */
+async getHeadcountMetrics(req: GetHeadcountMetricsRequest, opts?: RequestOptions): Promise<GetHeadcountMetricsResponse> {
 const violations = validateGetHeadcountMetricsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/operation/v1/headcount";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -83,7 +123,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,9 +136,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetHeadcountMetricsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getShiftMetrics(req: GetShiftMetricsRequest): Promise<GetShiftMetricsResponse> {
+/** Returns shift metrics for a period. */
+async getShiftMetrics(req: GetShiftMetricsRequest, opts?: RequestOptions): Promise<GetShiftMetricsResponse> {
 const violations = validateGetShiftMetricsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/operation/v1/shifts";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -107,7 +149,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -119,9 +162,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetShiftMetricsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTimeOffMetrics(req: GetTimeOffMetricsRequest): Promise<GetTimeOffMetricsResponse> {
+/** Returns time-off metrics for a period. */
+async getTimeOffMetrics(req: GetTimeOffMetricsRequest, opts?: RequestOptions): Promise<GetTimeOffMetricsResponse> {
 const violations = validateGetTimeOffMetricsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/operation/v1/time-off";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -131,7 +175,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -143,9 +188,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetTimeOffMetricsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getUtilization(req: GetUtilizationRequest): Promise<GetUtilizationResponse> {
+/** Returns utilization metrics for a period. */
+async getUtilization(req: GetUtilizationRequest, opts?: RequestOptions): Promise<GetUtilizationResponse> {
 const violations = validateGetUtilizationRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/operation/v1/utilization";
 const query = new URLSearchParams();
 if (req.period !== undefined) {
@@ -155,7 +201,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -167,16 +214,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetUtilizationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getOperationsSummary(req: GetOperationsSummaryRequest): Promise<GetOperationsSummaryResponse> {
+/** Returns headline HR operations KPI counters. */
+async getOperationsSummary(req: GetOperationsSummaryRequest, opts?: RequestOptions): Promise<GetOperationsSummaryResponse> {
 const violations = validateGetOperationsSummaryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/insights/operation/v1/summary";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

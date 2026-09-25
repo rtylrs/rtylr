@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.RegisterRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.RegisterResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/login:
         post:
             tags:
@@ -37,12 +49,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.LoginRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.LoginResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/register/google:
         post:
             tags:
@@ -57,12 +81,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.GoogleAuthRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.GoogleAuthResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/password-reset/request:
         post:
             tags:
@@ -77,12 +113,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.ResetPasswordRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.ResetPasswordResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/password-reset/confirm:
         post:
             tags:
@@ -97,12 +145,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.ResetPasswordConfirmRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.ResetPasswordConfirmResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/verify-email:
         post:
             tags:
@@ -117,12 +177,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.VerifyEmailRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.VerifyEmailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/resend-verification:
         post:
             tags:
@@ -137,12 +209,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.ResendVerificationRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.ResendVerificationResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/invite/accept:
         post:
             tags:
@@ -157,12 +241,24 @@ paths:
                             $ref: '#/components/schemas/common.auth.v1.InviteAcceptRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.InviteAcceptResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/email-exists:
         get:
             tags:
@@ -173,18 +269,31 @@ paths:
             parameters:
                 - name: email
                   in: query
+                  description: email is the address to probe during inline registration/login validation.
                   required: true
                   schema:
                     type: string
                     format: email
                     description: email is the address to probe during inline registration/login validation.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.CheckEmailExistsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /common/auth/v1/social/authorize:
         get:
             tags:
@@ -195,7 +304,8 @@ paths:
             parameters:
                 - name: provider
                   in: query
-                  required: true
+                  description: provider is the social login provider (google, github, microsoft, apple).
+                  required: false
                   schema:
                     type: string
                     enum:
@@ -203,15 +313,27 @@ paths:
                         - github
                         - microsoft
                         - apple
-                        -
+                        - ""
                     description: provider is the social login provider (google, github, microsoft, apple).
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.auth.v1.SocialAuthorizeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         common.auth.v1.RegisterRequest:
@@ -248,6 +370,7 @@ components:
                     description: message is a human-readable result message.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 email:
@@ -286,6 +409,7 @@ components:
                     description: message is a human-readable result message.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 email:
@@ -452,7 +576,7 @@ components:
                         - github
                         - microsoft
                         - apple
-                        -
+                        - ""
                     description: provider is the social login provider (google, github, microsoft, apple).
             required:
                 - provider
@@ -464,3 +588,13 @@ components:
                     description: url is the provider-hosted consent URL to redirect the browser to.
             required:
                 - url
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: AuthService
+      description: AuthService defines the public authentication endpoints.

@@ -2,12 +2,18 @@
 
 export interface RecurringInvoice {
 id?: string | undefined;
+/** The business owner for this recurring invoice. */
 ownerId?: string | undefined;
+/** The invoice used as the recurring invoice template. */
 templateInvoiceId?: string | undefined;
+/** How often the recurring invoice should be generated. */
 frequency?: string | undefined;
+/** The next generation date. */
 nextInvoiceDate?: string | undefined;
+/** When recurring generation should stop; absent when open-ended. */
 endDate?: string | undefined;
 isActive?: boolean | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -52,10 +58,15 @@ return violations;
 }
 
 export interface CreateRecurringInvoiceRequest {
+/** The invoice used as the recurring invoice template. */
 templateInvoiceId: string;
+/** How often the recurring invoice should be generated. */
 frequency: string;
+/** The next generation date, formatted as YYYY-MM-DD. */
 nextInvoiceDate: string;
+/** When recurring generation should stop; absent when open-ended. */
 endDate?: string | undefined;
+/** Whether the recurring invoice should start active. */
 isActive?: boolean | undefined;
 }
 
@@ -89,14 +100,16 @@ if (v.frequency !== undefined && v.frequency !== null && !(typeof v.frequency ==
 if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
 if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && !(typeof v.nextInvoiceDate === "string")) violations.push("next_invoice_date has invalid type");
 if (!(v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null) || v.nextInvoiceDate === "") violations.push("next_invoice_date is required");
-if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && !(new RegExp("^\\d{4}-\\d{2}-\\d{2}$")).test(v.nextInvoiceDate)) violations.push("next_invoice_date has invalid format");
+if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && v.nextInvoiceDate !== "" && !(new RegExp("^\\d{4}-\\d{2}-\\d{2}$")).test(v.nextInvoiceDate)) violations.push("next_invoice_date has invalid format");
 if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
 export interface CreateRecurringInvoiceResponse {
+/** The recurring invoice that was created. */
 id?: string | undefined;
+/** The backend confirmation message. */
 message?: string | undefined;
 }
 
@@ -198,6 +211,7 @@ return violations;
 }
 
 export interface ListRecurringInvoicesResponse {
+/** The full set of recurring invoices for the owner. */
 recurringInvoices?: (RecurringInvoice)[] | undefined;
 page?: number | undefined;
 pageSize?: number | undefined;
@@ -234,6 +248,7 @@ return violations;
 }
 
 export interface PauseRecurringInvoiceRequest {
+/** The recurring invoice to pause. */
 id?: string | undefined;
 }
 
@@ -258,6 +273,7 @@ return violations;
 }
 
 export interface PauseRecurringInvoiceResponse {
+/** The backend confirmation message. */
 message?: string | undefined;
 }
 
@@ -281,6 +297,7 @@ return violations;
 }
 
 export interface ResumeRecurringInvoiceRequest {
+/** The recurring invoice to resume. */
 id?: string | undefined;
 }
 
@@ -305,6 +322,7 @@ return violations;
 }
 
 export interface ResumeRecurringInvoiceResponse {
+/** The backend confirmation message. */
 message?: string | undefined;
 }
 
@@ -328,10 +346,15 @@ return violations;
 }
 
 export interface UpdateRecurringInvoiceBody {
+/** The invoice used as the recurring invoice template. */
 templateInvoiceId?: string | undefined;
+/** How often the recurring invoice should be generated. */
 frequency: string;
+/** The next generation date, formatted as YYYY-MM-DD. */
 nextInvoiceDate: string;
+/** When recurring generation should stop; absent when open-ended. */
 endDate?: string | undefined;
+/** Whether the recurring invoice is active. */
 isActive?: boolean | undefined;
 }
 
@@ -363,14 +386,16 @@ if (v.frequency !== undefined && v.frequency !== null && !(typeof v.frequency ==
 if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
 if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && !(typeof v.nextInvoiceDate === "string")) violations.push("next_invoice_date has invalid type");
 if (!(v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null) || v.nextInvoiceDate === "") violations.push("next_invoice_date is required");
-if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && !(new RegExp("^\\d{4}-\\d{2}-\\d{2}$")).test(v.nextInvoiceDate)) violations.push("next_invoice_date has invalid format");
+if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && v.nextInvoiceDate !== "" && !(new RegExp("^\\d{4}-\\d{2}-\\d{2}$")).test(v.nextInvoiceDate)) violations.push("next_invoice_date has invalid format");
 if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
 export interface UpdateRecurringInvoiceRequest {
+/** The recurring invoice to update. */
 id?: string | undefined;
+/** Carries updatable recurring invoice fields bound from the HTTP payload. */
 body?: UpdateRecurringInvoiceBody | undefined;
 }
 
@@ -399,6 +424,7 @@ return violations;
 }
 
 export interface UpdateRecurringInvoiceResponse {
+/** The backend confirmation message. */
 message?: string | undefined;
 }
 

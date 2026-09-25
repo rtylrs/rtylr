@@ -6,20 +6,34 @@ import (
 	"strconv"
 )
 
+// PayrollEntryPayload is a single employee's computed pay for a payroll run.
 type PayrollEntryPayload struct {
-	Id            int64   `json:"id,omitempty"`
-	OwnerId       int64   `json:"owner_id,omitempty"`
-	PayrollRunId  int64   `json:"payroll_run_id,omitempty"`
-	EmployeeId    int64   `json:"employee_id,omitempty"`
-	BasePay       float64 `json:"base_pay,omitempty"`
-	OvertimePay   float64 `json:"overtime_pay,omitempty"`
-	Deductions    float64 `json:"deductions,omitempty"`
-	Bonuses       float64 `json:"bonuses,omitempty"`
-	NetPay        float64 `json:"net_pay,omitempty"`
-	HoursWorked   float64 `json:"hours_worked,omitempty"`
+	// Unique identifier for the payroll entry.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this entry belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Payroll run this entry is part of.
+	PayrollRunId int64 `json:"payroll_run_id,omitempty"`
+	// Employee this entry compensates.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Gross base pay for the period.
+	BasePay float64 `json:"base_pay,omitempty"`
+	// Compensation for overtime hours worked.
+	OvertimePay float64 `json:"overtime_pay,omitempty"`
+	// Total deductions applied (tax, insurance, etc.).
+	Deductions float64 `json:"deductions,omitempty"`
+	// Additional bonuses awarded in this period.
+	Bonuses float64 `json:"bonuses,omitempty"`
+	// Final take-home pay after deductions and bonuses.
+	NetPay float64 `json:"net_pay,omitempty"`
+	// Total regular hours worked in the period.
+	HoursWorked float64 `json:"hours_worked,omitempty"`
+	// Total overtime hours worked in the period.
 	OvertimeHours float64 `json:"overtime_hours,omitempty"`
-	CreatedAt     int64   `json:"created_at,omitempty"`
-	UpdatedAt     int64   `json:"updated_at,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *PayrollEntryPayload) MarshalJSON() ([]byte, error) {
@@ -205,20 +219,34 @@ func (x *PayrollEntryPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// PayrollRunPayload is a payroll run covering one pay period.
 type PayrollRunPayload struct {
-	Id          int64                  `json:"id,omitempty"`
-	OwnerId     int64                  `json:"owner_id,omitempty"`
-	PeriodStart string                 `json:"period_start,omitempty"`
-	PeriodEnd   string                 `json:"period_end,omitempty"`
-	Status      string                 `json:"status,omitempty"`
-	CreatedBy   int64                  `json:"created_by,omitempty"`
-	ApprovedBy  *int64                 `json:"approved_by,omitempty"`
-	ExportedAt  *int64                 `json:"exported_at,omitempty"`
-	TotalGross  float64                `json:"total_gross,omitempty"`
-	TotalNet    float64                `json:"total_net,omitempty"`
-	Entries     []*PayrollEntryPayload `json:"entries,omitempty"`
-	CreatedAt   int64                  `json:"created_at,omitempty"`
-	UpdatedAt   int64                  `json:"updated_at,omitempty"`
+	// Unique identifier for the payroll run.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this run belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Start of the pay period (ISO-8601 date).
+	PeriodStart string `json:"period_start,omitempty"`
+	// End of the pay period (ISO-8601 date).
+	PeriodEnd string `json:"period_end,omitempty"`
+	// Workflow status (draft | in_review | approved | exported).
+	Status string `json:"status,omitempty"`
+	// Employee who initiated the payroll run.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// Employee who approved the run; absent if not yet approved.
+	ApprovedBy *int64 `json:"approved_by,omitempty"`
+	// Unix timestamp when the run was exported; absent if not yet exported.
+	ExportedAt *int64 `json:"exported_at,omitempty"`
+	// Sum of all entry gross pay amounts in this run.
+	TotalGross float64 `json:"total_gross,omitempty"`
+	// Sum of all entry net pay amounts in this run.
+	TotalNet float64 `json:"total_net,omitempty"`
+	// Individual payroll entries included in this run.
+	Entries []*PayrollEntryPayload `json:"entries,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *PayrollRunPayload) MarshalJSON() ([]byte, error) {
@@ -432,10 +460,14 @@ type ListPayrollRunsRequest struct {
 }
 
 type ListPayrollRunsResponse struct {
-	Runs   []*PayrollRunPayload `json:"runs,omitempty"`
-	Total  int64                `json:"total,omitempty"`
-	Limit  int32                `json:"limit,omitempty"`
-	Offset int32                `json:"offset,omitempty"`
+	// Page of payroll runs.
+	Runs []*PayrollRunPayload `json:"runs,omitempty"`
+	// Total number of payroll runs across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListPayrollRunsResponse) GetRuns() []*PayrollRunPayload {
@@ -471,8 +503,10 @@ func (x *ListPayrollRunsResponse) GetOffset() int32 {
 }
 
 type TriggerPayrollRunRequest struct {
+	// Start of the pay period to process (ISO-8601 date).
 	PeriodStart string `json:"period_start,omitempty"`
-	PeriodEnd   string `json:"period_end,omitempty"`
+	// End of the pay period to process (ISO-8601 date).
+	PeriodEnd string `json:"period_end,omitempty"`
 }
 
 func (x *TriggerPayrollRunRequest) GetPeriodStart() string {
@@ -492,6 +526,7 @@ func (x *TriggerPayrollRunRequest) GetPeriodEnd() string {
 }
 
 type TriggerPayrollRunResponse struct {
+	// The newly created payroll run with computed entries.
 	Run *PayrollRunPayload `json:"run,omitempty"`
 }
 
@@ -504,6 +539,7 @@ func (x *TriggerPayrollRunResponse) GetRun() *PayrollRunPayload {
 }
 
 type ApprovePayrollRunRequest struct {
+	// ID of the payroll run to approve.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -545,6 +581,7 @@ func (x *ApprovePayrollRunRequest) GetId() int64 {
 }
 
 type ApprovePayrollRunResponse struct {
+	// The approved payroll run.
 	Run *PayrollRunPayload `json:"run,omitempty"`
 }
 
@@ -557,6 +594,7 @@ func (x *ApprovePayrollRunResponse) GetRun() *PayrollRunPayload {
 }
 
 type ExportPayrollRequest struct {
+	// ID of the payroll run to export.
 	RunId *int64 `json:"run_id,omitempty"`
 }
 
@@ -605,6 +643,7 @@ func (x *ExportPayrollRequest) GetRunId() int64 {
 }
 
 type ExportPayrollResponse struct {
+	// Unique identifier for the generated export batch.
 	BatchId string `json:"batch_id,omitempty"`
 }
 

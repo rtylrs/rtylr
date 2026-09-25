@@ -28,9 +28,10 @@ func (x *PermissionMatrix) GetRoles() []string {
 }
 
 type PermissionRow struct {
-	Key        string          `json:"key,omitempty"`
-	Category   string          `json:"category,omitempty"`
-	Label      string          `json:"label,omitempty"`
+	Key      string `json:"key,omitempty"`
+	Category string `json:"category,omitempty"`
+	Label    string `json:"label,omitempty"`
+	// role -> enabled
 	RoleValues map[string]bool `json:"role_values,omitempty"`
 }
 
@@ -67,21 +68,36 @@ func (x *PermissionRow) GetRoleValues() map[string]bool {
 }
 
 type CustomRole struct {
-	Id           int64    `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Description  string   `json:"description,omitempty"`
-	Permissions  []string `json:"permissions,omitempty"`
-	AppId        string   `json:"app_id,omitempty"`
-	RoleKey      string   `json:"role_key,omitempty"`
-	Level        int32    `json:"level,omitempty"`
-	ParentRoleId *int64   `json:"parent_role_id,omitempty"`
-	ScopeRules   []string `json:"scope_rules,omitempty"`
-	IsSystem     bool     `json:"is_system,omitempty"`
-	IsArchived   bool     `json:"is_archived,omitempty"`
-	Lifecycle    string   `json:"lifecycle,omitempty"`
-	Version      int64    `json:"version,omitempty"`
-	MemberCount  int32    `json:"member_count,omitempty"`
-	CreatedAt    string   `json:"created_at,omitempty"`
+	// Stable identifier of the role within the business.
+	Id int64 `json:"id,omitempty"`
+	// Display name shown to administrators.
+	Name string `json:"name,omitempty"`
+	// Optional explanation of the role's intended use.
+	Description string `json:"description,omitempty"`
+	// Permission keys granted by this role.
+	Permissions []string `json:"permissions,omitempty"`
+	// Application that owns the role and its permissions.
+	AppId string `json:"app_id,omitempty"`
+	// Optional application-specific role key.
+	RoleKey string `json:"role_key,omitempty"`
+	// Relative authority level used for delegation checks.
+	Level int32 `json:"level,omitempty"`
+	// Optional role from which this role inherits or was derived.
+	ParentRoleId *int64 `json:"parent_role_id,omitempty"`
+	// Scope rules limiting where the role applies.
+	ScopeRules []string `json:"scope_rules,omitempty"`
+	// Whether the role is a seeded system role.
+	IsSystem bool `json:"is_system,omitempty"`
+	// Whether the role is archived and unavailable for new assignments.
+	IsArchived bool `json:"is_archived,omitempty"`
+	// Lifecycle state of the role.
+	Lifecycle string `json:"lifecycle,omitempty"`
+	// Monotonically increasing version used for cache and audit coordination.
+	Version int64 `json:"version,omitempty"`
+	// Number of active members assigned to the role.
+	MemberCount int32 `json:"member_count,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *CustomRole) MarshalJSON() ([]byte, error) {
@@ -276,9 +292,12 @@ func (x *GetPermissionsResponse) GetMatrix() *PermissionMatrix {
 }
 
 type ListRolesRequest struct {
-	AppId    *string `json:"app_id,omitempty"`
-	Page     *int32  `json:"page,omitempty"`
-	PageSize *int32  `json:"page_size,omitempty"`
+	// Restrict results to one application.
+	AppId *string `json:"app_id,omitempty"`
+	// One-based result page.
+	Page *int32 `json:"page,omitempty"`
+	// Maximum number of roles returned per page.
+	PageSize *int32 `json:"page_size,omitempty"`
 }
 
 func (x *ListRolesRequest) GetAppId() string {
@@ -318,11 +337,16 @@ func (x *ListRolesRequest) GetPageSize() int32 {
 }
 
 type ListRolesResponse struct {
-	Roles    []*CustomRole `json:"roles,omitempty"`
-	Page     int32         `json:"page,omitempty"`
-	PageSize int32         `json:"page_size,omitempty"`
-	Total    int64         `json:"total,omitempty"`
-	NextPage *int32        `json:"next_page,omitempty"`
+	// Roles visible in the requested page.
+	Roles []*CustomRole `json:"roles,omitempty"`
+	// Current one-based page.
+	Page int32 `json:"page,omitempty"`
+	// Effective page size.
+	PageSize int32 `json:"page_size,omitempty"`
+	// Total number of matching roles.
+	Total int64 `json:"total,omitempty"`
+	// Next page number, when more results remain.
+	NextPage *int32 `json:"next_page,omitempty"`
 }
 
 func (m *ListRolesResponse) MarshalJSON() ([]byte, error) {
@@ -399,14 +423,22 @@ func (x *ListRolesResponse) GetNextPage() int32 {
 }
 
 type CreateRoleRequest struct {
-	Name         string   `json:"name,omitempty"`
-	Description  string   `json:"description,omitempty"`
-	AppId        *string  `json:"app_id,omitempty"`
-	RoleKey      *string  `json:"role_key,omitempty"`
-	Level        *int32   `json:"level,omitempty"`
-	ParentRoleId *int64   `json:"parent_role_id,omitempty"`
-	ScopeRules   []string `json:"scope_rules,omitempty"`
-	Permissions  []string `json:"permissions,omitempty"`
+	// Display name for the new role.
+	Name string `json:"name,omitempty"`
+	// Optional explanation of the role's intended use.
+	Description string `json:"description,omitempty"`
+	// Application that owns the role.
+	AppId *string `json:"app_id,omitempty"`
+	// Optional application-specific role key.
+	RoleKey *string `json:"role_key,omitempty"`
+	// Relative authority level used for delegation checks.
+	Level *int32 `json:"level,omitempty"`
+	// Optional source role for inheritance or cloning semantics.
+	ParentRoleId *int64 `json:"parent_role_id,omitempty"`
+	// Scope rules to apply to assignments of the role.
+	ScopeRules []string `json:"scope_rules,omitempty"`
+	// Permission keys granted by the role.
+	Permissions []string `json:"permissions,omitempty"`
 }
 
 func (m *CreateRoleRequest) MarshalJSON() ([]byte, error) {
@@ -587,6 +619,7 @@ func (x *DeleteRoleResponse) GetMessage() string {
 }
 
 type UpdateRoleBody struct {
+	// The role name.
 	Name         string   `json:"name,omitempty"`
 	Description  string   `json:"description,omitempty"`
 	AppId        *string  `json:"app_id,omitempty"`
@@ -954,16 +987,26 @@ func (x *ArchiveRoleResponse) GetRole() *CustomRole {
 }
 
 type RoleAssignment struct {
-	Id        int64    `json:"id,omitempty"`
-	RoleId    int64    `json:"role_id,omitempty"`
-	AppId     string   `json:"app_id,omitempty"`
-	UserId    *int64   `json:"user_id,omitempty"`
-	GroupId   *int64   `json:"group_id,omitempty"`
-	Status    string   `json:"status,omitempty"`
-	Source    string   `json:"source,omitempty"`
-	IsPrimary bool     `json:"is_primary,omitempty"`
-	Scopes    []string `json:"scopes,omitempty"`
-	GrantedAt string   `json:"granted_at,omitempty"`
+	// Stable identifier of the assignment.
+	Id int64 `json:"id,omitempty"`
+	// Role being assigned.
+	RoleId int64 `json:"role_id,omitempty"`
+	// Application in which the assignment is effective.
+	AppId string `json:"app_id,omitempty"`
+	// User receiving the assignment, when directly assigned.
+	UserId *int64 `json:"user_id,omitempty"`
+	// Group receiving the assignment, when group assigned.
+	GroupId *int64 `json:"group_id,omitempty"`
+	// Lifecycle status of the assignment.
+	Status string `json:"status,omitempty"`
+	// Provenance of the assignment, such as explicit or group.
+	Source string `json:"source,omitempty"`
+	// Whether this is the user's primary role for the application.
+	IsPrimary bool `json:"is_primary,omitempty"`
+	// Scope values attached to this assignment.
+	Scopes []string `json:"scopes,omitempty"`
+	// Time at which the assignment was granted.
+	GrantedAt string `json:"granted_at,omitempty"`
 }
 
 func (m *RoleAssignment) MarshalJSON() ([]byte, error) {
@@ -1120,10 +1163,14 @@ func (x *RoleAssignment) GetGrantedAt() string {
 }
 
 type ListRoleAssignmentsRequest struct {
-	RoleId   *int64  `json:"role_id,omitempty"`
-	AppId    *string `json:"app_id,omitempty"`
-	Page     *int32  `json:"page,omitempty"`
-	PageSize *int32  `json:"page_size,omitempty"`
+	// Restrict results to one role.
+	RoleId *int64 `json:"role_id,omitempty"`
+	// Restrict results to one application.
+	AppId *string `json:"app_id,omitempty"`
+	// One-based result page.
+	Page *int32 `json:"page,omitempty"`
+	// Maximum number of assignments returned per page.
+	PageSize *int32 `json:"page_size,omitempty"`
 }
 
 func (m *ListRoleAssignmentsRequest) MarshalJSON() ([]byte, error) {
@@ -1207,11 +1254,16 @@ func (x *ListRoleAssignmentsRequest) GetPageSize() int32 {
 }
 
 type ListRoleAssignmentsResponse struct {
+	// Assignments visible in the requested page.
 	Assignments []*RoleAssignment `json:"assignments,omitempty"`
-	Page        int32             `json:"page,omitempty"`
-	PageSize    int32             `json:"page_size,omitempty"`
-	Total       int64             `json:"total,omitempty"`
-	NextPage    *int32            `json:"next_page,omitempty"`
+	// Current one-based page.
+	Page int32 `json:"page,omitempty"`
+	// Effective page size.
+	PageSize int32 `json:"page_size,omitempty"`
+	// Total number of matching assignments.
+	Total int64 `json:"total,omitempty"`
+	// Next page number, when more results remain.
+	NextPage *int32 `json:"next_page,omitempty"`
 }
 
 func (m *ListRoleAssignmentsResponse) MarshalJSON() ([]byte, error) {
@@ -1288,12 +1340,18 @@ func (x *ListRoleAssignmentsResponse) GetNextPage() int32 {
 }
 
 type AssignRoleRequest struct {
-	RoleId    *int64   `json:"role_id,omitempty"`
-	AppId     string   `json:"app_id,omitempty"`
-	UserId    *int64   `json:"user_id,omitempty"`
-	GroupId   *int64   `json:"group_id,omitempty"`
-	IsPrimary bool     `json:"is_primary,omitempty"`
-	Scopes    []string `json:"scopes,omitempty"`
+	// Role to assign.
+	RoleId *int64 `json:"role_id,omitempty"`
+	// Application in which the assignment is effective.
+	AppId string `json:"app_id,omitempty"`
+	// User receiving the assignment, when directly assigned.
+	UserId *int64 `json:"user_id,omitempty"`
+	// Group receiving the assignment, when group assigned.
+	GroupId *int64 `json:"group_id,omitempty"`
+	// Whether this is the user's primary role for the application.
+	IsPrimary bool `json:"is_primary,omitempty"`
+	// Scope values attached to this assignment.
+	Scopes []string `json:"scopes,omitempty"`
 }
 
 func (m *AssignRoleRequest) MarshalJSON() ([]byte, error) {
@@ -1530,9 +1588,12 @@ func (x *PreviewPermissionImpactRequest) GetPermissions() []string {
 }
 
 type PreviewPermissionImpactResponse struct {
-	AddedPermissions    []string `json:"added_permissions,omitempty"`
-	RemovedPermissions  []string `json:"removed_permissions,omitempty"`
-	AffectedMemberCount int32    `json:"affected_member_count,omitempty"`
+	// Permission keys added by the proposed change.
+	AddedPermissions []string `json:"added_permissions,omitempty"`
+	// Permission keys removed by the proposed change.
+	RemovedPermissions []string `json:"removed_permissions,omitempty"`
+	// Number of active members affected by the proposed change.
+	AffectedMemberCount int32 `json:"affected_member_count,omitempty"`
 }
 
 func (x *PreviewPermissionImpactResponse) GetAddedPermissions() []string {
@@ -1560,17 +1621,28 @@ func (x *PreviewPermissionImpactResponse) GetAffectedMemberCount() int32 {
 }
 
 type RoleAuditEvent struct {
-	Id            int64  `json:"id,omitempty"`
-	Action        string `json:"action,omitempty"`
-	AppId         string `json:"app_id,omitempty"`
-	RoleId        *int64 `json:"role_id,omitempty"`
-	ActorUserId   *int64 `json:"actor_user_id,omitempty"`
-	TargetUserId  *int64 `json:"target_user_id,omitempty"`
+	// Stable identifier of the audit event.
+	Id int64 `json:"id,omitempty"`
+	// Action recorded by the audit event.
+	Action string `json:"action,omitempty"`
+	// Application affected by the event.
+	AppId string `json:"app_id,omitempty"`
+	// Role affected by the event, when applicable.
+	RoleId *int64 `json:"role_id,omitempty"`
+	// User who performed the action, when available.
+	ActorUserId *int64 `json:"actor_user_id,omitempty"`
+	// Direct user target, when applicable.
+	TargetUserId *int64 `json:"target_user_id,omitempty"`
+	// Group target, when applicable.
 	TargetGroupId *int64 `json:"target_group_id,omitempty"`
-	BeforeJson    string `json:"before_json,omitempty"`
-	AfterJson     string `json:"after_json,omitempty"`
-	Reason        string `json:"reason,omitempty"`
-	CreatedAt     string `json:"created_at,omitempty"`
+	// Serialized state before the change.
+	BeforeJson string `json:"before_json,omitempty"`
+	// Serialized state after the change.
+	AfterJson string `json:"after_json,omitempty"`
+	// Reason supplied for the change.
+	Reason string `json:"reason,omitempty"`
+	// Time at which the event was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *RoleAuditEvent) MarshalJSON() ([]byte, error) {

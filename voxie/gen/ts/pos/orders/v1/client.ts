@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface OrderServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** OrderService defines the POS order endpoints. */
 export class OrderServiceClient {
 private baseUrl: string;
 private options: OrderServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listOrders(req: ListOrdersRequest): Promise<ListOrdersResponse> {
+/** ListOrders returns POS orders for the active business and filters. */
+async listOrders(req: ListOrdersRequest, opts?: RequestOptions): Promise<ListOrdersResponse> {
 const violations = validateListOrdersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/orders/v1/orders";
 const query = new URLSearchParams();
 if (req.sessionId !== undefined) {
@@ -101,7 +141,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -113,14 +154,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListOrdersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createOrder(req: CreateOrderRequest): Promise<CreateOrderResponse> {
+/** CreateOrder creates a POS order. */
+async createOrder(req: CreateOrderRequest, opts?: RequestOptions): Promise<CreateOrderResponse> {
 const violations = validateCreateOrderRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/orders/v1/orders";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateOrderRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -132,14 +175,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createPublicOrder(req: CreatePublicOrderRequest): Promise<CreatePublicOrderResponse> {
+/** CreatePublicOrder places an anonymous online order from the public menu app. */
+async createPublicOrder(req: CreatePublicOrderRequest, opts?: RequestOptions): Promise<CreatePublicOrderResponse> {
 const violations = validateCreatePublicOrderRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/orders/v1/orders/public";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreatePublicOrderRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -151,9 +196,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreatePublicOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPublicOrderStatus(req: GetPublicOrderStatusRequest): Promise<GetPublicOrderStatusResponse> {
+/** GetPublicOrderStatus returns lifecycle status for a public online order. */
+async getPublicOrderStatus(req: GetPublicOrderStatusRequest, opts?: RequestOptions): Promise<GetPublicOrderStatusResponse> {
 const violations = validateGetPublicOrderStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/orders/v1/orders/{order_id}/public-status";
 path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
 const query = new URLSearchParams();
@@ -167,7 +213,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -179,9 +226,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetPublicOrderStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getOrderDetail(req: GetOrderDetailRequest): Promise<GetOrderDetailResponse> {
+/** GetOrderDetail returns an order and its purchased items. */
+async getOrderDetail(req: GetOrderDetailRequest, opts?: RequestOptions): Promise<GetOrderDetailResponse> {
 const violations = validateGetOrderDetailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/orders/v1/orders/{order_id}";
 path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
 const query = new URLSearchParams();
@@ -189,7 +237,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -201,15 +250,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetOrderDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateOrderStatus(req: UpdateOrderStatusRequest): Promise<UpdateOrderStatusResponse> {
+/** UpdateOrderStatus changes the order lifecycle status. */
+async updateOrderStatus(req: UpdateOrderStatusRequest, opts?: RequestOptions): Promise<UpdateOrderStatusResponse> {
 const violations = validateUpdateOrderStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/orders/v1/orders/{order_id}/status";
 path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateOrderStatusRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -221,15 +272,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateOrderStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async voidOrder(req: VoidOrderRequest): Promise<VoidOrderResponse> {
+/** VoidOrder voids an existing order. */
+async voidOrder(req: VoidOrderRequest, opts?: RequestOptions): Promise<VoidOrderResponse> {
 const violations = validateVoidOrderRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/pos/orders/v1/orders/{order_id}/void";
 path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeVoidOrderRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

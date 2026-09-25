@@ -8,41 +8,83 @@ import (
 )
 
 type Task struct {
-	Id               int64    `json:"id,omitempty"`
-	ProjectId        int64    `json:"project_id,omitempty"`
-	WorkspaceId      int64    `json:"workspace_id,omitempty"`
-	OwnerId          int64    `json:"owner_id,omitempty"`
-	ParentTaskId     *int64   `json:"parent_task_id,omitempty"`
-	Title            string   `json:"title,omitempty"`
-	Description      string   `json:"description,omitempty"`
-	Status           string   `json:"status,omitempty"`
-	Priority         string   `json:"priority,omitempty"`
-	AssigneeId       *int64   `json:"assignee_id,omitempty"`
-	ReporterId       int64    `json:"reporter_id,omitempty"`
-	DueDate          *string  `json:"due_date,omitempty"`
-	StartDate        *string  `json:"start_date,omitempty"`
-	CompletedAt      *string  `json:"completed_at,omitempty"`
-	EstimatedHours   *float64 `json:"estimated_hours,omitempty"`
-	ActualHours      *float64 `json:"actual_hours,omitempty"`
-	SortOrder        int64    `json:"sort_order,omitempty"`
-	Labels           []int64  `json:"labels,omitempty"`
-	CreatedAt        string   `json:"created_at,omitempty"`
-	UpdatedAt        string   `json:"updated_at,omitempty"`
-	Identifier       string   `json:"identifier,omitempty"`
-	ProjectName      string   `json:"project_name,omitempty"`
-	ProjectColor     string   `json:"project_color,omitempty"`
-	AssigneeName     string   `json:"assignee_name,omitempty"`
-	AssigneeInitials string   `json:"assignee_initials,omitempty"`
-	SubtaskCount     int32    `json:"subtask_count,omitempty"`
-	SectionId        *int64   `json:"section_id,omitempty"`
-	CycleId          *int64   `json:"cycle_id,omitempty"`
-	MilestoneId      *int64   `json:"milestone_id,omitempty"`
-	Archived         bool     `json:"archived,omitempty"`
-	EffortMinutes    *int32   `json:"effort_minutes,omitempty"`
-	WaitingOn        string   `json:"waiting_on,omitempty"`
-	DecisionNote     string   `json:"decision_note,omitempty"`
-	FocusPin         bool     `json:"focus_pin,omitempty"`
-	Dependencies     []int64  `json:"dependencies,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId int64 `json:"project_id,omitempty"`
+	// workspace_id is the workspace id value for this contract.
+	WorkspaceId int64 `json:"workspace_id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// parent_task_id is the parent task id value for this contract.
+	ParentTaskId *int64 `json:"parent_task_id,omitempty"`
+	// title is the title value for this contract.
+	Title string `json:"title,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// priority is the priority value for this contract.
+	Priority string `json:"priority,omitempty"`
+	// assignee_id is the assignee id value for this contract.
+	AssigneeId *int64 `json:"assignee_id,omitempty"`
+	// reporter_id is the reporter id value for this contract.
+	ReporterId int64 `json:"reporter_id,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate *string `json:"due_date,omitempty"`
+	// start_date is the start date value for this contract.
+	StartDate *string `json:"start_date,omitempty"`
+	// completed_at is the completed at value for this contract.
+	CompletedAt *string `json:"completed_at,omitempty"`
+	// estimated_hours is the estimated hours value for this contract.
+	EstimatedHours *float64 `json:"estimated_hours,omitempty"`
+	// actual_hours is the actual hours value for this contract.
+	ActualHours *float64 `json:"actual_hours,omitempty"`
+	// sort_order is the sort order value for this contract.
+	SortOrder int64 `json:"sort_order,omitempty"`
+	// labels is the labels value for this contract.
+	Labels []int64 `json:"labels,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
+	// Human-readable identifier like "FLOW-42" (project code + sequence).
+	// Display projection populated by the backend on list/detail reads; safe
+	// to leave at zero value on writes.
+	Identifier string `json:"identifier,omitempty"`
+	// Project name (denormalised from flow_projects.name) for list views.
+	ProjectName string `json:"project_name,omitempty"`
+	// Project color hex for inline badges on cross-project lists.
+	ProjectColor string `json:"project_color,omitempty"`
+	// Assignee display name. Empty if unassigned.
+	AssigneeName string `json:"assignee_name,omitempty"`
+	// Two-letter uppercase initials derived from assignee_name. Empty if unassigned.
+	AssigneeInitials string `json:"assignee_initials,omitempty"`
+	// Number of direct subtasks. Powers the "N subtasks" pill on task rows.
+	SubtaskCount int32 `json:"subtask_count,omitempty"`
+	// Section bucket within a project (e.g. "Backlog", "Sprint 5"). Empty if unbucketed.
+	SectionId *int64 `json:"section_id,omitempty"`
+	// Cycle (sprint) this task belongs to, if any.
+	CycleId *int64 `json:"cycle_id,omitempty"`
+	// Milestone this task rolls up to, if any.
+	MilestoneId *int64 `json:"milestone_id,omitempty"`
+	// Whether the task is archived. Archived tasks are excluded from default
+	// list and board views but stay readable by id. Absent means false, as
+	// with every other non-nullable scalar in this message.
+	Archived bool `json:"archived,omitempty"`
+	// Quick effort estimate in minutes. Null when no estimate is set. The
+	// write path treats 0 as a clear, so a stored 0 does not occur.
+	EffortMinutes *int32 `json:"effort_minutes,omitempty"`
+	// Free-text blocker label. Empty if nothing is blocking.
+	WaitingOn string `json:"waiting_on,omitempty"`
+	// One-line decision log. Empty if none recorded.
+	DecisionNote string `json:"decision_note,omitempty"`
+	// Whether the *calling* user has pinned this task to their Today view.
+	// Resolved per request from flow_task_focus_pins; never a shared task flag.
+	FocusPin bool `json:"focus_pin,omitempty"`
+	// Task ids this task depends on. Read-only projection; write through the
+	// addTaskDependency / removeTaskDependency RPCs.
+	Dependencies []int64 `json:"dependencies,omitempty"`
 }
 
 func (m *Task) MarshalJSON() ([]byte, error) {
@@ -546,15 +588,24 @@ func (x *Task) GetDependencies() []int64 {
 }
 
 type TaskComment struct {
-	Id            int64  `json:"id,omitempty"`
-	TaskId        int64  `json:"task_id,omitempty"`
-	UserId        int64  `json:"user_id,omitempty"`
-	ActorName     string `json:"actor_name,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// task_id is the task id value for this contract.
+	TaskId int64 `json:"task_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// Display name resolved from the comment author's current profile.
+	ActorName string `json:"actor_name,omitempty"`
+	// Two-letter initials resolved from the comment author's current profile.
 	ActorInitials string `json:"actor_initials,omitempty"`
-	Content       string `json:"content,omitempty"`
-	IsEdited      bool   `json:"is_edited,omitempty"`
-	CreatedAt     string `json:"created_at,omitempty"`
-	UpdatedAt     string `json:"updated_at,omitempty"`
+	// content is the content value for this contract.
+	Content string `json:"content,omitempty"`
+	// is_edited is the is edited value for this contract.
+	IsEdited bool `json:"is_edited,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *TaskComment) MarshalJSON() ([]byte, error) {
@@ -679,15 +730,24 @@ func (x *TaskComment) GetUpdatedAt() string {
 }
 
 type TaskActivity struct {
-	Id            int64  `json:"id,omitempty"`
-	TaskId        int64  `json:"task_id,omitempty"`
-	UserId        int64  `json:"user_id,omitempty"`
-	ActorName     string `json:"actor_name,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// task_id is the task id value for this contract.
+	TaskId int64 `json:"task_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// Display name resolved from the activity author's current profile.
+	ActorName string `json:"actor_name,omitempty"`
+	// Two-letter initials resolved from the activity author's current profile.
 	ActorInitials string `json:"actor_initials,omitempty"`
-	Action        string `json:"action,omitempty"`
-	OldValue      string `json:"old_value,omitempty"`
-	NewValue      string `json:"new_value,omitempty"`
-	CreatedAt     string `json:"created_at,omitempty"`
+	// action is the action value for this contract.
+	Action string `json:"action,omitempty"`
+	// old_value is the old value value for this contract.
+	OldValue string `json:"old_value,omitempty"`
+	// new_value is the new value value for this contract.
+	NewValue string `json:"new_value,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *TaskActivity) MarshalJSON() ([]byte, error) {
@@ -812,11 +872,17 @@ func (x *TaskActivity) GetCreatedAt() string {
 }
 
 type TaskPayloadCompact struct {
-	Id        int64  `json:"id,omitempty"`
-	Title     string `json:"title,omitempty"`
-	Status    string `json:"status,omitempty"`
-	Priority  string `json:"priority,omitempty"`
-	DueDate   string `json:"due_date,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// title is the title value for this contract.
+	Title string `json:"title,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// priority is the priority value for this contract.
+	Priority string `json:"priority,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// created_at is when the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
@@ -898,13 +964,20 @@ func (x *TaskPayloadCompact) GetCreatedAt() string {
 }
 
 type Attachment struct {
-	Id         int64  `json:"id,omitempty"`
-	TaskId     int64  `json:"task_id,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Url        string `json:"url,omitempty"`
-	Size       int64  `json:"size,omitempty"`
-	UploadedBy int64  `json:"uploaded_by,omitempty"`
-	CreatedAt  string `json:"created_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// task_id is the task id value for this contract.
+	TaskId int64 `json:"task_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// url is the url value for this contract.
+	Url string `json:"url,omitempty"`
+	// size is the size value for this contract.
+	Size int64 `json:"size,omitempty"`
+	// uploaded_by is the uploaded by value for this contract.
+	UploadedBy int64 `json:"uploaded_by,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *Attachment) MarshalJSON() ([]byte, error) {
@@ -1023,13 +1096,20 @@ func (x *Attachment) GetCreatedAt() string {
 }
 
 type TimeLog struct {
-	Id              int64  `json:"id,omitempty"`
-	TaskId          int64  `json:"task_id,omitempty"`
-	UserId          int64  `json:"user_id,omitempty"`
-	DurationMinutes int64  `json:"duration_minutes,omitempty"`
-	Description     string `json:"description,omitempty"`
-	LoggedAt        string `json:"logged_at,omitempty"`
-	CreatedAt       string `json:"created_at,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// task_id is the task id value for this contract.
+	TaskId int64 `json:"task_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// duration_minutes is the duration minutes value for this contract.
+	DurationMinutes int64 `json:"duration_minutes,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// logged_at is the logged at value for this contract.
+	LoggedAt string `json:"logged_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *TimeLog) MarshalJSON() ([]byte, error) {
@@ -1148,15 +1228,30 @@ func (x *TimeLog) GetCreatedAt() string {
 }
 
 type ListTasksRequest struct {
-	ProjectId   *int64  `json:"project_id,omitempty"`
-	Status      string  `json:"status,omitempty"`
-	AssigneeId  *int64  `json:"assignee_id,omitempty"`
-	Priority    string  `json:"priority,omitempty"`
+	// project_id is the project id value for this contract.
+	// NOTE: the original proto enforced a message-level "exactly one of
+	// project_id, workspace_id required" constraint via
+	// (buf.validate.message).oneof - onk has no decorator for this
+	// cross-field constraint, so both fields are translated as plain
+	// optional fields with no equivalent validation. Flagged for manual
+	// follow-up.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// assignee_id is the assignee id value for this contract.
+	AssigneeId *int64 `json:"assignee_id,omitempty"`
+	// priority is the priority value for this contract.
+	Priority string `json:"priority,omitempty"`
+	// workspace_id filters tasks by workspace when project_id is absent.
 	WorkspaceId *string `json:"workspace_id,omitempty"`
-	Page        int32   `json:"page,omitempty"`
-	Limit       int32   `json:"limit,omitempty"`
-	SortBy      string  `json:"sort_by,omitempty"`
-	SortDir     string  `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListTasksRequest) MarshalJSON() ([]byte, error) {
@@ -1289,6 +1384,7 @@ func (x *ListTasksRequest) GetSortDir() string {
 }
 
 type ListTasksResponse struct {
+	// tasks is the tasks value for this contract.
 	Tasks      []*Task                                  `json:"tasks,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -1310,9 +1406,13 @@ func (x *ListTasksResponse) GetPagination() *common_pagination_v1.PaginationResp
 }
 
 type GetMyTasksRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -1349,6 +1449,7 @@ func (x *GetMyTasksRequest) GetSortDir() string {
 }
 
 type GetMyTasksResponse struct {
+	// tasks is the tasks value for this contract.
 	Tasks      []*Task                                  `json:"tasks,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -1435,10 +1536,14 @@ func (x *GetMyTasksProjectResponse) GetWorkspaceId() int64 {
 type SearchTasksRequest struct {
 	Q           string `json:"q,omitempty"`
 	WorkspaceId string `json:"workspace_id,omitempty"`
-	Page        int32  `json:"page,omitempty"`
-	Limit       int32  `json:"limit,omitempty"`
-	SortBy      string `json:"sort_by,omitempty"`
-	SortDir     string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (x *SearchTasksRequest) GetQ() string {
@@ -1511,17 +1616,28 @@ func (x *SearchTasksResponse) GetPagination() *common_pagination_v1.PaginationRe
 }
 
 type CreateTaskRequest struct {
-	ProjectId      *int64   `json:"project_id,omitempty"`
-	WorkspaceId    *int64   `json:"workspace_id,omitempty"`
-	ParentTaskId   *int64   `json:"parent_task_id,omitempty"`
-	Title          string   `json:"title,omitempty"`
-	Description    string   `json:"description,omitempty"`
-	Priority       string   `json:"priority,omitempty"`
-	AssigneeId     *int64   `json:"assignee_id,omitempty"`
-	DueDate        string   `json:"due_date,omitempty"`
-	StartDate      string   `json:"start_date,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// workspace_id is the workspace id value for this contract.
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
+	// parent_task_id is the parent task id value for this contract.
+	ParentTaskId *int64 `json:"parent_task_id,omitempty"`
+	// title is the title value for this contract.
+	Title string `json:"title,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// priority is the priority value for this contract.
+	Priority string `json:"priority,omitempty"`
+	// assignee_id is the assignee id value for this contract.
+	AssigneeId *int64 `json:"assignee_id,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// start_date is the start date value for this contract.
+	StartDate string `json:"start_date,omitempty"`
+	// estimated_hours is the estimated hours value for this contract.
 	EstimatedHours *float64 `json:"estimated_hours,omitempty"`
-	Labels         []int64  `json:"labels,omitempty"`
+	// labels is the labels value for this contract.
+	Labels []int64 `json:"labels,omitempty"`
 }
 
 func (m *CreateTaskRequest) MarshalJSON() ([]byte, error) {
@@ -1720,6 +1836,7 @@ func (x *CreateTaskRequest) GetLabels() []int64 {
 }
 
 type CreateTaskResponse struct {
+	// task is the task value for this contract.
 	Task *Task `json:"task,omitempty"`
 }
 
@@ -1732,6 +1849,7 @@ func (x *CreateTaskResponse) GetTask() *Task {
 }
 
 type GetTaskDetailRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -1773,9 +1891,13 @@ func (x *GetTaskDetailRequest) GetId() int64 {
 }
 
 type GetTaskDetailResponse struct {
-	Task     *Task           `json:"task,omitempty"`
-	Subtasks []*Task         `json:"subtasks,omitempty"`
-	Comments []*TaskComment  `json:"comments,omitempty"`
+	// task is the task value for this contract.
+	Task *Task `json:"task,omitempty"`
+	// subtasks is the subtasks value for this contract.
+	Subtasks []*Task `json:"subtasks,omitempty"`
+	// comments is the comments value for this contract.
+	Comments []*TaskComment `json:"comments,omitempty"`
+	// activity is the activity value for this contract.
 	Activity []*TaskActivity `json:"activity,omitempty"`
 }
 
@@ -1812,20 +1934,50 @@ func (x *GetTaskDetailResponse) GetActivity() []*TaskActivity {
 }
 
 type UpdateTaskBody struct {
-	Title          string   `json:"title,omitempty"`
-	Description    string   `json:"description,omitempty"`
-	Status         string   `json:"status,omitempty"`
-	Priority       string   `json:"priority,omitempty"`
-	AssigneeId     *int64   `json:"assignee_id,omitempty"`
-	DueDate        string   `json:"due_date,omitempty"`
-	StartDate      string   `json:"start_date,omitempty"`
-	Labels         []int64  `json:"labels,omitempty"`
-	Archived       *bool    `json:"archived,omitempty"`
-	EffortMinutes  *int32   `json:"effort_minutes,omitempty"`
+	// Every field here is optional on purpose. This is a partial update: the
+	// client sends only what changed, and the repository preserves omitted
+	// columns with COALESCE(?, col). Marking a field @required here rejects a
+	// single-field patch with a 400 before the handler ever runs, which is
+	// exactly the defect this contract previously had.
+	//
+	// title is the title value for this contract.
+	Title string `json:"title,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// priority is the priority value for this contract.
+	Priority string `json:"priority,omitempty"`
+	// assignee_id is the assignee id value for this contract.
+	AssigneeId *int64 `json:"assignee_id,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// start_date is the start date value for this contract.
+	StartDate string `json:"start_date,omitempty"`
+	// labels is the labels value for this contract. Absent leaves labels
+	// untouched; @min_items is deliberately absent because requiring one label
+	// made every task without labels permanently unupdatable.
+	Labels []int64 `json:"labels,omitempty"`
+	// Updated archived status; absent to keep current value. True archives the
+	// task, false restores it.
+	Archived *bool `json:"archived,omitempty"`
+	// Quick effort estimate in minutes for the effort chips. Absent leaves the
+	// value untouched; 0 clears it. Zero minutes is meaningless as a stored
+	// value, so it is safe as the clear sentinel, and it keeps this field out
+	// of the COALESCE ambiguity that makes description impossible to clear.
+	EffortMinutes *int32 `json:"effort_minutes,omitempty"`
+	// Estimated hours. Absent leaves untouched; 0 clears. Same sentinel rule as
+	// effort_minutes.
 	EstimatedHours *float64 `json:"estimated_hours,omitempty"`
-	WaitingOn      *string  `json:"waiting_on,omitempty"`
-	DecisionNote   *string  `json:"decision_note,omitempty"`
-	FocusPin       *bool    `json:"focus_pin,omitempty"`
+	// Free-text blocker label: person, team or approval. Absent leaves
+	// untouched; empty string clears.
+	WaitingOn *string `json:"waiting_on,omitempty"`
+	// One-line decision log. Absent leaves untouched; empty string clears.
+	DecisionNote *string `json:"decision_note,omitempty"`
+	// Pin this task into the caller's own Today view. Absent leaves untouched;
+	// true pins, false unpins. Per-caller, not per-task: Today is a personal
+	// view, so this writes flow_task_focus_pins rather than a task column.
+	FocusPin *bool `json:"focus_pin,omitempty"`
 }
 
 func (m *UpdateTaskBody) MarshalJSON() ([]byte, error) {
@@ -2017,7 +2169,9 @@ func (x *UpdateTaskBody) GetFocusPin() bool {
 }
 
 type UpdateTaskRequest struct {
-	Id   int64           `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable task fields bound from the HTTP payload.
 	Body *UpdateTaskBody `json:"body,omitempty"`
 }
 
@@ -2067,6 +2221,7 @@ func (x *UpdateTaskRequest) GetBody() *UpdateTaskBody {
 }
 
 type UpdateTaskResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -2079,6 +2234,7 @@ func (x *UpdateTaskResponse) GetMessage() string {
 }
 
 type UpdateTaskStatusBody struct {
+	// status is the current lifecycle state.
 	Status string `json:"status,omitempty"`
 }
 
@@ -2091,7 +2247,9 @@ func (x *UpdateTaskStatusBody) GetStatus() string {
 }
 
 type UpdateTaskStatusRequest struct {
-	Id   int64                 `json:"id,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// body carries the new task status bound from the HTTP payload.
 	Body *UpdateTaskStatusBody `json:"body,omitempty"`
 }
 
@@ -2141,6 +2299,7 @@ func (x *UpdateTaskStatusRequest) GetBody() *UpdateTaskStatusBody {
 }
 
 type UpdateTaskStatusResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -2153,6 +2312,7 @@ func (x *UpdateTaskStatusResponse) GetMessage() string {
 }
 
 type DeleteTaskRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -2194,6 +2354,7 @@ func (x *DeleteTaskRequest) GetId() int64 {
 }
 
 type DeleteTaskResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -2206,15 +2367,25 @@ func (x *DeleteTaskResponse) GetMessage() string {
 }
 
 type CreateSubtaskRequest struct {
-	ParentTaskId   *int64   `json:"parent_task_id,omitempty"`
-	ProjectId      *int64   `json:"project_id,omitempty"`
-	WorkspaceId    *int64   `json:"workspace_id,omitempty"`
-	Title          string   `json:"title,omitempty"`
-	Description    string   `json:"description,omitempty"`
-	Priority       string   `json:"priority,omitempty"`
-	AssigneeId     *int64   `json:"assignee_id,omitempty"`
-	DueDate        string   `json:"due_date,omitempty"`
-	StartDate      string   `json:"start_date,omitempty"`
+	// parent_task_id is the parent task id value for this contract.
+	ParentTaskId *int64 `json:"parent_task_id,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// workspace_id is the workspace id value for this contract.
+	WorkspaceId *int64 `json:"workspace_id,omitempty"`
+	// title is the title value for this contract.
+	Title string `json:"title,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// priority is the priority value for this contract.
+	Priority string `json:"priority,omitempty"`
+	// assignee_id is the assignee id value for this contract.
+	AssigneeId *int64 `json:"assignee_id,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `json:"due_date,omitempty"`
+	// start_date is the start date value for this contract.
+	StartDate string `json:"start_date,omitempty"`
+	// estimated_hours is the estimated hours value for this contract.
 	EstimatedHours *float64 `json:"estimated_hours,omitempty"`
 }
 
@@ -2390,7 +2561,9 @@ func (x *CreateSubtaskRequest) GetEstimatedHours() float64 {
 }
 
 type CreateSubtaskResponse struct {
-	TaskId  int64  `json:"task_id,omitempty"`
+	// task_id is the task id value for this contract.
+	TaskId int64 `json:"task_id,omitempty"`
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -2440,10 +2613,15 @@ func (x *CreateSubtaskResponse) GetMessage() string {
 }
 
 type GetSubtasksRequest struct {
-	TaskId  int64  `json:"task_id,omitempty"`
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// task_id is the task id value for this contract.
+	TaskId int64 `json:"task_id,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -2517,6 +2695,7 @@ func (x *GetSubtasksRequest) GetSortDir() string {
 }
 
 type GetSubtasksResponse struct {
+	// subtasks is the subtasks value for this contract.
 	Subtasks   []*TaskPayloadCompact                    `json:"subtasks,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -2538,7 +2717,9 @@ func (x *GetSubtasksResponse) GetPagination() *common_pagination_v1.PaginationRe
 }
 
 type AddCommentRequest struct {
-	TaskId  int64  `json:"task_id,omitempty"`
+	// task_id is the task id value for this contract.
+	TaskId int64 `json:"task_id,omitempty"`
+	// content is the content value for this contract.
 	Content string `json:"content,omitempty"`
 }
 
@@ -2588,6 +2769,7 @@ func (x *AddCommentRequest) GetContent() string {
 }
 
 type AddCommentResponse struct {
+	// comment is the comment value for this contract.
 	Comment *TaskComment `json:"comment,omitempty"`
 }
 
@@ -2600,6 +2782,7 @@ func (x *AddCommentResponse) GetComment() *TaskComment {
 }
 
 type DeleteCommentRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -2641,6 +2824,7 @@ func (x *DeleteCommentRequest) GetId() int64 {
 }
 
 type DeleteCommentResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -2653,6 +2837,7 @@ func (x *DeleteCommentResponse) GetMessage() string {
 }
 
 type GetTaskActivityRequest struct {
+	// task_id is the task id value for this contract.
 	TaskId int64 `json:"task_id,omitempty"`
 }
 
@@ -2694,6 +2879,7 @@ func (x *GetTaskActivityRequest) GetTaskId() int64 {
 }
 
 type GetTaskActivityResponse struct {
+	// activity is the activity value for this contract.
 	Activity []*TaskActivity `json:"activity,omitempty"`
 }
 
@@ -2706,10 +2892,14 @@ func (x *GetTaskActivityResponse) GetActivity() []*TaskActivity {
 }
 
 type CreateAttachmentRequest struct {
-	TaskId int64  `json:"task_id,omitempty"`
-	Name   string `json:"name,omitempty"`
-	Url    string `json:"url,omitempty"`
-	Size   *int64 `json:"size,omitempty"`
+	// task_id identifies the task the attachment belongs to.
+	TaskId int64 `json:"task_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// url is the url value for this contract.
+	Url string `json:"url,omitempty"`
+	// size is the size value for this contract.
+	Size *int64 `json:"size,omitempty"`
 }
 
 func (m *CreateAttachmentRequest) MarshalJSON() ([]byte, error) {
@@ -2791,8 +2981,10 @@ func (x *CreateAttachmentRequest) GetSize() int64 {
 }
 
 type CreateAttachmentResponse struct {
-	AttachmentId int64  `json:"attachment_id,omitempty"`
-	Message      string `json:"message,omitempty"`
+	// attachment_id is the attachment id value for this contract.
+	AttachmentId int64 `json:"attachment_id,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (m *CreateAttachmentResponse) MarshalJSON() ([]byte, error) {
@@ -2841,6 +3033,7 @@ func (x *CreateAttachmentResponse) GetMessage() string {
 }
 
 type GetAttachmentsRequest struct {
+	// task_id is the task id value for this contract.
 	TaskId int64 `json:"task_id,omitempty"`
 }
 
@@ -2882,6 +3075,7 @@ func (x *GetAttachmentsRequest) GetTaskId() int64 {
 }
 
 type GetAttachmentsResponse struct {
+	// attachments is the attachments value for this contract.
 	Attachments []*Attachment `json:"attachments,omitempty"`
 }
 
@@ -2894,6 +3088,7 @@ func (x *GetAttachmentsResponse) GetAttachments() []*Attachment {
 }
 
 type DeleteAttachmentRequest struct {
+	// id is the unique identifier for the resource.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -2935,6 +3130,7 @@ func (x *DeleteAttachmentRequest) GetId() int64 {
 }
 
 type DeleteAttachmentResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -2947,9 +3143,12 @@ func (x *DeleteAttachmentResponse) GetMessage() string {
 }
 
 type CreateTimeLogRequest struct {
+	// duration_minutes is the duration minutes value for this contract.
 	DurationMinutes *int64 `json:"duration_minutes,omitempty"`
-	Description     string `json:"description,omitempty"`
-	TaskId          int64  `json:"task_id,omitempty"`
+	// description is the description value for this contract.
+	Description string `json:"description,omitempty"`
+	// task_id identifies the task the time log belongs to.
+	TaskId int64 `json:"task_id,omitempty"`
 }
 
 func (m *CreateTimeLogRequest) MarshalJSON() ([]byte, error) {
@@ -3023,8 +3222,10 @@ func (x *CreateTimeLogRequest) GetTaskId() int64 {
 }
 
 type CreateTimeLogResponse struct {
-	TimeLogId int64  `json:"time_log_id,omitempty"`
-	Message   string `json:"message,omitempty"`
+	// time_log_id is the time log id value for this contract.
+	TimeLogId int64 `json:"time_log_id,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (m *CreateTimeLogResponse) MarshalJSON() ([]byte, error) {
@@ -3073,6 +3274,7 @@ func (x *CreateTimeLogResponse) GetMessage() string {
 }
 
 type GetTimeLogsRequest struct {
+	// task_id is the task id value for this contract.
 	TaskId int64 `json:"task_id,omitempty"`
 }
 
@@ -3114,6 +3316,7 @@ func (x *GetTimeLogsRequest) GetTaskId() int64 {
 }
 
 type GetTimeLogsResponse struct {
+	// time_logs is the time logs value for this contract.
 	TimeLogs []*TimeLog `json:"time_logs,omitempty"`
 }
 
@@ -3126,6 +3329,7 @@ func (x *GetTimeLogsResponse) GetTimeLogs() []*TimeLog {
 }
 
 type DeleteTimeLogRequest struct {
+	// id is the time log identifier.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -3167,6 +3371,7 @@ func (x *DeleteTimeLogRequest) GetId() int64 {
 }
 
 type DeleteTimeLogResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -3179,6 +3384,7 @@ func (x *DeleteTimeLogResponse) GetMessage() string {
 }
 
 type AddTaskDependencyBody struct {
+	// depends_on_task_id is the task this task is blocked by.
 	DependsOnTaskId int64 `json:"depends_on_task_id,omitempty"`
 }
 
@@ -3220,8 +3426,10 @@ func (x *AddTaskDependencyBody) GetDependsOnTaskId() int64 {
 }
 
 type AddTaskDependencyRequest struct {
-	TaskId int64                  `json:"task_id,omitempty"`
-	Body   *AddTaskDependencyBody `json:"body,omitempty"`
+	// task_id is the task gaining the dependency.
+	TaskId int64 `json:"task_id,omitempty"`
+	// body carries the dependency target bound from the HTTP payload.
+	Body *AddTaskDependencyBody `json:"body,omitempty"`
 }
 
 func (m *AddTaskDependencyRequest) MarshalJSON() ([]byte, error) {
@@ -3270,6 +3478,7 @@ func (x *AddTaskDependencyRequest) GetBody() *AddTaskDependencyBody {
 }
 
 type AddTaskDependencyResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -3282,7 +3491,9 @@ func (x *AddTaskDependencyResponse) GetMessage() string {
 }
 
 type RemoveTaskDependencyRequest struct {
-	TaskId          int64 `json:"task_id,omitempty"`
+	// task_id is the task losing the dependency.
+	TaskId int64 `json:"task_id,omitempty"`
+	// depends_on_task_id is the dependency being removed.
 	DependsOnTaskId int64 `json:"depends_on_task_id,omitempty"`
 }
 
@@ -3342,6 +3553,7 @@ func (x *RemoveTaskDependencyRequest) GetDependsOnTaskId() int64 {
 }
 
 type RemoveTaskDependencyResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

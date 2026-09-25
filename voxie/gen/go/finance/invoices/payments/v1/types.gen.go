@@ -8,13 +8,20 @@ import (
 )
 
 type RecordPaymentRequest struct {
-	InvoiceId   int64   `json:"invoice_id,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	PaymentDate string  `json:"payment_date,omitempty"`
-	Method      string  `json:"method,omitempty"`
-	Reference   string  `json:"reference,omitempty"`
-	Notes       string  `json:"notes,omitempty"`
+	// invoice_id is the invoice id value for this contract.
+	InvoiceId int64 `json:"invoice_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `json:"currency,omitempty"`
+	// payment_date is the payment date value for this contract.
+	PaymentDate string `json:"payment_date,omitempty"`
+	// method is the method value for this contract.
+	Method string `json:"method,omitempty"`
+	// reference is the reference value for this contract.
+	Reference string `json:"reference,omitempty"`
+	// notes is the notes value for this contract.
+	Notes string `json:"notes,omitempty"`
 }
 
 func (m *RecordPaymentRequest) MarshalJSON() ([]byte, error) {
@@ -103,8 +110,10 @@ func (x *RecordPaymentRequest) GetNotes() string {
 }
 
 type RecordPaymentResponse struct {
+	// payment is the payment value for this contract.
 	Payment *finance_invoices_v1.RecordPaymentResponsePayload `json:"payment,omitempty"`
-	Message string                                            `json:"message,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (x *RecordPaymentResponse) GetPayment() *finance_invoices_v1.RecordPaymentResponsePayload {

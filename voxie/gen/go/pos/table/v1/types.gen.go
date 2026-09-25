@@ -6,15 +6,20 @@ import (
 	"strconv"
 )
 
+// Table is a POS floor table.
 type Table struct {
-	Id         int64  `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
 	OwnerId    int64  `json:"owner_id,omitempty"`
 	LocationId *int64 `json:"location_id,omitempty"`
 	Label      string `json:"label,omitempty"`
 	Seats      int32  `json:"seats,omitempty"`
-	Status     string `json:"status,omitempty"`
-	CreatedAt  string `json:"created_at,omitempty"`
-	UpdatedAt  string `json:"updated_at,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Table) MarshalJSON() ([]byte, error) {
@@ -276,7 +281,8 @@ type UpdateTableBody struct {
 	LocationId *int64 `json:"location_id,omitempty"`
 	Label      string `json:"label,omitempty"`
 	Seats      *int32 `json:"seats,omitempty"`
-	Status     string `json:"status,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
 }
 
 func (m *UpdateTableBody) MarshalJSON() ([]byte, error) {
@@ -352,7 +358,8 @@ func (x *UpdateTableBody) GetStatus() string {
 }
 
 type UpdateTableRequest struct {
-	Id   int64            `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable table fields bound from the HTTP payload.
 	Body *UpdateTableBody `json:"body,omitempty"`
 }
 
@@ -414,6 +421,7 @@ func (x *UpdateTableResponse) GetMessage() string {
 }
 
 type UpdateTableStatusBody struct {
+	// status is the current lifecycle state.
 	Status string `json:"status,omitempty"`
 }
 
@@ -426,7 +434,8 @@ func (x *UpdateTableStatusBody) GetStatus() string {
 }
 
 type UpdateTableStatusRequest struct {
-	Id   int64                  `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// body carries the new table status bound from the HTTP payload.
 	Body *UpdateTableStatusBody `json:"body,omitempty"`
 }
 

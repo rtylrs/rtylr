@@ -12,25 +12,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of inventory rows to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Maximum number of inventory rows to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of inventory rows to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Number of inventory rows to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.inventory.v1.GetInventoryReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/inventory/v1/low-stock:
         get:
             tags:
@@ -40,25 +54,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of low-stock rows to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Maximum number of low-stock rows to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of low-stock rows to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Number of low-stock rows to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.inventory.v1.GetLowStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/inventory/v1/valuation:
         get:
             tags:
@@ -68,25 +96,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of valuation rows to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Maximum number of valuation rows to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of valuation rows to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Number of valuation rows to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.inventory.v1.GetValuationResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/inventory/v1/adjust:
         post:
             tags:
@@ -100,12 +142,24 @@ paths:
                             $ref: '#/components/schemas/erp.inventory.v1.AdjustInventoryRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.inventory.v1.AdjustInventoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.inventory.v1.GetInventoryReportRequest:
@@ -155,6 +209,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_name:
                     type: string
@@ -287,6 +342,7 @@ components:
                     type: string
                 total_items:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 total_value:
                     type: number
@@ -306,6 +362,7 @@ components:
                 product_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 change:
                     exclusiveMinimum: 0
@@ -328,3 +385,13 @@ components:
                     description: A human-readable result message.
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: InventoryService
+      description: InventoryService defines ERP inventory endpoints.

@@ -12,58 +12,80 @@ paths:
             parameters:
                 - name: status
                   in: query
-                  required: true
+                  description: status filters invoices by lifecycle state.
+                  required: false
                   schema:
                     type: string
                     description: status filters invoices by lifecycle state.
                 - name: search
                   in: query
-                  required: true
+                  description: search filters by customer or invoice number.
+                  required: false
                   schema:
                     type: string
                     description: search filters by customer or invoice number.
                 - name: customer_id
                   in: query
+                  description: |-
+                    customer_id filters by the linked CRM customer; absent to include
+                    invoices for all customers and invoices with no customer link.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         customer_id filters by the linked CRM customer; absent to include
                         invoices for all customers and invoices with no customer link.
                 - name: date_from
                   in: query
-                  required: true
+                  description: date_from is the inclusive start date filter.
+                  required: false
                   schema:
                     type: string
                     description: date_from is the inclusive start date filter.
                 - name: date_to
                   in: query
-                  required: true
+                  description: date_to is the inclusive end date filter.
+                  required: false
                   schema:
                     type: string
                     description: date_to is the inclusive end date filter.
                 - name: page
                   in: query
-                  required: true
+                  description: page is the one-based page number to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: page is the one-based page number to return.
                 - name: page_size
                   in: query
-                  required: true
+                  description: page_size is the maximum number of invoices to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: page_size is the maximum number of invoices to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.ListInvoicesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - InvoicesService
@@ -76,12 +98,24 @@ paths:
                             $ref: '#/components/schemas/finance.invoices.v1.CreateInvoiceRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.CreateInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/invoices/v1/invoices/billable-time:
         get:
             tags:
@@ -91,25 +125,39 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: page is the one-based page number to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: page is the one-based page number to return.
                 - name: page_size
                   in: query
-                  required: true
+                  description: page_size is the maximum number of time entries to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: page_size is the maximum number of time entries to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.ListBillableTimeEntriesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/invoices/v1/invoices/{id}:
         get:
             tags:
@@ -119,17 +167,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.GetInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - InvoicesService
@@ -138,10 +202,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
@@ -151,12 +219,24 @@ paths:
                             description: body carries updatable invoice fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - InvoicesService
@@ -165,17 +245,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.DeleteInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/invoices/v1/invoices/{id}/status:
         patch:
             tags:
@@ -185,10 +281,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
@@ -198,12 +298,24 @@ paths:
                             description: body carries status update fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.UpdateInvoiceStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /finance/invoices/v1/invoices/{id}/send:
         post:
             tags:
@@ -213,23 +325,39 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/finance.invoices.v1.SendInvoiceRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/finance.invoices.v1.SendInvoiceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         finance.invoices.v1.ListInvoicesRequest:
@@ -243,6 +371,7 @@ components:
                     description: search filters by customer or invoice number.
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         customer_id filters by the linked CRM customer; absent to include
@@ -297,6 +426,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 invoice_number:
@@ -402,18 +532,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the time entry.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: employee_id identifies the employee who logged the time.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id identifies the optional Flow project.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id identifies the optional Flow task.
                 date:
@@ -421,6 +555,7 @@ components:
                     description: date is the day on which the time was logged.
                 duration_minutes:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: duration_minutes is the approved billable duration.
                 description:
@@ -465,6 +600,7 @@ components:
                     description: client_tax_id is the client tax id value for this contract.
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         customer_id is the CRM customer to issue to. When supplied the server
@@ -548,6 +684,7 @@ components:
                     description: discount_pct is the discount pct value for this contract.
                 sort_order:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: sort_order is the sort order value for this contract.
                 total:
@@ -578,14 +715,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         customer_id links to the CRM customer this invoice was issued to; absent
@@ -709,6 +849,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -733,6 +874,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 amount:
@@ -769,6 +911,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -857,6 +1000,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -888,6 +1032,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -906,6 +1051,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -918,3 +1064,13 @@ components:
                     description: message is a human-readable result message.
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: InvoicesService
+      description: InvoicesService defines finance invoice endpoints.

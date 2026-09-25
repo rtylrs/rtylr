@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Floor is a physical seating area within a branch.
 type Floor struct {
 	Id         int64  `json:"id,omitempty"`
 	BusinessId int64  `json:"business_id,omitempty"`
@@ -13,7 +14,8 @@ type Floor struct {
 	Name       string `json:"name,omitempty"`
 	SortOrder  int32  `json:"sort_order,omitempty"`
 	IsActive   bool   `json:"is_active,omitempty"`
-	CreatedAt  string `json:"created_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *Floor) MarshalJSON() ([]byte, error) {
@@ -267,7 +269,9 @@ func (x *UpdateFloorBody) GetSortOrder() int32 {
 }
 
 type UpdateFloorRequest struct {
-	Id   int64            `json:"id,omitempty"`
+	// id is the unique identifier for the floor.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable floor fields bound from the HTTP payload.
 	Body *UpdateFloorBody `json:"body,omitempty"`
 }
 
@@ -329,6 +333,7 @@ func (x *UpdateFloorResponse) GetMessage() string {
 }
 
 type DeleteFloorRequest struct {
+	// id is the unique identifier for the floor.
 	Id int64 `json:"id,omitempty"`
 }
 

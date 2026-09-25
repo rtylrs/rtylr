@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface CustomerServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** CustomerService defines CRM customer endpoints. */
 export class CustomerServiceClient {
 private baseUrl: string;
 private options: CustomerServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listCustomers(req: ListCustomersRequest): Promise<ListCustomersResponse> {
+/** Returns customers for the active business with optional filters. */
+async listCustomers(req: ListCustomersRequest, opts?: RequestOptions): Promise<ListCustomersResponse> {
 const violations = validateListCustomersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customer/v1/customers";
 const query = new URLSearchParams();
 if (req.search !== undefined) {
@@ -95,7 +135,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -107,14 +148,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListCustomersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createCustomer(req: CreateCustomerRequest): Promise<CreateCustomerResponse> {
+/** Creates a new customer record. */
+async createCustomer(req: CreateCustomerRequest, opts?: RequestOptions): Promise<CreateCustomerResponse> {
 const violations = validateCreateCustomerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customer/v1/customers";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateCustomerRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -126,9 +169,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateCustomerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCustomer(req: GetCustomerRequest): Promise<GetCustomerResponse> {
+/** Returns a single customer by ID. */
+async getCustomer(req: GetCustomerRequest, opts?: RequestOptions): Promise<GetCustomerResponse> {
 const violations = validateGetCustomerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customer/v1/customers/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -136,7 +180,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -148,15 +193,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetCustomerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateCustomer(req: UpdateCustomerRequest): Promise<UpdateCustomerResponse> {
+/** Updates an existing customer. */
+async updateCustomer(req: UpdateCustomerRequest, opts?: RequestOptions): Promise<UpdateCustomerResponse> {
 const violations = validateUpdateCustomerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customer/v1/customers/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateCustomerRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -168,9 +215,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateCustomerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteCustomer(req: DeleteCustomerRequest): Promise<DeleteCustomerResponse> {
+/** Removes a customer by ID. */
+async deleteCustomer(req: DeleteCustomerRequest, opts?: RequestOptions): Promise<DeleteCustomerResponse> {
 const violations = validateDeleteCustomerRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/customer/v1/customers/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -178,7 +226,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

@@ -17,50 +17,67 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: status
                   in: query
-                  required: true
+                  description: status is the current lifecycle state.
+                  required: false
                   schema:
                     type: string
                     description: status is the current lifecycle state.
                 - name: date_from
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: date_to
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: search
                   in: query
-                  required: true
+                  description: search filters orders by order number, customer, or matching text.
+                  required: false
                   schema:
                     type: string
                     description: search filters orders by order number, customer, or matching text.
                 - name: page
                   in: query
-                  required: true
+                  description: page is the one-based page number to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: page is the one-based page number to return.
                 - name: page_size
                   in: query
-                  required: true
+                  description: page_size is the maximum number of orders to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: page_size is the maximum number of orders to return.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.v1.ListOrdersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - OrderService
@@ -74,12 +91,24 @@ paths:
                             $ref: '#/components/schemas/pos.orders.v1.CreateOrderRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.v1.CreateOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/orders/v1/orders/public:
         post:
             tags:
@@ -94,12 +123,24 @@ paths:
                             $ref: '#/components/schemas/pos.orders.v1.CreatePublicOrderRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.v1.CreatePublicOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/orders/v1/orders/{order_id}/public-status:
         get:
             tags:
@@ -112,20 +153,30 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: business_id
                   in: query
+                  description: |-
+                    business_id scopes the lookup to the business the order belongs to,
+                    preventing cross-tenant order enumeration on this anonymous endpoint.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         business_id scopes the lookup to the business the order belongs to,
                         preventing cross-tenant order enumeration on this anonymous endpoint.
                 - name: public_token
                   in: query
+                  description: |-
+                    Single-use? No: this credential is scoped to this order and is safe to
+                    present repeatedly for status polling. It must never be replaced by the
+                    sequential order ID alone.
                   required: true
                   schema:
                     type: string
@@ -134,12 +185,24 @@ paths:
                         present repeatedly for status polling. It must never be replaced by the
                         sequential order ID alone.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.v1.GetPublicOrderStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/orders/v1/orders/{order_id}:
         get:
             tags:
@@ -152,15 +215,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.v1.GetOrderDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/orders/v1/orders/{order_id}/status:
         put:
             tags:
@@ -173,7 +250,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -184,12 +263,24 @@ paths:
                             description: body carries the new order status bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.v1.UpdateOrderStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/orders/v1/orders/{order_id}/void:
         post:
             tags:
@@ -202,21 +293,40 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/pos.orders.v1.VoidOrderRequest'
+                            type: object
+                            properties:
+                                reason:
+                                    type: string
+                            required:
+                                - reason
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.orders.v1.VoidOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.orders.v1.ListOrdersRequest:
@@ -225,6 +335,7 @@ components:
                 session_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 status:
                     type: string
@@ -285,19 +396,24 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 session_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 table_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_number:
                     type: string
@@ -308,11 +424,13 @@ components:
                     description: status is the current lifecycle state.
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 customer_name:
                     type: string
                 staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 subtotal:
                     type: number
@@ -383,12 +501,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 menu_item_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -440,17 +561,21 @@ components:
             properties:
                 session_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 table_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 location_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 type:
                     type: string
                 customer_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 customer_name:
                     type: string
@@ -481,6 +606,7 @@ components:
             properties:
                 menu_item_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -514,6 +640,7 @@ components:
             properties:
                 order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_number:
                     type: string
@@ -529,6 +656,7 @@ components:
                 owner_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 customer_name:
                     type: string
@@ -556,6 +684,7 @@ components:
                 menu_item_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -579,6 +708,7 @@ components:
             properties:
                 order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_number:
                     type: string
@@ -598,10 +728,12 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         business_id scopes the lookup to the business the order belongs to,
@@ -621,6 +753,7 @@ components:
             properties:
                 order_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 order_number:
                     type: string
@@ -636,6 +769,7 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - order_id
@@ -653,6 +787,7 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -682,6 +817,7 @@ components:
                 order_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reason:
                     type: string
@@ -695,3 +831,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OrderService
+      description: OrderService defines the POS order endpoints.

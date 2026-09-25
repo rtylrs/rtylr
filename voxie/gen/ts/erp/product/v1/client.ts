@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface ProductServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** ProductService defines ERP product endpoints. */
 export class ProductServiceClient {
 private baseUrl: string;
 private options: ProductServiceClientOptions;
@@ -71,9 +110,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listProducts(req: ListProductsRequest): Promise<ListProductsResponse> {
+async listProducts(req: ListProductsRequest, opts?: RequestOptions): Promise<ListProductsResponse> {
 const violations = validateListProductsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/products";
 const query = new URLSearchParams();
 if (req.search !== undefined) {
@@ -92,7 +131,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -104,14 +144,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListProductsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createProduct(req: CreateProductRequest): Promise<CreateProductResponse> {
+async createProduct(req: CreateProductRequest, opts?: RequestOptions): Promise<CreateProductResponse> {
 const violations = validateCreateProductRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/products";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateProductRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -123,9 +164,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getProductByBarcode(req: GetProductByBarcodeRequest): Promise<GetProductByBarcodeResponse> {
+async getProductByBarcode(req: GetProductByBarcodeRequest, opts?: RequestOptions): Promise<GetProductByBarcodeResponse> {
 const violations = validateGetProductByBarcodeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/barcodes/{code}/product";
 path = path.replace("{code}", encodeURIComponent(String(req.code)));
 const query = new URLSearchParams();
@@ -133,7 +174,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -145,9 +187,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetProductByBarcodeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getProduct(req: GetProductRequest): Promise<GetProductResponse> {
+async getProduct(req: GetProductRequest, opts?: RequestOptions): Promise<GetProductResponse> {
 const violations = validateGetProductRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/products/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -155,7 +197,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -167,9 +210,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getProductFull(req: GetProductFullRequest): Promise<GetProductFullResponse> {
+async getProductFull(req: GetProductFullRequest, opts?: RequestOptions): Promise<GetProductFullResponse> {
 const violations = validateGetProductFullRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/products/{id}/full";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -177,7 +220,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -189,9 +233,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetProductFullResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listProductAttributes(req: ListProductAttributesRequest): Promise<ListProductAttributesResponse> {
+async listProductAttributes(req: ListProductAttributesRequest, opts?: RequestOptions): Promise<ListProductAttributesResponse> {
 const violations = validateListProductAttributesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/products/{id}/attributes";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -199,7 +243,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -211,15 +256,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListProductAttributesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateProduct(req: UpdateProductRequest): Promise<UpdateProductResponse> {
+async updateProduct(req: UpdateProductRequest, opts?: RequestOptions): Promise<UpdateProductResponse> {
 const violations = validateUpdateProductRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/products/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateProductRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -231,9 +277,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteProduct(req: DeleteProductRequest): Promise<DeleteProductResponse> {
+async deleteProduct(req: DeleteProductRequest, opts?: RequestOptions): Promise<DeleteProductResponse> {
 const violations = validateDeleteProductRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/products/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -241,7 +287,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -253,16 +300,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getDashboard(req: GetDashboardRequest): Promise<GetDashboardResponse> {
+async getDashboard(req: GetDashboardRequest, opts?: RequestOptions): Promise<GetDashboardResponse> {
 const violations = validateGetDashboardRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/dashboard";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -274,9 +322,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetDashboardResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listReorderSuggestions(req: ListReorderSuggestionsRequest): Promise<ListReorderSuggestionsResponse> {
+async listReorderSuggestions(req: ListReorderSuggestionsRequest, opts?: RequestOptions): Promise<ListReorderSuggestionsResponse> {
 const violations = validateListReorderSuggestionsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/reorder-suggestions";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -289,7 +337,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -301,9 +350,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListReorderSuggestionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listExpiringItems(req: ListExpiringItemsRequest): Promise<ListExpiringItemsResponse> {
+async listExpiringItems(req: ListExpiringItemsRequest, opts?: RequestOptions): Promise<ListExpiringItemsResponse> {
 const violations = validateListExpiringItemsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/erp/product/v1/expiry";
 const query = new URLSearchParams();
 if (req.daysAhead !== undefined) {
@@ -319,7 +368,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

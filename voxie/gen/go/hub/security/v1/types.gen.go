@@ -49,6 +49,7 @@ type ActiveSession struct {
 	Id        string `json:"id,omitempty"`
 	Ip        string `json:"ip,omitempty"`
 	UserAgent string `json:"user_agent,omitempty"`
+	// When the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
 	IsCurrent bool   `json:"is_current,omitempty"`
 }
@@ -94,12 +95,15 @@ func (x *ActiveSession) GetIsCurrent() bool {
 }
 
 type LoginEntry struct {
-	Id        int64  `json:"id,omitempty"`
+	// Database identifier for this login event.
+	Id int64 `json:"id,omitempty"`
+	// Email address used for lookup or contact.
 	Email     string `json:"email,omitempty"`
 	Method    string `json:"method,omitempty"`
 	Ip        string `json:"ip,omitempty"`
 	UserAgent string `json:"user_agent,omitempty"`
 	Success   bool   `json:"success,omitempty"`
+	// When the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
@@ -204,7 +208,9 @@ func (x *GetSecurityStateResponse) GetState() *SecurityState {
 }
 
 type LoginHistoryRequest struct {
-	Page     int32 `json:"page,omitempty"`
+	// 1-based page number to return.
+	Page int32 `json:"page,omitempty"`
+	// Maximum number of login events to return in one page.
 	PageSize int32 `json:"page_size,omitempty"`
 }
 
@@ -225,11 +231,15 @@ func (x *LoginHistoryRequest) GetPageSize() int32 {
 }
 
 type LoginHistoryResponse struct {
-	History  []*LoginEntry `json:"history,omitempty"`
-	Total    int32         `json:"total,omitempty"`
-	Page     int32         `json:"page,omitempty"`
-	PageSize int32         `json:"page_size,omitempty"`
-	HasMore  bool          `json:"has_more,omitempty"`
+	History []*LoginEntry `json:"history,omitempty"`
+	// Total number of login events for the authenticated user.
+	Total int32 `json:"total,omitempty"`
+	// The 1-based page number returned.
+	Page int32 `json:"page,omitempty"`
+	// The number of login events requested per page after server limits.
+	PageSize int32 `json:"page_size,omitempty"`
+	// Whether another page of login events is available.
+	HasMore bool `json:"has_more,omitempty"`
 }
 
 func (x *LoginHistoryResponse) GetHistory() []*LoginEntry {

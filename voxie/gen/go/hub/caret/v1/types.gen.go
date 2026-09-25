@@ -7,7 +7,10 @@ type CaretTool struct {
 	Description      string `json:"description,omitempty"`
 	Category         string `json:"category,omitempty"`
 	RequiresApproval bool   `json:"requires_approval,omitempty"`
-	Scope            string `json:"scope,omitempty"`
+	// Access scope of this tool: "read" or "write". Mirrors the server-side
+	// gating already applied in ask/analyst modes; exposed so the UI can
+	// surface it too (e.g. counting write-scoped tools).
+	Scope string `json:"scope,omitempty"`
 }
 
 func (x *CaretTool) GetName() string {

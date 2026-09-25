@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/hr.approval_chain.v1.UpsertApprovalChainRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.approval_chain.v1.UpsertApprovalChainResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.approval_chain.v1.UpsertApprovalChainRequest:
@@ -31,6 +43,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Chain ID for update; absent (zero) to create a new chain.
                 request_type:
@@ -59,14 +72,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for this approval level.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this level belongs to.
                 chain_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Parent approval chain this level is part of.
                 level_order:
@@ -78,10 +94,12 @@ components:
                     description: Type of approver (direct_manager | dept_head | hr_admin | role | specific_person).
                 approver_role_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Role that can approve at this level; absent unless approver_type is role.
                 approver_employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Specific employee who approves; absent unless approver_type is specific_person.
                 threshold_min_value:
@@ -101,10 +119,12 @@ components:
                     description: What happens on timeout (escalate | auto_approve | do_nothing).
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -132,10 +152,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the approval chain.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this chain belongs to.
                 request_type:
@@ -154,10 +176,12 @@ components:
                     description: Ordered levels that make up the approval pipeline.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -170,3 +194,13 @@ components:
                 - created_at
                 - updated_at
             description: ApprovalChainPayload is the ordered approval pipeline for a request type.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ApprovalChainService
+      description: ApprovalChainService defines HR approval chain endpoints.

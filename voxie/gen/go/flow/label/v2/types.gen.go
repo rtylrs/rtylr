@@ -7,10 +7,18 @@ import (
 	"strconv"
 )
 
+// Label is business-scoped in v2: one pool shared by every project in the
+// caller's business. Names are not unique by contract; duplicate names from
+// the migration are tolerated and may be deduped later without a breaking
+// change.
 type Label struct {
-	Id        int64  `json:"id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Color     string `json:"color,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// color is the color value for this contract.
+	Color string `json:"color,omitempty"`
+	// created_at is when the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
@@ -76,9 +84,13 @@ func (x *Label) GetCreatedAt() string {
 }
 
 type ListLabelsRequest struct {
-	Page    int32  `json:"page,omitempty"`
-	Limit   int32  `json:"limit,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
@@ -115,6 +127,7 @@ func (x *ListLabelsRequest) GetSortDir() string {
 }
 
 type ListLabelsResponse struct {
+	// labels is the labels value for this contract.
 	Labels     []*Label                                 `json:"labels,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
@@ -136,7 +149,9 @@ func (x *ListLabelsResponse) GetPagination() *common_pagination_v1.PaginationRes
 }
 
 type CreateLabelRequest struct {
-	Name  string `json:"name,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// color is the color value for this contract.
 	Color string `json:"color,omitempty"`
 }
 
@@ -157,6 +172,7 @@ func (x *CreateLabelRequest) GetColor() string {
 }
 
 type CreateLabelResponse struct {
+	// label is the label value for this contract.
 	Label *Label `json:"label,omitempty"`
 }
 
@@ -169,8 +185,11 @@ func (x *CreateLabelResponse) GetLabel() *Label {
 }
 
 type UpdateLabelRequest struct {
-	Id    int64  `json:"id,omitempty"`
-	Name  string `json:"name,omitempty"`
+	// id is the label identifier.
+	Id int64 `json:"id,omitempty"`
+	// name is the label name.
+	Name string `json:"name,omitempty"`
+	// color is the label color.
 	Color string `json:"color,omitempty"`
 }
 
@@ -228,6 +247,7 @@ func (x *UpdateLabelRequest) GetColor() string {
 }
 
 type UpdateLabelResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -240,6 +260,7 @@ func (x *UpdateLabelResponse) GetMessage() string {
 }
 
 type DeleteLabelRequest struct {
+	// id is the label identifier.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -281,6 +302,7 @@ func (x *DeleteLabelRequest) GetId() int64 {
 }
 
 type DeleteLabelResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 

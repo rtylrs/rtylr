@@ -7,11 +7,16 @@ import (
 )
 
 type RegisterRequest struct {
-	Email        string  `json:"email,omitempty"`
-	Password     string  `json:"password,omitempty"`
-	Name         string  `json:"name,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	// password is the user-provided secret for authentication.
+	Password string `json:"password,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// business_name is the optional business name to create for the user.
 	BusinessName *string `json:"business_name,omitempty"`
-	PlanSlug     *string `json:"plan_slug,omitempty"`
+	// plan_slug optionally selects the subscription plan to assign after registration.
+	PlanSlug *string `json:"plan_slug,omitempty"`
 }
 
 func (x *RegisterRequest) GetEmail() string {
@@ -63,11 +68,16 @@ func (x *RegisterRequest) GetPlanSlug() string {
 }
 
 type RegisterResponse struct {
-	Token   string `json:"token,omitempty"`
+	// token is the opaque token used to complete the operation.
+	Token string `json:"token,omitempty"`
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
-	UserId  int64  `json:"user_id,omitempty"`
-	Email   string `json:"email,omitempty"`
-	Name    string `json:"name,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
 }
 
 func (m *RegisterResponse) MarshalJSON() ([]byte, error) {
@@ -140,7 +150,9 @@ func (x *RegisterResponse) GetName() string {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	// password is the user-provided secret for authentication.
 	Password string `json:"password,omitempty"`
 }
 
@@ -161,12 +173,18 @@ func (x *LoginRequest) GetPassword() string {
 }
 
 type LoginResponse struct {
-	Token          string `json:"token,omitempty"`
-	Message        string `json:"message,omitempty"`
-	UserId         int64  `json:"user_id,omitempty"`
-	Email          string `json:"email,omitempty"`
-	Name           string `json:"name,omitempty"`
-	IsConsoleAdmin bool   `json:"is_console_admin,omitempty"`
+	// token is the opaque token used to complete the operation.
+	Token string `json:"token,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `json:"user_id,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `json:"email,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// is_console_admin indicates the user can access the internal console.
+	IsConsoleAdmin bool `json:"is_console_admin,omitempty"`
 }
 
 func (m *LoginResponse) MarshalJSON() ([]byte, error) {
@@ -247,8 +265,10 @@ func (x *LoginResponse) GetIsConsoleAdmin() bool {
 }
 
 type GoogleAuthRequest struct {
+	// business_name is the optional business name to create for the user.
 	BusinessName *string `json:"business_name,omitempty"`
-	Code         string  `json:"code,omitempty"`
+	// code is the OAuth authorization code returned by the provider callback.
+	Code string `json:"code,omitempty"`
 }
 
 func (x *GoogleAuthRequest) GetBusinessName() string {
@@ -272,8 +292,10 @@ func (x *GoogleAuthRequest) GetCode() string {
 }
 
 type GoogleAuthResponse struct {
+	// token is the opaque token used to complete the operation.
 	Token string `json:"token,omitempty"`
-	IsNew bool   `json:"is_new,omitempty"`
+	// is_new is the is new value for this contract.
+	IsNew bool `json:"is_new,omitempty"`
 }
 
 func (x *GoogleAuthResponse) GetToken() string {
@@ -293,6 +315,7 @@ func (x *GoogleAuthResponse) GetIsNew() bool {
 }
 
 type ResetPasswordRequest struct {
+	// email is the email address used for lookup or contact.
 	Email string `json:"email,omitempty"`
 }
 
@@ -305,6 +328,7 @@ func (x *ResetPasswordRequest) GetEmail() string {
 }
 
 type ResetPasswordResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -317,7 +341,9 @@ func (x *ResetPasswordResponse) GetMessage() string {
 }
 
 type ResetPasswordConfirmRequest struct {
-	Token    string `json:"token,omitempty"`
+	// token is the opaque reset token from the password reset link.
+	Token string `json:"token,omitempty"`
+	// password is the new password selected by the user.
 	Password string `json:"password,omitempty"`
 }
 
@@ -338,6 +364,7 @@ func (x *ResetPasswordConfirmRequest) GetPassword() string {
 }
 
 type ResetPasswordConfirmResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -350,6 +377,7 @@ func (x *ResetPasswordConfirmResponse) GetMessage() string {
 }
 
 type VerifyEmailRequest struct {
+	// token is the opaque email verification token.
 	Token string `json:"token,omitempty"`
 }
 
@@ -362,8 +390,10 @@ func (x *VerifyEmailRequest) GetToken() string {
 }
 
 type VerifyEmailResponse struct {
-	Verified bool   `json:"verified,omitempty"`
-	Message  string `json:"message,omitempty"`
+	// verified indicates the email was verified successfully.
+	Verified bool `json:"verified,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
 }
 
 func (x *VerifyEmailResponse) GetVerified() bool {
@@ -383,6 +413,7 @@ func (x *VerifyEmailResponse) GetMessage() string {
 }
 
 type ResendVerificationRequest struct {
+	// email is the address that should receive a verification email.
 	Email string `json:"email,omitempty"`
 }
 
@@ -395,7 +426,9 @@ func (x *ResendVerificationRequest) GetEmail() string {
 }
 
 type ResendVerificationResponse struct {
-	Ok      bool   `json:"ok,omitempty"`
+	// ok indicates the request was accepted.
+	Ok bool `json:"ok,omitempty"`
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -416,7 +449,9 @@ func (x *ResendVerificationResponse) GetMessage() string {
 }
 
 type InviteAcceptRequest struct {
-	Token    string `json:"token,omitempty"`
+	// token is the opaque token used to complete the operation.
+	Token string `json:"token,omitempty"`
+	// password is the user-provided secret for authentication.
 	Password string `json:"password,omitempty"`
 }
 
@@ -437,6 +472,7 @@ func (x *InviteAcceptRequest) GetPassword() string {
 }
 
 type InviteAcceptResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
 }
 
@@ -449,6 +485,7 @@ func (x *InviteAcceptResponse) GetMessage() string {
 }
 
 type CheckEmailExistsRequest struct {
+	// email is the address to probe during inline registration/login validation.
 	Email string `json:"email,omitempty"`
 }
 
@@ -461,6 +498,7 @@ func (x *CheckEmailExistsRequest) GetEmail() string {
 }
 
 type CheckEmailExistsResponse struct {
+	// exists is true when an account with this email is already registered.
 	Exists bool `json:"exists,omitempty"`
 }
 
@@ -473,6 +511,7 @@ func (x *CheckEmailExistsResponse) GetExists() bool {
 }
 
 type SocialAuthorizeRequest struct {
+	// provider is the social login provider (google, github, microsoft, apple).
 	Provider string `json:"provider,omitempty"`
 }
 
@@ -485,6 +524,7 @@ func (x *SocialAuthorizeRequest) GetProvider() string {
 }
 
 type SocialAuthorizeResponse struct {
+	// url is the provider-hosted consent URL to redirect the browser to.
 	Url string `json:"url,omitempty"`
 }
 

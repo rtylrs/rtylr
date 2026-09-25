@@ -6,13 +6,16 @@ import (
 	"strconv"
 )
 
+// Template is a reusable message template for campaigns and notifications.
 type Template struct {
-	Id        int64  `json:"id,omitempty"`
-	OwnerId   int64  `json:"owner_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Type      string `json:"type,omitempty"`
-	Subject   string `json:"subject,omitempty"`
-	Body      string `json:"body,omitempty"`
+	Id      int64  `json:"id,omitempty"`
+	OwnerId int64  `json:"owner_id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	// Template kind, e.g. "email" or "sms".
+	Type    string `json:"type,omitempty"`
+	Subject string `json:"subject,omitempty"`
+	Body    string `json:"body,omitempty"`
+	// Arbitrary JSON template variables (source: google.protobuf.Value).
 	Variables string `json:"variables,omitempty"`
 	IsActive  bool   `json:"is_active,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
@@ -139,10 +142,11 @@ func (x *Template) GetUpdatedAt() string {
 }
 
 type CreateTemplateRequest struct {
-	Name      string `json:"name,omitempty"`
-	Type      string `json:"type,omitempty"`
-	Subject   string `json:"subject,omitempty"`
-	Body      string `json:"body,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Subject string `json:"subject,omitempty"`
+	Body    string `json:"body,omitempty"`
+	// Arbitrary JSON template variables (source: google.protobuf.Value).
 	Variables string `json:"variables,omitempty"`
 	IsActive  bool   `json:"is_active,omitempty"`
 }
@@ -314,10 +318,11 @@ func (x *ListTemplatesResponse) GetTemplates() []*Template {
 }
 
 type UpdateTemplateBody struct {
-	Name      string `json:"name,omitempty"`
-	Type      string `json:"type,omitempty"`
-	Subject   string `json:"subject,omitempty"`
-	Body      string `json:"body,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Subject string `json:"subject,omitempty"`
+	Body    string `json:"body,omitempty"`
+	// Arbitrary JSON template variables (source: google.protobuf.Value).
 	Variables string `json:"variables,omitempty"`
 	IsActive  bool   `json:"is_active,omitempty"`
 }

@@ -11,12 +11,24 @@ paths:
             description: Returns the authenticated user profile.
             operationId: UserService_getMe
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.user.v1.GetMeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         patch:
             tags:
                 - UserService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/hub.user.v1.UpdateProfileRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.user.v1.UpdateProfileResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/user/v1/users/password:
         post:
             tags:
@@ -50,12 +74,24 @@ paths:
                             $ref: '#/components/schemas/hub.user.v1.ChangePasswordRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.user.v1.ChangePasswordResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/user/v1/users/switch-business:
         post:
             tags:
@@ -70,12 +106,24 @@ paths:
                             $ref: '#/components/schemas/hub.user.v1.SwitchBusinessRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.user.v1.SwitchBusinessResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.user.v1.GetMeRequest:
@@ -85,6 +133,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 email:
                     type: string
@@ -99,6 +148,7 @@ components:
                     type: string
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_name:
                     type: string
@@ -171,6 +221,7 @@ components:
                     description: Whether the user has the Dash Admin override.
                 authorization_version:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Monotonic authorization version for cache refresh.
             required:
@@ -336,6 +387,7 @@ components:
                 business_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Business to activate in the current session.
             required:
@@ -348,3 +400,13 @@ components:
                     description: Fresh JWT scoped to the selected business.
             required:
                 - token
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: UserService
+      description: UserService defines hub user profile endpoints.

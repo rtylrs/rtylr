@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface CompatibilityServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** Compatibility contract for the profile projection used by Flow and HR. */
 export class CompatibilityServiceClient {
 private baseUrl: string;
 private options: CompatibilityServiceClientOptions;
@@ -71,9 +110,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getStaffDetail(req: GetStaffDetailRequest): Promise<GetStaffDetailResponse> {
+async getStaffDetail(req: GetStaffDetailRequest, opts?: RequestOptions): Promise<GetStaffDetailResponse> {
 const violations = validateGetStaffDetailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/detail";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -83,7 +122,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -95,16 +135,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetStaffDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getMyEmployee(req: GetMyEmployeeRequest): Promise<GetMyEmployeeResponse> {
+async getMyEmployee(req: GetMyEmployeeRequest, opts?: RequestOptions): Promise<GetMyEmployeeResponse> {
 const violations = validateGetMyEmployeeRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/me";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -116,16 +157,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetMyEmployeeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTimeOff(req: EmptyRequest): Promise<JsonResponse> {
+async getTimeOff(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-off";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -137,14 +179,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async submitTimeOff(req: BodyRequest): Promise<JsonResponse> {
+async submitTimeOff(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-off";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -156,14 +199,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async approveTimeOff(req: BodyRequest): Promise<JsonResponse> {
+async approveTimeOff(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-off/approve";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -175,9 +219,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getShifts(req: QueryRequest): Promise<JsonResponse> {
+async getShifts(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -253,7 +297,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -265,9 +310,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getAvailability(req: QueryRequest): Promise<JsonResponse> {
+async getAvailability(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts/availability";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -343,7 +388,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -355,14 +401,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertShift(req: BodyRequest): Promise<JsonResponse> {
+async upsertShift(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -374,14 +421,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async setAvailability(req: BodyRequest): Promise<JsonResponse> {
+async setAvailability(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts/availability";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -393,14 +441,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateShift(req: BodyRequest): Promise<JsonResponse> {
+async updateShift(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -412,9 +461,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getRoster(req: QueryRequest): Promise<JsonResponse> {
+async getRoster(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts/roster";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -490,7 +539,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -502,14 +552,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createShiftAssignment(req: BodyRequest): Promise<JsonResponse> {
+async createShiftAssignment(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts/roster/assignments";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -521,14 +572,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async publishRoster(req: BodyRequest): Promise<JsonResponse> {
+async publishRoster(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/shifts/roster/publish";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -540,9 +592,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTimesheets(req: QueryRequest): Promise<JsonResponse> {
+async getTimesheets(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/timesheets";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -618,7 +670,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -630,16 +683,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCurrentTimesheet(req: EmptyRequest): Promise<JsonResponse> {
+async getCurrentTimesheet(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/timesheets/current";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -651,9 +705,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTimesheet(req: PathRequest): Promise<JsonResponse> {
+async getTimesheet(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/timesheets/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -661,7 +715,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -673,15 +728,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async submitTimesheet(req: PathBodyRequest): Promise<JsonResponse> {
+async submitTimesheet(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/timesheets/{id}/submit";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -693,15 +749,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async approveTimesheet(req: PathBodyRequest): Promise<JsonResponse> {
+async approveTimesheet(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/timesheets/{id}/approve";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -713,15 +770,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async rejectTimesheet(req: PathBodyRequest): Promise<JsonResponse> {
+async rejectTimesheet(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/timesheets/{id}/reject";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -733,9 +791,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTraining(req: QueryRequest): Promise<JsonResponse> {
+async getTraining(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/training";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -811,7 +869,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -823,14 +882,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertTraining(req: BodyRequest): Promise<JsonResponse> {
+async upsertTraining(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/training";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -842,9 +902,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getDocuments(req: QueryRequest): Promise<JsonResponse> {
+async getDocuments(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/documents";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -920,7 +980,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -932,9 +993,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getExpiringDocuments(req: QueryRequest): Promise<JsonResponse> {
+async getExpiringDocuments(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/documents/expiring";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1010,7 +1071,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1022,14 +1084,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createDocument(req: BodyRequest): Promise<JsonResponse> {
+async createDocument(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/documents";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1041,9 +1104,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteDocument(req: PathRequest): Promise<JsonResponse> {
+async deleteDocument(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/documents/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1051,7 +1114,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1063,9 +1127,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getBenefits(req: QueryRequest): Promise<JsonResponse> {
+async getBenefits(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/benefits";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1141,7 +1205,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1153,9 +1218,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getStaff(req: QueryRequest): Promise<JsonResponse> {
+async getStaff(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1231,7 +1296,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1243,14 +1309,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertStaff(req: BodyRequest): Promise<JsonResponse> {
+async upsertStaff(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1262,14 +1329,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateStaff(req: BodyRequest): Promise<JsonResponse> {
+async updateStaff(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1281,14 +1349,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async clockIn(req: BodyRequest): Promise<JsonResponse> {
+async clockIn(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/clock-in";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1300,14 +1369,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async clockOut(req: BodyRequest): Promise<JsonResponse> {
+async clockOut(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/staff/clock-out";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1319,16 +1389,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getConfig(req: EmptyRequest): Promise<JsonResponse> {
+async getConfig(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1340,14 +1411,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateConfig(req: BodyRequest): Promise<JsonResponse> {
+async updateConfig(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/config";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1359,16 +1431,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getDashboard(req: EmptyRequest): Promise<JsonResponse> {
+async getDashboard(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/dashboard/v1/dashboard";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1380,16 +1453,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getDashboardWidgets(req: EmptyRequest): Promise<JsonResponse> {
+async getDashboardWidgets(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/dashboard/v1/dashboard/widgets";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1401,14 +1475,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateDashboardWidgets(req: BodyRequest): Promise<JsonResponse> {
+async updateDashboardWidgets(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/dashboard/v1/dashboard/widgets";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1420,14 +1495,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async generateReport(req: BodyRequest): Promise<JsonResponse> {
+async generateReport(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/reports/generate";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1439,9 +1515,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getEmployees(req: QueryRequest): Promise<JsonResponse> {
+async getEmployees(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1517,7 +1593,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1529,9 +1606,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getEmployee(req: PathRequest): Promise<JsonResponse> {
+async getEmployee(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -1539,7 +1616,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1551,14 +1629,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createEmployee(req: BodyRequest): Promise<JsonResponse> {
+async createEmployee(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1570,15 +1649,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateEmployee(req: PathBodyRequest): Promise<JsonResponse> {
+async updateEmployee(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1590,14 +1670,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async inviteEmployee(req: BodyRequest): Promise<JsonResponse> {
+async inviteEmployee(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/invite";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1609,9 +1690,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getAttendance(req: QueryRequest): Promise<JsonResponse> {
+async getAttendance(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/attendance";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1687,7 +1768,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1699,14 +1781,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async clockInAttendance(req: BodyRequest): Promise<JsonResponse> {
+async clockInAttendance(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/attendance/clock-in";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1718,14 +1801,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async clockOutAttendance(req: BodyRequest): Promise<JsonResponse> {
+async clockOutAttendance(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/attendance/clock-out";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1737,14 +1821,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateEmployeePin(req: BodyRequest): Promise<JsonResponse> {
+async updateEmployeePin(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/employees/me/pin";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1756,16 +1841,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getRoles(req: EmptyRequest): Promise<JsonResponse> {
+async getRoles(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/roles";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1777,16 +1863,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPermissions(req: EmptyRequest): Promise<JsonResponse> {
+async getPermissions(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/permissions";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1798,14 +1885,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createRole(req: BodyRequest): Promise<JsonResponse> {
+async createRole(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/roles";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1817,15 +1905,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateRole(req: PathBodyRequest): Promise<JsonResponse> {
+async updateRole(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/roles/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1837,16 +1926,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getOnboardingTemplates(req: EmptyRequest): Promise<JsonResponse> {
+async getOnboardingTemplates(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/templates";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1858,14 +1948,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createOnboardingTemplate(req: BodyRequest): Promise<JsonResponse> {
+async createOnboardingTemplate(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/templates";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1877,9 +1968,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getOnboardingChecklists(req: QueryRequest): Promise<JsonResponse> {
+async getOnboardingChecklists(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/checklists";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -1955,7 +2046,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -1967,9 +2059,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getOnboardingSummary(req: QueryRequest): Promise<JsonResponse> {
+async getOnboardingSummary(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/checklists/summary";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -2045,7 +2137,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2057,15 +2150,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async completeOnboardingItem(req: PathBodyRequest): Promise<JsonResponse> {
+async completeOnboardingItem(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/onboarding/checklists/{id}/complete";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2077,9 +2171,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getReviewCycles(req: QueryRequest): Promise<JsonResponse> {
+async getReviewCycles(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/cycles";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -2155,7 +2249,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2167,9 +2262,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getReviewCycle(req: PathRequest): Promise<JsonResponse> {
+async getReviewCycle(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/cycles/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -2177,7 +2272,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2189,14 +2285,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createReviewCycle(req: BodyRequest): Promise<JsonResponse> {
+async createReviewCycle(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/cycles";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2208,15 +2305,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async openReviewCycle(req: PathBodyRequest): Promise<JsonResponse> {
+async openReviewCycle(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/cycles/{id}/open";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2228,9 +2326,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getGoals(req: QueryRequest): Promise<JsonResponse> {
+async getGoals(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/goals";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -2306,7 +2404,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2318,14 +2417,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createGoal(req: BodyRequest): Promise<JsonResponse> {
+async createGoal(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/goals";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2337,15 +2437,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateGoal(req: PathBodyRequest): Promise<JsonResponse> {
+async updateGoal(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/goals/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2357,9 +2458,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPerformanceReviews(req: QueryRequest): Promise<JsonResponse> {
+async getPerformanceReviews(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/reviews";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -2435,7 +2536,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2447,15 +2549,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async submitPerformanceReview(req: PathBodyRequest): Promise<JsonResponse> {
+async submitPerformanceReview(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/reviews/{id}/submit";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2467,15 +2570,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async sharePerformanceReview(req: PathBodyRequest): Promise<JsonResponse> {
+async sharePerformanceReview(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/performance/reviews/{id}/share";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2487,9 +2591,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getLeaveCalendar(req: QueryRequest): Promise<JsonResponse> {
+async getLeaveCalendar(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/leave/calendar";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -2565,7 +2669,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2577,14 +2682,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createLocation(req: BodyRequest): Promise<JsonResponse> {
+async createLocation(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/locations";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2596,16 +2702,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSetupStatus(req: EmptyRequest): Promise<JsonResponse> {
+async getSetupStatus(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/setup/status";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2617,15 +2724,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async completeSetupStep(req: PathBodyRequest): Promise<JsonResponse> {
+async completeSetupStep(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/setup/steps/{id}/complete";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2637,16 +2745,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getOvertimeConfig(req: EmptyRequest): Promise<JsonResponse> {
+async getOvertimeConfig(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/overtime/config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2658,14 +2767,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateOvertimeConfig(req: BodyRequest): Promise<JsonResponse> {
+async updateOvertimeConfig(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/overtime/config";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2677,16 +2787,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPayrollConfig(req: EmptyRequest): Promise<JsonResponse> {
+async getPayrollConfig(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2698,14 +2809,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updatePayrollConfig(req: BodyRequest): Promise<JsonResponse> {
+async updatePayrollConfig(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/config";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2717,9 +2829,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPayrollRuns(req: QueryRequest): Promise<JsonResponse> {
+async getPayrollRuns(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/runs";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -2795,7 +2907,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2807,9 +2920,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPayrollRun(req: PathRequest): Promise<JsonResponse> {
+async getPayrollRun(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/runs/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -2817,7 +2930,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2829,9 +2943,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getMyPayrollRuns(req: QueryRequest): Promise<JsonResponse> {
+async getMyPayrollRuns(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/my-runs";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -2907,7 +3021,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2919,9 +3034,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getMyPayrollRun(req: PathRequest): Promise<JsonResponse> {
+async getMyPayrollRun(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/my-runs/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -2929,7 +3044,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2941,14 +3057,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async triggerPayrollRun(req: BodyRequest): Promise<JsonResponse> {
+async triggerPayrollRun(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/runs/trigger";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2960,15 +3077,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async approvePayrollRun(req: PathBodyRequest): Promise<JsonResponse> {
+async approvePayrollRun(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/payroll/runs/{id}/approve";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -2980,9 +3098,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTimeEntries(req: QueryRequest): Promise<JsonResponse> {
+async getTimeEntries(req: QueryRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateQueryRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entries";
 const query = new URLSearchParams();
 if (req.id !== undefined) {
@@ -3058,7 +3176,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3070,14 +3189,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTimeEntry(req: BodyRequest): Promise<JsonResponse> {
+async createTimeEntry(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entries";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3089,15 +3209,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateTimeEntry(req: PathBodyRequest): Promise<JsonResponse> {
+async updateTimeEntry(req: PathBodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entries/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodePathBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3109,9 +3230,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteTimeEntry(req: PathRequest): Promise<JsonResponse> {
+async deleteTimeEntry(req: PathRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validatePathRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entries/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -3119,7 +3240,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3131,14 +3253,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async markTimeEntriesInvoiced(req: BodyRequest): Promise<JsonResponse> {
+async markTimeEntriesInvoiced(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/time-entries/mark-invoiced";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3150,16 +3273,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getReviews(req: EmptyRequest): Promise<JsonResponse> {
+async getReviews(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/reviews";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3171,14 +3295,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createReview(req: BodyRequest): Promise<JsonResponse> {
+async createReview(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/reviews";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3190,16 +3315,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getOneOnOnes(req: EmptyRequest): Promise<JsonResponse> {
+async getOneOnOnes(req: EmptyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateEmptyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/one-on-ones";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -3211,14 +3337,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async upsertOneOnOne(req: BodyRequest): Promise<JsonResponse> {
+async upsertOneOnOne(req: BodyRequest, opts?: RequestOptions): Promise<JsonResponse> {
 const violations = validateBodyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/one-on-ones";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeBodyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

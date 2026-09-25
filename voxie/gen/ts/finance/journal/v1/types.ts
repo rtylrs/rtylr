@@ -7,7 +7,9 @@ number?: string | undefined;
 date?: string | undefined;
 description?: string | undefined;
 lines?: (JournalLine)[] | undefined;
+/** draft, posted */
 status?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
 }
 
@@ -196,11 +198,17 @@ return violations;
 }
 
 export interface ListJournalEntriesRequest {
+/** The current result page. */
 page?: number | undefined;
+/** The maximum number of records to return. */
 limit?: number | undefined;
+/** The field to sort results by. */
 sortBy?: string | undefined;
+/** The sort direction ("asc" or "desc"). */
 sortDir?: string | undefined;
+/** The inclusive start date filter. */
 fromDate?: string | undefined;
+/** The inclusive end date filter. */
 toDate?: string | undefined;
 }
 

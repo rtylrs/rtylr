@@ -7,15 +7,27 @@ import (
 	"strconv"
 )
 
+// Cycle is a sprint-style time box scoped to ONE project in v2. v1 attached
+// cycles to workspaces with an optional project filter; the removal of
+// workspaces makes the project the only sensible owner.
 type Cycle struct {
-	Id        int64  `json:"id,omitempty"`
-	ProjectId int64  `json:"project_id,omitempty"`
-	Name      string `json:"name,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// project_id is the project this cycle belongs to. Always set in v2;
+	// workspace-era cycles were migrated onto their filtered project or archived.
+	ProjectId int64 `json:"project_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `json:"name,omitempty"`
+	// start_date is the start date value for this contract.
 	StartDate string `json:"start_date,omitempty"`
-	EndDate   string `json:"end_date,omitempty"`
-	Status    string `json:"status,omitempty"`
-	Scope     int32  `json:"scope,omitempty"`
-	Completed int32  `json:"completed,omitempty"`
+	// end_date is the end date value for this contract.
+	EndDate string `json:"end_date,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// scope is the total task count in the cycle. Display projection.
+	Scope int32 `json:"scope,omitempty"`
+	// completed is how many of those tasks are done. Display projection.
+	Completed int32 `json:"completed,omitempty"`
 }
 
 func (m *Cycle) MarshalJSON() ([]byte, error) {
@@ -122,11 +134,16 @@ func (x *Cycle) GetCompleted() int32 {
 }
 
 type ListCyclesRequest struct {
+	// project_id lists the cycles of one project.
 	ProjectId *int64 `json:"project_id,omitempty"`
-	Page      int32  `json:"page,omitempty"`
-	Limit     int32  `json:"limit,omitempty"`
-	SortBy    string `json:"sort_by,omitempty"`
-	SortDir   string `json:"sort_dir,omitempty"`
+	// The current result page.
+	Page int32 `json:"page,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// The field to sort results by.
+	SortBy string `json:"sort_by,omitempty"`
+	// The sort direction ("asc" or "desc").
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListCyclesRequest) MarshalJSON() ([]byte, error) {

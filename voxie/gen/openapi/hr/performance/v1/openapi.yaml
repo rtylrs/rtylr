@@ -11,12 +11,24 @@ paths:
             description: Returns review cycles.
             operationId: PerformanceService_listReviewCycles
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.performance.v1.ListReviewCyclesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - PerformanceService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/hr.performance.v1.CreateReviewCycleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.performance.v1.CreateReviewCycleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/performance/v1/review-cycles/open:
         post:
             tags:
@@ -50,12 +74,24 @@ paths:
                             $ref: '#/components/schemas/hr.performance.v1.OpenReviewCycleRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.performance.v1.OpenReviewCycleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/performance/v1/goals:
         get:
             tags:
@@ -66,25 +102,41 @@ paths:
             parameters:
                 - name: employee_id
                   in: query
+                  description: Filter by employee; absent to include all employees.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 - name: review_cycle_id
                   in: query
+                  description: Filter by review cycle; absent to include all cycles.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by review cycle; absent to include all cycles.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.performance.v1.ListGoalsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/performance/v1/reviews:
         post:
             tags:
@@ -99,12 +151,24 @@ paths:
                             $ref: '#/components/schemas/hr.performance.v1.SubmitReviewRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.performance.v1.SubmitReviewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.performance.v1.ListReviewCyclesRequest:
@@ -140,10 +204,12 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the review cycle.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this cycle belongs to.
                 name:
@@ -163,10 +229,12 @@ components:
                     description: Workflow status (draft | open | in_review | completed).
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -215,6 +283,7 @@ components:
                 cycle_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the review cycle to open for submissions.
             required:
@@ -233,10 +302,12 @@ components:
             properties:
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 review_cycle_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by review cycle; absent to include all cycles.
         hr.performance.v1.ListGoalsResponse:
@@ -269,18 +340,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the review goal.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this goal belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee this goal is assigned to.
                 review_cycle_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Review cycle this goal is part of.
                 title:
@@ -301,10 +376,12 @@ components:
                     description: Goal status (active | achieved | missed).
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -324,6 +401,7 @@ components:
                 review_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the performance review being submitted.
                 overall_rating:
@@ -351,22 +429,27 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the performance review.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this review belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee being reviewed.
                 review_cycle_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Review cycle this review is part of.
                 reviewer_employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee conducting the review.
                 review_type:
@@ -383,14 +466,17 @@ components:
                     description: Workflow status (draft | submitted | completed | shared).
                 shared_with_employee_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when the review was shared with the employee; absent if not yet shared.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -404,3 +490,13 @@ components:
                 - created_at
                 - updated_at
             description: PerformanceReviewPayload is a single reviewer's evaluation of an employee within a review cycle.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: PerformanceService
+      description: PerformanceService defines HR performance review endpoints.

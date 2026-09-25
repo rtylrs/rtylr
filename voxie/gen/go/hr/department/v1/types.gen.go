@@ -6,15 +6,21 @@ import (
 	"strconv"
 )
 
+// DepartmentPayload is an HR department record.
 type DepartmentPayload struct {
-	Id             int64  `json:"id,omitempty"`
-	OwnerId        int64  `json:"owner_id,omitempty"`
-	BusinessId     int64  `json:"business_id,omitempty"`
+	// Unique identifier for the department.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this department belongs to.
+	OwnerId    int64 `json:"owner_id,omitempty"`
+	BusinessId int64 `json:"business_id,omitempty"`
+	// Display name of the department.
 	Name           string `json:"name,omitempty"`
 	Description    string `json:"description,omitempty"`
 	ManagerStaffId int64  `json:"manager_staff_id,omitempty"`
-	CreatedAt      int64  `json:"created_at,omitempty"`
-	UpdatedAt      int64  `json:"updated_at,omitempty"`
+	// Unix timestamp when this department was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this department was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *DepartmentPayload) MarshalJSON() ([]byte, error) {
@@ -161,6 +167,7 @@ func (x *DepartmentPayload) GetUpdatedAt() int64 {
 }
 
 type CreateDepartmentRequest struct {
+	// Display name of the department.
 	Name           string `json:"name,omitempty"`
 	Description    string `json:"description,omitempty"`
 	ManagerStaffId int64  `json:"manager_staff_id,omitempty"`
@@ -329,6 +336,7 @@ func (x *ListDepartmentsResponse) GetDepartments() []*DepartmentPayload {
 }
 
 type UpdateDepartmentBody struct {
+	// name is the updated department name.
 	Name           string `json:"name,omitempty"`
 	Description    string `json:"description,omitempty"`
 	ManagerStaffId int64  `json:"manager_staff_id,omitempty"`
@@ -388,7 +396,9 @@ func (x *UpdateDepartmentBody) GetManagerStaffId() int64 {
 }
 
 type UpdateDepartmentRequest struct {
-	Id   int64                 `json:"id,omitempty"`
+	// ID of the department to update.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable department fields bound from the HTTP payload.
 	Body *UpdateDepartmentBody `json:"body,omitempty"`
 }
 

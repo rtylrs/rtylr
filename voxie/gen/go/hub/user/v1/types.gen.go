@@ -7,8 +7,10 @@ import (
 )
 
 type RoleScope struct {
+	// Scope resource type, such as location, department, or project.
 	ScopeType string `json:"scope_type,omitempty"`
-	ScopeId   string `json:"scope_id,omitempty"`
+	// Tenant-owned resource identifier.
+	ScopeId string `json:"scope_id,omitempty"`
 }
 
 func (x *RoleScope) GetScopeType() string {
@@ -28,13 +30,20 @@ func (x *RoleScope) GetScopeId() string {
 }
 
 type AppRoleAssignment struct {
-	AppId            string       `json:"app_id,omitempty"`
-	RoleIds          []string     `json:"role_ids,omitempty"`
-	PrimaryRoleId    *string      `json:"primary_role_id,omitempty"`
-	AssignmentSource string       `json:"assignment_source,omitempty"`
-	Status           string       `json:"status,omitempty"`
-	Scopes           []*RoleScope `json:"scopes,omitempty"`
-	GroupId          *string      `json:"group_id,omitempty"`
+	// Application receiving the role assignment.
+	AppId string `json:"app_id,omitempty"`
+	// Canonical role identifiers.
+	RoleIds []string `json:"role_ids,omitempty"`
+	// Primary display role identifier.
+	PrimaryRoleId *string `json:"primary_role_id,omitempty"`
+	// Server-owned assignment source.
+	AssignmentSource string `json:"assignment_source,omitempty"`
+	// Assignment lifecycle status.
+	Status string `json:"status,omitempty"`
+	// Resource scopes attached to the assignment.
+	Scopes []*RoleScope `json:"scopes,omitempty"`
+	// Group target when the assignment is group-derived.
+	GroupId *string `json:"group_id,omitempty"`
 }
 
 func (x *AppRoleAssignment) GetAppId() string {
@@ -102,12 +111,18 @@ func (x *AppRoleAssignment) GetGroupId() string {
 }
 
 type LicenseAssignment struct {
-	AppId            string  `json:"app_id,omitempty"`
-	Status           string  `json:"status,omitempty"`
-	AssignmentSource string  `json:"assignment_source,omitempty"`
-	GroupId          *string `json:"group_id,omitempty"`
-	GrantedAt        string  `json:"granted_at,omitempty"`
-	RevokedAt        *string `json:"revoked_at,omitempty"`
+	// Licensed application identifier.
+	AppId string `json:"app_id,omitempty"`
+	// License lifecycle status.
+	Status string `json:"status,omitempty"`
+	// Server-owned license source.
+	AssignmentSource string `json:"assignment_source,omitempty"`
+	// Group target when the license is group-derived.
+	GroupId *string `json:"group_id,omitempty"`
+	// Time the license was granted.
+	GrantedAt string `json:"granted_at,omitempty"`
+	// Time the license was revoked, when revoked.
+	RevokedAt *string `json:"revoked_at,omitempty"`
 }
 
 func (x *LicenseAssignment) GetAppId() string {
@@ -167,15 +182,25 @@ func (x *LicenseAssignment) GetRevokedAt() string {
 }
 
 type EffectiveAppAccess struct {
-	AppId             string            `json:"app_id,omitempty"`
-	Licensed          bool              `json:"licensed,omitempty"`
-	HasAccess         bool              `json:"has_access,omitempty"`
-	RoleIds           []string          `json:"role_ids,omitempty"`
-	PrimaryRoleId     *string           `json:"primary_role_id,omitempty"`
-	DisplayRole       *string           `json:"display_role,omitempty"`
-	Permissions       []string          `json:"permissions,omitempty"`
-	Scopes            []*RoleScope      `json:"scopes,omitempty"`
-	Sources           []string          `json:"sources,omitempty"`
+	// Application represented by this access entry.
+	AppId string `json:"app_id,omitempty"`
+	// Whether an active user or group license exists.
+	Licensed bool `json:"licensed,omitempty"`
+	// Whether the user has an active role assignment.
+	HasAccess bool `json:"has_access,omitempty"`
+	// Effective canonical role identifiers.
+	RoleIds []string `json:"role_ids,omitempty"`
+	// Primary role used for display and app entry.
+	PrimaryRoleId *string `json:"primary_role_id,omitempty"`
+	// Server-resolved display role.
+	DisplayRole *string `json:"display_role,omitempty"`
+	// Effective permission keys for this application.
+	Permissions []string `json:"permissions,omitempty"`
+	// Resource scopes attached to effective assignments.
+	Scopes []*RoleScope `json:"scopes,omitempty"`
+	// Sources contributing to effective access.
+	Sources []string `json:"sources,omitempty"`
+	// Permission-to-role source explanation.
 	PermissionSources map[string]string `json:"permission_sources,omitempty"`
 }
 
@@ -268,16 +293,26 @@ func (x *EffectiveAppAccess) GetPermissionSources() map[string]string {
 }
 
 type EffectiveAccess struct {
-	BusinessId           string                `json:"business_id,omitempty"`
-	DashRole             *string               `json:"dash_role,omitempty"`
-	DashRoleId           *string               `json:"dash_role_id,omitempty"`
-	DashPermissions      []string              `json:"dash_permissions,omitempty"`
-	SubscribedApps       []string              `json:"subscribed_apps,omitempty"`
-	Licenses             []*LicenseAssignment  `json:"licenses,omitempty"`
-	Apps                 []*EffectiveAppAccess `json:"apps,omitempty"`
-	IsOwner              bool                  `json:"is_owner,omitempty"`
-	IsAdmin              bool                  `json:"is_admin,omitempty"`
-	AuthorizationVersion int64                 `json:"authorization_version,omitempty"`
+	// Active business scope for this authorization snapshot.
+	BusinessId string `json:"business_id,omitempty"`
+	// Effective Dash role key.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Effective Dash role identifier.
+	DashRoleId *string `json:"dash_role_id,omitempty"`
+	// Effective Dash permission keys.
+	DashPermissions []string `json:"dash_permissions,omitempty"`
+	// Business applications subscribed for this snapshot.
+	SubscribedApps []string `json:"subscribed_apps,omitempty"`
+	// Active and historical license assignments.
+	Licenses []*LicenseAssignment `json:"licenses,omitempty"`
+	// Effective application access entries.
+	Apps []*EffectiveAppAccess `json:"apps,omitempty"`
+	// Whether the user is the business owner.
+	IsOwner bool `json:"is_owner,omitempty"`
+	// Whether the user has the Dash Admin override.
+	IsAdmin bool `json:"is_admin,omitempty"`
+	// Monotonic authorization version for cache refresh.
+	AuthorizationVersion int64 `json:"authorization_version,omitempty"`
 }
 
 func (m *EffectiveAccess) MarshalJSON() ([]byte, error) {
@@ -398,14 +433,22 @@ func (x *EffectiveAccess) GetAuthorizationVersion() int64 {
 }
 
 type ProvisioningStatus struct {
-	Mode                   *string `json:"mode,omitempty"`
-	State                  *string `json:"state,omitempty"`
-	EmailVerified          *bool   `json:"email_verified,omitempty"`
-	PasswordChangeRequired *bool   `json:"password_change_required,omitempty"`
-	MfaRequired            *bool   `json:"mfa_required,omitempty"`
-	MfaEnrolled            *bool   `json:"mfa_enrolled,omitempty"`
-	MfaVerified            *bool   `json:"mfa_verified,omitempty"`
-	RecoveryAvailable      *bool   `json:"recovery_available,omitempty"`
+	// Provisioning mode used for the account.
+	Mode *string `json:"mode,omitempty"`
+	// Current provisioning lifecycle state.
+	State *string `json:"state,omitempty"`
+	// Whether the work email is verified.
+	EmailVerified *bool `json:"email_verified,omitempty"`
+	// Whether a first-login password change is required.
+	PasswordChangeRequired *bool `json:"password_change_required,omitempty"`
+	// Whether MFA is required before sensitive access.
+	MfaRequired *bool `json:"mfa_required,omitempty"`
+	// Whether MFA enrollment is complete.
+	MfaEnrolled *bool `json:"mfa_enrolled,omitempty"`
+	// Whether the current MFA verification window is valid.
+	MfaVerified *bool `json:"mfa_verified,omitempty"`
+	// Whether account recovery is available.
+	RecoveryAvailable *bool `json:"recovery_available,omitempty"`
 }
 
 func (x *ProvisioningStatus) GetMode() string {
@@ -508,18 +551,23 @@ type GetMeRequest struct {
 }
 
 type GetMeResponse struct {
-	Id                 int64               `json:"id,omitempty"`
-	Email              string              `json:"email,omitempty"`
-	FullName           string              `json:"full_name,omitempty"`
-	Apps               []string            `json:"apps,omitempty"`
-	Role               string              `json:"role,omitempty"`
-	BusinessId         int64               `json:"business_id,omitempty"`
-	BusinessName       string              `json:"business_name,omitempty"`
-	IsOwner            bool                `json:"is_owner,omitempty"`
-	IsConsoleAdmin     bool                `json:"is_console_admin,omitempty"`
-	Onboarded          bool                `json:"onboarded,omitempty"`
-	DashRole           *string             `json:"dash_role,omitempty"`
-	EffectiveAccess    *EffectiveAccess    `json:"effective_access,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Email address used for lookup or contact.
+	Email        string   `json:"email,omitempty"`
+	FullName     string   `json:"full_name,omitempty"`
+	Apps         []string `json:"apps,omitempty"`
+	Role         string   `json:"role,omitempty"`
+	BusinessId   int64    `json:"business_id,omitempty"`
+	BusinessName string   `json:"business_name,omitempty"`
+	IsOwner      bool     `json:"is_owner,omitempty"`
+	// is_console_admin indicates the user can access the internal console.
+	IsConsoleAdmin bool `json:"is_console_admin,omitempty"`
+	Onboarded      bool `json:"onboarded,omitempty"`
+	// Effective Dash role for the active business.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Server-resolved authorization snapshot.
+	EffectiveAccess *EffectiveAccess `json:"effective_access,omitempty"`
+	// Account provisioning and security state.
 	ProvisioningStatus *ProvisioningStatus `json:"provisioning_status,omitempty"`
 }
 
@@ -671,7 +719,8 @@ func (x *GetMeResponse) GetProvisioningStatus() *ProvisioningStatus {
 }
 
 type UpdateProfileRequest struct {
-	Name  string  `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Reserved for future profile email changes.
 	Email *string `json:"email,omitempty"`
 }
 
@@ -732,6 +781,7 @@ type ChangePasswordResponse struct {
 }
 
 type SwitchBusinessRequest struct {
+	// Business to activate in the current session.
 	BusinessId *int64 `json:"business_id,omitempty"`
 }
 
@@ -780,6 +830,7 @@ func (x *SwitchBusinessRequest) GetBusinessId() int64 {
 }
 
 type SwitchBusinessResponse struct {
+	// Fresh JWT scoped to the selected business.
 	Token string `json:"token,omitempty"`
 }
 

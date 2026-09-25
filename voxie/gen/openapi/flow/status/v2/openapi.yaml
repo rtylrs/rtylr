@@ -13,22 +13,39 @@ paths:
             parameters:
                 - name: project_id
                   in: query
+                  description: |-
+                    project_id scopes the listing to one project's set. Required: there is no
+                    business-wide set to fall back on, and a listing across projects would
+                    mix pipelines that have nothing to do with each other.
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         project_id scopes the listing to one project's set. Required: there is no
                         business-wide set to fall back on, and a listing across projects would
                         mix pipelines that have nothing to do with each other.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.status.v2.ListStatusesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - StatusService
@@ -42,12 +59,24 @@ paths:
                             $ref: '#/components/schemas/flow.status.v2.CreateStatusRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.status.v2.CreateStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/status/v2/statuses/{id}:
         put:
             tags:
@@ -58,10 +87,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the status identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the status identifier.
             requestBody:
                 content:
                     application/json:
@@ -70,12 +103,24 @@ paths:
                                 - $ref: '#/components/schemas/flow.status.v2.UpdateStatusBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.status.v2.UpdateStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - StatusService
@@ -85,17 +130,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the status identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the status identifier.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.status.v2.DeleteStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/status/v2/tasks/status:
         put:
             tags:
@@ -114,12 +175,24 @@ paths:
                             $ref: '#/components/schemas/flow.status.v2.SetTaskStatusRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.status.v2.SetTaskStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.status.v2.ListStatusesRequest:
@@ -128,6 +201,7 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         project_id scopes the listing to one project's set. Required: there is no
@@ -153,10 +227,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         project_id is the project this status belongs to. Status sets are per
@@ -232,6 +308,7 @@ components:
                 project_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project to add the status to.
                 name:
@@ -281,6 +358,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the status identifier.
                 body:
@@ -343,6 +421,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the status identifier.
             required:
@@ -372,10 +451,12 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task to move.
                 status_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         status_id is the custom status to apply. Zero clears it, putting the task
@@ -400,3 +481,17 @@ components:
             required:
                 - message
                 - status
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: StatusService
+      description: |-
+        StatusService manages per-project custom statuses.
+
+        Board columns stay independent of statuses. T4 of the proposal preserves
+        today's decoupling, so nothing here reads or writes flow_project_columns.

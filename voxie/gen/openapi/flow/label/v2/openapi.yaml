@@ -12,37 +12,53 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.label.v2.ListLabelsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - LabelService
@@ -55,12 +71,24 @@ paths:
                             $ref: '#/components/schemas/flow.label.v2.CreateLabelRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.label.v2.CreateLabelResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/label/v2/labels/{id}:
         put:
             tags:
@@ -70,23 +98,49 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the label identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the label identifier.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.label.v2.UpdateLabelRequest'
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                    description: name is the label name.
+                                color:
+                                    type: string
+                                    description: color is the label color.
+                            required:
+                                - name
+                                - color
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.label.v2.UpdateLabelResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - LabelService
@@ -95,17 +149,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the label identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the label identifier.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.label.v2.DeleteLabelResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/label/v2/tasks/labels:
         put:
             tags:
@@ -119,12 +189,24 @@ paths:
                             $ref: '#/components/schemas/flow.label.v2.SetTaskLabelsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.label.v2.SetTaskLabelsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.label.v2.ListLabelsRequest:
@@ -168,6 +250,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 name:
@@ -249,6 +332,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the label identifier.
                 name:
@@ -275,6 +359,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the label identifier.
             required:
@@ -293,11 +378,13 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 label_ids:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
             required:
                 - task_id
@@ -309,3 +396,12 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LabelService

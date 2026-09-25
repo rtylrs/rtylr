@@ -6,14 +6,25 @@ import (
 	"strconv"
 )
 
+// ReportRequestPayload describes the parameters for an HR report.
+// Report types: attendance | timesheet | leave_utilization | leave_calendar
+// | overtime | payroll_cost | headcount | turnover
+// | checklist_completion | performance_review_status
 type ReportRequestPayload struct {
-	ReportType   string `json:"report_type,omitempty"`
-	DateFrom     string `json:"date_from,omitempty"`
-	DateTo       string `json:"date_to,omitempty"`
-	LocationId   *int64 `json:"location_id,omitempty"`
+	// Type of report to generate (see report type constants above).
+	ReportType string `json:"report_type,omitempty"`
+	// Start of the reporting period (ISO-8601 date).
+	DateFrom string `json:"date_from,omitempty"`
+	// End of the reporting period (ISO-8601 date).
+	DateTo string `json:"date_to,omitempty"`
+	// Filter by location; absent to include all locations.
+	LocationId *int64 `json:"location_id,omitempty"`
+	// Filter by department; absent to include all departments.
 	DepartmentId *int64 `json:"department_id,omitempty"`
-	EmployeeId   *int64 `json:"employee_id,omitempty"`
-	Format       string `json:"format,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Output format (json | csv | pdf).
+	Format string `json:"format,omitempty"`
 }
 
 func (m *ReportRequestPayload) MarshalJSON() ([]byte, error) {
@@ -142,11 +153,16 @@ func (x *ReportRequestPayload) GetFormat() string {
 	return x.Format
 }
 
+// ReportPayload is a generated HR report.
 type ReportPayload struct {
-	ReportType  string `json:"report_type,omitempty"`
-	GeneratedAt int64  `json:"generated_at,omitempty"`
-	Data        []byte `json:"data,omitempty"`
-	Format      string `json:"format,omitempty"`
+	// Type of report that was generated.
+	ReportType string `json:"report_type,omitempty"`
+	// Unix timestamp when the report was generated.
+	GeneratedAt int64 `json:"generated_at,omitempty"`
+	// Serialised report content (CSV, JSON, or PDF binary depending on format).
+	Data []byte `json:"data,omitempty"`
+	// Format of the serialised data (json | csv | pdf).
+	Format string `json:"format,omitempty"`
 }
 
 func (m *ReportPayload) MarshalJSON() ([]byte, error) {
@@ -211,6 +227,7 @@ func (x *ReportPayload) GetFormat() string {
 }
 
 type GenerateReportRequest struct {
+	// Parameters describing the report to generate.
 	Request *ReportRequestPayload `json:"request,omitempty"`
 }
 
@@ -223,6 +240,7 @@ func (x *GenerateReportRequest) GetRequest() *ReportRequestPayload {
 }
 
 type GenerateReportResponse struct {
+	// The generated report.
 	Report *ReportPayload `json:"report,omitempty"`
 }
 

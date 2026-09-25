@@ -107,7 +107,9 @@ return violations;
 }
 
 export interface ListPriceListsRequest {
+/** Maximum number of price lists to return. */
 limit?: number | undefined;
+/** Number of price lists to skip. */
 offset?: number | undefined;
 }
 

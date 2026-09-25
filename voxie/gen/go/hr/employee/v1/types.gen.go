@@ -7,26 +7,46 @@ import (
 	"strconv"
 )
 
+// EmployeePayload is an HR employee record.
 type EmployeePayload struct {
-	Id                  int64    `json:"id,omitempty"`
-	OwnerId             int64    `json:"owner_id,omitempty"`
-	UserId              int64    `json:"user_id,omitempty"`
-	DepartmentId        int64    `json:"department_id,omitempty"`
-	LocationId          int64    `json:"location_id,omitempty"`
-	ManagerId           *int64   `json:"manager_id,omitempty"`
-	ContractType        string   `json:"contract_type,omitempty"`
-	Status              string   `json:"status,omitempty"`
-	HireDate            string   `json:"hire_date,omitempty"`
-	ProbationEndDate    *string  `json:"probation_end_date,omitempty"`
-	TerminationDate     *string  `json:"termination_date,omitempty"`
-	HourlyRate          *float64 `json:"hourly_rate,omitempty"`
-	MonthlySalary       *float64 `json:"monthly_salary,omitempty"`
-	Currency            string   `json:"currency,omitempty"`
-	WorkScheduleId      *int64   `json:"work_schedule_id,omitempty"`
-	AccountCreationMode string   `json:"account_creation_mode,omitempty"`
-	JobTitle            string   `json:"job_title,omitempty"`
-	CreatedAt           int64    `json:"created_at,omitempty"`
-	UpdatedAt           int64    `json:"updated_at,omitempty"`
+	// Unique identifier for the employee record.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this employee belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Linked user account ID.
+	UserId int64 `json:"user_id,omitempty"`
+	// Department the employee is assigned to.
+	DepartmentId int64 `json:"department_id,omitempty"`
+	// Work location the employee reports to.
+	LocationId int64 `json:"location_id,omitempty"`
+	// Direct manager; absent if top-level.
+	ManagerId *int64 `json:"manager_id,omitempty"`
+	// Employment arrangement (full_time | part_time | freelancer).
+	ContractType string `json:"contract_type,omitempty"`
+	// Current employment status (active | probation | inactive | terminated).
+	Status string `json:"status,omitempty"`
+	// Date the employee was hired (ISO-8601 format).
+	HireDate string `json:"hire_date,omitempty"`
+	// End of probation period; absent if no probation (ISO-8601 format).
+	ProbationEndDate *string `json:"probation_end_date,omitempty"`
+	// Date employment was terminated; absent if still employed (ISO-8601 format).
+	TerminationDate *string `json:"termination_date,omitempty"`
+	// Pay rate per hour for hourly employees; absent if salaried only.
+	HourlyRate *float64 `json:"hourly_rate,omitempty"`
+	// Monthly gross salary; absent if hourly only.
+	MonthlySalary *float64 `json:"monthly_salary,omitempty"`
+	// ISO-4217 currency code for compensation (e.g. "USD").
+	Currency string `json:"currency,omitempty"`
+	// Assigned work schedule; absent if using department default.
+	WorkScheduleId *int64 `json:"work_schedule_id,omitempty"`
+	// How the employee account was created (hr_created | invite_link).
+	AccountCreationMode string `json:"account_creation_mode,omitempty"`
+	// Employee's job title or position name.
+	JobTitle string `json:"job_title,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *EmployeePayload) MarshalJSON() ([]byte, error) {
@@ -321,20 +341,34 @@ func (x *EmployeePayload) GetUpdatedAt() int64 {
 }
 
 type CreateEmployeeRequest struct {
-	UserId         int64   `json:"user_id,omitempty"`
-	DepartmentId   int64   `json:"department_id,omitempty"`
-	LocationId     int64   `json:"location_id,omitempty"`
-	WorkScheduleId int64   `json:"work_schedule_id,omitempty"`
-	FirstName      string  `json:"first_name,omitempty"`
-	LastName       string  `json:"last_name,omitempty"`
-	Email          string  `json:"email,omitempty"`
-	Phone          string  `json:"phone,omitempty"`
-	EmploymentType string  `json:"employment_type,omitempty"`
-	Salary         float64 `json:"salary,omitempty"`
-	HourlyRate     float64 `json:"hourly_rate,omitempty"`
-	OvertimeRate   float64 `json:"overtime_rate,omitempty"`
-	StartDate      string  `json:"start_date,omitempty"`
-	Address        string  `json:"address,omitempty"`
+	// user_id links this employee record to an existing login account; zero leaves it unlinked.
+	UserId int64 `json:"user_id,omitempty"`
+	// department_id is the department assignment; zero leaves it unset.
+	DepartmentId int64 `json:"department_id,omitempty"`
+	// location_id is the work location assignment; zero leaves it unset.
+	LocationId int64 `json:"location_id,omitempty"`
+	// work_schedule_id is the work schedule assignment; zero leaves it unset.
+	WorkScheduleId int64 `json:"work_schedule_id,omitempty"`
+	// first_name is the employee's given name.
+	FirstName string `json:"first_name,omitempty"`
+	// last_name is the employee's family name.
+	LastName string `json:"last_name,omitempty"`
+	// email is the employee email address.
+	Email string `json:"email,omitempty"`
+	// phone is the employee phone number.
+	Phone string `json:"phone,omitempty"`
+	// employment_type is the employment type label.
+	EmploymentType string `json:"employment_type,omitempty"`
+	// salary is the monthly or salaried compensation amount.
+	Salary float64 `json:"salary,omitempty"`
+	// hourly_rate is the employee hourly pay rate.
+	HourlyRate float64 `json:"hourly_rate,omitempty"`
+	// overtime_rate is the employee overtime pay rate.
+	OvertimeRate float64 `json:"overtime_rate,omitempty"`
+	// start_date is the start date in YYYY-MM-DD format.
+	StartDate string `json:"start_date,omitempty"`
+	// address is the employee address.
+	Address string `json:"address,omitempty"`
 }
 
 func (m *CreateEmployeeRequest) MarshalJSON() ([]byte, error) {
@@ -509,6 +543,7 @@ func (x *CreateEmployeeRequest) GetAddress() string {
 }
 
 type CreateEmployeeResponse struct {
+	// The newly created employee record.
 	Employee *hr_staff_v1.Staff `json:"employee,omitempty"`
 }
 
@@ -521,8 +556,10 @@ func (x *CreateEmployeeResponse) GetEmployee() *hr_staff_v1.Staff {
 }
 
 type InviteEmployeeRequest struct {
+	// ID of the employee to invite.
 	EmployeeId *int64 `json:"employee_id,omitempty"`
-	SendVia    string `json:"send_via,omitempty"`
+	// Channel to deliver the invite (email | sms).
+	SendVia string `json:"send_via,omitempty"`
 }
 
 func (m *InviteEmployeeRequest) MarshalJSON() ([]byte, error) {
@@ -578,8 +615,10 @@ func (x *InviteEmployeeRequest) GetSendVia() string {
 }
 
 type InviteEmployeeResponse struct {
+	// Sensitive: do not log this field. One-time invite token for the employee.
 	InviteToken string `json:"invite_token,omitempty"`
-	ExpiresAt   int64  `json:"expires_at,omitempty"`
+	// Unix timestamp when the invite expires.
+	ExpiresAt int64 `json:"expires_at,omitempty"`
 }
 
 func (m *InviteEmployeeResponse) MarshalJSON() ([]byte, error) {
@@ -628,7 +667,9 @@ func (x *InviteEmployeeResponse) GetExpiresAt() int64 {
 }
 
 type AcceptInviteRequest struct {
-	Token    string `json:"token,omitempty"`
+	// Sensitive: do not log this field. The invite token received by the employee.
+	Token string `json:"token,omitempty"`
+	// Sensitive: do not log this field. Password chosen by the employee.
 	Password string `json:"password,omitempty"`
 }
 
@@ -649,6 +690,7 @@ func (x *AcceptInviteRequest) GetPassword() string {
 }
 
 type AcceptInviteResponse struct {
+	// Whether the invite was accepted successfully.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -661,11 +703,16 @@ func (x *AcceptInviteResponse) GetSuccess() bool {
 }
 
 type ListEmployeesRequest struct {
-	DepartmentId *int64  `json:"department_id,omitempty"`
-	LocationId   *int64  `json:"location_id,omitempty"`
-	Status       *string `json:"status,omitempty"`
-	Limit        int32   `json:"limit,omitempty"`
-	Offset       int32   `json:"offset,omitempty"`
+	// Filter by department; absent to include all departments.
+	DepartmentId *int64 `json:"department_id,omitempty"`
+	// Filter by location; absent to include all locations.
+	LocationId *int64 `json:"location_id,omitempty"`
+	// Filter by employment status; absent to include all statuses.
+	Status *string `json:"status,omitempty"`
+	// Maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// Number of records to skip for pagination.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (m *ListEmployeesRequest) MarshalJSON() ([]byte, error) {
@@ -766,10 +813,14 @@ func (x *ListEmployeesRequest) GetOffset() int32 {
 }
 
 type ListEmployeesResponse struct {
+	// Page of employee records matching the filters.
 	Employees []*EmployeePayload `json:"employees,omitempty"`
-	Total     int64              `json:"total,omitempty"`
-	Limit     int32              `json:"limit,omitempty"`
-	Offset    int32              `json:"offset,omitempty"`
+	// Total number of employees matching the filters.
+	Total int64 `json:"total,omitempty"`
+	// Limit that was applied.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset that was applied.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListEmployeesResponse) GetEmployees() []*EmployeePayload {
@@ -805,25 +856,44 @@ func (x *ListEmployeesResponse) GetOffset() int32 {
 }
 
 type UpdateEmployeeBody struct {
-	UserId                int64   `json:"user_id,omitempty"`
-	DepartmentId          int64   `json:"department_id,omitempty"`
-	LocationId            int64   `json:"location_id,omitempty"`
-	WorkScheduleId        int64   `json:"work_schedule_id,omitempty"`
-	FirstName             string  `json:"first_name,omitempty"`
-	LastName              string  `json:"last_name,omitempty"`
-	Email                 string  `json:"email,omitempty"`
-	Phone                 string  `json:"phone,omitempty"`
-	EmploymentType        string  `json:"employment_type,omitempty"`
-	Status                string  `json:"status,omitempty"`
-	Salary                float64 `json:"salary,omitempty"`
-	HourlyRate            float64 `json:"hourly_rate,omitempty"`
-	OvertimeRate          float64 `json:"overtime_rate,omitempty"`
-	StartDate             string  `json:"start_date,omitempty"`
-	EndDate               string  `json:"end_date,omitempty"`
-	Address               string  `json:"address,omitempty"`
-	EmergencyContactName  string  `json:"emergency_contact_name,omitempty"`
-	EmergencyContactPhone string  `json:"emergency_contact_phone,omitempty"`
-	Notes                 string  `json:"notes,omitempty"`
+	// user_id links this employee record to an existing login account; zero leaves it unlinked.
+	UserId int64 `json:"user_id,omitempty"`
+	// department_id is the department assignment; zero leaves it unset.
+	DepartmentId int64 `json:"department_id,omitempty"`
+	// location_id is the work location assignment; zero leaves it unset.
+	LocationId int64 `json:"location_id,omitempty"`
+	// work_schedule_id is the work schedule assignment; zero leaves it unset.
+	WorkScheduleId int64 `json:"work_schedule_id,omitempty"`
+	// first_name is the employee's given name.
+	FirstName string `json:"first_name,omitempty"`
+	// last_name is the employee's family name.
+	LastName string `json:"last_name,omitempty"`
+	// email is the employee email address.
+	Email string `json:"email,omitempty"`
+	// phone is the employee phone number.
+	Phone string `json:"phone,omitempty"`
+	// employment_type is the employment type label.
+	EmploymentType string `json:"employment_type,omitempty"`
+	// status is the employment status.
+	Status string `json:"status,omitempty"`
+	// salary is the monthly or salaried compensation amount.
+	Salary float64 `json:"salary,omitempty"`
+	// hourly_rate is the employee hourly pay rate.
+	HourlyRate float64 `json:"hourly_rate,omitempty"`
+	// overtime_rate is the employee overtime pay rate.
+	OvertimeRate float64 `json:"overtime_rate,omitempty"`
+	// start_date is the start date in YYYY-MM-DD format.
+	StartDate string `json:"start_date,omitempty"`
+	// end_date is the end date in YYYY-MM-DD format.
+	EndDate string `json:"end_date,omitempty"`
+	// address is the employee address.
+	Address string `json:"address,omitempty"`
+	// emergency_contact_name is the emergency contact name.
+	EmergencyContactName string `json:"emergency_contact_name,omitempty"`
+	// emergency_contact_phone is the emergency contact phone.
+	EmergencyContactPhone string `json:"emergency_contact_phone,omitempty"`
+	// notes are internal employee notes.
+	Notes string `json:"notes,omitempty"`
 }
 
 func (m *UpdateEmployeeBody) MarshalJSON() ([]byte, error) {
@@ -1038,7 +1108,9 @@ func (x *UpdateEmployeeBody) GetNotes() string {
 }
 
 type UpdateEmployeeRequest struct {
-	Id   int64               `json:"id,omitempty"`
+	// id is the employee ID from the route.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable employee fields bound from the HTTP payload.
 	Body *UpdateEmployeeBody `json:"body,omitempty"`
 }
 
@@ -1088,6 +1160,7 @@ func (x *UpdateEmployeeRequest) GetBody() *UpdateEmployeeBody {
 }
 
 type UpdateEmployeeResponse struct {
+	// The updated employee record.
 	Employee *hr_staff_v1.Staff `json:"employee,omitempty"`
 }
 

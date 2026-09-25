@@ -13,24 +13,38 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum records to return. Defaults to 50 and is capped by the server.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum records to return. Defaults to 50 and is capped by the server.
                 - name: cursor
                   in: query
-                  required: true
+                  description: Opaque continuation token from a previous response.
+                  required: false
                   schema:
                     type: string
                     description: Opaque continuation token from a previous response.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.notification.v1.ListNotificationsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/notification/v1/notifications/read-all:
         patch:
             tags:
@@ -45,12 +59,24 @@ paths:
                             $ref: '#/components/schemas/hub.notification.v1.MarkAllReadRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.notification.v1.MarkAllReadResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/notification/v1/notifications/{id}/read:
         patch:
             tags:
@@ -63,21 +89,35 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.notification.v1.MarkNotificationReadRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.notification.v1.MarkNotificationReadResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.notification.v1.ListNotificationsRequest:
@@ -110,6 +150,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 title:
                     type: string
@@ -149,6 +190,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -159,3 +201,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: NotificationService
+      description: NotificationService defines hub notification endpoints.

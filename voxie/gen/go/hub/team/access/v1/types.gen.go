@@ -8,18 +8,26 @@ import (
 )
 
 type AccessRequest struct {
-	Id             int64                    `json:"id,omitempty"`
-	UserId         int64                    `json:"user_id,omitempty"`
-	App            string                   `json:"app,omitempty"`
-	RoleIds        []string                 `json:"role_ids,omitempty"`
-	Scopes         []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
-	Reason         *string                  `json:"reason,omitempty"`
-	Status         string                   `json:"status,omitempty"`
-	ApproverId     *int64                   `json:"approver_id,omitempty"`
-	ApprovedAt     *string                  `json:"approved_at,omitempty"`
-	RequesterName  string                   `json:"requester_name,omitempty"`
-	RequesterEmail string                   `json:"requester_email,omitempty"`
-	CreatedAt      string                   `json:"created_at,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Identifies the user who requested access.
+	UserId int64  `json:"user_id,omitempty"`
+	App    string `json:"app,omitempty"`
+	// Requested normalized role identifiers.
+	RoleIds []string `json:"role_ids,omitempty"`
+	// Requested resource scopes.
+	Scopes []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
+	// Optional business reason for the request.
+	Reason *string `json:"reason,omitempty"`
+	// Current request lifecycle status.
+	Status string `json:"status,omitempty"`
+	// User who approved the request, when approved.
+	ApproverId *int64 `json:"approver_id,omitempty"`
+	// Approval timestamp, when approved.
+	ApprovedAt     *string `json:"approved_at,omitempty"`
+	RequesterName  string  `json:"requester_name,omitempty"`
+	RequesterEmail string  `json:"requester_email,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *AccessRequest) MarshalJSON() ([]byte, error) {
@@ -183,10 +191,13 @@ func (x *AccessRequest) GetCreatedAt() string {
 }
 
 type RequestAccessRequest struct {
-	App     string                   `json:"app,omitempty"`
-	RoleIds []string                 `json:"role_ids,omitempty"`
-	Scopes  []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
-	Reason  *string                  `json:"reason,omitempty"`
+	App string `json:"app,omitempty"`
+	// Requested normalized role identifiers.
+	RoleIds []string `json:"role_ids,omitempty"`
+	// Requested resource scopes.
+	Scopes []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
+	// Optional business reason for the request.
+	Reason *string `json:"reason,omitempty"`
 }
 
 func (x *RequestAccessRequest) GetApp() string {
@@ -253,11 +264,14 @@ func (x *ListAccessRequestsResponse) GetRequests() []*AccessRequest {
 }
 
 type ApproveAccessRequestRequest struct {
-	Id      int64                    `json:"id,omitempty"`
-	UserId  *int64                   `json:"user_id,omitempty"`
-	App     string                   `json:"app,omitempty"`
-	RoleIds []string                 `json:"role_ids,omitempty"`
-	Scopes  []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Identifies the user being granted access.
+	UserId *int64 `json:"user_id,omitempty"`
+	App    string `json:"app,omitempty"`
+	// Approved normalized role identifiers.
+	RoleIds []string `json:"role_ids,omitempty"`
+	// Approved resource scopes.
+	Scopes []*hub_user_v1.RoleScope `json:"scopes,omitempty"`
 }
 
 func (m *ApproveAccessRequestRequest) MarshalJSON() ([]byte, error) {

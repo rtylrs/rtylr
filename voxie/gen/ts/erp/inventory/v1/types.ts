@@ -143,6 +143,7 @@ return violations;
 }
 
 export interface AdjustInventoryResponse {
+/** A human-readable result message. */
 message?: string | undefined;
 }
 
@@ -166,7 +167,9 @@ return violations;
 }
 
 export interface GetInventoryReportRequest {
+/** Maximum number of inventory rows to return. */
 limit?: number | undefined;
+/** Number of inventory rows to skip. */
 offset?: number | undefined;
 }
 
@@ -237,7 +240,9 @@ return violations;
 }
 
 export interface GetLowStockRequest {
+/** Maximum number of low-stock rows to return. */
 limit?: number | undefined;
+/** Number of low-stock rows to skip. */
 offset?: number | undefined;
 }
 
@@ -308,7 +313,9 @@ return violations;
 }
 
 export interface GetValuationRequest {
+/** Maximum number of valuation rows to return. */
 limit?: number | undefined;
+/** Number of valuation rows to skip. */
 offset?: number | undefined;
 }
 

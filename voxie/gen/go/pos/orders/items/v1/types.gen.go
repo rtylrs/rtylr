@@ -7,6 +7,7 @@ import (
 )
 
 type UpdateOrderItemStatusBody struct {
+	// status is the current lifecycle state.
 	Status string `json:"status,omitempty"`
 }
 
@@ -19,9 +20,10 @@ func (x *UpdateOrderItemStatusBody) GetStatus() string {
 }
 
 type UpdateOrderItemStatusRequest struct {
-	OrderId int64                      `json:"order_id,omitempty"`
-	ItemId  int64                      `json:"item_id,omitempty"`
-	Body    *UpdateOrderItemStatusBody `json:"body,omitempty"`
+	OrderId int64 `json:"order_id,omitempty"`
+	ItemId  int64 `json:"item_id,omitempty"`
+	// body carries the new order item status bound from the HTTP payload.
+	Body *UpdateOrderItemStatusBody `json:"body,omitempty"`
 }
 
 func (m *UpdateOrderItemStatusRequest) MarshalJSON() ([]byte, error) {

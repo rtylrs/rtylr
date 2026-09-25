@@ -4,14 +4,23 @@ import * as hub_user_v1 from "../../../user/v1/types.js";
 export interface InviteUserRequest {
 email: string;
 fullName: string;
+/** Legacy global role accepted during the migration window. */
 role?: string | undefined;
+/** Legacy flat application list accepted during the migration window. */
 apps?: (string)[] | undefined;
+/** Independent Dash role assignment. */
 dashRole?: string | undefined;
+/** Independent application role assignments. */
 appAssignments?: (hub_user_v1.AppRoleAssignment)[] | undefined;
+/** Groups that provide inherited access. */
 groupIds?: (string)[] | undefined;
+/** Optional user-provided secret; omit it to send an invitation link. */
 password?: string | undefined;
+/** Direct credential provisioning uses a write-only temporary secret. */
 username?: string | undefined;
+/** Write-only temporary password for direct provisioning. */
 temporaryPassword?: string | undefined;
+/** Invitation or direct-credential provisioning mode. */
 provisioningMode?: string | undefined;
 }
 
@@ -52,7 +61,7 @@ export function validateInviteUserRequest(v: InviteUserRequest): string[] {
 const violations: string[] = [];
 if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
-if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.email !== undefined && v.email !== null && v.email !== "" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
 if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
 if (!(v.fullName !== undefined && v.fullName !== null) || v.fullName === "") violations.push("full_name is required");
 if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
@@ -99,9 +108,13 @@ export interface BulkInviteRequest {
 emails?: (string)[] | undefined;
 role?: string | undefined;
 apps?: (string)[] | undefined;
+/** Independent Dash role assignment shared by all invitees. */
 dashRole?: string | undefined;
+/** Independent application role assignments shared by all invitees. */
 appAssignments?: (hub_user_v1.AppRoleAssignment)[] | undefined;
+/** Groups that provide inherited access to all invitees. */
 groupIds?: (string)[] | undefined;
+/** Identifies an optional group to add invitees to. */
 groupId?: string | undefined;
 }
 
@@ -180,6 +193,7 @@ return violations;
 }
 
 export interface BulkInviteResponse {
+/** Per-email invite outcome list. */
 results?: (BulkInviteResult)[] | undefined;
 message?: string | undefined;
 }
@@ -208,6 +222,7 @@ return violations;
 }
 
 export interface VerifyInviteRequest {
+/** Opaque token used to complete the operation. */
 token: string;
 }
 
@@ -235,8 +250,14 @@ export interface VerifyInviteResponse {
 email?: string | undefined;
 fullName?: string | undefined;
 valid?: boolean | undefined;
+/**
+ * Lists the app IDs the invited user will have access to, so the
+ * frontend can redirect to the right app after the invite is accepted.
+ */
 apps?: (string)[] | undefined;
+/** Dash role that will become active after acceptance. */
 dashRole?: string | undefined;
+/** Application roles that will become active after acceptance. */
 appAssignments?: (hub_user_v1.AppRoleAssignment)[] | undefined;
 }
 
@@ -276,7 +297,9 @@ return violations;
 }
 
 export interface AcceptInviteRequest {
+/** Opaque token used to complete the operation. */
 token: string;
+/** User-provided secret for authentication. */
 password: string;
 }
 

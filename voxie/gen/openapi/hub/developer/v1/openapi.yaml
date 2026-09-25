@@ -11,12 +11,24 @@ paths:
             description: Returns API keys for the active business.
             operationId: DeveloperService_listApiKeys
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.ListApiKeysResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - DeveloperService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/hub.developer.v1.CreateApiKeyRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.CreateApiKeyResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/developer/v1/api-keys/revoke:
         post:
             tags:
@@ -50,12 +74,24 @@ paths:
                             $ref: '#/components/schemas/hub.developer.v1.RevokeApiKeyRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.RevokeApiKeyResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/developer/v1/webhooks:
         get:
             tags:
@@ -64,12 +100,24 @@ paths:
             description: Returns configured webhooks.
             operationId: DeveloperService_listWebhooks
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.ListWebhooksResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - DeveloperService
@@ -83,12 +131,24 @@ paths:
                             $ref: '#/components/schemas/hub.developer.v1.CreateWebhookRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.CreateWebhookResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/developer/v1/webhooks/{id}:
         put:
             tags:
@@ -101,21 +161,49 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hub.developer.v1.UpdateWebhookRequest'
+                            type: object
+                            properties:
+                                url:
+                                    type: string
+                                events:
+                                    type: array
+                                    items:
+                                        type: string
+                                    minItems: 1
+                                is_active:
+                                    type: boolean
+                            required:
+                                - url
+                                - events
+                                - is_active
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.UpdateWebhookResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - DeveloperService
@@ -127,15 +215,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.DeleteWebhookResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/developer/v1/webhooks/deliveries:
         get:
             tags:
@@ -155,16 +257,23 @@ paths:
             parameters:
                 - name: webhook_id
                   in: query
-                  required: true
+                  description: |-
+                    webhook_id narrows to one registration. Omit for every registration in
+                    the business.
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         webhook_id narrows to one registration. Omit for every registration in
                         the business.
                 - name: status
                   in: query
-                  required: true
+                  description: |-
+                    status narrows to one status. "dead" is the one worth watching, since
+                    those events will never arrive without intervention.
+                  required: false
                   schema:
                     type: string
                     description: |-
@@ -172,23 +281,35 @@ paths:
                         those events will never arrive without intervention.
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: limit
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.developer.v1.ListWebhookDeliveriesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.developer.v1.ListApiKeysRequest:
@@ -207,6 +328,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -252,6 +374,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 key:
                     type: string
@@ -267,6 +390,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -293,6 +417,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 url:
                     type: string
@@ -331,6 +456,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -343,6 +469,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 url:
                     type: string
@@ -372,6 +499,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -387,6 +515,7 @@ components:
             properties:
                 webhook_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         webhook_id narrows to one registration. Omit for every registration in
@@ -425,12 +554,15 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 webhook_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 event_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 event_type:
                     type: string
@@ -517,3 +649,13 @@ components:
                 - has_next
                 - has_prev
             description: Standard pagination response metadata.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: DeveloperService
+      description: DeveloperService defines hub developer API endpoints.

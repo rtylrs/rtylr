@@ -2,9 +2,11 @@
 
 export interface Quote {
 id?: string | undefined;
+/** Identifies the tenant that owns the resource. */
 ownerId?: string | undefined;
 customerName?: string | undefined;
 customerEmail?: string | undefined;
+/** draft, sent, accepted, rejected, expired, converted */
 status?: string | undefined;
 lines?: (QuoteLine)[] | undefined;
 subtotal?: number | undefined;
@@ -13,7 +15,9 @@ discount?: number | undefined;
 total?: number | undefined;
 validUntil?: string | undefined;
 notes?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
+/** When the record was last updated. */
 updatedAt?: string | undefined;
 }
 
@@ -118,6 +122,7 @@ return violations;
 export interface CreateQuoteRequest {
 customerName: string;
 customerEmail?: string | undefined;
+/** The initial lifecycle state - defaults to "draft" if empty. */
 status?: string | undefined;
 lines?: (QuoteLine)[] | undefined;
 subtotal?: number | undefined;
@@ -256,7 +261,9 @@ return violations;
 }
 
 export interface ListQuotesRequest {
+/** The one-based page number to return. */
 page?: number | undefined;
+/** The maximum number of quotes to return. */
 pageSize?: number | undefined;
 }
 
@@ -284,8 +291,11 @@ return violations;
 
 export interface ListQuotesResponse {
 quotes?: (Quote)[] | undefined;
+/** The current result page. */
 page?: number | undefined;
+/** The number of records requested per page. */
 pageSize?: number | undefined;
+/** Whether additional pages are available. */
 hasMore?: boolean | undefined;
 }
 
@@ -344,6 +354,7 @@ return violations;
 
 export interface UpdateQuoteStatusRequest {
 id?: string | undefined;
+/** Carries status update fields bound from the HTTP payload. */
 body?: UpdateQuoteStatusBody | undefined;
 }
 
@@ -419,6 +430,7 @@ return violations;
 }
 
 export interface ConvertQuoteResponse {
+/** The identifier of the invoice created from this quote. */
 invoiceId?: string | undefined;
 message?: string | undefined;
 }

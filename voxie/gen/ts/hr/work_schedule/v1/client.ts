@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface WorkScheduleServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** WorkScheduleService defines HR work schedule endpoints. */
 export class WorkScheduleServiceClient {
 private baseUrl: string;
 private options: WorkScheduleServiceClientOptions;
@@ -71,9 +110,10 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listWorkSchedules(req: ListWorkSchedulesRequest): Promise<ListWorkSchedulesResponse> {
+/** Lists work schedules for the tenant. */
+async listWorkSchedules(req: ListWorkSchedulesRequest, opts?: RequestOptions): Promise<ListWorkSchedulesResponse> {
 const violations = validateListWorkSchedulesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/work-schedule/v1/work-schedules";
 const query = new URLSearchParams();
 if (req.limit !== undefined) {
@@ -86,7 +126,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -98,14 +139,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListWorkSchedulesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createWorkSchedule(req: CreateWorkScheduleRequest): Promise<CreateWorkScheduleResponse> {
+/** Creates a new work schedule. */
+async createWorkSchedule(req: CreateWorkScheduleRequest, opts?: RequestOptions): Promise<CreateWorkScheduleResponse> {
 const violations = validateCreateWorkScheduleRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/work-schedule/v1/work-schedules";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateWorkScheduleRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -117,15 +160,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateWorkScheduleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateWorkSchedule(req: UpdateWorkScheduleRequest): Promise<UpdateWorkScheduleResponse> {
+/** Updates an existing work schedule. */
+async updateWorkSchedule(req: UpdateWorkScheduleRequest, opts?: RequestOptions): Promise<UpdateWorkScheduleResponse> {
 const violations = validateUpdateWorkScheduleRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hr/work-schedule/v1/work-schedules/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateWorkScheduleRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

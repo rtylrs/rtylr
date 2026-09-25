@@ -13,23 +13,35 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
                 - name: page_size
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/recruit.career.v1.ListSubmissionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /recruit/career/v1/submissions/status:
         patch:
             tags:
@@ -43,15 +55,27 @@ paths:
                         schema:
                             allOf:
                                 - $ref: '#/components/schemas/recruit.career.v1.UpdateSubmissionStatusBody'
-                            description: body carries the new status bound from the HTTP payload.
+                            description: body carries the submission id and new status bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/recruit.career.v1.UpdateSubmissionStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         recruit.career.v1.ListSubmissionsRequest:
@@ -94,9 +118,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 career_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 candidate_name:
                     type: string
@@ -132,25 +158,27 @@ components:
         recruit.career.v1.UpdateSubmissionStatusRequest:
             type: object
             properties:
-                id:
-                    exclusiveMinimum: 0
-                    type: string
-                    format: int64
                 body:
                     allOf:
                         - $ref: '#/components/schemas/recruit.career.v1.UpdateSubmissionStatusBody'
-                    description: body carries the new status bound from the HTTP payload.
+                    description: body carries the submission id and new status bound from the HTTP payload.
             required:
-                - id
                 - body
             description: UpdateSubmissionStatusRequest advances a candidate through the funnel.
         recruit.career.v1.UpdateSubmissionStatusBody:
             type: object
             properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id identifies the submission to update.
                 status:
                     type: string
                     description: 'status is one of: pending | reviewing | interview | offer | hired | rejected.'
             required:
+                - id
                 - status
             description: UpdateSubmissionStatusBody carries the status transition.
         recruit.career.v1.UpdateSubmissionStatusResponse:
@@ -162,3 +190,16 @@ components:
             required:
                 - message
             description: UpdateSubmissionStatusResponse confirms the transition.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: RecruitCareerService
+      description: |-
+        RecruitCareerService defines the read surface for recruit submissions and
+        the status transition endpoint. Create/update of careers and sections stay
+        on legacy routes until that migration happens.

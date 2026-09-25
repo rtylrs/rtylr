@@ -2,6 +2,7 @@
 import * as flow_task_v1 from "../../task/v1/types.js";
 
 export interface GetFlowDashboardRequest {
+/** workspace_id is the workspace id value for this contract. */
 workspaceId: string;
 }
 
@@ -27,10 +28,15 @@ return violations;
 }
 
 export interface GetFlowDashboardResponse {
+/** open_tasks is the open tasks value for this contract. */
 openTasks?: string | undefined;
+/** in_progress_tasks is the in progress tasks value for this contract. */
 inProgressTasks?: string | undefined;
+/** completed_this_week is the completed this week value for this contract. */
 completedThisWeek?: string | undefined;
+/** overdue_tasks is the overdue tasks value for this contract. */
 overdueTasks?: string | undefined;
+/** my_tasks is the my tasks value for this contract. */
 myTasks?: (flow_task_v1.Task)[] | undefined;
 }
 

@@ -13,27 +13,40 @@ paths:
             parameters:
                 - name: search
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: department_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: status
                   in: query
-                  required: true
+                  description: The current lifecycle state.
+                  required: false
                   schema:
                     type: string
                     description: The current lifecycle state.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.ListStaffResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - StaffService
@@ -47,12 +60,24 @@ paths:
                             $ref: '#/components/schemas/hr.staff.v1.CreateStaffRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.CreateStaffResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/staff/v1/staff/{id}:
         get:
             tags:
@@ -65,15 +90,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.GetStaffResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - StaffService
@@ -85,7 +124,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -95,12 +136,24 @@ paths:
                                 - $ref: '#/components/schemas/hr.staff.v1.UpdateStaffBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.UpdateStaffResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - StaffService
@@ -112,15 +165,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.DeleteStaffResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/staff/v1/staff/clock-in:
         post:
             tags:
@@ -135,12 +202,24 @@ paths:
                             $ref: '#/components/schemas/hr.staff.v1.ClockInRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.ClockInResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/staff/v1/staff/clock-out:
         post:
             tags:
@@ -155,12 +234,24 @@ paths:
                             $ref: '#/components/schemas/hr.staff.v1.ClockOutRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.ClockOutResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/staff/v1/staff/directory:
         get:
             tags:
@@ -179,6 +270,7 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: page_size
                   in: query
@@ -186,14 +278,27 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.staff.v1.ListStaffDirectoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.staff.v1.ListStaffRequest:
@@ -224,18 +329,23 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 manager_staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         manager_staff_id is this person's direct manager, as a STAFF id (not a
@@ -337,13 +447,16 @@ components:
                 user_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 department_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 manager_staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         Optional, unlike department_id: most staff have no explicit manager, and
@@ -443,6 +556,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -452,6 +566,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -469,6 +584,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -482,9 +598,11 @@ components:
                 department_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 manager_staff_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Optional for the same reason as on create. Zero clears the reporting line.
                 first_name:
@@ -586,6 +704,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -602,6 +721,7 @@ components:
                 staff_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - staff_id
@@ -618,6 +738,7 @@ components:
                 staff_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - staff_id
@@ -634,10 +755,12 @@ components:
                 page:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - page
@@ -651,12 +774,15 @@ components:
                         $ref: '#/components/schemas/hr.staff.v1.DirectoryStaffEntry'
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 page_size:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - staff
@@ -668,6 +794,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 first_name:
                     type: string
@@ -675,6 +802,7 @@ components:
                     type: string
                 department_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 role:
                     type: string
@@ -703,3 +831,13 @@ components:
                 overtime_rate, address, or emergency_contact_* - those stay HR-admin-only
                 regardless of caller, enforced here at the contract level rather than
                 relying solely on runtime field-zeroing.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: StaffService
+      description: StaffService defines HR staff endpoints.

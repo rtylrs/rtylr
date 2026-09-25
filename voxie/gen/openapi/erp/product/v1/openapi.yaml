@@ -12,38 +12,55 @@ paths:
             parameters:
                 - name: search
                   in: query
-                  required: true
+                  description: Filters products by name or SKU.
+                  required: false
                   schema:
                     type: string
                     description: Filters products by name or SKU.
                 - name: category_id
                   in: query
-                  required: true
+                  description: Filters products by category.
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filters products by category.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of products to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: The maximum number of products to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: The number of records to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: The number of records to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.ListProductsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - ProductService
@@ -56,12 +73,24 @@ paths:
                             $ref: '#/components/schemas/erp.product.v1.CreateProductRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.CreateProductResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/product/v1/barcodes/{code}/product:
         get:
             tags:
@@ -75,12 +104,24 @@ paths:
                   schema:
                     type: string
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.GetProductByBarcodeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/product/v1/products/{id}:
         get:
             tags:
@@ -92,15 +133,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.GetProductResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - ProductService
@@ -111,7 +166,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -121,12 +178,24 @@ paths:
                                 - $ref: '#/components/schemas/erp.product.v1.UpdateProductBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.UpdateProductResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - ProductService
@@ -137,15 +206,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.DeleteProductResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/product/v1/products/{id}/full:
         get:
             tags:
@@ -157,15 +240,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.GetProductFullResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/product/v1/products/{id}/attributes:
         get:
             tags:
@@ -177,15 +274,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.ListProductAttributesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/product/v1/dashboard:
         get:
             tags:
@@ -193,12 +304,24 @@ paths:
             summary: getDashboard
             operationId: ProductService_getDashboard
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.GetDashboardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/product/v1/reorder-suggestions:
         get:
             tags:
@@ -208,25 +331,39 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of reorder suggestions to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Maximum number of reorder suggestions to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of reorder suggestions to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Number of reorder suggestions to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.ListReorderSuggestionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /erp/product/v1/expiry:
         get:
             tags:
@@ -236,31 +373,45 @@ paths:
             parameters:
                 - name: days_ahead
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: integer
                     format: int32
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of expiring items to return.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Maximum number of expiring items to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of expiring items to skip.
+                  required: false
                   schema:
                     type: integer
                     format: int64
                     description: Number of expiring items to skip.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/erp.product.v1.ListExpiringItemsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         erp.product.v1.ListProductsRequest:
@@ -271,6 +422,7 @@ components:
                     description: Filters products by name or SKU.
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filters products by category.
                 limit:
@@ -316,15 +468,19 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 supplier_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -363,9 +519,11 @@ components:
                     description: When the record was last updated.
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 brand_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 compare_at_price:
                     type: number
@@ -443,10 +601,12 @@ components:
                 category_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 supplier_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -485,6 +645,7 @@ components:
                     description: The opening tracked quantity for this product.
                 brand_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Links the product to a brand when present.
                 compare_at_price:
@@ -564,6 +725,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -592,6 +754,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -609,6 +772,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -626,18 +790,23 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 category_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 supplier_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -670,6 +839,7 @@ components:
                     type: boolean
                 brand_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 compare_at_price:
                     type: number
@@ -751,6 +921,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -768,6 +939,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -787,6 +959,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -800,10 +973,12 @@ components:
                 category_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 supplier_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -842,6 +1017,7 @@ components:
                     description: The tracked quantity to store for this product.
                 brand_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Links the product to a brand when present.
                 compare_at_price:
@@ -929,6 +1105,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -985,6 +1162,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -1010,6 +1188,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 po_number:
                     type: string
@@ -1083,6 +1262,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -1162,6 +1342,7 @@ components:
             properties:
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -1184,3 +1365,13 @@ components:
                 - expiry_date
                 - quantity
                 - warehouse_name
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ProductService
+      description: ProductService defines ERP product endpoints.

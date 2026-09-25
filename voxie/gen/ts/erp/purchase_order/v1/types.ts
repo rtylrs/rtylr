@@ -52,6 +52,7 @@ id?: string | undefined;
 ownerId?: string | undefined;
 supplierId?: string | undefined;
 poNumber?: string | undefined;
+/** Current lifecycle state. */
 status?: string | undefined;
 subtotal?: number | undefined;
 taxAmount?: number | undefined;
@@ -60,7 +61,9 @@ expectedDelivery?: string | undefined;
 receivedAt?: string | undefined;
 notes?: string | undefined;
 createdBy?: string | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
+/** When the record was last updated. */
 updatedAt?: string | undefined;
 items?: (PurchaseOrderItem)[] | undefined;
 }
@@ -163,8 +166,11 @@ return violations;
 }
 
 export interface ListPurchaseOrdersRequest {
+/** Filters purchase orders by lifecycle state. */
 status?: string | undefined;
+/** The 1-based page number. */
 page?: number | undefined;
+/** The number of rows to return. */
 pageSize?: number | undefined;
 }
 
@@ -195,8 +201,11 @@ return violations;
 
 export interface ListPurchaseOrdersResponse {
 purchaseOrders?: (PurchaseOrder)[] | undefined;
+/** True when another page is available. */
 hasMore?: boolean | undefined;
+/** The returned 1-based page number. */
 page?: number | undefined;
+/** The returned page size. */
 pageSize?: number | undefined;
 }
 
@@ -281,6 +290,7 @@ return violations;
 
 export interface CreatePurchaseOrderResponse {
 purchaseOrderId?: string | undefined;
+/** A human-readable result message. */
 message?: string | undefined;
 }
 
@@ -355,7 +365,9 @@ return violations;
 }
 
 export interface UpdatePurchaseOrderStatusBody {
+/** Current lifecycle state. */
 status: string;
+/** Per-line quantities submitted by the receiving operator. */
 items?: (PurchaseOrderItem)[] | undefined;
 }
 

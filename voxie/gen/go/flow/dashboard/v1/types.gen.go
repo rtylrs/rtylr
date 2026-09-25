@@ -8,6 +8,7 @@ import (
 )
 
 type GetFlowDashboardRequest struct {
+	// workspace_id is the workspace id value for this contract.
 	WorkspaceId *int64 `json:"workspace_id,omitempty"`
 }
 
@@ -56,11 +57,16 @@ func (x *GetFlowDashboardRequest) GetWorkspaceId() int64 {
 }
 
 type GetFlowDashboardResponse struct {
-	OpenTasks         int64                `json:"open_tasks,omitempty"`
-	InProgressTasks   int64                `json:"in_progress_tasks,omitempty"`
-	CompletedThisWeek int64                `json:"completed_this_week,omitempty"`
-	OverdueTasks      int64                `json:"overdue_tasks,omitempty"`
-	MyTasks           []*flow_task_v1.Task `json:"my_tasks,omitempty"`
+	// open_tasks is the open tasks value for this contract.
+	OpenTasks int64 `json:"open_tasks,omitempty"`
+	// in_progress_tasks is the in progress tasks value for this contract.
+	InProgressTasks int64 `json:"in_progress_tasks,omitempty"`
+	// completed_this_week is the completed this week value for this contract.
+	CompletedThisWeek int64 `json:"completed_this_week,omitempty"`
+	// overdue_tasks is the overdue tasks value for this contract.
+	OverdueTasks int64 `json:"overdue_tasks,omitempty"`
+	// my_tasks is the my tasks value for this contract.
+	MyTasks []*flow_task_v1.Task `json:"my_tasks,omitempty"`
 }
 
 func (m *GetFlowDashboardResponse) MarshalJSON() ([]byte, error) {

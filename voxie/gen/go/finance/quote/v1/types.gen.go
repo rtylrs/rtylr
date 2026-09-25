@@ -7,20 +7,24 @@ import (
 )
 
 type Quote struct {
-	Id            int64        `json:"id,omitempty"`
-	OwnerId       int64        `json:"owner_id,omitempty"`
-	CustomerName  string       `json:"customer_name,omitempty"`
-	CustomerEmail string       `json:"customer_email,omitempty"`
-	Status        string       `json:"status,omitempty"`
-	Lines         []*QuoteLine `json:"lines,omitempty"`
-	Subtotal      float64      `json:"subtotal,omitempty"`
-	Tax           float64      `json:"tax,omitempty"`
-	Discount      float64      `json:"discount,omitempty"`
-	Total         float64      `json:"total,omitempty"`
-	ValidUntil    string       `json:"valid_until,omitempty"`
-	Notes         string       `json:"notes,omitempty"`
-	CreatedAt     string       `json:"created_at,omitempty"`
-	UpdatedAt     string       `json:"updated_at,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Identifies the tenant that owns the resource.
+	OwnerId       int64  `json:"owner_id,omitempty"`
+	CustomerName  string `json:"customer_name,omitempty"`
+	CustomerEmail string `json:"customer_email,omitempty"`
+	// draft, sent, accepted, rejected, expired, converted
+	Status     string       `json:"status,omitempty"`
+	Lines      []*QuoteLine `json:"lines,omitempty"`
+	Subtotal   float64      `json:"subtotal,omitempty"`
+	Tax        float64      `json:"tax,omitempty"`
+	Discount   float64      `json:"discount,omitempty"`
+	Total      float64      `json:"total,omitempty"`
+	ValidUntil string       `json:"valid_until,omitempty"`
+	Notes      string       `json:"notes,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
+	// When the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 func (m *Quote) MarshalJSON() ([]byte, error) {
@@ -223,16 +227,17 @@ func (x *QuoteLine) GetTotal() float64 {
 }
 
 type CreateQuoteRequest struct {
-	CustomerName  string       `json:"customer_name,omitempty"`
-	CustomerEmail string       `json:"customer_email,omitempty"`
-	Status        string       `json:"status,omitempty"`
-	Lines         []*QuoteLine `json:"lines,omitempty"`
-	Subtotal      float64      `json:"subtotal,omitempty"`
-	Tax           float64      `json:"tax,omitempty"`
-	ValidUntil    string       `json:"valid_until,omitempty"`
-	Discount      *float64     `json:"discount,omitempty"`
-	Total         float64      `json:"total,omitempty"`
-	Notes         string       `json:"notes,omitempty"`
+	CustomerName  string `json:"customer_name,omitempty"`
+	CustomerEmail string `json:"customer_email,omitempty"`
+	// The initial lifecycle state - defaults to "draft" if empty.
+	Status     string       `json:"status,omitempty"`
+	Lines      []*QuoteLine `json:"lines,omitempty"`
+	Subtotal   float64      `json:"subtotal,omitempty"`
+	Tax        float64      `json:"tax,omitempty"`
+	ValidUntil string       `json:"valid_until,omitempty"`
+	Discount   *float64     `json:"discount,omitempty"`
+	Total      float64      `json:"total,omitempty"`
+	Notes      string       `json:"notes,omitempty"`
 }
 
 func (x *CreateQuoteRequest) GetCustomerName() string {
@@ -385,7 +390,9 @@ func (x *GetQuoteResponse) GetQuote() *Quote {
 }
 
 type ListQuotesRequest struct {
-	Page     int64 `json:"page,omitempty"`
+	// The one-based page number to return.
+	Page int64 `json:"page,omitempty"`
+	// The maximum number of quotes to return.
 	PageSize int64 `json:"page_size,omitempty"`
 }
 
@@ -406,10 +413,13 @@ func (x *ListQuotesRequest) GetPageSize() int64 {
 }
 
 type ListQuotesResponse struct {
-	Quotes   []*Quote `json:"quotes,omitempty"`
-	Page     int64    `json:"page,omitempty"`
-	PageSize int64    `json:"page_size,omitempty"`
-	HasMore  bool     `json:"has_more,omitempty"`
+	Quotes []*Quote `json:"quotes,omitempty"`
+	// The current result page.
+	Page int64 `json:"page,omitempty"`
+	// The number of records requested per page.
+	PageSize int64 `json:"page_size,omitempty"`
+	// Whether additional pages are available.
+	HasMore bool `json:"has_more,omitempty"`
 }
 
 func (x *ListQuotesResponse) GetQuotes() []*Quote {
@@ -457,7 +467,8 @@ func (x *UpdateQuoteStatusBody) GetStatus() string {
 }
 
 type UpdateQuoteStatusRequest struct {
-	Id   int64                  `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// Carries status update fields bound from the HTTP payload.
 	Body *UpdateQuoteStatusBody `json:"body,omitempty"`
 }
 
@@ -560,6 +571,7 @@ func (x *ConvertQuoteRequest) GetId() int64 {
 }
 
 type ConvertQuoteResponse struct {
+	// The identifier of the invoice created from this quote.
 	InvoiceId int64  `json:"invoice_id,omitempty"`
 	Message   string `json:"message,omitempty"`
 }

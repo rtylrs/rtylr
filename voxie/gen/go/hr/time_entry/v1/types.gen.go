@@ -6,25 +6,44 @@ import (
 	"strconv"
 )
 
+// TimeEntryPayload is a logged unit of employee work time.
 type TimeEntryPayload struct {
-	Id              int64   `json:"id,omitempty"`
-	OwnerId         int64   `json:"owner_id,omitempty"`
-	EmployeeId      int64   `json:"employee_id,omitempty"`
-	ProjectId       *int64  `json:"project_id,omitempty"`
-	TaskId          *int64  `json:"task_id,omitempty"`
-	CategoryId      *int64  `json:"category_id,omitempty"`
-	Date            string  `json:"date,omitempty"`
-	DurationMinutes int32   `json:"duration_minutes,omitempty"`
-	StartTime       *string `json:"start_time,omitempty"`
-	EndTime         *string `json:"end_time,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	IsBillable      bool    `json:"is_billable,omitempty"`
-	Status          string  `json:"status,omitempty"`
+	// Unique identifier for the time entry.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this entry belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee who logged the time.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Associated project; absent if not project-based.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// Associated task; absent if not task-level tracking.
+	TaskId *int64 `json:"task_id,omitempty"`
+	// Time category for reporting; absent if uncategorised.
+	CategoryId *int64 `json:"category_id,omitempty"`
+	// Date the work was performed (ISO-8601 format, e.g. "2026-04-14").
+	Date string `json:"date,omitempty"`
+	// Total duration of work in minutes.
+	DurationMinutes int32 `json:"duration_minutes,omitempty"`
+	// Clock-in time (ISO-8601 time or datetime); absent if duration-only entry.
+	StartTime *string `json:"start_time,omitempty"`
+	// Clock-out time (ISO-8601 time or datetime); absent if duration-only entry.
+	EndTime *string `json:"end_time,omitempty"`
+	// Free-text description of the work performed.
+	Description string `json:"description,omitempty"`
+	// Whether this time is billable to a client.
+	IsBillable bool `json:"is_billable,omitempty"`
+	// Workflow status (draft | submitted | approved | rejected).
+	Status string `json:"status,omitempty"`
+	// Reason the entry was rejected; absent unless status is rejected.
 	RejectionReason *string `json:"rejection_reason,omitempty"`
-	ApprovedBy      *int64  `json:"approved_by,omitempty"`
-	Source          string  `json:"source,omitempty"`
-	CreatedAt       int64   `json:"created_at,omitempty"`
-	UpdatedAt       int64   `json:"updated_at,omitempty"`
+	// Employee ID of the approver; absent if not yet approved.
+	ApprovedBy *int64 `json:"approved_by,omitempty"`
+	// How the entry was created (manual | timer | flow_import).
+	Source string `json:"source,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *TimeEntryPayload) MarshalJSON() ([]byte, error) {
@@ -320,19 +339,32 @@ func (x *TimeEntryPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// TimesheetPayload is an employee's time entries grouped over a period.
 type TimesheetPayload struct {
-	Id                   int64               `json:"id,omitempty"`
-	OwnerId              int64               `json:"owner_id,omitempty"`
-	EmployeeId           int64               `json:"employee_id,omitempty"`
-	PeriodStart          string              `json:"period_start,omitempty"`
-	PeriodEnd            string              `json:"period_end,omitempty"`
-	Status               string              `json:"status,omitempty"`
-	CurrentApprovalLevel int32               `json:"current_approval_level,omitempty"`
-	SubmittedAt          *int64              `json:"submitted_at,omitempty"`
-	TotalMinutes         int32               `json:"total_minutes,omitempty"`
-	Entries              []*TimeEntryPayload `json:"entries,omitempty"`
-	CreatedAt            int64               `json:"created_at,omitempty"`
-	UpdatedAt            int64               `json:"updated_at,omitempty"`
+	// Unique identifier for the timesheet.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this timesheet belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee this timesheet is for.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Start of the timesheet period (ISO-8601 date).
+	PeriodStart string `json:"period_start,omitempty"`
+	// End of the timesheet period (ISO-8601 date).
+	PeriodEnd string `json:"period_end,omitempty"`
+	// Workflow status (draft | submitted | approved | rejected | locked).
+	Status string `json:"status,omitempty"`
+	// Current step in a multi-level approval chain.
+	CurrentApprovalLevel int32 `json:"current_approval_level,omitempty"`
+	// Unix timestamp when the timesheet was submitted; absent if still in draft.
+	SubmittedAt *int64 `json:"submitted_at,omitempty"`
+	// Sum of all entry durations in minutes.
+	TotalMinutes int32 `json:"total_minutes,omitempty"`
+	// Individual time entries within this timesheet.
+	Entries []*TimeEntryPayload `json:"entries,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *TimesheetPayload) MarshalJSON() ([]byte, error) {
@@ -517,16 +549,34 @@ func (x *TimesheetPayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+// ListTimeEntriesRequest selects logged time. Every filter is optional and
+// they combine with AND. The response is always a page: callers that need
+// everything must follow offset until total is reached.
 type ListTimeEntriesRequest struct {
-	EmployeeId *int64  `json:"employee_id,omitempty"`
-	Date       *string `json:"date,omitempty"`
-	FromDate   *string `json:"from_date,omitempty"`
-	ToDate     *string `json:"to_date,omitempty"`
-	ProjectId  *int64  `json:"project_id,omitempty"`
-	IsBillable *bool   `json:"is_billable,omitempty"`
-	Status     *string `json:"status,omitempty"`
-	Limit      int32   `json:"limit,omitempty"`
-	Offset     int32   `json:"offset,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by exact date; absent to include all dates. Ignored when from_date
+	// or to_date is supplied.
+	Date *string `json:"date,omitempty"`
+	// Include entries dated on or after this day (ISO-8601, e.g. "2026-04-01");
+	// absent to leave the range open at the start.
+	FromDate *string `json:"from_date,omitempty"`
+	// Include entries dated on or before this day; absent to leave the range
+	// open at the end.
+	ToDate *string `json:"to_date,omitempty"`
+	// Filter by the Flow project the time was logged against; absent to include
+	// all projects and entries with no project.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// Filter by billability; absent to include both billable and non-billable
+	// time.
+	IsBillable *bool `json:"is_billable,omitempty"`
+	// Filter by workflow status (draft | submitted | approved | rejected);
+	// absent to include all statuses.
+	Status *string `json:"status,omitempty"`
+	// Maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// Number of records to skip for pagination.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (m *ListTimeEntriesRequest) MarshalJSON() ([]byte, error) {
@@ -675,10 +725,14 @@ func (x *ListTimeEntriesRequest) GetOffset() int32 {
 }
 
 type ListTimeEntriesResponse struct {
+	// Time entries matching the filters.
 	Entries []*TimeEntryPayload `json:"entries,omitempty"`
-	Total   int64               `json:"total,omitempty"`
-	Limit   int32               `json:"limit,omitempty"`
-	Offset  int32               `json:"offset,omitempty"`
+	// Total number of matching time entries across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListTimeEntriesResponse) GetEntries() []*TimeEntryPayload {
@@ -714,17 +768,28 @@ func (x *ListTimeEntriesResponse) GetOffset() int32 {
 }
 
 type CreateTimeEntryRequest struct {
-	EmployeeId      *int64  `json:"employee_id,omitempty"`
-	ProjectId       *int64  `json:"project_id,omitempty"`
-	TaskId          *int64  `json:"task_id,omitempty"`
-	CategoryId      *int64  `json:"category_id,omitempty"`
-	Date            string  `json:"date,omitempty"`
-	DurationMinutes *int32  `json:"duration_minutes,omitempty"`
-	StartTime       *string `json:"start_time,omitempty"`
-	EndTime         *string `json:"end_time,omitempty"`
-	Description     string  `json:"description,omitempty"`
-	IsBillable      bool    `json:"is_billable,omitempty"`
-	Source          string  `json:"source,omitempty"`
+	// Employee who logged the time.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Associated project; absent if not project-based.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// Associated task; absent if not task-level tracking.
+	TaskId *int64 `json:"task_id,omitempty"`
+	// Time category for reporting; absent if uncategorised.
+	CategoryId *int64 `json:"category_id,omitempty"`
+	// Date the work was performed (ISO-8601 format).
+	Date string `json:"date,omitempty"`
+	// Total duration of work in minutes.
+	DurationMinutes *int32 `json:"duration_minutes,omitempty"`
+	// Clock-in time; absent if duration-only entry.
+	StartTime *string `json:"start_time,omitempty"`
+	// Clock-out time; absent if duration-only entry.
+	EndTime *string `json:"end_time,omitempty"`
+	// Free-text description of the work performed.
+	Description string `json:"description,omitempty"`
+	// Whether this time is billable to a client.
+	IsBillable bool `json:"is_billable,omitempty"`
+	// How the entry was created (manual | timer | flow_import).
+	Source string `json:"source,omitempty"`
 }
 
 func (m *CreateTimeEntryRequest) MarshalJSON() ([]byte, error) {
@@ -915,6 +980,7 @@ func (x *CreateTimeEntryRequest) GetSource() string {
 }
 
 type CreateTimeEntryResponse struct {
+	// The newly created time entry.
 	Entry *TimeEntryPayload `json:"entry,omitempty"`
 }
 
@@ -927,8 +993,10 @@ func (x *CreateTimeEntryResponse) GetEntry() *TimeEntryPayload {
 }
 
 type ListTimesheetsRequest struct {
-	EmployeeId *int64  `json:"employee_id,omitempty"`
-	Status     *string `json:"status,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by status; absent to include all statuses.
+	Status *string `json:"status,omitempty"`
 }
 
 func (m *ListTimesheetsRequest) MarshalJSON() ([]byte, error) {
@@ -988,10 +1056,14 @@ func (x *ListTimesheetsRequest) GetStatus() string {
 }
 
 type ListTimesheetsResponse struct {
+	// Page of timesheets matching the filters.
 	Timesheets []*TimesheetPayload `json:"timesheets,omitempty"`
-	Total      int64               `json:"total,omitempty"`
-	Limit      int32               `json:"limit,omitempty"`
-	Offset     int32               `json:"offset,omitempty"`
+	// Total number of matching timesheets across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListTimesheetsResponse) GetTimesheets() []*TimesheetPayload {
@@ -1027,6 +1099,7 @@ func (x *ListTimesheetsResponse) GetOffset() int32 {
 }
 
 type SubmitTimesheetRequest struct {
+	// ID of the timesheet to submit for approval.
 	TimesheetId *int64 `json:"timesheet_id,omitempty"`
 }
 
@@ -1075,6 +1148,7 @@ func (x *SubmitTimesheetRequest) GetTimesheetId() int64 {
 }
 
 type SubmitTimesheetResponse struct {
+	// Whether the submission was accepted.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -1087,7 +1161,9 @@ func (x *SubmitTimesheetResponse) GetSuccess() bool {
 }
 
 type ApproveTimesheetBody struct {
-	Approved        bool    `json:"approved,omitempty"`
+	// True to approve, false to reject.
+	Approved bool `json:"approved,omitempty"`
+	// Reason for rejection; absent if approving.
 	RejectionReason *string `json:"rejection_reason,omitempty"`
 }
 
@@ -1112,7 +1188,9 @@ func (x *ApproveTimesheetBody) GetRejectionReason() string {
 }
 
 type ApproveTimesheetRequest struct {
-	Id   int64                 `json:"id,omitempty"`
+	// ID of the timesheet being reviewed.
+	Id int64 `json:"id,omitempty"`
+	// body carries approval decision fields bound from the HTTP payload.
 	Body *ApproveTimesheetBody `json:"body,omitempty"`
 }
 
@@ -1162,6 +1240,7 @@ func (x *ApproveTimesheetRequest) GetBody() *ApproveTimesheetBody {
 }
 
 type ApproveTimesheetResponse struct {
+	// Whether the approval action was processed.
 	Success bool `json:"success,omitempty"`
 }
 
@@ -1173,8 +1252,13 @@ func (x *ApproveTimesheetResponse) GetSuccess() bool {
 	return x.Success
 }
 
+// MarkTimeEntriesInvoicedRequest records that the listed approved billable
+// entries are settled by one finance invoice. Idempotent per entry: an entry
+// already carrying a billable_invoice_id is skipped, never overwritten.
 type MarkTimeEntriesInvoicedRequest struct {
-	Id   int64                        `json:"id,omitempty"`
+	// ID kept for route symmetry with approveTimesheet; unused by the handler.
+	Id int64 `json:"id,omitempty"`
+	// body carries the batch fields bound from the HTTP payload.
 	Body *MarkTimeEntriesInvoicedBody `json:"body,omitempty"`
 }
 
@@ -1223,9 +1307,14 @@ func (x *MarkTimeEntriesInvoicedRequest) GetBody() *MarkTimeEntriesInvoicedBody 
 	return x.Body
 }
 
+// MarkTimeEntriesInvoicedBody is the payload of markTimeEntriesInvoiced.
 type MarkTimeEntriesInvoicedBody struct {
-	EntryIds  []int64 `json:"entry_ids,omitempty"`
-	InvoiceId *int64  `json:"invoice_id,omitempty"`
+	// entry_ids are the time entries this invoice bills. Every entry must
+	// belong to the caller's business; foreign or missing ids are counted as
+	// skipped rather than failing the batch.
+	EntryIds []int64 `json:"entry_ids,omitempty"`
+	// invoice_id is the finance invoice that settles them.
+	InvoiceId *int64 `json:"invoice_id,omitempty"`
 }
 
 func (m *MarkTimeEntriesInvoicedBody) MarshalJSON() ([]byte, error) {
@@ -1296,8 +1385,14 @@ func (x *MarkTimeEntriesInvoicedBody) GetInvoiceId() int64 {
 	return *x.InvoiceId
 }
 
+// MarkTimeEntriesInvoicedResponse reports how the batch landed, so a caller
+// can tell "all marked" from "some were already invoiced" without a second
+// read.
 type MarkTimeEntriesInvoicedResponse struct {
-	MarkedCount  int32 `json:"marked_count,omitempty"`
+	// marked_count is how many entries now carry this invoice id.
+	MarkedCount int32 `json:"marked_count,omitempty"`
+	// skipped_count is how many of entry_ids were already invoiced, not
+	// approved billable work, or belong to another business.
 	SkippedCount int32 `json:"skipped_count,omitempty"`
 }
 

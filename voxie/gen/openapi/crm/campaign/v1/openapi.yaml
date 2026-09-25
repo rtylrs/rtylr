@@ -13,29 +13,44 @@ paths:
             parameters:
                 - name: status
                   in: query
-                  required: true
+                  description: Filters campaigns by lifecycle state.
+                  required: false
                   schema:
                     type: string
                     description: Filters campaigns by lifecycle state.
                 - name: limit
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: offset
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.campaign.v1.ListCampaignsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - CampaignService
@@ -49,12 +64,24 @@ paths:
                             $ref: '#/components/schemas/crm.campaign.v1.CreateCampaignRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.campaign.v1.CreateCampaignResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/campaign/v1/campaigns/{id}:
         get:
             tags:
@@ -67,15 +94,29 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.campaign.v1.GetCampaignDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - CampaignService
@@ -87,7 +128,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -97,12 +140,24 @@ paths:
                                 - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/campaign/v1/campaigns/stats:
         get:
             tags:
@@ -113,21 +168,37 @@ paths:
             parameters:
                 - name: campaign_id
                   in: query
+                  description: |-
+                    The live route is GET /campaigns/stats?campaign_id=... (query param,
+                    not a path segment).
                   required: true
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         The live route is GET /campaigns/stats?campaign_id=... (query param,
                         not a path segment).
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.campaign.v1.GetCampaignStatsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /crm/campaign/v1/campaigns/{id}/status:
         put:
             tags:
@@ -142,7 +213,9 @@ paths:
                   in: path
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             requestBody:
                 content:
@@ -152,12 +225,24 @@ paths:
                                 - $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignStatusBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/crm.campaign.v1.UpdateCampaignStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         crm.campaign.v1.ListCampaignsRequest:
@@ -168,9 +253,11 @@ components:
                     description: Filters campaigns by lifecycle state.
                 limit:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 offset:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - status
@@ -185,12 +272,15 @@ components:
                         $ref: '#/components/schemas/crm.campaign.v1.Campaign'
                 total:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 limit:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 offset:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - campaigns
@@ -202,9 +292,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 name:
                     type: string
@@ -218,6 +310,7 @@ components:
                     description: Current lifecycle state.
                 segment_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 subject:
                     type: string
@@ -229,18 +322,23 @@ components:
                     type: string
                 audience_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 sent_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 delivered_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 opened_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 clicked_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 created_at:
                     type: string
@@ -277,6 +375,7 @@ components:
                     type: string
                 segment_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 subject:
                     type: string
@@ -302,6 +401,7 @@ components:
             properties:
                 campaign_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -314,6 +414,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - id
@@ -334,27 +435,35 @@ components:
             properties:
                 campaign_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 audience_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 sent_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 delivered_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 opened_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 clicked_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 bounced_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 failed_count:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - campaign_id
@@ -372,6 +481,7 @@ components:
                 campaign_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         The live route is GET /campaigns/stats?campaign_id=... (query param,
@@ -392,6 +502,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -413,6 +524,7 @@ components:
                     type: string
                 segment_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 subject:
                     type: string
@@ -446,6 +558,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 body:
                     allOf:
@@ -467,3 +580,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CampaignService
+      description: CampaignService defines CRM campaign endpoints.

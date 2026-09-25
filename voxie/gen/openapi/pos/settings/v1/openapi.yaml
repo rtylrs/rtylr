@@ -11,12 +11,24 @@ paths:
             description: Returns the active business POS settings.
             operationId: SettingsService_getPOSSettings
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.settings.v1.GetPOSSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - SettingsService
@@ -30,12 +42,24 @@ paths:
                             $ref: '#/components/schemas/pos.settings.v1.UpdatePOSSettingsRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.settings.v1.UpdatePOSSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.settings.v1.GetPOSSettingsRequest:
@@ -55,9 +79,11 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: business_id is the business id these settings belong to.
                 business_profile:
@@ -164,3 +190,13 @@ components:
                 - settings
                 - message
             description: UpdatePOSSettingsResponse returns the saved POS settings.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SettingsService
+      description: SettingsService defines POS business settings endpoints.

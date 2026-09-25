@@ -6,16 +6,55 @@ import (
 	"strconv"
 )
 
+// Status is one entry in a project's own status set.
+//
+// Versioned v2 rather than v1 despite being a new capability. Every live flow
+// capability is on v2 after the workspace removal, and v1 contracts are still
+// being deleted, so a lone `flow/status/v1` would read as the older of two
+// generations when it is the only one that exists. Nothing here has a v1
+// history to be compatible with.
+//
+// A project with no statuses is the normal case, not an unconfigured one. It
+// falls back to the six built-in string statuses, which is what makes the whole
+// feature additive.
 type Status struct {
-	Id           int64  `json:"id,omitempty"`
-	ProjectId    int64  `json:"project_id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Bucket       string `json:"bucket,omitempty"`
+	// id is the unique identifier for the resource.
+	Id int64 `json:"id,omitempty"`
+	// project_id is the project this status belongs to. Status sets are per
+	// project by design: two projects in one business may run entirely different
+	// pipelines.
+	ProjectId int64 `json:"project_id,omitempty"`
+	// name is what the user sees on the board. Unique within a project.
+	Name string `json:"name,omitempty"`
+	// bucket is the semantic meaning, one of "backlog", "active", "done" or
+	// "cancelled".
+	//
+	// It exists so a rollup can count across projects whose pipelines have
+	// nothing in common: a project calling its in-flight state "Building" and
+	// one calling it "Legal review" both report `active`.
+	//
+	// The contract cannot express a closed set, so the server validates it and
+	// rejects anything else with 400. Do not treat an unrecognised value as a
+	// default; that is how a cancelled task would get counted as open.
+	Bucket string `json:"bucket,omitempty"`
+	// legacy_status is which of the six built-in values `Task.status` carries
+	// while this status is applied: "backlog", "todo", "in_progress",
+	// "in_review", "done" or "cancelled".
+	//
+	// The string status column is not going away, so every existing query,
+	// filter and index keeps working and no consumer has to learn about this
+	// capability to stay correct. A custom status reports its nearest built-in.
 	LegacyStatus string `json:"legacy_status,omitempty"`
-	Color        string `json:"color,omitempty"`
-	SortOrder    int32  `json:"sort_order,omitempty"`
-	IsDefault    bool   `json:"is_default,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
+	// color is the swatch shown on the board, as a hex string.
+	Color string `json:"color,omitempty"`
+	// sort_order is the position within the project's set, ascending.
+	SortOrder int32 `json:"sort_order,omitempty"`
+	// is_default marks the status a newly created task receives. At most one per
+	// project, enforced by the server rather than by the schema, because MySQL
+	// cannot express a partial unique index on it.
+	IsDefault bool `json:"is_default,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *Status) MarshalJSON() ([]byte, error) {
@@ -130,6 +169,9 @@ func (x *Status) GetCreatedAt() string {
 }
 
 type ListStatusesRequest struct {
+	// project_id scopes the listing to one project's set. Required: there is no
+	// business-wide set to fall back on, and a listing across projects would
+	// mix pipelines that have nothing to do with each other.
 	ProjectId *int64 `json:"project_id,omitempty"`
 }
 
@@ -178,6 +220,9 @@ func (x *ListStatusesRequest) GetProjectId() int64 {
 }
 
 type ListStatusesResponse struct {
+	// statuses is the project's set in `sort_order`, and is EMPTY for a project
+	// that has not configured any. Empty means "use the built-ins", never
+	// "this project has no statuses".
 	Statuses []*Status `json:"statuses,omitempty"`
 }
 
@@ -190,13 +235,23 @@ func (x *ListStatusesResponse) GetStatuses() []*Status {
 }
 
 type CreateStatusRequest struct {
-	ProjectId    *int64 `json:"project_id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Bucket       string `json:"bucket,omitempty"`
+	// project_id is the project to add the status to.
+	ProjectId *int64 `json:"project_id,omitempty"`
+	// name must be unique within the project. A duplicate is rejected with 409.
+	Name string `json:"name,omitempty"`
+	// bucket is one of "backlog", "active", "done", "cancelled".
+	Bucket string `json:"bucket,omitempty"`
+	// legacy_status is one of the six built-in values. Optional: when absent the
+	// server derives it from the bucket, so a caller that does not care about
+	// the compatibility column can leave it alone.
 	LegacyStatus string `json:"legacy_status,omitempty"`
-	Color        string `json:"color,omitempty"`
-	SortOrder    int32  `json:"sort_order,omitempty"`
-	IsDefault    bool   `json:"is_default,omitempty"`
+	// color is a hex string. Optional, server default applies.
+	Color string `json:"color,omitempty"`
+	// sort_order places the status in the set. Optional, appended when absent.
+	SortOrder int32 `json:"sort_order,omitempty"`
+	// is_default makes this the status new tasks receive, clearing the flag on
+	// whichever status held it.
+	IsDefault bool `json:"is_default,omitempty"`
 }
 
 func (m *CreateStatusRequest) MarshalJSON() ([]byte, error) {
@@ -292,6 +347,7 @@ func (x *CreateStatusRequest) GetIsDefault() bool {
 }
 
 type CreateStatusResponse struct {
+	// status is the created status, including the derived legacy_status.
 	Status *Status `json:"status,omitempty"`
 }
 
@@ -304,6 +360,7 @@ func (x *CreateStatusResponse) GetStatus() *Status {
 }
 
 type UpdateStatusRequest struct {
+	// id is the status identifier.
 	Id   int64             `json:"id,omitempty"`
 	Body *UpdateStatusBody `json:"body,omitempty"`
 }
@@ -353,13 +410,27 @@ func (x *UpdateStatusRequest) GetBody() *UpdateStatusBody {
 	return x.Body
 }
 
+// UpdateStatusBody is a replacement, so send the whole status.
+//
+// Only `name`, `bucket` and `color` are required. `legacy_status` stays
+// optional for the same reason as on create, and nothing here is required
+// merely because the row has a column for it: end_date on the HR staff body
+// was @required for exactly that reason and it made every update to an active
+// employee silently impossible.
 type UpdateStatusBody struct {
-	Name         string `json:"name,omitempty"`
-	Bucket       string `json:"bucket,omitempty"`
-	Color        string `json:"color,omitempty"`
+	// name must remain unique within the project.
+	Name string `json:"name,omitempty"`
+	// bucket is one of the four semantic buckets.
+	Bucket string `json:"bucket,omitempty"`
+	// color is a hex string.
+	Color string `json:"color,omitempty"`
+	// legacy_status is one of the six built-in values, derived from the bucket
+	// when absent.
 	LegacyStatus string `json:"legacy_status,omitempty"`
-	SortOrder    int32  `json:"sort_order,omitempty"`
-	IsDefault    bool   `json:"is_default,omitempty"`
+	// sort_order is the position within the set.
+	SortOrder int32 `json:"sort_order,omitempty"`
+	// is_default makes this the status new tasks receive.
+	IsDefault bool `json:"is_default,omitempty"`
 }
 
 func (x *UpdateStatusBody) GetName() string {
@@ -411,6 +482,7 @@ func (x *UpdateStatusBody) GetIsDefault() bool {
 }
 
 type UpdateStatusResponse struct {
+	// status is the updated status.
 	Status *Status `json:"status,omitempty"`
 }
 
@@ -423,6 +495,7 @@ func (x *UpdateStatusResponse) GetStatus() *Status {
 }
 
 type DeleteStatusRequest struct {
+	// id is the status identifier.
 	Id int64 `json:"id,omitempty"`
 }
 
@@ -464,8 +537,15 @@ func (x *DeleteStatusRequest) GetId() int64 {
 }
 
 type DeleteStatusResponse struct {
-	Message             string `json:"message,omitempty"`
-	ReassignedTaskCount int32  `json:"reassigned_task_count,omitempty"`
+	// message is a human-readable result message.
+	Message string `json:"message,omitempty"`
+	// reassigned_task_count is how many tasks fell back to their built-in string
+	// status because they were on the deleted one.
+	//
+	// Deleting a status never blocks on its tasks and never deletes them. The
+	// server clears their status_id, and the string status they already carry
+	// keeps them where the user left them.
+	ReassignedTaskCount int32 `json:"reassigned_task_count,omitempty"`
 }
 
 func (x *DeleteStatusResponse) GetMessage() string {
@@ -485,8 +565,14 @@ func (x *DeleteStatusResponse) GetReassignedTaskCount() int32 {
 }
 
 type SetTaskStatusRequest struct {
-	TaskId   *int64 `json:"task_id,omitempty"`
-	StatusId int64  `json:"status_id,omitempty"`
+	// task_id is the task to move.
+	TaskId *int64 `json:"task_id,omitempty"`
+	// status_id is the custom status to apply. Zero clears it, putting the task
+	// back on its built-in string status.
+	//
+	// Not @required @gt(0), because zero is the meaningful "no custom status"
+	// value rather than a missing argument.
+	StatusId int64 `json:"status_id,omitempty"`
 }
 
 func (m *SetTaskStatusRequest) MarshalJSON() ([]byte, error) {
@@ -552,8 +638,11 @@ func (x *SetTaskStatusRequest) GetStatusId() int64 {
 }
 
 type SetTaskStatusResponse struct {
+	// message is a human-readable result message.
 	Message string `json:"message,omitempty"`
-	Status  string `json:"status,omitempty"`
+	// status is the resulting built-in string status the task now carries, so a
+	// caller does not need a second request to keep its cached task correct.
+	Status string `json:"status,omitempty"`
 }
 
 func (x *SetTaskStatusResponse) GetMessage() string {

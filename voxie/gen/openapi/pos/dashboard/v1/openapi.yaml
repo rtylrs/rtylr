@@ -11,12 +11,24 @@ paths:
             description: Returns aggregate sales metrics for the POS dashboard.
             operationId: DashboardService_dashboard
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.dashboard.v1.DashboardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.dashboard.v1.DashboardRequest:
@@ -41,3 +53,13 @@ components:
                 - order_count
                 - avg_order
                 - table_turnover
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: DashboardService
+      description: DashboardService defines POS dashboard summary endpoints.

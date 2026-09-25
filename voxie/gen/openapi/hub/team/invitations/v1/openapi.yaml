@@ -17,12 +17,24 @@ paths:
                             $ref: '#/components/schemas/hub.team.invitations.v1.InviteUserRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.team.invitations.v1.InviteUserResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/team/invitations/v1/invitations/bulk:
         post:
             tags:
@@ -37,12 +49,24 @@ paths:
                             $ref: '#/components/schemas/hub.team.invitations.v1.BulkInviteRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.team.invitations.v1.BulkInviteResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/team/invitations/v1/invitations/verify:
         post:
             tags:
@@ -57,12 +81,24 @@ paths:
                             $ref: '#/components/schemas/hub.team.invitations.v1.VerifyInviteRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.team.invitations.v1.VerifyInviteResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hub/team/invitations/v1/invitations/accept:
         post:
             tags:
@@ -77,12 +113,24 @@ paths:
                             $ref: '#/components/schemas/hub.team.invitations.v1.AcceptInviteRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hub.team.invitations.v1.AcceptInviteResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hub.team.invitations.v1.InviteUserRequest:
@@ -113,6 +161,7 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                     description: Groups that provide inherited access.
                 password:
@@ -184,6 +233,7 @@ components:
             properties:
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -216,10 +266,12 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                     description: Groups that provide inherited access to all invitees.
                 group_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Identifies an optional group to add invitees to.
             required:
@@ -248,6 +300,7 @@ components:
                     type: string
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 status:
                     type: string
@@ -315,3 +368,13 @@ components:
                     type: string
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: InvitationsService
+      description: InvitationsService defines hub team invitation endpoints.

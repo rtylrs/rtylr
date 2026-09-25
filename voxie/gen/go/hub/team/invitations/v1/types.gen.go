@@ -8,17 +8,26 @@ import (
 )
 
 type InviteUserRequest struct {
-	Email             string                           `json:"email,omitempty"`
-	FullName          string                           `json:"full_name,omitempty"`
-	Role              *string                          `json:"role,omitempty"`
-	Apps              []string                         `json:"apps,omitempty"`
-	DashRole          *string                          `json:"dash_role,omitempty"`
-	AppAssignments    []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
-	GroupIds          []int64                          `json:"group_ids,omitempty"`
-	Password          *string                          `json:"password,omitempty"`
-	Username          *string                          `json:"username,omitempty"`
-	TemporaryPassword *string                          `json:"temporary_password,omitempty"`
-	ProvisioningMode  *string                          `json:"provisioning_mode,omitempty"`
+	Email    string `json:"email,omitempty"`
+	FullName string `json:"full_name,omitempty"`
+	// Legacy global role accepted during the migration window.
+	Role *string `json:"role,omitempty"`
+	// Legacy flat application list accepted during the migration window.
+	Apps []string `json:"apps,omitempty"`
+	// Independent Dash role assignment.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Independent application role assignments.
+	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
+	// Groups that provide inherited access.
+	GroupIds []int64 `json:"group_ids,omitempty"`
+	// Optional user-provided secret; omit it to send an invitation link.
+	Password *string `json:"password,omitempty"`
+	// Direct credential provisioning uses a write-only temporary secret.
+	Username *string `json:"username,omitempty"`
+	// Write-only temporary password for direct provisioning.
+	TemporaryPassword *string `json:"temporary_password,omitempty"`
+	// Invitation or direct-credential provisioning mode.
+	ProvisioningMode *string `json:"provisioning_mode,omitempty"`
 }
 
 func (m *InviteUserRequest) MarshalJSON() ([]byte, error) {
@@ -219,13 +228,17 @@ func (x *InviteUserResponse) GetMessage() string {
 }
 
 type BulkInviteRequest struct {
-	Emails         []string                         `json:"emails,omitempty"`
-	Role           *string                          `json:"role,omitempty"`
-	Apps           []string                         `json:"apps,omitempty"`
-	DashRole       *string                          `json:"dash_role,omitempty"`
+	Emails []string `json:"emails,omitempty"`
+	Role   *string  `json:"role,omitempty"`
+	Apps   []string `json:"apps,omitempty"`
+	// Independent Dash role assignment shared by all invitees.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Independent application role assignments shared by all invitees.
 	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
-	GroupIds       []int64                          `json:"group_ids,omitempty"`
-	GroupId        int64                            `json:"group_id,omitempty"`
+	// Groups that provide inherited access to all invitees.
+	GroupIds []int64 `json:"group_ids,omitempty"`
+	// Identifies an optional group to add invitees to.
+	GroupId int64 `json:"group_id,omitempty"`
 }
 
 func (m *BulkInviteRequest) MarshalJSON() ([]byte, error) {
@@ -406,6 +419,7 @@ func (x *BulkInviteResult) GetMessage() string {
 }
 
 type BulkInviteResponse struct {
+	// Per-email invite outcome list.
 	Results []*BulkInviteResult `json:"results,omitempty"`
 	Message string              `json:"message,omitempty"`
 }
@@ -427,6 +441,7 @@ func (x *BulkInviteResponse) GetMessage() string {
 }
 
 type VerifyInviteRequest struct {
+	// Opaque token used to complete the operation.
 	Token string `json:"token,omitempty"`
 }
 
@@ -439,11 +454,15 @@ func (x *VerifyInviteRequest) GetToken() string {
 }
 
 type VerifyInviteResponse struct {
-	Email          string                           `json:"email,omitempty"`
-	FullName       string                           `json:"full_name,omitempty"`
-	Valid          bool                             `json:"valid,omitempty"`
-	Apps           []string                         `json:"apps,omitempty"`
-	DashRole       *string                          `json:"dash_role,omitempty"`
+	Email    string `json:"email,omitempty"`
+	FullName string `json:"full_name,omitempty"`
+	Valid    bool   `json:"valid,omitempty"`
+	// Lists the app IDs the invited user will have access to, so the
+	// frontend can redirect to the right app after the invite is accepted.
+	Apps []string `json:"apps,omitempty"`
+	// Dash role that will become active after acceptance.
+	DashRole *string `json:"dash_role,omitempty"`
+	// Application roles that will become active after acceptance.
 	AppAssignments []*hub_user_v1.AppRoleAssignment `json:"app_assignments,omitempty"`
 }
 
@@ -500,7 +519,9 @@ func (x *VerifyInviteResponse) GetAppAssignments() []*hub_user_v1.AppRoleAssignm
 }
 
 type AcceptInviteRequest struct {
-	Token    string `json:"token,omitempty"`
+	// Opaque token used to complete the operation.
+	Token string `json:"token,omitempty"`
+	// User-provided secret for authentication.
 	Password string `json:"password,omitempty"`
 }
 

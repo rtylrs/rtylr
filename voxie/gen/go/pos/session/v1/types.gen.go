@@ -6,18 +6,22 @@ import (
 	"strconv"
 )
 
+// Session is a POS register session.
 type Session struct {
-	Id           int64   `json:"id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
 	OwnerId      int64   `json:"owner_id,omitempty"`
 	LocationId   *int64  `json:"location_id,omitempty"`
 	StaffId      *int64  `json:"staff_id,omitempty"`
 	OpeningFloat float64 `json:"opening_float,omitempty"`
 	ClosingFloat float64 `json:"closing_float,omitempty"`
 	TotalSales   float64 `json:"total_sales,omitempty"`
-	Status       string  `json:"status,omitempty"`
-	OpenedAt     string  `json:"opened_at,omitempty"`
-	ClosedAt     *string `json:"closed_at,omitempty"`
-	CreatedAt    string  `json:"created_at,omitempty"`
+	// status is the current lifecycle state.
+	Status   string  `json:"status,omitempty"`
+	OpenedAt string  `json:"opened_at,omitempty"`
+	ClosedAt *string `json:"closed_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *Session) MarshalJSON() ([]byte, error) {
@@ -185,17 +189,27 @@ func (x *Session) GetCreatedAt() string {
 	return x.CreatedAt
 }
 
+// CurrentSession is the active open register session for the requesting staff member.
 type CurrentSession struct {
-	Id          int64   `json:"id,omitempty"`
-	OwnerId     int64   `json:"owner_id,omitempty"`
-	LocationId  int64   `json:"location_id,omitempty"`
-	StaffId     int64   `json:"staff_id,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the session.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// location_id is the active location id.
+	LocationId int64 `json:"location_id,omitempty"`
+	// staff_id is the staff member who opened the session.
+	StaffId int64 `json:"staff_id,omitempty"`
+	// opening_cash is the cash drawer opening float.
 	OpeningCash float64 `json:"opening_cash,omitempty"`
+	// closing_cash is the cash drawer closing float.
 	ClosingCash float64 `json:"closing_cash,omitempty"`
-	TotalSales  float64 `json:"total_sales,omitempty"`
-	Status      string  `json:"status,omitempty"`
-	OpenedAt    string  `json:"opened_at,omitempty"`
-	ClosedAt    *string `json:"closed_at,omitempty"`
+	// total_sales is the current session sales total.
+	TotalSales float64 `json:"total_sales,omitempty"`
+	// status is the current lifecycle state.
+	Status string `json:"status,omitempty"`
+	// opened_at is when the session was opened.
+	OpenedAt string `json:"opened_at,omitempty"`
+	// closed_at is when the session was closed.
+	ClosedAt *string `json:"closed_at,omitempty"`
 }
 
 func (m *CurrentSession) MarshalJSON() ([]byte, error) {
@@ -398,6 +412,7 @@ type GetCurrentSessionRequest struct {
 }
 
 type GetCurrentSessionResponse struct {
+	// session is the current open register session; null when none is open.
 	Session *CurrentSession `json:"session,omitempty"`
 }
 

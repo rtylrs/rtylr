@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,11 +74,25 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface TaskServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
 export class TaskServiceClient {
@@ -71,9 +109,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listTasks(req: ListTasksRequest): Promise<ListTasksResponse> {
+async listTasks(req: ListTasksRequest, opts?: RequestOptions): Promise<ListTasksResponse> {
 const violations = validateListTasksRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks";
 const query = new URLSearchParams();
 if (req.projectId !== undefined) {
@@ -107,7 +145,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -119,9 +158,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListTasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getMyTasks(req: GetMyTasksRequest): Promise<GetMyTasksResponse> {
+async getMyTasks(req: GetMyTasksRequest, opts?: RequestOptions): Promise<GetMyTasksResponse> {
 const violations = validateGetMyTasksRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/my";
 const query = new URLSearchParams();
 if (req.page !== undefined) {
@@ -140,7 +179,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -152,16 +192,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetMyTasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getMyTasksProject(req: GetMyTasksProjectRequest): Promise<GetMyTasksProjectResponse> {
+async getMyTasksProject(req: GetMyTasksProjectRequest, opts?: RequestOptions): Promise<GetMyTasksProjectResponse> {
 const violations = validateGetMyTasksProjectRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/my-project";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -173,9 +214,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetMyTasksProjectResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async searchTasks(req: SearchTasksRequest): Promise<SearchTasksResponse> {
+async searchTasks(req: SearchTasksRequest, opts?: RequestOptions): Promise<SearchTasksResponse> {
 const violations = validateSearchTasksRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/search";
 const query = new URLSearchParams();
 if (req.q !== undefined) {
@@ -200,7 +241,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -212,14 +254,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeSearchTasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTask(req: CreateTaskRequest): Promise<CreateTaskResponse> {
+async createTask(req: CreateTaskRequest, opts?: RequestOptions): Promise<CreateTaskResponse> {
 const violations = validateCreateTaskRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateTaskRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -231,9 +274,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateTaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTaskDetail(req: GetTaskDetailRequest): Promise<GetTaskDetailResponse> {
+async getTaskDetail(req: GetTaskDetailRequest, opts?: RequestOptions): Promise<GetTaskDetailResponse> {
 const violations = validateGetTaskDetailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -241,7 +284,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -253,15 +297,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetTaskDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateTask(req: UpdateTaskRequest): Promise<UpdateTaskResponse> {
+async updateTask(req: UpdateTaskRequest, opts?: RequestOptions): Promise<UpdateTaskResponse> {
 const violations = validateUpdateTaskRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateTaskRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -273,15 +318,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateTaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateTaskStatus(req: UpdateTaskStatusRequest): Promise<UpdateTaskStatusResponse> {
+async updateTaskStatus(req: UpdateTaskStatusRequest, opts?: RequestOptions): Promise<UpdateTaskStatusResponse> {
 const violations = validateUpdateTaskStatusRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{id}/status";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateTaskStatusRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -293,9 +339,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateTaskStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteTask(req: DeleteTaskRequest): Promise<DeleteTaskResponse> {
+async deleteTask(req: DeleteTaskRequest, opts?: RequestOptions): Promise<DeleteTaskResponse> {
 const violations = validateDeleteTaskRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -303,7 +349,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -315,14 +362,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteTaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createSubtask(req: CreateSubtaskRequest): Promise<CreateSubtaskResponse> {
+async createSubtask(req: CreateSubtaskRequest, opts?: RequestOptions): Promise<CreateSubtaskResponse> {
 const violations = validateCreateSubtaskRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/subtasks";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateSubtaskRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -334,9 +382,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateSubtaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSubtasks(req: GetSubtasksRequest): Promise<GetSubtasksResponse> {
+async getSubtasks(req: GetSubtasksRequest, opts?: RequestOptions): Promise<GetSubtasksResponse> {
 const violations = validateGetSubtasksRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/subtasks";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const query = new URLSearchParams();
@@ -356,7 +404,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -368,15 +417,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetSubtasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async addComment(req: AddCommentRequest): Promise<AddCommentResponse> {
+async addComment(req: AddCommentRequest, opts?: RequestOptions): Promise<AddCommentResponse> {
 const violations = validateAddCommentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/comments";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAddCommentRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -388,9 +438,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAddCommentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteComment(req: DeleteCommentRequest): Promise<DeleteCommentResponse> {
+async deleteComment(req: DeleteCommentRequest, opts?: RequestOptions): Promise<DeleteCommentResponse> {
 const violations = validateDeleteCommentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/comments/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -398,7 +448,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -410,9 +461,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteCommentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTaskActivity(req: GetTaskActivityRequest): Promise<GetTaskActivityResponse> {
+async getTaskActivity(req: GetTaskActivityRequest, opts?: RequestOptions): Promise<GetTaskActivityResponse> {
 const violations = validateGetTaskActivityRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/activity";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const query = new URLSearchParams();
@@ -420,7 +471,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -432,14 +484,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetTaskActivityResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createAttachment(req: CreateAttachmentRequest): Promise<CreateAttachmentResponse> {
+async createAttachment(req: CreateAttachmentRequest, opts?: RequestOptions): Promise<CreateAttachmentResponse> {
 const violations = validateCreateAttachmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/attachments";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateAttachmentRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -451,9 +504,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateAttachmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getAttachments(req: GetAttachmentsRequest): Promise<GetAttachmentsResponse> {
+async getAttachments(req: GetAttachmentsRequest, opts?: RequestOptions): Promise<GetAttachmentsResponse> {
 const violations = validateGetAttachmentsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/attachments";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const query = new URLSearchParams();
@@ -461,7 +514,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -473,9 +527,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetAttachmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteAttachment(req: DeleteAttachmentRequest): Promise<DeleteAttachmentResponse> {
+async deleteAttachment(req: DeleteAttachmentRequest, opts?: RequestOptions): Promise<DeleteAttachmentResponse> {
 const violations = validateDeleteAttachmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/attachments/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -483,7 +537,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -495,15 +550,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteAttachmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createTimeLog(req: CreateTimeLogRequest): Promise<CreateTimeLogResponse> {
+async createTimeLog(req: CreateTimeLogRequest, opts?: RequestOptions): Promise<CreateTimeLogResponse> {
 const violations = validateCreateTimeLogRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/time-logs";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateTimeLogRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -515,9 +571,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateTimeLogResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getTimeLogs(req: GetTimeLogsRequest): Promise<GetTimeLogsResponse> {
+async getTimeLogs(req: GetTimeLogsRequest, opts?: RequestOptions): Promise<GetTimeLogsResponse> {
 const violations = validateGetTimeLogsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/time-logs";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const query = new URLSearchParams();
@@ -525,7 +581,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -537,9 +594,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetTimeLogsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteTimeLog(req: DeleteTimeLogRequest): Promise<DeleteTimeLogResponse> {
+async deleteTimeLog(req: DeleteTimeLogRequest, opts?: RequestOptions): Promise<DeleteTimeLogResponse> {
 const violations = validateDeleteTimeLogRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/time-logs/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -547,7 +604,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -559,15 +617,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteTimeLogResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async addTaskDependency(req: AddTaskDependencyRequest): Promise<AddTaskDependencyResponse> {
+async addTaskDependency(req: AddTaskDependencyRequest, opts?: RequestOptions): Promise<AddTaskDependencyResponse> {
 const violations = validateAddTaskDependencyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/dependencies";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAddTaskDependencyRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -579,9 +638,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAddTaskDependencyResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async removeTaskDependency(req: RemoveTaskDependencyRequest): Promise<RemoveTaskDependencyResponse> {
+async removeTaskDependency(req: RemoveTaskDependencyRequest, opts?: RequestOptions): Promise<RemoveTaskDependencyResponse> {
 const violations = validateRemoveTaskDependencyRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/task/v1/tasks/{task_id}/dependencies/{depends_on_task_id}";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 path = path.replace("{depends_on_task_id}", encodeURIComponent(String(req.dependsOnTaskId)));
@@ -590,7 +649,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

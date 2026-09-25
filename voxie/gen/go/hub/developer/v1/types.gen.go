@@ -8,8 +8,9 @@ import (
 )
 
 type ApiKey struct {
-	Id         int64    `json:"id,omitempty"`
-	Name       string   `json:"name,omitempty"`
+	Id   int64  `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	// First 8 chars shown
 	KeyPrefix  string   `json:"key_prefix,omitempty"`
 	Scopes     []string `json:"scopes,omitempty"`
 	CreatedAt  string   `json:"created_at,omitempty"`
@@ -416,19 +417,33 @@ func (x *ListApiKeysResponse) GetKeys() []*ApiKey {
 	return x.Keys
 }
 
+// WebhookDelivery is one attempt to deliver one event to one registration.
 type WebhookDelivery struct {
-	Id             int64  `json:"id,omitempty"`
-	WebhookId      int64  `json:"webhook_id,omitempty"`
-	EventId        int64  `json:"event_id,omitempty"`
-	EventType      string `json:"event_type,omitempty"`
-	Status         string `json:"status,omitempty"`
-	Attempts       int32  `json:"attempts,omitempty"`
-	MaxAttempts    int32  `json:"max_attempts,omitempty"`
-	ResponseStatus int32  `json:"response_status,omitempty"`
-	LastError      string `json:"last_error,omitempty"`
-	NextAttemptAt  string `json:"next_attempt_at,omitempty"`
-	DeliveredAt    string `json:"delivered_at,omitempty"`
-	CreatedAt      string `json:"created_at,omitempty"`
+	Id        int64 `json:"id,omitempty"`
+	WebhookId int64 `json:"webhook_id,omitempty"`
+	EventId   int64 `json:"event_id,omitempty"`
+	// event_type is the event this delivery carries, for example "order_created".
+	EventType string `json:"event_type,omitempty"`
+	// status is one of pending, delivering, delivered, failed or dead. A dead
+	// delivery has exhausted its attempts and will not be retried.
+	Status string `json:"status,omitempty"`
+	// attempts is how many times delivery has been tried.
+	Attempts int32 `json:"attempts,omitempty"`
+	// max_attempts is the cap after which a failing delivery is dead-lettered.
+	MaxAttempts int32 `json:"max_attempts,omitempty"`
+	// response_status is the HTTP status the endpoint answered. Zero when the
+	// request never got a response, such as a timeout or a refused connection.
+	ResponseStatus int32 `json:"response_status,omitempty"`
+	// last_error is why the most recent attempt failed. It includes a short
+	// excerpt of the endpoint's own response body when it sent one, which is
+	// usually the fastest way for the owner to see what their endpoint said.
+	LastError string `json:"last_error,omitempty"`
+	// next_attempt_at is when a retryable delivery will be tried again. Empty
+	// for one that is delivered or dead.
+	NextAttemptAt string `json:"next_attempt_at,omitempty"`
+	// delivered_at is when the endpoint accepted the event. Empty until then.
+	DeliveredAt string `json:"delivered_at,omitempty"`
+	CreatedAt   string `json:"created_at,omitempty"`
 }
 
 func (m *WebhookDelivery) MarshalJSON() ([]byte, error) {
@@ -577,10 +592,14 @@ func (x *WebhookDelivery) GetCreatedAt() string {
 }
 
 type ListWebhookDeliveriesRequest struct {
-	WebhookId int64  `json:"webhook_id,omitempty"`
-	Status    string `json:"status,omitempty"`
-	Page      int32  `json:"page,omitempty"`
-	Limit     int32  `json:"limit,omitempty"`
+	// webhook_id narrows to one registration. Omit for every registration in
+	// the business.
+	WebhookId int64 `json:"webhook_id,omitempty"`
+	// status narrows to one status. "dead" is the one worth watching, since
+	// those events will never arrive without intervention.
+	Status string `json:"status,omitempty"`
+	Page   int32  `json:"page,omitempty"`
+	Limit  int32  `json:"limit,omitempty"`
 }
 
 func (m *ListWebhookDeliveriesRequest) MarshalJSON() ([]byte, error) {

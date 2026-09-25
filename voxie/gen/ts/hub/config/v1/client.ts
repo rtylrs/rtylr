@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface ConfigServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** ConfigService defines hub configuration endpoints. */
 export class ConfigServiceClient {
 private baseUrl: string;
 private options: ConfigServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async getConfig(req: GetConfigRequest): Promise<GetConfigResponse> {
+/** Returns the active business configuration. */
+async getConfig(req: GetConfigRequest, opts?: RequestOptions): Promise<GetConfigResponse> {
 const violations = validateGetConfigRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createConfig(req: CreateConfigRequest): Promise<CreateConfigResponse> {
+/** Creates the business configuration. */
+async createConfig(req: CreateConfigRequest, opts?: RequestOptions): Promise<CreateConfigResponse> {
 const violations = validateCreateConfigRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateConfigRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,14 +154,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateConfig(req: UpdateConfigRequest): Promise<UpdateConfigResponse> {
+/** Updates the business configuration. */
+async updateConfig(req: UpdateConfigRequest, opts?: RequestOptions): Promise<UpdateConfigResponse> {
 const violations = validateUpdateConfigRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateConfigRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -130,16 +175,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getCustomDomain(req: GetCustomDomainRequest): Promise<GetCustomDomainResponse> {
+async getCustomDomain(req: GetCustomDomainRequest, opts?: RequestOptions): Promise<GetCustomDomainResponse> {
 const violations = validateGetCustomDomainRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config/custom-domain";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -151,14 +197,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async registerCustomDomain(req: RegisterCustomDomainRequest): Promise<RegisterCustomDomainResponse> {
+async registerCustomDomain(req: RegisterCustomDomainRequest, opts?: RequestOptions): Promise<RegisterCustomDomainResponse> {
 const violations = validateRegisterCustomDomainRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config/custom-domain";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeRegisterCustomDomainRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -170,14 +217,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRegisterCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async verifyCustomDomain(req: VerifyCustomDomainRequest): Promise<VerifyCustomDomainResponse> {
+async verifyCustomDomain(req: VerifyCustomDomainRequest, opts?: RequestOptions): Promise<VerifyCustomDomainResponse> {
 const violations = validateVerifyCustomDomainRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config/custom-domain/verify";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeVerifyCustomDomainRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -189,16 +237,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeVerifyCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async removeCustomDomain(req: RemoveCustomDomainRequest): Promise<RemoveCustomDomainResponse> {
+async removeCustomDomain(req: RemoveCustomDomainRequest, opts?: RequestOptions): Promise<RemoveCustomDomainResponse> {
 const violations = validateRemoveCustomDomainRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config/custom-domain";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -210,14 +259,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRemoveCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async sendTestEmail(req: SendTestEmailRequest): Promise<SendTestEmailResponse> {
+/** Queues a test email using the configured tenant sender settings. */
+async sendTestEmail(req: SendTestEmailRequest, opts?: RequestOptions): Promise<SendTestEmailResponse> {
 const violations = validateSendTestEmailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/config/test-email";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSendTestEmailRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -229,16 +280,18 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeSendTestEmailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getIndustries(req: GetIndustriesRequest): Promise<GetIndustriesResponse> {
+/** Returns the industry catalog grouped by category. */
+async getIndustries(req: GetIndustriesRequest, opts?: RequestOptions): Promise<GetIndustriesResponse> {
 const violations = validateGetIndustriesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/config/v1/industries";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

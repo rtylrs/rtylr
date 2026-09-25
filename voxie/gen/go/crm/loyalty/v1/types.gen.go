@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// LoyaltyConfig is a business's loyalty program configuration.
 type LoyaltyConfig struct {
 	Id                    int64   `json:"id,omitempty"`
 	OwnerId               int64   `json:"owner_id,omitempty"`
@@ -233,6 +234,7 @@ func (x *LoyaltyConfig) GetUpdatedAt() string {
 	return x.UpdatedAt
 }
 
+// LoyaltyTransaction is a single points award or redemption event.
 type LoyaltyTransaction struct {
 	Id            int64  `json:"id,omitempty"`
 	OwnerId       int64  `json:"owner_id,omitempty"`
@@ -431,6 +433,7 @@ func (x *LoyaltyTransaction) GetCreatedAt() string {
 	return x.CreatedAt
 }
 
+// LoyaltyTier is a spend-based tier with an associated discount.
 type LoyaltyTier struct {
 	Id          int64   `json:"id,omitempty"`
 	OwnerId     int64   `json:"owner_id,omitempty"`
@@ -705,7 +708,9 @@ func (x *AwardPointsResponse) GetMessage() string {
 }
 
 type CreateLoyaltyTierRequest struct {
-	Name        string   `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Points threshold at which this tier starts applying. Zero is valid and
+	// means an entry tier every customer qualifies for from their first point.
 	MinPoints   *int64   `json:"min_points,omitempty"`
 	DiscountPct *float64 `json:"discount_pct,omitempty"`
 	Perks       string   `json:"perks,omitempty"`
@@ -890,6 +895,7 @@ func (x *ListLoyaltyTiersResponse) GetTiers() []*LoyaltyTier {
 }
 
 type ListLoyaltyTransactionsRequest struct {
+	// Filters transactions for a single customer.
 	CustomerId int64 `json:"customer_id,omitempty"`
 	Page       int64 `json:"page,omitempty"`
 	PageSize   int64 `json:"page_size,omitempty"`
@@ -1438,7 +1444,9 @@ func (x *UpdateLoyaltyConfigResponse) GetMessage() string {
 }
 
 type UpdateLoyaltyTierBody struct {
-	Name        string   `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Points threshold at which this tier starts applying. Zero is valid and
+	// means an entry tier every customer qualifies for from their first point.
 	MinPoints   *int64   `json:"min_points,omitempty"`
 	DiscountPct *float64 `json:"discount_pct,omitempty"`
 	Perks       string   `json:"perks,omitempty"`

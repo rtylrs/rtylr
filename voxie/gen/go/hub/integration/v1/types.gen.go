@@ -6,13 +6,16 @@ import (
 	"strconv"
 )
 
+// Integration is a connected third-party integration.
 type Integration struct {
-	Id          int64  `json:"id,omitempty"`
-	Provider    string `json:"provider,omitempty"`
+	Id       int64  `json:"id,omitempty"`
+	Provider string `json:"provider,omitempty"`
+	// The current lifecycle state.
 	Status      string `json:"status,omitempty"`
 	Config      []byte `json:"config,omitempty"`
 	ConnectedAt string `json:"connected_at,omitempty"`
-	CreatedAt   string `json:"created_at,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *Integration) MarshalJSON() ([]byte, error) {

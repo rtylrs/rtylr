@@ -13,23 +13,37 @@ paths:
             parameters:
                 - name: branch_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 - name: product_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.stock.v1.ListStockMovementsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/stock/v1/receive:
         post:
             tags:
@@ -44,12 +58,24 @@ paths:
                             $ref: '#/components/schemas/pos.stock.v1.ReceiveStockRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.stock.v1.ReceiveStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/stock/v1/adjust:
         post:
             tags:
@@ -64,12 +90,24 @@ paths:
                             $ref: '#/components/schemas/pos.stock.v1.AdjustStockRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.stock.v1.AdjustStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/stock/v1/waste:
         post:
             tags:
@@ -84,12 +122,24 @@ paths:
                             $ref: '#/components/schemas/pos.stock.v1.WasteStockRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.stock.v1.WasteStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/stock/v1/transfer:
         post:
             tags:
@@ -104,12 +154,24 @@ paths:
                             $ref: '#/components/schemas/pos.stock.v1.TransferStockRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.stock.v1.TransferStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/stock/v1/inventory:
         get:
             tags:
@@ -120,17 +182,30 @@ paths:
             parameters:
                 - name: branch_id
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.stock.v1.ListInventoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /pos/stock/v1/low-stock:
         get:
             tags:
@@ -145,14 +220,27 @@ paths:
                   schema:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/pos.stock.v1.LowStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         pos.stock.v1.ListStockMovementsRequest:
@@ -160,9 +248,11 @@ components:
             properties:
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - branch_id
@@ -181,15 +271,19 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 type:
                     type: string
@@ -199,6 +293,7 @@ components:
                     format: double
                 reference_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 reference_type:
                     type: string
@@ -206,6 +301,7 @@ components:
                     type: string
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 created_at:
                     type: string
@@ -225,10 +321,12 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity:
                     exclusiveMinimum: 0
@@ -239,6 +337,7 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - branch_id
@@ -251,6 +350,7 @@ components:
             properties:
                 movement_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -263,10 +363,12 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity:
                     exclusiveMinimum: 0
@@ -277,6 +379,7 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - branch_id
@@ -289,6 +392,7 @@ components:
             properties:
                 movement_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -301,10 +405,12 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity:
                     exclusiveMinimum: 0
@@ -315,6 +421,7 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - branch_id
@@ -327,6 +434,7 @@ components:
             properties:
                 movement_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -339,14 +447,17 @@ components:
                 from_branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 to_branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity:
                     exclusiveMinimum: 0
@@ -357,6 +468,7 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - from_branch_id
@@ -370,6 +482,7 @@ components:
             properties:
                 movement_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 message:
                     type: string
@@ -381,6 +494,7 @@ components:
             properties:
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - branch_id
@@ -398,15 +512,19 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 business_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 branch_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 product_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                 quantity:
                     type: number
@@ -422,6 +540,7 @@ components:
                     description: updated_at is when the record was last updated.
                 item_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: item_id is an alias for product_id used by POS catalog UIs.
                 name:
@@ -462,6 +581,7 @@ components:
                 branch_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - branch_id
@@ -474,3 +594,13 @@ components:
                         $ref: '#/components/schemas/pos.stock.v1.BranchInventory'
             required:
                 - items
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: StockService
+      description: StockService defines POS inventory and stock movement endpoints.

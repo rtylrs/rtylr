@@ -60,13 +60,16 @@ return violations;
 
 export interface Group {
 id?: string | undefined;
+/** Identifies the owner of the group. */
 ownerId?: string | undefined;
 name?: string | undefined;
 description?: string | undefined;
 color?: string | undefined;
 resourcePermissions?: (ResourcePermission)[] | undefined;
 memberCount?: number | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
+/** When the record was last updated. */
 updatedAt?: string | undefined;
 }
 
@@ -115,9 +118,12 @@ return violations;
 }
 
 export interface GroupMember {
+/** Identifies the member user. */
 userId?: string | undefined;
+/** Email address used for lookup or contact. */
 email?: string | undefined;
 fullName?: string | undefined;
+/** When the member was added to the group. */
 addedAt?: string | undefined;
 }
 
@@ -149,15 +155,22 @@ if (v.addedAt !== undefined && v.addedAt !== null && !(typeof v.addedAt === "str
 return violations;
 }
 
+/**
+ * GroupDetail mirrors Group with the member list flattened alongside it
+ * (the legacy payload embeds the group fields at the top level).
+ */
 export interface GroupDetail {
 id?: string | undefined;
+/** Identifies the owner of the group. */
 ownerId?: string | undefined;
 name?: string | undefined;
 description?: string | undefined;
 color?: string | undefined;
 resourcePermissions?: (ResourcePermission)[] | undefined;
 memberCount?: number | undefined;
+/** When the record was created. */
 createdAt?: string | undefined;
+/** When the record was last updated. */
 updatedAt?: string | undefined;
 members?: (GroupMember)[] | undefined;
 }
@@ -505,6 +518,7 @@ return violations;
 }
 
 export interface AddGroupMembersResponse {
+/** Number of members added. */
 added?: number | undefined;
 message?: string | undefined;
 }

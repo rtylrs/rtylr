@@ -6,23 +6,40 @@ import (
 	"strconv"
 )
 
+// AttendanceRecordPayload is a single clock-in/clock-out attendance record.
 type AttendanceRecordPayload struct {
-	Id              int64    `json:"id,omitempty"`
-	OwnerId         int64    `json:"owner_id,omitempty"`
-	EmployeeId      int64    `json:"employee_id,omitempty"`
-	LocationId      int64    `json:"location_id,omitempty"`
-	Date            string   `json:"date,omitempty"`
-	ClockInAt       int64    `json:"clock_in_at,omitempty"`
-	ClockOutAt      *int64   `json:"clock_out_at,omitempty"`
-	DurationMinutes *int32   `json:"duration_minutes,omitempty"`
-	ClockInMethod   string   `json:"clock_in_method,omitempty"`
-	ClockInLat      *float64 `json:"clock_in_lat,omitempty"`
-	ClockInLng      *float64 `json:"clock_in_lng,omitempty"`
-	IsLate          bool     `json:"is_late,omitempty"`
-	LateMinutes     int32    `json:"late_minutes,omitempty"`
-	Status          string   `json:"status,omitempty"`
-	CreatedAt       int64    `json:"created_at,omitempty"`
-	UpdatedAt       int64    `json:"updated_at,omitempty"`
+	// Unique identifier for the attendance record.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this record belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Employee this attendance record is for.
+	EmployeeId int64 `json:"employee_id,omitempty"`
+	// Work location where attendance was recorded.
+	LocationId int64 `json:"location_id,omitempty"`
+	// Date of the attendance record (ISO-8601 format).
+	Date string `json:"date,omitempty"`
+	// Unix timestamp when the employee clocked in.
+	ClockInAt int64 `json:"clock_in_at,omitempty"`
+	// Unix timestamp when the employee clocked out; absent if still clocked in.
+	ClockOutAt *int64 `json:"clock_out_at,omitempty"`
+	// Total worked duration in minutes; absent if still clocked in.
+	DurationMinutes *int32 `json:"duration_minutes,omitempty"`
+	// Method used to clock in (app | qr | gps | pin | facial).
+	ClockInMethod string `json:"clock_in_method,omitempty"`
+	// Latitude at clock-in; absent if location not captured.
+	ClockInLat *float64 `json:"clock_in_lat,omitempty"`
+	// Longitude at clock-in; absent if location not captured.
+	ClockInLng *float64 `json:"clock_in_lng,omitempty"`
+	// Whether the employee clocked in after the scheduled start.
+	IsLate bool `json:"is_late,omitempty"`
+	// Number of minutes late; zero if on time.
+	LateMinutes int32 `json:"late_minutes,omitempty"`
+	// Attendance status (present | absent | partial).
+	Status string `json:"status,omitempty"`
+	// Unix timestamp when this record was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this record was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 }
 
 func (m *AttendanceRecordPayload) MarshalJSON() ([]byte, error) {
@@ -272,12 +289,18 @@ func (x *AttendanceRecordPayload) GetUpdatedAt() int64 {
 }
 
 type AttendanceClockInRequest struct {
-	Method     string   `json:"method,omitempty"`
-	LocationId *int64   `json:"location_id,omitempty"`
-	Lat        *float64 `json:"lat,omitempty"`
-	Lng        *float64 `json:"lng,omitempty"`
-	QrToken    *string  `json:"qr_token,omitempty"`
-	Pin        *string  `json:"pin,omitempty"`
+	// Method used to clock in (app | qr | gps | pin | facial).
+	Method string `json:"method,omitempty"`
+	// Work location where the employee is clocking in.
+	LocationId *int64 `json:"location_id,omitempty"`
+	// Latitude at clock-in; absent if location not available.
+	Lat *float64 `json:"lat,omitempty"`
+	// Longitude at clock-in; absent if location not available.
+	Lng *float64 `json:"lng,omitempty"`
+	// QR token scanned at a terminal; absent if not using QR method.
+	QrToken *string `json:"qr_token,omitempty"`
+	// PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field.
+	Pin *string `json:"pin,omitempty"`
 }
 
 func (m *AttendanceClockInRequest) MarshalJSON() ([]byte, error) {
@@ -381,6 +404,7 @@ func (x *AttendanceClockInRequest) GetPin() string {
 }
 
 type AttendanceClockInResponse struct {
+	// The created attendance record.
 	Record *AttendanceRecordPayload `json:"record,omitempty"`
 }
 
@@ -393,6 +417,7 @@ func (x *AttendanceClockInResponse) GetRecord() *AttendanceRecordPayload {
 }
 
 type AttendanceClockOutRequest struct {
+	// ID of the attendance record to close.
 	AttendanceRecordId *int64 `json:"attendance_record_id,omitempty"`
 }
 
@@ -441,6 +466,7 @@ func (x *AttendanceClockOutRequest) GetAttendanceRecordId() int64 {
 }
 
 type AttendanceClockOutResponse struct {
+	// The updated attendance record with clock-out data.
 	Record *AttendanceRecordPayload `json:"record,omitempty"`
 }
 
@@ -453,8 +479,10 @@ func (x *AttendanceClockOutResponse) GetRecord() *AttendanceRecordPayload {
 }
 
 type ListAttendanceRequest struct {
-	EmployeeId *int64  `json:"employee_id,omitempty"`
-	Date       *string `json:"date,omitempty"`
+	// Filter by employee; absent to include all employees.
+	EmployeeId *int64 `json:"employee_id,omitempty"`
+	// Filter by date; absent to include all dates.
+	Date *string `json:"date,omitempty"`
 }
 
 func (m *ListAttendanceRequest) MarshalJSON() ([]byte, error) {
@@ -514,10 +542,14 @@ func (x *ListAttendanceRequest) GetDate() string {
 }
 
 type ListAttendanceResponse struct {
+	// Attendance records matching the filters.
 	Records []*AttendanceRecordPayload `json:"records,omitempty"`
-	Total   int64                      `json:"total,omitempty"`
-	Limit   int32                      `json:"limit,omitempty"`
-	Offset  int32                      `json:"offset,omitempty"`
+	// Total number of matching attendance records across all pages.
+	Total int64 `json:"total,omitempty"`
+	// Page size used for this request.
+	Limit int32 `json:"limit,omitempty"`
+	// Offset used for this request.
+	Offset int32 `json:"offset,omitempty"`
 }
 
 func (x *ListAttendanceResponse) GetRecords() []*AttendanceRecordPayload {

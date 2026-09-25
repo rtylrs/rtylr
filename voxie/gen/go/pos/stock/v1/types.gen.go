@@ -6,18 +6,21 @@ import (
 	"strconv"
 )
 
+// StockMovement is a recorded inventory movement.
 type StockMovement struct {
-	Id            int64   `json:"id,omitempty"`
-	BusinessId    int64   `json:"business_id,omitempty"`
-	BranchId      int64   `json:"branch_id,omitempty"`
-	ProductId     int64   `json:"product_id,omitempty"`
+	Id         int64 `json:"id,omitempty"`
+	BusinessId int64 `json:"business_id,omitempty"`
+	BranchId   int64 `json:"branch_id,omitempty"`
+	ProductId  int64 `json:"product_id,omitempty"`
+	// type is the type value for this contract.
 	Type          string  `json:"type,omitempty"`
 	Quantity      float64 `json:"quantity,omitempty"`
 	ReferenceId   *int64  `json:"reference_id,omitempty"`
 	ReferenceType *string `json:"reference_type,omitempty"`
 	Note          *string `json:"note,omitempty"`
 	EmployeeId    *int64  `json:"employee_id,omitempty"`
-	CreatedAt     string  `json:"created_at,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *StockMovement) MarshalJSON() ([]byte, error) {
@@ -209,20 +212,27 @@ func (x *StockMovement) GetCreatedAt() string {
 	return x.CreatedAt
 }
 
+// BranchInventory is a per-branch inventory row for a product.
 type BranchInventory struct {
-	Id                int64   `json:"id,omitempty"`
-	BusinessId        int64   `json:"business_id,omitempty"`
-	BranchId          int64   `json:"branch_id,omitempty"`
-	ProductId         int64   `json:"product_id,omitempty"`
-	Quantity          float64 `json:"quantity,omitempty"`
-	ReorderPoint      float64 `json:"reorder_point,omitempty"`
-	ReorderQuantity   float64 `json:"reorder_quantity,omitempty"`
-	UpdatedAt         string  `json:"updated_at,omitempty"`
-	ItemId            int64   `json:"item_id,omitempty"`
-	Name              string  `json:"name,omitempty"`
-	Sku               string  `json:"sku,omitempty"`
-	Unit              string  `json:"unit,omitempty"`
-	CurrentQty        float64 `json:"current_qty,omitempty"`
+	Id              int64   `json:"id,omitempty"`
+	BusinessId      int64   `json:"business_id,omitempty"`
+	BranchId        int64   `json:"branch_id,omitempty"`
+	ProductId       int64   `json:"product_id,omitempty"`
+	Quantity        float64 `json:"quantity,omitempty"`
+	ReorderPoint    float64 `json:"reorder_point,omitempty"`
+	ReorderQuantity float64 `json:"reorder_quantity,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt string `json:"updated_at,omitempty"`
+	// item_id is an alias for product_id used by POS catalog UIs.
+	ItemId int64 `json:"item_id,omitempty"`
+	// name is the ERP product display name.
+	Name string `json:"name,omitempty"`
+	// sku is the ERP product SKU.
+	Sku  string `json:"sku,omitempty"`
+	Unit string `json:"unit,omitempty"`
+	// current_qty is an alias for quantity used by POS inventory UIs.
+	CurrentQty float64 `json:"current_qty,omitempty"`
+	// low_stock_threshold is the ERP product low-stock threshold.
 	LowStockThreshold float64 `json:"low_stock_threshold,omitempty"`
 }
 

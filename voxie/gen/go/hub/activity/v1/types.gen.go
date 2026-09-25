@@ -16,7 +16,8 @@ type ActivityEntry struct {
 	Description string `json:"description,omitempty"`
 	UserId      int64  `json:"user_id,omitempty"`
 	UserName    string `json:"user_name,omitempty"`
-	CreatedAt   string `json:"created_at,omitempty"`
+	// When the record was created.
+	CreatedAt string `json:"created_at,omitempty"`
 }
 
 func (m *ActivityEntry) MarshalJSON() ([]byte, error) {
@@ -159,7 +160,9 @@ func (x *ActivityEntry) GetCreatedAt() string {
 }
 
 type ListActivityRequest struct {
-	Limit  int32  `json:"limit,omitempty"`
+	// The maximum number of records to return.
+	Limit int32 `json:"limit,omitempty"`
+	// offset is the number of records to skip, for paging through the feed.
 	Offset *int32 `json:"offset,omitempty"`
 }
 
@@ -185,7 +188,8 @@ func (x *ListActivityRequest) GetOffset() int32 {
 
 type ListActivityResponse struct {
 	Activities []*ActivityEntry `json:"activities,omitempty"`
-	Total      int32            `json:"total,omitempty"`
+	// total is the total number of matching activity entries, for pagination math.
+	Total int32 `json:"total,omitempty"`
 }
 
 func (x *ListActivityResponse) GetActivities() []*ActivityEntry {

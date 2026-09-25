@@ -13,19 +13,26 @@ paths:
             parameters:
                 - name: employee_id
                   in: query
+                  description: Filter by employee; absent to include all employees.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 - name: status
                   in: query
+                  description: Filter by status; absent to include all statuses.
                   required: false
                   schema:
                     type: string
                     description: Filter by status; absent to include all statuses.
                 - name: from_date
                   in: query
+                  description: |-
+                    Include requests overlapping this day or later (ISO-8601 date); absent
+                    to leave the range open at the start. A request overlaps when it starts
+                    on or before to_date and ends on or after from_date.
                   required: false
                   schema:
                     type: string
@@ -35,6 +42,9 @@ paths:
                         on or before to_date and ends on or after from_date.
                 - name: to_date
                   in: query
+                  description: |-
+                    Include requests overlapping this day or earlier (ISO-8601 date); absent
+                    to leave the range open at the end.
                   required: false
                   schema:
                     type: string
@@ -43,25 +53,39 @@ paths:
                         to leave the range open at the end.
                 - name: limit
                   in: query
-                  required: true
+                  description: Maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Maximum number of records to return.
                 - name: offset
                   in: query
-                  required: true
+                  description: Number of records to skip for pagination.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: Number of records to skip for pagination.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.ListLeaveRequestsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - LeaveService
@@ -75,12 +99,24 @@ paths:
                             $ref: '#/components/schemas/hr.leave.v1.CreateLeaveRequestRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.CreateLeaveRequestResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/leave/v1/requests/{request_id}/approve:
         patch:
             tags:
@@ -91,10 +127,14 @@ paths:
             parameters:
                 - name: request_id
                   in: path
+                  description: request_id is the leave request being reviewed.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: request_id is the leave request being reviewed.
             requestBody:
                 content:
                     application/json:
@@ -103,12 +143,24 @@ paths:
                                 - $ref: '#/components/schemas/hr.leave.v1.ApproveLeaveBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.ApproveLeaveResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/leave/v1/requests/{request_id}/cancel:
         patch:
             tags:
@@ -119,23 +171,45 @@ paths:
             parameters:
                 - name: request_id
                   in: path
+                  description: |-
+                    request_id is the leave request being withdrawn. Only the request's own
+                    subject may cancel it, and only while it is still pending - the leave
+                    approval permission grants no override here.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: |-
+                        request_id is the leave request being withdrawn. Only the request's own
+                        subject may cancel it, and only while it is still pending - the leave
+                        approval permission grants no override here.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/hr.leave.v1.CancelLeaveRequestRequest'
-                required: true
+                            type: object
+                required: false
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.CancelLeaveResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/leave/v1/types:
         get:
             tags:
@@ -144,12 +218,24 @@ paths:
             description: ListLeaveTypes returns configured leave types.
             operationId: LeaveService_listLeaveTypes
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.ListLeaveTypesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - LeaveService
@@ -163,12 +249,24 @@ paths:
                             $ref: '#/components/schemas/hr.leave.v1.CreateLeaveTypeRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.CreateLeaveTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/leave/v1/types/{id}:
         put:
             tags:
@@ -179,10 +277,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: ID of the leave type to update.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: ID of the leave type to update.
             requestBody:
                 content:
                     application/json:
@@ -191,12 +293,24 @@ paths:
                                 - $ref: '#/components/schemas/hr.leave.v1.UpdateLeaveTypeBody'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.UpdateLeaveTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /hr/leave/v1/balances:
         get:
             tags:
@@ -207,25 +321,40 @@ paths:
             parameters:
                 - name: employee_id
                   in: query
+                  description: Filter by employee; absent to include all employees.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 - name: year
                   in: query
+                  description: Filter by year; absent to return current year.
                   required: false
                   schema:
                     type: integer
                     format: int32
                     description: Filter by year; absent to return current year.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/hr.leave.v1.ListLeaveBalancesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         hr.leave.v1.ListLeaveRequestsRequest:
@@ -233,6 +362,7 @@ components:
             properties:
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 status:
@@ -291,18 +421,22 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the leave request.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this request belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee who is requesting leave.
                 leave_type_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Leave type being requested.
                 start_date:
@@ -330,10 +464,12 @@ components:
                     description: Reason the request was rejected; absent unless status is rejected.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -355,11 +491,13 @@ components:
                 employee_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee requesting leave.
                 leave_type_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Leave type being requested.
                 start_date:
@@ -397,6 +535,7 @@ components:
                 request_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: request_id is the leave request being reviewed.
                 body:
@@ -431,6 +570,7 @@ components:
                 request_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         request_id is the leave request being withdrawn. Only the request's own
@@ -478,10 +618,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the leave type.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this leave type belongs to.
                 name:
@@ -513,10 +655,12 @@ components:
                     description: Whether this leave type is currently available for new requests.
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -581,6 +725,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: ID of the leave type to update.
                 body:
@@ -634,6 +779,7 @@ components:
             properties:
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Filter by employee; absent to include all employees.
                 year:
@@ -670,18 +816,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unique identifier for the balance record.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Tenant owner this balance belongs to.
                 employee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Employee this balance is for.
                 leave_type_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Leave type this balance tracks.
                 year:
@@ -706,10 +856,12 @@ components:
                     description: Days still available (entitled - used - pending).
                 created_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was created.
                 updated_at:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Unix timestamp when this record was last updated.
             required:
@@ -725,3 +877,13 @@ components:
                 - created_at
                 - updated_at
             description: LeaveBalancePayload tracks an employee's remaining entitlement for a leave type and year.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LeaveService
+      description: LeaveService defines HR leave endpoints.

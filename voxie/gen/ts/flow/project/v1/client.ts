@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,11 +74,25 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface ProjectServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
 export class ProjectServiceClient {
@@ -71,9 +109,9 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listProjects(req: ListProjectsRequest): Promise<ListProjectsResponse> {
+async listProjects(req: ListProjectsRequest, opts?: RequestOptions): Promise<ListProjectsResponse> {
 const violations = validateListProjectsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects";
 const query = new URLSearchParams();
 if (req.workspaceId !== undefined) {
@@ -95,7 +133,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -107,14 +146,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListProjectsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createProject(req: CreateProjectRequest): Promise<CreateProjectResponse> {
+async createProject(req: CreateProjectRequest, opts?: RequestOptions): Promise<CreateProjectResponse> {
 const violations = validateCreateProjectRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateProjectRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -126,15 +166,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateProjectResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateProject(req: UpdateProjectRequest): Promise<UpdateProjectResponse> {
+async updateProject(req: UpdateProjectRequest, opts?: RequestOptions): Promise<UpdateProjectResponse> {
 const violations = validateUpdateProjectRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateProjectRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -146,9 +187,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateProjectResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteProject(req: DeleteProjectRequest): Promise<DeleteProjectResponse> {
+async deleteProject(req: DeleteProjectRequest, opts?: RequestOptions): Promise<DeleteProjectResponse> {
 const violations = validateDeleteProjectRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -156,7 +197,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -168,9 +210,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteProjectResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listProjectColumns(req: ListProjectColumnsRequest): Promise<ListProjectColumnsResponse> {
+async listProjectColumns(req: ListProjectColumnsRequest, opts?: RequestOptions): Promise<ListProjectColumnsResponse> {
 const violations = validateListProjectColumnsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/columns";
 const query = new URLSearchParams();
 if (req.projectId !== undefined) {
@@ -192,7 +234,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -204,14 +247,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListProjectColumnsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createProjectColumn(req: CreateProjectColumnRequest): Promise<CreateProjectColumnResponse> {
+async createProjectColumn(req: CreateProjectColumnRequest, opts?: RequestOptions): Promise<CreateProjectColumnResponse> {
 const violations = validateCreateProjectColumnRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/columns";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateProjectColumnRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -223,15 +267,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateProjectColumnResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateProjectColumn(req: UpdateProjectColumnRequest): Promise<UpdateProjectColumnResponse> {
+async updateProjectColumn(req: UpdateProjectColumnRequest, opts?: RequestOptions): Promise<UpdateProjectColumnResponse> {
 const violations = validateUpdateProjectColumnRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/columns/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateProjectColumnRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -243,9 +288,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateProjectColumnResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteProjectColumn(req: DeleteProjectColumnRequest): Promise<DeleteProjectColumnResponse> {
+async deleteProjectColumn(req: DeleteProjectColumnRequest, opts?: RequestOptions): Promise<DeleteProjectColumnResponse> {
 const violations = validateDeleteProjectColumnRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/columns/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -253,7 +298,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -265,14 +311,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeDeleteProjectColumnResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async moveTaskToColumn(req: MoveTaskToColumnRequest): Promise<MoveTaskToColumnResponse> {
+async moveTaskToColumn(req: MoveTaskToColumnRequest, opts?: RequestOptions): Promise<MoveTaskToColumnResponse> {
 const violations = validateMoveTaskToColumnRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/columns/move";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeMoveTaskToColumnRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -284,9 +331,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeMoveTaskToColumnResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async listProjectMembers(req: ListProjectMembersRequest): Promise<ListProjectMembersResponse> {
+async listProjectMembers(req: ListProjectMembersRequest, opts?: RequestOptions): Promise<ListProjectMembersResponse> {
 const violations = validateListProjectMembersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/members";
 const query = new URLSearchParams();
 if (req.projectId !== undefined) {
@@ -308,7 +355,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -320,14 +368,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListProjectMembersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async addProjectMember(req: AddProjectMemberRequest): Promise<AddProjectMemberResponse> {
+async addProjectMember(req: AddProjectMemberRequest, opts?: RequestOptions): Promise<AddProjectMemberResponse> {
 const violations = validateAddProjectMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/members";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeAddProjectMemberRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -339,9 +388,9 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeAddProjectMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async removeProjectMember(req: RemoveProjectMemberRequest): Promise<RemoveProjectMemberResponse> {
+async removeProjectMember(req: RemoveProjectMemberRequest, opts?: RequestOptions): Promise<RemoveProjectMemberResponse> {
 const violations = validateRemoveProjectMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/members";
 const query = new URLSearchParams();
 if (req.projectId !== undefined) {
@@ -354,7 +403,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -366,14 +416,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRemoveProjectMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateProjectMemberRole(req: UpdateProjectMemberRoleRequest): Promise<UpdateProjectMemberRoleResponse> {
+async updateProjectMemberRole(req: UpdateProjectMemberRoleRequest, opts?: RequestOptions): Promise<UpdateProjectMemberRoleResponse> {
 const violations = validateUpdateProjectMemberRoleRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/members/role";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateProjectMemberRoleRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -385,14 +436,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateProjectMemberRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async inviteProjectMember(req: InviteProjectMemberRequest): Promise<InviteProjectMemberResponse> {
+async inviteProjectMember(req: InviteProjectMemberRequest, opts?: RequestOptions): Promise<InviteProjectMemberResponse> {
 const violations = validateInviteProjectMemberRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/members/invite";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeInviteProjectMemberRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -404,14 +456,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeInviteProjectMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async transferProjectOwnership(req: TransferProjectOwnershipRequest): Promise<TransferProjectOwnershipResponse> {
+async transferProjectOwnership(req: TransferProjectOwnershipRequest, opts?: RequestOptions): Promise<TransferProjectOwnershipResponse> {
 const violations = validateTransferProjectOwnershipRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/transfer";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeTransferProjectOwnershipRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -423,14 +476,15 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeTransferProjectOwnershipResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async moveProject(req: MoveProjectRequest): Promise<MoveProjectResponse> {
+async moveProject(req: MoveProjectRequest, opts?: RequestOptions): Promise<MoveProjectResponse> {
 const violations = validateMoveProjectRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/move";
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeMoveProjectRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -442,9 +496,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeMoveProjectResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getProjectLabourCost(req: GetProjectLabourCostRequest): Promise<GetProjectLabourCostResponse> {
+/**
+ * Returns the live labour-cost aggregate for one project. Money is
+ * computed server-side by HR from pay rates that never cross this
+ * boundary: only aggregate cents and coverage counts are returned, so a
+ * caller who may see a project's cost does not thereby gain sight of any
+ * individual's pay.
+ */
+async getProjectLabourCost(req: GetProjectLabourCostRequest, opts?: RequestOptions): Promise<GetProjectLabourCostResponse> {
 const violations = validateGetProjectLabourCostRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/flow/project/v1/projects/{id}/labour-cost";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -452,7 +513,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

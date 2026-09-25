@@ -6,14 +6,18 @@ import (
 	"strconv"
 )
 
+// Location is a physical POS location for a business.
 type Location struct {
-	Id        int64  `json:"id,omitempty"`
-	OwnerId   int64  `json:"owner_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Address   string `json:"address,omitempty"`
-	Phone     string `json:"phone,omitempty"`
-	IsActive  bool   `json:"is_active,omitempty"`
+	Id int64 `json:"id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId  int64  `json:"owner_id,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Address  string `json:"address,omitempty"`
+	Phone    string `json:"phone,omitempty"`
+	IsActive bool   `json:"is_active,omitempty"`
+	// created_at is when the record was created.
 	CreatedAt string `json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
 	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
@@ -121,10 +125,11 @@ func (x *Location) GetUpdatedAt() string {
 }
 
 type CreateLocationRequest struct {
-	Name     string `json:"name,omitempty"`
-	Address  string `json:"address,omitempty"`
-	Phone    string `json:"phone,omitempty"`
-	IsActive *bool  `json:"is_active,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Address string `json:"address,omitempty"`
+	Phone   string `json:"phone,omitempty"`
+	// Defaults to true when absent.
+	IsActive *bool `json:"is_active,omitempty"`
 }
 
 func (x *CreateLocationRequest) GetName() string {
@@ -229,10 +234,11 @@ func (x *ListLocationsResponse) GetLocations() []*Location {
 }
 
 type UpdateLocationBody struct {
-	Name     string `json:"name,omitempty"`
-	Address  string `json:"address,omitempty"`
-	Phone    string `json:"phone,omitempty"`
-	IsActive *bool  `json:"is_active,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Address string `json:"address,omitempty"`
+	Phone   string `json:"phone,omitempty"`
+	// Unchanged when absent.
+	IsActive *bool `json:"is_active,omitempty"`
 }
 
 func (x *UpdateLocationBody) GetName() string {
@@ -272,7 +278,9 @@ func (x *UpdateLocationBody) GetIsActive() bool {
 }
 
 type UpdateLocationRequest struct {
-	Id   int64               `json:"id,omitempty"`
+	// id is the unique identifier for the location.
+	Id int64 `json:"id,omitempty"`
+	// body carries updatable location fields bound from the HTTP payload.
 	Body *UpdateLocationBody `json:"body,omitempty"`
 }
 

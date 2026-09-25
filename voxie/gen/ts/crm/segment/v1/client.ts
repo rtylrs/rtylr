@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface SegmentServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** SegmentService defines CRM segment endpoints. */
 export class SegmentServiceClient {
 private baseUrl: string;
 private options: SegmentServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listSegments(req: ListSegmentsRequest): Promise<ListSegmentsResponse> {
+/** Returns all segments for the active business. */
+async listSegments(req: ListSegmentsRequest, opts?: RequestOptions): Promise<ListSegmentsResponse> {
 const violations = validateListSegmentsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segment/v1/segments";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListSegmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createSegment(req: CreateSegmentRequest): Promise<CreateSegmentResponse> {
+/** Creates a new customer segment. */
+async createSegment(req: CreateSegmentRequest, opts?: RequestOptions): Promise<CreateSegmentResponse> {
 const violations = validateCreateSegmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segment/v1/segments";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateSegmentRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,9 +154,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateSegmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSegmentDetail(req: GetSegmentDetailRequest): Promise<GetSegmentDetailResponse> {
+/** Returns a segment and its member customers. */
+async getSegmentDetail(req: GetSegmentDetailRequest, opts?: RequestOptions): Promise<GetSegmentDetailResponse> {
 const violations = validateGetSegmentDetailRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segment/v1/segments/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -121,7 +165,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -133,9 +178,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetSegmentDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getSegmentCustomers(req: GetSegmentCustomersRequest): Promise<GetSegmentCustomersResponse> {
+/** Returns paginated customers in a segment. */
+async getSegmentCustomers(req: GetSegmentCustomersRequest, opts?: RequestOptions): Promise<GetSegmentCustomersResponse> {
 const violations = validateGetSegmentCustomersRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segment/v1/segments/{segment_id}/customers";
 path = path.replace("{segment_id}", encodeURIComponent(String(req.segmentId)));
 const query = new URLSearchParams();
@@ -149,7 +195,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -161,15 +208,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetSegmentCustomersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateSegment(req: UpdateSegmentRequest): Promise<UpdateSegmentResponse> {
+/** Updates an existing segment. */
+async updateSegment(req: UpdateSegmentRequest, opts?: RequestOptions): Promise<UpdateSegmentResponse> {
 const violations = validateUpdateSegmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segment/v1/segments/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateSegmentRequest(req)["body"]),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -181,9 +230,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateSegmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteSegment(req: DeleteSegmentRequest): Promise<DeleteSegmentResponse> {
+/** Removes a segment by ID. */
+async deleteSegment(req: DeleteSegmentRequest, opts?: RequestOptions): Promise<DeleteSegmentResponse> {
 const violations = validateDeleteSegmentRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/crm/segment/v1/segments/{id}";
 path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const query = new URLSearchParams();
@@ -191,7 +241,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {

@@ -12,9 +12,14 @@ paths:
             parameters:
                 - name: project_id
                   in: query
+                  description: |-
+                    project_id narrows results to one project. Omitted, the call returns
+                    every task in the caller's business the visibility policy lets them see,
+                    which replaces v1's workspace-wide listing mode.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         project_id narrows results to one project. Omitted, the call returns
@@ -22,56 +27,76 @@ paths:
                         which replaces v1's workspace-wide listing mode.
                 - name: status
                   in: query
-                  required: true
+                  description: status is the current lifecycle state.
+                  required: false
                   schema:
                     type: string
                     description: status is the current lifecycle state.
                 - name: assignee_id
                   in: query
+                  description: assignee_id is the assignee id value for this contract.
                   required: false
                   schema:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: assignee_id is the assignee id value for this contract.
                 - name: priority
                   in: query
-                  required: true
+                  description: priority is the priority value for this contract.
+                  required: false
                   schema:
                     type: string
                     description: priority is the priority value for this contract.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.ListTasksResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - TaskService
@@ -84,12 +109,24 @@ paths:
                             $ref: '#/components/schemas/flow.task.v2.CreateTaskRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.CreateTaskResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/my:
         get:
             tags:
@@ -99,37 +136,53 @@ paths:
             parameters:
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.GetMyTasksResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/my-project:
         get:
             tags:
@@ -137,12 +190,24 @@ paths:
             summary: getMyTasksProject
             operationId: TaskService_getMyTasksProject
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.GetMyTasksProjectResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/search:
         get:
             tags:
@@ -152,42 +217,58 @@ paths:
             parameters:
                 - name: q
                   in: query
-                  required: true
+                  required: false
                   schema:
                     type: string
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.SearchTasksResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{id}:
         get:
             tags:
@@ -197,17 +278,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.GetTaskDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         put:
             tags:
                 - TaskService
@@ -216,10 +313,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
@@ -229,12 +330,24 @@ paths:
                             description: body carries updatable task fields bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.UpdateTaskResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         delete:
             tags:
                 - TaskService
@@ -243,17 +356,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.DeleteTaskResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{id}/status:
         patch:
             tags:
@@ -263,10 +392,14 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             requestBody:
                 content:
                     application/json:
@@ -276,12 +409,24 @@ paths:
                             description: body carries the new task status bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.UpdateTaskStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/subtasks:
         post:
             tags:
@@ -295,12 +440,24 @@ paths:
                             $ref: '#/components/schemas/flow.task.v2.CreateSubtaskRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.CreateSubtaskResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{task_id}/subtasks:
         get:
             tags:
@@ -310,43 +467,63 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id is the task id value for this contract.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id is the task id value for this contract.
                 - name: page
                   in: query
-                  required: true
+                  description: The current result page.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The current result page.
                 - name: limit
                   in: query
-                  required: true
+                  description: The maximum number of records to return.
+                  required: false
                   schema:
                     type: integer
                     format: int32
                     description: The maximum number of records to return.
                 - name: sort_by
                   in: query
-                  required: true
+                  description: The field to sort results by.
+                  required: false
                   schema:
                     type: string
                     description: The field to sort results by.
                 - name: sort_dir
                   in: query
-                  required: true
+                  description: The sort direction ("asc" or "desc").
+                  required: false
                   schema:
                     type: string
                     description: The sort direction ("asc" or "desc").
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.GetSubtasksResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{task_id}/comments:
         post:
             tags:
@@ -356,23 +533,45 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id is the task id value for this contract.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id is the task id value for this contract.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.task.v2.AddCommentRequest'
+                            type: object
+                            properties:
+                                content:
+                                    type: string
+                                    description: content is the content value for this contract.
+                            required:
+                                - content
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.AddCommentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/comments/{id}:
         delete:
             tags:
@@ -382,17 +581,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.DeleteCommentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{task_id}/activity:
         get:
             tags:
@@ -402,17 +617,33 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id is the task id value for this contract.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id is the task id value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.GetTaskActivityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/attachments:
         post:
             tags:
@@ -426,12 +657,24 @@ paths:
                             $ref: '#/components/schemas/flow.task.v2.CreateAttachmentRequest'
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.CreateAttachmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{task_id}/attachments:
         get:
             tags:
@@ -441,17 +684,33 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id is the task id value for this contract.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id is the task id value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.GetAttachmentsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/attachments/{id}:
         delete:
             tags:
@@ -461,17 +720,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the unique identifier for the resource.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the unique identifier for the resource.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.DeleteAttachmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{task_id}/time-logs:
         get:
             tags:
@@ -481,17 +756,33 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id is the task id value for this contract.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id is the task id value for this contract.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.GetTimeLogsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
         post:
             tags:
                 - TaskService
@@ -500,23 +791,52 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id identifies the task the time log belongs to.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id identifies the task the time log belongs to.
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/flow.task.v2.CreateTimeLogRequest'
+                            type: object
+                            properties:
+                                duration_minutes:
+                                    exclusiveMinimum: 0
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                    description: duration_minutes is the duration minutes value for this contract.
+                                description:
+                                    type: string
+                                    description: description is the description value for this contract.
+                            required:
+                                - duration_minutes
+                                - description
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.CreateTimeLogResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/time-logs/{id}:
         delete:
             tags:
@@ -526,17 +846,33 @@ paths:
             parameters:
                 - name: id
                   in: path
+                  description: id is the time log identifier.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: id is the time log identifier.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.DeleteTimeLogResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{task_id}/dependencies:
         post:
             tags:
@@ -546,10 +882,14 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id is the task gaining the dependency.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id is the task gaining the dependency.
             requestBody:
                 content:
                     application/json:
@@ -559,12 +899,24 @@ paths:
                             description: body carries the dependency target bound from the HTTP payload.
                 required: true
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.AddTaskDependencyResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
     /flow/task/v2/tasks/{task_id}/dependencies/{depends_on_task_id}:
         delete:
             tags:
@@ -574,23 +926,43 @@ paths:
             parameters:
                 - name: task_id
                   in: path
+                  description: task_id is the task losing the dependency.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: task_id is the task losing the dependency.
                 - name: depends_on_task_id
                   in: path
+                  description: depends_on_task_id is the dependency being removed.
                   required: true
                   schema:
+                    exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
+                    description: depends_on_task_id is the dependency being removed.
             responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/flow.task.v2.RemoveTaskDependencyResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
 components:
     schemas:
         flow.task.v2.ListTasksRequest:
@@ -598,6 +970,7 @@ components:
             properties:
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         project_id narrows results to one project. Omitted, the call returns
@@ -608,6 +981,7 @@ components:
                     description: status is the current lifecycle state.
                 assignee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: assignee_id is the assignee id value for this contract.
                 priority:
@@ -653,18 +1027,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: project_id is the project id value for this contract.
                 owner_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: owner_id identifies the tenant that owns the resource.
                 parent_task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: parent_task_id is the parent task id value for this contract.
                 title:
@@ -678,6 +1056,7 @@ components:
                     description: status is the current lifecycle state.
                 status_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         The custom status (flow.status.v2) applied to this task, if any. Zero
@@ -699,10 +1078,12 @@ components:
                     description: priority is the priority value for this contract.
                 assignee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: assignee_id is the assignee id value for this contract.
                 reporter_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: reporter_id is the reporter id value for this contract.
                 due_date:
@@ -724,12 +1105,14 @@ components:
                     description: actual_hours is the actual hours value for this contract.
                 sort_order:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: sort_order is the sort order value for this contract.
                 labels:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                     description: labels is the labels value for this contract.
                 created_at:
@@ -762,14 +1145,17 @@ components:
                     description: Number of direct subtasks. Powers the "N subtasks" pill on task rows.
                 section_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Section bucket within a project (e.g. "Backlog", "Sprint 5"). Empty if unbucketed.
                 cycle_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Cycle (sprint) this task belongs to, if any. Cycles are project-scoped in v2.
                 milestone_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: Milestone this task rolls up to, if any.
                 archived:
@@ -799,6 +1185,7 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                     description: |-
                         Task ids this task depends on. Read-only projection; write through the
@@ -909,6 +1296,7 @@ components:
             properties:
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
             required:
                 - project_id
@@ -955,6 +1343,7 @@ components:
             properties:
                 project_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         project_id files the task into a specific project. OMITTED, the backend
@@ -963,6 +1352,7 @@ components:
                         carries no @required. A response always echoes where the task landed.
                 parent_task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: parent_task_id is the parent task id value for this contract.
                 title:
@@ -980,6 +1370,7 @@ components:
                         means the backend default rather than a client-mandated value.
                 assignee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         assignee_id is the assignee id value for this contract. Assigning grants
@@ -998,6 +1389,7 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                     description: |-
                         labels is the labels value for this contract. Optional in v2: tasks may
@@ -1025,6 +1417,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -1061,14 +1454,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 actor_name:
@@ -1104,14 +1500,17 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 actor_name:
@@ -1148,6 +1547,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -1181,6 +1581,7 @@ components:
                     description: priority is the priority value for this contract.
                 assignee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: assignee_id is the assignee id value for this contract.
                 due_date:
@@ -1193,6 +1594,7 @@ components:
                     type: array
                     items:
                         type: string
+                        pattern: ^-?[0-9]+$
                         format: int64
                     description: |-
                         labels is the labels value for this contract. Absent leaves labels
@@ -1253,6 +1655,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 body:
@@ -1284,6 +1687,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -1302,6 +1706,7 @@ components:
                 parent_task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: |-
                         parent_task_id is the parent task id value for this contract. The new
@@ -1318,6 +1723,7 @@ components:
                     description: priority is the priority value for this contract.
                 assignee_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: assignee_id is the assignee id value for this contract.
                 due_date:
@@ -1342,6 +1748,7 @@ components:
             properties:
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
                 message:
@@ -1356,6 +1763,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
                 page:
@@ -1397,6 +1805,7 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 title:
@@ -1427,6 +1836,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
                 content:
@@ -1450,6 +1860,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -1468,6 +1879,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
             required:
@@ -1488,6 +1900,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id identifies the task the attachment belongs to.
                 name:
@@ -1499,6 +1912,7 @@ components:
                 size:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: size is the size value for this contract.
             required:
@@ -1511,6 +1925,7 @@ components:
             properties:
                 attachment_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: attachment_id is the attachment id value for this contract.
                 message:
@@ -1525,6 +1940,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
             required:
@@ -1544,10 +1960,12 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
                 name:
@@ -1558,10 +1976,12 @@ components:
                     description: url is the url value for this contract.
                 size:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: size is the size value for this contract.
                 uploaded_by:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: uploaded_by is the uploaded by value for this contract.
                 created_at:
@@ -1581,6 +2001,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
             required:
@@ -1599,6 +2020,7 @@ components:
                 duration_minutes:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: duration_minutes is the duration minutes value for this contract.
                 description:
@@ -1607,6 +2029,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id identifies the task the time log belongs to.
             required:
@@ -1618,6 +2041,7 @@ components:
             properties:
                 time_log_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: time_log_id is the time log id value for this contract.
                 message:
@@ -1632,6 +2056,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
             required:
@@ -1651,18 +2076,22 @@ components:
             properties:
                 id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the unique identifier for the resource.
                 task_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task id value for this contract.
                 user_id:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: user_id identifies the user associated with this request.
                 duration_minutes:
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: duration_minutes is the duration minutes value for this contract.
                 description:
@@ -1688,6 +2117,7 @@ components:
                 id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: id is the time log identifier.
             required:
@@ -1706,6 +2136,7 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task gaining the dependency.
                 body:
@@ -1721,6 +2152,7 @@ components:
                 depends_on_task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: depends_on_task_id is the task this task is blocked by.
             required:
@@ -1739,11 +2171,13 @@ components:
                 task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: task_id is the task losing the dependency.
                 depends_on_task_id:
                     exclusiveMinimum: 0
                     type: string
+                    pattern: ^-?[0-9]+$
                     format: int64
                     description: depends_on_task_id is the dependency being removed.
             required:
@@ -1757,3 +2191,12 @@ components:
                     description: message is a human-readable result message.
             required:
                 - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TaskService

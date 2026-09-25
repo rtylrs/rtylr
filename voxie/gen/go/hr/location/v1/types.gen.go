@@ -6,16 +6,27 @@ import (
 	"strconv"
 )
 
+// LocationPayload is a physical work location for a tenant.
 type LocationPayload struct {
-	Id        int64   `json:"id,omitempty"`
-	OwnerId   int64   `json:"owner_id,omitempty"`
-	Name      string  `json:"name,omitempty"`
-	Address   string  `json:"address,omitempty"`
-	Timezone  *string `json:"timezone,omitempty"`
-	IsActive  bool    `json:"is_active,omitempty"`
-	CreatedAt int64   `json:"created_at,omitempty"`
-	UpdatedAt int64   `json:"updated_at,omitempty"`
-	Slug      string  `json:"slug,omitempty"`
+	// Unique identifier for the location.
+	Id int64 `json:"id,omitempty"`
+	// Tenant owner this location belongs to.
+	OwnerId int64 `json:"owner_id,omitempty"`
+	// Human-readable name of the location (e.g. "Downtown Office").
+	Name string `json:"name,omitempty"`
+	// Full street address of the location.
+	Address string `json:"address,omitempty"`
+	// IANA timezone identifier (e.g. "America/New_York"); absent if using tenant default.
+	Timezone *string `json:"timezone,omitempty"`
+	// Whether this location is currently active and assignable.
+	IsActive bool `json:"is_active,omitempty"`
+	// Unix timestamp when this location was created.
+	CreatedAt int64 `json:"created_at,omitempty"`
+	// Unix timestamp when this location was last updated.
+	UpdatedAt int64 `json:"updated_at,omitempty"`
+	// URL-safe slug, scoped per business. Powers public URLs like
+	// menu.rtylr.com/<business-slug>/<location-slug>.
+	Slug string `json:"slug,omitempty"`
 }
 
 func (m *LocationPayload) MarshalJSON() ([]byte, error) {
@@ -153,7 +164,14 @@ func (x *LocationPayload) GetSlug() string {
 	return x.Slug
 }
 
+// ListLocationsResponse lists all locations for a tenant.
+//
+// NOTE: this message has no corresponding request message or RPC anywhere
+// in the source proto (service.proto declares only CreateLocation and
+// UpdateLocation) - it appears to be dead/unused. Carried over unchanged
+// and flagged for manual follow-up.
 type ListLocationsResponse struct {
+	// All locations for the tenant.
 	Locations []*LocationPayload `json:"locations,omitempty"`
 }
 
@@ -166,10 +184,14 @@ func (x *ListLocationsResponse) GetLocations() []*LocationPayload {
 }
 
 type CreateLocationRequest struct {
-	Name     string  `json:"name,omitempty"`
-	Address  string  `json:"address,omitempty"`
+	// Human-readable name of the location.
+	Name string `json:"name,omitempty"`
+	// Full street address of the location.
+	Address string `json:"address,omitempty"`
+	// IANA timezone identifier; absent to use tenant default.
 	Timezone *string `json:"timezone,omitempty"`
-	Slug     *string `json:"slug,omitempty"`
+	// Optional URL-safe slug; auto-generated from name if absent.
+	Slug *string `json:"slug,omitempty"`
 }
 
 func (x *CreateLocationRequest) GetName() string {
@@ -213,6 +235,7 @@ func (x *CreateLocationRequest) GetSlug() string {
 }
 
 type CreateLocationResponse struct {
+	// The newly created location.
 	Location *LocationPayload `json:"location,omitempty"`
 }
 
@@ -224,12 +247,18 @@ func (x *CreateLocationResponse) GetLocation() *LocationPayload {
 	return x.Location
 }
 
+// UpdateLocationBody carries updatable location fields bound from the HTTP payload.
 type UpdateLocationBody struct {
-	Name     *string `json:"name,omitempty"`
-	Address  *string `json:"address,omitempty"`
+	// New name; absent to keep current.
+	Name *string `json:"name,omitempty"`
+	// New address; absent to keep current.
+	Address *string `json:"address,omitempty"`
+	// New timezone; absent to keep current.
 	Timezone *string `json:"timezone,omitempty"`
-	IsActive *bool   `json:"is_active,omitempty"`
-	Slug     *string `json:"slug,omitempty"`
+	// New active status; absent to keep current.
+	IsActive *bool `json:"is_active,omitempty"`
+	// New slug; absent to keep current.
+	Slug *string `json:"slug,omitempty"`
 }
 
 func (x *UpdateLocationBody) GetName() string {
@@ -293,6 +322,7 @@ func (x *UpdateLocationBody) GetSlug() string {
 }
 
 type UpdateLocationRequest struct {
+	// ID of the location to update.
 	Id   int64               `json:"id,omitempty"`
 	Body *UpdateLocationBody `json:"body,omitempty"`
 }
@@ -343,6 +373,7 @@ func (x *UpdateLocationRequest) GetBody() *UpdateLocationBody {
 }
 
 type UpdateLocationResponse struct {
+	// The updated location.
 	Location *LocationPayload `json:"location,omitempty"`
 }
 

@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Receipt is a completed order receipt.
 type Receipt struct {
 	Id            int64   `json:"id,omitempty"`
 	OrderNumber   string  `json:"order_number,omitempty"`
@@ -93,7 +94,9 @@ func (x *Receipt) GetPaidAt() string {
 }
 
 type EmailReceiptRequest struct {
-	Id    int64  `json:"id,omitempty"`
+	// id is the unique identifier for the receipt.
+	Id int64 `json:"id,omitempty"`
+	// Recipient email address for the receipt.
 	Email string `json:"email,omitempty"`
 }
 

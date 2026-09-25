@@ -38,6 +38,30 @@ for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLengt
 return new TextDecoder().decode(body);
 }
 
+export class RequestValidationError extends TypeError {
+readonly violations: string[];
+
+constructor(prefix: string, violations: string[]) {
+super(prefix + ": " + violations.join("; "));
+this.name = "RequestValidationError";
+this.violations = violations;
+}
+}
+
+export interface RequestOptions {
+signal?: AbortSignal;
+headers?: Record<string, string>;
+timeoutMs?: number;
+}
+
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30000;
+
+function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): AbortSignal | null {
+if (!(timeoutMs > 0)) return signal ?? null;
+const timeout = AbortSignal.timeout(timeoutMs);
+return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -50,13 +74,28 @@ this.body = body;
 }
 }
 
+export class TypedApiError<T extends object = Record<string, unknown>> extends ApiError {
+readonly errorType: string;
+readonly data: T;
+
+constructor(statusCode: number, body: string, errorType: string, data: T) {
+super(statusCode, body);
+this.name = errorType;
+this.errorType = errorType;
+this.data = data;
+Object.assign(this, data);
+}
+}
+
 export interface BusinessServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
 maxResponseBodyBytes?: number;
 maxSSELineBytes?: number;
+timeoutMs?: number;
 }
 
+/** BusinessService defines hub business endpoints. */
 export class BusinessServiceClient {
 private baseUrl: string;
 private options: BusinessServiceClientOptions;
@@ -71,16 +110,18 @@ const doFetch = this.options.fetch ?? fetch;
 return doFetch(input, init);
 }
 
-async listMyBusinesses(req: ListMyBusinessesRequest): Promise<ListMyBusinessesResponse> {
+/** Returns the businesses owned by the current user. */
+async listMyBusinesses(req: ListMyBusinessesRequest, opts?: RequestOptions): Promise<ListMyBusinessesResponse> {
 const violations = validateListMyBusinessesRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/mine";
 const query = new URLSearchParams();
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -92,14 +133,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeListMyBusinessesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async createSubBusiness(req: CreateSubBusinessRequest): Promise<CreateSubBusinessResponse> {
+/** Creates a sub-business under a parent business. */
+async createSubBusiness(req: CreateSubBusinessRequest, opts?: RequestOptions): Promise<CreateSubBusinessResponse> {
 const violations = validateCreateSubBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeCreateSubBusinessRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -111,14 +154,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCreateSubBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async onboardBusiness(req: OnboardBusinessRequest): Promise<OnboardBusinessResponse> {
+/** Creates the owner's first business during onboarding. */
+async onboardBusiness(req: OnboardBusinessRequest, opts?: RequestOptions): Promise<OnboardBusinessResponse> {
 const violations = validateOnboardBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/onboard";
 const res = await this.request(this.baseUrl + path, {
 method: "POST",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeOnboardBusinessRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -130,9 +175,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeOnboardBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async checkBusinessNameExists(req: CheckBusinessNameExistsRequest): Promise<CheckBusinessNameExistsResponse> {
+/** Probes whether a business name is already taken. */
+async checkBusinessNameExists(req: CheckBusinessNameExistsRequest, opts?: RequestOptions): Promise<CheckBusinessNameExistsResponse> {
 const violations = validateCheckBusinessNameExistsRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/name-exists";
 const query = new URLSearchParams();
 if (req.name !== undefined) {
@@ -142,7 +188,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -154,9 +201,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeCheckBusinessNameExistsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getBusiness(req: GetBusinessRequest): Promise<GetBusinessResponse> {
+/** Returns a business by ID. */
+async getBusiness(req: GetBusinessRequest, opts?: RequestOptions): Promise<GetBusinessResponse> {
 const violations = validateGetBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/{business_id}";
 path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
 const query = new URLSearchParams();
@@ -164,7 +212,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -176,9 +225,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async lookupBusinessBySlug(req: LookupBusinessBySlugRequest): Promise<LookupBusinessBySlugResponse> {
+/** Resolves a business by public slug. */
+async lookupBusinessBySlug(req: LookupBusinessBySlugRequest, opts?: RequestOptions): Promise<LookupBusinessBySlugResponse> {
 const violations = validateLookupBusinessBySlugRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/by-slug";
 const query = new URLSearchParams();
 if (req.slug !== undefined) {
@@ -188,7 +238,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -200,9 +251,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeLookupBusinessBySlugResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async getPublicBusiness(req: GetPublicBusinessRequest): Promise<GetPublicBusinessResponse> {
+/** Returns public-safe business branding for anonymous menu surfaces. */
+async getPublicBusiness(req: GetPublicBusinessRequest, opts?: RequestOptions): Promise<GetPublicBusinessResponse> {
 const violations = validateGetPublicBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/public";
 const query = new URLSearchParams();
 if (req.businessId !== undefined) {
@@ -212,7 +264,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "GET",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -224,14 +277,16 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeGetPublicBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async setSlug(req: SetSlugRequest): Promise<SetSlugResponse> {
+/** Updates only the business slug. */
+async setSlug(req: SetSlugRequest, opts?: RequestOptions): Promise<SetSlugResponse> {
 const violations = validateSetSlugRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/slug";
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSetSlugRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -243,15 +298,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeSetSlugResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async updateBusiness(req: UpdateBusinessRequest): Promise<UpdateBusinessResponse> {
+/** Updates an existing business. */
+async updateBusiness(req: UpdateBusinessRequest, opts?: RequestOptions): Promise<UpdateBusinessResponse> {
 const violations = validateUpdateBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/{business_id}";
 path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PUT",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeUpdateBusinessRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -263,15 +320,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeUpdateBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async renameBusiness(req: RenameBusinessRequest): Promise<RenameBusinessResponse> {
+/** Renames an active business owned by the current user. */
+async renameBusiness(req: RenameBusinessRequest, opts?: RequestOptions): Promise<RenameBusinessResponse> {
 const violations = validateRenameBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/{business_id}/name";
 path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeRenameBusinessRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -283,15 +342,17 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeRenameBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async setLogo(req: SetLogoRequest): Promise<SetLogoResponse> {
+/** Sets the logo for an active business owned by the current user. */
+async setLogo(req: SetLogoRequest, opts?: RequestOptions): Promise<SetLogoResponse> {
 const violations = validateSetLogoRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/{business_id}/logo";
 path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
 const res = await this.request(this.baseUrl + path, {
 method: "PATCH",
-headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
+headers: { "Content-Type": "application/json", ...this.options.defaultHeaders, ...opts?.headers },
 body: JSON.stringify(encodeSetLogoRequest(req)),
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
@@ -303,9 +364,10 @@ const text = await readResponseText(res, this.options.maxResponseBodyBytes);
 return decodeSetLogoResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
-async deleteBusiness(req: DeleteBusinessRequest): Promise<DeleteBusinessResponse> {
+/** Removes an active business owned by the current user. */
+async deleteBusiness(req: DeleteBusinessRequest, opts?: RequestOptions): Promise<DeleteBusinessResponse> {
 const violations = validateDeleteBusinessRequest(req);
-if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
+if (violations.length > 0) throw new RequestValidationError("invalid request", violations);
 let path = "/hub/business/v1/businesses/{business_id}";
 path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
 const query = new URLSearchParams();
@@ -313,7 +375,8 @@ const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
 method: "DELETE",
-headers: { ...this.options.defaultHeaders },
+headers: { ...this.options.defaultHeaders, ...opts?.headers },
+signal: requestSignal(opts?.signal, opts?.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS),
 });
 
 if (!res.ok) {
