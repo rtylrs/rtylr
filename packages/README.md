@@ -9,7 +9,6 @@ npm.
 | Package                   | Description                                    |
 | ------------------------- | ---------------------------------------------- |
 | `@voxire/api`             | API client, realtime WebSocket, result helpers |
-| `@voxire/assets`          | Icons, global SCSS variables                   |
 | `@voxire/auth`            | Auth store, route guards, cookie helpers       |
 | `@voxire/caret`           | Caret AI chat components and hooks             |
 | `@voxire/components`      | Core UI component library                      |
@@ -20,7 +19,7 @@ npm.
 | `@voxire/menu`            | Public digital menu components and layouts     |
 | `@voxire/observability`   | Sentry + PostHog boot helpers                  |
 | `@voxire/permissions`     | Role/capability matrix and guards              |
-| `@voxire/tailwind-config` | Shared Tailwind configuration                  |
+| `@voxire/tailwind-config` | Shared Tailwind v4 theme tokens                  |
 | `@voxire/types`           | Shared domain types (business, user, etc.)     |
 | `@voxire/ui`              | Headless UI primitives (shadcn-based)          |
 | `@voxire/utils`           | Formatting, validation, and common hooks       |

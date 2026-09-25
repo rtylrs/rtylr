@@ -1,10 +1,5 @@
 #!/usr/bin/env sh
 
-# `pnpm build`, not `pnpm turbo build`.
-#
-# apps/rtylr's build runs the contracts guard and typecheck before Vite builds;
-# invoking a task runner directly skipped both, so a broken contract change
-# could reach main unnoticed. Vite strips types rather than checking them.
 echo "Running tests, typecheck and build before push..."
 cd apps/rtylr
 pnpm test && pnpm build

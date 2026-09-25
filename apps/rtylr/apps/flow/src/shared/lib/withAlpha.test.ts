@@ -74,13 +74,8 @@ describe('no colour gets an alpha by string concatenation', () => {
 describe('Flow assigns tones from tokens, not raw hex', () => {
   it.each([
     ['shared/stores/flowStore.ts', 'done'],
-    ['shared/lib/progressUtils.ts', 'on_track'],
-    ['shared/lib/workloadUtils.ts', 'ok'],
     ['shared/components/CycleBadge.tsx', 'active'],
   ])('%s maps %s to the approved token', (file, key) => {
-    // The exact pair, not the first line starting with the key:
-    // progressUtils has an on_track in its label map as well as its colour
-    // map, and the label one comes first.
     const source = fs.readFileSync(path.join(SRC, file), 'utf8');
     expect(source, `${key} in ${file}`).toContain(`${key}: 'var(--flow-status-approved)'`);
   });

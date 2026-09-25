@@ -114,19 +114,19 @@
   "home": {
     "pricing": {
       "badge": "Tarifs",
-      "title": "Une seule plateforme.\nToutes les applications incluses.",
-      "description": "Les 7 applications sont incluses dans chaque forfait. Ce qui change, c’est le nombre de personnes et d’établissements que vous gérez. Commencez gratuitement, sans carte bancaire."
+      "title": "Une suite rtylr.\nUn espace de travail connecté.",
+      "description": "Une seule suite pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Ce qui change, c’est l’échelle. Commencez gratuitement, sans carte bancaire."
     },
     "meta": {
-      "title": "rtylr · Toute votre entreprise sur une seule plateforme.",
-      "description": "POS, ERP, HR, CRM, Finance et Flow. Le système d’exploitation d’entreprise tout-en-un, conçu pour les équipes de toute taille. Propulsé par l’IA.",
+      "title": "rtylr · Toute votre entreprise dans une seule suite.",
+      "description": "La suite rtylr pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Un espace connecté pour les équipes modernes. Propulsé par l’IA.",
       "ogSiteName": "Rtylr",
       "keywords": "POS, ERP, HR, CRM, Finance, Flow, logiciel de caisse, système de caisse, gestion des stocks, gestion de la paie, programme de fidélité, facturation, gestion de projet, logiciel pour restaurant, logiciel pour commerce, IA",
-      "schemaDescription": "Une seule plateforme d’entreprise pour POS, ERP, CRM, HR, Finance et Flow, sur un modèle de données unique\u00a0: une vente met à jour le stock et la comptabilité sans passer par un export."
+      "schemaDescription": "La suite rtylr réunit les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé\u00a0: une vente met à jour l’entreprise sans passer par un export."
     },
     "directAnswer": {
       "label": "Qu’est-ce que rtylr\u00a0?",
-      "body": "rtylr est un système d’exploitation d’entreprise tout-en-un pour les petites et moyennes entreprises\u00a0: caisse, ERP, HR, CRM, finance et gestion de projet sur une seule base de données. Il est conçu pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes, sur un établissement comme sur vingt. L’intérêt n’est pas qu’il y ait sept applications\u00a0: c’est qu’une vente déplace le stock, le chiffre d’affaires et la fidélité sans que personne n’exporte de fichier."
+      "body": "rtylr est la suite d’entreprise des petites et moyennes entreprises. Elle relie les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé. Elle est conçue pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes, sur un établissement comme sur vingt. Une vente déplace le stock, le chiffre d’affaires et la fidélité sans que personne n’exporte de fichier."
     },
     "howItWorks": {
       "eyebrow": "COMMENT ÇA MARCHE",
@@ -134,30 +134,30 @@
       "steps": [
         {
           "title": "Créer le compte",
-          "description": "E-mail, mot de passe, terminé. Sans carte bancaire. Toutes les applications ouvertes dès la première minute."
+          "description": "E-mail, mot de passe, terminé. Sans carte bancaire. Votre espace rtylr est prêt dès la première minute."
         },
         {
           "title": "Configurer Hub",
           "description": "Établissements, équipe, marque, taxes, matériel. Hub est l’endroit unique où vous réglez tout le reste."
         },
         {
-          "title": "Attribuer les applications",
-          "description": "POS pour la salle. HR pour les managers. Finance pour votre comptable. Chacun ne voit que les applications qu’il utilise vraiment."
+          "title": "Définir les rôles et les accès",
+          "description": "Donnez à l’équipe de salle les outils dont elle a besoin, aux responsables la vue sur les équipes et à votre comptable les chiffres. Chacun voit la bonne partie de la suite."
         },
         {
           "title": "Passer en service",
-          "description": "Tous les départements en ligne d’un coup. Sept applications qui se parlent déjà. Aucun projet d’intégration."
+          "description": "Tous les départements travaillent sur le même modèle de données connecté. Aucun projet d’intégration."
         }
       ]
     },
     "cta": {
       "title": "À vous\nde construire.",
-      "subtitle": "Gratuit jusqu’à 10 membres. Sans carte bancaire.\nLancez tous vos départements en un après-midi."
+      "subtitle": "Gratuit jusqu’à 10 membres. Sans carte bancaire.\nLancez votre entreprise en un après-midi."
     },
     "products": {
-      "badge": "LA PLATEFORME",
-      "title": "Sept applications.\nUne base de données.",
-      "subtitle": "Ni regroupées, ni intégrées. Construites dans la même plateforme depuis la première ligne de code\u00a0: une vente dans POS met à jour le stock, la paie et le compte de résultat dans le même mouvement.",
+      "badge": "LA SUITE RTYLR",
+      "title": "Une suite.\nUn modèle de données partagé.",
+      "subtitle": "Les ventes, les stocks, les équipes, les clients, la comptabilité et les opérations sont conçus pour fonctionner ensemble\u00a0: une vente met à jour le reste de l’entreprise sans export.",
       "cardsTop": [
         {
           "title": "Caisse",
@@ -187,11 +187,11 @@
         },
         {
           "title": "Des analyses sur l’ensemble",
-          "description": "Tendances du chiffre d’affaires, cohortes de clients, marge sur main-d’œuvre. Chaque chiffre est tiré en direct de toutes les autres applications."
+          "description": "Tendances du chiffre d’affaires, cohortes de clients, marge sur main-d’œuvre. Chaque chiffre reste à jour dans toute la suite rtylr."
         }
       ],
       "explore": "Découvrir →",
-      "exploreLabel": "Découvrir {{app}}"
+      "exploreLabel": "Découvrir le flux {{capability}}"
     },
     "integrations": {
       "badge": "INTÉGRATIONS",
@@ -241,8 +241,8 @@
       "checkLabel": "À vérifier\u00a0:",
       "claims": [
         {
-          "title": "Une base de données, pas sept intégrations",
-          "body": "POS, ERP, CRM, HR, Finance et Flow lisent et écrivent les mêmes enregistrements. Une vente décrémente le stock et arrive au grand livre au moment où elle se produit, parce qu’il n’y a pas de second système avec lequel se synchroniser."
+          "title": "Un modèle de données, aucune couture de synchronisation",
+          "body": "Les ventes, les stocks, les équipes, les clients, la finance et les opérations lisent et écrivent les mêmes enregistrements. Une vente décrémente le stock et arrive dans les comptes au moment où elle se produit, parce qu’il n’y a pas de second système à synchroniser."
         },
         {
           "title": "Chaque page est lisible par une machine",
@@ -255,13 +255,13 @@
           "check": "https://rtylr.com/pages.json"
         },
         {
-          "title": "Les 7 applications dans chaque forfait",
-          "body": "Aucun module vendu en plus, aucune licence par application. Les forfaits diffèrent par le nombre de personnes et d’établissements que vous gérez, pas par les parties du produit que vous avez le droit d’ouvrir.",
+          "title": "Une suite rtylr dans chaque forfait",
+          "body": "Aucune licence ajoutée. Les forfaits diffèrent par le nombre de personnes et d’établissements que vous gérez et par les contrôles dont une équipe plus grande a besoin, pas par l’achat de pièces séparées du produit.",
           "check": "https://rtylr.com/pricing/"
         },
         {
           "title": "Le forfait Free ne demande aucune carte",
-          "body": "Dix membres d’équipe sur un établissement, les 7 applications, aucun moyen de paiement et aucun compte à rebours d’essai. C’est un forfait, pas un décompte.",
+          "body": "Dix membres d’équipe sur un établissement, la suite rtylr essentielle, aucun moyen de paiement et aucun compte à rebours d’essai. C’est un forfait, pas un décompte.",
           "check": "https://rtylr.com/pricing/"
         },
         {
@@ -274,8 +274,8 @@
     "hero": {
       "announcePill": "BÊTA",
       "announceText": "Caret AI est en version bêta. Décrivez votre activité, regardez-la se construire",
-      "title": "Gérez toute votre entreprise.\nDepuis une seule plateforme.",
-      "promptPlaceholder": "Décrivez votre activité. Caret AI prépare votre caisse, vos stocks, vos équipes et vos factures",
+      "title": "Gérez toute votre entreprise.\nDepuis un espace rtylr.",
+      "promptPlaceholder": "Décrivez votre activité. Caret AI prépare votre espace rtylr",
       "caretLabel": "Caret AI",
       "moreOptions": "Plus d’options",
       "submit": "Commencer à construire",
@@ -318,12 +318,12 @@
       "promptLabel": "Décrivez votre activité"
     },
     "features": {
-      "badge": "LA PLATEFORME",
-      "title": "Que fait chaque application\u00a0?",
-      "titleAccent": "Un écran à la fois.",
-      "openCta": "Ouvrir {{app}}",
-      "showLabel": "Afficher {{app}}",
-      "chooseAppLabel": "Choisir une application de la plateforme",
+      "badge": "LA SUITE RTYLR",
+      "title": "Que peut faire la suite rtylr\u00a0?",
+      "titleAccent": "Une opération connectée.",
+      "openCta": "Découvrir le flux {{capability}}",
+      "showLabel": "Afficher le flux {{capability}}",
+      "chooseAppLabel": "Choisir une capacité de la suite",
       "items": [
         {
           "title": "Une caisse qui suit le rythme du vrai service.",
@@ -339,19 +339,19 @@
         },
         {
           "title": "Aucun client oublié.",
-          "description": "Chaque vente encaissée dans POS enrichit la fiche client. Segmentation par dépenses, fréquence de visite, anniversaire, étiquettes. La campagne part de la même application\u00a0: pas de détour par Mailchimp."
+          "description": "Chaque vente encaissée dans POS enrichit la fiche client. Segmentation par dépenses, fréquence de visite, anniversaire, étiquettes. La campagne part du même flux connecté\u00a0: pas de détour par Mailchimp."
         },
         {
           "title": "Un vrai compte de résultat, en temps réel.",
           "description": "Des factures récurrentes qui s’encaissent toutes seules. Des dépenses saisies à la source. La TVA calculée par juridiction fiscale. Un compte de résultat qui se met à jour à chaque vente, pas à la clôture du mois."
         },
         {
-          "title": "Le travail circule entre les applications.",
+          "title": "Le travail circule dans un seul système.",
           "description": "Tableaux kanban, automatisations et tâches rattachées à la facture, au client ou au service dont elles parlent vraiment. Des opérations qui ne se perdent pas entre deux outils."
         },
         {
           "title": "Le tableau de bord qui voit tout.",
-          "description": "Tendances du chiffre d’affaires, cohortes de clients, performance par produit, marge sur main-d’œuvre. Chaque chiffre est tiré en direct de toutes les autres applications. Ni SQL, ni ETL nocturne."
+          "description": "Tendances du chiffre d’affaires, cohortes de clients, performance par produit, marge sur main-d’œuvre. Chaque chiffre reste à jour dans toute la suite rtylr. Ni SQL, ni ETL nocturne."
         }
       ],
       "demos": {
@@ -536,16 +536,16 @@
   },
   "pricing": {
     "meta": {
-      "title": "Tarifs rtylr\u00a0: POS, ERP, CRM, HR et Finance | rtylr",
-      "description": "Ce que comprend chaque forfait rtylr\u00a0: POS, ERP, HR, CRM, Finance et Flow partout. Commencez gratuitement, sans carte, puis demandez un devis."
+      "title": "Tarifs rtylr\u00a0: une suite pour toute l’entreprise | rtylr",
+      "description": "Les forfaits rtylr réunissent une suite connectée pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Commencez gratuitement, sans carte."
     },
     "hero": {
-      "title": "Les 7 applications.\nDans chaque forfait.",
-      "subtitle": "Aucun module vendu en plus, aucune licence par application. Ce qui change d’un forfait à l’autre, c’est l’échelle."
+      "title": "Une suite rtylr.\nTous les forfaits.",
+      "subtitle": "Aucune licence ajoutée. Ce qui change d’un forfait à l’autre, c’est l’échelle."
     },
     "directAnswer": {
       "label": "Que comprennent les forfaits rtylr\u00a0?",
-      "body": "Chaque forfait rtylr comprend les sept applications\u00a0: POS, ERP, CRM, HR, Finance, Flow et les intégrations matérielles. Les forfaits diffèrent par l’échelle et non par les fonctionnalités\u00a0: ce qui change, c’est le nombre de personnes et d’établissements que vous gérez, ainsi que les contrôles dont une équipe plus grande a besoin. Free couvre 10 personnes sur un établissement et ne demande aucune carte. rtylr n’a pas encore publié de prix pour Pro et Scale\u00a0: ces deux forfaits sont sur devis."
+      "body": "Chaque forfait rtylr donne à votre équipe une suite connectée pour les ventes, les stocks, les équipes, les clients, la finance et les opérations. Les forfaits diffèrent par l’échelle et non par les fonctionnalités\u00a0: ce qui change, c’est le nombre de personnes et d’établissements que vous gérez, ainsi que les contrôles dont une équipe plus grande a besoin. Free couvre 10 personnes sur un établissement et ne demande aucune carte. rtylr n’a pas encore publié de prix pour Pro et Scale\u00a0: ces deux forfaits sont sur devis."
     },
     "plans": {
       "title": "Que contient chaque forfait\u00a0?",
@@ -555,7 +555,7 @@
         "description": "Tout ce qu’il faut pour faire tourner un seul établissement.",
         "features": [
           "Jusqu’à 10 membres d’équipe",
-          "Les 7 applications incluses",
+          "Suite rtylr essentielle incluse",
           "1 établissement",
           "1\u00a0000 crédits IA / mois",
           "Aucune carte bancaire requise"
@@ -593,7 +593,7 @@
       "included": "Inclus",
       "notIncluded": "Non inclus",
       "rows": [
-        "Les 7 applications",
+        "Suite rtylr incluse",
         "Assistant IA",
         "Support prioritaire",
         "SSO",
@@ -604,7 +604,7 @@
     },
     "bottom": {
       "title": "Commencez sur Free. Montez de forfait quand vous l’aurez dépassé.",
-      "subtitle": "10 utilisateurs et les 7 applications sont à vous dès le premier jour, sans carte. Réservez une démo si vous préférez d’abord le voir tourner sur vos propres chiffres."
+      "subtitle": "10 utilisateurs et la suite rtylr sont à vous dès le premier jour, sans carte. Réservez une démo si vous préférez d’abord le voir tourner sur vos propres chiffres."
     }
   },
   "pos": {
@@ -884,15 +884,15 @@
       "items": [
         {
           "question": "Qu’est-ce que rtylr\u00a0?",
-          "answer": "rtylr est un système d’exploitation d’entreprise tout-en-un pour les petites et moyennes entreprises. Il réunit caisse, ERP, HR, CRM, finance et gestion de projet sur une seule plateforme\u00a0: une équipe cesse d’assembler une caisse, un tableur, un outil comptable et un gestionnaire de tâches. Conçu pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes."
+          "answer": "rtylr est la suite d’entreprise des petites et moyennes entreprises. Elle réunit les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé\u00a0: une équipe cesse d’assembler une caisse, un tableur, un outil comptable et un gestionnaire de tâches. Conçu pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes."
         },
         {
           "question": "Combien coûte rtylr\u00a0?",
-          "answer": "rtylr n’a pas encore publié ses prix. Le forfait Free est réellement gratuit, ne demande aucune carte et couvre 10 membres d’équipe sur un établissement avec les 7 applications\u00a0: vous pouvez faire tourner un établissement dessus dès aujourd’hui. Pro et Scale sont sur devis\u00a0: dites-nous la taille de votre équipe et le nombre de vos établissements. Voir rtylr.com/pricing pour le détail de chaque forfait."
+          "answer": "rtylr n’a pas encore publié ses prix. Le forfait Free est réellement gratuit, ne demande aucune carte et couvre 10 membres d’équipe sur un établissement avec la suite rtylr essentielle\u00a0: vous pouvez faire tourner un établissement dessus dès aujourd’hui. Pro et Scale sont sur devis\u00a0: dites-nous la taille de votre équipe et le nombre de vos établissements. Voir rtylr.com/pricing pour le détail de chaque forfait."
         },
         {
-          "question": "Puis-je n’utiliser qu’une seule application rtylr, ou faut-il les prendre toutes\u00a0?",
-          "answer": "Chaque application fonctionne seule. Flow, Finance ou HR s’utilisent séparément, avec leur propre connexion, leurs réglages et leur équipe. La raison d’en faire tourner plusieurs, c’est le partage des données\u00a0: les clients du CRM arrivent dans POS, les employés de HR arrivent dans le planning, et le chiffre d’affaires de POS arrive dans Finance sans export. Ce n’est jamais obligatoire."
+          "question": "Puis-je commencer avec un seul flux de travail\u00a0?",
+          "answer": "Oui. Vous pouvez commencer avec le flux de travail qui compte le plus pour votre entreprise, tout en gardant vos données dans un seul espace rtylr et sur un modèle partagé. La suite grandit avec vous, sans connexions distinctes ni exports."
         },
         {
           "question": "rtylr remplace-t-il mon logiciel de caisse\u00a0?",

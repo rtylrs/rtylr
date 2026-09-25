@@ -1,12 +1,9 @@
 /* ─────────────────────────────────────────────────────────────────────────
  * Shared design tokens, as a Tailwind v4 @theme block.
  *
- * tailwind.config.ts beside this file is a v3-style JS config, and v4 does not
- * read it: the apps deliberately do not use @config, because it breaks v4's
- * content scanner in this monorepo. The result was that every utility the preset
- * defined resolved to nothing - `bg-accent` computed to rgba(0,0,0,0), Button's
- * loading spinner did not spin, Dialog had no shadow. This file is the port that
- * every globals.css claimed had already happened.
+ * Tailwind v4 reads this theme directly. The apps do not use `@config`,
+ * because that directive is not supported by the v4 content scanner in this
+ * monorepo.
  *
  * Import it after `@import 'tailwindcss'`:
  *
@@ -18,8 +15,7 @@
  *
  *   :root { --color-accent: var(--accent); }
  *
- * Keep this in step with tailwind.config.ts, which stays as the readable
- * description of the palette.
+ * This file is the shared description of the palette.
  * ───────────────────────────────────────────────────────────────────────── */
 
 /* ─────────────────────────────────────────────────────────────────────────

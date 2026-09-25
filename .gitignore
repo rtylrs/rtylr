@@ -51,15 +51,6 @@ Thumbs.db
 .next/
 out/
 
-# Nx
-.nx/cache
-.nx/workspace-data
-apps/*/build
-apps/*/apps/*/build
-
-# Turborepo
-.turbo/
-
 # AI agent config: local to each machine, per the agreement in #33
 .claude/
 CLAUDE.md

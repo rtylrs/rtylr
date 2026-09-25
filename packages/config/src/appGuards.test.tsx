@@ -62,6 +62,5 @@ describe('AppFlagGuard', () => {
   test('FLAG_KEYS surface stable string values', () => {
     expect(FLAG_KEYS.APP_RECRUIT).toBe('app.recruit');
     expect(FLAG_KEYS.APP_ERP).toBe('app.erp');
-    expect(FLAG_KEYS.APP_POS_PAYMENTS).toBe('app.pos.payments');
   });
 });

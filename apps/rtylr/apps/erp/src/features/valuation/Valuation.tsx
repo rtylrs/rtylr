@@ -25,7 +25,7 @@ async function loadAllValuationItems(firstPage: GetValuationResponse): Promise<V
   const firstItems = firstPage.items ?? [];
   const items = [...firstItems];
   let offset = (firstPage.offset ?? 0) + firstItems.length;
-  let hasMore = firstPage.hasMore === true;
+  const hasMore = firstPage.hasMore === true;
   const visitedOffsets = new Set<number>();
 
   while (hasMore) {

@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Package, Users, Heart, DollarSign, Workflow, BarChart2, Share2 } from 'lucide-react';
+import {
+  ShoppingCart,
+  Package,
+  Users,
+  Heart,
+  DollarSign,
+  Workflow,
+  BarChart2,
+  Share2,
+} from 'lucide-react';
 import styles from './CTAGraphic.module.scss';
 
 interface OrbitNode {
@@ -8,9 +17,8 @@ interface OrbitNode {
   Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
 }
 
-// Same seven apps/icons as ProductsSection, in orbit around the shared
-// database - deliberately not POS-centric, since the whole platform is the
-// point, not any one app.
+// The suite capabilities orbit the shared data model - deliberately not
+// POS-centric, since the whole suite is the point, not any one workflow.
 const NODES: OrbitNode[] = [
   { id: 'pos', label: 'POS', Icon: ShoppingCart },
   { id: 'erp', label: 'ERP', Icon: Package },
@@ -37,7 +45,12 @@ const CTAGraphic: React.FC = (): React.JSX.Element => {
 
   return (
     <div className={styles.graphic}>
-      <svg className={styles.lines} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <svg
+        className={styles.lines}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
+      >
         {NODES.map((node, i) => {
           const { x, y } = nodePosition(i, NODES.length);
           return (
@@ -75,7 +88,9 @@ const CTAGraphic: React.FC = (): React.JSX.Element => {
             <span className={hovered === i ? styles.nodeCircleActive : styles.nodeCircle}>
               <Icon size={18} strokeWidth={1.6} />
             </span>
-            <span className={hovered === i ? styles.nodeLabelActive : styles.nodeLabel}>{node.label}</span>
+            <span className={hovered === i ? styles.nodeLabelActive : styles.nodeLabel}>
+              {node.label}
+            </span>
           </button>
         );
       })}

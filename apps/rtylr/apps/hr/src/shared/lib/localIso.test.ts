@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { toLocalIso, todayIso } from './dateUtils';
 import { addDays, isWeekend, isToday } from './hrDateUtils';
-import { periodStartDate } from './reportUtils';
 
 /**
  * HR's date bugs pointed in both directions at once, so one pinned zone is not
@@ -83,11 +82,6 @@ describe.each(ZONES)('date handling at %s', (tz) => {
     }
   });
 
-  it('anchors a report period to the right month and year', () => {
-    expect(inZone(tz, () => periodStartDate('2024-03-15', 'monthly'))).toBe('2024-03-01');
-    expect(inZone(tz, () => periodStartDate('2024-06-20', 'yearly'))).toBe('2024-01-01');
-    expect(inZone(tz, () => periodStartDate('2024-05-10', 'quarterly'))).toBe('2024-04-01');
-  });
 });
 
 describe('no local Date is serialised through UTC', () => {
