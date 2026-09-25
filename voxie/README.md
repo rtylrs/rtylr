@@ -12,19 +12,19 @@ voxie/
     hub/business/v1/
     hub/config/v1/    # references business/v1.Business - a cross-package reference
     ...
-  gen/go/            # generated Go types, validation, HTTP server, and client
-  gen/ts/            # generated TypeScript types, HTTP client, and validation metadata
-  gen/openapi/       # generated OpenAPI 3.1 specs (YAML and JSON)
+  gen/go/            # generated Go types, validation, HTTP server, and client (gitignored)
+  gen/ts/            # generated TypeScript types, HTTP client, and validation metadata (gitignored)
+  gen/openapi/       # generated OpenAPI 3.1 specs, YAML and JSON (gitignored)
 ```
 
 The base HTTP path for a service is inferred from its schema directory (kebab-casing multi-word segments, e.g. `hr/time_entry` → `/hr/time-entry`) - no `base_path` needed unless the route is irregular. Cross-directory type references resolve automatically by name, with no import statement needed.
 
-Go output (`gen/go`) is generated here and committed — `onion` consumes it directly from the submodule checkout, no local generation needed. `rtylr` still generates its own TypeScript: `pnpm contracts:sync` into `packages/contracts/src`.
+`voxie/` is an in-tree module of the rtylr monorepo. `onion` consumes `gen/go` through the `github.com/voxire/voxie` module (a `replace` directive in `services/onion/go.mod`); the frontends consume `gen/ts` through the `@voxire/voxie` pnpm workspace package. Neither output is committed — `make generate` produces it locally and CI produces it before building.
 
 ## Usage
 
 ```bash
-make generate   # regenerates code and OpenAPI docs from api/*.onk — commit the result
+make generate   # regenerates gen/ from api/*.onk; output is gitignored, never commit it
 make typecheck  # typechecks the generated TypeScript output
 ```
 
@@ -35,16 +35,12 @@ directory, for example `gen/openapi/hub/business/v1/openapi.yaml` and
 types, including shared types. Directories with multiple services use
 `<ServiceName>.openapi.yaml` and `<ServiceName>.openapi.json`.
 
-The `Contracts` workflow runs on pushes to `main`: it regenerates the outputs,
-builds and typechecks them, then commits any generated changes. Feature PRs
-should contain the source/config change only, not `gen/`.
-
 ## Adding or Changing Contracts
 
 1. Create or edit `api/{app-or-common}/{domain}/v1/models.onk` and `service.onk`.
 2. Run `onek check api` to validate, then `make generate` to regenerate `gen/go`/`gen/ts`.
-3. Commit, and prove it end-to-end: compile the generated Go, spin up the server with a test implementation, and exercise it over real HTTP - don't just confirm it generates without errors.
-4. Update the Voxie submodule pointer in `onion` and `rtylr`; run `pnpm contracts:sync` in `rtylr`.
+3. Prove it end-to-end in the same change: compile the generated Go (`go build ./...` in `services/onion`), spin up the server with a test implementation, and exercise it over real HTTP - don't just confirm it generates without errors.
+4. Run `pnpm --filter @voxire/voxie typecheck` and the affected app typechecks. The contract, generated consumers and Go handlers belong in one commit; `gen/` never is.
 
 ## Known gaps
 
@@ -54,4 +50,4 @@ should contain the source/config change only, not `gen/`.
 ## Tools
 
 - `onekit`/`onek` (github.com/1homsi/onekit) generates Go/TypeScript types, validation, HTTP server, and client code from `.onk` contracts in `api/`.
-- `rtylr` owns its own TypeScript code generation.
+- the `@voxire/voxie` workspace package exposes the generated TypeScript to the frontends.

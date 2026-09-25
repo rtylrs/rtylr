@@ -1,26 +1,20 @@
 # rtylr-landing
 
-The RTYLR marketing site (rtylr.com), extracted from the `rtylr` monorepo into
-its own repo so it builds, deploys, and evolves independently of the product
-apps.
+The RTYLR marketing site (rtylr.com), part of the `rtylr` monorepo. It builds,
+deploys and evolves independently of the product apps.
 
 ## Layout
 
 ```
 apps/landing/      the Next.js (SSG) marketing site
-packages/          git submodule -> voxire/packages (shared @voxire/* design system,
-                   config, observability, consent, utils — consumed as workspace deps)
+packages/          the shared @voxire/* design system, config, observability,
+                   consent and utils, consumed as workspace deps
 pnpm-workspace.yaml
 ```
 
 ## Setup
 
 ```bash
-# clone WITH the packages submodule
-git clone --recurse-submodules git@github.com:voxire/rtylr-landing.git
-# (or, after a plain clone)
-git submodule update --init --recursive
-
 pnpm install
 ```
 
@@ -36,7 +30,6 @@ pnpm build      # next build (webpack) + next-sitemap -> dist/landing
 
 - Build command: `pnpm install && pnpm build`
 - Output directory: `dist/landing`
-- Enable git submodules in the Pages project (the build needs `packages/`).
 - Node 20, pnpm 10.33.
 
 ## How a change reaches production
@@ -79,12 +72,8 @@ Nothing deploys on merge. Production ships only for a tag that
 
 ## Updating the shared packages
 
-The `@voxire/*` packages live in the `packages` submodule. To pick up changes:
-
-```bash
-git submodule update --remote packages
-git add packages && git commit -m "bump packages"
-```
+The `@voxire/*` packages are workspace members of this repository; edit them
+here and they are consumed immediately.
 
 ## A/B variant routing
 

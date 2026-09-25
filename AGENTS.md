@@ -14,11 +14,12 @@ This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch,
 | `apps/docs/`       | Product documentation site                                                                   |
 | `apps/mcp/`        | MCP server and tool integration                                                              |
 | `packages/`        | Shared `@voxire/*` libraries; changes can affect multiple products                           |
-| `packages/voxie/`  | Git submodule containing API contracts and generated clients/types                           |
+| `voxie/`           | API contracts (`.onk`) and the generated Go/TypeScript/OpenAPI output consumed on both sides  |
+| `services/onion/`  | Go backend: modules, platform packages, sqlc, worker                                         |
 | `docs/legal/`      | Legal-readiness review, draft DPA and operational guidance                                   |
 | `.github/`         | Release and deployment automation                                                            |
 
-Backend services and deployment repositories are separate. A frontend change does not establish that the backend supports a field, enforces a permission or implements a retention policy.
+Deployment repositories (`tryrtylr/deploy`, `tryrtylr/infra`, `tryrtylr/pipelines`) are separate. A frontend change does not establish that the backend supports a field, enforces a permission or implements a retention policy.
 
 ## Scope and implementation
 
@@ -26,8 +27,8 @@ Backend services and deployment repositories are separate. A frontend change doe
 - Solve the requested problem with the smallest coherent change. Avoid unrelated refactors, dependency upgrades, formatting sweeps and new abstractions without a concrete need.
 - Follow nearby feature structure and existing shared components, hooks, API helpers and styling conventions. Keep shared behavior in the appropriate package instead of copying it between apps.
 - Keep TypeScript types meaningful. Avoid `any`, unsafe assertions and suppressed errors as substitutes for understanding a contract.
-- Use the established generated-client/API boundary and result/error conventions. Do not invent request fields, bypass transport helpers or hand-edit generated code. Contract changes belong in Voxie; update its pinned commit deliberately.
-- `packages/` is an ordinary directory; only `packages/voxie/` is a submodule. Do not update it to the latest remote commit just to fix a local setup problem.
+- Use the established generated-client/API boundary and result/error conventions. Do not invent request fields, bypass transport helpers or hand-edit generated code. Contract changes belong in `voxie/api/`; run `make -C voxie generate` so the contract, its generated consumers and the Go handlers land in one change.
+- `voxie/gen/` is generated and gitignored. Never commit it; regenerate with `make -C voxie generate` (or `pnpm --filter rtylr typecheck`, which generates it when missing) instead of editing it.
 - Preserve tenant boundaries, authorization, offline behavior and account/session handling. Client-side visibility is not server-side authorization. Surface failures honestly instead of disguising them as empty or successful results.
 - Keep user-facing text in the existing locale system. Update affected English, French and Arabic resources together, preserve interpolation and check RTL where relevant. Do not enable an unshipped locale just because its strings exist.
 - Preserve accessible names, keyboard behavior, focus, semantic markup and loading/error states when changing UI.
@@ -45,8 +46,8 @@ Backend services and deployment repositories are separate. A frontend change doe
 Use the pnpm version declared in `package.json` and the root lockfile. From the repository root:
 
 ```sh
-git submodule update --init --recursive
 pnpm install --frozen-lockfile
+make -C voxie generate   # contracts are generated, not committed
 ```
 
 Run package-specific scripts with `pnpm --filter <package-name> <script>`. Read that package's `package.json`: names and available scripts differ between products.

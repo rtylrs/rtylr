@@ -13,10 +13,10 @@ change a contract and every consumer with it.
 | `apps/docs/` | The documentation site (Next.js static export). |
 | `apps/mcp/` | The MCP server. Build-only; nothing deploys it. |
 | `packages/` | The shared library layer (`@voxire/*`). |
-| `packages/voxie/` | Generated contracts (Go + TypeScript). A submodule, because `onion` consumes it too. |
+| `voxie/` | API contracts (`.onk`) plus generated Go, TypeScript and OpenAPI output. In-tree and the single source of truth. |
+| `services/onion/` | The Go backend: modules, platform packages, sqlc, worker. |
 
-`onion` (the backend) and `voxie` are intentionally separate repositories.
-`tryrtylr/deploy`, `tryrtylr/infra` and `tryrtylr/pipelines` stay separate too:
+`tryrtylr/deploy`, `tryrtylr/infra` and `tryrtylr/pipelines` stay separate:
 they are the release control plane, the infrastructure, and the reusable
 workflows.
 
@@ -39,7 +39,7 @@ pnpm -C apps/rtylr build   # the ten rtylr apps, one command
 ```
 
 The rtylr workspace keeps its own scripts (`apps/rtylr/package.json`) for the
-things that only concern it: the submodule pin guard, contracts, the vitest
+things that only concern it: the contracts guard, contracts, the vitest
 suite across packages and apps, and the app build fan-out.
 
 ## Releases and deployment
@@ -70,6 +70,8 @@ Other workflows:
   inside the app (`dist/landing`, `out`).
 - `apps/pos` builds the web app into `apps/pos/dist`; the desktop shell builds
   through Tauri from `apps/pos/core`.
-- Generated Voxie output is committed. Bump the `packages/voxie` submodule
-  pointer when contracts change, then run the rtylr workspace's
-  `pnpm contracts:sync`.
+- Contract output is generated, not committed. Run `make -C voxie generate`
+  after changing anything under `voxie/api/`; CI regenerates before every build.
+  `voxie/` is the Go module `github.com/voxire/voxie`, consumed by `onion`
+  through a `replace` directive and by the apps as the `@voxire/voxie`
+  workspace package.

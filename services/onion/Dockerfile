@@ -1,9 +1,12 @@
 # Build stage
 # Build on the native runner arch and cross-compile to TARGETARCH — the builder
 # downloads an amd64 sqlc and runs codegen, which can't run under arm64 emulation.
+#
+# Build from the repository root so the service and the contract module are both
+# in context: docker build -f services/onion/Dockerfile .
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.22 AS builder
 
-WORKDIR /app
+WORKDIR /src
 
 # Layer 1: system tools — cached until this line changes
 RUN apk add --no-cache curl bash ca-certificates
@@ -21,12 +24,17 @@ RUN set -eux; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
 
-# Layer 3: copy source tree. voxie is still a pinned submodule recorded by the
-# checkout; cloning a moving branch here would make identical source commits
-# produce different binaries.
-COPY . .
+# Layer 3: generated contract output is gitignored, so produce it from the
+# pinned onek release before Go compiles against it.
+COPY voxie/ ./voxie/
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.19.0 && \
+    cd /src/voxie && onek build .
+
+# Layer 4: the service, plus the SQL schemas and email templates it embeds.
+COPY services/onion/ ./services/onion/
+WORKDIR /src/services/onion
 RUN set -eux; \
-    test -f ./voxie/go.mod; \
+    test -f /src/voxie/go.mod; \
     test -f ./internal/platform/database/schemas/hr_core/schema.sql; \
     test -d ./internal/platform/email/templates
 
@@ -62,7 +70,7 @@ RUN addgroup -S app && adduser -S -G app app
 WORKDIR /app
 
 COPY --from=builder /app/api /app/api
-COPY --chown=app:app internal/ai/classifier/models/cua-s1-forms /app/models/cua-s1-forms
+COPY --chown=app:app services/onion/internal/ai/classifier/models/cua-s1-forms /app/models/cua-s1-forms
 
 ENV FORM_MAPPING_CHECKPOINT_PATH=/app/models/cua-s1-forms
 

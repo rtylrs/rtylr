@@ -80,35 +80,30 @@ apps/{name}/src/
 
 ## API Contracts (voxie)
 
-API request/response types are defined as Protocol Buffers in `packages/voxie`, shared between frontend and backend as the single source of truth.
+API request/response types are defined as `.onk` contracts in `voxie/api/`, shared between frontend and backend as the single source of truth.
 
 ```
-voxie/proto/
+voxie/api/
   common/v1/             # Pagination, errors, timestamps
-  auth/v1/               # Login, register, password reset
-  hub/v1/                # Team, business, apps, dashboard, billing, developer
+  hub/business/v1/       # Team, business, apps, dashboard, billing, developer
+  ...
 ```
 
 ### Setup
 
 ```bash
-# Clone with submodules
-git clone --recurse-submodules git@github.com:voxire/rtylr.git
-
-# Or if already cloned
-git submodule update --init --recursive
-
-# Voxie contains the committed generated TypeScript output.
+pnpm install
+make -C ../../voxie generate   # gen/ is generated, not committed
 ```
 
 ### Updating contracts
 
 ```bash
-# Edit `.onk` files and regenerate in the Voxie repository; commit and push it
-# there. Advance whichever consumer pointers should receive that contract
-# version. Consumers may intentionally remain on older Voxie commits:
-git submodule update --remote packages
-git add packages && git commit -m "chore: bump shared packages"
+# Edit .onk files under voxie/api/, regenerate, and prove it end-to-end in the
+# same change. Contracts, generated consumers and Go handlers land together:
+make -C ../../voxie generate
+pnpm typecheck
+cd ../../services/onion && go build ./...
 ```
 
 ## API Layer

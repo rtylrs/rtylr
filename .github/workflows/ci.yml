@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/rtylr/**'
       - 'packages/**'
+      - 'voxie/**'
   workflow_dispatch:
 
 concurrency:

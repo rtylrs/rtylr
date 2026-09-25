@@ -9,6 +9,7 @@ on:
     paths:
       - 'apps/pos/**'
       - 'packages/**'
+      - 'voxie/**'
   workflow_dispatch:
 
 concurrency:

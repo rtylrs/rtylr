@@ -1,11 +1,14 @@
 # Dockerfile for the `worker` runmode (cmd/worker) — the email-queue worker.
 # No HTTP server, no media-engine: a small static Go binary on alpine.
+#
+# Build from the repository root so the service and the contract module are both
+# in context: docker build -f services/onion/Dockerfile.worker .
 
 # ── Build stage ──────────────────────────────────────────────────────────────
 # Build on the native runner arch and cross-compile to TARGETARCH (the builder
 # downloads an amd64 sqlc, which can't run under arm64 emulation).
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.22 AS builder
-WORKDIR /app
+WORKDIR /src
 RUN apk add --no-cache ca-certificates curl bash
 # sqlc: the worker imports the email package, whose generated query code is
 # produced by scripts/generate_sqlc.sh (gitignored, regenerated per build).
@@ -19,10 +22,15 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
-# copy source tree. voxie is still a pinned submodule the context must contain.
-COPY . .
+# Generated contract output is gitignored, so produce it from the pinned onek
+# release before Go compiles against it.
+COPY voxie/ ./voxie/
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.19.0 && \
+    cd /src/voxie && onek build .
+COPY services/onion/ ./services/onion/
+WORKDIR /src/services/onion
 RUN set -eux; \
-    test -f ./voxie/go.mod; \
+    test -f /src/voxie/go.mod; \
     test -f ./internal/platform/database/schemas/hr_core/schema.sql; \
     test -d ./internal/platform/email/templates
 RUN go mod download && go mod verify
