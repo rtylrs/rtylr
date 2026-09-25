@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-
-echo "Running tests, typecheck and build before push..."
-cd apps/rtylr
-pnpm test && pnpm build

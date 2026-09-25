@@ -6,8 +6,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/rtylr/**'
-      - 'packages/**'
+      - 'clients/web/rtylr/**'
+      - 'clients/packages/**'
       - 'voxie/**'
   workflow_dispatch:
 

@@ -1,8 +1,7 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# Patterns here are deliberately unanchored: the rtylr workspace lives under
-# apps/rtylr, and landing/pos will sit beside it, so a build artifact must be
-# ignored wherever its project sits.
+# Patterns here are deliberately unanchored: every client package lives under
+# clients/, so a build artifact must be ignored wherever its project sits.
 
 # compiled output
 dist/

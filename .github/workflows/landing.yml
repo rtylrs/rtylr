@@ -13,14 +13,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/landing/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
+      - 'clients/web/landing/**'
+      - 'clients/packages/**'
+      - 'clients/pnpm-lock.yaml'
   pull_request:
     paths:
-      - 'apps/landing/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
+      - 'clients/web/landing/**'
+      - 'clients/packages/**'
+      - 'clients/pnpm-lock.yaml'
   workflow_dispatch:
 
 concurrency:
@@ -34,6 +34,9 @@ jobs:
   checks:
     name: checks
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    defaults:
+      run:
+        working-directory: clients
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,14 +46,14 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: package.json
+          package_json_file: clients/package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          cache-dependency-path: clients/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -70,7 +73,7 @@ jobs:
         run: pnpm --filter @rtylr/landing test:unit
 
       - name: Open Graph images are current
-        run: node apps/landing/scripts/generate-og-images.mjs --check
+        run: node web/landing/scripts/generate-og-images.mjs --check
 
       - name: Install Playwright chromium
         run: pnpm --filter @rtylr/landing exec playwright install --with-deps chromium
@@ -83,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: apps/landing/playwright-report
+          path: clients/web/landing/playwright-report
           retention-days: 7
 
   version:

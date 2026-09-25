@@ -8,12 +8,13 @@ This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch,
 
 | Path               | Responsibility                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- |
-| `apps/rtylr/apps/` | Auth, Dash, CRM, ERP, HR, Finance, Flow, Insights, Recruit and Menu frontends                |
-| `apps/landing/`    | Next.js marketing site, public legal pages and localized copy; production uses static export |
-| `apps/pos/`        | POS frontend and native/Tauri code; web and native checks are separate                       |
-| `apps/docs/`       | Product documentation site                                                                   |
-| `apps/mcp/`        | MCP server and tool integration                                                              |
-| `packages/`        | Shared `@voxire/*` libraries; changes can affect multiple products                           |
+| `clients/`         | pnpm workspace root; every JavaScript/TypeScript package lives under it                      |
+| `clients/web/rtylr/apps/` | Auth, Dash, CRM, ERP, HR, Finance, Flow, Insights, Recruit and Menu frontends         |
+| `clients/web/landing/` | Next.js marketing site, public legal pages and localized copy; production uses static export |
+| `clients/pos/`     | POS frontend and native/Tauri code; web and native checks are separate                       |
+| `clients/web/docs/` | Product documentation site                                                                  |
+| `clients/web/mcp/` | MCP server and tool integration                                                             |
+| `clients/packages/` | Shared `@voxire/*` libraries and the generated contracts package; changes can affect multiple products |
 | `voxie/`           | API contracts (`.onk`) and the generated Go/TypeScript/OpenAPI output consumed on both sides  |
 | `services/onion/`  | Go backend: modules, platform packages, sqlc, worker                                         |
 | `docs/legal/`      | Legal-readiness review, draft DPA and operational guidance                                   |
@@ -46,39 +47,40 @@ Deployment repositories (`tryrtylr/deploy`, `tryrtylr/infra`, `tryrtylr/pipeline
 Use the pnpm version declared in `package.json` and the root lockfile. From the repository root:
 
 ```sh
-pnpm install --frozen-lockfile
+pnpm -C clients install --frozen-lockfile
 make -C voxie generate   # contracts are generated, not committed
+git config core.hooksPath .githooks
 ```
 
-Run package-specific scripts with `pnpm --filter <package-name> <script>`. Read that package's `package.json`: names and available scripts differ between products.
+Run package-specific scripts with `pnpm -C clients --filter <package-name> <script>`. Read that package's `package.json`: names and available scripts differ between products.
 
 Examples, all invoked from the repository root:
 
 ```sh
 # One app; replace @rtylr/auth with the affected package.
-pnpm --filter @rtylr/auth typecheck
-pnpm --filter @rtylr/auth build
+pnpm -C clients --filter @rtylr/auth typecheck
+pnpm -C clients --filter @rtylr/auth build
 
 # Focused main-frontend/shared-package tests; supply actual test-file paths.
-apps/rtylr/scripts/vitest.sh run apps/rtylr/apps/auth/src/features/register/Register.test.tsx
+clients/web/rtylr/scripts/vitest.sh run clients/web/rtylr/apps/auth/src/features/register/Register.test.tsx
 
 # Full main-frontend/shared-package suite, including its collected-file check.
-pnpm --dir apps/rtylr test
+pnpm -C clients/web/rtylr test
 
 # Broader main-frontend checks when the change warrants them.
-pnpm -r --filter './apps/rtylr/apps/*' typecheck
-pnpm -r --filter './packages/*' typecheck
-pnpm -r --filter './apps/rtylr/apps/*' build
+pnpm -C clients -r --filter './web/rtylr/apps/*' typecheck
+pnpm -C clients -r --filter './packages/*' typecheck
+pnpm -C clients -r --filter './web/rtylr/apps/*' build
 
 # Landing checks read exported HTML, so build first.
-pnpm --filter @rtylr/landing build
-pnpm --filter @rtylr/landing test:unit
+pnpm -C clients --filter @rtylr/landing build
+pnpm -C clients --filter @rtylr/landing test:unit
 
 # Check changed app transport boundaries.
-pnpm --dir apps/rtylr contracts:enforce
+pnpm -C clients/web/rtylr contracts:enforce
 ```
 
-Relative pnpm filters depend on the working directory. Some aggregate scripts under `apps/rtylr` use root-relative filters: verify what actually ran. **“No projects matched” or zero collected tests is not a successful check.** Use explicit root-level filters when needed. Inspect scripts again before relying on this workaround.
+pnpm filters are relative to the workspace root at `clients/`. Some aggregate scripts under `clients/web/rtylr` use workspace-root-relative filters: verify what actually ran. **“No projects matched” or zero collected tests is not a successful check.** Use explicit `pnpm -C clients` filters when needed. Inspect scripts again before relying on this workaround.
 
 ## Testing that earns its cost
 

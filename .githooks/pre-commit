@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+# Formats only the files being committed.
+#
+# This used to run `pnpm format:check` across the whole tree, which made the gate
+# unenforceable across more than one machine: a single commit that skipped the
+# hook, or was pushed straight to main, left everybody else's commits blocked
+# until someone swept the tree. People then bypassed with --no-verify, which
+# admitted the next unformatted change. That loop produced a 204-file backlog
+# from 21 scripted commits, and two full-tree sweeps in nine hours.
+#
+# Scoped to staged files, nobody inherits anyone else's debt and a direct push
+# cannot poison the gate.
+cd clients/web/rtylr
+pnpm exec lint-staged
+
+echo "Checking OneKit boundary..."
+pnpm contracts:enforce

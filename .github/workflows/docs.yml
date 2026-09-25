@@ -7,8 +7,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/docs/**'
-      - 'packages/**'
+      - 'clients/web/docs/**'
+      - 'clients/packages/**'
   workflow_dispatch:
 
 concurrency:

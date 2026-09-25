@@ -37,21 +37,21 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: apps/rtylr/package.json
+          package_json_file: clients/web/rtylr/package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          cache-dependency-path: clients/pnpm-lock.yaml
 
       - name: Install dependencies
-        working-directory: apps/rtylr
+        working-directory: clients/web/rtylr
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        working-directory: apps/rtylr
+        working-directory: clients/web/rtylr
         run: pnpm build
 
       - name: Resolve version
@@ -79,7 +79,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Sync dist to S3
-        working-directory: apps/rtylr
+        working-directory: clients/web/rtylr
         run: aws s3 sync dist/ s3://voxire-ci-artifacts/${{ github.sha }}/dist/ --delete --no-progress
 
   publish:
@@ -102,7 +102,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Download app dist from S3
-        working-directory: apps/rtylr
+        working-directory: clients/web/rtylr
         env:
           APP: ${{ matrix.app }}
         run: aws s3 sync "s3://voxire-ci-artifacts/${{ github.sha }}/dist/${APP}/" "dist/${APP}/" --no-progress
@@ -120,7 +120,7 @@ jobs:
         run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
       - name: Build and push public image
-        working-directory: apps/rtylr
+        working-directory: clients/web/rtylr
         env:
           APP: ${{ matrix.app }}
           VERSION: ${{ needs.build.outputs.version }}

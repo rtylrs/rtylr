@@ -19,7 +19,7 @@ voxie/
 
 The base HTTP path for a service is inferred from its schema directory (kebab-casing multi-word segments, e.g. `hr/time_entry` → `/hr/time-entry`) - no `base_path` needed unless the route is irregular. Cross-directory type references resolve automatically by name, with no import statement needed.
 
-`voxie/` is an in-tree module of the rtylr monorepo. `onion` consumes `gen/go` through the `github.com/voxire/voxie` module (a `replace` directive in `services/onion/go.mod`); the frontends consume `gen/ts` through the `@voxire/voxie` pnpm workspace package. Neither output is committed — `make generate` produces it locally and CI produces it before building.
+`voxie/` is an in-tree module of the rtylr monorepo. `onion` consumes `gen/go` through the `github.com/voxire/voxie` module (a `replace` directive in `services/onion/go.mod`); the frontends consume the TypeScript half through the `@voxire/voxie` workspace package at `clients/packages/contracts` (`make generate` copies it there). Neither output is committed — `make generate` produces it locally and CI produces it before building.
 
 ## Usage
 

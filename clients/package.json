@@ -1,0 +1,18 @@
+{
+  "name": "rtylr-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Workspace root: every client product and the shared library layer under clients/",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint web/rtylr/apps packages",
+    "lint:fix": "eslint web/rtylr/apps packages --fix"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "typescript-eslint": "^8.59.0"
+  }
+}

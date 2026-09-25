@@ -36,7 +36,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: package.json
+          package_json_file: clients/package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -46,10 +46,11 @@ jobs:
           cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
+        working-directory: clients
         run: pnpm install --frozen-lockfile
 
       - name: Build (web)
-        working-directory: apps/pos
+        working-directory: clients/pos
         run: pnpm build
 
       - name: Resolve version
@@ -80,7 +81,7 @@ jobs:
         run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
       - name: Build and push public image
-        working-directory: apps/pos
+        working-directory: clients/pos
         env:
           VERSION: ${{ steps.v.outputs.version }}
         run: |
