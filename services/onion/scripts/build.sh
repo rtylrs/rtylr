@@ -1,9 +1,9 @@
 #!/bin/bash
 set -xe
 
-# Voxie owns the generated Go module. Verify that the checked-out submodule
-# matches Onion's recorded commit before Go compiles against that contract.
-./scripts/check-voxie-ref.sh
+# Voxie's generated Go output is gitignored. Regenerate it so Go compiles
+# against the current .onk contracts, not a stale local generation.
+make -C ../../voxie generate
 
 for dir in ./db/dbmodels/*/; do
  [ -d "$dir" ] || continue

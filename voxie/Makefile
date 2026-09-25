@@ -23,7 +23,7 @@ install-js:
 # onekit.toml sets api/ as the schema root, so generated import paths
 # mirror the schema path exactly (gen/go/hub/business/v1, no "api/" prefix) -
 # matching what every consumer already imports from the pre-onk proto days.
-generate: install-onek install-js
+generate: install-onek
 	rm -rf gen
 	python3 scripts/generate_validation_metadata.py --proto-root api --out-dir gen/ts/validation
 	onek build .

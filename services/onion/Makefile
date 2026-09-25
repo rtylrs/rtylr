@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all build-media-engine generate generate-module lint vet test test-db direct-authorization-evidence role-access-control-v2-rollback-check route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
+.PHONY: onion setup build build-all build-media-engine generate contracts generate-module lint vet test test-db direct-authorization-evidence role-access-control-v2-rollback-check route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -15,12 +15,11 @@ setup:
 # build.sh generates again on its own so it stays self-contained when invoked
 # directly. The repeat costs about seven seconds against a multi-minute target,
 # which is worth keeping both entry points correct on their own terms.
-build: generate
+build: generate contracts
 	./scripts/build.sh
 
 # Build all service binaries
-build-all: generate
-	./scripts/check-voxie-ref.sh
+build-all: generate contracts
 	@echo "Building API binary..."
 	@mkdir -p ./bin
 	@VERSION=$$(git describe --tags --always --dirty 2>/dev/null || echo "dev"); \
@@ -43,30 +42,34 @@ build-media-engine:
 generate:
 	./scripts/generate_sqlc.sh
 
+# Voxie's generated Go output is gitignored; regenerate before Go compiles.
+contracts:
+	$(MAKE) -C ../../voxie generate
+
 generate-module:
 	@test -n "$(NAME)" || (echo "usage: make generate-module NAME=<module_name>" && exit 1)
 	./scripts/generate-module.sh $(NAME)
 
-lint: generate
+lint: generate contracts
 	./scripts/lint.sh
 
-vet: generate
+vet: generate contracts
 	go vet ./...
 
-test: generate
+test: generate contracts
 	./scripts/test.sh
 
 # Run the database-backed integration tests against the local-env MySQL
 # container. Resets a dedicated onion_test DB (drop → migrate → seed) each
 # run so the tests stay repeatable. Requires `make local-env-up` first.
 # Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos_users/...`
-test-db: generate
+test-db: generate contracts
 	./scripts/test-db.sh $(PKG)
 
 direct-authorization-evidence:
 	./scripts/run-role-access-control-v2-direct-coverage.sh
 
-role-access-control-v2-rollback-check: generate
+role-access-control-v2-rollback-check: generate contracts
 	./scripts/test-role-access-control-v2-rollback.sh
 
 route-contract-check:
