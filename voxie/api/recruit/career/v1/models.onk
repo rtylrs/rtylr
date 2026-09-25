@@ -53,13 +53,14 @@ message ListSubmissionsResponse {
 
 /// UpdateSubmissionStatusRequest advances a candidate through the funnel.
 message UpdateSubmissionStatusRequest {
-  id: int64? @required @gt(0)
-  /// body carries the new status bound from the HTTP payload.
+  /// body carries the submission id and new status bound from the HTTP payload.
   body: UpdateSubmissionStatusBody
 }
 
 /// UpdateSubmissionStatusBody carries the status transition.
 message UpdateSubmissionStatusBody {
+  /// id identifies the submission to update.
+  id: int64? @required @gt(0)
   /// status is one of: pending | reviewing | interview | offer | hired | rejected.
   status: string @required
 }
