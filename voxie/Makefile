@@ -1,4 +1,4 @@
-.PHONY: clean generate install-onek install-js typecheck
+.PHONY: clean generate install-onek typecheck
 
 # Onekit CLI version. Generated output is gitignored; see `make generate`.
 ONK_VERSION := v0.19.0
@@ -14,10 +14,6 @@ clean:
 # Install the onek CLI used to generate Go/TypeScript from api/*.onk contracts.
 install-onek:
 	go install github.com/1homsi/onekit/cmd/onek@$(ONK_VERSION)
-
-# Install JS codegen tooling
-install-js:
-	pnpm install --frozen-lockfile
 
 # Regenerate gen/go, gen/ts, and gen/openapi from api/*.onk. Output is gitignored.
 # onekit.toml sets api/ as the schema root, so generated import paths

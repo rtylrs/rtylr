@@ -5,6 +5,7 @@
 # the same files, not merely the same versions.
 packages:
   - 'packages/*'
+  - 'voxie'
   - 'apps/rtylr'
   - 'apps/rtylr/apps/*'
   - 'apps/landing'
