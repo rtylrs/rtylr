@@ -49,6 +49,13 @@ before(() => {
 });
 
 const read = (p) => readFileSync(path.join(OUT, p), 'utf8');
+
+describe('release artifact', () => {
+  it('publishes a version document', () => {
+    const data = JSON.parse(read('version.json'));
+    assert.match(data.version, /^\d+\.\d+\.\d+/);
+  });
+});
 const jsonLd = (html) => [...html.matchAll(LD)].map((m) => m[1]);
 const stripScripts = (html) => html.replace(/<script.*?<\/script>/gs, '');
 

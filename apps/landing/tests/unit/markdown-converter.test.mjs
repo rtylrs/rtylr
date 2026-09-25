@@ -6,6 +6,7 @@ import {
   extractPageMeta,
   buildPagesIndex,
   buildLlmsTxt,
+  versionFromReleaseTag,
 } from '../../scripts/generate-agent-artifacts.mjs';
 
 const PAGE = (main) => `<!DOCTYPE html><html><head><title>T · rtylr</title></head><body>${main}</body></html>`;
@@ -172,6 +173,16 @@ describe('artifact builders', () => {
     assert.ok(txt.includes('Accept: text/markdown'));
     assert.ok(txt.includes('/openapi.json'));
     assert.ok(txt.includes('[Pricing](https://rtylr.com/pricing/)'));
+  });
+});
+
+describe('release versions', () => {
+  it('extracts the version from a landing release tag', () => {
+    assert.equal(versionFromReleaseTag('rtylr-landing-v0.2.7'), '0.2.7');
+  });
+
+  it('rejects unrelated tags', () => {
+    assert.equal(versionFromReleaseTag('main'), null);
   });
 });
 

@@ -26,12 +26,39 @@
 
 import { readFileSync, writeFileSync, readdirSync, statSync, copyFileSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const APP_DIR = dirname(SCRIPT_DIR);
 const DIST_DIR = join(APP_DIR, 'dist', 'landing');
 const SITE_URL = 'https://rtylr.com';
+const RELEASE_TAG_PATTERN = /^rtylr-landing-v(\d+\.\d+\.\d+(?:[+~-][A-Za-z0-9.-]+)?)$/;
+
+export function versionFromReleaseTag(tag) {
+  return typeof tag === 'string' ? tag.match(RELEASE_TAG_PATTERN)?.[1] ?? null : null;
+}
+
+function releaseTagAtHead() {
+  for (const tag of [process.env.RTYLR_LANDING_RELEASE_TAG, process.env.GITHUB_REF_NAME]) {
+    if (versionFromReleaseTag(tag)) return tag;
+  }
+
+  try {
+    return execFileSync('git', ['tag', '--points-at', 'HEAD', '--list', 'rtylr-landing-v*'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .trim()
+      .split('\n')[0] ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function resolveLandingVersion() {
+  return versionFromReleaseTag(releaseTagAtHead()) ?? process.env.npm_package_version ?? '0.0.0';
+}
 
 // ---------------------------------------------------------------------------
 // Tiny HTML tokenizer -> tree
@@ -646,13 +673,14 @@ async function main() {
   }
 
   const generatedAt = new Date(startedAt).toISOString();
+  writeFileSync(join(DIST_DIR, 'version.json'), JSON.stringify({ version: resolveLandingVersion() }, null, 2) + '\n');
   writeFileSync(join(DIST_DIR, 'pages.json'), JSON.stringify(buildPagesIndex(pages, generatedAt), null, 2) + '\n');
   writeFileSync(join(DIST_DIR, 'llms.txt'), buildLlmsTxt(pages, generatedAt));
   writeFileSync(join(DIST_DIR, 'llms-full.txt'), buildLlmsFullTxt(pages, generatedAt));
   copyFileSync(join(APP_DIR, 'cloudflare', '_worker.js'), join(DIST_DIR, '_worker.js'));
 
   console.log(
-    `[agent-artifacts] ${markdownWritten} markdown siblings, ${pages.length} indexed pages, llms.txt + llms-full.txt + pages.json + _worker.js written in ${Date.now() - startedAt}ms`
+    `[agent-artifacts] ${markdownWritten} markdown siblings, ${pages.length} indexed pages, llms.txt + llms-full.txt + pages.json + version.json + _worker.js written in ${Date.now() - startedAt}ms`
   );
 }
 
