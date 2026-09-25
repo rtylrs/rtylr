@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.99.2",
-    "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/config": "workspace:*",
     "@voxire/i18n": "workspace:*",
@@ -33,8 +32,6 @@
     "@types/node": "^25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/react-helmet": "^6.1.11",
-    "@vitejs/plugin-react": "^6.0.1",
     "sass": "^1.99.0",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"

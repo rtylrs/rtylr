@@ -81,7 +81,6 @@ export default defineConfig(() => ({
     include: ['react', 'react-dom', 'zustand', 'motion', 'lucide-react'],
     exclude: [
       '@voxire/ui',
-      '@voxire/tailwind-config',
       '@voxire/auth',
       '@voxire/api',
       '@voxire/types',

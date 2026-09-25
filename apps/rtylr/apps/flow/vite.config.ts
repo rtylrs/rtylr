@@ -71,6 +71,6 @@ export default defineConfig(() => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'zustand', 'motion', 'lucide-react', 'axios', 'sonner'],
+    include: ['react', 'react-dom', 'zustand', 'motion', 'lucide-react', 'sonner'],
   },
 }));

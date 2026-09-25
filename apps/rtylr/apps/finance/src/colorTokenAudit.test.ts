@@ -28,8 +28,7 @@ const componentSources = Object.entries(sourceFiles).filter(
   ([path]) =>
     !path.endsWith('.test.ts') &&
     !path.endsWith('.test.tsx') &&
-    path !== './shared/lib/settings.ts' &&
-    path !== './shared/schemas/expenses.ts'
+    path !== './shared/lib/settings.ts'
 );
 
 describe('Finance color tokens', () => {

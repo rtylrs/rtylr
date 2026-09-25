@@ -1,3 +1,0 @@
-# rtylr Docs
-
-The rtylr documentation site covers the business platform, its apps, the API, and self-hosting paths. The interactive home experience is implemented in Next.js; this plain-text file remains the plain-language content source for the docs tree.

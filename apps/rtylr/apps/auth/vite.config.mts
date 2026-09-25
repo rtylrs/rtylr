@@ -82,6 +82,6 @@ export default defineConfig(() => ({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'motion', '@voxire/config', '@voxire/utils'],
-    exclude: ['@voxire/components', '@voxire/ui', '@voxire/tailwind-config'],
+    exclude: ['@voxire/components', '@voxire/ui'],
   },
 }));

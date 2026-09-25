@@ -1,26 +1,12 @@
 node_modules
 dist
 .next
-.turbo
 pnpm-lock.yaml
 coverage
 *.min.js
 *.min.css
 voxie
-# The packages submodule. It is a separate repository with its own review and
-# its own CI, and rtylr contributors are not supposed to commit into it, so
-# gating rtylr's format check on code it may not edit only ever blocks work
-# here. It arrived as a real block: one 108-character line in
-# packages/config/src/assets.ts made `pnpm format:check` red on main for every
-# branch.
-packages
 **/next-env.d.ts
-# Scratch files written by the Remember plugin, in this repo and in the packages
-# submodule. They are gitignored, but the pre-commit hook runs `prettier --check`
-# over the whole tree, so they failed every unrelated commit.
 **/.remember/**
-# Untracked nested worktrees for other in-progress issues (same reason as above -
-# the pre-commit hook scans the whole tree, and these are full app checkouts, at
-# any depth since a stray nested checkout can carry its own worktree dirs too).
 **/.codex-worktrees/**
 **/.worktrees/**

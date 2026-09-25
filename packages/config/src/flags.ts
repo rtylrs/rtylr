@@ -26,7 +26,6 @@ export const FLAG_KEYS = {
   APP_INSIGHTS: 'app.insights',
   APP_MENU: 'app.menu',
   APP_POS: 'app.pos',
-  APP_POS_PAYMENTS: 'app.pos.payments',
   APP_RECRUIT_FILE_UPLOAD: 'app.recruit.fileUpload',
   /**
    * Flow's UI-only stub routes (Timeline, CalendarView, Roadmap,
@@ -52,7 +51,6 @@ export const FLAG_PROD_DEFAULTS: Record<FlagKey, boolean> = {
   [FLAG_KEYS.APP_INSIGHTS]: true,
   [FLAG_KEYS.APP_MENU]: true,
   [FLAG_KEYS.APP_POS]: true,
-  [FLAG_KEYS.APP_POS_PAYMENTS]: false, // off until Paddle is wired
   [FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD]: true, // storage & presigned R2 upload wired
   [FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES]: false, // off until screens render real data
 };
@@ -70,5 +68,4 @@ export const FLAG_ENV_OVERRIDES: Partial<Record<FlagKey, string>> = {
   [FLAG_KEYS.APP_INSIGHTS]: 'VITE_APP_INSIGHTS_ENABLED',
   [FLAG_KEYS.APP_MENU]: 'VITE_APP_MENU_ENABLED',
   [FLAG_KEYS.APP_POS]: 'VITE_APP_POS_ENABLED',
-  [FLAG_KEYS.APP_POS_PAYMENTS]: 'VITE_APP_POS_PAYMENTS_ENABLED',
 };
