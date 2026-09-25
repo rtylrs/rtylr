@@ -341,7 +341,7 @@ export function organizationSchema(): Record<string, unknown> {
     url: BASE,
     logo: `${BASE}/favicon/android-chrome-512x512.png`,
     description:
-      'All-in-one business OS for modern teams. POS, ERP, CRM, HR, Finance, and Flow in a single platform.',
+      'The rtylr suite for modern teams, connecting sales, inventory, people, customers, finance and operations on one shared data model.',
     foundingDate: '2024',
     sameAs: ['https://voxire.com'],
     address: {
@@ -365,7 +365,7 @@ export function webSiteSchema(): Record<string, unknown> {
     '@type': 'WebSite',
     name: 'rtylr',
     url: BASE,
-    description: 'Your entire business, one platform.',
+    description: 'One rtylr suite for your entire business, on one connected workspace.',
     publisher: { '@type': 'Organization', name: 'rtylr', url: BASE },
   };
 }

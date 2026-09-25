@@ -118,15 +118,15 @@
       "items": [
         {
           "question": "What is rtylr?",
-          "answer": "rtylr is an all-in-one business operating system for small and mid-sized businesses. It bundles point of sale, ERP, HR, CRM, finance and project management into one platform, so a team stops stitching a register, a spreadsheet, an accounting tool and a task tracker together. Built for restaurants, retail and services businesses running 2 to 200 staff."
+          "answer": "rtylr is the business suite for small and mid-sized companies. It brings sales, inventory, people, customers, finance and operations together on one shared data model, so a team stops stitching a register, a spreadsheet, an accounting tool and a task tracker together. Built for restaurants, retail and services businesses running 2 to 200 staff."
         },
         {
           "question": "How much does rtylr cost?",
-          "answer": "rtylr has not published its prices yet. The Free plan is genuinely free, needs no card, and covers 10 team members at one location with all 7 apps, so you can run a location on it today. Pro and Scale are quoted: tell us your team size and how many locations you run. See rtylr.com/pricing for what each plan includes."
+          "answer": "rtylr has not published its prices yet. The Free plan is genuinely free, needs no card, and covers 10 team members at one location with the core rtylr suite, so you can run a location on it today. Pro and Scale are quoted: tell us your team size and how many locations you run. See rtylr.com/pricing for what each plan includes."
         },
         {
-          "question": "Can I use only one app from rtylr, or do I need all of them?",
-          "answer": "You can use any single app on its own. Flow, Finance or HR each work standalone, with their own login, settings and team. The reason to run more than one is shared data: customers from CRM reach the POS, staff from HR reach the schedule, and POS revenue reaches Finance without an export. It is never required."
+          "question": "Can I start with one workflow?",
+          "answer": "Yes. You can start with the workflow that matters most to your business, while everything stays in one rtylr workspace and on one shared data model. The suite grows with you, without separate logins or exports."
         },
         {
           "question": "Does rtylr replace my point-of-sale system?",
@@ -281,7 +281,7 @@
         },
         {
           "question": "Does Flow have a free tier?",
-          "answer": "Yes. Flow is included in the Free plan along with the other six apps, covering 10 team members at one location, with unlimited projects, tasks, comments and attachments. Pro and Scale raise the team and location limits and add the controls a larger team needs. rtylr does not publish prices yet, so Pro and Scale are quoted."
+          "answer": "Yes. Flow is part of the rtylr suite, covering 10 team members at one location with unlimited projects, tasks, comments and attachments. Pro and Scale raise the team and location limits and add the controls a larger team needs. rtylr does not publish prices yet, so Pro and Scale are quoted."
         }
       ]
     },
@@ -406,16 +406,16 @@
   },
   "pricing": {
     "meta": {
-      "title": "rtylr Pricing: POS, ERP, CRM, HR and Finance in One Plan | rtylr",
-      "description": "rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card, then talk to us for a quote."
+      "title": "rtylr Pricing: One Suite for Your Entire Business | rtylr",
+      "description": "One connected rtylr suite for sales, inventory, people, customers, finance and operations. Start free with no card, then talk to us for a quote."
     },
     "hero": {
-      "title": "All 7 apps.\nEvery plan.",
-      "subtitle": "No module upsells and no per-app licence. What changes between plans is scale."
+      "title": "One rtylr suite.\nEvery plan.",
+      "subtitle": "No add-on licensing. What changes between plans is scale."
     },
     "directAnswer": {
       "label": "What do rtylr plans include?",
-      "body": "Every rtylr plan includes all seven apps: POS, ERP, CRM, HR, Finance, Flow and the hardware integrations. Plans differ by scale rather than by feature, so what changes is how many people and locations you run and the controls a larger team needs. Free covers 10 people at one location and needs no card. rtylr has not published prices for Pro and Scale yet, so those are quoted."
+      "body": "Every rtylr plan gives your team one connected suite for sales, inventory, people, customers, finance and operations. Plans differ by scale rather than by feature, so what changes is how many people and locations you run and the controls a larger team needs. Free covers 10 people at one location and needs no card. rtylr has not published prices for Pro and Scale yet, so those are quoted."
     },
     "plans": {
       "title": "What is in each plan?",
@@ -425,7 +425,7 @@
         "description": "Everything you need to run a single location.",
         "features": [
           "Up to 10 team members",
-          "All 7 apps included",
+          "Core rtylr suite included",
           "1 location",
           "1,000 AI credits / month",
           "No credit card required"
@@ -463,7 +463,7 @@
       "included": "Included",
       "notIncluded": "Not included",
       "rows": [
-        "All 7 apps",
+        "rtylr suite included",
         "AI assistant",
         "Priority support",
         "SSO",
@@ -474,25 +474,25 @@
     },
     "bottom": {
       "title": "Start on Free. Move up when you outgrow it.",
-      "subtitle": "10 seats and all 7 apps are yours from day one, with no card. Book a demo if you would rather see it running on your own numbers first."
+      "subtitle": "10 seats and the rtylr suite are yours from day one, with no card. Book a demo if you would rather see it running on your own numbers first."
     }
   },
   "home": {
     "pricing": {
       "badge": "Pricing",
-      "title": "One platform.\nEvery app included.",
-      "description": "All 7 apps come with every plan. What changes is how many people and locations you run. Start free with no card."
+      "title": "One rtylr suite.\nOne connected workspace.",
+      "description": "One plan gives your team the rtylr suite, with the capabilities you need to run sales, inventory, people, customers, finance and operations. What changes is scale. Start free with no card."
     },
     "meta": {
-      "title": "rtylr · Your entire business, one platform.",
-      "description": "POS, ERP, HR, CRM, Finance & Flow. The all-in-one business OS built for modern teams of every size. Powered by AI.",
+      "title": "rtylr · One suite for your entire business.",
+      "description": "The rtylr suite for sales, inventory, people, customers, finance and operations. One connected workspace for modern teams. Powered by AI.",
       "ogSiteName": "Rtylr",
       "keywords": "POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI",
-      "schemaDescription": "One business platform covering POS, ERP, CRM, HR, Finance and Flow on a single data model, so a sale updates stock and the books without an export."
+      "schemaDescription": "The rtylr suite brings sales, inventory, people, customers, finance and operations together on one shared data model, so a sale updates the business without an export."
     },
     "directAnswer": {
       "label": "What is rtylr?",
-      "body": "rtylr is an all-in-one business operating system for small and mid-sized companies: point of sale, ERP, HR, CRM, finance and project management on a single database. It is built for restaurants, retail and services businesses running 2 to 200 staff, across one location or twenty. The point is not that it is seven apps. It is that a sale moves stock, revenue and loyalty without anyone exporting a file."
+      "body": "rtylr is the business suite for small and mid-sized companies, connecting sales, inventory, people, customers, finance and operations on one shared data model. It is built for restaurants, retail and services businesses running 2 to 200 staff, across one location or twenty. A sale moves stock, revenue and loyalty without anyone exporting a file."
     },
     "howItWorks": {
       "eyebrow": "HOW IT WORKS",
@@ -500,30 +500,30 @@
       "steps": [
         {
           "title": "Sign up",
-          "description": "Email, password, done. No credit card. Every app unlocked from minute one."
+          "description": "Email, password, done. No credit card. Your rtylr workspace is ready from minute one."
         },
         {
           "title": "Configure Hub",
           "description": "Locations, team, brand, tax, hardware. Hub is the one place you set everything else."
         },
         {
-          "title": "Assign apps",
-          "description": "POS for the floor. HR for managers. Finance for your accountant. Each person sees only the apps they actually use."
+          "title": "Set roles and permissions",
+          "description": "Give the floor team the tools they need, managers the people view, and your accountant the numbers. Each person sees the right part of the suite."
         },
         {
           "title": "Go live",
-          "description": "Every department live at once. Seven apps, already talking to each other. No integration project."
+          "description": "Every department works from the same connected data model. No integration project."
         }
       ]
     },
     "cta": {
       "title": "It's your turn\nto build.",
-      "subtitle": "Free for up to 10 members. No credit card.\nLaunch every department in an afternoon."
+      "subtitle": "Free for up to 10 members. No credit card.\nLaunch your business in an afternoon."
     },
     "products": {
-      "badge": "THE PLATFORM",
-      "title": "Seven apps.\nOne database.",
-      "subtitle": "Not bundled. Not integrated. Built into the same platform from the first line of code, so a sale in POS updates inventory, payroll, and the P&L in the same breath.",
+      "badge": "THE RTYLR SUITE",
+      "title": "One suite.\nOne shared data model.",
+      "subtitle": "Sales, inventory, people, customers, books and operations are designed to work together, so a sale updates the rest of your business without an export.",
       "cardsTop": [
         {
           "title": "Point of sale",
@@ -553,11 +553,11 @@
         },
         {
           "title": "Analytics across everything",
-          "description": "Revenue trends, customer cohorts, labor margin. Every number pulled live from every other app."
+          "description": "Revenue trends, customer cohorts, labor margin. Every number stays current across the rtylr suite."
         }
       ],
       "explore": "Explore →",
-      "exploreLabel": "Explore {{app}}"
+      "exploreLabel": "Explore the {{capability}} workflow"
     },
     "integrations": {
       "badge": "INTEGRATIONS",
@@ -607,8 +607,8 @@
       "checkLabel": "Check it:",
       "claims": [
         {
-          "title": "One database, not seven integrations",
-          "body": "POS, ERP, CRM, HR, Finance and Flow read and write the same records. A sale depletes stock and lands in the ledger as it happens, because there is no second system to sync to."
+          "title": "One data model, no sync seams",
+          "body": "Sales, inventory, people, customers, finance and operations read and write the same records. A sale depletes stock and lands in the books as it happens, because there is no second system to sync."
         },
         {
           "title": "Every page is readable by a machine",
@@ -621,13 +621,13 @@
           "check": "https://rtylr.com/pages.json"
         },
         {
-          "title": "All 7 apps on every plan",
-          "body": "No module upsells and no per-app licence. The plans differ by how many people and locations you run, not by which parts of the product you are allowed to open.",
+          "title": "One rtylr suite on every plan",
+          "body": "No add-on licensing. Plans differ by how many people and locations you run and the controls a larger team needs, not by buying separate pieces of the product.",
           "check": "https://rtylr.com/pricing/"
         },
         {
           "title": "The Free plan needs no card",
-          "body": "Ten team members at one location, all 7 apps, no payment method and no trial clock. It is a plan, not a countdown.",
+          "body": "Ten team members at one location, the core rtylr suite, no payment method and no trial clock. It is a plan, not a countdown.",
           "check": "https://rtylr.com/pricing/"
         },
         {
@@ -640,8 +640,8 @@
     "hero": {
       "announcePill": "BETA",
       "announceText": "Caret AI is in beta. Describe your business, watch it build",
-      "title": "Run your entire business.\nFrom a single platform.",
-      "promptPlaceholder": "Describe your business. Caret AI drafts your POS, inventory, staff, and invoices",
+      "title": "Run your entire business.\nFrom one rtylr workspace.",
+      "promptPlaceholder": "Describe your business. Caret AI drafts your rtylr workspace",
       "caretLabel": "Caret AI",
       "moreOptions": "More options",
       "submit": "Start building",
@@ -684,12 +684,12 @@
       "promptLabel": "Describe your business"
     },
     "features": {
-      "badge": "THE PLATFORM",
-      "title": "What does each app do?",
-      "titleAccent": "One screen at a time.",
-      "openCta": "Open {{app}}",
-      "showLabel": "Show {{app}}",
-      "chooseAppLabel": "Choose a platform app",
+      "badge": "THE RTYLR SUITE",
+      "title": "What can the rtylr suite do?",
+      "titleAccent": "One connected operation.",
+      "openCta": "Explore the {{capability}} workflow",
+      "showLabel": "Show the {{capability}} workflow",
+      "chooseAppLabel": "Choose a suite capability",
       "items": [
         {
           "title": "A register that keeps up with real service.",
@@ -705,19 +705,19 @@
         },
         {
           "title": "Every customer, remembered.",
-          "description": "Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same app - no Mailchimp detour required."
+          "description": "Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same connected workflow - no Mailchimp detour required."
         },
         {
           "title": "A real P&L, in real time.",
           "description": "Recurring invoices that collect themselves. Expenses captured at source. Sales tax by jurisdiction. A P&L that updates with every sale, not at month-end."
         },
         {
-          "title": "Work that moves between apps.",
+          "title": "Work that moves through one system.",
           "description": "Kanban boards, automations, and tasks linked to the invoice, customer, or shift they’re actually about. Operations that don’t slip between tools."
         },
         {
           "title": "The dashboard that sees everything.",
-          "description": "Revenue trends, customer cohorts, product performance, labor margin. Every number pulled live from every other app. No SQL, no nightly ETL."
+          "description": "Revenue trends, customer cohorts, product performance, labor margin. Every number stays current across the rtylr suite. No SQL, no nightly ETL."
         }
       ],
       "demos": {
@@ -1287,7 +1287,7 @@
       },
       {
         "label": "Products",
-        "description": "POS, ERP, HR, CRM, Finance, Flow."
+        "description": "Explore the capabilities of the rtylr suite."
       },
       {
         "label": "Book a demo",
@@ -1305,8 +1305,8 @@
   },
   "about": {
     "meta": {
-      "title": "About rtylr · The All-in-One Business OS for Modern Teams",
-      "description": "We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow, and Insights."
+      "title": "About rtylr · The Business Suite for Modern Teams",
+      "description": "We're building the operating system for commerce. One rtylr suite for sales, inventory, people, customers, finance and operations."
     },
     "clusters": [
       {
@@ -1325,7 +1325,7 @@
     "values": [
       {
         "title": "Everything in one place",
-        "body": "No more juggling seven tools. One login, one workspace, one source of truth for your business."
+        "body": "No more juggling disconnected tools. One login, one workspace, one source of truth for your business."
       },
       {
         "title": "Built for teams",
@@ -1333,7 +1333,7 @@
       },
       {
         "title": "AI-first by design",
-        "body": "Every app ships with an embedded AI assistant, not a bolt-on, but part of the core experience."
+        "body": "AI is built into the rtylr experience, not added as a bolt-on, but part of the core workflow."
       },
       {
         "title": "Always available offline",
@@ -1353,8 +1353,8 @@
       "title": "We got tired of the duct tape."
     },
     "platform": {
-      "eyebrow": "The Platform",
-      "title": "Seven apps. One platform."
+      "eyebrow": "The rtylr Suite",
+      "title": "One rtylr suite. One connected business."
     },
     "valuesTitle": "What we stand for.",
     "cta": {
@@ -1658,7 +1658,7 @@
         "articles": [
           "Create your rtylr workspace",
           "Add your first location",
-          "Invite team members and assign apps",
+          "Invite team members and set access",
           "Connect your POS hardware"
         ],
         "title": "Getting started",
@@ -1678,12 +1678,12 @@
       {
         "articles": [
           "Assign roles to team members",
-          "Give someone access to a specific app",
+          "Give someone access to a specific capability",
           "Remove a member and what it means for billing",
           "Set up SSO (Scale plan)"
         ],
         "title": "Team and permissions",
-        "description": "Roles, app access, seat management, and invites."
+        "description": "Roles, capability access, seat management, and invites."
       },
       {
         "articles": [
@@ -1694,7 +1694,7 @@
           "Build your first CRM segment"
         ],
         "title": "Configuration",
-        "description": "Set up each app for your business type and workflow."
+        "description": "Set up each capability for your business type and workflow."
       },
       {
         "articles": [

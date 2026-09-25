@@ -1,7 +1,7 @@
 {
   "name": "rtylr",
   "short_name": "rtylr",
-  "description": "POS, ERP, HR, CRM, Finance & Flow. The all-in-one business OS.",
+  "description": "The rtylr suite for sales, inventory, people, customers, finance and operations.",
   "icons": [
     {
       "src": "/favicon/android-chrome-192x192.png",

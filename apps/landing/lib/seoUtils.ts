@@ -4,9 +4,9 @@
  */
 
 const BASE_URL = 'https://rtylr.com';
-const DEFAULT_TITLE = 'rtylr - Your Entire Business, One Platform';
+const DEFAULT_TITLE = 'rtylr - One Suite for Your Entire Business';
 const DEFAULT_DESCRIPTION =
-  'rtylr is an all-in-one business OS. POS, ERP, CRM, HR, Finance, and Flow in a single platform.';
+  'The rtylr suite connects sales, inventory, people, customers, finance and operations in one workspace.';
 
 /**
  * Builds the full page title, appending the site name when the page

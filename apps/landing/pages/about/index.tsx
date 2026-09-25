@@ -26,8 +26,6 @@ const CLUSTER_APPS: string[][] = [
   ['HR', 'Flow', 'Insights'],
 ];
 
-
-
 const AboutPage = (): React.JSX.Element => {
   const { t } = useTranslation();
   const clusters = t('about.clusters', { returnObjects: true }) as unknown as {
@@ -57,7 +55,7 @@ const AboutPage = (): React.JSX.Element => {
           canonical="https://rtylr.com/about/"
           structuredData={aboutPageSchema({
             description:
-              "We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow and Insights.",
+              "We're building the operating system for commerce. One rtylr suite for sales, inventory, people, customers, finance and operations.",
           })}
         />
 
@@ -78,9 +76,9 @@ const AboutPage = (): React.JSX.Element => {
                 <Lines text={t('about.hero.title')} />
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Most small businesses run on six to eight disconnected apps. They export CSVs all
-                Friday. They reconcile on Sundays. They pay for integrations they hate. We think
-                that&apos;s a bug in the industry. rtylr is our fix.
+                Many small businesses still run on disconnected tools. They export CSVs all Friday.
+                They reconcile on Sundays. They pay for integrations they hate. We think that&apos;s
+                a bug in the industry. rtylr is our fix.
               </motion.p>
             </div>
           </motion.section>
@@ -100,9 +98,10 @@ const AboutPage = (): React.JSX.Element => {
                   <h2 className={styles.missionTitle}>{t('about.mission.title')}</h2>
                   <p className={styles.missionBody}>
                     Commerce software should work the way commerce does, one sale, one inventory
-                    drop, one payroll line, one customer record. Not seven apps pretending they talk
-                    to each other. rtylr replaces the whole stack with a single platform where
-                    everything updates at once, because it&apos;s all the same database underneath.
+                    drop, one payroll line, one customer record. Not a collection of disconnected
+                    tools pretending to be one system. rtylr replaces the whole stack with a single
+                    suite where everything updates at once, because it is all the same data model
+                    underneath.
                   </p>
                 </motion.div>
               </div>
@@ -127,19 +126,19 @@ const AboutPage = (): React.JSX.Element => {
               <motion.div className={styles.storyBody} variants={blurFadeIn}>
                 <p>
                   We kept watching businesses in Lebanon and across the region stitch together
-                  QuickBooks for the books, a standalone POS for the register, a separate HR portal
-                  for payroll, and a CRM that never talked to any of them. Every week the owner
-                  spent Friday exporting CSVs and Sunday reconciling them.
+                  QuickBooks for the books, a point-of-sale system for the register, a separate HR
+                  portal for payroll, and a CRM that never talked to any of them. Every week the
+                  owner spent Friday exporting CSVs and Sunday reconciling them.
                 </p>
                 <p>
-                  The tools were fine. The problem was that they were separate. Seven subscriptions,
-                  seven UIs, seven places your data could disagree with itself. And somehow, the
-                  customer still got billed for &ldquo;integrations.&rdquo;
+                  The tools were fine. The problem was that they were separate. Multiple
+                  subscriptions, multiple UIs, multiple places your data could disagree with itself.
+                  And somehow, the customer still got billed for &ldquo;integrations.&rdquo;
                 </p>
                 <p>
                   So in 2024 Abed and Mohammad left their corporate roles and started building what
-                  should have existed all along, a single platform for the whole business, with AI
-                  wired in from the ground floor.
+                  should have existed all along, a single rtylr suite for the whole business, with
+                  AI wired in from the ground floor.
                 </p>
               </motion.div>
             </div>
@@ -222,16 +221,14 @@ const AboutPage = (): React.JSX.Element => {
             <div className={styles.sectionContainer}>
               <motion.div className={styles.ctaInner} variants={blurFadeIn}>
                 <h2 className={styles.ctaTitle}>{t('about.cta.title')}</h2>
-                <p className={styles.ctaSubtitle}>
-                {t('about.cta.subtitle')}
-              </p>
+                <p className={styles.ctaSubtitle}>{t('about.cta.subtitle')}</p>
                 <div className={styles.ctaButtons}>
                   <button className={styles.ctaPrimary} onClick={handleGetStarted}>
-                {t('common.cta.getStarted')}
-              </button>
+                    {t('common.cta.getStarted')}
+                  </button>
                   <button className={styles.ctaSecondary} onClick={handleBookDemo}>
-                {t('common.cta.bookDemo')}
-              </button>
+                    {t('common.cta.bookDemo')}
+                  </button>
                 </div>
               </motion.div>
             </div>

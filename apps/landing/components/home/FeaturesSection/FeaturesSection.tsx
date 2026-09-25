@@ -61,7 +61,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
   const FEATURES: Feature[] = FEATURE_META.map((meta, i) => ({
     ...meta,
     ...items[i],
-    ctaText: t('home.features.openCta', { app: meta.category }),
+    ctaText: t('home.features.openCta', { capability: meta.category }),
   }));
 
   const active = FEATURES[activeIndex];
@@ -183,7 +183,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
                 <button
                   key={f.id}
                   type="button"
-                  aria-label={t('home.features.showLabel', { app: f.category })}
+                  aria-label={t('home.features.showLabel', { capability: f.category })}
                   aria-pressed={i === activeIndex}
                   onClick={() => selectFeature(i)}
                   className={cn(styles.progressDot, i === activeIndex && styles.progressDotActive)}

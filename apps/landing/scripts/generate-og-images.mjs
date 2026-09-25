@@ -136,7 +136,11 @@ function readHeadline({ file, route }) {
 
   if (!headline) {
     const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/);
-    headline = title ? stripTags(title[1]).split(/\s[|·]\s/)[0].trim() : '';
+    headline = title
+      ? stripTags(title[1])
+          .split(/\s[|·]\s/)[0]
+          .trim()
+      : '';
   }
   if (!headline) throw new Error(`no h1 and no usable title on ${route}`);
 
@@ -236,7 +240,7 @@ function template({ headline, label, breakFont = false }) {
   </div>
   <div class="foot">
     <span>rtylr.com</span>
-    <span class="apps">POS · ERP · CRM · HR · Finance · Flow</span>
+    <span class="apps">Sales · Inventory · People · Customers · Finance · Operations</span>
   </div>
 </body>`;
 }

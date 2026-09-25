@@ -20,7 +20,7 @@ test.describe('Landing page', () => {
     await page.goto(`${LANDING_URL}/pricing`);
     // Heading is unique per page so it's a stable anchor - beats
     // scanning for "Free"/"Pro"/"Scale" which appear 11 times.
-    await expect(page.getByRole('heading', { level: 1, name: /all 7 apps/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /one rtylr suite/i })).toBeVisible();
   });
 
   test('pricing page states no price anywhere', async ({ page }) => {
