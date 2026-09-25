@@ -12,7 +12,7 @@ import {
 
 describe('buildPageTitle', () => {
   it('returns default title when no argument is provided', () => {
-    expect(buildPageTitle()).toBe('rtylr - Your Entire Business, One Platform');
+    expect(buildPageTitle()).toBe('rtylr - One Suite for Your Entire Business');
   });
 
   it('appends site name for a custom page title', () => {
@@ -20,7 +20,7 @@ describe('buildPageTitle', () => {
   });
 
   it('returns the default title unchanged when passed directly', () => {
-    const defaultTitle = 'rtylr - Your Entire Business, One Platform';
+    const defaultTitle = 'rtylr - One Suite for Your Entire Business';
     expect(buildPageTitle(defaultTitle)).toBe(defaultTitle);
   });
 });

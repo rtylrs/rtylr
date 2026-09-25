@@ -86,7 +86,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <Link
         href={product.href}
         className={styles.cardArrow}
-        aria-label={t('home.products.exploreLabel', { app: product.label })}
+        aria-label={t('home.products.exploreLabel', { capability: product.label })}
       >
         {t('home.products.explore')}
       </Link>

@@ -5,7 +5,7 @@
   },
   "home": {
     "route": "/",
-    "headline": "Run your entire business. From a single platform."
+    "headline": "Run your entire business. From one rtylr workspace."
   },
   "about": {
     "route": "/about/",
@@ -85,7 +85,7 @@
   },
   "pricing": {
     "route": "/pricing/",
-    "headline": "All 7 apps. Every plan."
+    "headline": "One rtylr suite. Every plan."
   },
   "support": {
     "route": "/support/",

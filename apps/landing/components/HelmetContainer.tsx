@@ -76,7 +76,7 @@ function ogImageFor(canonicalUrl: string): string {
 }
 
 function HelmetContainer({
-  title = 'rtylr · Your entire business, one platform.',
+  title = 'rtylr · One suite for your entire business.',
   description = '',
   image = '',
   url = '',
