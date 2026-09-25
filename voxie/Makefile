@@ -1,7 +1,7 @@
 .PHONY: clean generate install-onek install-js typecheck
 
 # Onekit v0.19.0: latest release; main CI regenerates and commits output.
-ONK_VERSION := 627f76e4fd75d45275833e02e483b276af97ddf7
+ONK_VERSION := v0.19.0
 
 # Clean generated code
 clean:
