@@ -5,6 +5,7 @@ import { HelmetContainer } from '@voxire/components';
 import { Avatar, EmptyState } from '@voxire/ui';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import type { PresenceEntry } from '../../shared/schemas/presence';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { usePresence } from './usePresence';
 
 function initials(name: string): string {
@@ -54,7 +55,12 @@ const GROUPS = [
  */
 const PresenceScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading, isError, refetch } = usePresence();
+  const presenceQuery = usePresence();
+  const { data, isLoading, refetch } = presenceQuery;
+  // A 403 can retry into a paused query that never reaches isError, with
+  // isLoading false and no data. Treating that as "no one here" told owners
+  // the company was empty when the server had refused them.
+  const isError = hasQueryFailed(presenceQuery);
 
   const statusLabel = (status: string): string => {
     if (status === 'on_leave') return t('flow.presence.onLeave');
@@ -84,7 +90,7 @@ const PresenceScreen = (): React.JSX.Element => {
           />
         )}
 
-        {!isLoading && !isError && (data?.presence.length ?? 0) === 0 && (
+        {!isLoading && !isError && data && data.presence.length === 0 && (
           <EmptyState
             icon={Users}
             title={t('flow.presence.noResults')}
