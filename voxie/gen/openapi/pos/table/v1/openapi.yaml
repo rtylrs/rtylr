@@ -1,0 +1,288 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/table/v1/tables:
+        get:
+            tags:
+                - TableService
+            summary: listTables
+            description: Returns tables for the active business.
+            operationId: TableService_listTables
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.table.v1.ListTablesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - TableService
+            summary: createTable
+            description: Creates a new table.
+            operationId: TableService_createTable
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.table.v1.CreateTableRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.table.v1.CreateTableResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/table/v1/tables/{id}:
+        put:
+            tags:
+                - TableService
+            summary: updateTable
+            description: Updates an existing table.
+            operationId: TableService_updateTable
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.table.v1.UpdateTableBody'
+                            description: body carries updatable table fields bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.table.v1.UpdateTableResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - TableService
+            summary: deleteTable
+            description: Removes a table by ID.
+            operationId: TableService_deleteTable
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.table.v1.DeleteTableResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.table.v1.ListTablesRequest:
+            type: object
+        pos.table.v1.ListTablesResponse:
+            type: object
+            properties:
+                tables:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.table.v1.Table'
+            required:
+                - tables
+        pos.table.v1.Table:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                label:
+                    type: string
+                seats:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - label
+                - seats
+                - status
+                - created_at
+                - updated_at
+            description: Table is a POS floor table.
+        pos.table.v1.CreateTableRequest:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                label:
+                    type: string
+                seats:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+            required:
+                - label
+                - seats
+        pos.table.v1.CreateTableResponse:
+            type: object
+            properties:
+                table_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - table_id
+                - message
+        pos.table.v1.UpdateTableRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.table.v1.UpdateTableBody'
+                    description: body carries updatable table fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+        pos.table.v1.UpdateTableBody:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                label:
+                    type: string
+                seats:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+            required:
+                - label
+                - seats
+                - status
+        pos.table.v1.UpdateTableResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        pos.table.v1.DeleteTableRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        pos.table.v1.DeleteTableResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TableService
+      description: TableService defines POS floor table endpoints.

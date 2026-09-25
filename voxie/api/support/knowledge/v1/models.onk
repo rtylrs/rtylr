@@ -1,0 +1,60 @@
+package support.knowledge.v1
+
+message Article {
+  id: int64
+  business_id: int64
+  title: string
+  slug: string
+  body: string
+  category: string
+  is_published: bool
+  views: int32
+  created_at: string
+  updated_at: string
+}
+
+message ListArticlesRequest {
+  page: int32 @query("page")
+  page_size: int32 @query("page_size")
+}
+
+message ListArticlesResponse {
+  articles: Article[]
+  total: int32
+  page: int32
+  page_size: int32
+}
+
+message CreateArticleRequest {
+  title: string @required
+  slug: string @required
+  body: string
+  category: string
+  is_published: bool
+}
+
+message CreateArticleResponse {
+  article_id: int64
+  message: string
+}
+
+message UpdateArticleRequest {
+  id: int64 @gt(0)
+  title: string
+  slug: string
+  body: string
+  category: string
+  is_published: bool
+}
+
+message UpdateArticleResponse {
+  message: string
+}
+
+message DeleteArticleRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteArticleResponse {
+  message: string
+}

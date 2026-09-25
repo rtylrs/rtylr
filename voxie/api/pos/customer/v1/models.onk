@@ -1,0 +1,22 @@
+package pos.customer.v1
+
+/// Customer is a lightweight customer record for POS lookups. Named
+/// distinctly from crm.customer.v1's Customer (a genuine cross-directory
+/// name collision - see crm/segment/v1/models.onk which references the
+/// unqualified "Customer" name expecting the full crm.customer.v1 record).
+message Customer {
+  id: int64
+  first_name: string
+  last_name: string
+  /// email is the email address used for lookup or contact.
+  email: string
+  phone: string
+}
+
+message SearchCustomersRequest {
+  query: string @required @query("query")
+}
+
+message SearchCustomersResponse {
+  customers: Customer[]
+}

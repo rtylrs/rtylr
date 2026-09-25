@@ -1,0 +1,9 @@
+package hr.document.v1
+
+service DocumentService {
+  listDocuments(ListDocumentsRequest) -> ListDocumentsResponse @get("/documents")
+
+  createDocument(CreateDocumentRequest) -> CreateDocumentResponse @post("/documents")
+
+  deleteDocument(DeleteDocumentRequest) -> DeleteDocumentResponse @delete("/documents/{id}")
+}

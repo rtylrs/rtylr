@@ -1,0 +1,28 @@
+package crm.loyalty.v1
+
+/// LoyaltyService defines CRM loyalty program endpoints.
+service LoyaltyService {
+  /// Returns the loyalty program configuration.
+  getLoyaltyConfig(GetLoyaltyConfigRequest) -> GetLoyaltyConfigResponse @get("/config")
+
+  /// Updates the loyalty program configuration.
+  updateLoyaltyConfig(UpdateLoyaltyConfigRequest) -> UpdateLoyaltyConfigResponse @patch("/config")
+
+  /// Returns all loyalty tiers.
+  listLoyaltyTiers(ListLoyaltyTiersRequest) -> ListLoyaltyTiersResponse @get("/tiers")
+
+  /// Creates a new loyalty tier.
+  createLoyaltyTier(CreateLoyaltyTierRequest) -> CreateLoyaltyTierResponse @post("/tiers")
+
+  /// Updates an existing loyalty tier.
+  updateLoyaltyTier(UpdateLoyaltyTierRequest) -> UpdateLoyaltyTierResponse @put("/tiers/{id}") @body("body")
+
+  /// Returns paginated loyalty transactions.
+  listLoyaltyTransactions(ListLoyaltyTransactionsRequest) -> ListLoyaltyTransactionsResponse @get("/transactions")
+
+  /// Awards loyalty points to a customer.
+  awardPoints(AwardPointsRequest) -> AwardPointsResponse @post("/award")
+
+  /// Redeems loyalty points for a customer.
+  redeemPoints(RedeemPointsRequest) -> RedeemPointsResponse @post("/redeem")
+}

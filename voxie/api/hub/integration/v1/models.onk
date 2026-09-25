@@ -1,0 +1,37 @@
+package hub.integration.v1
+
+/// Integration is a connected third-party integration.
+message Integration {
+  id: int64
+  provider: string
+  /// The current lifecycle state.
+  status: string
+  config: bytes
+  connected_at: string
+  /// When the record was created.
+  created_at: string
+}
+
+message ConnectIntegrationRequest {
+  provider: string @required
+  config: bytes
+}
+
+message ConnectIntegrationResponse {
+  id: int64
+  message: string
+}
+
+message DisconnectIntegrationRequest {
+  id: int64? @required @gt(0)
+}
+
+message DisconnectIntegrationResponse {
+  message: string
+}
+
+message ListIntegrationsRequest {}
+
+message ListIntegrationsResponse {
+  integrations: Integration[]
+}

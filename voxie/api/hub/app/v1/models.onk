@@ -1,0 +1,57 @@
+package hub.app.v1
+
+message App {
+  id: string
+  name: string
+  description: string
+  icon: string
+  is_enabled: bool
+}
+
+message Addon {
+  id: string
+  name: string
+  description: string
+  icon: string
+  price: float64
+  is_free: bool
+  is_enabled: bool
+  enabled_at: string?
+  disabled_at: string?
+}
+
+message ListAppsRequest {}
+
+message ListAppsResponse {
+  apps: App[]
+}
+
+message ListAddonsRequest {}
+
+message ListAddonsResponse {
+  addons: Addon[]
+}
+
+message AddonStatusRequest {
+  addon_id: string @required
+}
+
+message AddonStatusResponse {
+  is_enabled: bool
+}
+
+message EnableAddonRequest {
+  addon_id: string @required
+}
+
+message EnableAddonResponse {
+  message: string
+}
+
+message DisableAddonRequest {
+  addon_id: string @required
+}
+
+message DisableAddonResponse {
+  message: string
+}

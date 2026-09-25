@@ -1,0 +1,336 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/stock-take/v1/stock-takes:
+        get:
+            tags:
+                - StockTakeService
+            summary: listStockTakes
+            operationId: StockTakeService_listStockTakes
+            parameters:
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.stock_take.v1.ListStockTakesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - StockTakeService
+            summary: createStockTake
+            operationId: StockTakeService_createStockTake
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.stock_take.v1.CreateStockTakeRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.stock_take.v1.CreateStockTakeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /erp/stock-take/v1/stock-takes/{id}:
+        put:
+            tags:
+                - StockTakeService
+            summary: updateStockTake
+            operationId: StockTakeService_updateStockTake
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeBody'
+                            required:
+                                - body
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        erp.stock_take.v1.ListStockTakesRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+            required:
+                - page
+                - page_size
+        erp.stock_take.v1.ListStockTakesResponse:
+            type: object
+            properties:
+                stock_takes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.stock_take.v1.StockTake'
+                has_more:
+                    type: boolean
+                page:
+                    type: integer
+                    format: int64
+                page_size:
+                    type: integer
+                    format: int64
+            required:
+                - stock_takes
+                - has_more
+                - page
+                - page_size
+        erp.stock_take.v1.StockTake:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                warehouse_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                status:
+                    type: string
+                notes:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.stock_take.v1.StockTakeItem'
+                started_at:
+                    type: string
+                completed_at:
+                    type: string
+                created_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - warehouse_id
+                - status
+                - notes
+                - items
+                - started_at
+                - completed_at
+                - created_at
+        erp.stock_take.v1.StockTakeItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                stock_take_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                expected_qty:
+                    type: number
+                    format: double
+                counted_qty:
+                    type: number
+                    format: double
+                variance:
+                    type: number
+                    format: double
+                created_at:
+                    type: string
+            required:
+                - id
+                - stock_take_id
+                - product_id
+                - expected_qty
+                - counted_qty
+                - variance
+                - created_at
+        erp.stock_take.v1.CreateStockTakeRequest:
+            type: object
+            properties:
+                warehouse_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                notes:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.stock_take.v1.CreateStockTakeItemRequest'
+            required:
+                - warehouse_id
+                - notes
+                - items
+        erp.stock_take.v1.CreateStockTakeItemRequest:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                expected_qty:
+                    type: number
+                    format: double
+                counted_qty:
+                    type: number
+                    format: double
+            required:
+                - product_id
+                - expected_qty
+                - counted_qty
+        erp.stock_take.v1.CreateStockTakeResponse:
+            type: object
+            properties:
+                stock_take_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - stock_take_id
+                - message
+        erp.stock_take.v1.UpdateStockTakeRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeBody'
+            required:
+                - id
+                - body
+        erp.stock_take.v1.UpdateStockTakeBody:
+            type: object
+            properties:
+                status:
+                    type: string
+                notes:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.stock_take.v1.UpdateStockTakeItemBody'
+            required:
+                - status
+                - notes
+                - items
+        erp.stock_take.v1.UpdateStockTakeItemBody:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                expected_qty:
+                    type: number
+                    format: double
+                counted_qty:
+                    type: number
+                    format: double
+            required:
+                - product_id
+                - expected_qty
+                - counted_qty
+        erp.stock_take.v1.UpdateStockTakeResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: StockTakeService
+      description: StockTakeService defines ERP stock take endpoints.

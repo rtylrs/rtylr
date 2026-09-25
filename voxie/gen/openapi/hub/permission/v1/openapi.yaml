@@ -1,0 +1,1232 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/permission/v1/permissions:
+        get:
+            tags:
+                - PermissionService
+            summary: getPermissions
+            description: Returns the permission matrix.
+            operationId: PermissionService_getPermissions
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.GetPermissionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/roles:
+        get:
+            tags:
+                - PermissionService
+            summary: listRoles
+            description: Returns defined roles.
+            operationId: PermissionService_listRoles
+            parameters:
+                - name: app_id
+                  in: query
+                  description: Restrict results to one application.
+                  required: false
+                  schema:
+                    type: string
+                    description: Restrict results to one application.
+                - name: page
+                  in: query
+                  description: One-based result page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: One-based result page.
+                - name: page_size
+                  in: query
+                  description: Maximum number of roles returned per page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Maximum number of roles returned per page.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.ListRolesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - PermissionService
+            summary: createRole
+            description: Creates a new role.
+            operationId: PermissionService_createRole
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.permission.v1.CreateRoleRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.CreateRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/roles/{id}:
+        get:
+            tags:
+                - PermissionService
+            summary: getRole
+            description: Returns one role with its normalized lifecycle metadata.
+            operationId: PermissionService_getRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.GetRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        put:
+            tags:
+                - PermissionService
+            summary: updateRole
+            description: Updates a custom role.
+            operationId: PermissionService_updateRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hub.permission.v1.UpdateRoleBody'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.UpdateRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - PermissionService
+            summary: deleteRole
+            description: Archives a custom role. Assigned roles are revoked as part of archiving.
+            operationId: PermissionService_deleteRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.DeleteRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/roles/{id}/clone:
+        post:
+            tags:
+                - PermissionService
+            summary: cloneRole
+            description: Clones a role into a new custom role.
+            operationId: PermissionService_cloneRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                description:
+                                    type: string
+                            required:
+                                - name
+                                - description
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.CloneRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/roles/{id}/archive:
+        post:
+            tags:
+                - PermissionService
+            summary: archiveRole
+            description: Archives a custom role with an audit reason.
+            operationId: PermissionService_archiveRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                reason:
+                                    type: string
+                            required:
+                                - reason
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.ArchiveRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/role-assignments:
+        get:
+            tags:
+                - PermissionService
+            summary: listRoleAssignments
+            description: Lists normalized role assignments.
+            operationId: PermissionService_listRoleAssignments
+            parameters:
+                - name: role_id
+                  in: query
+                  description: Restrict results to one role.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Restrict results to one role.
+                - name: app_id
+                  in: query
+                  description: Restrict results to one application.
+                  required: false
+                  schema:
+                    type: string
+                    description: Restrict results to one application.
+                - name: page
+                  in: query
+                  description: One-based result page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: One-based result page.
+                - name: page_size
+                  in: query
+                  description: Maximum number of assignments returned per page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Maximum number of assignments returned per page.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.ListRoleAssignmentsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - PermissionService
+            summary: assignRole
+            description: Assigns a role to one member or group.
+            operationId: PermissionService_assignRole
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.permission.v1.AssignRoleRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.AssignRoleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/role-assignments/{id}:
+        delete:
+            tags:
+                - PermissionService
+            summary: removeRoleAssignment
+            description: Revokes one normalized role assignment.
+            operationId: PermissionService_removeRoleAssignment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.RemoveRoleAssignmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/roles/{id}/preview:
+        post:
+            tags:
+                - PermissionService
+            summary: previewPermissionImpact
+            description: Previews the permission delta for a role update.
+            operationId: PermissionService_previewPermissionImpact
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                permissions:
+                                    type: array
+                                    items:
+                                        type: string
+                            required:
+                                - permissions
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.PreviewPermissionImpactResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/roles/audit:
+        get:
+            tags:
+                - PermissionService
+            summary: listRoleAudit
+            description: Lists role lifecycle and assignment audit events.
+            operationId: PermissionService_listRoleAudit
+            parameters:
+                - name: role_id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.ListRoleAuditResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/permission/v1/matrix:
+        patch:
+            tags:
+                - PermissionService
+            summary: updatePermissionMatrix
+            description: Toggles a single permission cell.
+            operationId: PermissionService_updatePermissionMatrix
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.permission.v1.UpdatePermissionMatrixRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.permission.v1.UpdatePermissionMatrixResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hub.permission.v1.GetPermissionsRequest:
+            type: object
+        hub.permission.v1.GetPermissionsResponse:
+            type: object
+            properties:
+                matrix:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.PermissionMatrix'
+            required:
+                - matrix
+        hub.permission.v1.PermissionMatrix:
+            type: object
+            properties:
+                rows:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.permission.v1.PermissionRow'
+                roles:
+                    type: array
+                    items:
+                        type: string
+            required:
+                - rows
+                - roles
+        hub.permission.v1.PermissionRow:
+            type: object
+            properties:
+                key:
+                    type: string
+                category:
+                    type: string
+                label:
+                    type: string
+                role_values:
+                    type: object
+                    additionalProperties:
+                        type: boolean
+                    description: role -> enabled
+            required:
+                - key
+                - category
+                - label
+                - role_values
+        hub.permission.v1.ListRolesRequest:
+            type: object
+            properties:
+                app_id:
+                    type: string
+                    description: Restrict results to one application.
+                page:
+                    type: integer
+                    format: int32
+                    description: One-based result page.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: Maximum number of roles returned per page.
+        hub.permission.v1.ListRolesResponse:
+            type: object
+            properties:
+                roles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+                    description: Roles visible in the requested page.
+                page:
+                    type: integer
+                    format: int32
+                    description: Current one-based page.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: Effective page size.
+                total:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Total number of matching roles.
+                next_page:
+                    type: integer
+                    format: int32
+                    description: Next page number, when more results remain.
+            required:
+                - roles
+                - page
+                - page_size
+                - total
+        hub.permission.v1.CustomRole:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Stable identifier of the role within the business.
+                name:
+                    type: string
+                    description: Display name shown to administrators.
+                description:
+                    type: string
+                    description: Optional explanation of the role's intended use.
+                permissions:
+                    type: array
+                    items:
+                        type: string
+                    description: Permission keys granted by this role.
+                app_id:
+                    type: string
+                    description: Application that owns the role and its permissions.
+                role_key:
+                    type: string
+                    description: Optional application-specific role key.
+                level:
+                    type: integer
+                    format: int32
+                    description: Relative authority level used for delegation checks.
+                parent_role_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Optional role from which this role inherits or was derived.
+                scope_rules:
+                    type: array
+                    items:
+                        type: string
+                    description: Scope rules limiting where the role applies.
+                is_system:
+                    type: boolean
+                    description: Whether the role is a seeded system role.
+                is_archived:
+                    type: boolean
+                    description: Whether the role is archived and unavailable for new assignments.
+                lifecycle:
+                    type: string
+                    description: Lifecycle state of the role.
+                version:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Monotonically increasing version used for cache and audit coordination.
+                member_count:
+                    type: integer
+                    format: int32
+                    description: Number of active members assigned to the role.
+                created_at:
+                    type: string
+                    description: When the record was created.
+            required:
+                - id
+                - name
+                - description
+                - permissions
+                - app_id
+                - role_key
+                - level
+                - scope_rules
+                - is_system
+                - is_archived
+                - lifecycle
+                - version
+                - member_count
+                - created_at
+        hub.permission.v1.CreateRoleRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Display name for the new role.
+                description:
+                    type: string
+                    description: Optional explanation of the role's intended use.
+                app_id:
+                    type: string
+                    description: Application that owns the role.
+                role_key:
+                    type: string
+                    description: Optional application-specific role key.
+                level:
+                    type: integer
+                    format: int32
+                    description: Relative authority level used for delegation checks.
+                parent_role_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Optional source role for inheritance or cloning semantics.
+                scope_rules:
+                    type: array
+                    items:
+                        type: string
+                    description: Scope rules to apply to assignments of the role.
+                permissions:
+                    type: array
+                    items:
+                        type: string
+                    description: Permission keys granted by the role.
+            required:
+                - name
+                - description
+                - scope_rules
+                - permissions
+        hub.permission.v1.CreateRoleResponse:
+            type: object
+            properties:
+                role:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
+        hub.permission.v1.UpdateRoleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.UpdateRoleBody'
+            required:
+                - id
+                - body
+        hub.permission.v1.UpdateRoleBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: The role name.
+                description:
+                    type: string
+                app_id:
+                    type: string
+                level:
+                    type: integer
+                    format: int32
+                parent_role_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                scope_rules:
+                    type: array
+                    items:
+                        type: string
+                permissions:
+                    type: array
+                    items:
+                        type: string
+            required:
+                - name
+                - description
+                - scope_rules
+                - permissions
+        hub.permission.v1.UpdateRoleResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                role:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - message
+        hub.permission.v1.DeleteRoleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        hub.permission.v1.DeleteRoleResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        hub.permission.v1.GetRoleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        hub.permission.v1.GetRoleResponse:
+            type: object
+            properties:
+                role:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
+        hub.permission.v1.CloneRoleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+            required:
+                - id
+                - name
+                - description
+        hub.permission.v1.CloneRoleResponse:
+            type: object
+            properties:
+                role:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
+        hub.permission.v1.ArchiveRoleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reason:
+                    type: string
+            required:
+                - id
+                - reason
+        hub.permission.v1.ArchiveRoleResponse:
+            type: object
+            properties:
+                role:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.CustomRole'
+            required:
+                - role
+        hub.permission.v1.ListRoleAssignmentsRequest:
+            type: object
+            properties:
+                role_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Restrict results to one role.
+                app_id:
+                    type: string
+                    description: Restrict results to one application.
+                page:
+                    type: integer
+                    format: int32
+                    description: One-based result page.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: Maximum number of assignments returned per page.
+        hub.permission.v1.ListRoleAssignmentsResponse:
+            type: object
+            properties:
+                assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.permission.v1.RoleAssignment'
+                    description: Assignments visible in the requested page.
+                page:
+                    type: integer
+                    format: int32
+                    description: Current one-based page.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: Effective page size.
+                total:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Total number of matching assignments.
+                next_page:
+                    type: integer
+                    format: int32
+                    description: Next page number, when more results remain.
+            required:
+                - assignments
+                - page
+                - page_size
+                - total
+        hub.permission.v1.RoleAssignment:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Stable identifier of the assignment.
+                role_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Role being assigned.
+                app_id:
+                    type: string
+                    description: Application in which the assignment is effective.
+                user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: User receiving the assignment, when directly assigned.
+                group_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Group receiving the assignment, when group assigned.
+                status:
+                    type: string
+                    description: Lifecycle status of the assignment.
+                source:
+                    type: string
+                    description: Provenance of the assignment, such as explicit or group.
+                is_primary:
+                    type: boolean
+                    description: Whether this is the user's primary role for the application.
+                scopes:
+                    type: array
+                    items:
+                        type: string
+                    description: Scope values attached to this assignment.
+                granted_at:
+                    type: string
+                    description: Time at which the assignment was granted.
+            required:
+                - id
+                - role_id
+                - app_id
+                - status
+                - source
+                - is_primary
+                - scopes
+                - granted_at
+        hub.permission.v1.AssignRoleRequest:
+            type: object
+            properties:
+                role_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Role to assign.
+                app_id:
+                    type: string
+                    description: Application in which the assignment is effective.
+                user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: User receiving the assignment, when directly assigned.
+                group_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Group receiving the assignment, when group assigned.
+                is_primary:
+                    type: boolean
+                    description: Whether this is the user's primary role for the application.
+                scopes:
+                    type: array
+                    items:
+                        type: string
+                    description: Scope values attached to this assignment.
+            required:
+                - role_id
+                - app_id
+                - is_primary
+                - scopes
+        hub.permission.v1.AssignRoleResponse:
+            type: object
+            properties:
+                assignment:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.permission.v1.RoleAssignment'
+            required:
+                - assignment
+        hub.permission.v1.RemoveRoleAssignmentRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        hub.permission.v1.RemoveRoleAssignmentResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        hub.permission.v1.PreviewPermissionImpactRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                permissions:
+                    type: array
+                    items:
+                        type: string
+            required:
+                - id
+                - permissions
+        hub.permission.v1.PreviewPermissionImpactResponse:
+            type: object
+            properties:
+                added_permissions:
+                    type: array
+                    items:
+                        type: string
+                    description: Permission keys added by the proposed change.
+                removed_permissions:
+                    type: array
+                    items:
+                        type: string
+                    description: Permission keys removed by the proposed change.
+                affected_member_count:
+                    type: integer
+                    format: int32
+                    description: Number of active members affected by the proposed change.
+            required:
+                - added_permissions
+                - removed_permissions
+                - affected_member_count
+        hub.permission.v1.ListRoleAuditRequest:
+            type: object
+            properties:
+                role_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+        hub.permission.v1.ListRoleAuditResponse:
+            type: object
+            properties:
+                events:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.permission.v1.RoleAuditEvent'
+                page:
+                    type: integer
+                    format: int32
+                page_size:
+                    type: integer
+                    format: int32
+                total:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                next_page:
+                    type: integer
+                    format: int32
+            required:
+                - events
+                - page
+                - page_size
+                - total
+        hub.permission.v1.RoleAuditEvent:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Stable identifier of the audit event.
+                action:
+                    type: string
+                    description: Action recorded by the audit event.
+                app_id:
+                    type: string
+                    description: Application affected by the event.
+                role_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Role affected by the event, when applicable.
+                actor_user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: User who performed the action, when available.
+                target_user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Direct user target, when applicable.
+                target_group_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Group target, when applicable.
+                before_json:
+                    type: string
+                    description: Serialized state before the change.
+                after_json:
+                    type: string
+                    description: Serialized state after the change.
+                reason:
+                    type: string
+                    description: Reason supplied for the change.
+                created_at:
+                    type: string
+                    description: Time at which the event was created.
+            required:
+                - id
+                - action
+                - app_id
+                - before_json
+                - after_json
+                - reason
+                - created_at
+        hub.permission.v1.UpdatePermissionMatrixRequest:
+            type: object
+            properties:
+                role:
+                    type: string
+                permission_key:
+                    type: string
+                enabled:
+                    type: boolean
+            required:
+                - role
+                - permission_key
+                - enabled
+        hub.permission.v1.UpdatePermissionMatrixResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            required:
+                - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: PermissionService
+      description: PermissionService defines hub permission and role endpoints.

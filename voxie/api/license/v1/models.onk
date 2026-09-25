@@ -1,0 +1,18 @@
+package license.v1
+
+/// LicenseState is the public, secret-free status used by admin notices.
+message LicenseState {
+  mode: string
+  valid: bool
+  status: string
+  reason: string?
+  expires_at: string?
+  grace_until: string?
+  checked_at: string?
+}
+
+message GetLicenseStateRequest {}
+
+message GetLicenseStateResponse {
+  state: LicenseState @unwrap
+}

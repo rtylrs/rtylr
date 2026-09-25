@@ -1,0 +1,297 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/category/v1/categories:
+        get:
+            tags:
+                - CategoryService
+            summary: listCategories
+            operationId: CategoryService_listCategories
+            parameters:
+                - name: limit
+                  in: query
+                  description: Maximum number of categories to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of categories to return.
+                - name: offset
+                  in: query
+                  description: Number of categories to skip.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of categories to skip.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.ListCategoriesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - CategoryService
+            summary: createCategory
+            operationId: CategoryService_createCategory
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.category.v1.CreateCategoryRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.CreateCategoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /erp/category/v1/categories/{id}:
+        put:
+            tags:
+                - CategoryService
+            summary: updateCategory
+            operationId: CategoryService_updateCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/erp.category.v1.UpdateCategoryBody'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.UpdateCategoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - CategoryService
+            summary: deleteCategory
+            operationId: CategoryService_deleteCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.category.v1.DeleteCategoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        erp.category.v1.ListCategoriesRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of categories to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of categories to skip.
+            required:
+                - limit
+                - offset
+        erp.category.v1.ListCategoriesResponse:
+            type: object
+            properties:
+                categories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.category.v1.Category'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+            required:
+                - categories
+                - has_more
+                - limit
+                - offset
+                - total
+        erp.category.v1.Category:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - created_at
+                - updated_at
+        erp.category.v1.CreateCategoryRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+            required:
+                - name
+                - description
+        erp.category.v1.CreateCategoryResponse:
+            type: object
+            properties:
+                category_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - category_id
+                - message
+        erp.category.v1.UpdateCategoryRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.category.v1.UpdateCategoryBody'
+            required:
+                - id
+                - body
+        erp.category.v1.UpdateCategoryBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+            required:
+                - name
+                - description
+        erp.category.v1.UpdateCategoryResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        erp.category.v1.DeleteCategoryRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        erp.category.v1.DeleteCategoryResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CategoryService

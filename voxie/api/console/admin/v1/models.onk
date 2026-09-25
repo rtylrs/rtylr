@@ -1,0 +1,262 @@
+package console.admin.v1
+
+message User {
+  id: int64 @encode(number)
+  email: string
+  full_name: string
+  business_id: int64? @encode(number)
+  is_console_admin: bool
+  is_banned: bool
+  ban_reason: string?
+  banned_at: string?
+  created_at: string
+}
+
+message Business {
+  id: int64 @encode(number)
+  owner_id: int64 @encode(number)
+  name: string
+  slug: string
+  created_at: string
+}
+
+message Subscription {
+  id: int64 @encode(number)
+  owner_id: int64 @encode(number)
+  owner_name: string
+  owner_email: string
+  business_id: int64? @encode(number)
+  business_name: string
+  plan_id: int64 @encode(number)
+  plan_name: string
+  status: string
+  seat_count: int32
+  active_seat_count: int32
+  included_seat_limit: int32
+  included_seat_count: int32
+  billable_seat_count: int32
+  trial_ends_at: string?
+  next_billing_date: string?
+  current_period_ends_at: string?
+  paddle_subscription_id: string?
+  paddle_customer_id: string?
+  days_remaining: int32?
+  created_at: string
+  updated_at: string?
+}
+
+message Plan {
+  id: int64 @encode(number)
+  name: string
+  price_per_seat_cents: int32
+  annual_price_per_seat_cents: int32
+  is_active: bool
+  created_at: string
+}
+
+message Stats {
+  total_users: int64 @encode(number)
+  banned_users: int64 @encode(number)
+  active_subscriptions: int64 @encode(number)
+  total_businesses: int64 @encode(number)
+  total_grants: int64 @encode(number)
+  manual_addon_grants: int64 @encode(number)
+  console_admins: int64 @encode(number)
+}
+
+message GetStatsRequest {}
+
+message GetStatsResponse {
+  stats: Stats
+}
+
+message ListUsersRequest {
+  limit: int32 @query("limit")
+  offset: int32 @query("offset")
+  id: int64? @query("id") @encode(number)
+  email: string @query("email")
+  name: string @query("name")
+}
+
+message ListUsersResponse {
+  users: User[]
+  total: int64 @encode(number)
+}
+
+message GetUserRequest {
+  id: int64 @gt(0) @encode(number)
+}
+
+message GetUserResponse {
+  user: User
+}
+
+message CreateUserRequest {
+  email: string @email
+  password: string
+  full_name: string
+  is_console_admin: bool
+}
+
+message CreateUserResponse {
+  user: User
+  message: string
+}
+
+message UpdateUserRequest {
+  id: int64 @gt(0) @encode(number)
+  full_name: string?
+  email: string?
+}
+
+message UpdateUserResponse {
+  message: string
+}
+
+message DeleteUserRequest {
+  id: int64 @gt(0) @encode(number)
+}
+
+message DeleteUserResponse {
+  message: string
+}
+
+message BanUserRequest {
+  id: int64 @gt(0) @encode(number)
+  reason: string
+}
+
+message BanUserResponse {
+  message: string
+}
+
+message UnbanUserRequest {
+  id: int64 @gt(0) @encode(number)
+}
+
+message UnbanUserResponse {
+  message: string
+}
+
+message SetConsoleAdminRequest {
+  id: int64 @gt(0) @encode(number)
+  is_console_admin: bool
+}
+
+message SetConsoleAdminResponse {
+  message: string
+}
+
+message GetUserSubscriptionRequest {
+  user_id: int64 @gt(0) @encode(number)
+}
+
+message GetUserSubscriptionResponse {
+  subscription: Subscription?
+}
+
+message ListBusinessesRequest {
+  limit: int32 @query("limit")
+  offset: int32 @query("offset")
+  id: int64? @query("id") @encode(number)
+  name: string @query("name")
+  owner_id: int64? @query("owner_id") @encode(number)
+}
+
+message ListBusinessesResponse {
+  businesses: Business[]
+  total: int64 @encode(number)
+}
+
+message UpdateBusinessRequest {
+  id: int64 @gt(0) @encode(number)
+  name: string
+}
+
+message UpdateBusinessResponse {
+  message: string
+}
+
+message DeleteBusinessRequest {
+  id: int64 @gt(0) @encode(number)
+}
+
+message DeleteBusinessResponse {
+  message: string
+}
+
+message CreateBusinessOwnerRequest {
+  email: string @email
+  password: string
+  full_name: string
+  business_name: string
+  industry: string
+  country: string
+  timezone: string
+  currency: string
+  grant_plan: bool
+  plan_id: int64? @encode(number)
+  subscription_status: string
+  grant_days: int32?
+}
+
+message CreateBusinessOwnerResponse {
+  owner: User
+  business: Business
+  subscription: Subscription?
+  message: string
+}
+
+message ListSubscriptionsRequest {
+  limit: int32 @query("limit")
+  offset: int32 @query("offset")
+  status: string @query("status")
+}
+
+message ListSubscriptionsResponse {
+  subscriptions: Subscription[]
+  total: int64 @encode(number)
+}
+
+message UpsertSubscriptionRequest {
+  owner_id: int64 @gt(0) @encode(number)
+  plan_id: int64 @gt(0) @encode(number)
+  status: string
+  seat_count: int32?
+  trial_ends_at: string?
+  next_billing_date: string?
+  current_period_ends_at: string?
+  total_days: int32?
+  paddle_subscription_id: string?
+  paddle_customer_id: string?
+}
+
+message UpsertSubscriptionResponse {
+  message: string
+}
+
+message DeleteSubscriptionRequest {
+  id: int64 @gt(0) @encode(number)
+}
+
+message DeleteSubscriptionResponse {
+  message: string
+}
+
+message ListPlansRequest {}
+
+message ListPlansResponse {
+  plans: Plan[]
+}
+
+message UpdatePlanRequest {
+  id: int64 @gt(0) @encode(number)
+  name: string?
+  price_per_seat_cents: int32?
+  annual_price_per_seat_cents: int32?
+  is_active: bool?
+}
+
+message UpdatePlanResponse {
+  message: string
+}

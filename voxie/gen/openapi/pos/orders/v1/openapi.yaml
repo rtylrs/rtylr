@@ -1,0 +1,843 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/orders/v1/orders:
+        get:
+            tags:
+                - OrderService
+            summary: listOrders
+            description: ListOrders returns POS orders for the active business and filters.
+            operationId: OrderService_listOrders
+            parameters:
+                - name: session_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: status
+                  in: query
+                  description: status is the current lifecycle state.
+                  required: false
+                  schema:
+                    type: string
+                    description: status is the current lifecycle state.
+                - name: date_from
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: date_to
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: search
+                  in: query
+                  description: search filters orders by order number, customer, or matching text.
+                  required: false
+                  schema:
+                    type: string
+                    description: search filters orders by order number, customer, or matching text.
+                - name: page
+                  in: query
+                  description: page is the one-based page number to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: page is the one-based page number to return.
+                - name: page_size
+                  in: query
+                  description: page_size is the maximum number of orders to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: page_size is the maximum number of orders to return.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.v1.ListOrdersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - OrderService
+            summary: createOrder
+            description: CreateOrder creates a POS order.
+            operationId: OrderService_createOrder
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.orders.v1.CreateOrderRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.v1.CreateOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/orders/v1/orders/public:
+        post:
+            tags:
+                - OrderService
+            summary: createPublicOrder
+            description: CreatePublicOrder places an anonymous online order from the public menu app.
+            operationId: OrderService_createPublicOrder
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.orders.v1.CreatePublicOrderRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.v1.CreatePublicOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/orders/v1/orders/{order_id}/public-status:
+        get:
+            tags:
+                - OrderService
+            summary: getPublicOrderStatus
+            description: GetPublicOrderStatus returns lifecycle status for a public online order.
+            operationId: OrderService_getPublicOrderStatus
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: business_id
+                  in: query
+                  description: |-
+                    business_id scopes the lookup to the business the order belongs to,
+                    preventing cross-tenant order enumeration on this anonymous endpoint.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        business_id scopes the lookup to the business the order belongs to,
+                        preventing cross-tenant order enumeration on this anonymous endpoint.
+                - name: public_token
+                  in: query
+                  description: |-
+                    Single-use? No: this credential is scoped to this order and is safe to
+                    present repeatedly for status polling. It must never be replaced by the
+                    sequential order ID alone.
+                  required: true
+                  schema:
+                    type: string
+                    description: |-
+                        Single-use? No: this credential is scoped to this order and is safe to
+                        present repeatedly for status polling. It must never be replaced by the
+                        sequential order ID alone.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.v1.GetPublicOrderStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/orders/v1/orders/{order_id}:
+        get:
+            tags:
+                - OrderService
+            summary: getOrderDetail
+            description: GetOrderDetail returns an order and its purchased items.
+            operationId: OrderService_getOrderDetail
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.v1.GetOrderDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/orders/v1/orders/{order_id}/status:
+        put:
+            tags:
+                - OrderService
+            summary: updateOrderStatus
+            description: UpdateOrderStatus changes the order lifecycle status.
+            operationId: OrderService_updateOrderStatus
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.orders.v1.UpdateOrderStatusBody'
+                            description: body carries the new order status bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.v1.UpdateOrderStatusResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/orders/v1/orders/{order_id}/void:
+        post:
+            tags:
+                - OrderService
+            summary: voidOrder
+            description: VoidOrder voids an existing order.
+            operationId: OrderService_voidOrder
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                reason:
+                                    type: string
+                            required:
+                                - reason
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.v1.VoidOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.orders.v1.ListOrdersRequest:
+            type: object
+            properties:
+                session_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                date_from:
+                    type: string
+                date_to:
+                    type: string
+                search:
+                    type: string
+                    description: search filters orders by order number, customer, or matching text.
+                page:
+                    type: integer
+                    format: int64
+                    description: page is the one-based page number to return.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: page_size is the maximum number of orders to return.
+            required:
+                - session_id
+                - status
+                - date_from
+                - date_to
+                - search
+                - page
+                - page_size
+        pos.orders.v1.ListOrdersResponse:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.orders.v1.Order'
+                total:
+                    type: integer
+                    format: int64
+                    description: total is the total number of matching records.
+                has_more:
+                    type: boolean
+                    description: has_more indicates another page is available.
+                page:
+                    type: integer
+                    format: int64
+                    description: page is the one-based page number returned.
+                page_size:
+                    type: integer
+                    format: int64
+                    description: page_size is the page size returned.
+            required:
+                - orders
+                - total
+                - has_more
+                - page
+                - page_size
+        pos.orders.v1.Order:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                session_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                table_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                order_number:
+                    type: string
+                type:
+                    type: string
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                customer_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                customer_name:
+                    type: string
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                subtotal:
+                    type: number
+                    format: double
+                discount_amount:
+                    type: number
+                    format: double
+                tax_amount:
+                    type: number
+                    format: double
+                total:
+                    type: number
+                    format: double
+                payment_method:
+                    type: string
+                payment_status:
+                    type: string
+                amount_paid:
+                    type: number
+                    format: double
+                change_due:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+                kitchen_notes:
+                    type: string
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+                paid_at:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.orders.v1.OrderItem'
+            required:
+                - id
+                - owner_id
+                - session_id
+                - table_id
+                - location_id
+                - order_number
+                - type
+                - status
+                - customer_id
+                - customer_name
+                - staff_id
+                - subtotal
+                - discount_amount
+                - tax_amount
+                - total
+                - payment_method
+                - payment_status
+                - amount_paid
+                - change_due
+                - notes
+                - kitchen_notes
+                - created_at
+                - updated_at
+                - paid_at
+                - items
+        pos.orders.v1.OrderItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                order_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                menu_item_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                quantity:
+                    type: number
+                    format: double
+                unit_price:
+                    type: number
+                    format: double
+                discount_pct:
+                    type: number
+                    format: double
+                discount_amount:
+                    type: number
+                    format: double
+                tax_rate:
+                    type: number
+                    format: double
+                total:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+            required:
+                - id
+                - order_id
+                - menu_item_id
+                - name
+                - sku
+                - quantity
+                - unit_price
+                - discount_pct
+                - discount_amount
+                - tax_rate
+                - total
+                - notes
+                - status
+                - created_at
+        pos.orders.v1.CreateOrderRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                table_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                type:
+                    type: string
+                customer_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                customer_name:
+                    type: string
+                payment_method:
+                    type: string
+                notes:
+                    type: string
+                kitchen_notes:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.orders.v1.CreateOrderItemInput'
+                    minItems: 1
+            required:
+                - session_id
+                - table_id
+                - location_id
+                - type
+                - customer_id
+                - customer_name
+                - payment_method
+                - notes
+                - kitchen_notes
+                - items
+        pos.orders.v1.CreateOrderItemInput:
+            type: object
+            properties:
+                menu_item_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                quantity:
+                    type: number
+                    format: double
+                unit_price:
+                    type: number
+                    format: double
+                discount_pct:
+                    type: number
+                    format: double
+                tax_rate:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+            required:
+                - menu_item_id
+                - name
+                - sku
+                - quantity
+                - unit_price
+                - discount_pct
+                - tax_rate
+                - notes
+        pos.orders.v1.CreateOrderResponse:
+            type: object
+            properties:
+                order_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                order_number:
+                    type: string
+                message:
+                    type: string
+            required:
+                - order_id
+                - order_number
+                - message
+        pos.orders.v1.CreatePublicOrderRequest:
+            type: object
+            properties:
+                owner_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                customer_name:
+                    type: string
+                customer_phone:
+                    type: string
+                customer_email:
+                    type: string
+                notes:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.orders.v1.PublicOrderItemInput'
+                    minItems: 1
+            required:
+                - owner_id
+                - customer_name
+                - customer_phone
+                - customer_email
+                - notes
+                - items
+        pos.orders.v1.PublicOrderItemInput:
+            type: object
+            properties:
+                menu_item_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                quantity:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                unit_price:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+            required:
+                - menu_item_id
+                - name
+                - quantity
+                - unit_price
+                - notes
+        pos.orders.v1.CreatePublicOrderResponse:
+            type: object
+            properties:
+                order_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                order_number:
+                    type: string
+                status:
+                    type: string
+                public_token:
+                    type: string
+                    description: Opaque credential required to retrieve this order's public status.
+            required:
+                - order_id
+                - order_number
+                - status
+                - public_token
+        pos.orders.v1.GetPublicOrderStatusRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                business_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        business_id scopes the lookup to the business the order belongs to,
+                        preventing cross-tenant order enumeration on this anonymous endpoint.
+                public_token:
+                    type: string
+                    description: |-
+                        Single-use? No: this credential is scoped to this order and is safe to
+                        present repeatedly for status polling. It must never be replaced by the
+                        sequential order ID alone.
+            required:
+                - order_id
+                - business_id
+                - public_token
+        pos.orders.v1.GetPublicOrderStatusResponse:
+            type: object
+            properties:
+                order_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                order_number:
+                    type: string
+                status:
+                    type: string
+            required:
+                - order_id
+                - order_number
+                - status
+        pos.orders.v1.GetOrderDetailRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - order_id
+        pos.orders.v1.GetOrderDetailResponse:
+            type: object
+            properties:
+                order:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.orders.v1.Order'
+            required:
+                - order
+        pos.orders.v1.UpdateOrderStatusRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.orders.v1.UpdateOrderStatusBody'
+                    description: body carries the new order status bound from the HTTP payload.
+            required:
+                - order_id
+                - body
+        pos.orders.v1.UpdateOrderStatusBody:
+            type: object
+            properties:
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+            required:
+                - status
+        pos.orders.v1.UpdateOrderStatusResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        pos.orders.v1.VoidOrderRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reason:
+                    type: string
+            required:
+                - order_id
+                - reason
+        pos.orders.v1.VoidOrderResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OrderService
+      description: OrderService defines the POS order endpoints.

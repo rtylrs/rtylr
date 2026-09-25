@@ -1,0 +1,7 @@
+package flow.profile.v1
+
+/// ProfileService exposes business-member profiles with public-project
+/// discoverability. Only callers inside the same business can read a profile.
+service ProfileService {
+  getProfile(GetProfileRequest) -> GetProfileResponse @get("/profile/{user_id}")
+}

@@ -1,0 +1,5 @@
+package hub.caret.v1
+
+service CaretService {
+  listCaretTools(ListCaretToolsRequest) -> ListCaretToolsResponse @post("/tools")
+}

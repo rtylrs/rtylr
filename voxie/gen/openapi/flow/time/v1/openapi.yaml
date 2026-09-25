@@ -1,0 +1,1222 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/time/v1/work-days:
+        get:
+            tags:
+                - TimeService
+            summary: getWorkDay
+            operationId: TimeService_getWorkDay
+            parameters:
+                - name: date
+                  in: query
+                  description: date is the day to read, as YYYY-MM-DD.
+                  required: true
+                  schema:
+                    type: string
+                    description: date is the day to read, as YYYY-MM-DD.
+                - name: employee_id
+                  in: query
+                  description: |-
+                    employee_id reads another person's day, which requires manage team time.
+                    Omitted, it reads the caller's own.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        employee_id reads another person's day, which requires manage team time.
+                        Omitted, it reads the caller's own.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.GetWorkDayResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        put:
+            tags:
+                - TimeService
+            summary: upsertWorkDay
+            operationId: TimeService_upsertWorkDay
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.time.v1.UpsertWorkDayRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.UpsertWorkDayResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /flow/time/v1/work-days/range:
+        get:
+            tags:
+                - TimeService
+            summary: listWorkDays
+            operationId: TimeService_listWorkDays
+            parameters:
+                - name: from
+                  in: query
+                  description: from_date is the inclusive start of the range, as YYYY-MM-DD.
+                  required: true
+                  schema:
+                    type: string
+                    description: from_date is the inclusive start of the range, as YYYY-MM-DD.
+                - name: to
+                  in: query
+                  description: to_date is the inclusive end of the range, as YYYY-MM-DD.
+                  required: true
+                  schema:
+                    type: string
+                    description: to_date is the inclusive end of the range, as YYYY-MM-DD.
+                - name: employee_id
+                  in: query
+                  description: employee_id lists another person's days.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: employee_id lists another person's days.
+                - name: page
+                  in: query
+                  description: The current result page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  description: The maximum number of records to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.ListWorkDaysResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /flow/time/v1/work-days/team:
+        get:
+            tags:
+                - TimeService
+            summary: listWorkDaysForWorkspace
+            operationId: TimeService_listWorkDaysForWorkspace
+            parameters:
+                - name: workspace_id
+                  in: query
+                  description: |-
+                    workspace_id is whose members' days this lists. The caller must hold at
+                    least admin on this workspace.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        workspace_id is whose members' days this lists. The caller must hold at
+                        least admin on this workspace.
+                - name: from
+                  in: query
+                  description: from_date is the inclusive start of the range, as YYYY-MM-DD.
+                  required: true
+                  schema:
+                    type: string
+                    description: from_date is the inclusive start of the range, as YYYY-MM-DD.
+                - name: to
+                  in: query
+                  description: to_date is the inclusive end of the range, as YYYY-MM-DD.
+                  required: true
+                  schema:
+                    type: string
+                    description: to_date is the inclusive end of the range, as YYYY-MM-DD.
+                - name: page
+                  in: query
+                  description: The current result page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  description: The maximum number of records to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.ListWorkDaysForWorkspaceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /flow/time/v1/work-days/{work_day_id}/lines:
+        post:
+            tags:
+                - TimeService
+            summary: createWorkDayLine
+            operationId: TimeService_createWorkDayLine
+            parameters:
+                - name: work_day_id
+                  in: path
+                  description: work_day_id is the day to add the line to.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: work_day_id is the day to add the line to.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                client_key:
+                                    type: string
+                                    description: client_key makes the create idempotent across an offline retry.
+                                duration_minutes:
+                                    exclusiveMinimum: 0
+                                    type: integer
+                                    format: int32
+                                    description: duration_minutes is the time spent.
+                                description:
+                                    type: string
+                                    description: description is what was done.
+                                project_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                task_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_type_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_mode:
+                                    type: string
+                                    description: work_mode overrides the day's mode for this line only.
+                                is_billable:
+                                    type: boolean
+                            required:
+                                - client_key
+                                - duration_minutes
+                                - description
+                                - is_billable
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.CreateWorkDayLineResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /flow/time/v1/work-days/lines/{id}:
+        delete:
+            tags:
+                - TimeService
+            summary: deleteWorkDayLine
+            operationId: TimeService_deleteWorkDayLine
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the line to remove.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the line to remove.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.DeleteWorkDayLineResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        patch:
+            tags:
+                - TimeService
+            summary: updateWorkDayLine
+            operationId: TimeService_updateWorkDayLine
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the line to change.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the line to change.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                duration_minutes:
+                                    exclusiveMinimum: 0
+                                    type: integer
+                                    format: int32
+                                description:
+                                    type: string
+                                project_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                task_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_type_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                work_mode:
+                                    type: string
+                                is_billable:
+                                    type: boolean
+                            required:
+                                - duration_minutes
+                                - description
+                                - is_billable
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.UpdateWorkDayLineResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /flow/time/v1/work-types:
+        get:
+            tags:
+                - TimeService
+            summary: listWorkTypes
+            operationId: TimeService_listWorkTypes
+            parameters:
+                - name: include_archived
+                  in: query
+                  description: include_archived returns archived nodes too, for editing the tree.
+                  required: false
+                  schema:
+                    type: boolean
+                    description: include_archived returns archived nodes too, for editing the tree.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.ListWorkTypesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - TimeService
+            summary: createWorkType
+            operationId: TimeService_createWorkType
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.time.v1.CreateWorkTypeRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.CreateWorkTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /flow/time/v1/work-types/{id}:
+        put:
+            tags:
+                - TimeService
+            summary: updateWorkType
+            operationId: TimeService_updateWorkType
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                description:
+                                    type: string
+                                    description: description is shown to employees as the task description once picked.
+                                parent_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                hr_category_id:
+                                    type: string
+                                    pattern: ^-?[0-9]+$
+                                    format: int64
+                                sort_order:
+                                    type: integer
+                                    format: int32
+                                archived:
+                                    type: boolean
+                            required:
+                                - name
+                                - description
+                                - sort_order
+                                - archived
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.UpdateWorkTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - TimeService
+            summary: deleteWorkType
+            operationId: TimeService_deleteWorkType
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.time.v1.DeleteWorkTypeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        flow.time.v1.GetWorkDayRequest:
+            type: object
+            properties:
+                date:
+                    type: string
+                    description: date is the day to read, as YYYY-MM-DD.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        employee_id reads another person's day, which requires manage team time.
+                        Omitted, it reads the caller's own.
+            required:
+                - date
+        flow.time.v1.GetWorkDayResponse:
+            type: object
+            properties:
+                work_day:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.time.v1.WorkDay'
+                    description: work_day is null when nothing has been recorded for that date yet.
+                lines:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.time.v1.WorkDayLine'
+                    description: lines are the day's pieces of work.
+            required:
+                - lines
+        flow.time.v1.WorkDay:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: employee_id is the person the day belongs to.
+                user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        user_id is the employee's auth user id, populated when the caller already
+                        resolved it (the team view, which joins against workspace membership).
+                        Callers reading their own day already know their own identity and get
+                        this unset.
+                date:
+                    type: string
+                    description: date is the calendar day in the person's own timezone, as YYYY-MM-DD.
+                timezone:
+                    type: string
+                    description: |-
+                        timezone is the IANA zone the day was recorded in. Stored per record because
+                        a travelling worker's day boundary is their own, not the workspace's.
+                work_mode:
+                    type: string
+                    description: |-
+                        work_mode is one of onsite, remote or hybrid. It is the day's default and a
+                        line may override it.
+                start_time:
+                    type: string
+                    description: |-
+                        start_time is the local start of the day as HH:MM, or null for a day that
+                        records only its lines.
+                end_time:
+                    type: string
+                    description: end_time is the local end of the day as HH:MM.
+                break_minutes:
+                    type: integer
+                    format: int32
+                    description: break_minutes is unpaid break time, subtracted from the clocked total.
+                status:
+                    type: string
+                    description: status is one of draft, submitted, approved, rejected or reopened.
+                clocked_minutes:
+                    type: integer
+                    format: int32
+                    description: clocked_minutes is end minus start minus breaks, or zero when unclocked.
+                logged_minutes:
+                    type: integer
+                    format: int32
+                    description: logged_minutes is the sum of this day's lines.
+                gap_minutes:
+                    type: integer
+                    format: int32
+                    description: |-
+                        gap_minutes is clocked minus logged. It is reported, never enforced: a
+                        blocked submission produces invented lines rather than honest ones.
+                logged_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        logged_by is the user who recorded the day, which differs from employee_id
+                        when a manager fills it in on someone's behalf.
+                approved_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: approved_by is the approver, once the day has been approved.
+                approved_at:
+                    type: string
+                    description: approved_at is when it was approved.
+                reopened_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: reopened_by is the manager who reopened an approved day.
+                reopened_at:
+                    type: string
+                    description: reopened_at is when it was reopened.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last changed.
+            required:
+                - id
+                - employee_id
+                - date
+                - timezone
+                - work_mode
+                - break_minutes
+                - status
+                - clocked_minutes
+                - logged_minutes
+                - gap_minutes
+                - created_at
+                - updated_at
+            description: |-
+                WorkDay is one person's working day: the mode, the clock, and the state of its
+                approval. The individual pieces of work are its lines.
+        flow.time.v1.WorkDayLine:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                work_day_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: work_day_id is the day this line belongs to.
+                project_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        project_id is the project the work was for. A line may have a project and no
+                        task, for work that is not tracked as one.
+                task_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: task_id is the task the work was for.
+                work_type_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: work_type_id is the classification node, at either level of the tree.
+                work_mode:
+                    type: string
+                    description: work_mode overrides the day's mode for this line only. Null means inherit.
+                description:
+                    type: string
+                    description: description is what was done.
+                duration_minutes:
+                    type: integer
+                    format: int32
+                    description: duration_minutes is the time spent.
+                is_billable:
+                    type: boolean
+                    description: is_billable marks the line as chargeable, defaulted from the work type.
+                status:
+                    type: string
+                    description: status mirrors the day's approval state for this line.
+                client_key:
+                    type: string
+                    description: |-
+                        client_key is generated by the client before the line is sent. It makes an
+                        offline retry idempotent, so a field worker syncing twice does not log twice.
+                logged_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: logged_by is who recorded the line.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last changed.
+            required:
+                - id
+                - work_day_id
+                - description
+                - duration_minutes
+                - is_billable
+                - status
+                - client_key
+                - created_at
+                - updated_at
+            description: |-
+                WorkDayLine is one piece of work inside a day. It is persisted as an HR time
+                entry, so payroll and Flow read the same rows.
+        flow.time.v1.UpsertWorkDayRequest:
+            type: object
+            properties:
+                date:
+                    type: string
+                    description: date is the day being recorded, as YYYY-MM-DD.
+                timezone:
+                    type: string
+                    description: timezone is the IANA zone of the person recording it.
+                work_mode:
+                    type: string
+                    description: work_mode is one of onsite, remote or hybrid.
+                start_time:
+                    type: string
+                    description: start_time is the local start as HH:MM.
+                end_time:
+                    type: string
+                    description: end_time is the local end as HH:MM.
+                break_minutes:
+                    type: integer
+                    format: int32
+                    description: break_minutes is unpaid break time.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: employee_id records the day on someone else's behalf.
+            required:
+                - date
+                - timezone
+                - work_mode
+                - break_minutes
+        flow.time.v1.UpsertWorkDayResponse:
+            type: object
+            properties:
+                work_day:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.time.v1.WorkDay'
+            required:
+                - work_day
+        flow.time.v1.ListWorkDaysRequest:
+            type: object
+            properties:
+                from_date:
+                    type: string
+                    description: from_date is the inclusive start of the range, as YYYY-MM-DD.
+                to_date:
+                    type: string
+                    description: to_date is the inclusive end of the range, as YYYY-MM-DD.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: employee_id lists another person's days.
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+            required:
+                - from_date
+                - to_date
+                - page
+                - limit
+        flow.time.v1.ListWorkDaysResponse:
+            type: object
+            properties:
+                work_days:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.time.v1.WorkDay'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - work_days
+                - pagination
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
+            description: Standard pagination response metadata.
+        flow.time.v1.ListWorkDaysForWorkspaceRequest:
+            type: object
+            properties:
+                workspace_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        workspace_id is whose members' days this lists. The caller must hold at
+                        least admin on this workspace.
+                from_date:
+                    type: string
+                    description: from_date is the inclusive start of the range, as YYYY-MM-DD.
+                to_date:
+                    type: string
+                    description: to_date is the inclusive end of the range, as YYYY-MM-DD.
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+            required:
+                - workspace_id
+                - from_date
+                - to_date
+                - page
+                - limit
+        flow.time.v1.ListWorkDaysForWorkspaceResponse:
+            type: object
+            properties:
+                work_days:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.time.v1.WorkDay'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - work_days
+                - pagination
+        flow.time.v1.CreateWorkDayLineRequest:
+            type: object
+            properties:
+                work_day_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: work_day_id is the day to add the line to.
+                client_key:
+                    type: string
+                    description: client_key makes the create idempotent across an offline retry.
+                duration_minutes:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+                    description: duration_minutes is the time spent.
+                description:
+                    type: string
+                    description: description is what was done.
+                project_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                task_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                work_type_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                work_mode:
+                    type: string
+                    description: work_mode overrides the day's mode for this line only.
+                is_billable:
+                    type: boolean
+            required:
+                - work_day_id
+                - client_key
+                - duration_minutes
+                - description
+                - is_billable
+        flow.time.v1.CreateWorkDayLineResponse:
+            type: object
+            properties:
+                line:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.time.v1.WorkDayLine'
+            required:
+                - line
+        flow.time.v1.UpdateWorkDayLineRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the line to change.
+                duration_minutes:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+                description:
+                    type: string
+                project_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                task_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                work_type_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                work_mode:
+                    type: string
+                is_billable:
+                    type: boolean
+            required:
+                - id
+                - duration_minutes
+                - description
+                - is_billable
+        flow.time.v1.UpdateWorkDayLineResponse:
+            type: object
+            properties:
+                line:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.time.v1.WorkDayLine'
+            required:
+                - line
+        flow.time.v1.DeleteWorkDayLineRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the line to remove.
+            required:
+                - id
+        flow.time.v1.DeleteWorkDayLineResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+            required:
+                - message
+        flow.time.v1.ListWorkTypesRequest:
+            type: object
+            properties:
+                include_archived:
+                    type: boolean
+                    description: include_archived returns archived nodes too, for editing the tree.
+            required:
+                - include_archived
+        flow.time.v1.ListWorkTypesResponse:
+            type: object
+            properties:
+                work_types:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.time.v1.WorkType'
+            required:
+                - work_types
+        flow.time.v1.WorkType:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                parent_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        parent_id is the parent node, or null for a top-level type. The tree is
+                        exactly two levels deep.
+                name:
+                    type: string
+                    description: name is the display name of this work type.
+                description:
+                    type: string
+                    description: |-
+                        description is a business-authored explanation of what this work type
+                        covers, shown to employees as a read-only "Task Description" once they
+                        pick the type in Log Hours - distinct from the free-text description an
+                        employee types for what they actually did.
+                hr_category_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: hr_category_id maps this node to an HR payroll category.
+                sort_order:
+                    type: integer
+                    format: int32
+                    description: sort_order controls the order the tree is presented in.
+                archived:
+                    type: boolean
+                    description: archived hides the node from pickers without breaking historic entries.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last changed.
+            required:
+                - id
+                - name
+                - description
+                - sort_order
+                - archived
+                - created_at
+                - updated_at
+            description: |-
+                WorkType is one node of the two-level work classification a workspace admin
+                maintains, for example Development with a Code review child. Entries point at
+                either level; hr_category_id maps the node onto HR's payroll category so one
+                entry serves both project reporting and payroll.
+        flow.time.v1.CreateWorkTypeRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: name is the display name.
+                description:
+                    type: string
+                    description: description is shown to employees as the task description once picked.
+                parent_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: parent_id nests this node under a top-level type.
+                hr_category_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: hr_category_id maps the node onto an HR payroll category.
+                sort_order:
+                    type: integer
+                    format: int32
+            required:
+                - name
+                - description
+                - sort_order
+        flow.time.v1.CreateWorkTypeResponse:
+            type: object
+            properties:
+                work_type:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.time.v1.WorkType'
+            required:
+                - work_type
+        flow.time.v1.UpdateWorkTypeRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                    description: description is shown to employees as the task description once picked.
+                parent_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                hr_category_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                sort_order:
+                    type: integer
+                    format: int32
+                archived:
+                    type: boolean
+            required:
+                - id
+                - name
+                - description
+                - sort_order
+                - archived
+        flow.time.v1.UpdateWorkTypeResponse:
+            type: object
+            properties:
+                work_type:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.time.v1.WorkType'
+            required:
+                - work_type
+        flow.time.v1.DeleteWorkTypeRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        flow.time.v1.DeleteWorkTypeResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TimeService
+      description: |-
+        TimeService is Flow's daily time logging: a work day per person per date, the
+        lines of work inside it, and the work-type tree those lines are classified by.
+
+        Lines persist as HR time entries, so Flow and payroll read the same rows rather
+        than reconciling two stores. Approval lives in a separate service.

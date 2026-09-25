@@ -1,0 +1,136 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/setting/v1/settings:
+        get:
+            tags:
+                - SettingService
+            summary: getUserSettings
+            operationId: SettingService_getUserSettings
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.setting.v1.GetUserSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        put:
+            tags:
+                - SettingService
+            summary: updateUserSettings
+            operationId: SettingService_updateUserSettings
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.setting.v1.UpdateUserSettingsRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.setting.v1.UpdateUserSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        flow.setting.v1.GetUserSettingsRequest:
+            type: object
+        flow.setting.v1.GetUserSettingsResponse:
+            type: object
+            properties:
+                task_assigned:
+                    type: boolean
+                task_comments:
+                    type: boolean
+                mentions:
+                    type: boolean
+                status_changes:
+                    type: boolean
+                weekly_digest:
+                    type: boolean
+                email_notifications:
+                    type: boolean
+                sidebar_preferences:
+                    type: string
+                    description: JSON-encoded per-user Flow sidebar layout and visibility preferences.
+            required:
+                - task_assigned
+                - task_comments
+                - mentions
+                - status_changes
+                - weekly_digest
+                - email_notifications
+        flow.setting.v1.UpdateUserSettingsRequest:
+            type: object
+            properties:
+                task_assigned:
+                    type: boolean
+                    description: |-
+                        Notify the user when a task is assigned to them. Omit to preserve the
+                        stored preference; send false to turn the notification off.
+                task_comments:
+                    type: boolean
+                    description: |-
+                        Notify the user about comments on their tasks. Omit to preserve the
+                        stored preference; send false to turn the notification off.
+                mentions:
+                    type: boolean
+                    description: |-
+                        Notify the user when they are mentioned. Omit to preserve the stored
+                        preference; send false to turn the notification off.
+                status_changes:
+                    type: boolean
+                    description: |-
+                        Notify the user when a task status changes. Omit to preserve the stored
+                        preference; send false to turn the notification off.
+                weekly_digest:
+                    type: boolean
+                    description: |-
+                        Send the user the weekly digest email. Omit to preserve the stored
+                        preference; send false to turn the digest off.
+                email_notifications:
+                    type: boolean
+                    description: |-
+                        Master switch for this user's Flow email notifications. Omit to preserve
+                        the stored preference; send false to turn all of them off.
+                sidebar_preferences:
+                    type: string
+                    description: JSON-encoded per-user Flow sidebar layout and visibility preferences.
+        flow.setting.v1.UpdateUserSettingsResponse:
+            type: object
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SettingService

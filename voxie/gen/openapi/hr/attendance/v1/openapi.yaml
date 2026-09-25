@@ -1,0 +1,303 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/attendance/v1/attendance:
+        get:
+            tags:
+                - AttendanceService
+            summary: listAttendance
+            description: ListAttendance returns attendance records with optional filters.
+            operationId: AttendanceService_listAttendance
+            parameters:
+                - name: employee_id
+                  in: query
+                  description: Filter by employee; absent to include all employees.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                - name: date
+                  in: query
+                  description: Filter by date; absent to include all dates.
+                  required: false
+                  schema:
+                    type: string
+                    description: Filter by date; absent to include all dates.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.attendance.v1.ListAttendanceResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/attendance/v1/attendance/clock-in:
+        post:
+            tags:
+                - AttendanceService
+            summary: attendanceClockIn
+            description: AttendanceClockIn records an attendance clock-in.
+            operationId: AttendanceService_attendanceClockIn
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.attendance.v1.AttendanceClockInRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.attendance.v1.AttendanceClockInResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/attendance/v1/attendance/clock-out:
+        post:
+            tags:
+                - AttendanceService
+            summary: attendanceClockOut
+            description: AttendanceClockOut records an attendance clock-out.
+            operationId: AttendanceService_attendanceClockOut
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.attendance.v1.AttendanceClockOutRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.attendance.v1.AttendanceClockOutResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.attendance.v1.ListAttendanceRequest:
+            type: object
+            properties:
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                date:
+                    type: string
+                    description: Filter by date; absent to include all dates.
+        hr.attendance.v1.ListAttendanceResponse:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.attendance.v1.AttendanceRecordPayload'
+                    description: Attendance records matching the filters.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of matching attendance records across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - records
+                - total
+                - limit
+                - offset
+        hr.attendance.v1.AttendanceRecordPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the attendance record.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this record belongs to.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee this attendance record is for.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Work location where attendance was recorded.
+                date:
+                    type: string
+                    description: Date of the attendance record (ISO-8601 format).
+                clock_in_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the employee clocked in.
+                clock_out_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the employee clocked out; absent if still clocked in.
+                duration_minutes:
+                    type: integer
+                    format: int32
+                    description: Total worked duration in minutes; absent if still clocked in.
+                clock_in_method:
+                    type: string
+                    description: Method used to clock in (app | qr | gps | pin | facial).
+                clock_in_lat:
+                    type: number
+                    format: double
+                    description: Latitude at clock-in; absent if location not captured.
+                clock_in_lng:
+                    type: number
+                    format: double
+                    description: Longitude at clock-in; absent if location not captured.
+                is_late:
+                    type: boolean
+                    description: Whether the employee clocked in after the scheduled start.
+                late_minutes:
+                    type: integer
+                    format: int32
+                    description: Number of minutes late; zero if on time.
+                status:
+                    type: string
+                    description: Attendance status (present | absent | partial).
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - location_id
+                - date
+                - clock_in_at
+                - clock_in_method
+                - is_late
+                - late_minutes
+                - status
+                - created_at
+                - updated_at
+            description: AttendanceRecordPayload is a single clock-in/clock-out attendance record.
+        hr.attendance.v1.AttendanceClockInRequest:
+            type: object
+            properties:
+                method:
+                    type: string
+                    description: Method used to clock in (app | qr | gps | pin | facial).
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Work location where the employee is clocking in.
+                lat:
+                    type: number
+                    format: double
+                    description: Latitude at clock-in; absent if location not available.
+                lng:
+                    type: number
+                    format: double
+                    description: Longitude at clock-in; absent if location not available.
+                qr_token:
+                    type: string
+                    description: QR token scanned at a terminal; absent if not using QR method.
+                pin:
+                    type: string
+                    description: 'PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field.'
+            required:
+                - method
+                - location_id
+        hr.attendance.v1.AttendanceClockInResponse:
+            type: object
+            properties:
+                record:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.attendance.v1.AttendanceRecordPayload'
+                    description: The created attendance record.
+            required:
+                - record
+        hr.attendance.v1.AttendanceClockOutRequest:
+            type: object
+            properties:
+                attendance_record_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the attendance record to close.
+            required:
+                - attendance_record_id
+        hr.attendance.v1.AttendanceClockOutResponse:
+            type: object
+            properties:
+                record:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.attendance.v1.AttendanceRecordPayload'
+                    description: The updated attendance record with clock-out data.
+            required:
+                - record
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: AttendanceService
+      description: AttendanceService defines HR attendance endpoints.

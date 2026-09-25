@@ -1,0 +1,233 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/location/v1/locations:
+        get:
+            tags:
+                - LocationService
+            summary: listLocations
+            description: Returns locations for the active business.
+            operationId: LocationService_listLocations
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.location.v1.ListLocationsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - LocationService
+            summary: createLocation
+            description: Creates a new location.
+            operationId: LocationService_createLocation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.location.v1.CreateLocationRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.location.v1.CreateLocationResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/location/v1/locations/{id}:
+        put:
+            tags:
+                - LocationService
+            summary: updateLocation
+            description: Updates an existing location.
+            operationId: LocationService_updateLocation
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the unique identifier for the location.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the location.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.location.v1.UpdateLocationBody'
+                            description: body carries updatable location fields bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.location.v1.UpdateLocationResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.location.v1.ListLocationsRequest:
+            type: object
+        pos.location.v1.ListLocationsResponse:
+            type: object
+            properties:
+                locations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.location.v1.Location'
+            required:
+                - locations
+        pos.location.v1.Location:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                name:
+                    type: string
+                address:
+                    type: string
+                phone:
+                    type: string
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - address
+                - phone
+                - is_active
+                - created_at
+                - updated_at
+            description: Location is a physical POS location for a business.
+        pos.location.v1.CreateLocationRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                address:
+                    type: string
+                phone:
+                    type: string
+                is_active:
+                    type: boolean
+                    description: Defaults to true when absent.
+            required:
+                - name
+                - address
+                - phone
+        pos.location.v1.CreateLocationResponse:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - location_id
+                - message
+        pos.location.v1.UpdateLocationRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the location.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.location.v1.UpdateLocationBody'
+                    description: body carries updatable location fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+        pos.location.v1.UpdateLocationBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                address:
+                    type: string
+                phone:
+                    type: string
+                is_active:
+                    type: boolean
+                    description: Unchanged when absent.
+            required:
+                - name
+                - address
+                - phone
+        pos.location.v1.UpdateLocationResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LocationService
+      description: LocationService defines POS location endpoints.

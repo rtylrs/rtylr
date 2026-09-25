@@ -1,0 +1,13 @@
+package hr.benefit.v1
+
+service BenefitService {
+  listBenefits(ListBenefitsRequest) -> ListBenefitsResponse @get("/benefits")
+
+  createBenefit(CreateBenefitRequest) -> CreateBenefitResponse @post("/benefits")
+
+  /// Enrolls the calling employee in a benefit plan.
+  enrollInBenefit(EnrollInBenefitRequest) -> EnrollInBenefitResponse @post("/benefits/enrollments")
+
+  /// Returns the calling employee's own benefit enrollments.
+  listMyBenefitEnrollments(ListMyBenefitEnrollmentsRequest) -> ListMyBenefitEnrollmentsResponse @get("/benefits/enrollments/mine")
+}

@@ -1,0 +1,76 @@
+package hr.location.v1
+
+/// LocationPayload is a physical work location for a tenant.
+message LocationPayload {
+  /// Unique identifier for the location.
+  id: int64
+  /// Tenant owner this location belongs to.
+  owner_id: int64
+  /// Human-readable name of the location (e.g. "Downtown Office").
+  name: string
+  /// Full street address of the location.
+  address: string
+  /// IANA timezone identifier (e.g. "America/New_York"); absent if using tenant default.
+  timezone: string?
+  /// Whether this location is currently active and assignable.
+  is_active: bool
+  /// Unix timestamp when this location was created.
+  created_at: int64
+  /// Unix timestamp when this location was last updated.
+  updated_at: int64
+  /// URL-safe slug, scoped per business. Powers public URLs like
+  /// menu.rtylr.com/<business-slug>/<location-slug>.
+  slug: string
+}
+
+/// ListLocationsResponse lists all locations for a tenant.
+///
+/// NOTE: this message has no corresponding request message or RPC anywhere
+/// in the source proto (service.proto declares only CreateLocation and
+/// UpdateLocation) - it appears to be dead/unused. Carried over unchanged
+/// and flagged for manual follow-up.
+message ListLocationsResponse {
+  /// All locations for the tenant.
+  locations: LocationPayload[]
+}
+
+message CreateLocationRequest {
+  /// Human-readable name of the location.
+  name: string @required
+  /// Full street address of the location.
+  address: string
+  /// IANA timezone identifier; absent to use tenant default.
+  timezone: string?
+  /// Optional URL-safe slug; auto-generated from name if absent.
+  slug: string?
+}
+
+message CreateLocationResponse {
+  /// The newly created location.
+  location: LocationPayload
+}
+
+/// UpdateLocationBody carries updatable location fields bound from the HTTP payload.
+message UpdateLocationBody {
+  /// New name; absent to keep current.
+  name: string?
+  /// New address; absent to keep current.
+  address: string?
+  /// New timezone; absent to keep current.
+  timezone: string?
+  /// New active status; absent to keep current.
+  is_active: bool?
+  /// New slug; absent to keep current.
+  slug: string?
+}
+
+message UpdateLocationRequest {
+  /// ID of the location to update.
+  id: int64 @gt(0)
+  body: UpdateLocationBody
+}
+
+message UpdateLocationResponse {
+  /// The updated location.
+  location: LocationPayload
+}

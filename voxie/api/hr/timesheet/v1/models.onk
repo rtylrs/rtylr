@@ -1,0 +1,19 @@
+package hr.timesheet.v1
+
+/// TimesheetEntry is a weekly hours summary for a staff member.
+message TimesheetEntry {
+  staff_id: int64 @encode(number)
+  staff_name: string
+  week_start: string
+  total_hours: float64
+  regular_hours: float64
+  overtime_hours: float64
+}
+
+message ListTimesheetsRequest {
+  week_start: string @query("week_start")
+}
+
+message ListTimesheetsResponse {
+  timesheets: TimesheetEntry[]
+}

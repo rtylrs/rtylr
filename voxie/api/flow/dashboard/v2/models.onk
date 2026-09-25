@@ -1,0 +1,44 @@
+package flow.dashboard.v2
+
+message GetFlowDashboardRequest {}
+
+/// DashboardTask is the compact task shape the dashboard's my-tasks widget
+/// renders. v1 reused the fat Task message from the task domain; with both
+/// task.v1 and task.v2 in circulation a plain-name reference became ambiguous,
+/// and the dashboard never needed most of those fields anyway. Deliberately
+/// local to this package.
+message DashboardTask {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// title is the title value for this contract.
+  title: string
+  /// status is the current lifecycle state.
+  status: string
+  /// priority is the priority value for this contract.
+  priority: string
+  /// due_date is the due date value for this contract.
+  due_date: string?
+  /// project_name is the denormalised project display name.
+  project_name: string
+  /// project_color is the project color hex for inline badges.
+  project_color: string
+  /// assignee_name is the assignee display name. Empty if unassigned.
+  assignee_name: string
+  /// assignee_initials are two-letter uppercase initials. Empty if unassigned.
+  assignee_initials: string
+}
+
+message GetFlowDashboardResponse {
+  /// open_tasks is the open tasks value for this contract.
+  open_tasks: int64
+  /// in_progress_tasks is the in progress tasks value for this contract.
+  in_progress_tasks: int64
+  /// completed_this_week is the completed this week value for this contract.
+  completed_this_week: int64
+  /// overdue_tasks is the overdue tasks value for this contract.
+  overdue_tasks: int64
+  /// my_tasks lists tasks assigned to the caller across their visible
+  /// projects. With workspaces gone there is exactly one scope, so v1's
+  /// workspace-scoped my-tasks concern dissolves.
+  my_tasks: DashboardTask[]
+}

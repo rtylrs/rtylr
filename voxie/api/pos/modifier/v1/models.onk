@@ -1,0 +1,61 @@
+package pos.modifier.v1
+
+/// Modifier is a customization option that can be attached to a menu item.
+message Modifier {
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  name: string
+  price_delta: float64
+  group_name: string
+  is_required: bool
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+message CreateModifierRequest {
+  name: string @required
+  price_delta: float64 @gte(0)
+  group_name: string @required
+  is_required: bool
+}
+
+message CreateModifierResponse {
+  modifier_id: int64
+  message: string
+}
+
+message DeleteModifierRequest {
+  /// id is the unique identifier for the modifier.
+  id: int64 @gt(0)
+}
+
+message DeleteModifierResponse {
+  message: string
+}
+
+message ListModifiersRequest {}
+
+message ListModifiersResponse {
+  modifiers: Modifier[]
+}
+
+message UpdateModifierBody {
+  name: string @required
+  price_delta: float64 @gte(0)
+  group_name: string @required
+  is_required: bool
+}
+
+message UpdateModifierRequest {
+  /// id is the unique identifier for the modifier.
+  id: int64 @gt(0)
+  /// body carries updatable modifier fields bound from the HTTP payload.
+  body: UpdateModifierBody
+}
+
+message UpdateModifierResponse {
+  message: string
+}

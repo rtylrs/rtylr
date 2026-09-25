@@ -1,0 +1,14 @@
+package finance.quote.v1
+
+/// QuoteService defines sales quote endpoints.
+service QuoteService {
+  listQuotes(ListQuotesRequest) -> ListQuotesResponse @get("/quotes")
+
+  createQuote(CreateQuoteRequest) -> CreateQuoteResponse @post("/quotes")
+
+  getQuote(GetQuoteRequest) -> GetQuoteResponse @get("/quotes/{id}")
+
+  updateQuoteStatus(UpdateQuoteStatusRequest) -> UpdateQuoteStatusResponse @patch("/quotes/{id}/status")
+
+  convertQuote(ConvertQuoteRequest) -> ConvertQuoteResponse @post("/quotes/{id}/convert")
+}

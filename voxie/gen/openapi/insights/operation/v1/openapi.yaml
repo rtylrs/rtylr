@@ -1,0 +1,485 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /insights/operation/v1/headcount:
+        get:
+            tags:
+                - OperationService
+            summary: getHeadcountMetrics
+            description: Returns headcount metrics for a period.
+            operationId: OperationService_getHeadcountMetrics
+            parameters:
+                - name: period
+                  in: query
+                  description: period is the period value for this contract.
+                  required: false
+                  schema:
+                    type: string
+                    description: period is the period value for this contract.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.operation.v1.GetHeadcountMetricsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /insights/operation/v1/shifts:
+        get:
+            tags:
+                - OperationService
+            summary: getShiftMetrics
+            description: Returns shift metrics for a period.
+            operationId: OperationService_getShiftMetrics
+            parameters:
+                - name: period
+                  in: query
+                  description: period is the period value for this contract.
+                  required: false
+                  schema:
+                    type: string
+                    description: period is the period value for this contract.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.operation.v1.GetShiftMetricsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /insights/operation/v1/time-off:
+        get:
+            tags:
+                - OperationService
+            summary: getTimeOffMetrics
+            description: Returns time-off metrics for a period.
+            operationId: OperationService_getTimeOffMetrics
+            parameters:
+                - name: period
+                  in: query
+                  description: period is the period value for this contract.
+                  required: false
+                  schema:
+                    type: string
+                    description: period is the period value for this contract.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.operation.v1.GetTimeOffMetricsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /insights/operation/v1/utilization:
+        get:
+            tags:
+                - OperationService
+            summary: getUtilization
+            description: Returns utilization metrics for a period.
+            operationId: OperationService_getUtilization
+            parameters:
+                - name: period
+                  in: query
+                  description: period is the period value for this contract.
+                  required: false
+                  schema:
+                    type: string
+                    description: period is the period value for this contract.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.operation.v1.GetUtilizationResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /insights/operation/v1/summary:
+        get:
+            tags:
+                - OperationService
+            summary: getOperationsSummary
+            description: Returns headline HR operations KPI counters.
+            operationId: OperationService_getOperationsSummary
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.operation.v1.GetOperationsSummaryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        insights.operation.v1.GetHeadcountMetricsRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: period is the period value for this contract.
+            required:
+                - period
+        insights.operation.v1.GetHeadcountMetricsResponse:
+            type: object
+            properties:
+                metrics:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.operation.v1.HeadcountMetrics'
+                    description: metrics is the metrics value for this contract.
+            required:
+                - metrics
+        insights.operation.v1.HeadcountMetrics:
+            type: object
+            properties:
+                current:
+                    type: integer
+                    format: int32
+                    description: current is the current value for this contract.
+                hired_this_period:
+                    type: integer
+                    format: int32
+                    description: hired_this_period is the hired this period value for this contract.
+                departed_this_period:
+                    type: integer
+                    format: int32
+                    description: departed_this_period is the departed this period value for this contract.
+                turnover_rate:
+                    type: number
+                    format: double
+                    description: turnover_rate is the turnover rate value for this contract.
+                trend:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.operation.v1.HeadcountPoint'
+                    description: trend is the trend value for this contract.
+            required:
+                - current
+                - hired_this_period
+                - departed_this_period
+                - turnover_rate
+                - trend
+        insights.operation.v1.HeadcountPoint:
+            type: object
+            properties:
+                date:
+                    type: string
+                    description: date is the date value for this contract.
+                count:
+                    type: integer
+                    format: int32
+                    description: count is the count value for this contract.
+            required:
+                - date
+                - count
+        insights.operation.v1.GetShiftMetricsRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: period is the period value for this contract.
+            required:
+                - period
+        insights.operation.v1.GetShiftMetricsResponse:
+            type: object
+            properties:
+                metrics:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.operation.v1.ShiftMetrics'
+                    description: metrics is the metrics value for this contract.
+            required:
+                - metrics
+        insights.operation.v1.ShiftMetrics:
+            type: object
+            properties:
+                total_shifts:
+                    type: integer
+                    format: int32
+                    description: total_shifts is the total shifts value for this contract.
+                covered:
+                    type: integer
+                    format: int32
+                    description: covered is the covered value for this contract.
+                missed:
+                    type: integer
+                    format: int32
+                    description: missed is the missed value for this contract.
+                coverage_rate:
+                    type: number
+                    format: double
+                    description: coverage_rate is the coverage rate value for this contract.
+                by_day:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.operation.v1.ShiftsByDay'
+                    description: by_day is the by day value for this contract.
+            required:
+                - total_shifts
+                - covered
+                - missed
+                - coverage_rate
+                - by_day
+        insights.operation.v1.ShiftsByDay:
+            type: object
+            properties:
+                day:
+                    type: string
+                    description: day is the day value for this contract.
+                scheduled:
+                    type: integer
+                    format: int32
+                    description: scheduled is the scheduled value for this contract.
+                completed:
+                    type: integer
+                    format: int32
+                    description: completed is the completed value for this contract.
+            required:
+                - day
+                - scheduled
+                - completed
+        insights.operation.v1.GetTimeOffMetricsRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: period is the period value for this contract.
+            required:
+                - period
+        insights.operation.v1.GetTimeOffMetricsResponse:
+            type: object
+            properties:
+                metrics:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.operation.v1.TimeOffMetrics'
+                    description: metrics is the metrics value for this contract.
+            required:
+                - metrics
+        insights.operation.v1.TimeOffMetrics:
+            type: object
+            properties:
+                total_requests:
+                    type: integer
+                    format: int32
+                    description: total_requests is the total requests value for this contract.
+                approved:
+                    type: integer
+                    format: int32
+                    description: approved is the approved value for this contract.
+                pending:
+                    type: integer
+                    format: int32
+                    description: pending is the pending value for this contract.
+                rejected:
+                    type: integer
+                    format: int32
+                    description: rejected is the rejected value for this contract.
+                by_type:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.operation.v1.TimeOffByType'
+                    description: by_type is the by type value for this contract.
+            required:
+                - total_requests
+                - approved
+                - pending
+                - rejected
+                - by_type
+        insights.operation.v1.TimeOffByType:
+            type: object
+            properties:
+                type:
+                    type: string
+                    description: type is the type value for this contract.
+                days:
+                    type: integer
+                    format: int32
+                    description: days is the days value for this contract.
+                requests:
+                    type: integer
+                    format: int32
+                    description: requests is the requests value for this contract.
+            required:
+                - type
+                - days
+                - requests
+        insights.operation.v1.GetUtilizationRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: period is the period value for this contract.
+            required:
+                - period
+        insights.operation.v1.GetUtilizationResponse:
+            type: object
+            properties:
+                metrics:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.operation.v1.UtilizationMetrics'
+                    description: metrics is the metrics value for this contract.
+            required:
+                - metrics
+        insights.operation.v1.UtilizationMetrics:
+            type: object
+            properties:
+                avg_utilization:
+                    type: number
+                    format: double
+                    description: avg_utilization is the avg utilization value for this contract.
+                total_staff:
+                    type: integer
+                    format: int32
+                    description: total_staff is the total staff value for this contract.
+                active_today:
+                    type: integer
+                    format: int32
+                    description: active_today is the active today value for this contract.
+                total_hours:
+                    type: number
+                    format: double
+                    description: total_hours is the total hours value for this contract.
+                available_hours:
+                    type: number
+                    format: double
+                    description: available_hours is the available hours capacity for the period.
+                overtime_hours:
+                    type: number
+                    format: double
+                    description: overtime_hours is the overtime hours value for this contract.
+                by_staff:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.operation.v1.StaffUtilization'
+                    description: by_staff is the by staff value for this contract.
+            required:
+                - avg_utilization
+                - total_staff
+                - active_today
+                - total_hours
+                - available_hours
+                - overtime_hours
+                - by_staff
+        insights.operation.v1.StaffUtilization:
+            type: object
+            properties:
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: staff_id is the staff id value for this contract.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                hours_worked:
+                    type: number
+                    format: double
+                    description: hours_worked is the hours worked value for this contract.
+                hours_scheduled:
+                    type: number
+                    format: double
+                    description: hours_scheduled is the hours scheduled value for this contract.
+                utilization:
+                    type: number
+                    format: double
+                    description: utilization is the utilization value for this contract.
+            required:
+                - staff_id
+                - name
+                - hours_worked
+                - hours_scheduled
+                - utilization
+        insights.operation.v1.GetOperationsSummaryRequest:
+            type: object
+        insights.operation.v1.GetOperationsSummaryResponse:
+            type: object
+            properties:
+                active_staff:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: active_staff is the active staff count.
+                shifts_this_week:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: shifts_this_week is the scheduled shift count this week.
+                pending_time_off:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: pending_time_off is the pending time-off request count.
+                open_leave_requests:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: open_leave_requests is the open leave request count.
+            required:
+                - active_staff
+                - shifts_this_week
+                - pending_time_off
+                - open_leave_requests
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OperationService
+      description: OperationService defines insights operations analytics endpoints.

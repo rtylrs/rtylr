@@ -1,0 +1,74 @@
+package hub.menu.v1
+
+message ListMenuRequest {}
+
+message ListMenuResponse {
+  items: MenuItem[]
+}
+
+message UpdateMenuRequest {
+  items: MenuItem[] @min_items(1)
+}
+
+message UpdateMenuResponse {
+  success: bool
+}
+
+message MenuBanner {
+  id: int64
+  title: string
+  body: string
+  image_url: string
+  link_url: string
+  position: int32
+  is_active: bool?
+  starts_at: string
+  ends_at: string
+  created_at: string
+  updated_at: string
+}
+
+message ListMenuBannersRequest {}
+
+message ListMenuBannersResponse {
+  banners: MenuBanner[]
+}
+
+message CreateMenuBannerRequest {
+  title: string @required
+  body: string
+  image_url: string
+  link_url: string
+  position: int32
+  is_active: bool?
+  starts_at: string
+  ends_at: string
+}
+
+message CreateMenuBannerResponse {
+  banner: MenuBanner
+}
+
+message UpdateMenuBannerRequest {
+  id: int64 @gt(0)
+  title: string @required
+  body: string
+  image_url: string
+  link_url: string
+  position: int32
+  is_active: bool
+  starts_at: string
+  ends_at: string
+}
+
+message UpdateMenuBannerResponse {
+  banner: MenuBanner
+}
+
+message DeleteMenuBannerRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteMenuBannerResponse {
+  success: bool
+}

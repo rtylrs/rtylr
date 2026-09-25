@@ -1,0 +1,28 @@
+package hub.team.groups.v1
+
+/// GroupsService defines hub team group endpoints.
+service GroupsService {
+  /// Returns groups for the active business.
+  listGroups(ListGroupsRequest) -> ListGroupsResponse @get("/groups")
+
+  /// Creates a new group.
+  createGroup(CreateGroupRequest) -> CreateGroupResponse @post("/groups")
+
+  /// Returns a group with its members.
+  getGroupDetail(GetGroupDetailRequest) -> GetGroupDetailResponse @get("/groups/{id}")
+
+  /// Updates an existing group.
+  updateGroup(UpdateGroupRequest) -> UpdateGroupResponse @put("/groups/{id}")
+
+  /// Deletes a group.
+  deleteGroup(DeleteGroupRequest) -> DeleteGroupResponse @delete("/groups/{id}")
+
+  /// Adds users to a group.
+  addGroupMembers(AddGroupMembersRequest) -> AddGroupMembersResponse @post("/groups/{id}/members")
+
+  /// Removes a user from a group.
+  removeGroupMember(RemoveGroupMemberRequest) -> RemoveGroupMemberResponse @delete("/groups/{id}/members/{user_id}")
+
+  /// Returns the groups a user belongs to.
+  getUserGroups(GetUserGroupsRequest) -> GetUserGroupsResponse @get("/users/{user_id}/groups")
+}

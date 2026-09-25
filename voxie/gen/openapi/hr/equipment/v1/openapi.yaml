@@ -1,0 +1,439 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/equipment/v1/assets:
+        get:
+            tags:
+                - EquipmentService
+            summary: listAssets
+            description: ListAssets returns equipment assets with optional filters.
+            operationId: EquipmentService_listAssets
+            parameters:
+                - name: employee_id
+                  in: query
+                  description: Filter by employee; absent to include all employees.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                - name: condition
+                  in: query
+                  description: Filter by condition; absent to include all conditions.
+                  required: false
+                  schema:
+                    type: string
+                    description: Filter by condition; absent to include all conditions.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.equipment.v1.ListAssetsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/equipment/v1/requests:
+        get:
+            tags:
+                - EquipmentService
+            summary: listEquipmentRequests
+            description: ListEquipmentRequests returns equipment requests with optional filters.
+            operationId: EquipmentService_listEquipmentRequests
+            parameters:
+                - name: employee_id
+                  in: query
+                  description: Filter by employee; absent to include all employees.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                - name: status
+                  in: query
+                  description: Filter by status; absent to include all statuses.
+                  required: false
+                  schema:
+                    type: string
+                    description: Filter by status; absent to include all statuses.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.equipment.v1.ListEquipmentRequestsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - EquipmentService
+            summary: createEquipmentRequest
+            description: CreateEquipmentRequest submits an equipment request.
+            operationId: EquipmentService_createEquipmentRequest
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.equipment.v1.CreateEquipmentRequestRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.equipment.v1.CreateEquipmentRequestResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/equipment/v1/requests/{equipment_request_id}/approve:
+        patch:
+            tags:
+                - EquipmentService
+            summary: approveEquipment
+            description: ApproveEquipment approves an equipment request.
+            operationId: EquipmentService_approveEquipment
+            parameters:
+                - name: equipment_request_id
+                  in: path
+                  description: ID of the equipment request being reviewed.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the equipment request being reviewed.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hr.equipment.v1.ApproveEquipmentBody'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.equipment.v1.ApproveEquipmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.equipment.v1.ListAssetsRequest:
+            type: object
+            properties:
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                condition:
+                    type: string
+                    description: Filter by condition; absent to include all conditions.
+        hr.equipment.v1.ListAssetsResponse:
+            type: object
+            properties:
+                assets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.equipment.v1.AssetPayload'
+                    description: Page of assets matching the filters.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of matching assets across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - assets
+                - total
+                - limit
+                - offset
+        hr.equipment.v1.AssetPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the asset.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this asset belongs to.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee the asset is currently assigned to.
+                name:
+                    type: string
+                    description: Human-readable name of the asset (e.g. "MacBook Pro 16-inch").
+                serial_number:
+                    type: string
+                    description: Manufacturer serial number; absent if not tracked.
+                assigned_date:
+                    type: string
+                    description: Date the asset was assigned to the employee (ISO-8601 date).
+                returned_date:
+                    type: string
+                    description: Date the asset was returned; absent if still assigned (ISO-8601 date).
+                condition:
+                    type: string
+                    description: Physical condition of the asset (new | good | fair | damaged).
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - name
+                - assigned_date
+                - condition
+                - created_at
+                - updated_at
+            description: AssetPayload is a physical asset assigned to an employee.
+        hr.equipment.v1.ListEquipmentRequestsRequest:
+            type: object
+            properties:
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                status:
+                    type: string
+                    description: Filter by status; absent to include all statuses.
+        hr.equipment.v1.ListEquipmentRequestsResponse:
+            type: object
+            properties:
+                requests:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.equipment.v1.EquipmentRequestPayload'
+                    description: Page of equipment requests matching the filters.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of matching equipment requests across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - requests
+                - total
+                - limit
+                - offset
+        hr.equipment.v1.EquipmentRequestPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the equipment request.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this request belongs to.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee who needs the equipment.
+                equipment_type:
+                    type: string
+                    description: Category of equipment being requested (e.g. "laptop", "monitor", "desk").
+                description:
+                    type: string
+                    description: Free-text description of the specific equipment needed.
+                urgency:
+                    type: string
+                    description: Priority level (low | medium | high).
+                needed_by_date:
+                    type: string
+                    description: Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
+                status:
+                    type: string
+                    description: Workflow status (pending | approved | ordered | delivered | rejected).
+                current_approval_level:
+                    type: integer
+                    format: int32
+                    description: Current step in a multi-level approval chain.
+                approved_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee who approved the request; absent if not yet approved.
+                delivered_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the equipment was delivered; absent if not yet delivered.
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - equipment_type
+                - description
+                - urgency
+                - status
+                - current_approval_level
+                - created_at
+                - updated_at
+            description: EquipmentRequestPayload is a request for equipment made on behalf of an employee.
+        hr.equipment.v1.CreateEquipmentRequestRequest:
+            type: object
+            properties:
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee who needs the equipment.
+                equipment_type:
+                    type: string
+                    description: Category of equipment being requested.
+                description:
+                    type: string
+                    description: Free-text description of the specific equipment needed.
+                urgency:
+                    type: string
+                    description: Priority level (low | medium | high).
+                needed_by_date:
+                    type: string
+                    description: Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
+            required:
+                - employee_id
+                - equipment_type
+                - description
+                - urgency
+        hr.equipment.v1.CreateEquipmentRequestResponse:
+            type: object
+            properties:
+                request:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.equipment.v1.EquipmentRequestPayload'
+                    description: The newly created equipment request.
+            required:
+                - request
+        hr.equipment.v1.ApproveEquipmentRequest:
+            type: object
+            properties:
+                equipment_request_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the equipment request being reviewed.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.equipment.v1.ApproveEquipmentBody'
+            required:
+                - equipment_request_id
+                - body
+        hr.equipment.v1.ApproveEquipmentBody:
+            type: object
+            properties:
+                approved:
+                    type: boolean
+                    description: True to approve, false to reject.
+            required:
+                - approved
+            description: ApproveEquipmentBody carries approval decision fields bound from the HTTP payload.
+        hr.equipment.v1.ApproveEquipmentResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the approval action was processed.
+            required:
+                - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: EquipmentService
+      description: EquipmentService defines HR equipment endpoints.

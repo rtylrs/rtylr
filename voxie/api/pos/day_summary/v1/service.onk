@@ -1,0 +1,7 @@
+package pos.day_summary.v1
+
+/// DaySummaryService defines POS end-of-day summary endpoints.
+service DaySummaryService {
+  /// Returns aggregate sales, tax, tips, and payment breakdown for a given day.
+  daySummary(DaySummaryRequest) -> DaySummaryResponse @get("/day-summary")
+}

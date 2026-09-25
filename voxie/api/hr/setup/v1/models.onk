@@ -1,0 +1,71 @@
+package hr.setup.v1
+
+/// SetupWizardStepPayload is a single step in the HR setup wizard.
+message SetupWizardStepPayload {
+  /// Unique identifier for the setup step record.
+  id: int64
+  /// Tenant owner this step belongs to.
+  owner_id: int64
+  /// Which setup step this represents (company_profile | work_schedule | leave_policy | org_structure | locations | roles_permissions | payroll | notifications | employees).
+  step_key: string
+  /// Unix timestamp when this step was completed; absent if not yet completed.
+  completed_at: int64?
+  /// Unix timestamp when this step record was created.
+  created_at: int64
+  /// Unix timestamp when this step record was last updated.
+  updated_at: int64
+}
+
+/// HRCompanyConfigPayload is the tenant-wide HR configuration set during setup.
+message HRCompanyConfigPayload {
+  /// Unique identifier for the config record.
+  id: int64
+  /// Tenant owner this config belongs to.
+  owner_id: int64
+  /// How time is tracked (time_logging | attendance | both).
+  time_tracking_model: string
+  /// Period for timesheet submission (weekly | biweekly | monthly).
+  timesheet_period: string
+  /// Period for payroll runs (weekly | biweekly | monthly).
+  payroll_period: string
+  /// How gross pay is calculated (hourly | salary | both).
+  payroll_gross_model: string
+  /// Unix timestamp when the full setup wizard was completed; absent if still in progress.
+  setup_completed_at: int64?
+  /// Unix timestamp when this config was created.
+  created_at: int64
+  /// Unix timestamp when this config was last updated.
+  updated_at: int64
+  /// Enabled clock-in methods for attendance tracking
+  /// (values: "app", "pin", "gps", "kiosk"). Empty defaults to ["app"].
+  clock_in_methods: string[]
+  /// App IDs this tenant is subscribed to (values: "flow", "finance",
+  /// "erp", "crm", "pos", "hr"). Drives cross-app UI affordances such as
+  /// the "Import from Flow" button on HR timesheets.
+  subscribed_apps: string[]
+  /// Whether the company-wide staff directory is visible to employees
+  /// outside HR (e.g. Flow's Directory screen). Defaults to false: the
+  /// business owner must opt in before any employee's role/department/
+  /// contact info is exposed beyond HR's own admin screens.
+  directory_enabled: bool
+}
+
+/// GetSetupStatusResponse summarises setup wizard progress and current HR configuration.
+message GetSetupStatusResponse {
+  /// All wizard steps and their completion state.
+  steps: SetupWizardStepPayload[]
+  /// Current HR configuration for the tenant.
+  config: HRCompanyConfigPayload
+  /// Whether every setup step has been completed.
+  is_complete: bool
+}
+
+message CompleteSetupStepRequest {
+  /// The step to mark as completed (must match a valid step_key).
+  step_key: string @required
+}
+
+message CompleteSetupStepResponse {
+  /// The step after being marked complete.
+  step: SetupWizardStepPayload
+}

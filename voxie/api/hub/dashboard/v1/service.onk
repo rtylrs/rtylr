@@ -1,0 +1,7 @@
+package hub.dashboard.v1
+
+/// DashboardService defines hub dashboard endpoints.
+service DashboardService {
+  /// Returns key performance indicators for the active business.
+  getKPIs(GetKPIsRequest) -> GetKPIsResponse @get("/kpis")
+}

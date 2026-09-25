@@ -1,0 +1,11 @@
+package support.knowledge.v1
+
+service KnowledgeService {
+  listArticles(ListArticlesRequest) -> ListArticlesResponse @get("/articles")
+
+  createArticle(CreateArticleRequest) -> CreateArticleResponse @post("/articles")
+
+  updateArticle(UpdateArticleRequest) -> UpdateArticleResponse @put("/articles/{id}")
+
+  deleteArticle(DeleteArticleRequest) -> DeleteArticleResponse @delete("/articles/{id}")
+}

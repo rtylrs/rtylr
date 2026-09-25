@@ -1,0 +1,99 @@
+package finance.quote.v1
+
+// ── Quotes ──────────────────────────────────────────────────────────
+
+message Quote {
+  id: int64
+  /// Identifies the tenant that owns the resource.
+  owner_id: int64
+  customer_name: string
+  customer_email: string
+  /// draft, sent, accepted, rejected, expired, converted
+  status: string
+  lines: QuoteLine[]
+  subtotal: float64
+  tax: float64
+  discount: float64
+  total: float64
+  valid_until: string
+  notes: string
+  /// When the record was created.
+  created_at: string
+  /// When the record was last updated.
+  updated_at: string
+}
+
+message QuoteLine {
+  description: string
+  quantity: int32
+  unit_price: float64
+  tax_rate: float64
+  total: float64
+}
+
+message CreateQuoteRequest {
+  customer_name: string @required
+  customer_email: string
+  /// The initial lifecycle state - defaults to "draft" if empty.
+  status: string
+  lines: QuoteLine[] @min_items(1)
+  subtotal: float64 @gte(0)
+  tax: float64 @gte(0)
+  valid_until: string @required
+  discount: float64? @required @gte(0)
+  total: float64 @gte(0)
+  notes: string
+}
+
+message CreateQuoteResponse {
+  quote: Quote
+}
+
+message GetQuoteRequest {
+  id: int64 @gt(0)
+}
+
+message GetQuoteResponse {
+  quote: Quote
+}
+
+message ListQuotesRequest {
+  /// The one-based page number to return.
+  page: int64 @query("page") @encode(number)
+  /// The maximum number of quotes to return.
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListQuotesResponse {
+  quotes: Quote[]
+  /// The current result page.
+  page: int64 @encode(number)
+  /// The number of records requested per page.
+  page_size: int64 @encode(number)
+  /// Whether additional pages are available.
+  has_more: bool
+}
+
+message UpdateQuoteStatusBody {
+  status: string @required
+}
+
+message UpdateQuoteStatusRequest {
+  id: int64 @gt(0)
+  /// Carries status update fields bound from the HTTP payload.
+  body: UpdateQuoteStatusBody
+}
+
+message UpdateQuoteStatusResponse {
+  message: string
+}
+
+message ConvertQuoteRequest {
+  id: int64 @gt(0)
+}
+
+message ConvertQuoteResponse {
+  /// The identifier of the invoice created from this quote.
+  invoice_id: int64
+  message: string
+}

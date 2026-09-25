@@ -1,0 +1,361 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/warehouse/v1/warehouses:
+        get:
+            tags:
+                - WarehouseService
+            summary: listWarehouses
+            operationId: WarehouseService_listWarehouses
+            parameters:
+                - name: limit
+                  in: query
+                  description: Maximum number of warehouses to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of warehouses to return.
+                - name: offset
+                  in: query
+                  description: Number of warehouses to skip.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of warehouses to skip.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.ListWarehousesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - WarehouseService
+            summary: createWarehouse
+            operationId: WarehouseService_createWarehouse
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.warehouse.v1.CreateWarehouseRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.CreateWarehouseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /erp/warehouse/v1/warehouses/{id}:
+        put:
+            tags:
+                - WarehouseService
+            summary: updateWarehouse
+            operationId: WarehouseService_updateWarehouse
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseBody'
+                            required:
+                                - body
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - WarehouseService
+            summary: deleteWarehouse
+            operationId: WarehouseService_deleteWarehouse
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.warehouse.v1.DeleteWarehouseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        erp.warehouse.v1.ListWarehousesRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of warehouses to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of warehouses to skip.
+            required:
+                - limit
+                - offset
+        erp.warehouse.v1.ListWarehousesResponse:
+            type: object
+            properties:
+                warehouses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.warehouse.v1.Warehouse'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+            required:
+                - warehouses
+                - has_more
+                - limit
+                - offset
+                - total
+        erp.warehouse.v1.Warehouse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                address:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                manager_name:
+                    type: string
+                capacity:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                is_default:
+                    type: boolean
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - address
+                - city
+                - country
+                - manager_name
+                - capacity
+                - is_default
+                - is_active
+                - created_at
+                - updated_at
+        erp.warehouse.v1.CreateWarehouseRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                address:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                manager_name:
+                    type: string
+                capacity:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                is_default:
+                    type: boolean
+                is_active:
+                    type: boolean
+            required:
+                - name
+                - address
+                - city
+                - country
+                - manager_name
+                - capacity
+                - is_default
+                - is_active
+        erp.warehouse.v1.CreateWarehouseResponse:
+            type: object
+            properties:
+                warehouse_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - warehouse_id
+                - message
+        erp.warehouse.v1.UpdateWarehouseRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.warehouse.v1.UpdateWarehouseBody'
+            required:
+                - id
+                - body
+        erp.warehouse.v1.UpdateWarehouseBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                address:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                manager_name:
+                    type: string
+                capacity:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                is_default:
+                    type: boolean
+                is_active:
+                    type: boolean
+            required:
+                - name
+                - address
+                - city
+                - country
+                - manager_name
+                - capacity
+                - is_default
+                - is_active
+        erp.warehouse.v1.UpdateWarehouseResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        erp.warehouse.v1.DeleteWarehouseRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        erp.warehouse.v1.DeleteWarehouseResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: WarehouseService

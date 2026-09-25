@@ -1,0 +1,19 @@
+package crm.customer.v1
+
+/// CustomerService defines CRM customer endpoints.
+service CustomerService {
+  /// Returns customers for the active business with optional filters.
+  listCustomers(ListCustomersRequest) -> ListCustomersResponse @get("/customers")
+
+  /// Creates a new customer record.
+  createCustomer(CreateCustomerRequest) -> CreateCustomerResponse @post("/customers")
+
+  /// Returns a single customer by ID.
+  getCustomer(GetCustomerRequest) -> GetCustomerResponse @get("/customers/{id}")
+
+  /// Updates an existing customer.
+  updateCustomer(UpdateCustomerRequest) -> UpdateCustomerResponse @put("/customers/{id}") @body("body")
+
+  /// Removes a customer by ID.
+  deleteCustomer(DeleteCustomerRequest) -> DeleteCustomerResponse @delete("/customers/{id}")
+}

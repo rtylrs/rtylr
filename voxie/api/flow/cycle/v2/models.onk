@@ -1,0 +1,62 @@
+package flow.cycle.v2
+
+/// Cycle is a sprint-style time box scoped to ONE project in v2. v1 attached
+/// cycles to workspaces with an optional project filter; the removal of
+/// workspaces makes the project the only sensible owner.
+message Cycle {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// project_id is the project this cycle belongs to. Always set in v2;
+  /// workspace-era cycles were migrated onto their filtered project or archived.
+  project_id: int64
+  /// name is the name value for this contract.
+  name: string
+  /// start_date is the start date value for this contract.
+  start_date: string
+  /// end_date is the end date value for this contract.
+  end_date: string
+  /// status is the current lifecycle state.
+  status: string
+  /// scope is the total task count in the cycle. Display projection.
+  scope: int32
+  /// completed is how many of those tasks are done. Display projection.
+  completed: int32
+}
+
+message ListCyclesRequest {
+  /// project_id lists the cycles of one project.
+  project_id: int64? @required @gt(0) @query("project_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListCyclesResponse {
+  cycles: Cycle[]
+  pagination: PaginationResponse
+}
+
+message CreateCycleRequest {
+  name: string @required
+  project_id: int64? @required @gt(0)
+  start_date: string
+  end_date: string
+}
+
+message CreateCycleResponse {
+  cycle: Cycle
+}
+
+message UpdateCycleRequest {
+  id: int64 @gt(0)
+  name: string
+  status: string
+  end_date: string
+}
+
+message UpdateCycleResponse {}

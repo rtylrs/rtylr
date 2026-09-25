@@ -1,0 +1,106 @@
+package finance.recurring_invoice.v1
+
+// ── Recurring Invoices ──────────────────────────────────────────────
+
+message RecurringInvoice {
+  id: int64
+  /// The business owner for this recurring invoice.
+  owner_id: int64
+  /// The invoice used as the recurring invoice template.
+  template_invoice_id: int64
+  /// How often the recurring invoice should be generated.
+  frequency: string
+  /// The next generation date.
+  next_invoice_date: string
+  /// When recurring generation should stop; absent when open-ended.
+  end_date: string?
+  is_active: bool
+  /// When the record was created.
+  created_at: string
+}
+
+message CreateRecurringInvoiceRequest {
+  /// The invoice used as the recurring invoice template.
+  template_invoice_id: int64? @required @gt(0)
+  /// How often the recurring invoice should be generated.
+  frequency: string @required
+  /// The next generation date, formatted as YYYY-MM-DD.
+  next_invoice_date: string @required @pattern("^\\d{4}-\\d{2}-\\d{2}$")
+  /// When recurring generation should stop; absent when open-ended.
+  end_date: string?
+  /// Whether the recurring invoice should start active.
+  is_active: bool?
+}
+
+message CreateRecurringInvoiceResponse {
+  /// The recurring invoice that was created.
+  id: int64
+  /// The backend confirmation message.
+  message: string
+}
+
+message GetRecurringInvoiceRequest {
+  id: int64 @gt(0)
+}
+
+message GetRecurringInvoiceResponse {
+  invoice: RecurringInvoice
+}
+
+message ListRecurringInvoicesRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListRecurringInvoicesResponse {
+  /// The full set of recurring invoices for the owner.
+  recurring_invoices: RecurringInvoice[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
+}
+
+message PauseRecurringInvoiceRequest {
+  /// The recurring invoice to pause.
+  id: int64 @gt(0)
+}
+
+message PauseRecurringInvoiceResponse {
+  /// The backend confirmation message.
+  message: string
+}
+
+message ResumeRecurringInvoiceRequest {
+  /// The recurring invoice to resume.
+  id: int64 @gt(0)
+}
+
+message ResumeRecurringInvoiceResponse {
+  /// The backend confirmation message.
+  message: string
+}
+
+message UpdateRecurringInvoiceBody {
+  /// The invoice used as the recurring invoice template.
+  template_invoice_id: int64?
+  /// How often the recurring invoice should be generated.
+  frequency: string @required
+  /// The next generation date, formatted as YYYY-MM-DD.
+  next_invoice_date: string @required @pattern("^\\d{4}-\\d{2}-\\d{2}$")
+  /// When recurring generation should stop; absent when open-ended.
+  end_date: string?
+  /// Whether the recurring invoice is active.
+  is_active: bool?
+}
+
+message UpdateRecurringInvoiceRequest {
+  /// The recurring invoice to update.
+  id: int64 @gt(0)
+  /// Carries updatable recurring invoice fields bound from the HTTP payload.
+  body: UpdateRecurringInvoiceBody
+}
+
+message UpdateRecurringInvoiceResponse {
+  /// The backend confirmation message.
+  message: string
+}

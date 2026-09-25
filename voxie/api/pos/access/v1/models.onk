@@ -1,0 +1,79 @@
+package pos.access.v1
+
+/// MyLocation is a location entry for the current staff member.
+message MyLocation {
+  location_id: int64
+  name: string
+  address: string
+  phone: string
+}
+
+/// RosterEntry is a staff member entry within a location roster.
+message RosterEntry {
+  /// user_id identifies the staff member.
+  user_id: int64
+  name: string
+  /// has_pin tells the terminal whether the staff member can sign in with a PIN.
+  has_pin: bool
+  /// is_manager tells whether this staff member can manage POS access.
+  is_manager: bool
+  /// pos_role is the POS-specific role label.
+  pos_role: string
+}
+
+/// MemberLocationEntry is a location assignment for a staff member.
+message MemberLocationEntry {
+  /// id is the unique assignment identifier.
+  id: int64
+  /// location_id identifies the assigned location.
+  location_id: int64
+  /// can_manage_pos_users controls POS staff management.
+  can_manage_pos_users: bool
+  /// can_manage_terminals controls terminal management.
+  can_manage_terminals: bool
+  /// can_view_reports controls POS reporting access.
+  can_view_reports: bool
+}
+
+message AssignLocationRequest {
+  /// user_id identifies the user associated with this request.
+  user_id: int64? @required @gt(0)
+  location_id: int64? @required @gt(0)
+  can_manage_pos_users: bool
+  can_manage_terminals: bool
+  can_view_reports: bool
+}
+
+message AssignLocationResponse {
+  id: int64
+}
+
+message GetLocationRosterRequest {
+  location_id: int64? @required @gt(0) @query("location_id")
+}
+
+message GetLocationRosterResponse {
+  roster: RosterEntry[]
+}
+
+message GetMemberLocationsRequest {
+  user_id: int64? @required @gt(0) @query("user_id")
+}
+
+message GetMemberLocationsResponse {
+  locations: MemberLocationEntry[]
+}
+
+message GetMyLocationsRequest {}
+
+message GetMyLocationsResponse {
+  locations: MyLocation[]
+}
+
+message RemoveLocationRequest {
+  id: int64? @required @gt(0)
+}
+
+message RemoveLocationResponse {
+  success: bool
+}

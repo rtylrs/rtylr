@@ -1,0 +1,40 @@
+package hr.review.v1
+
+message Review {
+  id: int64
+  owner_id: int64
+  staff_id: int64
+  reviewer_id: int64
+  period: string
+  rating: float64
+  goals_rating: float64
+  values_rating: float64
+  skills_rating: float64
+  notes: string
+  status: string
+  created_at: string
+  updated_at: string
+}
+
+message ListReviewsRequest {}
+
+message ListReviewsResponse {
+  reviews: Review[]
+}
+
+message CreateReviewRequest {
+  staff_id: int64? @required
+  reviewer_id: int64
+  period: string @required
+  rating: float64
+  goals_rating: float64
+  values_rating: float64
+  skills_rating: float64
+  notes: string
+  status: string
+}
+
+message CreateReviewResponse {
+  id: int64
+  message: string
+}

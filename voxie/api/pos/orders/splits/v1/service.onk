@@ -1,0 +1,5 @@
+package pos.orders.splits.v1
+
+service OrderSplitService {
+  splitOrder(SplitOrderRequest) -> SplitOrderResponse @post("/orders/{order_id}/split")
+}

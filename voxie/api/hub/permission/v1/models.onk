@@ -1,0 +1,291 @@
+package hub.permission.v1
+
+message PermissionMatrix {
+  rows: PermissionRow[]
+  roles: string[]
+}
+
+message PermissionRow {
+  key: string
+  category: string
+  label: string
+  /// role -> enabled
+  role_values: map[string, bool]
+}
+
+message CustomRole {
+  /// Stable identifier of the role within the business.
+  id: int64
+  /// Display name shown to administrators.
+  name: string
+  /// Optional explanation of the role's intended use.
+  description: string
+  /// Permission keys granted by this role.
+  permissions: string[]
+  /// Application that owns the role and its permissions.
+  app_id: string
+  /// Optional application-specific role key.
+  role_key: string
+  /// Relative authority level used for delegation checks.
+  level: int32
+  /// Optional role from which this role inherits or was derived.
+  parent_role_id: int64?
+  /// Scope rules limiting where the role applies.
+  scope_rules: string[]
+  /// Whether the role is a seeded system role.
+  is_system: bool
+  /// Whether the role is archived and unavailable for new assignments.
+  is_archived: bool
+  /// Lifecycle state of the role.
+  lifecycle: string
+  /// Monotonically increasing version used for cache and audit coordination.
+  version: int64
+  /// Number of active members assigned to the role.
+  member_count: int32
+  /// When the record was created.
+  created_at: string
+}
+
+message GetPermissionsRequest {}
+
+message GetPermissionsResponse {
+  matrix: PermissionMatrix
+}
+
+message ListRolesRequest {
+  /// Restrict results to one application.
+  app_id: string? @query("app_id")
+  /// One-based result page.
+  page: int32? @query("page")
+  /// Maximum number of roles returned per page.
+  page_size: int32? @query("page_size")
+}
+
+message ListRolesResponse {
+  /// Roles visible in the requested page.
+  roles: CustomRole[]
+  /// Current one-based page.
+  page: int32
+  /// Effective page size.
+  page_size: int32
+  /// Total number of matching roles.
+  total: int64
+  /// Next page number, when more results remain.
+  next_page: int32?
+}
+
+message CreateRoleRequest {
+  /// Display name for the new role.
+  name: string @required
+  /// Optional explanation of the role's intended use.
+  description: string
+  /// Application that owns the role.
+  app_id: string?
+  /// Optional application-specific role key.
+  role_key: string?
+  /// Relative authority level used for delegation checks.
+  level: int32?
+  /// Optional source role for inheritance or cloning semantics.
+  parent_role_id: int64?
+  /// Scope rules to apply to assignments of the role.
+  scope_rules: string[]
+  /// Permission keys granted by the role.
+  permissions: string[]
+}
+
+message CreateRoleResponse {
+  role: CustomRole
+}
+
+message DeleteRoleRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteRoleResponse {
+  message: string
+}
+
+message UpdateRoleBody {
+  /// The role name.
+  name: string @required
+  description: string
+  app_id: string?
+  level: int32?
+  parent_role_id: int64?
+  scope_rules: string[]
+  permissions: string[]
+}
+
+message UpdateRoleRequest {
+  id: int64 @gt(0)
+  body: UpdateRoleBody
+}
+
+message UpdateRoleResponse {
+  message: string
+  role: CustomRole?
+}
+
+message GetRoleRequest {
+  id: int64 @gt(0)
+}
+
+message GetRoleResponse {
+  role: CustomRole
+}
+
+message CloneRoleRequest {
+  id: int64 @gt(0)
+  name: string @required
+  description: string
+}
+
+message CloneRoleResponse {
+  role: CustomRole
+}
+
+message ArchiveRoleRequest {
+  id: int64 @gt(0)
+  reason: string
+}
+
+message ArchiveRoleResponse {
+  role: CustomRole
+}
+
+message RoleAssignment {
+  /// Stable identifier of the assignment.
+  id: int64
+  /// Role being assigned.
+  role_id: int64
+  /// Application in which the assignment is effective.
+  app_id: string
+  /// User receiving the assignment, when directly assigned.
+  user_id: int64?
+  /// Group receiving the assignment, when group assigned.
+  group_id: int64?
+  /// Lifecycle status of the assignment.
+  status: string
+  /// Provenance of the assignment, such as explicit or group.
+  source: string
+  /// Whether this is the user's primary role for the application.
+  is_primary: bool
+  /// Scope values attached to this assignment.
+  scopes: string[]
+  /// Time at which the assignment was granted.
+  granted_at: string
+}
+
+message ListRoleAssignmentsRequest {
+  /// Restrict results to one role.
+  role_id: int64? @query("role_id")
+  /// Restrict results to one application.
+  app_id: string? @query("app_id")
+  /// One-based result page.
+  page: int32? @query("page")
+  /// Maximum number of assignments returned per page.
+  page_size: int32? @query("page_size")
+}
+
+message ListRoleAssignmentsResponse {
+  /// Assignments visible in the requested page.
+  assignments: RoleAssignment[]
+  /// Current one-based page.
+  page: int32
+  /// Effective page size.
+  page_size: int32
+  /// Total number of matching assignments.
+  total: int64
+  /// Next page number, when more results remain.
+  next_page: int32?
+}
+
+message AssignRoleRequest {
+  /// Role to assign.
+  role_id: int64? @required @gt(0)
+  /// Application in which the assignment is effective.
+  app_id: string @required
+  /// User receiving the assignment, when directly assigned.
+  user_id: int64?
+  /// Group receiving the assignment, when group assigned.
+  group_id: int64?
+  /// Whether this is the user's primary role for the application.
+  is_primary: bool
+  /// Scope values attached to this assignment.
+  scopes: string[]
+}
+
+message AssignRoleResponse {
+  assignment: RoleAssignment
+}
+
+message RemoveRoleAssignmentRequest {
+  id: int64 @gt(0)
+}
+
+message RemoveRoleAssignmentResponse {
+  message: string
+}
+
+message PreviewPermissionImpactRequest {
+  id: int64 @gt(0)
+  permissions: string[]
+}
+
+message PreviewPermissionImpactResponse {
+  /// Permission keys added by the proposed change.
+  added_permissions: string[]
+  /// Permission keys removed by the proposed change.
+  removed_permissions: string[]
+  /// Number of active members affected by the proposed change.
+  affected_member_count: int32
+}
+
+message RoleAuditEvent {
+  /// Stable identifier of the audit event.
+  id: int64
+  /// Action recorded by the audit event.
+  action: string
+  /// Application affected by the event.
+  app_id: string
+  /// Role affected by the event, when applicable.
+  role_id: int64?
+  /// User who performed the action, when available.
+  actor_user_id: int64?
+  /// Direct user target, when applicable.
+  target_user_id: int64?
+  /// Group target, when applicable.
+  target_group_id: int64?
+  /// Serialized state before the change.
+  before_json: string
+  /// Serialized state after the change.
+  after_json: string
+  /// Reason supplied for the change.
+  reason: string
+  /// Time at which the event was created.
+  created_at: string
+}
+
+message ListRoleAuditRequest {
+  role_id: int64? @query("role_id")
+  page: int32? @query("page")
+  page_size: int32? @query("page_size")
+}
+
+message ListRoleAuditResponse {
+  events: RoleAuditEvent[]
+  page: int32
+  page_size: int32
+  total: int64
+  next_page: int32?
+}
+
+message UpdatePermissionMatrixRequest {
+  role: string @required
+  permission_key: string @required
+  enabled: bool
+}
+
+message UpdatePermissionMatrixResponse {
+  success: bool
+}

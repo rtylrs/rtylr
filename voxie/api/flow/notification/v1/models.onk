@@ -1,0 +1,45 @@
+package flow.notification.v1
+
+message Notification {
+  id: int64
+  type: string
+  title: string
+  description: string
+  task_id: string
+  task_title: string
+  /// The user whose action caused this notification, when the source recorded one.
+  actor_id: int64?
+  /// Display name resolved from the acting user's current profile.
+  actor_name: string
+  actor_initials: string
+  project: string
+  project_color: string
+  read: bool
+  timestamp: string
+}
+
+message ListNotificationsRequest {
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListNotificationsResponse {
+  notifications: Notification[]
+  pagination: PaginationResponse
+}
+
+message MarkNotificationReadRequest {
+  id: int64
+}
+
+message MarkNotificationReadResponse {}
+
+message MarkAllNotificationsReadRequest {}
+
+message MarkAllNotificationsReadResponse {}

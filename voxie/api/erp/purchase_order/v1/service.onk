@@ -1,0 +1,14 @@
+package erp.purchase_order.v1
+
+/// PurchaseOrderService defines ERP purchase order endpoints.
+service PurchaseOrderService {
+  listPurchaseOrders(ListPurchaseOrdersRequest) -> ListPurchaseOrdersResponse @get("/purchase-orders")
+
+  createPurchaseOrder(CreatePurchaseOrderRequest) -> CreatePurchaseOrderResponse @post("/purchase-orders")
+
+  getPurchaseOrder(GetPurchaseOrderRequest) -> GetPurchaseOrderResponse @get("/purchase-orders/{id}")
+
+  updatePurchaseOrderStatus(UpdatePurchaseOrderStatusRequest) -> UpdatePurchaseOrderStatusResponse @patch("/purchase-orders/{id}/status") @body("body")
+
+  approvePurchaseOrder(ApprovePurchaseOrderRequest) -> ApprovePurchaseOrderResponse @post("/purchase-orders/{id}/approve")
+}

@@ -1,0 +1,419 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/supplier/v1/suppliers:
+        get:
+            tags:
+                - SupplierService
+            summary: listSuppliers
+            operationId: SupplierService_listSuppliers
+            parameters:
+                - name: page
+                  in: query
+                  description: page is the 1-based page number.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page is the 1-based page number.
+                - name: page_size
+                  in: query
+                  description: page_size is the number of rows to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page_size is the number of rows to return.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.supplier.v1.ListSuppliersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - SupplierService
+            summary: createSupplier
+            operationId: SupplierService_createSupplier
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.supplier.v1.CreateSupplierRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.supplier.v1.CreateSupplierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /erp/supplier/v1/suppliers/{id}:
+        put:
+            tags:
+                - SupplierService
+            summary: updateSupplier
+            operationId: SupplierService_updateSupplier
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the unique identifier for the resource.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.supplier.v1.UpdateSupplierBody'
+                                    description: body carries updatable supplier fields bound from the HTTP payload.
+                            required:
+                                - body
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.supplier.v1.UpdateSupplierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - SupplierService
+            summary: deleteSupplier
+            operationId: SupplierService_deleteSupplier
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.supplier.v1.DeleteSupplierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        erp.supplier.v1.ListSuppliersRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the 1-based page number.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: page_size is the number of rows to return.
+            required:
+                - page
+                - page_size
+        erp.supplier.v1.ListSuppliersResponse:
+            type: object
+            properties:
+                suppliers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.supplier.v1.Supplier'
+                    description: suppliers is the suppliers value for this contract.
+                has_more:
+                    type: boolean
+                    description: has_more is true when another page is available.
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the returned 1-based page number.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: page_size is the returned page size.
+            required:
+                - suppliers
+                - has_more
+                - page
+                - page_size
+        erp.supplier.v1.Supplier:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                email:
+                    type: string
+                    description: email is the email address used for lookup or contact.
+                phone:
+                    type: string
+                    description: phone is the phone value for this contract.
+                address:
+                    type: string
+                    description: address is the address value for this contract.
+                city:
+                    type: string
+                    description: city is the city value for this contract.
+                country:
+                    type: string
+                    description: country is the country value for this contract.
+                tax_id:
+                    type: string
+                    description: tax_id is the tax id value for this contract.
+                payment_terms:
+                    type: string
+                    description: payment_terms is the payment terms value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+                is_active:
+                    type: boolean
+                    description: is_active is the is active value for this contract.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - email
+                - phone
+                - address
+                - city
+                - country
+                - tax_id
+                - payment_terms
+                - notes
+                - is_active
+                - created_at
+                - updated_at
+            description: Supplier is a business's registered supplier record.
+        erp.supplier.v1.CreateSupplierRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                email:
+                    type: string
+                    format: email
+                    description: email is the email address used for lookup or contact.
+                phone:
+                    type: string
+                    description: phone is the phone value for this contract.
+                address:
+                    type: string
+                    description: address is the address value for this contract.
+                city:
+                    type: string
+                    description: city is the city value for this contract.
+                country:
+                    type: string
+                    description: country is the country value for this contract.
+                tax_id:
+                    type: string
+                    description: tax_id is the tax id value for this contract.
+                payment_terms:
+                    type: string
+                    description: payment_terms is the payment terms value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+                is_active:
+                    type: boolean
+                    description: is_active is the is active value for this contract.
+            required:
+                - name
+                - email
+                - phone
+                - address
+                - city
+                - country
+                - tax_id
+                - payment_terms
+                - notes
+                - is_active
+        erp.supplier.v1.CreateSupplierResponse:
+            type: object
+            properties:
+                supplier_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: supplier_id is the supplier id value for this contract.
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+            required:
+                - supplier_id
+                - message
+        erp.supplier.v1.UpdateSupplierRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.supplier.v1.UpdateSupplierBody'
+                    description: body carries updatable supplier fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+        erp.supplier.v1.UpdateSupplierBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                email:
+                    type: string
+                    format: email
+                    description: email is the email address used for lookup or contact.
+                phone:
+                    type: string
+                    description: phone is the phone value for this contract.
+                address:
+                    type: string
+                    description: address is the address value for this contract.
+                city:
+                    type: string
+                    description: city is the city value for this contract.
+                country:
+                    type: string
+                    description: country is the country value for this contract.
+                tax_id:
+                    type: string
+                    description: tax_id is the tax id value for this contract.
+                payment_terms:
+                    type: string
+                    description: payment_terms is the payment terms value for this contract.
+                notes:
+                    type: string
+                    description: notes is the notes value for this contract.
+                is_active:
+                    type: boolean
+                    description: is_active is the is active value for this contract.
+            required:
+                - name
+                - email
+                - phone
+                - address
+                - city
+                - country
+                - tax_id
+                - payment_terms
+                - notes
+                - is_active
+        erp.supplier.v1.UpdateSupplierResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+                    description: message is a human-readable result message.
+            required:
+                - message
+        erp.supplier.v1.DeleteSupplierRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        erp.supplier.v1.DeleteSupplierResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SupplierService
+      description: SupplierService defines ERP supplier endpoints.

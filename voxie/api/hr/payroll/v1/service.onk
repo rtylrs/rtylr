@@ -1,0 +1,9 @@
+package hr.payroll.v1
+
+service PayrollService {
+  listPayroll(ListPayrollRequest) -> ListPayrollResponse @get("/payroll")
+
+  runPayroll(RunPayrollRequest) -> RunPayrollResponse @post("/payroll/run")
+
+  markPayrollPaid(MarkPayrollPaidRequest) -> MarkPayrollPaidResponse @post("/payroll/{id}/mark-paid")
+}

@@ -1,0 +1,10 @@
+package finance.bank_account.v1
+
+/// BankAccountService defines bank account endpoints.
+service BankAccountService {
+  listBankAccounts(ListBankAccountsRequest) -> ListBankAccountsResponse @get("/bank-accounts")
+
+  createBankAccount(CreateBankAccountRequest) -> CreateBankAccountResponse @post("/bank-accounts")
+
+  getBankAccount(GetBankAccountRequest) -> GetBankAccountResponse @get("/bank-accounts/{id}")
+}

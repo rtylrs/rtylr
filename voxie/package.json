@@ -1,0 +1,26 @@
+{
+  "name": "@voxire/voxie",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Generated TypeScript contracts and clients from Voxie's onekit .onk definitions",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./validation/metadata": "./gen/ts/validation/metadata.ts",
+    "./validation/metadata.json": "./gen/ts/validation/metadata.json",
+    "./*": "./gen/ts/*.ts",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./gen/ts/*"
+      ]
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

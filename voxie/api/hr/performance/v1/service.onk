@@ -1,0 +1,19 @@
+package hr.performance.v1
+
+/// PerformanceService defines HR performance review endpoints.
+service PerformanceService {
+  /// Returns review cycles.
+  listReviewCycles(ListReviewCyclesRequest) -> ListReviewCyclesResponse @get("/review-cycles")
+
+  /// Creates a review cycle.
+  createReviewCycle(CreateReviewCycleRequest) -> CreateReviewCycleResponse @post("/review-cycles")
+
+  /// Opens a review cycle for submissions.
+  openReviewCycle(OpenReviewCycleRequest) -> OpenReviewCycleResponse @post("/review-cycles/open")
+
+  /// Returns performance goals with optional filters.
+  listGoals(ListGoalsRequest) -> ListGoalsResponse @get("/goals")
+
+  /// Submits a performance review.
+  submitReview(SubmitReviewRequest) -> SubmitReviewResponse @post("/reviews")
+}

@@ -1,0 +1,75 @@
+package booking.appointment.v1
+
+message Appointment {
+  id: int64
+  owner_id: int64
+  business_id: int64
+  service_id: int64
+  resource_id: int64
+  staff_id: int64
+  customer_name: string
+  customer_email: string
+  customer_phone: string
+  start_time: string
+  end_time: string
+  status: string
+  notes: string
+  created_at: string
+  updated_at: string
+}
+
+message CreateAppointmentRequest {
+  service_id: int64? @required @gt(0)
+  resource_id: int64
+  staff_id: int64
+  customer_name: string @required
+  customer_email: string
+  customer_phone: string
+  start_time: string @required
+  end_time: string @required
+  status: string
+  notes: string
+}
+
+message CreateAppointmentResponse {
+  id: int64
+  message: string
+}
+
+message DeleteAppointmentRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteAppointmentResponse {
+  message: string
+}
+
+message ListAppointmentsRequest {}
+
+message ListAppointmentsResponse {
+  appointments: Appointment[]
+}
+
+message ListTodayAppointmentsRequest {}
+
+message ListTodayAppointmentsResponse {
+  appointments: Appointment[]
+}
+
+message UpdateAppointmentRequest {
+  id: int64 @gt(0)
+  service_id: int64
+  resource_id: int64
+  staff_id: int64
+  customer_name: string
+  customer_email: string
+  customer_phone: string
+  start_time: string
+  end_time: string
+  status: string
+  notes: string
+}
+
+message UpdateAppointmentResponse {
+  message: string
+}

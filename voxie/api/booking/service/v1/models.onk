@@ -1,0 +1,57 @@
+package booking.service.v1
+
+message BookingService {
+  id: int64
+  owner_id: int64
+  business_id: int64
+  name: string
+  description: string
+  duration_minutes: int32
+  price: float64
+  color: string
+  is_active: bool
+  created_at: string
+  updated_at: string
+}
+
+message CreateServiceRequest {
+  name: string @required
+  description: string
+  duration_minutes: int32? @required @gt(0)
+  price: float64 @gte(0)
+  color: string
+  is_active: bool
+}
+
+message CreateServiceResponse {
+  id: int64
+  message: string
+}
+
+message DeleteServiceRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteServiceResponse {
+  message: string
+}
+
+message ListServicesRequest {}
+
+message ListServicesResponse {
+  services: BookingService[]
+}
+
+message UpdateServiceRequest {
+  id: int64 @gt(0)
+  name: string @required
+  description: string
+  duration_minutes: int32? @required @gt(0)
+  price: float64 @gte(0)
+  color: string
+  is_active: bool
+}
+
+message UpdateServiceResponse {
+  message: string
+}

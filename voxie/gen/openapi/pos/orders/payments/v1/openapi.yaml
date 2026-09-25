@@ -1,0 +1,91 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/orders/payments/v1/orders/{order_id}/payment:
+        post:
+            tags:
+                - OrderPaymentService
+            summary: processPayment
+            operationId: OrderPaymentService_processPayment
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                payment_method:
+                                    type: string
+                                amount_paid:
+                                    exclusiveMinimum: 0
+                                    type: number
+                                    format: double
+                            required:
+                                - payment_method
+                                - amount_paid
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.payments.v1.ProcessPaymentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.orders.payments.v1.ProcessPaymentRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                payment_method:
+                    type: string
+                amount_paid:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+            required:
+                - order_id
+                - payment_method
+                - amount_paid
+        pos.orders.payments.v1.ProcessPaymentResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OrderPaymentService

@@ -1,0 +1,35 @@
+package erp.settings.v1
+
+/// ErpBusinessSettings stores tenant-level ERP defaults shared by operators.
+message ErpBusinessSettings {
+  id: int64
+  business_id: int64
+  currency: string @required
+  tax_rate: float64? @required @gte(0) @lte(100)
+  low_stock_threshold: float64? @required @gte(0)
+  default_warehouse_id: int64? @required @gt(0)
+  notify_on_low_stock: bool
+  notify_on_expiry: bool
+  created_at: string
+  updated_at: string
+}
+
+message GetErpSettingsRequest {}
+
+message GetErpSettingsResponse {
+  settings: ErpBusinessSettings @required
+}
+
+message UpdateErpSettingsRequest {
+  currency: string @required
+  tax_rate: float64? @required @gte(0) @lte(100)
+  low_stock_threshold: float64? @required @gte(0)
+  default_warehouse_id: int64? @required @gt(0)
+  notify_on_low_stock: bool
+  notify_on_expiry: bool
+}
+
+message UpdateErpSettingsResponse {
+  settings: ErpBusinessSettings @required
+  message: string
+}

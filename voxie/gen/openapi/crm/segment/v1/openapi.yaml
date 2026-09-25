@@ -1,0 +1,520 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /crm/segment/v1/segments:
+        get:
+            tags:
+                - SegmentService
+            summary: listSegments
+            description: Returns all segments for the active business.
+            operationId: SegmentService_listSegments
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.segment.v1.ListSegmentsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - SegmentService
+            summary: createSegment
+            description: Creates a new customer segment.
+            operationId: SegmentService_createSegment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.segment.v1.CreateSegmentRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.segment.v1.CreateSegmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /crm/segment/v1/segments/{id}:
+        get:
+            tags:
+                - SegmentService
+            summary: getSegmentDetail
+            description: Returns a segment and its member customers.
+            operationId: SegmentService_getSegmentDetail
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.segment.v1.GetSegmentDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        put:
+            tags:
+                - SegmentService
+            summary: updateSegment
+            description: Updates an existing segment.
+            operationId: SegmentService_updateSegment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/crm.segment.v1.UpdateSegmentBody'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.segment.v1.UpdateSegmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - SegmentService
+            summary: deleteSegment
+            description: Removes a segment by ID.
+            operationId: SegmentService_deleteSegment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.segment.v1.DeleteSegmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /crm/segment/v1/segments/{segment_id}/customers:
+        get:
+            tags:
+                - SegmentService
+            summary: getSegmentCustomers
+            description: Returns paginated customers in a segment.
+            operationId: SegmentService_getSegmentCustomers
+            parameters:
+                - name: segment_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: page
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: page_size
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.segment.v1.GetSegmentCustomersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        crm.segment.v1.ListSegmentsRequest:
+            type: object
+        crm.segment.v1.ListSegmentsResponse:
+            type: object
+            properties:
+                segments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.segment.v1.Segment'
+            required:
+                - segments
+        crm.segment.v1.Segment:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                filters:
+                    type: string
+                    description: JSON filter definition for this segment.
+                customer_count:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                last_calculated_at:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - filters
+                - customer_count
+                - created_at
+                - updated_at
+            description: Segment is a saved customer filter used for targeted campaigns.
+        crm.segment.v1.CreateSegmentRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                filters:
+                    type: string
+            required:
+                - name
+                - description
+                - filters
+        crm.segment.v1.CreateSegmentResponse:
+            type: object
+            properties:
+                segment_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - segment_id
+                - message
+        crm.segment.v1.GetSegmentDetailRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        crm.segment.v1.GetSegmentDetailResponse:
+            type: object
+            properties:
+                segment:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.segment.v1.Segment'
+                customers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.customer.v1.Customer'
+                    description: |-
+                        Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
+                        projection) so consumers can render loyalty tier/points without a
+                        second lookup.
+            required:
+                - segment
+                - customers
+        crm.customer.v1.Customer:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                first_name:
+                    type: string
+                last_name:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+                date_of_birth:
+                    type: string
+                gender:
+                    type: string
+                address:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                loyalty_points:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                total_spent:
+                    type: number
+                    format: double
+                visit_count:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                last_visit_at:
+                    type: string
+                loyalty_tier:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                notes:
+                    type: string
+                consent:
+                    type: object
+                    additionalProperties:
+                        type: boolean
+                    description: Explicit communication consent captured at customer creation/update.
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - gender
+                - address
+                - city
+                - country
+                - loyalty_points
+                - total_spent
+                - visit_count
+                - loyalty_tier
+                - tags
+                - notes
+                - consent
+                - is_active
+                - created_at
+                - updated_at
+            description: Customer is a CRM customer profile with loyalty and engagement data.
+        crm.segment.v1.GetSegmentCustomersRequest:
+            type: object
+            properties:
+                segment_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page_size:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - segment_id
+                - page
+                - page_size
+        crm.segment.v1.GetSegmentCustomersResponse:
+            type: object
+            properties:
+                customers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.customer.v1.Customer'
+                    description: |-
+                        Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
+                        projection) so consumers can render loyalty tier/points without a
+                        second lookup.
+                total:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page_size:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - customers
+                - total
+                - page
+                - page_size
+        crm.segment.v1.UpdateSegmentRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.segment.v1.UpdateSegmentBody'
+            required:
+                - id
+                - body
+        crm.segment.v1.UpdateSegmentBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                filters:
+                    type: string
+            required:
+                - name
+                - description
+                - filters
+        crm.segment.v1.UpdateSegmentResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        crm.segment.v1.DeleteSegmentRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        crm.segment.v1.DeleteSegmentResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SegmentService
+      description: SegmentService defines CRM segment endpoints.

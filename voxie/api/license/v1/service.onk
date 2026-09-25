@@ -1,0 +1,8 @@
+package license.v1
+
+/// LicenseService exposes the public self-host license status endpoint.
+service LicenseService {
+  base_path: "/license"
+
+  getLicenseState(GetLicenseStateRequest) -> GetLicenseStateResponse @get("/state")
+}

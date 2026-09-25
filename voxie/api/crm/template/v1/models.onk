@@ -1,0 +1,65 @@
+package crm.template.v1
+
+/// Template is a reusable message template for campaigns and notifications.
+message Template {
+  id: int64
+  owner_id: int64
+  name: string
+  /// Template kind, e.g. "email" or "sms".
+  type: string
+  subject: string
+  body: string
+  /// Arbitrary JSON template variables (source: google.protobuf.Value).
+  variables: string
+  is_active: bool
+  created_at: string
+  updated_at: string
+}
+
+message CreateTemplateRequest {
+  name: string @required
+  type: string @required
+  subject: string
+  body: string @required
+  /// Arbitrary JSON template variables (source: google.protobuf.Value).
+  variables: string
+  is_active: bool
+}
+
+message CreateTemplateResponse {
+  template_id: int64
+  message: string
+}
+
+message DeleteTemplateRequest {
+  id: int64
+}
+
+message DeleteTemplateResponse {
+  message: string
+}
+
+message ListTemplatesRequest {}
+
+message ListTemplatesResponse {
+  templates: Template[]
+}
+
+message UpdateTemplateBody {
+  name: string @required
+  type: string
+  subject: string
+  body: string
+  /// Arbitrary JSON template variables (source: google.protobuf.Value).
+  variables: string
+  is_active: bool
+}
+
+message UpdateTemplateRequest {
+  id: int64
+  body: UpdateTemplateBody
+}
+
+message UpdateTemplateResponse {
+  message: string
+}

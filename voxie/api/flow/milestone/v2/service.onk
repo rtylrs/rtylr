@@ -1,0 +1,9 @@
+package flow.milestone.v2
+
+service MilestoneService {
+  listMilestones(ListMilestonesRequest) -> ListMilestonesResponse @get("/milestones")
+
+  createMilestone(CreateMilestoneRequest) -> CreateMilestoneResponse @post("/milestones")
+
+  updateMilestone(UpdateMilestoneRequest) -> UpdateMilestoneResponse @put("/milestones/{id}")
+}

@@ -1,0 +1,57 @@
+package erp.category.v1
+
+message Category {
+  id: int64 @gt(0)
+  owner_id: int64
+  name: string
+  description: string
+  created_at: string
+  updated_at: string
+}
+
+message CreateCategoryRequest {
+  name: string @required
+  description: string
+}
+
+message CreateCategoryResponse {
+  category_id: int64
+  message: string
+}
+
+message UpdateCategoryBody {
+  name: string @required
+  description: string
+}
+
+message UpdateCategoryRequest {
+  id: int64 @gt(0)
+  body: UpdateCategoryBody
+}
+
+message UpdateCategoryResponse {
+  message: string
+}
+
+message DeleteCategoryRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteCategoryResponse {
+  message: string
+}
+
+message ListCategoriesRequest {
+  /// Maximum number of categories to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of categories to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListCategoriesResponse {
+  categories: Category[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
+}

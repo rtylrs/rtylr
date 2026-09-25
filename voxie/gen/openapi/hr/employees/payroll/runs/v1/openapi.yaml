@@ -1,0 +1,386 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/employees/payroll/runs/v1/runs:
+        get:
+            tags:
+                - RunsService
+            summary: listPayrollRuns
+            description: ListPayrollRuns returns payroll runs.
+            operationId: RunsService_listPayrollRuns
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ListPayrollRunsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/employees/payroll/runs/v1/runs/trigger:
+        post:
+            tags:
+                - RunsService
+            summary: triggerPayrollRun
+            description: TriggerPayrollRun triggers a new payroll run.
+            operationId: RunsService_triggerPayrollRun
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.employees.payroll.runs.v1.TriggerPayrollRunRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employees.payroll.runs.v1.TriggerPayrollRunResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/employees/payroll/runs/v1/runs/{id}/approve:
+        patch:
+            tags:
+                - RunsService
+            summary: approvePayrollRun
+            description: ApprovePayrollRun approves a payroll run.
+            operationId: RunsService_approvePayrollRun
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the payroll run to approve.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the payroll run to approve.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                required: false
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ApprovePayrollRunResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/employees/payroll/runs/v1/runs/export:
+        post:
+            tags:
+                - RunsService
+            summary: exportPayroll
+            description: ExportPayroll exports payroll data.
+            operationId: RunsService_exportPayroll
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ExportPayrollRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employees.payroll.runs.v1.ExportPayrollResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.employees.payroll.runs.v1.ListPayrollRunsRequest:
+            type: object
+        hr.employees.payroll.runs.v1.ListPayrollRunsResponse:
+            type: object
+            properties:
+                runs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.employees.payroll.runs.v1.PayrollRunPayload'
+                    description: Page of payroll runs.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of payroll runs across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - runs
+                - total
+                - limit
+                - offset
+        hr.employees.payroll.runs.v1.PayrollRunPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the payroll run.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this run belongs to.
+                period_start:
+                    type: string
+                    description: Start of the pay period (ISO-8601 date).
+                period_end:
+                    type: string
+                    description: End of the pay period (ISO-8601 date).
+                status:
+                    type: string
+                    description: Workflow status (draft | in_review | approved | exported).
+                created_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee who initiated the payroll run.
+                approved_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee who approved the run; absent if not yet approved.
+                exported_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the run was exported; absent if not yet exported.
+                total_gross:
+                    type: number
+                    format: double
+                    description: Sum of all entry gross pay amounts in this run.
+                total_net:
+                    type: number
+                    format: double
+                    description: Sum of all entry net pay amounts in this run.
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.employees.payroll.runs.v1.PayrollEntryPayload'
+                    description: Individual payroll entries included in this run.
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - period_start
+                - period_end
+                - status
+                - created_by
+                - total_gross
+                - total_net
+                - entries
+                - created_at
+                - updated_at
+            description: PayrollRunPayload is a payroll run covering one pay period.
+        hr.employees.payroll.runs.v1.PayrollEntryPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the payroll entry.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this entry belongs to.
+                payroll_run_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Payroll run this entry is part of.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee this entry compensates.
+                base_pay:
+                    type: number
+                    format: double
+                    description: Gross base pay for the period.
+                overtime_pay:
+                    type: number
+                    format: double
+                    description: Compensation for overtime hours worked.
+                deductions:
+                    type: number
+                    format: double
+                    description: Total deductions applied (tax, insurance, etc.).
+                bonuses:
+                    type: number
+                    format: double
+                    description: Additional bonuses awarded in this period.
+                net_pay:
+                    type: number
+                    format: double
+                    description: Final take-home pay after deductions and bonuses.
+                hours_worked:
+                    type: number
+                    format: double
+                    description: Total regular hours worked in the period.
+                overtime_hours:
+                    type: number
+                    format: double
+                    description: Total overtime hours worked in the period.
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - payroll_run_id
+                - employee_id
+                - base_pay
+                - overtime_pay
+                - deductions
+                - bonuses
+                - net_pay
+                - hours_worked
+                - overtime_hours
+                - created_at
+                - updated_at
+            description: PayrollEntryPayload is a single employee's computed pay for a payroll run.
+        hr.employees.payroll.runs.v1.TriggerPayrollRunRequest:
+            type: object
+            properties:
+                period_start:
+                    type: string
+                    description: Start of the pay period to process (ISO-8601 date).
+                period_end:
+                    type: string
+                    description: End of the pay period to process (ISO-8601 date).
+            required:
+                - period_start
+                - period_end
+        hr.employees.payroll.runs.v1.TriggerPayrollRunResponse:
+            type: object
+            properties:
+                run:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.employees.payroll.runs.v1.PayrollRunPayload'
+                    description: The newly created payroll run with computed entries.
+            required:
+                - run
+        hr.employees.payroll.runs.v1.ApprovePayrollRunRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the payroll run to approve.
+            required:
+                - id
+        hr.employees.payroll.runs.v1.ApprovePayrollRunResponse:
+            type: object
+            properties:
+                run:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.employees.payroll.runs.v1.PayrollRunPayload'
+                    description: The approved payroll run.
+            required:
+                - run
+        hr.employees.payroll.runs.v1.ExportPayrollRequest:
+            type: object
+            properties:
+                run_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the payroll run to export.
+            required:
+                - run_id
+        hr.employees.payroll.runs.v1.ExportPayrollResponse:
+            type: object
+            properties:
+                batch_id:
+                    type: string
+                    description: Unique identifier for the generated export batch.
+            required:
+                - batch_id
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: RunsService
+      description: RunsService defines HR payroll run endpoints.

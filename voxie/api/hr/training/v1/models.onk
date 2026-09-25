@@ -1,0 +1,30 @@
+package hr.training.v1
+
+/// TrainingCourse is a training course offered to staff.
+message TrainingCourse {
+  id: int64
+  owner_id: int64
+  name: string
+  description: string
+  duration_hours: float64
+  is_required: bool
+  created_at: string
+}
+
+message ListTrainingCoursesRequest {}
+
+message ListTrainingCoursesResponse {
+  courses: TrainingCourse[]
+}
+
+message CreateTrainingCourseRequest {
+  name: string @required
+  description: string
+  duration_hours: float64
+  is_required: bool
+}
+
+message CreateTrainingCourseResponse {
+  id: int64
+  message: string
+}

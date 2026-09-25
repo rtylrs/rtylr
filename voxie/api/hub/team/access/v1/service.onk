@@ -1,0 +1,13 @@
+package hub.team.access.v1
+
+/// AccessService defines hub team access request endpoints.
+service AccessService {
+  /// Submits a request for app access.
+  requestAccess(RequestAccessRequest) -> RequestAccessResponse @post("/requests")
+
+  /// Returns pending access requests for the business.
+  listAccessRequests(ListAccessRequestsRequest) -> ListAccessRequestsResponse @get("/requests")
+
+  /// Grants the requested app access.
+  approveAccessRequest(ApproveAccessRequestRequest) -> ApproveAccessRequestResponse @post("/requests/{id}/approve")
+}

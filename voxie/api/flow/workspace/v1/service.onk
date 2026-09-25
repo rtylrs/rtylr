@@ -1,0 +1,19 @@
+package flow.workspace.v1
+
+service WorkspaceService {
+  listWorkspaces(ListWorkspacesRequest) -> ListWorkspacesResponse @get("/workspaces")
+
+  createWorkspace(CreateWorkspaceRequest) -> CreateWorkspaceResponse @post("/workspaces")
+
+  updateWorkspace(UpdateWorkspaceRequest) -> UpdateWorkspaceResponse @put("/workspaces/{id}") @body("body")
+
+  deleteWorkspace(DeleteWorkspaceRequest) -> DeleteWorkspaceResponse @delete("/workspaces/{id}")
+
+  listWorkspaceMembers(ListWorkspaceMembersRequest) -> ListWorkspaceMembersResponse @get("/workspaces/members")
+
+  addWorkspaceMember(AddWorkspaceMemberRequest) -> AddWorkspaceMemberResponse @post("/workspaces/members")
+
+  removeWorkspaceMember(RemoveWorkspaceMemberRequest) -> RemoveWorkspaceMemberResponse @delete("/workspaces/members")
+
+  updateWorkspaceMemberRole(UpdateWorkspaceMemberRoleRequest) -> UpdateWorkspaceMemberRoleResponse @put("/workspaces/members/role")
+}

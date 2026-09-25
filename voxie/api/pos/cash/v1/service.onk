@@ -1,0 +1,16 @@
+package pos.cash.v1
+
+/// CashService defines POS cash drawer movement endpoints.
+service CashService {
+  /// Returns cash movements for a given session.
+  listCashMovements(ListCashMovementsRequest) -> ListCashMovementsResponse @get("/movements")
+
+  /// Records a cash drop.
+  cashDrop(CashDropRequest) -> CashDropResponse @post("/drop")
+
+  /// Records a cash pickup.
+  cashPickup(CashPickupRequest) -> CashPickupResponse @post("/pickup")
+
+  /// Records a cash drawer adjustment.
+  cashAdjust(CashAdjustRequest) -> CashAdjustResponse @post("/adjust")
+}

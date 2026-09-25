@@ -1,0 +1,106 @@
+package hr.employees.payroll.runs.v1
+
+/// PayrollEntryPayload is a single employee's computed pay for a payroll run.
+message PayrollEntryPayload {
+  /// Unique identifier for the payroll entry.
+  id: int64
+  /// Tenant owner this entry belongs to.
+  owner_id: int64
+  /// Payroll run this entry is part of.
+  payroll_run_id: int64
+  /// Employee this entry compensates.
+  employee_id: int64
+  /// Gross base pay for the period.
+  base_pay: float64
+  /// Compensation for overtime hours worked.
+  overtime_pay: float64
+  /// Total deductions applied (tax, insurance, etc.).
+  deductions: float64
+  /// Additional bonuses awarded in this period.
+  bonuses: float64
+  /// Final take-home pay after deductions and bonuses.
+  net_pay: float64
+  /// Total regular hours worked in the period.
+  hours_worked: float64
+  /// Total overtime hours worked in the period.
+  overtime_hours: float64
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+/// PayrollRunPayload is a payroll run covering one pay period.
+message PayrollRunPayload {
+  /// Unique identifier for the payroll run.
+  id: int64
+  /// Tenant owner this run belongs to.
+  owner_id: int64
+  /// Start of the pay period (ISO-8601 date).
+  period_start: string
+  /// End of the pay period (ISO-8601 date).
+  period_end: string
+  /// Workflow status (draft | in_review | approved | exported).
+  status: string
+  /// Employee who initiated the payroll run.
+  created_by: int64
+  /// Employee who approved the run; absent if not yet approved.
+  approved_by: int64?
+  /// Unix timestamp when the run was exported; absent if not yet exported.
+  exported_at: int64?
+  /// Sum of all entry gross pay amounts in this run.
+  total_gross: float64
+  /// Sum of all entry net pay amounts in this run.
+  total_net: float64
+  /// Individual payroll entries included in this run.
+  entries: PayrollEntryPayload[]
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+message ListPayrollRunsRequest {}
+
+message ListPayrollRunsResponse {
+  /// Page of payroll runs.
+  runs: PayrollRunPayload[]
+  /// Total number of payroll runs across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}
+
+message TriggerPayrollRunRequest {
+  /// Start of the pay period to process (ISO-8601 date).
+  period_start: string @required
+  /// End of the pay period to process (ISO-8601 date).
+  period_end: string @required
+}
+
+message TriggerPayrollRunResponse {
+  /// The newly created payroll run with computed entries.
+  run: PayrollRunPayload
+}
+
+message ApprovePayrollRunRequest {
+  /// ID of the payroll run to approve.
+  id: int64 @gt(0)
+}
+
+message ApprovePayrollRunResponse {
+  /// The approved payroll run.
+  run: PayrollRunPayload
+}
+
+message ExportPayrollRequest {
+  /// ID of the payroll run to export.
+  run_id: int64? @required @gt(0)
+}
+
+message ExportPayrollResponse {
+  /// Unique identifier for the generated export batch.
+  batch_id: string
+}

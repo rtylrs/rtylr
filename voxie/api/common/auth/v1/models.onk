@@ -1,0 +1,141 @@
+package common.auth.v1
+
+message RegisterRequest {
+  /// email is the email address used for lookup or contact.
+  email: string @required @email
+  /// password is the user-provided secret for authentication.
+  password: string @required
+  /// name is the name value for this contract.
+  name: string @required
+  /// business_name is the optional business name to create for the user.
+  business_name: string?
+  /// plan_slug optionally selects the subscription plan to assign after registration.
+  plan_slug: string?
+}
+
+message RegisterResponse {
+  /// token is the opaque token used to complete the operation.
+  token: string
+  /// message is a human-readable result message.
+  message: string
+  /// user_id identifies the user associated with this request.
+  user_id: int64
+  /// email is the email address used for lookup or contact.
+  email: string
+  /// name is the name value for this contract.
+  name: string
+}
+
+message LoginRequest {
+  /// email is the email address used for lookup or contact.
+  email: string @required @email
+  /// password is the user-provided secret for authentication.
+  password: string @required
+}
+
+message LoginResponse {
+  /// token is the opaque token used to complete the operation.
+  token: string
+  /// message is a human-readable result message.
+  message: string
+  /// user_id identifies the user associated with this request.
+  user_id: int64
+  /// email is the email address used for lookup or contact.
+  email: string
+  /// name is the name value for this contract.
+  name: string
+  /// is_console_admin indicates the user can access the internal console.
+  is_console_admin: bool
+}
+
+message GoogleAuthRequest {
+  /// business_name is the optional business name to create for the user.
+  business_name: string?
+  /// code is the OAuth authorization code returned by the provider callback.
+  code: string @required
+}
+
+message GoogleAuthResponse {
+  /// token is the opaque token used to complete the operation.
+  token: string
+  /// is_new is the is new value for this contract.
+  is_new: bool
+}
+
+message ResetPasswordRequest {
+  /// email is the email address used for lookup or contact.
+  email: string @required @email
+}
+
+message ResetPasswordResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message ResetPasswordConfirmRequest {
+  /// token is the opaque reset token from the password reset link.
+  token: string @required
+  /// password is the new password selected by the user.
+  password: string @required
+}
+
+message ResetPasswordConfirmResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message VerifyEmailRequest {
+  /// token is the opaque email verification token.
+  token: string @required
+}
+
+message VerifyEmailResponse {
+  /// verified indicates the email was verified successfully.
+  verified: bool
+  /// message is a human-readable result message.
+  message: string
+}
+
+message ResendVerificationRequest {
+  /// email is the address that should receive a verification email.
+  email: string @required @email
+}
+
+message ResendVerificationResponse {
+  /// ok indicates the request was accepted.
+  ok: bool
+  /// message is a human-readable result message.
+  message: string
+}
+
+message InviteAcceptRequest {
+  /// token is the opaque token used to complete the operation.
+  token: string @required
+  /// password is the user-provided secret for authentication.
+  password: string @required
+}
+
+message InviteAcceptResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message CheckEmailExistsRequest {
+  /// email is the address to probe during inline registration/login validation.
+  email: string @required @email @query("email")
+}
+
+message CheckEmailExistsResponse {
+  /// exists is true when an account with this email is already registered.
+  exists: bool
+}
+
+message SocialAuthorizeRequest {
+  /// provider is the social login provider (google, github, microsoft, apple).
+  provider: string @in("google", "github", "microsoft", "apple", "") @query("provider")
+}
+
+message SocialAuthorizeResponse {
+  /// url is the provider-hosted consent URL to redirect the browser to.
+  url: string
+}

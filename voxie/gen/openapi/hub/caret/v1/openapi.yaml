@@ -1,0 +1,89 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/caret/v1/tools:
+        post:
+            tags:
+                - CaretService
+            summary: listCaretTools
+            operationId: CaretService_listCaretTools
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.caret.v1.ListCaretToolsRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.caret.v1.ListCaretToolsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hub.caret.v1.ListCaretToolsRequest:
+            type: object
+            properties:
+                mode:
+                    type: string
+            required:
+                - mode
+        hub.caret.v1.ListCaretToolsResponse:
+            type: object
+            properties:
+                tools:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.caret.v1.CaretTool'
+            required:
+                - tools
+        hub.caret.v1.CaretTool:
+            type: object
+            properties:
+                name:
+                    type: string
+                label:
+                    type: string
+                description:
+                    type: string
+                category:
+                    type: string
+                requires_approval:
+                    type: boolean
+                scope:
+                    type: string
+                    description: |-
+                        Access scope of this tool: "read" or "write". Mirrors the server-side
+                        gating already applied in ask/analyst modes; exposed so the UI can
+                        surface it too (e.g. counting write-scoped tools).
+            required:
+                - name
+                - label
+                - description
+                - category
+                - requires_approval
+                - scope
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CaretService

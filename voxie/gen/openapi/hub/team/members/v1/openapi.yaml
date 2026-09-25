@@ -1,0 +1,480 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/team/members/v1/members:
+        get:
+            tags:
+                - MembersService
+            summary: listTeam
+            description: Returns team members for the active business.
+            operationId: MembersService_listTeam
+            parameters:
+                - name: page
+                  in: query
+                  description: page is the 1-based result page to return; defaults to 1.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page is the 1-based result page to return; defaults to 1.
+                - name: page_size
+                  in: query
+                  description: page_size is the maximum number of members per page; server caps at 500.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page_size is the maximum number of members per page; server caps at 500.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.members.v1.ListTeamResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/team/members/v1/members/{user_id}:
+        get:
+            tags:
+                - MembersService
+            summary: getMember
+            description: Returns a single team member by ID.
+            operationId: MembersService_getMember
+            parameters:
+                - name: user_id
+                  in: path
+                  description: Identifies the member to fetch.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Identifies the member to fetch.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.members.v1.GetMemberResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - MembersService
+            summary: removeMember
+            description: Removes a member from the team.
+            operationId: MembersService_removeMember
+            parameters:
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.team.members.v1.RemoveMemberResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hub.team.members.v1.ListTeamRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the 1-based result page to return; defaults to 1.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: page_size is the maximum number of members per page; server caps at 500.
+            required:
+                - page
+                - page_size
+        hub.team.members.v1.ListTeamResponse:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.members.v1.StaffUserPayload'
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of members across all pages, for pagination math.
+            required:
+                - users
+                - total
+        hub.team.members.v1.StaffUserPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                email:
+                    type: string
+                    description: Email address used for lookup or contact.
+                full_name:
+                    type: string
+                created_at:
+                    type: string
+                    description: When the record was created.
+                apps:
+                    type: array
+                    items:
+                        type: string
+                role:
+                    type: string
+                is_active:
+                    type: boolean
+                dash_role:
+                    type: string
+                    description: Independent Dash role assignment.
+                app_assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.AppRoleAssignment'
+                    description: Independent application role assignments.
+                effective_access:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.user.v1.EffectiveAccess'
+                    description: Server-resolved effective access.
+            required:
+                - id
+                - email
+                - full_name
+                - created_at
+                - apps
+                - role
+                - is_active
+                - app_assignments
+        hub.user.v1.AppRoleAssignment:
+            type: object
+            properties:
+                app_id:
+                    type: string
+                    description: Application receiving the role assignment.
+                role_ids:
+                    type: array
+                    items:
+                        type: string
+                    description: Canonical role identifiers.
+                primary_role_id:
+                    type: string
+                    description: Primary display role identifier.
+                assignment_source:
+                    type: string
+                    description: Server-owned assignment source.
+                status:
+                    type: string
+                    description: Assignment lifecycle status.
+                scopes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.RoleScope'
+                    description: Resource scopes attached to the assignment.
+                group_id:
+                    type: string
+                    description: Group target when the assignment is group-derived.
+            required:
+                - app_id
+                - role_ids
+                - assignment_source
+                - status
+                - scopes
+        hub.user.v1.RoleScope:
+            type: object
+            properties:
+                scope_type:
+                    type: string
+                    description: Scope resource type, such as location, department, or project.
+                scope_id:
+                    type: string
+                    description: Tenant-owned resource identifier.
+            required:
+                - scope_type
+                - scope_id
+        hub.user.v1.EffectiveAccess:
+            type: object
+            properties:
+                business_id:
+                    type: string
+                    description: Active business scope for this authorization snapshot.
+                dash_role:
+                    type: string
+                    description: Effective Dash role key.
+                dash_role_id:
+                    type: string
+                    description: Effective Dash role identifier.
+                dash_permissions:
+                    type: array
+                    items:
+                        type: string
+                    description: Effective Dash permission keys.
+                subscribed_apps:
+                    type: array
+                    items:
+                        type: string
+                    description: Business applications subscribed for this snapshot.
+                licenses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.LicenseAssignment'
+                    description: Active and historical license assignments.
+                apps:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.EffectiveAppAccess'
+                    description: Effective application access entries.
+                is_owner:
+                    type: boolean
+                    description: Whether the user is the business owner.
+                is_admin:
+                    type: boolean
+                    description: Whether the user has the Dash Admin override.
+                authorization_version:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Monotonic authorization version for cache refresh.
+            required:
+                - business_id
+                - dash_permissions
+                - subscribed_apps
+                - licenses
+                - apps
+                - is_owner
+                - is_admin
+                - authorization_version
+        hub.user.v1.LicenseAssignment:
+            type: object
+            properties:
+                app_id:
+                    type: string
+                    description: Licensed application identifier.
+                status:
+                    type: string
+                    description: License lifecycle status.
+                assignment_source:
+                    type: string
+                    description: Server-owned license source.
+                group_id:
+                    type: string
+                    description: Group target when the license is group-derived.
+                granted_at:
+                    type: string
+                    description: Time the license was granted.
+                revoked_at:
+                    type: string
+                    description: Time the license was revoked, when revoked.
+            required:
+                - app_id
+                - status
+                - assignment_source
+                - granted_at
+        hub.user.v1.EffectiveAppAccess:
+            type: object
+            properties:
+                app_id:
+                    type: string
+                    description: Application represented by this access entry.
+                licensed:
+                    type: boolean
+                    description: Whether an active user or group license exists.
+                has_access:
+                    type: boolean
+                    description: Whether the user has an active role assignment.
+                role_ids:
+                    type: array
+                    items:
+                        type: string
+                    description: Effective canonical role identifiers.
+                primary_role_id:
+                    type: string
+                    description: Primary role used for display and app entry.
+                display_role:
+                    type: string
+                    description: Server-resolved display role.
+                permissions:
+                    type: array
+                    items:
+                        type: string
+                    description: Effective permission keys for this application.
+                scopes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.RoleScope'
+                    description: Resource scopes attached to effective assignments.
+                sources:
+                    type: array
+                    items:
+                        type: string
+                    description: Sources contributing to effective access.
+                permission_sources:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    description: Permission-to-role source explanation.
+            required:
+                - app_id
+                - licensed
+                - has_access
+                - role_ids
+                - permissions
+                - scopes
+                - sources
+                - permission_sources
+        hub.team.members.v1.GetMemberRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Identifies the member to fetch.
+            required:
+                - user_id
+        hub.team.members.v1.GetMemberResponse:
+            type: object
+            properties:
+                user:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.team.members.v1.StaffUserWithGroups'
+            required:
+                - user
+        hub.team.members.v1.StaffUserWithGroups:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                email:
+                    type: string
+                    description: Email address used for lookup or contact.
+                full_name:
+                    type: string
+                created_at:
+                    type: string
+                    description: When the record was created.
+                apps:
+                    type: array
+                    items:
+                        type: string
+                role:
+                    type: string
+                is_active:
+                    type: boolean
+                dash_role:
+                    type: string
+                    description: Independent Dash role assignment.
+                app_assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.user.v1.AppRoleAssignment'
+                    description: Independent application role assignments.
+                effective_access:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.user.v1.EffectiveAccess'
+                    description: Server-resolved effective access.
+                groups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.team.groups.v1.GroupSummary'
+                    description: Groups the staff user belongs to.
+            required:
+                - id
+                - email
+                - full_name
+                - created_at
+                - apps
+                - role
+                - is_active
+                - app_assignments
+                - groups
+        hub.team.groups.v1.GroupSummary:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                color:
+                    type: string
+            required:
+                - id
+                - name
+                - color
+        hub.team.members.v1.RemoveMemberRequest:
+            type: object
+            properties:
+                user_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - user_id
+        hub.team.members.v1.RemoveMemberResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: MembersService
+      description: MembersService defines hub team member endpoints.

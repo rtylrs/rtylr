@@ -1,0 +1,201 @@
+package insights.report.v1
+
+message ReportTemplate {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// name is the name value for this contract.
+  name: string
+  /// description is the description value for this contract.
+  description: string
+  /// type is the type value for this contract.
+  /// revenue, customers, products, operations, financial
+  type: string
+  /// metrics is the metrics value for this contract.
+  metrics: string[]
+  /// format is the format value for this contract.
+  /// pdf, csv, xlsx
+  format: string
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message ScheduledReport {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// template_id is the template id value for this contract.
+  template_id: int64
+  /// template_name is the template name value for this contract.
+  template_name: string
+  /// frequency is the frequency value for this contract.
+  /// daily, weekly, monthly
+  frequency: string
+  /// recipient_email is the recipient email value for this contract.
+  recipient_email: string
+  /// channel is the delivery channel (email, slack).
+  channel: string
+  /// is_active is the is active value for this contract.
+  is_active: bool
+  /// last_sent_at is the last sent at value for this contract.
+  last_sent_at: string
+  /// next_send_at is the next send at value for this contract.
+  next_send_at: string
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message ListReportTemplatesRequest {
+  /// page is the current result page.
+  page: int32 @query("page")
+  /// limit is the maximum number of records to return.
+  limit: int32 @query("limit")
+  /// sort_by is the field to sort results by.
+  sort_by: string @query("sort_by")
+  /// sort_dir is the sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+  /// type is the type value for this contract.
+  type: string @query("type")
+}
+
+message ListReportTemplatesResponse {
+  /// templates is the templates value for this contract.
+  templates: ReportTemplate[]
+  /// pagination is the pagination value for this contract.
+  pagination: PaginationResponse
+}
+
+message CreateReportTemplateRequest {
+  /// name is the name value for this contract.
+  name: string @required
+  /// description is the description value for this contract.
+  description: string @required
+  /// type is the type value for this contract.
+  type: string @required
+  /// metrics is the metrics value for this contract.
+  metrics: string[] @min_items(1)
+  /// format is the format value for this contract.
+  format: string @required
+}
+
+message CreateReportTemplateResponse {
+  /// template is the template value for this contract.
+  template: ReportTemplate
+}
+
+message GetReportTemplateRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+}
+
+message GetReportTemplateResponse {
+  /// template is the template value for this contract.
+  template: ReportTemplate
+}
+
+message ListScheduledReportsRequest {
+  /// page is the current result page.
+  page: int32 @query("page")
+  /// limit is the maximum number of records to return.
+  limit: int32 @query("limit")
+  /// sort_by is the field to sort results by.
+  sort_by: string @query("sort_by")
+  /// sort_dir is the sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListScheduledReportsResponse {
+  /// reports is the reports value for this contract.
+  reports: ScheduledReport[]
+  /// pagination is the pagination value for this contract.
+  pagination: PaginationResponse
+}
+
+message CreateScheduledReportRequest {
+  /// template_slug is the template slug (e.g. revenue-monthly).
+  template_slug: string @required
+  /// frequency is the delivery frequency (daily, weekly, monthly).
+  frequency: string @required
+  /// channel is the delivery channel (email, slack).
+  channel: string @required
+  /// recipient_email is the delivery recipient.
+  recipient_email: string @required @email
+  /// is_active toggles whether the schedule is active.
+  is_active: bool
+}
+
+message CreateScheduledReportResponse {
+  /// report is the report value for this contract.
+  report: ScheduledReport
+}
+
+message UpdateScheduledReportRequest {
+  /// id is the scheduled report identifier.
+  id: int64 @gt(0)
+  /// template_slug is the template slug (e.g. revenue-monthly).
+  template_slug: string @required
+  /// frequency is the delivery frequency (daily, weekly, monthly).
+  frequency: string @required
+  /// channel is the delivery channel (email, slack).
+  channel: string @required
+  /// recipient_email is the delivery recipient.
+  recipient_email: string @required @email
+  /// is_active toggles whether the schedule is active.
+  is_active: bool
+}
+
+message UpdateScheduledReportResponse {
+  /// report is the updated scheduled report.
+  report: ScheduledReport
+}
+
+message DeleteScheduledReportRequest {
+  /// id is the scheduled report identifier.
+  id: int64 @gt(0)
+}
+
+message DeleteScheduledReportResponse {
+  /// deleted confirms the schedule was removed.
+  deleted: bool
+}
+
+message GenerateRevenueReportRequest {
+  /// from_date is the inclusive start date (YYYY-MM-DD).
+  from_date: string
+  /// to_date is the inclusive end date (YYYY-MM-DD).
+  to_date: string
+  /// format is the export format (csv, pdf).
+  format: string
+}
+
+message GenerateRevenueReportResponse {
+  /// report_id is the queued report identifier.
+  report_id: string
+  /// url is the download URL when ready.
+  url: string
+  /// status is the queue status.
+  status: string
+}
+
+message ExportRevenueReportRequest {
+  /// from_date is the inclusive start date (YYYY-MM-DD).
+  from_date: string @query("from")
+  /// to_date is the inclusive end date (YYYY-MM-DD).
+  to_date: string @query("to")
+}
+
+message ExportRevenueRow {
+  /// date is the revenue date (YYYY-MM-DD).
+  date: string
+  /// amount_minor_units is the revenue amount in minor units.
+  amount_minor_units: int64
+}
+
+message ExportRevenueReportResponse {
+  /// filename is the suggested download filename.
+  filename: string
+  /// content_type is the MIME type for the export payload.
+  content_type: string
+  /// csv is the CSV document body.
+  csv: string
+  /// rows is the structured export rows.
+  rows: ExportRevenueRow[]
+}

@@ -1,0 +1,226 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /finance/reconciliation/v1/reconciliation:
+        get:
+            tags:
+                - ReconciliationService
+            summary: getOverview
+            operationId: ReconciliationService_getOverview
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.reconciliation.v1.GetOverviewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /finance/reconciliation/v1/reconciliation/match:
+        post:
+            tags:
+                - ReconciliationService
+            summary: match
+            operationId: ReconciliationService_match
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/finance.reconciliation.v1.MatchRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/finance.reconciliation.v1.MatchResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        finance.reconciliation.v1.GetOverviewRequest:
+            type: object
+        finance.reconciliation.v1.GetOverviewResponse:
+            type: object
+            properties:
+                unmatched_bank_txns:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.reconciliation.v1.UnmatchedBankTransaction'
+                unmatched_invoices:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.reconciliation.v1.UnmatchedInvoice'
+                suggestions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/finance.reconciliation.v1.MatchSuggestion'
+                bank_txns_truncated:
+                    type: boolean
+                    description: Overview lists are bounded previews; true means more matching records exist.
+                invoices_truncated:
+                    type: boolean
+                expenses_truncated:
+                    type: boolean
+                preview_limit:
+                    type: integer
+                    format: int32
+            required:
+                - unmatched_bank_txns
+                - unmatched_invoices
+                - suggestions
+                - bank_txns_truncated
+                - invoices_truncated
+                - expenses_truncated
+                - preview_limit
+        finance.reconciliation.v1.UnmatchedBankTransaction:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                bank_account_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                amount_minor_units:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                currency:
+                    type: string
+                occurred_at:
+                    type: string
+                description:
+                    type: string
+                external_id:
+                    type: string
+            required:
+                - id
+                - bank_account_id
+                - amount_minor_units
+                - currency
+                - occurred_at
+                - description
+                - external_id
+        finance.reconciliation.v1.UnmatchedInvoice:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                invoice_number:
+                    type: string
+                client_name:
+                    type: string
+                amount_minor_units:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                currency:
+                    type: string
+                issue_date:
+                    type: string
+                due_date:
+                    type: string
+            required:
+                - id
+                - invoice_number
+                - client_name
+                - amount_minor_units
+                - currency
+                - issue_date
+                - due_date
+        finance.reconciliation.v1.MatchSuggestion:
+            type: object
+            properties:
+                bank_feed_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                target_type:
+                    type: string
+                target_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                amount_minor_units:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                days_apart:
+                    type: integer
+                    format: int32
+                score:
+                    type: number
+                    format: double
+            required:
+                - bank_feed_id
+                - target_type
+                - target_id
+                - amount_minor_units
+                - days_apart
+                - score
+        finance.reconciliation.v1.MatchRequest:
+            type: object
+            properties:
+                bank_feed_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                target_type:
+                    type: string
+                target_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - bank_feed_id
+                - target_type
+                - target_id
+        finance.reconciliation.v1.MatchResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - id
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReconciliationService

@@ -1,0 +1,85 @@
+package hr.attendance.v1
+
+/// AttendanceRecordPayload is a single clock-in/clock-out attendance record.
+message AttendanceRecordPayload {
+  /// Unique identifier for the attendance record.
+  id: int64
+  /// Tenant owner this record belongs to.
+  owner_id: int64
+  /// Employee this attendance record is for.
+  employee_id: int64
+  /// Work location where attendance was recorded.
+  location_id: int64
+  /// Date of the attendance record (ISO-8601 format).
+  date: string
+  /// Unix timestamp when the employee clocked in.
+  clock_in_at: int64
+  /// Unix timestamp when the employee clocked out; absent if still clocked in.
+  clock_out_at: int64?
+  /// Total worked duration in minutes; absent if still clocked in.
+  duration_minutes: int32?
+  /// Method used to clock in (app | qr | gps | pin | facial).
+  clock_in_method: string
+  /// Latitude at clock-in; absent if location not captured.
+  clock_in_lat: float64?
+  /// Longitude at clock-in; absent if location not captured.
+  clock_in_lng: float64?
+  /// Whether the employee clocked in after the scheduled start.
+  is_late: bool
+  /// Number of minutes late; zero if on time.
+  late_minutes: int32
+  /// Attendance status (present | absent | partial).
+  status: string
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+message AttendanceClockInRequest {
+  /// Method used to clock in (app | qr | gps | pin | facial).
+  method: string @required
+  /// Work location where the employee is clocking in.
+  location_id: int64? @required @gt(0)
+  /// Latitude at clock-in; absent if location not available.
+  lat: float64?
+  /// Longitude at clock-in; absent if location not available.
+  lng: float64?
+  /// QR token scanned at a terminal; absent if not using QR method.
+  qr_token: string?
+  /// PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field.
+  pin: string?
+}
+
+message AttendanceClockInResponse {
+  /// The created attendance record.
+  record: AttendanceRecordPayload
+}
+
+message AttendanceClockOutRequest {
+  /// ID of the attendance record to close.
+  attendance_record_id: int64? @required @gt(0)
+}
+
+message AttendanceClockOutResponse {
+  /// The updated attendance record with clock-out data.
+  record: AttendanceRecordPayload
+}
+
+message ListAttendanceRequest {
+  /// Filter by employee; absent to include all employees.
+  employee_id: int64? @query("employee_id")
+  /// Filter by date; absent to include all dates.
+  date: string? @query("date")
+}
+
+message ListAttendanceResponse {
+  /// Attendance records matching the filters.
+  records: AttendanceRecordPayload[]
+  /// Total number of matching attendance records across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}

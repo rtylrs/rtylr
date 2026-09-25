@@ -1,0 +1,61 @@
+package erp.brand.v1
+
+message Brand {
+  id: int64
+  owner_id: int64
+  name: string
+  logo_url: string
+  description: string
+  product_count: int64
+  created_at: string
+  updated_at: string
+}
+
+message CreateBrandRequest {
+  name: string @required
+  logo_url: string
+  description: string
+}
+
+message CreateBrandResponse {
+  brand_id: int64
+  message: string
+}
+
+message UpdateBrandBody {
+  name: string @required
+  logo_url: string
+  description: string
+}
+
+message UpdateBrandRequest {
+  id: int64 @gt(0)
+  body: UpdateBrandBody
+}
+
+message UpdateBrandResponse {
+  message: string
+}
+
+message DeleteBrandRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteBrandResponse {
+  message: string
+}
+
+message ListBrandsRequest {
+  /// Maximum number of brands to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of brands to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListBrandsResponse {
+  brands: Brand[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
+}

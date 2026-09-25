@@ -1,0 +1,128 @@
+package hub.team.groups.v1
+
+message ResourcePermission {
+  resource_key: string
+  permission_level: string
+}
+
+message GroupSummary {
+  id: int64
+  name: string
+  color: string
+}
+
+message Group {
+  id: int64
+  /// Identifies the owner of the group.
+  owner_id: int64
+  name: string
+  description: string
+  color: string
+  resource_permissions: ResourcePermission[]
+  member_count: int32
+  /// When the record was created.
+  created_at: string
+  /// When the record was last updated.
+  updated_at: string
+}
+
+message GroupMember {
+  /// Identifies the member user.
+  user_id: int64
+  /// Email address used for lookup or contact.
+  email: string
+  full_name: string
+  /// When the member was added to the group.
+  added_at: string
+}
+
+/// GroupDetail mirrors Group with the member list flattened alongside it
+/// (the legacy payload embeds the group fields at the top level).
+message GroupDetail {
+  id: int64
+  /// Identifies the owner of the group.
+  owner_id: int64
+  name: string
+  description: string
+  color: string
+  resource_permissions: ResourcePermission[]
+  member_count: int32
+  /// When the record was created.
+  created_at: string
+  /// When the record was last updated.
+  updated_at: string
+  members: GroupMember[]
+}
+
+message ListGroupsRequest {}
+
+message ListGroupsResponse {
+  groups: Group[]
+}
+
+message CreateGroupRequest {
+  name: string @required
+  description: string
+  color: string
+  resource_permissions: ResourcePermission[]
+}
+
+message CreateGroupResponse {
+  group: Group
+}
+
+message GetGroupDetailRequest {
+  id: int64 @gt(0)
+}
+
+message GetGroupDetailResponse {
+  group: GroupDetail
+}
+
+message UpdateGroupRequest {
+  id: int64 @gt(0)
+  name: string @required
+  description: string
+  color: string
+  resource_permissions: ResourcePermission[]
+}
+
+message UpdateGroupResponse {
+  group: Group
+}
+
+message DeleteGroupRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteGroupResponse {
+  message: string
+}
+
+message AddGroupMembersRequest {
+  id: int64 @gt(0)
+  user_ids: int64[] @min_items(1)
+}
+
+message AddGroupMembersResponse {
+  /// Number of members added.
+  added: int32
+  message: string
+}
+
+message RemoveGroupMemberRequest {
+  id: int64 @gt(0)
+  user_id: int64 @gt(0)
+}
+
+message RemoveGroupMemberResponse {
+  message: string
+}
+
+message GetUserGroupsRequest {
+  user_id: int64 @gt(0)
+}
+
+message GetUserGroupsResponse {
+  groups: GroupSummary[]
+}

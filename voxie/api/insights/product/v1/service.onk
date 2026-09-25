@@ -1,0 +1,19 @@
+package insights.product.v1
+
+/// ProductService defines insights product analytics endpoints.
+service ProductService {
+  /// Returns top-selling products.
+  getBestSellers(GetBestSellersRequest) -> GetBestSellersResponse @get("/best-sellers")
+
+  /// Returns performance by category.
+  getCategoryPerformance(GetCategoryPerformanceRequest) -> GetCategoryPerformanceResponse @get("/categories")
+
+  /// Returns product margin analysis.
+  getProductMargins(GetProductMarginsRequest) -> GetProductMarginsResponse @get("/margins")
+
+  /// Returns slow-moving products.
+  getSlowMovers(GetSlowMoversRequest) -> GetSlowMoversResponse @get("/slow-movers")
+
+  /// Returns aggregate product KPI counters.
+  getProductPerformance(GetProductPerformanceRequest) -> GetProductPerformanceResponse @get("/performance")
+}

@@ -1,0 +1,10 @@
+package erp.stock_take.v1
+
+/// StockTakeService defines ERP stock take endpoints.
+service StockTakeService {
+  listStockTakes(ListStockTakesRequest) -> ListStockTakesResponse @get("/stock-takes")
+
+  createStockTake(CreateStockTakeRequest) -> CreateStockTakeResponse @post("/stock-takes")
+
+  updateStockTake(UpdateStockTakeRequest) -> UpdateStockTakeResponse @put("/stock-takes/{id}")
+}

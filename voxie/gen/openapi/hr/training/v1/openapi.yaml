@@ -1,0 +1,142 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/training/v1/courses:
+        get:
+            tags:
+                - TrainingService
+            summary: listTrainingCourses
+            operationId: TrainingService_listTrainingCourses
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.training.v1.ListTrainingCoursesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - TrainingService
+            summary: createTrainingCourse
+            operationId: TrainingService_createTrainingCourse
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.training.v1.CreateTrainingCourseRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.training.v1.CreateTrainingCourseResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.training.v1.ListTrainingCoursesRequest:
+            type: object
+        hr.training.v1.ListTrainingCoursesResponse:
+            type: object
+            properties:
+                courses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.training.v1.TrainingCourse'
+            required:
+                - courses
+        hr.training.v1.TrainingCourse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                description:
+                    type: string
+                duration_hours:
+                    type: number
+                    format: double
+                is_required:
+                    type: boolean
+                created_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - description
+                - duration_hours
+                - is_required
+                - created_at
+            description: TrainingCourse is a training course offered to staff.
+        hr.training.v1.CreateTrainingCourseRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                duration_hours:
+                    type: number
+                    format: double
+                is_required:
+                    type: boolean
+            required:
+                - name
+                - description
+                - duration_hours
+                - is_required
+        hr.training.v1.CreateTrainingCourseResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - id
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TrainingService

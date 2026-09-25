@@ -1,0 +1,109 @@
+package crm.customer.v1
+
+/// Customer is a CRM customer profile with loyalty and engagement data.
+message Customer {
+  id: int64
+  owner_id: int64
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  date_of_birth: string?
+  gender: string
+  address: string
+  city: string
+  country: string
+  loyalty_points: int64
+  total_spent: float64
+  visit_count: int64
+  last_visit_at: string?
+  loyalty_tier: string
+  tags: string[]
+  notes: string
+  /// Explicit communication consent captured at customer creation/update.
+  consent: map[string, bool]
+  is_active: bool
+  created_at: string
+  updated_at: string
+}
+
+message CreateCustomerRequest {
+  first_name: string @required
+  last_name: string
+  /// Not yet enforced server-side; clients may send "".
+  email: string
+  phone: string
+  date_of_birth: string
+  gender: string
+  address: string
+  city: string
+  country: string
+  tags: string[]
+  notes: string
+  consent: map[string, bool]
+}
+
+message CreateCustomerResponse {
+  customer_id: int64
+  message: string
+}
+
+message DeleteCustomerRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteCustomerResponse {
+  message: string
+}
+
+message GetCustomerRequest {
+  id: int64 @gt(0)
+}
+
+message GetCustomerResponse {
+  customer: Customer
+}
+
+message ListCustomersRequest {
+  /// Filters customers by name, email, or phone.
+  search: string @query("search")
+  /// Filters by loyalty tier.
+  tier: string @query("tier")
+  /// Filters by customer tag.
+  tag: string @query("tag")
+  page: int64 @query("page")
+  page_size: int64 @query("page_size")
+}
+
+message ListCustomersResponse {
+  customers: Customer[]
+  total: int64
+  page: int64
+  page_size: int64
+}
+
+message UpdateCustomerBody {
+  first_name: string @required
+  last_name: string
+  /// Not yet enforced server-side; clients may send "".
+  email: string
+  phone: string
+  date_of_birth: string
+  gender: string
+  address: string
+  city: string
+  country: string
+  tags: string[]
+  notes: string
+  consent: map[string, bool]
+  is_active: bool?
+}
+
+message UpdateCustomerRequest {
+  id: int64 @gt(0)
+  body: UpdateCustomerBody
+}
+
+message UpdateCustomerResponse {
+  message: string
+}

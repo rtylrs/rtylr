@@ -1,0 +1,67 @@
+package pos.kds.v1
+
+/// KDSItem is a single line item on a kitchen display order.
+message KDSItem {
+  id: int64
+  order_id: int64
+  name: string
+  quantity: float64
+  notes: string
+  /// status is the current lifecycle state.
+  status: string
+}
+
+/// KDSOrder is an order shown on the kitchen display.
+message KDSOrder {
+  id: int64
+  order_number: string
+  type: string
+  /// status is the current lifecycle state.
+  status: string
+  table_id: int64
+  customer_name: string
+  kitchen_notes: string
+  /// created_at is when the record was created.
+  created_at: string
+  items: KDSItem[]
+}
+
+message ListKDSOrdersRequest {}
+
+message ListKDSOrdersResponse {
+  orders: KDSOrder[]
+}
+
+message UpdateKDSItemByIDBody {
+  /// status is the current lifecycle state.
+  status: string @required
+}
+
+message UpdateKDSItemByIDRequest {
+  /// item_id is the unique identifier for the order item.
+  item_id: int64 @gt(0)
+  /// body carries the new KDS item status bound from the HTTP payload.
+  body: UpdateKDSItemByIDBody
+}
+
+message UpdateKDSItemByIDResponse {
+  message: string
+}
+
+message UpdateKDSItemStatusBody {
+  /// status is the current lifecycle state.
+  status: string @required
+}
+
+message UpdateKDSItemStatusRequest {
+  /// order_id is the unique identifier for the order.
+  order_id: int64 @gt(0)
+  /// item_id is the unique identifier for the order item.
+  item_id: int64 @gt(0)
+  /// body carries the new KDS item status bound from the HTTP payload.
+  body: UpdateKDSItemStatusBody
+}
+
+message UpdateKDSItemStatusResponse {
+  message: string
+}

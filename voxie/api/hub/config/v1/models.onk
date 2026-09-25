@@ -1,0 +1,146 @@
+package hub.config.v1
+
+message ConfigPayload {
+  /// Identifies the business that owns this config. Serialized as a string
+  /// in the legacy payload.
+  owner_id: string
+  site_name: string
+  logo_url: string
+  favicon_url: string
+  meta_tags: string[]
+  contact_email: string
+  contact_number: string
+  sender_email: string
+  email_provider: string
+  sender_name: string
+  reply_to_email: string
+  email_notifications_enabled: bool
+  smtp_host: string
+  smtp_port: int32
+  smtp_username: string
+  smtp_password_configured: bool
+  website: string
+  maps_url: string
+  address: string
+  city: string
+  zipcode: string
+  country: string
+  instagram: string
+  maintenance_mode: bool
+  maintenance_notice: string
+  addons_enabled: bool
+  enable_reviews: bool
+  enable_wishlist: bool
+  enable_newsletter_signup: bool
+  about_content: string
+  footer_sub_text: string
+  slug: string
+}
+
+message CreateConfigRequest {
+  /// Accepted for legacy compatibility; the server derives the owning
+  /// business from the authenticated user.
+  owner: string
+  key: string @required
+  value: string @required
+  description: string
+}
+
+message CreateConfigResponse {
+  /// Identifies the created config.
+  config_id: int64
+  message: string
+}
+
+message GetConfigRequest {}
+
+message GetConfigResponse {
+  /// business is declared in hub.business.v1 - a cross-package reference.
+  business: hub.business.v1.Business
+  maintenance: bool
+}
+
+message IndustryType {
+  slug: string
+  label: string
+  icon: string
+}
+
+message IndustryGroup {
+  category: string
+  types: IndustryType[]
+}
+
+message GetIndustriesRequest {}
+
+message GetIndustriesResponse {
+  groups: IndustryGroup[]
+}
+
+message UpdateConfigRequest {
+  /// Absent means unchanged.
+  site_name: string?
+  logo_url: string?
+  favicon_url: string?
+  contact_email: string?
+  contact_number: string?
+  sender_email: string?
+  email_provider: string?
+  sender_name: string?
+  reply_to_email: string?
+  email_notifications_enabled: bool?
+  smtp_host: string?
+  smtp_port: int32?
+  smtp_username: string?
+  smtp_password: string?
+  website: string?
+  maps_url: string?
+  address: string?
+  city: string?
+  zipcode: string?
+  country: string?
+  instagram: string?
+  maintenance_mode: bool?
+  maintenance_notice: string?
+  addons_enabled: bool?
+  enable_reviews: bool?
+  enable_wishlist: bool?
+  enable_newsletter_signup: bool?
+  about_content: string?
+  footer_sub_text: string?
+}
+
+message UpdateConfigResponse {
+  message: string
+  config: ConfigPayload
+}
+
+message SendTestEmailRequest {
+  recipient: string @required
+}
+
+message SendTestEmailResponse {
+  message: string
+  queued: bool
+}
+
+message CustomDomain {
+  id: int64
+  business_id: int64
+  domain: string
+  status: string
+  verification_token: string
+  ssl_status: string
+  verified_at: string
+  created_at: string
+  updated_at: string
+}
+
+message GetCustomDomainRequest {}
+message GetCustomDomainResponse { domain: CustomDomain }
+message RegisterCustomDomainRequest { domain: string @required }
+message RegisterCustomDomainResponse { domain: CustomDomain }
+message VerifyCustomDomainRequest { verification_token: string @required }
+message VerifyCustomDomainResponse { domain: CustomDomain }
+message RemoveCustomDomainRequest {}
+message RemoveCustomDomainResponse { message: string }

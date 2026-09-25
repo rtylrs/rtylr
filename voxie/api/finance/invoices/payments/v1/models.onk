@@ -1,0 +1,25 @@
+package finance.invoices.payments.v1
+
+message RecordPaymentRequest {
+  /// invoice_id is the invoice id value for this contract.
+  invoice_id: int64 @gt(0)
+  /// amount is the amount value for this contract.
+  amount: float64 @gte(0)
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// payment_date is the payment date value for this contract.
+  payment_date: string @required
+  /// method is the method value for this contract.
+  method: string @required
+  /// reference is the reference value for this contract.
+  reference: string @required
+  /// notes is the notes value for this contract.
+  notes: string
+}
+
+message RecordPaymentResponse {
+  /// payment is the payment value for this contract.
+  payment: RecordPaymentResponsePayload
+  /// message is a human-readable result message.
+  message: string
+}

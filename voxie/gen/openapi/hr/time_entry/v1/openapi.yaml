@@ -1,0 +1,776 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/time-entry/v1/time-entries:
+        get:
+            tags:
+                - TimeEntryService
+            summary: listTimeEntries
+            description: Returns time entries with optional filters.
+            operationId: TimeEntryService_listTimeEntries
+            parameters:
+                - name: employee_id
+                  in: query
+                  description: Filter by employee; absent to include all employees.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                - name: date
+                  in: query
+                  description: |-
+                    Filter by exact date; absent to include all dates. Ignored when from_date
+                    or to_date is supplied.
+                  required: false
+                  schema:
+                    type: string
+                    description: |-
+                        Filter by exact date; absent to include all dates. Ignored when from_date
+                        or to_date is supplied.
+                - name: from_date
+                  in: query
+                  description: |-
+                    Include entries dated on or after this day (ISO-8601, e.g. "2026-04-01");
+                    absent to leave the range open at the start.
+                  required: false
+                  schema:
+                    type: string
+                    description: |-
+                        Include entries dated on or after this day (ISO-8601, e.g. "2026-04-01");
+                        absent to leave the range open at the start.
+                - name: to_date
+                  in: query
+                  description: |-
+                    Include entries dated on or before this day; absent to leave the range
+                    open at the end.
+                  required: false
+                  schema:
+                    type: string
+                    description: |-
+                        Include entries dated on or before this day; absent to leave the range
+                        open at the end.
+                - name: project_id
+                  in: query
+                  description: |-
+                    Filter by the Flow project the time was logged against; absent to include
+                    all projects and entries with no project.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Filter by the Flow project the time was logged against; absent to include
+                        all projects and entries with no project.
+                - name: is_billable
+                  in: query
+                  description: |-
+                    Filter by billability; absent to include both billable and non-billable
+                    time.
+                  required: false
+                  schema:
+                    type: boolean
+                    description: |-
+                        Filter by billability; absent to include both billable and non-billable
+                        time.
+                - name: status
+                  in: query
+                  description: |-
+                    Filter by workflow status (draft | submitted | approved | rejected);
+                    absent to include all statuses.
+                  required: false
+                  schema:
+                    type: string
+                    description: |-
+                        Filter by workflow status (draft | submitted | approved | rejected);
+                        absent to include all statuses.
+                - name: limit
+                  in: query
+                  description: Maximum number of records to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Maximum number of records to return.
+                - name: offset
+                  in: query
+                  description: Number of records to skip for pagination.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Number of records to skip for pagination.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.time_entry.v1.ListTimeEntriesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - TimeEntryService
+            summary: createTimeEntry
+            description: Creates a new time entry.
+            operationId: TimeEntryService_createTimeEntry
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.time_entry.v1.CreateTimeEntryRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.time_entry.v1.CreateTimeEntryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/time-entry/v1/timesheets:
+        get:
+            tags:
+                - TimeEntryService
+            summary: listTimesheets
+            description: Returns timesheets with optional filters.
+            operationId: TimeEntryService_listTimesheets
+            parameters:
+                - name: employee_id
+                  in: query
+                  description: Filter by employee; absent to include all employees.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                - name: status
+                  in: query
+                  description: Filter by status; absent to include all statuses.
+                  required: false
+                  schema:
+                    type: string
+                    description: Filter by status; absent to include all statuses.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.time_entry.v1.ListTimesheetsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - TimeEntryService
+            summary: submitTimesheet
+            description: Submits a timesheet for approval.
+            operationId: TimeEntryService_submitTimesheet
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.time_entry.v1.SubmitTimesheetRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.time_entry.v1.SubmitTimesheetResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/time-entry/v1/timesheets/{id}/approve:
+        patch:
+            tags:
+                - TimeEntryService
+            summary: approveTimesheet
+            description: Approves a submitted timesheet.
+            operationId: TimeEntryService_approveTimesheet
+            parameters:
+                - name: id
+                  in: path
+                  description: ID of the timesheet being reviewed.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the timesheet being reviewed.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hr.time_entry.v1.ApproveTimesheetBody'
+                            description: body carries approval decision fields bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.time_entry.v1.ApproveTimesheetResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/time-entry/v1/time-entries/mark-invoiced:
+        patch:
+            tags:
+                - TimeEntryService
+            summary: markTimeEntriesInvoiced
+            description: |-
+                Records that one finance invoice bills the listed time entries, so
+                unbilled-billable queries stop offering hours that have been invoiced.
+            operationId: TimeEntryService_markTimeEntriesInvoiced
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hr.time_entry.v1.MarkTimeEntriesInvoicedBody'
+                            description: body carries the batch fields bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.time_entry.v1.MarkTimeEntriesInvoicedResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.time_entry.v1.ListTimeEntriesRequest:
+            type: object
+            properties:
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                date:
+                    type: string
+                    description: |-
+                        Filter by exact date; absent to include all dates. Ignored when from_date
+                        or to_date is supplied.
+                from_date:
+                    type: string
+                    description: |-
+                        Include entries dated on or after this day (ISO-8601, e.g. "2026-04-01");
+                        absent to leave the range open at the start.
+                to_date:
+                    type: string
+                    description: |-
+                        Include entries dated on or before this day; absent to leave the range
+                        open at the end.
+                project_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Filter by the Flow project the time was logged against; absent to include
+                        all projects and entries with no project.
+                is_billable:
+                    type: boolean
+                    description: |-
+                        Filter by billability; absent to include both billable and non-billable
+                        time.
+                status:
+                    type: string
+                    description: |-
+                        Filter by workflow status (draft | submitted | approved | rejected);
+                        absent to include all statuses.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Maximum number of records to return.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Number of records to skip for pagination.
+            required:
+                - limit
+                - offset
+            description: |-
+                ListTimeEntriesRequest selects logged time. Every filter is optional and
+                they combine with AND. The response is always a page: callers that need
+                everything must follow offset until total is reached.
+        hr.time_entry.v1.ListTimeEntriesResponse:
+            type: object
+            properties:
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.time_entry.v1.TimeEntryPayload'
+                    description: Time entries matching the filters.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of matching time entries across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - entries
+                - total
+                - limit
+                - offset
+        hr.time_entry.v1.TimeEntryPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the time entry.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this entry belongs to.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee who logged the time.
+                project_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Associated project; absent if not project-based.
+                task_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Associated task; absent if not task-level tracking.
+                category_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Time category for reporting; absent if uncategorised.
+                date:
+                    type: string
+                    description: Date the work was performed (ISO-8601 format, e.g. "2026-04-14").
+                duration_minutes:
+                    type: integer
+                    format: int32
+                    description: Total duration of work in minutes.
+                start_time:
+                    type: string
+                    description: Clock-in time (ISO-8601 time or datetime); absent if duration-only entry.
+                end_time:
+                    type: string
+                    description: Clock-out time (ISO-8601 time or datetime); absent if duration-only entry.
+                description:
+                    type: string
+                    description: Free-text description of the work performed.
+                is_billable:
+                    type: boolean
+                    description: Whether this time is billable to a client.
+                status:
+                    type: string
+                    description: Workflow status (draft | submitted | approved | rejected).
+                rejection_reason:
+                    type: string
+                    description: Reason the entry was rejected; absent unless status is rejected.
+                approved_by:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee ID of the approver; absent if not yet approved.
+                source:
+                    type: string
+                    description: How the entry was created (manual | timer | flow_import).
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - date
+                - duration_minutes
+                - description
+                - is_billable
+                - status
+                - source
+                - created_at
+                - updated_at
+            description: TimeEntryPayload is a logged unit of employee work time.
+        hr.time_entry.v1.CreateTimeEntryRequest:
+            type: object
+            properties:
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee who logged the time.
+                project_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Associated project; absent if not project-based.
+                task_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Associated task; absent if not task-level tracking.
+                category_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Time category for reporting; absent if uncategorised.
+                date:
+                    type: string
+                    description: Date the work was performed (ISO-8601 format).
+                duration_minutes:
+                    exclusiveMinimum: 0
+                    type: integer
+                    format: int32
+                    description: Total duration of work in minutes.
+                start_time:
+                    type: string
+                    description: Clock-in time; absent if duration-only entry.
+                end_time:
+                    type: string
+                    description: Clock-out time; absent if duration-only entry.
+                description:
+                    type: string
+                    description: Free-text description of the work performed.
+                is_billable:
+                    type: boolean
+                    description: Whether this time is billable to a client.
+                source:
+                    type: string
+                    description: How the entry was created (manual | timer | flow_import).
+            required:
+                - employee_id
+                - date
+                - duration_minutes
+                - description
+                - is_billable
+                - source
+        hr.time_entry.v1.CreateTimeEntryResponse:
+            type: object
+            properties:
+                entry:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.time_entry.v1.TimeEntryPayload'
+                    description: The newly created time entry.
+            required:
+                - entry
+        hr.time_entry.v1.ListTimesheetsRequest:
+            type: object
+            properties:
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                status:
+                    type: string
+                    description: Filter by status; absent to include all statuses.
+        hr.time_entry.v1.ListTimesheetsResponse:
+            type: object
+            properties:
+                timesheets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.time_entry.v1.TimesheetPayload'
+                    description: Page of timesheets matching the filters.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of matching timesheets across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - timesheets
+                - total
+                - limit
+                - offset
+        hr.time_entry.v1.TimesheetPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the timesheet.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this timesheet belongs to.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee this timesheet is for.
+                period_start:
+                    type: string
+                    description: Start of the timesheet period (ISO-8601 date).
+                period_end:
+                    type: string
+                    description: End of the timesheet period (ISO-8601 date).
+                status:
+                    type: string
+                    description: Workflow status (draft | submitted | approved | rejected | locked).
+                current_approval_level:
+                    type: integer
+                    format: int32
+                    description: Current step in a multi-level approval chain.
+                submitted_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the timesheet was submitted; absent if still in draft.
+                total_minutes:
+                    type: integer
+                    format: int32
+                    description: Sum of all entry durations in minutes.
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.time_entry.v1.TimeEntryPayload'
+                    description: Individual time entries within this timesheet.
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - period_start
+                - period_end
+                - status
+                - current_approval_level
+                - total_minutes
+                - entries
+                - created_at
+                - updated_at
+            description: TimesheetPayload is an employee's time entries grouped over a period.
+        hr.time_entry.v1.SubmitTimesheetRequest:
+            type: object
+            properties:
+                timesheet_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the timesheet to submit for approval.
+            required:
+                - timesheet_id
+        hr.time_entry.v1.SubmitTimesheetResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the submission was accepted.
+            required:
+                - success
+        hr.time_entry.v1.ApproveTimesheetRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the timesheet being reviewed.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.time_entry.v1.ApproveTimesheetBody'
+                    description: body carries approval decision fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+        hr.time_entry.v1.ApproveTimesheetBody:
+            type: object
+            properties:
+                approved:
+                    type: boolean
+                    description: True to approve, false to reject.
+                rejection_reason:
+                    type: string
+                    description: Reason for rejection; absent if approving.
+            required:
+                - approved
+        hr.time_entry.v1.ApproveTimesheetResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the approval action was processed.
+            required:
+                - success
+        hr.time_entry.v1.MarkTimeEntriesInvoicedRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID kept for route symmetry with approveTimesheet; unused by the handler.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.time_entry.v1.MarkTimeEntriesInvoicedBody'
+                    description: body carries the batch fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+            description: |-
+                MarkTimeEntriesInvoicedRequest records that the listed approved billable
+                entries are settled by one finance invoice. Idempotent per entry: an entry
+                already carrying a billable_invoice_id is skipped, never overwritten.
+        hr.time_entry.v1.MarkTimeEntriesInvoicedBody:
+            type: object
+            properties:
+                entry_ids:
+                    type: array
+                    items:
+                        type: string
+                        pattern: ^-?[0-9]+$
+                        format: int64
+                    minItems: 1
+                    description: |-
+                        entry_ids are the time entries this invoice bills. Every entry must
+                        belong to the caller's business; foreign or missing ids are counted as
+                        skipped rather than failing the batch.
+                invoice_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: invoice_id is the finance invoice that settles them.
+            required:
+                - entry_ids
+                - invoice_id
+            description: MarkTimeEntriesInvoicedBody is the payload of markTimeEntriesInvoiced.
+        hr.time_entry.v1.MarkTimeEntriesInvoicedResponse:
+            type: object
+            properties:
+                marked_count:
+                    type: integer
+                    format: int32
+                    description: marked_count is how many entries now carry this invoice id.
+                skipped_count:
+                    type: integer
+                    format: int32
+                    description: |-
+                        skipped_count is how many of entry_ids were already invoiced, not
+                        approved billable work, or belong to another business.
+            required:
+                - marked_count
+                - skipped_count
+            description: |-
+                MarkTimeEntriesInvoicedResponse reports how the batch landed, so a caller
+                can tell "all marked" from "some were already invoiced" without a second
+                read.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: TimeEntryService
+      description: TimeEntryService defines HR time entry and timesheet endpoints.

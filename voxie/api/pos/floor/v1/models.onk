@@ -1,0 +1,57 @@
+package pos.floor.v1
+
+/// Floor is a physical seating area within a branch.
+message Floor {
+  id: int64
+  business_id: int64
+  branch_id: int64
+  name: string
+  sort_order: int32
+  is_active: bool
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message CreateFloorRequest {
+  branch_id: int64? @required @gt(0)
+  name: string @required
+  sort_order: int32? @required @gt(0)
+}
+
+message CreateFloorResponse {
+  floor_id: int64
+  message: string
+}
+
+message UpdateFloorBody {
+  name: string @required
+  sort_order: int32? @required @gt(0)
+}
+
+message UpdateFloorRequest {
+  /// id is the unique identifier for the floor.
+  id: int64 @gt(0)
+  /// body carries updatable floor fields bound from the HTTP payload.
+  body: UpdateFloorBody
+}
+
+message UpdateFloorResponse {
+  message: string
+}
+
+message DeleteFloorRequest {
+  /// id is the unique identifier for the floor.
+  id: int64 @gt(0)
+}
+
+message DeleteFloorResponse {
+  message: string
+}
+
+message ListFloorsRequest {
+  branch_id: int64 @query("branch_id")
+}
+
+message ListFloorsResponse {
+  floors: Floor[]
+}

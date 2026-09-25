@@ -1,0 +1,155 @@
+package hub.user.v1
+
+message RoleScope {
+  /// Scope resource type, such as location, department, or project.
+  scope_type: string
+  /// Tenant-owned resource identifier.
+  scope_id: string
+}
+
+message AppRoleAssignment {
+  /// Application receiving the role assignment.
+  app_id: string
+  /// Canonical role identifiers.
+  role_ids: string[]
+  /// Primary display role identifier.
+  primary_role_id: string?
+  /// Server-owned assignment source.
+  assignment_source: string
+  /// Assignment lifecycle status.
+  status: string
+  /// Resource scopes attached to the assignment.
+  scopes: RoleScope[]
+  /// Group target when the assignment is group-derived.
+  group_id: string?
+}
+
+message LicenseAssignment {
+  /// Licensed application identifier.
+  app_id: string
+  /// License lifecycle status.
+  status: string
+  /// Server-owned license source.
+  assignment_source: string
+  /// Group target when the license is group-derived.
+  group_id: string?
+  /// Time the license was granted.
+  granted_at: string
+  /// Time the license was revoked, when revoked.
+  revoked_at: string?
+}
+
+message EffectiveAppAccess {
+  /// Application represented by this access entry.
+  app_id: string
+  /// Whether an active user or group license exists.
+  licensed: bool
+  /// Whether the user has an active role assignment.
+  has_access: bool
+  /// Effective canonical role identifiers.
+  role_ids: string[]
+  /// Primary role used for display and app entry.
+  primary_role_id: string?
+  /// Server-resolved display role.
+  display_role: string?
+  /// Effective permission keys for this application.
+  permissions: string[]
+  /// Resource scopes attached to effective assignments.
+  scopes: RoleScope[]
+  /// Sources contributing to effective access.
+  sources: string[]
+  /// Permission-to-role source explanation.
+  permission_sources: map[string, string]
+}
+
+message EffectiveAccess {
+  /// Active business scope for this authorization snapshot.
+  business_id: string
+  /// Effective Dash role key.
+  dash_role: string?
+  /// Effective Dash role identifier.
+  dash_role_id: string?
+  /// Effective Dash permission keys.
+  dash_permissions: string[]
+  /// Business applications subscribed for this snapshot.
+  subscribed_apps: string[]
+  /// Active and historical license assignments.
+  licenses: LicenseAssignment[]
+  /// Effective application access entries.
+  apps: EffectiveAppAccess[]
+  /// Whether the user is the business owner.
+  is_owner: bool
+  /// Whether the user has the Dash Admin override.
+  is_admin: bool
+  /// Monotonic authorization version for cache refresh.
+  authorization_version: int64
+}
+
+message ProvisioningStatus {
+  /// Provisioning mode used for the account.
+  mode: string?
+  /// Current provisioning lifecycle state.
+  state: string?
+  /// Whether the work email is verified.
+  email_verified: bool?
+  /// Whether a first-login password change is required.
+  password_change_required: bool?
+  /// Whether MFA is required before sensitive access.
+  mfa_required: bool?
+  /// Whether MFA enrollment is complete.
+  mfa_enrolled: bool?
+  /// Whether the current MFA verification window is valid.
+  mfa_verified: bool?
+  /// Whether account recovery is available.
+  recovery_available: bool?
+}
+
+message GetMeRequest {}
+
+message GetMeResponse {
+  id: int64
+  /// Email address used for lookup or contact.
+  email: string
+  full_name: string
+  apps: string[]
+  role: string
+  business_id: int64
+  business_name: string
+  is_owner: bool
+  /// is_console_admin indicates the user can access the internal console.
+  is_console_admin: bool
+  onboarded: bool
+  /// Effective Dash role for the active business.
+  dash_role: string?
+  /// Server-resolved authorization snapshot.
+  effective_access: EffectiveAccess?
+  /// Account provisioning and security state.
+  provisioning_status: ProvisioningStatus?
+}
+
+message UpdateProfileRequest {
+  name: string @required
+  /// Reserved for future profile email changes.
+  email: string? @email
+}
+
+message UpdateProfileResponse {
+  user: GetMeResponse
+}
+
+message ChangePasswordRequest {
+  current_password: string @required
+  new_password: string @required
+}
+
+message ChangePasswordResponse {}
+
+message SwitchBusinessRequest {
+  /// Business to activate in the current session.
+  business_id: int64? @required @gt(0)
+}
+
+message SwitchBusinessResponse {
+  /// Fresh JWT scoped to the selected business.
+  token: string
+}

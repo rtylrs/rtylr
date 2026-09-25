@@ -1,0 +1,238 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/session/v1/sessions:
+        get:
+            tags:
+                - SessionService
+            summary: listSessions
+            description: Returns register sessions for the active business.
+            operationId: SessionService_listSessions
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.session.v1.ListSessionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/session/v1/sessions/open:
+        post:
+            tags:
+                - SessionService
+            summary: openSession
+            description: Opens a new register session.
+            operationId: SessionService_openSession
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.session.v1.OpenSessionRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.session.v1.OpenSessionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/session/v1/sessions/{id}/close:
+        post:
+            tags:
+                - SessionService
+            summary: closeSession
+            description: Closes an open register session.
+            operationId: SessionService_closeSession
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                closing_float:
+                                    type: number
+                                    minimum: 0
+                                    format: double
+                            required:
+                                - closing_float
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.session.v1.CloseSessionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.session.v1.ListSessionsRequest:
+            type: object
+        pos.session.v1.ListSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.session.v1.Session'
+            required:
+                - sessions
+        pos.session.v1.Session:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                opening_float:
+                    type: number
+                    format: double
+                closing_float:
+                    type: number
+                    format: double
+                total_sales:
+                    type: number
+                    format: double
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                opened_at:
+                    type: string
+                closed_at:
+                    type: string
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+            required:
+                - id
+                - owner_id
+                - opening_float
+                - closing_float
+                - total_sales
+                - status
+                - opened_at
+                - created_at
+            description: Session is a POS register session.
+        pos.session.v1.OpenSessionRequest:
+            type: object
+            properties:
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                staff_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                opening_float:
+                    type: number
+                    minimum: 0
+                    format: double
+            required:
+                - location_id
+                - staff_id
+                - opening_float
+        pos.session.v1.OpenSessionResponse:
+            type: object
+            properties:
+                session_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - session_id
+                - message
+        pos.session.v1.CloseSessionRequest:
+            type: object
+            properties:
+                closing_float:
+                    type: number
+                    minimum: 0
+                    format: double
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - closing_float
+                - id
+        pos.session.v1.CloseSessionResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SessionService
+      description: SessionService defines POS register session endpoints.

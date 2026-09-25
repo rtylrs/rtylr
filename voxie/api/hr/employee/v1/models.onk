@@ -1,0 +1,182 @@
+package hr.employee.v1
+
+/// EmployeePayload is an HR employee record.
+message EmployeePayload {
+  /// Unique identifier for the employee record.
+  id: int64
+  /// Tenant owner this employee belongs to.
+  owner_id: int64
+  /// Linked user account ID.
+  user_id: int64
+  /// Department the employee is assigned to.
+  department_id: int64
+  /// Work location the employee reports to.
+  location_id: int64
+  /// Direct manager; absent if top-level.
+  manager_id: int64?
+  /// Employment arrangement (full_time | part_time | freelancer).
+  contract_type: string
+  /// Current employment status (active | probation | inactive | terminated).
+  status: string
+  /// Date the employee was hired (ISO-8601 format).
+  hire_date: string
+  /// End of probation period; absent if no probation (ISO-8601 format).
+  probation_end_date: string?
+  /// Date employment was terminated; absent if still employed (ISO-8601 format).
+  termination_date: string?
+  /// Pay rate per hour for hourly employees; absent if salaried only.
+  hourly_rate: float64?
+  /// Monthly gross salary; absent if hourly only.
+  monthly_salary: float64?
+  /// ISO-4217 currency code for compensation (e.g. "USD").
+  currency: string
+  /// Assigned work schedule; absent if using department default.
+  work_schedule_id: int64?
+  /// How the employee account was created (hr_created | invite_link).
+  account_creation_mode: string
+  /// Employee's job title or position name.
+  job_title: string
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+message CreateEmployeeRequest {
+  /// user_id links this employee record to an existing login account; zero leaves it unlinked.
+  user_id: int64
+  /// department_id is the department assignment; zero leaves it unset.
+  department_id: int64
+  /// location_id is the work location assignment; zero leaves it unset.
+  location_id: int64
+  /// work_schedule_id is the work schedule assignment; zero leaves it unset.
+  work_schedule_id: int64
+  /// first_name is the employee's given name.
+  first_name: string @required
+  /// last_name is the employee's family name.
+  last_name: string @required
+  /// email is the employee email address.
+  email: string @required @email
+  /// phone is the employee phone number.
+  phone: string
+  /// employment_type is the employment type label.
+  employment_type: string @required
+  /// salary is the monthly or salaried compensation amount.
+  salary: float64 @gte(0)
+  /// hourly_rate is the employee hourly pay rate.
+  hourly_rate: float64 @gte(0)
+  /// overtime_rate is the employee overtime pay rate.
+  overtime_rate: float64 @gte(0)
+  /// start_date is the start date in YYYY-MM-DD format.
+  start_date: string @required
+  /// address is the employee address.
+  address: string
+}
+
+message CreateEmployeeResponse {
+  /// The newly created employee record.
+  employee: Staff
+}
+
+message InviteEmployeeRequest {
+  /// ID of the employee to invite.
+  employee_id: int64? @required @gt(0)
+  /// Channel to deliver the invite (email | sms).
+  send_via: string @required
+}
+
+message InviteEmployeeResponse {
+  /// Sensitive: do not log this field. One-time invite token for the employee.
+  invite_token: string
+  /// Unix timestamp when the invite expires.
+  expires_at: int64
+}
+
+message AcceptInviteRequest {
+  /// Sensitive: do not log this field. The invite token received by the employee.
+  token: string @required
+  /// Sensitive: do not log this field. Password chosen by the employee.
+  password: string @required
+}
+
+message AcceptInviteResponse {
+  /// Whether the invite was accepted successfully.
+  success: bool
+}
+
+message ListEmployeesRequest {
+  /// Filter by department; absent to include all departments.
+  department_id: int64? @query("department_id")
+  /// Filter by location; absent to include all locations.
+  location_id: int64? @query("location_id")
+  /// Filter by employment status; absent to include all statuses.
+  status: string? @query("status")
+  /// Maximum number of records to return.
+  limit: int32 @query("limit")
+  /// Number of records to skip for pagination.
+  offset: int32 @query("offset")
+}
+
+message ListEmployeesResponse {
+  /// Page of employee records matching the filters.
+  employees: EmployeePayload[]
+  /// Total number of employees matching the filters.
+  total: int64 @encode(number)
+  /// Limit that was applied.
+  limit: int32
+  /// Offset that was applied.
+  offset: int32
+}
+
+message UpdateEmployeeBody {
+  /// user_id links this employee record to an existing login account; zero leaves it unlinked.
+  user_id: int64
+  /// department_id is the department assignment; zero leaves it unset.
+  department_id: int64
+  /// location_id is the work location assignment; zero leaves it unset.
+  location_id: int64
+  /// work_schedule_id is the work schedule assignment; zero leaves it unset.
+  work_schedule_id: int64
+  /// first_name is the employee's given name.
+  first_name: string @required
+  /// last_name is the employee's family name.
+  last_name: string @required
+  /// email is the employee email address.
+  email: string @required
+  /// phone is the employee phone number.
+  phone: string
+  /// employment_type is the employment type label.
+  employment_type: string @required
+  /// status is the employment status.
+  status: string @required
+  /// salary is the monthly or salaried compensation amount.
+  salary: float64 @gte(0)
+  /// hourly_rate is the employee hourly pay rate.
+  hourly_rate: float64 @gte(0)
+  /// overtime_rate is the employee overtime pay rate.
+  overtime_rate: float64 @gte(0)
+  /// start_date is the start date in YYYY-MM-DD format.
+  start_date: string @required
+  /// end_date is the end date in YYYY-MM-DD format.
+  end_date: string @required
+  /// address is the employee address.
+  address: string
+  /// emergency_contact_name is the emergency contact name.
+  emergency_contact_name: string @required
+  /// emergency_contact_phone is the emergency contact phone.
+  emergency_contact_phone: string @required
+  /// notes are internal employee notes.
+  notes: string
+}
+
+message UpdateEmployeeRequest {
+  /// id is the employee ID from the route.
+  id: int64 @gt(0)
+  /// body carries updatable employee fields bound from the HTTP payload.
+  body: UpdateEmployeeBody
+}
+
+message UpdateEmployeeResponse {
+  /// The updated employee record.
+  employee: Staff
+}

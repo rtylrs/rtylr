@@ -1,0 +1,747 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /crm/loyalty/v1/config:
+        get:
+            tags:
+                - LoyaltyService
+            summary: getLoyaltyConfig
+            description: Returns the loyalty program configuration.
+            operationId: LoyaltyService_getLoyaltyConfig
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.GetLoyaltyConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        patch:
+            tags:
+                - LoyaltyService
+            summary: updateLoyaltyConfig
+            description: Updates the loyalty program configuration.
+            operationId: LoyaltyService_updateLoyaltyConfig
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyConfigRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyConfigResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /crm/loyalty/v1/tiers:
+        get:
+            tags:
+                - LoyaltyService
+            summary: listLoyaltyTiers
+            description: Returns all loyalty tiers.
+            operationId: LoyaltyService_listLoyaltyTiers
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.ListLoyaltyTiersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - LoyaltyService
+            summary: createLoyaltyTier
+            description: Creates a new loyalty tier.
+            operationId: LoyaltyService_createLoyaltyTier
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.loyalty.v1.CreateLoyaltyTierRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.CreateLoyaltyTierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /crm/loyalty/v1/tiers/{id}:
+        put:
+            tags:
+                - LoyaltyService
+            summary: updateLoyaltyTier
+            description: Updates an existing loyalty tier.
+            operationId: LoyaltyService_updateLoyaltyTier
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyTierBody'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyTierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /crm/loyalty/v1/transactions:
+        get:
+            tags:
+                - LoyaltyService
+            summary: listLoyaltyTransactions
+            description: Returns paginated loyalty transactions.
+            operationId: LoyaltyService_listLoyaltyTransactions
+            parameters:
+                - name: customer_id
+                  in: query
+                  description: Filters transactions for a single customer.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filters transactions for a single customer.
+                - name: page
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: page_size
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.ListLoyaltyTransactionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /crm/loyalty/v1/award:
+        post:
+            tags:
+                - LoyaltyService
+            summary: awardPoints
+            description: Awards loyalty points to a customer.
+            operationId: LoyaltyService_awardPoints
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.loyalty.v1.AwardPointsRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.AwardPointsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /crm/loyalty/v1/redeem:
+        post:
+            tags:
+                - LoyaltyService
+            summary: redeemPoints
+            description: Redeems loyalty points for a customer.
+            operationId: LoyaltyService_redeemPoints
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/crm.loyalty.v1.RedeemPointsRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/crm.loyalty.v1.RedeemPointsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        crm.loyalty.v1.GetLoyaltyConfigRequest:
+            type: object
+        crm.loyalty.v1.GetLoyaltyConfigResponse:
+            type: object
+            properties:
+                config:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.loyalty.v1.LoyaltyConfig'
+            required:
+                - config
+        crm.loyalty.v1.LoyaltyConfig:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                is_enabled:
+                    type: boolean
+                points_per_currency_unit:
+                    type: number
+                    format: double
+                currency_per_point:
+                    type: number
+                    format: double
+                bronze_min:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                silver_min:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                gold_min:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                platinum_min:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                bronze_discount_pct:
+                    type: number
+                    format: double
+                silver_discount_pct:
+                    type: number
+                    format: double
+                gold_discount_pct:
+                    type: number
+                    format: double
+                platinum_discount_pct:
+                    type: number
+                    format: double
+                points_expiry_days:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - is_enabled
+                - points_per_currency_unit
+                - currency_per_point
+                - bronze_min
+                - silver_min
+                - gold_min
+                - platinum_min
+                - bronze_discount_pct
+                - silver_discount_pct
+                - gold_discount_pct
+                - platinum_discount_pct
+                - points_expiry_days
+                - updated_at
+            description: LoyaltyConfig is a business's loyalty program configuration.
+        crm.loyalty.v1.UpdateLoyaltyConfigRequest:
+            type: object
+            properties:
+                is_enabled:
+                    type: boolean
+                points_per_currency_unit:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                currency_per_point:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                bronze_min:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                silver_min:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                gold_min:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                platinum_min:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                bronze_discount_pct:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                silver_discount_pct:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                gold_discount_pct:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                platinum_discount_pct:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                points_expiry_days:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - is_enabled
+                - points_per_currency_unit
+                - currency_per_point
+                - bronze_min
+                - silver_min
+                - gold_min
+                - platinum_min
+                - bronze_discount_pct
+                - silver_discount_pct
+                - gold_discount_pct
+                - platinum_discount_pct
+                - points_expiry_days
+        crm.loyalty.v1.UpdateLoyaltyConfigResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        crm.loyalty.v1.ListLoyaltyTiersRequest:
+            type: object
+        crm.loyalty.v1.ListLoyaltyTiersResponse:
+            type: object
+            properties:
+                tiers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.loyalty.v1.LoyaltyTier'
+            required:
+                - tiers
+        crm.loyalty.v1.LoyaltyTier:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                min_points:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                discount_pct:
+                    type: number
+                    format: double
+                perks:
+                    type: string
+                sort_order:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - name
+                - min_points
+                - discount_pct
+                - perks
+                - sort_order
+                - created_at
+                - updated_at
+            description: LoyaltyTier is a spend-based tier with an associated discount.
+        crm.loyalty.v1.CreateLoyaltyTierRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                min_points:
+                    type: string
+                    minimum: 0
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Points threshold at which this tier starts applying. Zero is valid and
+                        means an entry tier every customer qualifies for from their first point.
+                discount_pct:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                perks:
+                    type: string
+                sort_order:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - name
+                - min_points
+                - discount_pct
+                - perks
+                - sort_order
+        crm.loyalty.v1.CreateLoyaltyTierResponse:
+            type: object
+            properties:
+                tier_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - tier_id
+                - message
+        crm.loyalty.v1.UpdateLoyaltyTierRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/crm.loyalty.v1.UpdateLoyaltyTierBody'
+            required:
+                - id
+                - body
+        crm.loyalty.v1.UpdateLoyaltyTierBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                min_points:
+                    type: string
+                    minimum: 0
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Points threshold at which this tier starts applying. Zero is valid and
+                        means an entry tier every customer qualifies for from their first point.
+                discount_pct:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                perks:
+                    type: string
+                sort_order:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - name
+                - min_points
+                - discount_pct
+                - perks
+                - sort_order
+        crm.loyalty.v1.UpdateLoyaltyTierResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        crm.loyalty.v1.ListLoyaltyTransactionsRequest:
+            type: object
+            properties:
+                customer_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filters transactions for a single customer.
+                page:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page_size:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - customer_id
+                - page
+                - page_size
+        crm.loyalty.v1.ListLoyaltyTransactionsResponse:
+            type: object
+            properties:
+                transactions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/crm.loyalty.v1.LoyaltyTransaction'
+                total:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                page_size:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - transactions
+                - total
+                - page
+                - page_size
+        crm.loyalty.v1.LoyaltyTransaction:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                customer_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                type:
+                    type: string
+                points:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                balance_before:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                balance_after:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                description:
+                    type: string
+                reference_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reference_type:
+                    type: string
+                created_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - customer_id
+                - type
+                - points
+                - balance_before
+                - balance_after
+                - description
+                - reference_type
+                - created_at
+            description: LoyaltyTransaction is a single points award or redemption event.
+        crm.loyalty.v1.AwardPointsRequest:
+            type: object
+            properties:
+                customer_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                points:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                description:
+                    type: string
+                reference_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reference_type:
+                    type: string
+            required:
+                - customer_id
+                - points
+                - description
+                - reference_type
+        crm.loyalty.v1.AwardPointsResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        crm.loyalty.v1.RedeemPointsRequest:
+            type: object
+            properties:
+                customer_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                points:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                description:
+                    type: string
+                reference_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reference_type:
+                    type: string
+            required:
+                - customer_id
+                - points
+                - description
+                - reference_type
+        crm.loyalty.v1.RedeemPointsResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: LoyaltyService
+      description: LoyaltyService defines CRM loyalty program endpoints.

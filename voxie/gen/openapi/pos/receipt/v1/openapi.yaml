@@ -1,0 +1,170 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/receipt/v1/receipts:
+        get:
+            tags:
+                - ReceiptService
+            summary: listReceipts
+            description: Returns receipts, optionally filtered by date range.
+            operationId: ReceiptService_listReceipts
+            parameters:
+                - name: from
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                - name: to
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.receipt.v1.ListReceiptsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/receipt/v1/receipts/{id}/email:
+        post:
+            tags:
+                - ReceiptService
+            summary: emailReceipt
+            description: Emails a receipt to the given address.
+            operationId: ReceiptService_emailReceipt
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the unique identifier for the receipt.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the receipt.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    description: Recipient email address for the receipt.
+                            required:
+                                - email
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.receipt.v1.EmailReceiptResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.receipt.v1.ListReceiptsRequest:
+            type: object
+            properties:
+                from_date:
+                    type: string
+                to_date:
+                    type: string
+            required:
+                - from_date
+                - to_date
+        pos.receipt.v1.ListReceiptsResponse:
+            type: object
+            properties:
+                receipts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.receipt.v1.Receipt'
+            required:
+                - receipts
+        pos.receipt.v1.Receipt:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                order_number:
+                    type: string
+                customer_name:
+                    type: string
+                total:
+                    type: number
+                    format: double
+                payment_method:
+                    type: string
+                paid_at:
+                    type: string
+            required:
+                - id
+                - order_number
+                - customer_name
+                - total
+                - payment_method
+                - paid_at
+            description: Receipt is a completed order receipt.
+        pos.receipt.v1.EmailReceiptRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the receipt.
+                email:
+                    type: string
+                    description: Recipient email address for the receipt.
+            required:
+                - id
+                - email
+        pos.receipt.v1.EmailReceiptResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReceiptService
+      description: ReceiptService defines POS receipt endpoints.

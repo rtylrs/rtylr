@@ -1,0 +1,73 @@
+package erp.stock_take.v1
+
+message StockTakeItem {
+  id: int64
+  stock_take_id: int64
+  product_id: int64
+  expected_qty: float64
+  counted_qty: float64
+  variance: float64
+  created_at: string
+}
+
+message StockTake {
+  id: int64
+  owner_id: int64
+  warehouse_id: int64
+  status: string
+  notes: string
+  items: StockTakeItem[]
+  started_at: string
+  completed_at: string
+  created_at: string
+}
+
+message CreateStockTakeItemRequest {
+  product_id: int64
+  expected_qty: float64
+  counted_qty: float64
+}
+
+message CreateStockTakeRequest {
+  warehouse_id: int64? @required @gt(0)
+  notes: string
+  items: CreateStockTakeItemRequest[]
+}
+
+message CreateStockTakeResponse {
+  stock_take_id: int64
+  message: string
+}
+
+message ListStockTakesRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListStockTakesResponse {
+  stock_takes: StockTake[]
+  has_more: bool
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+}
+
+message UpdateStockTakeItemBody {
+  product_id: int64
+  expected_qty: float64
+  counted_qty: float64
+}
+
+message UpdateStockTakeBody {
+  status: string @required
+  notes: string
+  items: UpdateStockTakeItemBody[]
+}
+
+message UpdateStockTakeRequest {
+  id: int64 @gt(0)
+  body: UpdateStockTakeBody
+}
+
+message UpdateStockTakeResponse {
+  message: string
+}

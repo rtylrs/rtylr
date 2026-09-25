@@ -1,0 +1,63 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /booking/dashboard/v1/dashboard:
+        get:
+            tags:
+                - DashboardService
+            summary: getDashboard
+            operationId: DashboardService_getDashboard
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/booking.dashboard.v1.GetDashboardResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        booking.dashboard.v1.GetDashboardRequest:
+            type: object
+        booking.dashboard.v1.GetDashboardResponse:
+            type: object
+            properties:
+                today_count:
+                    type: integer
+                    format: int32
+                upcoming_count:
+                    type: integer
+                    format: int32
+                cancellation_rate:
+                    type: number
+                    format: double
+                revenue:
+                    type: number
+                    format: double
+            required:
+                - today_count
+                - upcoming_count
+                - cancellation_rate
+                - revenue
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: DashboardService

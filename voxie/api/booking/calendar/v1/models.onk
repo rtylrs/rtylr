@@ -1,0 +1,25 @@
+package booking.calendar.v1
+
+message CalendarAppointment {
+  id: int64
+  business_id: int64
+  service_id: int64
+  customer_name: string
+  start_time: string
+  end_time: string
+  status: string
+}
+
+message CalendarDay {
+  date: string
+  appointments: CalendarAppointment[]
+}
+
+message GetCalendarRequest {
+  from_date: string @required @query("from")
+  to_date: string @required @query("to")
+}
+
+message GetCalendarResponse {
+  days: CalendarDay[]
+}

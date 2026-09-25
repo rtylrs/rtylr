@@ -1,0 +1,13 @@
+package hub.memory.v1
+
+service MemoryService {
+  listChats(ListChatsRequest) -> ListChatsResponse @get("/chats")
+
+  getChatMessages(GetChatMessagesRequest) -> GetChatMessagesResponse @get("/chats/{session_id}/messages")
+
+  deleteChat(DeleteChatRequest) -> DeleteChatResponse @delete("/chats/{session_id}")
+
+  renameChat(RenameChatRequest) -> RenameChatResponse @put("/chats/{session_id}")
+
+  pinChat(PinChatRequest) -> PinChatResponse @put("/chats/{session_id}/pin")
+}

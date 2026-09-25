@@ -1,0 +1,23 @@
+package crm.campaign.v1
+
+/// CampaignService defines CRM campaign endpoints.
+service CampaignService {
+  /// Returns campaigns for the active business.
+  listCampaigns(ListCampaignsRequest) -> ListCampaignsResponse @get("/campaigns")
+
+  /// Creates a new marketing campaign.
+  createCampaign(CreateCampaignRequest) -> CreateCampaignResponse @post("/campaigns")
+
+  /// Returns a campaign and its stats.
+  getCampaignDetail(GetCampaignDetailRequest) -> GetCampaignDetailResponse @get("/campaigns/{id}")
+
+  /// Returns stats for a single campaign.
+  getCampaignStats(GetCampaignStatsRequest) -> GetCampaignStatsResponse @get("/campaigns/stats")
+
+  /// Updates campaign fields.
+  updateCampaign(UpdateCampaignRequest) -> UpdateCampaignResponse @put("/campaigns/{id}") @body("body")
+
+  /// Changes the campaign lifecycle status. The id is taken from the path;
+  /// only the status travels in the body (matches PUT /crm/campaigns/{id}/status).
+  updateCampaignStatus(UpdateCampaignStatusRequest) -> UpdateCampaignStatusResponse @put("/campaigns/{id}/status") @body("body")
+}

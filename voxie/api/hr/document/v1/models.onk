@@ -1,0 +1,55 @@
+package hr.document.v1
+
+message Document {
+  id: int64
+  owner_id: int64
+  staff_id: int64
+  name: string
+  type: string
+  file_url: string
+  expiry_date: string
+  created_at: string
+}
+
+/// EmployeeDocumentPayload is an employee document record.
+message EmployeeDocumentPayload {
+  id: int64
+  owner_id: int64
+  employee_id: int64
+  document_type: string
+  name: string
+  storage_mode: string
+  file_url: string
+  expiry_date: string?
+  uploaded_by: int64
+  uploaded_at: int64
+  created_at: int64
+  updated_at: int64
+}
+
+message CreateDocumentRequest {
+  staff_id: int64
+  name: string @required
+  type: string
+  file_url: string
+  expiry_date: string
+}
+
+message CreateDocumentResponse {
+  id: int64
+  message: string
+}
+
+message DeleteDocumentRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteDocumentResponse {
+  message: string
+}
+
+message ListDocumentsRequest {}
+
+message ListDocumentsResponse {
+  documents: Document[]
+}

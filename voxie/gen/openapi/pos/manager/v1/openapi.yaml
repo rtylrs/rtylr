@@ -1,0 +1,71 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/manager/v1/verify:
+        post:
+            tags:
+                - ManagerService
+            summary: verifyPIN
+            description: Verifies a manager PIN and returns the associated staff member.
+            operationId: ManagerService_verifyPIN
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.manager.v1.VerifyPINRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.manager.v1.VerifyPINResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.manager.v1.VerifyPINRequest:
+            type: object
+            properties:
+                pin:
+                    type: string
+            required:
+                - pin
+        pos.manager.v1.VerifyPINResponse:
+            type: object
+            properties:
+                valid:
+                    type: boolean
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - valid
+                - staff_id
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ManagerService
+      description: ManagerService defines POS manager override endpoints.

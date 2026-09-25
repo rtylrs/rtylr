@@ -1,0 +1,29 @@
+package support.settings.v1
+
+message Settings {
+  id: int64
+  business_id: int64
+  auto_assign: bool
+  sla_hours: int32
+  business_hours: string
+  notification_email: string
+  created_at: string
+  updated_at: string
+}
+
+message GetSettingsRequest {}
+
+message GetSettingsResponse {
+  settings: Settings
+}
+
+message UpdateSettingsRequest {
+  auto_assign: bool
+  sla_hours: int32? @required @gt(0) @lte(1000)
+  business_hours: string
+  notification_email: string
+}
+
+message UpdateSettingsResponse {
+  message: string
+}

@@ -1,0 +1,33 @@
+package hr.one_on_one.v1
+
+message OneOnOne {
+  id: int64
+  owner_id: int64
+  manager_id: int64
+  staff_id: int64
+  scheduled_at: string
+  notes: string
+  action_items: string
+  status: string
+  created_at: string
+}
+
+message ListOneOnOnesRequest {}
+
+message ListOneOnOnesResponse {
+  one_on_ones: OneOnOne[]
+}
+
+message CreateOneOnOneRequest {
+  manager_id: int64? @required @gt(0)
+  staff_id: int64? @required @gt(0)
+  scheduled_at: string @required
+  notes: string
+  action_items: string
+  status: string
+}
+
+message CreateOneOnOneResponse {
+  id: int64
+  message: string
+}

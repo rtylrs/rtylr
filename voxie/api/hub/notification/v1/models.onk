@@ -1,0 +1,48 @@
+package hub.notification.v1
+
+/// Notification is a single hub notification entry.
+message Notification {
+  id: int64
+  title: string
+  body: string
+  /// info, warning, success, error
+  type: string
+  read: bool
+  /// When the record was created.
+  created_at: string
+  link: string
+}
+
+message ListNotificationsRequest {
+  /// Maximum records to return. Defaults to 50 and is capped by the server.
+  limit: int32 @query("limit")
+  /// Opaque continuation token from a previous response.
+  cursor: string @query("cursor")
+}
+
+message ListNotificationsResponse {
+  notifications: Notification[]
+  next_cursor: string
+}
+
+message MarkAllReadRequest {}
+
+message MarkAllReadResponse {
+  message: string
+}
+
+message MarkNotificationReadRequest {
+  id: int64 @gt(0)
+}
+
+message MarkNotificationReadResponse {
+  message: string
+}
+
+message MarkNotificationsReadRequest {
+  ids: int64[] @min_items(1)
+}
+
+message MarkNotificationsReadResponse {
+  message: string
+}

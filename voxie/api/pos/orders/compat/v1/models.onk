@@ -1,0 +1,11 @@
+package pos.orders.compat.v1
+
+message ListOrdersRequest {
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+  status: string? @query("status")
+}
+
+message ListOrdersResponse {
+  orders: json[]
+}

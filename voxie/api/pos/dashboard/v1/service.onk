@@ -1,0 +1,7 @@
+package pos.dashboard.v1
+
+/// DashboardService defines POS dashboard summary endpoints.
+service DashboardService {
+  /// Returns aggregate sales metrics for the POS dashboard.
+  dashboard(DashboardRequest) -> DashboardResponse @get("/dashboard")
+}

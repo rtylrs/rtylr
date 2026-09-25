@@ -1,0 +1,399 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /erp/variant/v1/variants:
+        get:
+            tags:
+                - VariantService
+            summary: listVariants
+            operationId: VariantService_listVariants
+            parameters:
+                - name: product_id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: limit
+                  in: query
+                  description: Maximum number of variants to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Maximum number of variants to return.
+                - name: offset
+                  in: query
+                  description: Number of variants to skip.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int64
+                    description: Number of variants to skip.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.ListVariantsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - VariantService
+            summary: createVariant
+            operationId: VariantService_createVariant
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/erp.variant.v1.CreateVariantRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.CreateVariantResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /erp/variant/v1/variants/{id}:
+        put:
+            tags:
+                - VariantService
+            summary: updateVariant
+            operationId: VariantService_updateVariant
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                body:
+                                    allOf:
+                                        - $ref: '#/components/schemas/erp.variant.v1.UpdateVariantBody'
+                            required:
+                                - body
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.UpdateVariantResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - VariantService
+            summary: deleteVariant
+            operationId: VariantService_deleteVariant
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/erp.variant.v1.DeleteVariantResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        erp.variant.v1.ListVariantsRequest:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                limit:
+                    type: integer
+                    format: int64
+                    description: Maximum number of variants to return.
+                offset:
+                    type: integer
+                    format: int64
+                    description: Number of variants to skip.
+            required:
+                - product_id
+                - limit
+                - offset
+        erp.variant.v1.ListVariantsResponse:
+            type: object
+            properties:
+                variants:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/erp.variant.v1.Variant'
+                has_more:
+                    type: boolean
+                limit:
+                    type: integer
+                    format: int64
+                offset:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+            required:
+                - variants
+                - has_more
+                - limit
+                - offset
+                - total
+        erp.variant.v1.Variant:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                business_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                attributes:
+                    type: string
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - business_id
+                - product_id
+                - name
+                - sku
+                - barcode
+                - cost_price
+                - sale_price
+                - stock_quantity
+                - attributes
+                - is_active
+                - created_at
+                - updated_at
+        erp.variant.v1.CreateVariantRequest:
+            type: object
+            properties:
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                attributes:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - product_id
+                - name
+                - sku
+                - barcode
+                - cost_price
+                - sale_price
+                - stock_quantity
+                - attributes
+                - is_active
+        erp.variant.v1.CreateVariantResponse:
+            type: object
+            properties:
+                variant_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - variant_id
+                - message
+        erp.variant.v1.UpdateVariantRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/erp.variant.v1.UpdateVariantBody'
+            required:
+                - id
+                - body
+        erp.variant.v1.UpdateVariantBody:
+            type: object
+            properties:
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                barcode:
+                    type: string
+                cost_price:
+                    type: number
+                    format: double
+                sale_price:
+                    type: number
+                    format: double
+                stock_quantity:
+                    type: number
+                    format: double
+                attributes:
+                    type: string
+                is_active:
+                    type: boolean
+            required:
+                - product_id
+                - name
+                - sku
+                - barcode
+                - cost_price
+                - sale_price
+                - stock_quantity
+                - attributes
+                - is_active
+        erp.variant.v1.UpdateVariantResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        erp.variant.v1.DeleteVariantRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - id
+        erp.variant.v1.DeleteVariantResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: VariantService

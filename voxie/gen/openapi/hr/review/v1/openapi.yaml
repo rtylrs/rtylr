@@ -1,0 +1,188 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/review/v1/reviews:
+        get:
+            tags:
+                - ReviewService
+            summary: listReviews
+            operationId: ReviewService_listReviews
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.review.v1.ListReviewsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - ReviewService
+            summary: createReview
+            operationId: ReviewService_createReview
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.review.v1.CreateReviewRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.review.v1.CreateReviewResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.review.v1.ListReviewsRequest:
+            type: object
+        hr.review.v1.ListReviewsResponse:
+            type: object
+            properties:
+                reviews:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.review.v1.Review'
+            required:
+                - reviews
+        hr.review.v1.Review:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reviewer_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                period:
+                    type: string
+                rating:
+                    type: number
+                    format: double
+                goals_rating:
+                    type: number
+                    format: double
+                values_rating:
+                    type: number
+                    format: double
+                skills_rating:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+                status:
+                    type: string
+                created_at:
+                    type: string
+                updated_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - staff_id
+                - reviewer_id
+                - period
+                - rating
+                - goals_rating
+                - values_rating
+                - skills_rating
+                - notes
+                - status
+                - created_at
+                - updated_at
+        hr.review.v1.CreateReviewRequest:
+            type: object
+            properties:
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reviewer_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                period:
+                    type: string
+                rating:
+                    type: number
+                    format: double
+                goals_rating:
+                    type: number
+                    format: double
+                values_rating:
+                    type: number
+                    format: double
+                skills_rating:
+                    type: number
+                    format: double
+                notes:
+                    type: string
+                status:
+                    type: string
+            required:
+                - staff_id
+                - reviewer_id
+                - period
+                - rating
+                - goals_rating
+                - values_rating
+                - skills_rating
+                - notes
+                - status
+        hr.review.v1.CreateReviewResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - id
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReviewService

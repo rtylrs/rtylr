@@ -1,0 +1,110 @@
+package insights.product.v1
+
+message BestSeller {
+  /// product_id is the product id value for this contract.
+  product_id: int64
+  /// name is the name value for this contract.
+  name: string
+  /// units_sold is the units sold value for this contract.
+  units_sold: float64
+  /// revenue_minor_units is the revenue minor units value for this contract.
+  revenue_minor_units: int64
+}
+
+message SlowMover {
+  /// product_id is the product id value for this contract.
+  product_id: int64
+  /// name is the name value for this contract.
+  name: string
+  /// stock_quantity is the stock quantity value for this contract.
+  stock_quantity: float64
+}
+
+message MarginBucket {
+  /// label is the label value for this contract.
+  label: string
+  /// lower_pct is the lower pct value for this contract.
+  lower_pct: float64
+  /// upper_pct is the upper pct value for this contract.
+  upper_pct: float64
+  /// product_count is the product count value for this contract.
+  product_count: int64
+}
+
+message CategorySales {
+  /// category_id is the category id value for this contract.
+  category_id: int64
+  /// category_name is the category name value for this contract.
+  category_name: string
+  /// units_sold is the units sold value for this contract.
+  units_sold: float64
+  /// revenue_minor_units is the revenue minor units value for this contract.
+  revenue_minor_units: int64
+}
+
+message GetBestSellersRequest {
+  /// limit is the maximum number of products to return.
+  limit: int32 @query("limit")
+}
+
+message GetBestSellersResponse {
+  /// products is the products value for this contract.
+  products: BestSeller[]
+}
+
+message GetCategoryPerformanceRequest {}
+
+message GetCategoryPerformanceResponse {
+  /// categories is the categories value for this contract.
+  categories: CategorySales[]
+}
+
+message GetProductMarginsRequest {}
+
+message ProductMargin {
+  /// product_id is the ERP product.
+  product_id: int64
+  /// name is the product name at the time of the report.
+  name: string
+  /// units_sold is the quantity sold in the period.
+  units_sold: float64
+  /// revenue_minor_units is gross sales value in the smallest unit of the
+  /// reporting currency.
+  revenue_minor_units: int64
+  /// cost_minor_units is units_sold multiplied by the product's cost price,
+  /// in the same minor unit. Absent when the product has no cost price on
+  /// record, which is distinct from a cost of zero.
+  cost_minor_units: int64?
+}
+
+message GetProductMarginsResponse {
+  /// buckets is the buckets value for this contract.
+  buckets: MarginBucket[]
+  /// products is one row per product sold in the period, so margin per item
+  /// is answerable without pulling the ERP catalogue client-side. Absent when
+  /// the report is requested at distribution granularity only.
+  products: ProductMargin[]
+}
+
+message GetProductPerformanceRequest {}
+
+message GetProductPerformanceResponse {
+  /// total_skus is the total SKU count.
+  total_skus: int64
+  /// active_skus is the active SKU count.
+  active_skus: int64
+  /// out_of_stock is the out-of-stock SKU count.
+  out_of_stock: int64
+  /// avg_margin_pct is the average margin percentage.
+  avg_margin_pct: float64
+}
+
+message GetSlowMoversRequest {
+  /// days is the trailing sales window used to detect slow movers.
+  days: int32 @query("days")
+}
+
+message GetSlowMoversResponse {
+  /// products is the products value for this contract.
+  products: SlowMover[]
+}

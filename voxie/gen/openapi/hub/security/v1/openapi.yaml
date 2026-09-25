@@ -1,0 +1,480 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/security/v1/state:
+        get:
+            tags:
+                - SecurityService
+            summary: getSecurityState
+            description: Returns the current security settings.
+            operationId: SecurityService_getSecurityState
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.GetSecurityStateResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/security/v1/login-history:
+        get:
+            tags:
+                - SecurityService
+            summary: loginHistory
+            description: Returns paginated login events for the authenticated user.
+            operationId: SecurityService_loginHistory
+            parameters:
+                - name: page
+                  in: query
+                  description: 1-based page number to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: 1-based page number to return.
+                - name: page_size
+                  in: query
+                  description: Maximum number of login events to return in one page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Maximum number of login events to return in one page.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.LoginHistoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/security/v1/invalidate-sessions:
+        post:
+            tags:
+                - SecurityService
+            summary: invalidateSessions
+            description: Revokes all active sessions.
+            operationId: SecurityService_invalidateSessions
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.security.v1.InvalidateSessionsRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.InvalidateSessionsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/security/v1/2fa:
+        patch:
+            tags:
+                - SecurityService
+            summary: update2FA
+            description: Toggles two-factor authentication.
+            operationId: SecurityService_update2FA
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.security.v1.Update2FARequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.Update2FAResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/security/v1/mfa/enroll:
+        post:
+            tags:
+                - SecurityService
+            summary: beginMFAEnrollment
+            description: Starts a TOTP enrollment and returns the secret once.
+            operationId: SecurityService_beginMFAEnrollment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.security.v1.BeginMFAEnrollmentRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.BeginMFAEnrollmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/security/v1/mfa/enroll/confirm:
+        post:
+            tags:
+                - SecurityService
+            summary: completeMFAEnrollment
+            description: Confirms a TOTP enrollment and issues one-time recovery codes.
+            operationId: SecurityService_completeMFAEnrollment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.security.v1.CompleteMFAEnrollmentRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.CompleteMFAEnrollmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/security/v1/mfa/verify:
+        post:
+            tags:
+                - SecurityService
+            summary: verifyMFA
+            description: Verifies a TOTP code for the current authenticated session.
+            operationId: SecurityService_verifyMFA
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.security.v1.VerifyMFARequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.VerifyMFAResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/security/v1/mfa/recovery:
+        post:
+            tags:
+                - SecurityService
+            summary: useMFARecoveryCode
+            description: Consumes one recovery code for the current authenticated session.
+            operationId: SecurityService_useMFARecoveryCode
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.security.v1.UseMFARecoveryCodeRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.security.v1.UseMFARecoveryCodeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hub.security.v1.GetSecurityStateRequest:
+            type: object
+        hub.security.v1.GetSecurityStateResponse:
+            type: object
+            properties:
+                state:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.security.v1.SecurityState'
+            required:
+                - state
+        hub.security.v1.SecurityState:
+            type: object
+            properties:
+                two_factor_enabled:
+                    type: boolean
+                mfa_required:
+                    type: boolean
+                mfa_enrolled:
+                    type: boolean
+                active_sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.security.v1.ActiveSession'
+            required:
+                - two_factor_enabled
+                - mfa_required
+                - mfa_enrolled
+                - active_sessions
+        hub.security.v1.ActiveSession:
+            type: object
+            properties:
+                id:
+                    type: string
+                ip:
+                    type: string
+                user_agent:
+                    type: string
+                created_at:
+                    type: string
+                    description: When the record was created.
+                is_current:
+                    type: boolean
+            required:
+                - id
+                - ip
+                - user_agent
+                - created_at
+                - is_current
+        hub.security.v1.LoginHistoryRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: 1-based page number to return.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: Maximum number of login events to return in one page.
+            required:
+                - page
+                - page_size
+        hub.security.v1.LoginHistoryResponse:
+            type: object
+            properties:
+                history:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.security.v1.LoginEntry'
+                total:
+                    type: integer
+                    format: int32
+                    description: Total number of login events for the authenticated user.
+                page:
+                    type: integer
+                    format: int32
+                    description: The 1-based page number returned.
+                page_size:
+                    type: integer
+                    format: int32
+                    description: The number of login events requested per page after server limits.
+                has_more:
+                    type: boolean
+                    description: Whether another page of login events is available.
+            required:
+                - history
+                - total
+                - page
+                - page_size
+                - has_more
+        hub.security.v1.LoginEntry:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Database identifier for this login event.
+                email:
+                    type: string
+                    description: Email address used for lookup or contact.
+                method:
+                    type: string
+                ip:
+                    type: string
+                user_agent:
+                    type: string
+                success:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: When the record was created.
+            required:
+                - id
+                - email
+                - method
+                - ip
+                - user_agent
+                - success
+                - created_at
+        hub.security.v1.InvalidateSessionsRequest:
+            type: object
+        hub.security.v1.InvalidateSessionsResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        hub.security.v1.Update2FARequest:
+            type: object
+            properties:
+                enabled:
+                    type: boolean
+            required:
+                - enabled
+        hub.security.v1.Update2FAResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        hub.security.v1.BeginMFAEnrollmentRequest:
+            type: object
+        hub.security.v1.BeginMFAEnrollmentResponse:
+            type: object
+            properties:
+                secret:
+                    type: string
+                otpauth_uri:
+                    type: string
+            required:
+                - secret
+                - otpauth_uri
+        hub.security.v1.CompleteMFAEnrollmentRequest:
+            type: object
+            properties:
+                code:
+                    type: string
+            required:
+                - code
+        hub.security.v1.CompleteMFAEnrollmentResponse:
+            type: object
+            properties:
+                verified:
+                    type: boolean
+                recovery_codes:
+                    type: array
+                    items:
+                        type: string
+            required:
+                - verified
+                - recovery_codes
+        hub.security.v1.VerifyMFARequest:
+            type: object
+            properties:
+                code:
+                    type: string
+            required:
+                - code
+        hub.security.v1.VerifyMFAResponse:
+            type: object
+            properties:
+                verified:
+                    type: boolean
+            required:
+                - verified
+        hub.security.v1.UseMFARecoveryCodeRequest:
+            type: object
+            properties:
+                code:
+                    type: string
+            required:
+                - code
+        hub.security.v1.UseMFARecoveryCodeResponse:
+            type: object
+            properties:
+                verified:
+                    type: boolean
+            required:
+                - verified
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SecurityService
+      description: SecurityService defines hub security endpoints.

@@ -1,0 +1,10 @@
+package hub.billing.v1
+
+/// BillingService defines hub billing endpoints.
+service BillingService {
+  /// Returns billing summary for the active business.
+  getBillingSummary(GetBillingSummaryRequest) -> GetBillingSummaryResponse @get("/summary")
+
+  /// Returns billing invoices.
+  listInvoices(ListInvoicesRequest) -> ListInvoicesResponse @get("/invoices")
+}

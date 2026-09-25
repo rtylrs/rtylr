@@ -1,0 +1,451 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /insights/customer/v1/analytics:
+        get:
+            tags:
+                - CustomerService
+            summary: getCustomerAnalytics
+            description: Returns customer analytics for a period.
+            operationId: CustomerService_getCustomerAnalytics
+            parameters:
+                - name: period
+                  in: query
+                  description: period is the period value for this contract.
+                  required: false
+                  schema:
+                    type: string
+                    description: period is the period value for this contract.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.customer.v1.GetCustomerAnalyticsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /insights/customer/v1/churn:
+        get:
+            tags:
+                - CustomerService
+            summary: getChurnAnalysis
+            description: Returns churn analysis for a period.
+            operationId: CustomerService_getChurnAnalysis
+            parameters:
+                - name: period
+                  in: query
+                  description: period is the period value for this contract.
+                  required: false
+                  schema:
+                    type: string
+                    description: period is the period value for this contract.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.customer.v1.GetChurnAnalysisResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /insights/customer/v1/ltv:
+        get:
+            tags:
+                - CustomerService
+            summary: getLTVAnalysis
+            description: Returns lifetime value analysis.
+            operationId: CustomerService_getLTVAnalysis
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.customer.v1.GetLTVAnalysisResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /insights/customer/v1/top:
+        get:
+            tags:
+                - CustomerService
+            summary: getTopCustomers
+            description: Returns top customers by spend or order count.
+            operationId: CustomerService_getTopCustomers
+            parameters:
+                - name: page
+                  in: query
+                  description: page is the current result page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                - name: limit
+                  in: query
+                  description: limit is the maximum number of records to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  description: sort_by is the sort field (total_spent, order_count).
+                  required: false
+                  schema:
+                    type: string
+                    description: sort_by is the sort field (total_spent, order_count).
+                - name: sort_dir
+                  in: query
+                  description: sort_dir is the sort direction ("asc" or "desc").
+                  required: false
+                  schema:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+                - name: period
+                  in: query
+                  description: period is the period value for this contract.
+                  required: false
+                  schema:
+                    type: string
+                    description: period is the period value for this contract.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/insights.customer.v1.GetTopCustomersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        insights.customer.v1.GetCustomerAnalyticsRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: period is the period value for this contract.
+            required:
+                - period
+        insights.customer.v1.GetCustomerAnalyticsResponse:
+            type: object
+            properties:
+                analytics:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.customer.v1.CustomerAnalytics'
+                    description: analytics is the analytics value for this contract.
+            required:
+                - analytics
+        insights.customer.v1.CustomerAnalytics:
+            type: object
+            properties:
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                new_this_period:
+                    type: integer
+                    format: int32
+                    description: new_this_period is the new this period value for this contract.
+                retention_rate:
+                    type: number
+                    format: double
+                    description: retention_rate is the retention rate value for this contract.
+                avg_lifetime_value:
+                    type: number
+                    format: double
+                    description: avg_lifetime_value is the avg lifetime value value for this contract.
+                churn_rate:
+                    type: number
+                    format: double
+                    description: churn_rate is the churn rate value for this contract.
+                growth:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.customer.v1.CustomerGrowthPoint'
+                    description: growth is the growth value for this contract.
+            required:
+                - total
+                - new_this_period
+                - retention_rate
+                - avg_lifetime_value
+                - churn_rate
+                - growth
+        insights.customer.v1.CustomerGrowthPoint:
+            type: object
+            properties:
+                date:
+                    type: string
+                    description: date is the date value for this contract.
+                new_customers:
+                    type: integer
+                    format: int32
+                    description: new_customers is the new customers value for this contract.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+            required:
+                - date
+                - new_customers
+                - total
+        insights.customer.v1.GetChurnAnalysisRequest:
+            type: object
+            properties:
+                period:
+                    type: string
+                    description: period is the period value for this contract.
+            required:
+                - period
+        insights.customer.v1.GetChurnAnalysisResponse:
+            type: object
+            properties:
+                analysis:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.customer.v1.ChurnAnalysis'
+                    description: analysis is the analysis value for this contract.
+            required:
+                - analysis
+        insights.customer.v1.ChurnAnalysis:
+            type: object
+            properties:
+                churn_rate:
+                    type: number
+                    format: double
+                    description: churn_rate is the churn rate value for this contract.
+                churned_count:
+                    type: integer
+                    format: int32
+                    description: churned_count is the churned count value for this contract.
+                reasons:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.customer.v1.ChurnReason'
+                    description: reasons is the reasons value for this contract.
+            required:
+                - churn_rate
+                - churned_count
+                - reasons
+        insights.customer.v1.ChurnReason:
+            type: object
+            properties:
+                reason:
+                    type: string
+                    description: reason is the reason value for this contract.
+                count:
+                    type: integer
+                    format: int32
+                    description: count is the count value for this contract.
+                percentage:
+                    type: number
+                    format: double
+                    description: percentage is the percentage value for this contract.
+            required:
+                - reason
+                - count
+                - percentage
+        insights.customer.v1.GetLTVAnalysisRequest:
+            type: object
+        insights.customer.v1.GetLTVAnalysisResponse:
+            type: object
+            properties:
+                analysis:
+                    allOf:
+                        - $ref: '#/components/schemas/insights.customer.v1.LTVAnalysis'
+                    description: analysis is the analysis value for this contract.
+            required:
+                - analysis
+        insights.customer.v1.LTVAnalysis:
+            type: object
+            properties:
+                average:
+                    type: number
+                    format: double
+                    description: average is the average value for this contract.
+                median:
+                    type: number
+                    format: double
+                    description: median is the median value for this contract.
+                segments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.customer.v1.LTVSegment'
+                    description: segments is the segments value for this contract.
+            required:
+                - average
+                - median
+                - segments
+        insights.customer.v1.LTVSegment:
+            type: object
+            properties:
+                segment:
+                    type: string
+                    description: segment is the segment value for this contract.
+                avg_ltv:
+                    type: number
+                    format: double
+                    description: avg_ltv is the avg ltv value for this contract.
+                customer_count:
+                    type: integer
+                    format: int32
+                    description: customer_count is the customer count value for this contract.
+            required:
+                - segment
+                - avg_ltv
+                - customer_count
+        insights.customer.v1.GetTopCustomersRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: sort_by is the sort field (total_spent, order_count).
+                sort_dir:
+                    type: string
+                    description: sort_dir is the sort direction ("asc" or "desc").
+                period:
+                    type: string
+                    description: period is the period value for this contract.
+            required:
+                - page
+                - limit
+                - sort_by
+                - sort_dir
+                - period
+        insights.customer.v1.GetTopCustomersResponse:
+            type: object
+            properties:
+                customers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/insights.customer.v1.TopCustomerEntry'
+                    description: customers is the customers value for this contract.
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+                    description: pagination is the pagination value for this contract.
+            required:
+                - customers
+                - pagination
+        insights.customer.v1.TopCustomerEntry:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                total_spent:
+                    type: number
+                    format: double
+                    description: total_spent is the total spent value for this contract.
+                order_count:
+                    type: integer
+                    format: int32
+                    description: order_count is the order count value for this contract.
+                last_order_at:
+                    type: string
+                    description: last_order_at is the last order at value for this contract.
+            required:
+                - id
+                - name
+                - total_spent
+                - order_count
+                - last_order_at
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
+            description: Standard pagination response metadata.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CustomerService
+      description: CustomerService defines insights customer analytics endpoints.

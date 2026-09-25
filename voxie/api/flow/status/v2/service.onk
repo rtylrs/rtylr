@@ -1,0 +1,25 @@
+package flow.status.v2
+
+/// StatusService manages per-project custom statuses.
+///
+/// Board columns stay independent of statuses. T4 of the proposal preserves
+/// today's decoupling, so nothing here reads or writes flow_project_columns.
+service StatusService {
+  /// Returns one project's status set in sort order, empty when unconfigured.
+  listStatuses(ListStatusesRequest) -> ListStatusesResponse @get("/statuses")
+
+  /// Creates a status in a project's set.
+  createStatus(CreateStatusRequest) -> CreateStatusResponse @post("/statuses")
+
+  /// Replaces a status.
+  updateStatus(UpdateStatusRequest) -> UpdateStatusResponse @put("/statuses/{id}") @body("body")
+
+  /// Deletes a status, moving its tasks back to their built-in string status.
+  deleteStatus(DeleteStatusRequest) -> DeleteStatusResponse @delete("/statuses/{id}")
+
+  /// Applies a custom status to a task, or clears it with status_id zero.
+  ///
+  /// Lives here rather than on the task service, mirroring setTaskLabels in
+  /// flow.label.v2: the capability that owns the concept owns the setter.
+  setTaskStatus(SetTaskStatusRequest) -> SetTaskStatusResponse @put("/tasks/status")
+}

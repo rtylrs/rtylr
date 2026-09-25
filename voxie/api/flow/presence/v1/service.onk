@@ -1,0 +1,9 @@
+package flow.presence.v1
+
+/// Compatibility contract for the Flow presence aggregate until it has a
+/// first-class backend service package.
+service PresenceService {
+  base_path: "/flow"
+
+  getPresence(GetPresenceRequest) -> GetPresenceResponse @get("/presence/today")
+}

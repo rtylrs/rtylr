@@ -1,0 +1,10 @@
+package finance.journal.v1
+
+/// JournalService defines journal entry endpoints.
+service JournalService {
+  listJournalEntries(ListJournalEntriesRequest) -> ListJournalEntriesResponse @get("/entries")
+
+  createJournalEntry(CreateJournalEntryRequest) -> CreateJournalEntryResponse @post("/entries")
+
+  getJournalEntry(GetJournalEntryRequest) -> GetJournalEntryResponse @get("/entries/{id}")
+}

@@ -1,0 +1,54 @@
+package flow.profile.v1
+
+/// Profile is the public face of a business member inside Flow: identity plus
+/// the projects they chose to make discoverable. It backs the in-app profile
+/// page opened from avatars, comment authors and member pickers.
+message Profile {
+  /// user_id is the profile's subject.
+  user_id: int64
+  /// name is the display name.
+  name: string
+  /// email is the account email. Business members already share a roster;
+  /// this echoes it for contact actions.
+  email: string
+  /// initials are two-letter uppercase initials derived from name.
+  initials: string
+  /// role_title is the person's business role or job title, when set.
+  role_title: string
+  /// bio is what the person says about themselves. Empty if unset.
+  bio: string
+  /// public_projects lists the subject's PUBLIC projects - metadata only.
+  /// Private projects never appear here regardless of caller; opening any of
+  /// them still requires membership or a bypass role.
+  public_projects: ProfileProject[]
+}
+
+/// ProfileProject is the metadata card for one public project. Deliberately
+/// carries no task-level fields: public means "discoverable", not "openable".
+message ProfileProject {
+  /// id is the project identifier.
+  id: int64
+  /// name is the project display name.
+  name: string
+  /// icon is the project icon.
+  icon: string
+  /// color is the project color hex.
+  color: string
+  /// description is the short project description.
+  description: string
+  /// status is the current lifecycle state.
+  status: string
+  /// task_count is the total task count. Display projection.
+  task_count: int32
+  /// completed_count is the done task count. Display projection.
+  completed_count: int32
+}
+
+message GetProfileRequest {
+  /// user_id is the profile's subject.
+  user_id: int64 @gt(0)
+}
+
+message GetProfileResponse {
+  profile: Profile
+}

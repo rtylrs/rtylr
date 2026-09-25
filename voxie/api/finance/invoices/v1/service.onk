@@ -1,0 +1,20 @@
+package finance.invoices.v1
+
+/// InvoicesService defines finance invoice endpoints.
+service InvoicesService {
+  listInvoices(ListInvoicesRequest) -> ListInvoicesResponse @get("/invoices")
+
+  listBillableTimeEntries(ListBillableTimeEntriesRequest) -> ListBillableTimeEntriesResponse @get("/invoices/billable-time")
+
+  createInvoice(CreateInvoiceRequest) -> CreateInvoiceResponse @post("/invoices")
+
+  getInvoice(GetInvoiceRequest) -> GetInvoiceResponse @get("/invoices/{id}")
+
+  updateInvoice(UpdateInvoiceRequest) -> UpdateInvoiceResponse @put("/invoices/{id}") @body("body")
+
+  updateInvoiceStatus(UpdateInvoiceStatusRequest) -> UpdateInvoiceStatusResponse @patch("/invoices/{id}/status") @body("body")
+
+  deleteInvoice(DeleteInvoiceRequest) -> DeleteInvoiceResponse @delete("/invoices/{id}")
+
+  sendInvoice(SendInvoiceRequest) -> SendInvoiceResponse @post("/invoices/{id}/send")
+}

@@ -1,0 +1,11 @@
+package crm.template.v1
+
+service TemplateService {
+  listTemplates(ListTemplatesRequest) -> ListTemplatesResponse @get("/templates")
+
+  createTemplate(CreateTemplateRequest) -> CreateTemplateResponse @post("/templates")
+
+  updateTemplate(UpdateTemplateRequest) -> UpdateTemplateResponse @put("/templates/{id}") @body("body")
+
+  deleteTemplate(DeleteTemplateRequest) -> DeleteTemplateResponse @delete("/templates/{id}")
+}

@@ -1,0 +1,11 @@
+package erp.warehouse.v1
+
+service WarehouseService {
+  listWarehouses(ListWarehousesRequest) -> ListWarehousesResponse @get("/warehouses")
+
+  createWarehouse(CreateWarehouseRequest) -> CreateWarehouseResponse @post("/warehouses")
+
+  updateWarehouse(UpdateWarehouseRequest) -> UpdateWarehouseResponse @put("/warehouses/{id}")
+
+  deleteWarehouse(DeleteWarehouseRequest) -> DeleteWarehouseResponse @delete("/warehouses/{id}")
+}

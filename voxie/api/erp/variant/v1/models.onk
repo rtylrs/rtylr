@@ -1,0 +1,80 @@
+package erp.variant.v1
+
+message Variant {
+  id: int64 @gt(0)
+  owner_id: int64
+  business_id: int64
+  product_id: int64? @required @gt(0)
+  name: string @required
+  sku: string
+  barcode: string
+  cost_price: float64
+  sale_price: float64
+  stock_quantity: float64
+  attributes: string
+  is_active: bool
+  created_at: string
+  updated_at: string
+}
+
+message CreateVariantRequest {
+  product_id: int64? @required @gt(0)
+  name: string @required
+  sku: string
+  barcode: string
+  cost_price: float64
+  sale_price: float64
+  stock_quantity: float64
+  attributes: string
+  is_active: bool
+}
+
+message CreateVariantResponse {
+  variant_id: int64
+  message: string
+}
+
+message DeleteVariantRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteVariantResponse {
+  message: string
+}
+
+message ListVariantsRequest {
+  product_id: int64 @query("product_id")
+  /// Maximum number of variants to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of variants to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListVariantsResponse {
+  variants: Variant[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
+}
+
+message UpdateVariantBody {
+  product_id: int64
+  name: string @required
+  sku: string
+  barcode: string
+  cost_price: float64
+  sale_price: float64
+  stock_quantity: float64
+  attributes: string
+  is_active: bool
+}
+
+message UpdateVariantRequest {
+  id: int64 @gt(0)
+  body: UpdateVariantBody
+}
+
+message UpdateVariantResponse {
+  message: string
+}

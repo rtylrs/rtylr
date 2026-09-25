@@ -1,0 +1,22 @@
+package crm.segment.v1
+
+/// SegmentService defines CRM segment endpoints.
+service SegmentService {
+  /// Returns all segments for the active business.
+  listSegments(ListSegmentsRequest) -> ListSegmentsResponse @get("/segments")
+
+  /// Creates a new customer segment.
+  createSegment(CreateSegmentRequest) -> CreateSegmentResponse @post("/segments")
+
+  /// Returns a segment and its member customers.
+  getSegmentDetail(GetSegmentDetailRequest) -> GetSegmentDetailResponse @get("/segments/{id}")
+
+  /// Returns paginated customers in a segment.
+  getSegmentCustomers(GetSegmentCustomersRequest) -> GetSegmentCustomersResponse @get("/segments/{segment_id}/customers")
+
+  /// Updates an existing segment.
+  updateSegment(UpdateSegmentRequest) -> UpdateSegmentResponse @put("/segments/{id}") @body("body")
+
+  /// Removes a segment by ID.
+  deleteSegment(DeleteSegmentRequest) -> DeleteSegmentResponse @delete("/segments/{id}")
+}

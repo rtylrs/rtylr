@@ -1,0 +1,30 @@
+package hub.billing.v1
+
+message BillingSummary {
+  plan: string
+  status: string
+  current_usage: float64
+  usage_limit: float64
+  next_billing_date: string
+}
+
+message Invoice {
+  id: int64
+  amount: float64
+  currency: string
+  status: string
+  issued_at: string
+  paid_at: string
+}
+
+message GetBillingSummaryRequest {}
+
+message GetBillingSummaryResponse {
+  summary: BillingSummary
+}
+
+message ListInvoicesRequest {}
+
+message ListInvoicesResponse {
+  invoices: Invoice[]
+}

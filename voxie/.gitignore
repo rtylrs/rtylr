@@ -1,0 +1,15 @@
+.onekit/
+node_modules/
+
+# AI agent config: local to each machine, never committed
+CLAUDE.md
+Claude.md
+CLAUDE.local.md
+AGENTS.md
+GEMINI.md
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+.github/copilot-instructions.md

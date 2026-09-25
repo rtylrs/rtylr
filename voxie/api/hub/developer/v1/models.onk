@@ -1,0 +1,127 @@
+package hub.developer.v1
+
+message ApiKey {
+  id: int64
+  name: string
+  /// First 8 chars shown
+  key_prefix: string
+  scopes: string[]
+  created_at: string
+  last_used_at: string
+  expires_at: string
+  is_active: bool
+}
+
+message Webhook {
+  id: int64
+  url: string
+  events: string[]
+  is_active: bool
+  created_at: string
+  last_triggered_at: string
+}
+
+message CreateApiKeyRequest {
+  name: string @required
+  scopes: string[] @min_items(1)
+}
+
+message CreateApiKeyResponse {
+  id: int64
+  key: string
+  message: string
+}
+
+message CreateWebhookRequest {
+  url: string @required
+  events: string[] @min_items(1)
+}
+
+message CreateWebhookResponse {
+  id: int64
+  message: string
+}
+
+message DeleteWebhookRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteWebhookResponse {
+  message: string
+}
+
+message ListApiKeysRequest {}
+
+message ListApiKeysResponse {
+  keys: ApiKey[]
+}
+
+/// WebhookDelivery is one attempt to deliver one event to one registration.
+message WebhookDelivery {
+  id: int64
+  webhook_id: int64
+  event_id: int64
+  /// event_type is the event this delivery carries, for example "order_created".
+  event_type: string
+  /// status is one of pending, delivering, delivered, failed or dead. A dead
+  /// delivery has exhausted its attempts and will not be retried.
+  status: string
+  /// attempts is how many times delivery has been tried.
+  attempts: int32
+  /// max_attempts is the cap after which a failing delivery is dead-lettered.
+  max_attempts: int32
+  /// response_status is the HTTP status the endpoint answered. Zero when the
+  /// request never got a response, such as a timeout or a refused connection.
+  response_status: int32
+  /// last_error is why the most recent attempt failed. It includes a short
+  /// excerpt of the endpoint's own response body when it sent one, which is
+  /// usually the fastest way for the owner to see what their endpoint said.
+  last_error: string
+  /// next_attempt_at is when a retryable delivery will be tried again. Empty
+  /// for one that is delivered or dead.
+  next_attempt_at: string
+  /// delivered_at is when the endpoint accepted the event. Empty until then.
+  delivered_at: string
+  created_at: string
+}
+
+message ListWebhookDeliveriesRequest {
+  /// webhook_id narrows to one registration. Omit for every registration in
+  /// the business.
+  webhook_id: int64 @query("webhook_id")
+  /// status narrows to one status. "dead" is the one worth watching, since
+  /// those events will never arrive without intervention.
+  status: string @query("status")
+  page: int32 @query("page")
+  limit: int32 @query("limit")
+}
+
+message ListWebhookDeliveriesResponse {
+  deliveries: WebhookDelivery[]
+  pagination: PaginationResponse
+}
+
+message ListWebhooksRequest {}
+
+message ListWebhooksResponse {
+  webhooks: Webhook[]
+}
+
+message RevokeApiKeyRequest {
+  id: int64 @gt(0)
+}
+
+message RevokeApiKeyResponse {
+  message: string
+}
+
+message UpdateWebhookRequest {
+  id: int64 @gt(0)
+  url: string @required
+  events: string[] @min_items(1)
+  is_active: bool
+}
+
+message UpdateWebhookResponse {
+  webhook: Webhook
+}

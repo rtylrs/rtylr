@@ -1,0 +1,326 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/memory/v1/chats:
+        get:
+            tags:
+                - MemoryService
+            summary: listChats
+            operationId: MemoryService_listChats
+            parameters:
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.ListChatsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/memory/v1/chats/{session_id}/messages:
+        get:
+            tags:
+                - MemoryService
+            summary: getChatMessages
+            operationId: MemoryService_getChatMessages
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.GetChatMessagesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/memory/v1/chats/{session_id}:
+        put:
+            tags:
+                - MemoryService
+            summary: renameChat
+            operationId: MemoryService_renameChat
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                title:
+                                    type: string
+                            required:
+                                - title
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.RenameChatResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - MemoryService
+            summary: deleteChat
+            operationId: MemoryService_deleteChat
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.DeleteChatResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/memory/v1/chats/{session_id}/pin:
+        put:
+            tags:
+                - MemoryService
+            summary: pinChat
+            operationId: MemoryService_pinChat
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                pinned:
+                                    type: boolean
+                            required:
+                                - pinned
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.memory.v1.PinChatResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hub.memory.v1.ListChatsRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+            required:
+                - limit
+                - offset
+        hub.memory.v1.ListChatsResponse:
+            type: object
+            properties:
+                chats:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.memory.v1.ChatSummary'
+            required:
+                - chats
+        hub.memory.v1.ChatSummary:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                summary:
+                    type: string
+                updated_at:
+                    type: string
+                pinned:
+                    type: boolean
+                archived:
+                    type: boolean
+            required:
+                - id
+                - title
+                - summary
+                - updated_at
+                - pinned
+                - archived
+        hub.memory.v1.GetChatMessagesRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+            required:
+                - session_id
+        hub.memory.v1.GetChatMessagesResponse:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.memory.v1.ChatMessage'
+            required:
+                - messages
+        hub.memory.v1.ChatMessage:
+            type: object
+            properties:
+                id:
+                    type: string
+                role:
+                    type: string
+                content:
+                    type: string
+                created_at:
+                    type: string
+                tokens_used:
+                    type: integer
+                    format: int32
+            required:
+                - id
+                - role
+                - content
+                - created_at
+                - tokens_used
+        hub.memory.v1.DeleteChatRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+            required:
+                - session_id
+        hub.memory.v1.DeleteChatResponse:
+            type: object
+            properties:
+                deleted:
+                    type: boolean
+            required:
+                - deleted
+        hub.memory.v1.RenameChatRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+                title:
+                    type: string
+            required:
+                - session_id
+                - title
+        hub.memory.v1.RenameChatResponse:
+            type: object
+            properties:
+                updated:
+                    type: boolean
+            required:
+                - updated
+        hub.memory.v1.PinChatRequest:
+            type: object
+            properties:
+                session_id:
+                    type: string
+                pinned:
+                    type: boolean
+            required:
+                - session_id
+                - pinned
+        hub.memory.v1.PinChatResponse:
+            type: object
+            properties:
+                updated:
+                    type: boolean
+            required:
+                - updated
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: MemoryService

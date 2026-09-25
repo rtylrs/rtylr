@@ -1,0 +1,22 @@
+package hub.menu.v1
+
+/// MenuService defines hub navigation menu endpoints.
+service MenuService {
+  /// Returns the navigation menu for the current user.
+  listMenu(ListMenuRequest) -> ListMenuResponse @get("/menu")
+
+  /// Replaces the navigation menu items.
+  updateMenu(UpdateMenuRequest) -> UpdateMenuResponse @put("/menu")
+
+  /// Returns menu banners for the current business.
+  listMenuBanners(ListMenuBannersRequest) -> ListMenuBannersResponse @get("/menu/banners")
+
+  /// Creates a menu banner for the current business.
+  createMenuBanner(CreateMenuBannerRequest) -> CreateMenuBannerResponse @post("/menu/banners")
+
+  /// Updates a menu banner for the current business.
+  updateMenuBanner(UpdateMenuBannerRequest) -> UpdateMenuBannerResponse @put("/menu/banners/{id}")
+
+  /// Deletes a menu banner for the current business.
+  deleteMenuBanner(DeleteMenuBannerRequest) -> DeleteMenuBannerResponse @delete("/menu/banners/{id}")
+}

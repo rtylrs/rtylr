@@ -1,0 +1,76 @@
+package crm.compat.v1
+
+/// Typed OneKit compatibility surface for CRM routes that predate the
+/// canonical crm.* service packages. It keeps their existing wire paths while
+/// removing Axios/safe from app code.
+service CompatibilityService {
+  base_path: "/crm"
+
+  getDashboard(EmptyRequest) -> JsonResponse @get("/dashboard")
+  listCustomers(CustomerListRequest) -> JsonResponse @get("/customers")
+  getCustomer(IdQueryRequest) -> JsonResponse @get("/customers/detail")
+  getCustomerFull(IdQueryRequest) -> JsonResponse @get("/customers/detail/full")
+  getCustomerTimeline(CustomerTimelineRequest) -> JsonResponse @get("/customers/timeline")
+  createCustomer(BodyRequest) -> JsonResponse @post("/customers") @body("body")
+  updateCustomer(BodyRequest) -> JsonResponse @put("/customers") @body("body")
+  recordVisit(BodyRequest) -> JsonResponse @post("/customers/record-visit") @body("body")
+  importCustomers(BodyRequest) -> JsonResponse @post("/customers/import") @body("body")
+  mergeCustomers(BodyRequest) -> JsonResponse @post("/customers/merge") @body("body")
+  exportCustomer(ExportCustomerRequest) -> JsonResponse @get("/customers/export")
+
+  awardPoints(BodyRequest) -> JsonResponse @post("/loyalty/award") @body("body")
+  redeemPoints(BodyRequest) -> JsonResponse @post("/loyalty/redeem") @body("body")
+  getLoyaltyConfig(EmptyRequest) -> JsonResponse @get("/loyalty/config")
+  updateLoyaltyConfig(BodyRequest) -> JsonResponse @put("/loyalty/config") @body("body")
+  getLoyaltyTransactions(LoyaltyTransactionsRequest) -> JsonResponse @get("/loyalty/transactions")
+  getLoyaltyMembers(PageRequest) -> JsonResponse @get("/loyalty/members")
+  getLoyaltyRewards(EmptyRequest) -> JsonResponse @get("/loyalty/rewards")
+  upsertLoyaltyReward(BodyRequest) -> JsonResponse @post("/loyalty/rewards/upsert") @body("body")
+  getLoyaltyTiers(EmptyRequest) -> JsonResponse @get("/loyalty/tiers")
+  createLoyaltyTier(BodyRequest) -> JsonResponse @post("/loyalty/tiers") @body("body")
+  updateLoyaltyTier(BodyRequest) -> JsonResponse @put("/loyalty/tiers") @body("body")
+
+  listSegments(EmptyRequest) -> JsonResponse @get("/segments")
+  getSegment(IdQueryRequest) -> JsonResponse @get("/segments/detail")
+  getSegmentCustomers(SegmentCustomersRequest) -> JsonResponse @get("/segments/customers")
+  createSegment(BodyRequest) -> JsonResponse @post("/segments") @body("body")
+  updateSegment(BodyRequest) -> JsonResponse @put("/segments") @body("body")
+
+  listCampaigns(PageRequest) -> JsonResponse @get("/campaigns")
+  getCampaign(IdQueryRequest) -> JsonResponse @get("/campaigns/detail")
+  getCampaignStats(CampaignStatsRequest) -> JsonResponse @get("/campaigns/stats")
+  createCampaign(BodyRequest) -> JsonResponse @post("/campaigns") @body("body")
+  updateCampaign(PathBodyRequest) -> JsonResponse @put("/campaigns/{id}") @body("body")
+  updateCampaignStatus(PathBodyRequest) -> JsonResponse @put("/campaigns/{id}/status") @body("body")
+  deleteCampaign(PathRequest) -> JsonResponse @delete("/campaigns/{id}")
+
+  listAutomations(EmptyRequest) -> JsonResponse @get("/automations")
+  getAutomation(PathRequest) -> JsonResponse @get("/automations/{id}")
+  createAutomation(BodyRequest) -> JsonResponse @post("/automations") @body("body")
+  updateAutomation(PathBodyRequest) -> JsonResponse @put("/automations/{id}") @body("body")
+  deleteAutomation(PathRequest) -> JsonResponse @delete("/automations/{id}")
+
+  listTemplates(EmptyRequest) -> JsonResponse @get("/templates")
+  createTemplate(BodyRequest) -> JsonResponse @post("/templates") @body("body")
+  listFeedback(EmptyRequest) -> JsonResponse @get("/feedback")
+  getSettings(EmptyRequest) -> JsonResponse @get("/settings")
+  updateSettings(BodyRequest) -> JsonResponse @put("/settings") @body("body")
+
+  getSalesPipeline(EmptyRequest) -> JsonResponse @get("/sales/pipeline")
+  listLeads(PageRequest) -> JsonResponse @get("/sales/leads")
+  getLead(PathRequest) -> JsonResponse @get("/sales/leads/{id}")
+  createLead(BodyRequest) -> JsonResponse @post("/sales/leads") @body("body")
+  updateLead(PathBodyRequest) -> JsonResponse @put("/sales/leads/{id}") @body("body")
+  deleteLead(PathRequest) -> JsonResponse @delete("/sales/leads/{id}")
+  listTouchpoints(PathRequest) -> JsonResponse @get("/sales/leads/{id}/touchpoints")
+  createTouchpoint(BodyRequest) -> JsonResponse @post("/sales/touchpoints") @body("body")
+  deleteTouchpoint(PathRequest) -> JsonResponse @delete("/sales/touchpoints/{id}")
+  listContacts(ContactsRequest) -> JsonResponse @get("/sales/contacts")
+  createContact(BodyRequest) -> JsonResponse @post("/sales/contacts") @body("body")
+  updateContact(PathBodyRequest) -> JsonResponse @put("/sales/contacts/{id}") @body("body")
+  deleteContact(PathRequest) -> JsonResponse @delete("/sales/contacts/{id}")
+  listContracts(PageRequest) -> JsonResponse @get("/sales/contracts")
+  getContract(PathRequest) -> JsonResponse @get("/sales/contracts/{id}")
+  createContract(BodyRequest) -> JsonResponse @post("/sales/contracts") @body("body")
+  updateContract(PathBodyRequest) -> JsonResponse @put("/sales/contracts/{id}") @body("body")
+}

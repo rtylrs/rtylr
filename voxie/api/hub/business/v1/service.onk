@@ -1,0 +1,40 @@
+package hub.business.v1
+
+/// BusinessService defines hub business endpoints.
+service BusinessService {
+  /// Returns the businesses owned by the current user.
+  listMyBusinesses(ListMyBusinessesRequest) -> ListMyBusinessesResponse @get("/businesses/mine")
+
+  /// Creates a sub-business under a parent business.
+  createSubBusiness(CreateSubBusinessRequest) -> CreateSubBusinessResponse @post("/businesses")
+
+  /// Creates the owner's first business during onboarding.
+  onboardBusiness(OnboardBusinessRequest) -> OnboardBusinessResponse @post("/businesses/onboard")
+
+  /// Probes whether a business name is already taken.
+  checkBusinessNameExists(CheckBusinessNameExistsRequest) -> CheckBusinessNameExistsResponse @get("/businesses/name-exists")
+
+  /// Returns a business by ID.
+  getBusiness(GetBusinessRequest) -> GetBusinessResponse @get("/businesses/{business_id}")
+
+  /// Resolves a business by public slug.
+  lookupBusinessBySlug(LookupBusinessBySlugRequest) -> LookupBusinessBySlugResponse @get("/businesses/by-slug")
+
+  /// Returns public-safe business branding for anonymous menu surfaces.
+  getPublicBusiness(GetPublicBusinessRequest) -> GetPublicBusinessResponse @get("/businesses/public")
+
+  /// Updates only the business slug.
+  setSlug(SetSlugRequest) -> SetSlugResponse @patch("/businesses/slug")
+
+  /// Updates an existing business.
+  updateBusiness(UpdateBusinessRequest) -> UpdateBusinessResponse @put("/businesses/{business_id}")
+
+  /// Renames an active business owned by the current user.
+  renameBusiness(RenameBusinessRequest) -> RenameBusinessResponse @patch("/businesses/{business_id}/name")
+
+  /// Sets the logo for an active business owned by the current user.
+  setLogo(SetLogoRequest) -> SetLogoResponse @patch("/businesses/{business_id}/logo")
+
+  /// Removes an active business owned by the current user.
+  deleteBusiness(DeleteBusinessRequest) -> DeleteBusinessResponse @delete("/businesses/{business_id}")
+}

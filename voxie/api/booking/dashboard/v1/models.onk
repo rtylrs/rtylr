@@ -1,0 +1,10 @@
+package booking.dashboard.v1
+
+message GetDashboardRequest {}
+
+message GetDashboardResponse {
+  today_count: int32
+  upcoming_count: int32
+  cancellation_rate: float64
+  revenue: float64
+}

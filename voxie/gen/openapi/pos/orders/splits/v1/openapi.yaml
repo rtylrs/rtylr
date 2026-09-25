@@ -1,0 +1,105 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/orders/splits/v1/orders/{order_id}/split:
+        post:
+            tags:
+                - OrderSplitService
+            summary: splitOrder
+            operationId: OrderSplitService_splitOrder
+            parameters:
+                - name: order_id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                splits:
+                                    type: array
+                                    items:
+                                        $ref: '#/components/schemas/pos.orders.v1.SplitGroup'
+                                    minItems: 1
+                            required:
+                                - splits
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.splits.v1.SplitOrderResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.orders.splits.v1.SplitOrderRequest:
+            type: object
+            properties:
+                order_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                splits:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.orders.v1.SplitGroup'
+                    minItems: 1
+            required:
+                - order_id
+                - splits
+        pos.orders.v1.SplitGroup:
+            type: object
+            properties:
+                item_ids:
+                    type: array
+                    items:
+                        type: string
+                        pattern: ^-?[0-9]+$
+                        format: int64
+            required:
+                - item_ids
+        pos.orders.splits.v1.SplitOrderResponse:
+            type: object
+            properties:
+                order_ids:
+                    type: array
+                    items:
+                        type: string
+                        pattern: ^-?[0-9]+$
+                        format: int64
+                message:
+                    type: string
+            required:
+                - order_ids
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OrderSplitService

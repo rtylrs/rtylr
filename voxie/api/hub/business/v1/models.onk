@@ -1,0 +1,175 @@
+package hub.business.v1
+
+/// Business is a merchant's top-level business entity.
+message Business {
+  id: int64
+  name: string
+  /// restaurant, retail, services, etc.
+  type: string
+  logo_url: string
+  address: string
+  phone: string
+  /// Email address used for lookup or contact.
+  email: string
+  website: string
+  timezone: string
+  currency: string
+  country: string
+  plan: string
+  /// When the record was created.
+  created_at: string
+  /// URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+  slug: string
+}
+
+/// BusinessEntry is a compact business row for ownership listings.
+message BusinessEntry {
+  id: int64
+  name: string
+  logo_url: string
+  /// Identifies the parent business, zero for top-level businesses.
+  parent_id: int64
+  is_active: bool
+  /// True when the current user owns the business; false for team access.
+  is_owned: bool
+}
+
+/// PublicLocation is a location entry for public menu surfaces.
+message PublicLocation {
+  id: int64
+  name: string
+  slug: string
+  address: string
+  timezone: string
+  is_active: bool
+}
+
+/// PublicBusinessSummary resolves a public slug into a business summary.
+message PublicBusinessSummary {
+  id: int64
+  name: string
+  slug: string
+  logo_url: string
+  currency: string
+  type: string
+  timezone: string
+}
+
+/// PublicBusinessProfile is public-safe business branding for anonymous menu surfaces.
+message PublicBusinessProfile {
+  id: int64
+  name: string
+  logo_url: string
+  currency: string
+  timezone: string
+}
+
+message GetBusinessRequest {
+  business_id: int64 @gt(0)
+}
+
+message GetBusinessResponse {
+  business: Business
+}
+
+message CreateSubBusinessRequest {
+  name: string @required
+  parent_business_id: int64? @required @gt(0)
+}
+
+message CreateSubBusinessResponse {
+  id: int64
+}
+
+message OnboardBusinessRequest {
+  /// The first business name created during owner onboarding.
+  name: string @required
+}
+
+message OnboardBusinessResponse {
+  /// A fresh JWT carrying the new business_id.
+  token: string
+}
+
+message CheckBusinessNameExistsRequest {
+  name: string @required @query("name")
+}
+
+message CheckBusinessNameExistsResponse {
+  exists: bool
+}
+
+message GetPublicBusinessRequest {
+  business_id: int64 @gt(0) @query("business_id")
+}
+
+message GetPublicBusinessResponse {
+  business: PublicBusinessProfile
+}
+
+message ListMyBusinessesRequest {}
+
+message ListMyBusinessesResponse {
+  businesses: BusinessEntry[]
+}
+
+message LookupBusinessBySlugRequest {
+  slug: string @required @pattern("^[a-z0-9]$|^[a-z0-9][a-z0-9-]{0,78}[a-z0-9]$") @query("slug")
+}
+
+message LookupBusinessBySlugResponse {
+  business: PublicBusinessSummary
+  locations: PublicLocation[]
+}
+
+message SetSlugRequest {
+  slug: string @required @pattern("^[a-z0-9]$|^[a-z0-9][a-z0-9-]{0,78}[a-z0-9]$")
+}
+
+message SetSlugResponse {
+  slug: string
+}
+
+message UpdateBusinessRequest {
+  business_id: int64 @gt(0)
+  name: string @required
+  type: string @required
+  address: string
+  phone: string
+  email: string @required @email
+  website: string
+  timezone: string @required
+  currency: string @required
+  slug: string?
+}
+
+message UpdateBusinessResponse {
+  business: Business
+}
+
+message RenameBusinessRequest {
+  business_id: int64 @gt(0)
+  name: string @required
+}
+
+message RenameBusinessResponse {
+  business: Business
+}
+
+message SetLogoRequest {
+  business_id: int64 @gt(0)
+  /// Public URL of an already-uploaded asset (see @voxire/api uploadAsset).
+  logo_url: string @required
+}
+
+message SetLogoResponse {
+  business: Business
+}
+
+message DeleteBusinessRequest {
+  business_id: int64 @gt(0)
+}
+
+message DeleteBusinessResponse {
+  message: string
+}

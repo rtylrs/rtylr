@@ -1,0 +1,42 @@
+package flow.project.v1
+
+service ProjectService {
+  listProjects(ListProjectsRequest) -> ListProjectsResponse @get("/projects")
+
+  createProject(CreateProjectRequest) -> CreateProjectResponse @post("/projects")
+
+  updateProject(UpdateProjectRequest) -> UpdateProjectResponse @put("/projects/{id}") @body("body")
+
+  deleteProject(DeleteProjectRequest) -> DeleteProjectResponse @delete("/projects/{id}")
+
+  listProjectColumns(ListProjectColumnsRequest) -> ListProjectColumnsResponse @get("/projects/columns")
+
+  createProjectColumn(CreateProjectColumnRequest) -> CreateProjectColumnResponse @post("/projects/columns")
+
+  updateProjectColumn(UpdateProjectColumnRequest) -> UpdateProjectColumnResponse @put("/projects/columns/{id}")
+
+  deleteProjectColumn(DeleteProjectColumnRequest) -> DeleteProjectColumnResponse @delete("/projects/columns/{id}")
+
+  moveTaskToColumn(MoveTaskToColumnRequest) -> MoveTaskToColumnResponse @put("/projects/columns/move")
+
+  listProjectMembers(ListProjectMembersRequest) -> ListProjectMembersResponse @get("/projects/members")
+
+  addProjectMember(AddProjectMemberRequest) -> AddProjectMemberResponse @post("/projects/members")
+
+  removeProjectMember(RemoveProjectMemberRequest) -> RemoveProjectMemberResponse @delete("/projects/members")
+
+  updateProjectMemberRole(UpdateProjectMemberRoleRequest) -> UpdateProjectMemberRoleResponse @put("/projects/members/role")
+
+  inviteProjectMember(InviteProjectMemberRequest) -> InviteProjectMemberResponse @post("/projects/members/invite")
+
+  transferProjectOwnership(TransferProjectOwnershipRequest) -> TransferProjectOwnershipResponse @put("/projects/transfer")
+
+  moveProject(MoveProjectRequest) -> MoveProjectResponse @put("/projects/move")
+
+  /// Returns the live labour-cost aggregate for one project. Money is
+  /// computed server-side by HR from pay rates that never cross this
+  /// boundary: only aggregate cents and coverage counts are returned, so a
+  /// caller who may see a project's cost does not thereby gain sight of any
+  /// individual's pay.
+  getProjectLabourCost(GetProjectLabourCostRequest) -> GetProjectLabourCostResponse @get("/projects/{id}/labour-cost")
+}

@@ -1,0 +1,56 @@
+package flow.project.v2
+
+/// ProjectService is business-scoped: every operation resolves the caller's
+/// business from auth. Delete is a recycle-bin archive; permanent deletion
+/// happens by retention policy or through purgeProject.
+service ProjectService {
+  getProject(GetProjectRequest) -> GetProjectResponse @get("/projects/{id}")
+
+  listProjects(ListProjectsRequest) -> ListProjectsResponse @get("/projects")
+
+  createProject(CreateProjectRequest) -> CreateProjectResponse @post("/projects")
+
+  updateProject(UpdateProjectRequest) -> UpdateProjectResponse @put("/projects/{id}") @body("body")
+
+  /// archiveProject moves the project to the recycle bin. It is reversible via
+  /// restoreProject until purge_at passes.
+  archiveProject(ArchiveProjectRequest) -> ArchiveProjectResponse @delete("/projects/{id}")
+
+  setProjectVisibility(SetProjectVisibilityRequest) -> SetProjectVisibilityResponse @put("/projects/visibility")
+
+  listArchivedProjects(ListArchivedProjectsRequest) -> ListArchivedProjectsResponse @get("/projects/archived")
+
+  restoreProject(RestoreProjectRequest) -> RestoreProjectResponse @put("/projects/archived/restore")
+
+  /// purgeProject immediately and irreversibly deletes an archived project and
+  /// everything inside it, including attachment files. Server-gated to the
+  /// project creator and business admins.
+  purgeProject(PurgeProjectRequest) -> PurgeProjectResponse @delete("/projects/purged/{id}")
+
+  listProjectColumns(ListProjectColumnsRequest) -> ListProjectColumnsResponse @get("/projects/columns")
+
+  createProjectColumn(CreateProjectColumnRequest) -> CreateProjectColumnResponse @post("/projects/columns")
+
+  updateProjectColumn(UpdateProjectColumnRequest) -> UpdateProjectColumnResponse @put("/projects/columns/{id}")
+
+  deleteProjectColumn(DeleteProjectColumnRequest) -> DeleteProjectColumnResponse @delete("/projects/columns/{id}")
+
+  moveTaskToColumn(MoveTaskToColumnRequest) -> MoveTaskToColumnResponse @put("/projects/columns/move")
+
+  listProjectMembers(ListProjectMembersRequest) -> ListProjectMembersResponse @get("/projects/members")
+
+  addProjectMember(AddProjectMemberRequest) -> AddProjectMemberResponse @post("/projects/members")
+
+  removeProjectMember(RemoveProjectMemberRequest) -> RemoveProjectMemberResponse @delete("/projects/members")
+
+  updateProjectMemberRole(UpdateProjectMemberRoleRequest) -> UpdateProjectMemberRoleResponse @put("/projects/members/role")
+
+  inviteProjectMember(InviteProjectMemberRequest) -> InviteProjectMemberResponse @post("/projects/members/invite")
+
+  transferProjectOwnership(TransferProjectOwnershipRequest) -> TransferProjectOwnershipResponse @put("/projects/transfer")
+
+  /// getProjectLabourCost returns the labour cost of billable logged time on a
+  /// project. Requires admin on the project: it exposes aggregate spend, and
+  /// the aggregate is derived from HR rates that must not leak through Flow.
+  getProjectLabourCost(GetProjectLabourCostRequest) -> GetProjectLabourCostResponse @get("/projects/{id}/labour-cost")
+}

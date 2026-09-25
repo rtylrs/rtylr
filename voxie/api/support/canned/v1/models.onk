@@ -1,0 +1,49 @@
+package support.canned.v1
+
+message CannedResponse {
+  id: int64
+  business_id: int64
+  name: string
+  body: string
+  category: string
+  shortcut: string
+  created_at: string
+}
+
+message ListCannedResponsesRequest {}
+
+message ListCannedResponsesResponse {
+  canned_responses: CannedResponse[]
+}
+
+message CreateCannedResponseRequest {
+  name: string @required
+  body: string @required
+  category: string
+  shortcut: string
+}
+
+message CreateCannedResponseResponse {
+  canned_response_id: int64
+  message: string
+}
+
+message UpdateCannedResponseRequest {
+  id: int64 @gt(0)
+  name: string
+  body: string
+  category: string
+  shortcut: string
+}
+
+message UpdateCannedResponseResponse {
+  message: string
+}
+
+message DeleteCannedResponseRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteCannedResponseResponse {
+  message: string
+}

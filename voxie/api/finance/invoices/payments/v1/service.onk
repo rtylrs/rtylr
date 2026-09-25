@@ -1,0 +1,6 @@
+package finance.invoices.payments.v1
+
+/// InvoicePaymentService records payments against invoices.
+service InvoicePaymentService {
+  recordPayment(RecordPaymentRequest) -> RecordPaymentResponse @post("/invoices/{invoice_id}/payment")
+}

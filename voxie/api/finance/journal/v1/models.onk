@@ -1,0 +1,61 @@
+package finance.journal.v1
+
+// ── Journal Entries ─────────────────────────────────────────────────
+
+message JournalEntry {
+  id: int64
+  number: string
+  date: string
+  description: string
+  lines: JournalLine[]
+  /// draft, posted
+  status: string
+  /// When the record was created.
+  created_at: string
+}
+
+message JournalLine {
+  account_id: int64
+  account_name: string
+  debit: float64
+  credit: float64
+  description: string
+}
+
+message CreateJournalEntryRequest {
+  date: string @required
+  description: string @required
+  lines: JournalLine[] @min_items(1)
+}
+
+message CreateJournalEntryResponse {
+  entry: JournalEntry
+}
+
+message GetJournalEntryRequest {
+  id: int64 @gt(0)
+}
+
+message GetJournalEntryResponse {
+  entry: JournalEntry
+}
+
+message ListJournalEntriesRequest {
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+  /// The inclusive start date filter.
+  from_date: string @query("from_date")
+  /// The inclusive end date filter.
+  to_date: string @query("to_date")
+}
+
+message ListJournalEntriesResponse {
+  entries: JournalEntry[]
+  pagination: PaginationResponse
+}

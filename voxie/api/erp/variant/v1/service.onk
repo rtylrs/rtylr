@@ -1,0 +1,11 @@
+package erp.variant.v1
+
+service VariantService {
+  listVariants(ListVariantsRequest) -> ListVariantsResponse @get("/variants")
+
+  createVariant(CreateVariantRequest) -> CreateVariantResponse @post("/variants")
+
+  updateVariant(UpdateVariantRequest) -> UpdateVariantResponse @put("/variants/{id}")
+
+  deleteVariant(DeleteVariantRequest) -> DeleteVariantResponse @delete("/variants/{id}")
+}

@@ -1,0 +1,7 @@
+package pos.orders.holds.v1
+
+service OrderHoldService {
+  holdOrder(HoldOrderRequest) -> HoldOrderResponse @post("/orders/{order_id}/hold")
+
+  listHeldOrders(ListHeldOrdersRequest) -> ListHeldOrdersResponse @get("/orders/held")
+}

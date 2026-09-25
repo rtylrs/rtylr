@@ -1,0 +1,17 @@
+module = "github.com/voxire/voxie/gen/go"
+schema_root = "api"
+allow_legacy_contracts = true
+
+[generate.go-server]
+out = "gen/go"
+
+[generate.go-client]
+out = "gen/go"
+
+[generate.ts-client]
+out = "gen/ts"
+
+[generate.openapi]
+out = "gen/openapi"
+title = "Voxie API"
+version = "1.0.0"

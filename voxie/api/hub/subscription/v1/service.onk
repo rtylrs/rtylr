@@ -1,0 +1,15 @@
+package hub.subscription.v1
+
+service SubscriptionService {
+  getMySubscription(GetMySubscriptionRequest) -> GetMySubscriptionResponse @get("/my")
+
+  listPlans(ListPlansRequest) -> ListPlansResponse @get("/plans")
+
+  getBillingDetail(GetBillingDetailRequest) -> GetBillingDetailResponse @get("/billing")
+
+  getBillingHistory(GetBillingHistoryRequest) -> GetBillingHistoryResponse @get("/billing/history")
+
+  upsertSubscription(UpsertSubscriptionRequest) -> UpsertSubscriptionResponse @post("/my")
+
+  createCheckout(CreateCheckoutRequest) -> CreateCheckoutResponse @post("/checkout")
+}

@@ -1,0 +1,315 @@
+package erp.product.v1
+
+message Product {
+  id: int64 @gt(0)
+  owner_id: int64
+  category_id: int64
+  supplier_id: int64
+  name: string
+  sku: string
+  barcode: string
+  description: string
+  unit: string
+  cost_price: float64
+  sale_price: float64
+  stock_quantity: float64
+  low_stock_threshold: float64
+  reorder_quantity: float64
+  is_active: bool
+  track_inventory: bool
+  /// When the record was created.
+  created_at: string
+  /// When the record was last updated.
+  updated_at: string
+  business_id: int64
+  brand_id: int64
+  compare_at_price: float64
+  tax_rate: float64
+  currency: string
+  weight: float64
+  weight_unit: string
+  length: float64
+  width: float64
+  height: float64
+  dimension_unit: string
+  country_of_origin: string
+  hs_code: string
+  allow_backorder: bool
+  lead_time_days: int32
+  image_url: string
+}
+
+message FullProduct {
+  id: int64 @gt(0)
+  owner_id: int64
+  business_id: int64
+  category_id: int64
+  supplier_id: int64
+  name: string
+  sku: string
+  barcode: string
+  description: string
+  unit: string
+  cost_price: float64
+  sale_price: float64
+  stock_quantity: float64
+  low_stock_threshold: float64
+  reorder_quantity: float64
+  is_active: bool
+  track_inventory: bool
+  brand_id: int64
+  compare_at_price: float64
+  tax_rate: float64
+  currency: string
+  weight: float64
+  weight_unit: string
+  length: float64
+  width: float64
+  height: float64
+  dimension_unit: string
+  country_of_origin: string
+  hs_code: string
+  allow_backorder: bool
+  lead_time_days: int32
+  image_url: string
+  created_at: string
+  updated_at: string
+}
+
+message ProductAttribute {
+  id: int64
+  name: string
+  value: string
+  position: int32
+}
+
+message DashboardLowStockItem {
+  product_id: int64
+  name: string
+  sku: string
+  current_stock: float64
+  reorder_point: float64
+  warehouse_name: string
+}
+
+message DashboardRecentOrder {
+  id: int64
+  po_number: string
+  supplier_name: string
+  status: string
+  total: float64
+  created_at: string
+}
+
+message DashboardTopCategory {
+  name: string
+  product_count: int32
+}
+
+message ExpiringItem {
+  product_id: int64
+  name: string
+  sku: string
+  batch_id: string
+  expiry_date: string
+  quantity: float64
+  warehouse_name: string
+}
+
+message ReorderSuggestion {
+  product_id: int64
+  name: string
+  sku: string
+  current_stock: float64
+  reorder_point: float64
+  suggested_quantity: float64
+  avg_daily_sales: float64
+  lead_time_days: int32
+  confidence: string
+}
+
+message ListProductsRequest {
+  /// Filters products by name or SKU.
+  search: string @query("search")
+  /// Filters products by category.
+  category_id: int64 @query("category_id")
+  /// The maximum number of products to return.
+  limit: int64 @query("limit") @encode(number)
+  /// The number of records to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListProductsResponse {
+  products: Product[]
+  has_more: bool
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  total: int64 @encode(number)
+}
+
+message CreateProductRequest {
+  category_id: int64? @required @gt(0)
+  supplier_id: int64? @required @gt(0)
+  name: string @required
+  sku: string @required
+  barcode: string @required
+  description: string @required
+  unit: string @required
+  cost_price: float64 @gte(0)
+  sale_price: float64 @gte(0)
+  low_stock_threshold: float64 @gte(0)
+  reorder_quantity: float64 @gte(0)
+  is_active: bool
+  track_inventory: bool
+  /// The opening tracked quantity for this product.
+  stock_quantity: float64 @gte(0)
+  /// Links the product to a brand when present.
+  brand_id: int64
+  compare_at_price: float64 @gte(0)
+  tax_rate: float64 @gte(0)
+  currency: string
+  weight: float64 @gte(0)
+  weight_unit: string
+  length: float64 @gte(0)
+  width: float64 @gte(0)
+  height: float64 @gte(0)
+  dimension_unit: string
+  country_of_origin: string
+  hs_code: string
+  allow_backorder: bool
+  lead_time_days: int32 @gte(0)
+  image_url: string
+}
+
+message CreateProductResponse {
+  product_id: int64
+  /// A human-readable result message.
+  message: string
+}
+
+message GetProductByBarcodeRequest {
+  code: string @required
+}
+
+message GetProductByBarcodeResponse {
+  product: Product
+}
+
+message GetProductRequest {
+  id: int64 @gt(0)
+}
+
+message GetProductResponse {
+  product: Product
+}
+
+message GetProductFullRequest {
+  id: int64 @gt(0)
+}
+
+message GetProductFullResponse {
+  product: FullProduct
+}
+
+message ListProductAttributesRequest {
+  id: int64 @gt(0)
+}
+
+message ListProductAttributesResponse {
+  attributes: ProductAttribute[]
+}
+
+message UpdateProductBody {
+  category_id: int64? @required @gt(0)
+  supplier_id: int64? @required @gt(0)
+  name: string @required
+  sku: string @required
+  barcode: string @required
+  description: string @required
+  unit: string @required
+  cost_price: float64 @gte(0)
+  sale_price: float64 @gte(0)
+  low_stock_threshold: float64 @gte(0)
+  reorder_quantity: float64 @gte(0)
+  is_active: bool
+  track_inventory: bool
+  /// The tracked quantity to store for this product.
+  stock_quantity: float64 @gte(0)
+  /// Links the product to a brand when present.
+  brand_id: int64
+  compare_at_price: float64 @gte(0)
+  tax_rate: float64 @gte(0)
+  currency: string
+  weight: float64 @gte(0)
+  weight_unit: string
+  length: float64 @gte(0)
+  width: float64 @gte(0)
+  height: float64 @gte(0)
+  dimension_unit: string
+  country_of_origin: string
+  hs_code: string
+  allow_backorder: bool
+  lead_time_days: int32 @gte(0)
+  image_url: string
+}
+
+message UpdateProductRequest {
+  id: int64 @gt(0)
+  body: UpdateProductBody
+}
+
+message UpdateProductResponse {
+  message: string
+}
+
+message DeleteProductRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteProductResponse {
+  message: string
+}
+
+message GetDashboardRequest {}
+
+message GetDashboardResponse {
+  total_products: int32
+  low_stock_count: int32
+  pending_orders: int32
+  total_suppliers: int32
+  inventory_value: float64
+  low_stock_items: DashboardLowStockItem[]
+  recent_orders: DashboardRecentOrder[]
+  top_categories: DashboardTopCategory[]
+}
+
+message ListReorderSuggestionsRequest {
+  /// Maximum number of reorder suggestions to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of reorder suggestions to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListReorderSuggestionsResponse {
+  suggestions: ReorderSuggestion[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
+}
+
+message ListExpiringItemsRequest {
+  days_ahead: int32 @query("days_ahead")
+  /// Maximum number of expiring items to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of expiring items to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListExpiringItemsResponse {
+  items: ExpiringItem[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
+}

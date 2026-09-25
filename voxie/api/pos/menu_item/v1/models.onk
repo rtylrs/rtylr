@@ -1,0 +1,87 @@
+package pos.menu_item.v1
+
+/// MenuItem is a sellable item on the POS menu.
+message MenuItem {
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  category_id: int64
+  name: string
+  sku: string
+  sale_price: float64
+  is_active: bool
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+  /// Public storefront image for the menu item.
+  image_url: string
+  /// Display category name for the menu item.
+  category: string
+  /// Scanned barcode value for the menu item.
+  barcode: string
+  /// Customer-facing menu item description.
+  description: string
+  /// Sale tax rate for the menu item.
+  tax_rate: float64
+  /// Current tracked stock quantity for the menu item.
+  stock: float64
+  /// product_id is the ERP product this item is sold from; absent for items
+  /// that are not stocked as a single product. When it is absent, cost and
+  /// ERP-side stock for this item are unknown rather than zero. The server
+  /// must verify the referenced product belongs to the caller's business.
+  product_id: int64?
+  /// unit_cost is the cost of one unit at the time of the read, copied from
+  /// the linked ERP product. Absent when product_id is absent. Reported for
+  /// display and margin only: the authoritative value is the ERP product's.
+  unit_cost: float64?
+}
+
+message CreateMenuItemRequest {
+  name: string @required
+  sku: string @required
+  sale_price: float64 @gte(0)
+}
+
+message CreateMenuItemResponse {
+  item_id: int64
+  message: string
+}
+
+message ListMenuItemsRequest {}
+
+message ListMenuItemsResponse {
+  items: MenuItem[]
+}
+
+message ListPublicMenuItemsRequest {
+  business_id: int64 @gt(0) @query("business_id")
+  /// Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
+  location_id: int64 @query("location_id")
+}
+
+message ListPublicMenuItemsResponse {
+  items: MenuItem[]
+}
+
+message UpdateMenuItemBody {
+  /// Display name for the menu item.
+  name: string
+  /// Sell price for the menu item.
+  sale_price: float64 @gte(0)
+  /// Controls whether the item can be sold.
+  is_active: bool
+  /// Current tracked stock quantity for the menu item.
+  stock: float64 @gte(0)
+}
+
+message UpdateMenuItemRequest {
+  /// id is the unique identifier for the menu item.
+  id: int64 @gt(0)
+  /// body carries updatable menu item fields bound from the HTTP payload.
+  body: UpdateMenuItemBody
+}
+
+message UpdateMenuItemResponse {
+  message: string
+}

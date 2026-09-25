@@ -1,0 +1,74 @@
+package finance.bank_account.v1
+
+/// BankAccount is a business's linked bank account.
+message BankAccount {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// name is the name value for this contract.
+  name: string
+  /// bank_name is the bank name value for this contract.
+  bank_name: string
+  /// account_type is the account type value for this contract.
+  /// checking, savings
+  account_type: string
+  /// last_four is the last four value for this contract.
+  last_four: string
+  /// balance is the balance value for this contract.
+  balance: float64
+  /// currency is the currency value for this contract.
+  currency: string
+  /// is_primary is the is primary value for this contract.
+  is_primary: bool
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message CreateBankAccountRequest {
+  /// name is the name value for this contract.
+  name: string @required
+  /// bank_name is the bank name value for this contract.
+  bank_name: string @required
+  /// account_type is the account type value for this contract.
+  account_type: string @required
+  /// last_four is the last four value for this contract.
+  last_four: string @required
+  /// balance is the balance value for this contract.
+  balance: float64? @required @gte(0)
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// is_primary is the is primary value for this contract.
+  is_primary: bool
+}
+
+message CreateBankAccountResponse {
+  /// account is the account value for this contract.
+  account: BankAccount
+}
+
+message GetBankAccountRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+}
+
+message GetBankAccountResponse {
+  /// account is the account value for this contract.
+  account: BankAccount
+}
+
+message ListBankAccountsRequest {
+  /// page is the current result page.
+  page: int32 @query("page")
+  /// limit is the maximum number of records to return.
+  limit: int32 @query("limit")
+  /// sort_by is the field to sort results by.
+  sort_by: string @query("sort_by")
+  /// sort_dir is the sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListBankAccountsResponse {
+  /// accounts is the accounts value for this contract.
+  accounts: BankAccount[]
+  /// pagination is the pagination value for this contract.
+  pagination: PaginationResponse
+}

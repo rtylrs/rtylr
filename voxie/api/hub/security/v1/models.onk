@@ -1,0 +1,101 @@
+package hub.security.v1
+
+message SecurityState {
+  two_factor_enabled: bool
+  mfa_required: bool
+  mfa_enrolled: bool
+  active_sessions: ActiveSession[]
+}
+
+message ActiveSession {
+  id: string
+  ip: string
+  user_agent: string
+  /// When the record was created.
+  created_at: string
+  is_current: bool
+}
+
+message LoginEntry {
+  /// Database identifier for this login event.
+  id: int64
+  /// Email address used for lookup or contact.
+  email: string
+  method: string
+  ip: string
+  user_agent: string
+  success: bool
+  /// When the record was created.
+  created_at: string
+}
+
+message GetSecurityStateRequest {}
+
+message GetSecurityStateResponse {
+  state: SecurityState
+}
+
+message LoginHistoryRequest {
+  /// 1-based page number to return.
+  page: int32 @query("page")
+  /// Maximum number of login events to return in one page.
+  page_size: int32 @query("page_size")
+}
+
+message LoginHistoryResponse {
+  history: LoginEntry[]
+  /// Total number of login events for the authenticated user.
+  total: int32
+  /// The 1-based page number returned.
+  page: int32
+  /// The number of login events requested per page after server limits.
+  page_size: int32
+  /// Whether another page of login events is available.
+  has_more: bool
+}
+
+message InvalidateSessionsRequest {}
+
+message InvalidateSessionsResponse {
+  message: string
+}
+
+message Update2FARequest {
+  enabled: bool
+}
+
+message Update2FAResponse {
+  message: string
+}
+
+message BeginMFAEnrollmentRequest {}
+
+message BeginMFAEnrollmentResponse {
+  secret: string
+  otpauth_uri: string
+}
+
+message CompleteMFAEnrollmentRequest {
+  code: string @required
+}
+
+message CompleteMFAEnrollmentResponse {
+  verified: bool
+  recovery_codes: string[]
+}
+
+message VerifyMFARequest {
+  code: string @required
+}
+
+message VerifyMFAResponse {
+  verified: bool
+}
+
+message UseMFARecoveryCodeRequest {
+  code: string @required
+}
+
+message UseMFARecoveryCodeResponse {
+  verified: bool
+}

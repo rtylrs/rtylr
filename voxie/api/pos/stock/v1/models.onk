@@ -1,0 +1,120 @@
+package pos.stock.v1
+
+/// StockMovement is a recorded inventory movement.
+message StockMovement {
+  id: int64
+  business_id: int64
+  branch_id: int64
+  product_id: int64
+  /// type is the type value for this contract.
+  type: string
+  quantity: float64
+  reference_id: int64?
+  reference_type: string?
+  note: string?
+  employee_id: int64?
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+/// BranchInventory is a per-branch inventory row for a product.
+message BranchInventory {
+  id: int64
+  business_id: int64
+  branch_id: int64
+  product_id: int64
+  quantity: float64
+  reorder_point: float64
+  reorder_quantity: float64
+  /// updated_at is when the record was last updated.
+  updated_at: string
+  /// item_id is an alias for product_id used by POS catalog UIs.
+  item_id: int64
+  /// name is the ERP product display name.
+  name: string
+  /// sku is the ERP product SKU.
+  sku: string
+  unit: string
+  /// current_qty is an alias for quantity used by POS inventory UIs.
+  current_qty: float64
+  /// low_stock_threshold is the ERP product low-stock threshold.
+  low_stock_threshold: float64
+}
+
+message AdjustStockRequest {
+  branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
+  note: string
+  employee_id: int64? @required @gt(0)
+}
+
+message AdjustStockResponse {
+  movement_id: int64
+  message: string
+}
+
+message ListInventoryRequest {
+  branch_id: int64 @query("branch_id")
+}
+
+message ListInventoryResponse {
+  inventory: BranchInventory[]
+}
+
+message ListStockMovementsRequest {
+  branch_id: int64 @query("branch_id")
+  product_id: int64 @query("product_id")
+}
+
+message ListStockMovementsResponse {
+  movements: StockMovement[]
+}
+
+message LowStockRequest {
+  branch_id: int64? @required @gt(0) @query("branch_id")
+}
+
+message LowStockResponse {
+  items: BranchInventory[]
+}
+
+message ReceiveStockRequest {
+  branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
+  note: string @required
+  employee_id: int64? @required @gt(0)
+}
+
+message ReceiveStockResponse {
+  movement_id: int64
+  message: string
+}
+
+message TransferStockRequest {
+  from_branch_id: int64? @required @gt(0)
+  to_branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
+  note: string @required
+  employee_id: int64? @required @gt(0)
+}
+
+message TransferStockResponse {
+  movement_id: int64
+  message: string
+}
+
+message WasteStockRequest {
+  branch_id: int64? @required @gt(0)
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
+  note: string @required
+  employee_id: int64? @required @gt(0)
+}
+
+message WasteStockResponse {
+  movement_id: int64
+  message: string
+}

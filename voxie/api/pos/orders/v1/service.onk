@@ -1,0 +1,25 @@
+package pos.orders.v1
+
+/// OrderService defines the POS order endpoints.
+service OrderService {
+  /// ListOrders returns POS orders for the active business and filters.
+  listOrders(ListOrdersRequest) -> ListOrdersResponse @get("/orders")
+
+  /// CreateOrder creates a POS order.
+  createOrder(CreateOrderRequest) -> CreateOrderResponse @post("/orders")
+
+  /// CreatePublicOrder places an anonymous online order from the public menu app.
+  createPublicOrder(CreatePublicOrderRequest) -> CreatePublicOrderResponse @post("/orders/public")
+
+  /// GetPublicOrderStatus returns lifecycle status for a public online order.
+  getPublicOrderStatus(GetPublicOrderStatusRequest) -> GetPublicOrderStatusResponse @get("/orders/{order_id}/public-status")
+
+  /// GetOrderDetail returns an order and its purchased items.
+  getOrderDetail(GetOrderDetailRequest) -> GetOrderDetailResponse @get("/orders/{order_id}")
+
+  /// UpdateOrderStatus changes the order lifecycle status.
+  updateOrderStatus(UpdateOrderStatusRequest) -> UpdateOrderStatusResponse @put("/orders/{order_id}/status") @body("body")
+
+  /// VoidOrder voids an existing order.
+  voidOrder(VoidOrderRequest) -> VoidOrderResponse @post("/orders/{order_id}/void")
+}

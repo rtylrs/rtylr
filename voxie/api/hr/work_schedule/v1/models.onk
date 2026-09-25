@@ -1,0 +1,104 @@
+package hr.work_schedule.v1
+
+/// WorkSchedulePayload is a recurring staff work schedule.
+message WorkSchedulePayload {
+  /// Unique identifier for the work schedule.
+  id: int64
+  /// Tenant owner this schedule belongs to.
+  owner_id: int64
+  /// Display name of the schedule (e.g. "Standard 9-5").
+  name: string
+  /// Days of the week this schedule applies to (e.g. ["monday", "tuesday"]).
+  working_days: string[]
+  /// Shift start time in HH:MM 24-hour format.
+  start_time: string
+  /// Shift end time in HH:MM 24-hour format.
+  end_time: string
+  /// Duration of the daily break in minutes.
+  break_minutes: int32
+  /// Total contracted hours per week (e.g. 40.0).
+  contracted_hours_per_week: float64
+  /// Daily overtime threshold in minutes; hours beyond this count as OT.
+  daily_ot_threshold_minutes: int32
+  /// Weekly overtime threshold in minutes; hours beyond this count as OT.
+  weekly_ot_threshold_minutes: int32
+  /// Unix timestamp when this schedule was created.
+  created_at: int64
+  /// Unix timestamp when this schedule was last updated.
+  updated_at: int64
+}
+
+message ListWorkSchedulesRequest {
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// offset is the number of records to skip, for paging through the list.
+  offset: int32? @query("offset")
+}
+
+/// ListWorkSchedulesResponse lists work schedules for the tenant.
+///
+/// Read by Flow to size a member's workload bar against the hours they are
+/// actually contracted for, resolved through Employee.work_schedule_id. Before
+/// this had an RPC, Flow hardcoded 40 hours for everyone, which reads a
+/// part-timer as under-loaded and a four-day week as a shortfall.
+message ListWorkSchedulesResponse {
+  /// All work schedules for the tenant.
+  schedules: WorkSchedulePayload[]
+  /// total is the total number of schedules for the tenant, for pagination math.
+  total: int32
+}
+
+message CreateWorkScheduleRequest {
+  /// Display name of the schedule.
+  name: string @required
+  /// Days of the week this schedule applies to.
+  working_days: string[] @min_items(1)
+  /// Shift start time in HH:MM 24-hour format.
+  start_time: string @required
+  /// Shift end time in HH:MM 24-hour format.
+  end_time: string @required
+  /// Duration of the daily break in minutes.
+  break_minutes: int32? @required @gte(0)
+  /// Total contracted hours per week.
+  contracted_hours_per_week: float64 @gte(0)
+  /// Daily overtime threshold in minutes.
+  daily_ot_threshold_minutes: int32? @required @gte(0)
+  /// Weekly overtime threshold in minutes.
+  weekly_ot_threshold_minutes: int32? @required @gte(0)
+}
+
+message CreateWorkScheduleResponse {
+  /// The newly created work schedule.
+  schedule: WorkSchedulePayload
+}
+
+message UpdateWorkScheduleBody {
+  /// New name; absent to keep current.
+  name: string?
+  /// New working days; if provided, replaces all existing days.
+  working_days: string[] @min_items(1)
+  /// New start time; absent to keep current.
+  start_time: string?
+  /// New end time; absent to keep current.
+  end_time: string?
+  /// New break duration in minutes; absent to keep current.
+  break_minutes: int32?
+  /// New contracted hours per week; absent to keep current.
+  contracted_hours_per_week: float64?
+  /// New daily OT threshold; absent to keep current.
+  daily_ot_threshold_minutes: int32?
+  /// New weekly OT threshold; absent to keep current.
+  weekly_ot_threshold_minutes: int32?
+}
+
+message UpdateWorkScheduleRequest {
+  /// ID of the schedule to update.
+  id: int64 @gt(0)
+  /// body carries updatable work schedule fields bound from the HTTP payload.
+  body: UpdateWorkScheduleBody
+}
+
+message UpdateWorkScheduleResponse {
+  /// The updated work schedule.
+  schedule: WorkSchedulePayload
+}

@@ -1,0 +1,19 @@
+package flow.dashboard.v1
+
+message GetFlowDashboardRequest {
+  /// workspace_id is the workspace id value for this contract.
+  workspace_id: int64? @required @gt(0) @query("workspace_id")
+}
+
+message GetFlowDashboardResponse {
+  /// open_tasks is the open tasks value for this contract.
+  open_tasks: int64
+  /// in_progress_tasks is the in progress tasks value for this contract.
+  in_progress_tasks: int64
+  /// completed_this_week is the completed this week value for this contract.
+  completed_this_week: int64
+  /// overdue_tasks is the overdue tasks value for this contract.
+  overdue_tasks: int64
+  /// my_tasks is the my tasks value for this contract.
+  my_tasks: Task[]
+}

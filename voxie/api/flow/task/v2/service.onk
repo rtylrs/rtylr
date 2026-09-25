@@ -1,0 +1,47 @@
+package flow.task.v2
+
+service TaskService {
+  listTasks(ListTasksRequest) -> ListTasksResponse @get("/tasks")
+
+  getMyTasks(GetMyTasksRequest) -> GetMyTasksResponse @get("/tasks/my")
+
+  getMyTasksProject(GetMyTasksProjectRequest) -> GetMyTasksProjectResponse @get("/tasks/my-project")
+
+  searchTasks(SearchTasksRequest) -> SearchTasksResponse @get("/tasks/search")
+
+  createTask(CreateTaskRequest) -> CreateTaskResponse @post("/tasks")
+
+  getTaskDetail(GetTaskDetailRequest) -> GetTaskDetailResponse @get("/tasks/{id}")
+
+  updateTask(UpdateTaskRequest) -> UpdateTaskResponse @put("/tasks/{id}") @body("body")
+
+  updateTaskStatus(UpdateTaskStatusRequest) -> UpdateTaskStatusResponse @patch("/tasks/{id}/status") @body("body")
+
+  deleteTask(DeleteTaskRequest) -> DeleteTaskResponse @delete("/tasks/{id}")
+
+  createSubtask(CreateSubtaskRequest) -> CreateSubtaskResponse @post("/tasks/subtasks")
+
+  getSubtasks(GetSubtasksRequest) -> GetSubtasksResponse @get("/tasks/{task_id}/subtasks")
+
+  addComment(AddCommentRequest) -> AddCommentResponse @post("/tasks/{task_id}/comments")
+
+  deleteComment(DeleteCommentRequest) -> DeleteCommentResponse @delete("/tasks/comments/{id}")
+
+  getTaskActivity(GetTaskActivityRequest) -> GetTaskActivityResponse @get("/tasks/{task_id}/activity")
+
+  createAttachment(CreateAttachmentRequest) -> CreateAttachmentResponse @post("/tasks/attachments")
+
+  getAttachments(GetAttachmentsRequest) -> GetAttachmentsResponse @get("/tasks/{task_id}/attachments")
+
+  deleteAttachment(DeleteAttachmentRequest) -> DeleteAttachmentResponse @delete("/tasks/attachments/{id}")
+
+  createTimeLog(CreateTimeLogRequest) -> CreateTimeLogResponse @post("/tasks/{task_id}/time-logs")
+
+  getTimeLogs(GetTimeLogsRequest) -> GetTimeLogsResponse @get("/tasks/{task_id}/time-logs")
+
+  deleteTimeLog(DeleteTimeLogRequest) -> DeleteTimeLogResponse @delete("/tasks/time-logs/{id}")
+
+  addTaskDependency(AddTaskDependencyRequest) -> AddTaskDependencyResponse @post("/tasks/{task_id}/dependencies") @body("body")
+
+  removeTaskDependency(RemoveTaskDependencyRequest) -> RemoveTaskDependencyResponse @delete("/tasks/{task_id}/dependencies/{depends_on_task_id}")
+}

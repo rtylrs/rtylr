@@ -1,0 +1,202 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/settings/v1/settings:
+        get:
+            tags:
+                - SettingsService
+            summary: getPOSSettings
+            description: Returns the active business POS settings.
+            operationId: SettingsService_getPOSSettings
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.settings.v1.GetPOSSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        put:
+            tags:
+                - SettingsService
+            summary: updatePOSSettings
+            description: Updates the active business POS settings.
+            operationId: SettingsService_updatePOSSettings
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.settings.v1.UpdatePOSSettingsRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.settings.v1.UpdatePOSSettingsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.settings.v1.GetPOSSettingsRequest:
+            type: object
+            description: GetPOSSettingsRequest reads the current business POS settings.
+        pos.settings.v1.GetPOSSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.settings.v1.POSBusinessSettings'
+            required:
+                - settings
+            description: GetPOSSettingsResponse returns the current business POS settings.
+        pos.settings.v1.POSBusinessSettings:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                business_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: business_id is the business id these settings belong to.
+                business_profile:
+                    type: string
+                    description: business_profile is one of retail, restaurant, or quick_service.
+                theme:
+                    type: string
+                    description: theme is the default POS theme for this business.
+                features:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.settings.v1.POSFeatureSettings'
+                    description: features are the business-specific POS modules to expose.
+                receipt_footer:
+                    type: string
+                    description: receipt_footer is the default footer printed on receipts.
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            required:
+                - id
+                - business_id
+                - business_profile
+                - theme
+                - features
+                - receipt_footer
+                - created_at
+                - updated_at
+            description: POSBusinessSettings stores business-wide POS experience settings.
+        pos.settings.v1.POSFeatureSettings:
+            type: object
+            properties:
+                tables:
+                    type: boolean
+                    description: tables enables table and floor service workflows.
+                kitchen_display:
+                    type: boolean
+                    description: kitchen_display enables KDS and kitchen preparation workflows.
+                modifiers:
+                    type: boolean
+                    description: modifiers enables product modifier workflows.
+                combos:
+                    type: boolean
+                    description: combos enables bundle/combo workflows.
+                tips:
+                    type: boolean
+                    description: tips enables tipping during payment.
+                gift_cards:
+                    type: boolean
+                    description: gift_cards enables gift card selling and redemption.
+                customers:
+                    type: boolean
+                    description: customers enables customer lookup and customer assignment.
+                inventory:
+                    type: boolean
+                    description: inventory enables stock/inventory surfaces.
+                cash_drawer:
+                    type: boolean
+                    description: cash_drawer enables cash drawer actions and cash movement surfaces.
+            required:
+                - tables
+                - kitchen_display
+                - modifiers
+                - combos
+                - tips
+                - gift_cards
+                - customers
+                - inventory
+                - cash_drawer
+            description: POSFeatureSettings controls which business-specific POS modules are visible.
+        pos.settings.v1.UpdatePOSSettingsRequest:
+            type: object
+            properties:
+                business_profile:
+                    type: string
+                    description: business_profile is one of retail, restaurant, or quick_service.
+                theme:
+                    type: string
+                    description: theme is the default POS theme for this business.
+                features:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.settings.v1.POSFeatureSettings'
+                    description: features are the business-specific POS modules to expose.
+                receipt_footer:
+                    type: string
+                    description: receipt_footer is the default footer printed on receipts.
+            required:
+                - business_profile
+                - theme
+                - features
+                - receipt_footer
+            description: UpdatePOSSettingsRequest updates the current business POS settings.
+        pos.settings.v1.UpdatePOSSettingsResponse:
+            type: object
+            properties:
+                settings:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.settings.v1.POSBusinessSettings'
+                message:
+                    type: string
+            required:
+                - settings
+                - message
+            description: UpdatePOSSettingsResponse returns the saved POS settings.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SettingsService
+      description: SettingsService defines POS business settings endpoints.

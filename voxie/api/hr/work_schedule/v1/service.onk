@@ -1,0 +1,13 @@
+package hr.work_schedule.v1
+
+/// WorkScheduleService defines HR work schedule endpoints.
+service WorkScheduleService {
+  /// Lists work schedules for the tenant.
+  listWorkSchedules(ListWorkSchedulesRequest) -> ListWorkSchedulesResponse @get("/work-schedules")
+
+  /// Creates a new work schedule.
+  createWorkSchedule(CreateWorkScheduleRequest) -> CreateWorkScheduleResponse @post("/work-schedules")
+
+  /// Updates an existing work schedule.
+  updateWorkSchedule(UpdateWorkScheduleRequest) -> UpdateWorkScheduleResponse @put("/work-schedules/{id}") @body("body")
+}

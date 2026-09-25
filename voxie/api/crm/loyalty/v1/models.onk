@@ -1,0 +1,151 @@
+package crm.loyalty.v1
+
+/// LoyaltyConfig is a business's loyalty program configuration.
+message LoyaltyConfig {
+  id: int64
+  owner_id: int64
+  is_enabled: bool
+  points_per_currency_unit: float64
+  currency_per_point: float64
+  bronze_min: int64
+  silver_min: int64
+  gold_min: int64
+  platinum_min: int64
+  bronze_discount_pct: float64
+  silver_discount_pct: float64
+  gold_discount_pct: float64
+  platinum_discount_pct: float64
+  points_expiry_days: int64
+  updated_at: string
+}
+
+/// LoyaltyTransaction is a single points award or redemption event.
+message LoyaltyTransaction {
+  id: int64
+  owner_id: int64
+  customer_id: int64
+  type: string
+  points: int64
+  balance_before: int64
+  balance_after: int64
+  description: string
+  reference_id: int64?
+  reference_type: string
+  created_at: string
+}
+
+/// LoyaltyTier is a spend-based tier with an associated discount.
+message LoyaltyTier {
+  id: int64
+  owner_id: int64
+  name: string
+  min_points: int64
+  discount_pct: float64
+  perks: string
+  sort_order: int64
+  created_at: string
+  updated_at: string
+}
+
+message AwardPointsRequest {
+  customer_id: int64? @required @gt(0)
+  points: int64? @required @gt(0)
+  description: string @required
+  reference_id: int64?
+  reference_type: string @required
+}
+
+message AwardPointsResponse {
+  message: string
+}
+
+message CreateLoyaltyTierRequest {
+  name: string @required
+  /// Points threshold at which this tier starts applying. Zero is valid and
+  /// means an entry tier every customer qualifies for from their first point.
+  min_points: int64? @required @gte(0)
+  discount_pct: float64? @required @gt(0)
+  perks: string @required
+  sort_order: int64? @required @gt(0)
+}
+
+message CreateLoyaltyTierResponse {
+  tier_id: int64
+  message: string
+}
+
+message GetLoyaltyConfigRequest {}
+
+message GetLoyaltyConfigResponse {
+  config: LoyaltyConfig
+}
+
+message ListLoyaltyTiersRequest {}
+
+message ListLoyaltyTiersResponse {
+  tiers: LoyaltyTier[]
+}
+
+message ListLoyaltyTransactionsRequest {
+  /// Filters transactions for a single customer.
+  customer_id: int64 @query("customer_id")
+  page: int64 @query("page")
+  page_size: int64 @query("page_size")
+}
+
+message ListLoyaltyTransactionsResponse {
+  transactions: LoyaltyTransaction[]
+  total: int64
+  page: int64
+  page_size: int64
+}
+
+message RedeemPointsRequest {
+  customer_id: int64? @required @gt(0)
+  points: int64? @required @gt(0)
+  description: string @required
+  reference_id: int64?
+  reference_type: string @required
+}
+
+message RedeemPointsResponse {
+  message: string
+}
+
+message UpdateLoyaltyConfigRequest {
+  is_enabled: bool
+  points_per_currency_unit: float64? @required @gt(0)
+  currency_per_point: float64? @required @gt(0)
+  bronze_min: int64? @required @gt(0)
+  silver_min: int64? @required @gt(0)
+  gold_min: int64? @required @gt(0)
+  platinum_min: int64? @required @gt(0)
+  bronze_discount_pct: float64? @required @gt(0)
+  silver_discount_pct: float64? @required @gt(0)
+  gold_discount_pct: float64? @required @gt(0)
+  platinum_discount_pct: float64? @required @gt(0)
+  points_expiry_days: int64? @required @gt(0)
+}
+
+message UpdateLoyaltyConfigResponse {
+  message: string
+}
+
+message UpdateLoyaltyTierBody {
+  name: string @required
+  /// Points threshold at which this tier starts applying. Zero is valid and
+  /// means an entry tier every customer qualifies for from their first point.
+  min_points: int64? @required @gte(0)
+  discount_pct: float64? @required @gt(0)
+  perks: string @required
+  sort_order: int64? @required @gt(0)
+}
+
+message UpdateLoyaltyTierRequest {
+  id: int64 @gt(0)
+  body: UpdateLoyaltyTierBody
+}
+
+message UpdateLoyaltyTierResponse {
+  message: string
+}

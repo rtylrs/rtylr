@@ -1,0 +1,8 @@
+package erp.settings.v1
+
+/// SettingsService defines tenant-scoped ERP business settings endpoints.
+service SettingsService {
+  getErpSettings(GetErpSettingsRequest) -> GetErpSettingsResponse @get("/settings")
+
+  updateErpSettings(UpdateErpSettingsRequest) -> UpdateErpSettingsResponse @put("/settings")
+}

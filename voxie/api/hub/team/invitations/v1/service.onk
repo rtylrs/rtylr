@@ -1,0 +1,16 @@
+package hub.team.invitations.v1
+
+/// InvitationsService defines hub team invitation endpoints.
+service InvitationsService {
+  /// Sends a team invitation.
+  inviteUser(InviteUserRequest) -> InviteUserResponse @post("/invitations")
+
+  /// Sends team invitations to multiple emails at once.
+  bulkInvite(BulkInviteRequest) -> BulkInviteResponse @post("/invitations/bulk")
+
+  /// Validates an invitation token.
+  verifyInvite(VerifyInviteRequest) -> VerifyInviteResponse @post("/invitations/verify")
+
+  /// Accepts a team invitation.
+  acceptInvite(AcceptInviteRequest) -> AcceptInviteResponse @post("/invitations/accept")
+}

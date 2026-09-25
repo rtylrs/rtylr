@@ -1,0 +1,65 @@
+package pos.gift_card.v1
+
+/// GiftCard is a stored-value card that can be issued to and redeemed by a customer.
+message GiftCard {
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  /// business_id identifies the active business.
+  business_id: int64
+  /// customer_id identifies the linked customer when present.
+  customer_id: int64
+  code: string
+  initial_amount: float64
+  current_balance: float64
+  customer_name: string
+  customer_email: string
+  is_active: bool
+  expires_at: string
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+message CreateGiftCardRequest {
+  code: string @required
+  /// paid_order_id must identify a paid POS order for this business. The
+  /// server uses it as the tender reference for the liability entry.
+  paid_order_id: int64? @required @gt(0)
+  initial_amount: float64? @required @gt(0)
+  customer_name: string @required
+  customer_email: string @required @email
+  expires_at: string @required
+}
+
+message CreateGiftCardResponse {
+  gift_card_id: int64
+  message: string
+}
+
+message GetGiftCardByCodeRequest {
+  code: string @required
+}
+
+message GetGiftCardByCodeResponse {
+  gift_card: GiftCard
+}
+
+message ListGiftCardsRequest {}
+
+message ListGiftCardsResponse {
+  gift_cards: GiftCard[]
+}
+
+message RedeemGiftCardRequest {
+  code: string @required
+  /// order_id identifies the POS order receiving this gift-card tender.
+  order_id: int64? @required @gt(0)
+  amount: float64? @required @gt(0)
+}
+
+message RedeemGiftCardResponse {
+  gift_card: GiftCard
+  message: string
+}

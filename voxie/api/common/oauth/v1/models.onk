@@ -1,0 +1,58 @@
+package common.oauth.v1
+
+/// IssueRequest creates an OAuth authorization redirect for the signed-in user.
+message IssueRequest {
+  /// client_id identifies the OAuth client requesting authorization.
+  client_id: string @required
+  /// redirect_uri is the callback URI that receives the authorization code.
+  redirect_uri: string @required @uri
+  /// scope contains the requested OAuth scopes.
+  scope: string @required
+  /// state is echoed back to the redirect URI.
+  state: string @required
+  /// code_challenge is the PKCE challenge for the authorization code.
+  code_challenge: string @required
+  /// code_challenge_method is the PKCE challenge method.
+  code_challenge_method: string @required
+}
+
+/// IssueResponse returns the authorization redirect URL.
+message IssueResponse {
+  /// redirect_url is the URL the browser should navigate to.
+  redirect_url: string
+}
+
+message TokenRequest {
+  grant_type: string @required
+  code: string
+  code_verifier: string
+  redirect_uri: string
+  client_id: string @required
+  refresh_token: string
+}
+
+message TokenResponse {
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: int32
+}
+
+message RevokeRequest {
+  token: string @required
+  client_id: string
+}
+
+message RevokeResponse {
+  ok: bool
+}
+
+message MeRequest {}
+
+message MeResponse {
+  user_id: int64
+  business_id: int64
+  role: string
+  /// Server-resolved authorization for the active business.
+  effective_access: hub.user.v1.EffectiveAccess?
+}

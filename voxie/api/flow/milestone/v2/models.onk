@@ -1,0 +1,60 @@
+package flow.milestone.v2
+
+message MilestoneProject {
+  name: string
+  color: string
+}
+
+message Milestone {
+  id: int64
+  project_id: int64
+  name: string
+  target_date: string
+  progress: int32
+  computed_progress: int32
+  done_count: int32
+  task_count: int32
+  status: string
+  description: string
+  project: MilestoneProject
+}
+
+message ListMilestonesRequest {
+  /// project_id narrows milestones to one project. Omitted, all milestones of
+  /// projects the caller can access are returned.
+  project_id: int64? @query("project_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListMilestonesResponse {
+  milestones: Milestone[]
+  pagination: PaginationResponse
+}
+
+message CreateMilestoneRequest {
+  project_id: int64? @required @gt(0)
+  name: string @required
+  description: string
+  target_date: string
+}
+
+message CreateMilestoneResponse {
+  milestone: Milestone
+}
+
+message UpdateMilestoneRequest {
+  id: int64 @gt(0)
+  name: string
+  description: string
+  status: string
+  target_date: string
+}
+
+message UpdateMilestoneResponse {}

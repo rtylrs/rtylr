@@ -1,0 +1,292 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/modifier/v1/modifiers:
+        get:
+            tags:
+                - ModifierService
+            summary: listModifiers
+            description: Returns modifiers for the active business.
+            operationId: ModifierService_listModifiers
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.ListModifiersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - ModifierService
+            summary: createModifier
+            description: Creates a new modifier.
+            operationId: ModifierService_createModifier
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.modifier.v1.CreateModifierRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.CreateModifierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/modifier/v1/modifiers/{id}:
+        put:
+            tags:
+                - ModifierService
+            summary: updateModifier
+            description: Updates an existing modifier.
+            operationId: ModifierService_updateModifier
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the unique identifier for the modifier.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the modifier.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.modifier.v1.UpdateModifierBody'
+                            description: body carries updatable modifier fields bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.UpdateModifierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - ModifierService
+            summary: deleteModifier
+            description: Removes a modifier by ID.
+            operationId: ModifierService_deleteModifier
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the unique identifier for the modifier.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the modifier.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.modifier.v1.DeleteModifierResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.modifier.v1.ListModifiersRequest:
+            type: object
+        pos.modifier.v1.ListModifiersResponse:
+            type: object
+            properties:
+                modifiers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.modifier.v1.Modifier'
+            required:
+                - modifiers
+        pos.modifier.v1.Modifier:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                name:
+                    type: string
+                price_delta:
+                    type: number
+                    format: double
+                group_name:
+                    type: string
+                is_required:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+            required:
+                - id
+                - owner_id
+                - name
+                - price_delta
+                - group_name
+                - is_required
+                - created_at
+                - updated_at
+            description: Modifier is a customization option that can be attached to a menu item.
+        pos.modifier.v1.CreateModifierRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                price_delta:
+                    type: number
+                    minimum: 0
+                    format: double
+                group_name:
+                    type: string
+                is_required:
+                    type: boolean
+            required:
+                - name
+                - price_delta
+                - group_name
+                - is_required
+        pos.modifier.v1.CreateModifierResponse:
+            type: object
+            properties:
+                modifier_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - modifier_id
+                - message
+        pos.modifier.v1.UpdateModifierRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the modifier.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.modifier.v1.UpdateModifierBody'
+                    description: body carries updatable modifier fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+        pos.modifier.v1.UpdateModifierBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                price_delta:
+                    type: number
+                    minimum: 0
+                    format: double
+                group_name:
+                    type: string
+                is_required:
+                    type: boolean
+            required:
+                - name
+                - price_delta
+                - group_name
+                - is_required
+        pos.modifier.v1.UpdateModifierResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        pos.modifier.v1.DeleteModifierRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the modifier.
+            required:
+                - id
+        pos.modifier.v1.DeleteModifierResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ModifierService
+      description: ModifierService defines POS menu item modifier endpoints.

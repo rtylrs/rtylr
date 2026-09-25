@@ -1,0 +1,63 @@
+package erp.stock_transfer.v1
+
+message StockTransferItem {
+  id: int64
+  transfer_id: int64
+  product_id: int64
+  quantity: float64
+  created_at: string
+}
+
+message StockTransfer {
+  id: int64
+  owner_id: int64
+  from_warehouse_id: int64
+  to_warehouse_id: int64
+  status: string
+  notes: string
+  items: StockTransferItem[]
+  created_at: string
+  updated_at: string
+}
+
+message CreateStockTransferItemRequest {
+  product_id: int64? @required @gt(0)
+  quantity: float64? @required @gt(0)
+}
+
+message CreateStockTransferRequest {
+  from_warehouse_id: int64? @required @gt(0)
+  to_warehouse_id: int64? @required @gt(0)
+  notes: string
+  items: CreateStockTransferItemRequest[] @min_items(1)
+}
+
+message CreateStockTransferResponse {
+  transfer_id: int64
+  message: string
+}
+
+message ListStockTransfersRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListStockTransfersResponse {
+  stock_transfers: StockTransfer[]
+  has_more: bool
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+}
+
+message UpdateStockTransferStatusBody {
+  status: string @required
+}
+
+message UpdateStockTransferStatusRequest {
+  id: int64 @gt(0)
+  body: UpdateStockTransferStatusBody
+}
+
+message UpdateStockTransferStatusResponse {
+  message: string
+}

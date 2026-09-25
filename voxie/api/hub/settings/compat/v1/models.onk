@@ -1,0 +1,15 @@
+package hub.settings.compat.v1
+
+message TestEmailBody {
+  host: string
+  port: int32
+  username: string
+}
+
+message TestEmailRequest {
+  body: TestEmailBody
+}
+
+message TestEmailResponse {
+  data: json @unwrap
+}

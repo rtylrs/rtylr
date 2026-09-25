@@ -1,0 +1,16 @@
+package hr.employees.payroll.runs.v1
+
+/// RunsService defines HR payroll run endpoints.
+service RunsService {
+  /// ListPayrollRuns returns payroll runs.
+  listPayrollRuns(ListPayrollRunsRequest) -> ListPayrollRunsResponse @get("/runs")
+
+  /// TriggerPayrollRun triggers a new payroll run.
+  triggerPayrollRun(TriggerPayrollRunRequest) -> TriggerPayrollRunResponse @post("/runs/trigger")
+
+  /// ApprovePayrollRun approves a payroll run.
+  approvePayrollRun(ApprovePayrollRunRequest) -> ApprovePayrollRunResponse @patch("/runs/{id}/approve")
+
+  /// ExportPayroll exports payroll data.
+  exportPayroll(ExportPayrollRequest) -> ExportPayrollResponse @post("/runs/export")
+}

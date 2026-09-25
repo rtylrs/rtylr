@@ -1,0 +1,75 @@
+package erp.warehouse.v1
+
+message Warehouse {
+  id: int64
+  owner_id: int64
+  name: string
+  address: string
+  city: string
+  country: string
+  manager_name: string
+  capacity: int64
+  is_default: bool
+  is_active: bool
+  created_at: string
+  updated_at: string
+}
+
+message CreateWarehouseRequest {
+  name: string @required
+  address: string
+  city: string
+  country: string
+  manager_name: string
+  capacity: int64
+  is_default: bool
+  is_active: bool
+}
+
+message CreateWarehouseResponse {
+  warehouse_id: int64
+  message: string
+}
+
+message DeleteWarehouseRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteWarehouseResponse {
+  message: string
+}
+
+message ListWarehousesRequest {
+  /// Maximum number of warehouses to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of warehouses to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListWarehousesResponse {
+  warehouses: Warehouse[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
+}
+
+message UpdateWarehouseBody {
+  name: string @required
+  address: string
+  city: string
+  country: string
+  manager_name: string
+  capacity: int64
+  is_default: bool
+  is_active: bool
+}
+
+message UpdateWarehouseRequest {
+  id: int64 @gt(0)
+  body: UpdateWarehouseBody
+}
+
+message UpdateWarehouseResponse {
+  message: string
+}

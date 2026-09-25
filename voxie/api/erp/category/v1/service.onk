@@ -1,0 +1,11 @@
+package erp.category.v1
+
+service CategoryService {
+  listCategories(ListCategoriesRequest) -> ListCategoriesResponse @get("/categories")
+
+  createCategory(CreateCategoryRequest) -> CreateCategoryResponse @post("/categories")
+
+  updateCategory(UpdateCategoryRequest) -> UpdateCategoryResponse @put("/categories/{id}") @body("body")
+
+  deleteCategory(DeleteCategoryRequest) -> DeleteCategoryResponse @delete("/categories/{id}")
+}

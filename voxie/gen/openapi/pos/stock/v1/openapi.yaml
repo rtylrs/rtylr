@@ -1,0 +1,606 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/stock/v1/movements:
+        get:
+            tags:
+                - StockService
+            summary: listStockMovements
+            description: Returns stock movements, optionally filtered by branch and product.
+            operationId: StockService_listStockMovements
+            parameters:
+                - name: branch_id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: product_id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.stock.v1.ListStockMovementsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/stock/v1/receive:
+        post:
+            tags:
+                - StockService
+            summary: receiveStock
+            description: Records a stock receipt.
+            operationId: StockService_receiveStock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.stock.v1.ReceiveStockRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.stock.v1.ReceiveStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/stock/v1/adjust:
+        post:
+            tags:
+                - StockService
+            summary: adjustStock
+            description: Records a manual stock adjustment.
+            operationId: StockService_adjustStock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.stock.v1.AdjustStockRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.stock.v1.AdjustStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/stock/v1/waste:
+        post:
+            tags:
+                - StockService
+            summary: wasteStock
+            description: Records wasted stock.
+            operationId: StockService_wasteStock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.stock.v1.WasteStockRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.stock.v1.WasteStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/stock/v1/transfer:
+        post:
+            tags:
+                - StockService
+            summary: transferStock
+            description: Transfers stock between branches.
+            operationId: StockService_transferStock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.stock.v1.TransferStockRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.stock.v1.TransferStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/stock/v1/inventory:
+        get:
+            tags:
+                - StockService
+            summary: listInventory
+            description: Returns branch inventory levels.
+            operationId: StockService_listInventory
+            parameters:
+                - name: branch_id
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.stock.v1.ListInventoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/stock/v1/low-stock:
+        get:
+            tags:
+                - StockService
+            summary: lowStock
+            description: Returns branch inventory items at or below their reorder point.
+            operationId: StockService_lowStock
+            parameters:
+                - name: branch_id
+                  in: query
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.stock.v1.LowStockResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.stock.v1.ListStockMovementsRequest:
+            type: object
+            properties:
+                branch_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - branch_id
+                - product_id
+        pos.stock.v1.ListStockMovementsResponse:
+            type: object
+            properties:
+                movements:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.stock.v1.StockMovement'
+            required:
+                - movements
+        pos.stock.v1.StockMovement:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                business_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                branch_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                type:
+                    type: string
+                    description: type is the type value for this contract.
+                quantity:
+                    type: number
+                    format: double
+                reference_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                reference_type:
+                    type: string
+                note:
+                    type: string
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - product_id
+                - type
+                - quantity
+                - created_at
+            description: StockMovement is a recorded inventory movement.
+        pos.stock.v1.ReceiveStockRequest:
+            type: object
+            properties:
+                branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                quantity:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                note:
+                    type: string
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - branch_id
+                - product_id
+                - quantity
+                - note
+                - employee_id
+        pos.stock.v1.ReceiveStockResponse:
+            type: object
+            properties:
+                movement_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - movement_id
+                - message
+        pos.stock.v1.AdjustStockRequest:
+            type: object
+            properties:
+                branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                quantity:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                note:
+                    type: string
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - branch_id
+                - product_id
+                - quantity
+                - note
+                - employee_id
+        pos.stock.v1.AdjustStockResponse:
+            type: object
+            properties:
+                movement_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - movement_id
+                - message
+        pos.stock.v1.WasteStockRequest:
+            type: object
+            properties:
+                branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                quantity:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                note:
+                    type: string
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - branch_id
+                - product_id
+                - quantity
+                - note
+                - employee_id
+        pos.stock.v1.WasteStockResponse:
+            type: object
+            properties:
+                movement_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - movement_id
+                - message
+        pos.stock.v1.TransferStockRequest:
+            type: object
+            properties:
+                from_branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                to_branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                quantity:
+                    exclusiveMinimum: 0
+                    type: number
+                    format: double
+                note:
+                    type: string
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - from_branch_id
+                - to_branch_id
+                - product_id
+                - quantity
+                - note
+                - employee_id
+        pos.stock.v1.TransferStockResponse:
+            type: object
+            properties:
+                movement_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - movement_id
+                - message
+        pos.stock.v1.ListInventoryRequest:
+            type: object
+            properties:
+                branch_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - branch_id
+        pos.stock.v1.ListInventoryResponse:
+            type: object
+            properties:
+                inventory:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.stock.v1.BranchInventory'
+            required:
+                - inventory
+        pos.stock.v1.BranchInventory:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                business_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                branch_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                quantity:
+                    type: number
+                    format: double
+                reorder_point:
+                    type: number
+                    format: double
+                reorder_quantity:
+                    type: number
+                    format: double
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+                item_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: item_id is an alias for product_id used by POS catalog UIs.
+                name:
+                    type: string
+                    description: name is the ERP product display name.
+                sku:
+                    type: string
+                    description: sku is the ERP product SKU.
+                unit:
+                    type: string
+                current_qty:
+                    type: number
+                    format: double
+                    description: current_qty is an alias for quantity used by POS inventory UIs.
+                low_stock_threshold:
+                    type: number
+                    format: double
+                    description: low_stock_threshold is the ERP product low-stock threshold.
+            required:
+                - id
+                - business_id
+                - branch_id
+                - product_id
+                - quantity
+                - reorder_point
+                - reorder_quantity
+                - updated_at
+                - item_id
+                - name
+                - sku
+                - unit
+                - current_qty
+                - low_stock_threshold
+            description: BranchInventory is a per-branch inventory row for a product.
+        pos.stock.v1.LowStockRequest:
+            type: object
+            properties:
+                branch_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            required:
+                - branch_id
+        pos.stock.v1.LowStockResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.stock.v1.BranchInventory'
+            required:
+                - items
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: StockService
+      description: StockService defines POS inventory and stock movement endpoints.

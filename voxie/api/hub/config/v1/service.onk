@@ -1,0 +1,23 @@
+package hub.config.v1
+
+/// ConfigService defines hub configuration endpoints.
+service ConfigService {
+  /// Returns the active business configuration.
+  getConfig(GetConfigRequest) -> GetConfigResponse @get("/config")
+
+  /// Creates the business configuration.
+  createConfig(CreateConfigRequest) -> CreateConfigResponse @post("/config")
+
+  /// Updates the business configuration.
+  updateConfig(UpdateConfigRequest) -> UpdateConfigResponse @put("/config")
+  getCustomDomain(GetCustomDomainRequest) -> GetCustomDomainResponse @get("/config/custom-domain")
+  registerCustomDomain(RegisterCustomDomainRequest) -> RegisterCustomDomainResponse @post("/config/custom-domain")
+  verifyCustomDomain(VerifyCustomDomainRequest) -> VerifyCustomDomainResponse @post("/config/custom-domain/verify")
+  removeCustomDomain(RemoveCustomDomainRequest) -> RemoveCustomDomainResponse @delete("/config/custom-domain")
+
+  /// Queues a test email using the configured tenant sender settings.
+  sendTestEmail(SendTestEmailRequest) -> SendTestEmailResponse @post("/config/test-email")
+
+  /// Returns the industry catalog grouped by category.
+  getIndustries(GetIndustriesRequest) -> GetIndustriesResponse @get("/industries")
+}

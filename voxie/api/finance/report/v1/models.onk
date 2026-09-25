@@ -1,0 +1,92 @@
+package finance.report.v1
+
+// -- Tax Config --
+
+message TaxConfig {
+  id: int64
+  /// Identifies the tenant that owns the resource.
+  owner_id: int64
+  name: string
+  rate: float64
+  type: string
+  is_default: bool
+  is_active: bool
+  /// When the record was created.
+  created_at: string
+}
+
+// -- Expense Categories (from invoices module) --
+
+message ExpenseCategoryDetail {
+  id: int64
+  /// Identifies the tenant that owns the resource.
+  owner_id: int64
+  name: string
+  color: string
+  icon: string
+  /// When the record was created.
+  created_at: string
+}
+
+message GetPLReportRequest {
+  /// The reporting period label.
+  period: string @query("period")
+  /// The report anchor date.
+  date: string @required @query("date")
+}
+
+message GetPLReportResponse {
+  period: string
+  revenue: float64
+  cogs: float64
+  gross_profit: float64
+  operating_expenses: float64
+  net_profit: float64
+  margin_pct: float64
+}
+
+message GetTaxReportRequest {
+  /// The reporting period label.
+  period: string @query("period")
+  /// The report anchor date.
+  date: string @required @query("date")
+}
+
+message GetTaxReportResponse {
+  period: string
+  tax_collected: float64
+  tax_owed: float64
+}
+
+message ListExpenseCategoryDetailsRequest {}
+
+message ListExpenseCategoryDetailsResponse {
+  categories: ExpenseCategoryDetail[]
+}
+
+message CreateExpenseCategoryDetailRequest {
+  name: string @required
+  color: string @required
+  icon: string @required
+}
+
+message CreateExpenseCategoryDetailResponse {
+  category: ExpenseCategoryDetail
+}
+
+message ListTaxConfigRequest {}
+
+message ListTaxConfigResponse {
+  configs: TaxConfig[]
+}
+
+message CreateTaxConfigRequest {
+  name: string @required
+  rate: float64 @gte(0)
+  type: string @required
+  is_default: bool
+}
+
+message CreateTaxConfigResponse {
+  config: TaxConfig
+}

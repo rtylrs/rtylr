@@ -1,0 +1,95 @@
+package insights.dashboard.v1
+
+message WorkloadEntry {
+  /// user_id identifies the user associated with this request.
+  user_id: int64
+  /// open_tasks is the open tasks value for this contract.
+  open_tasks: int64
+  /// in_progress_tasks is the in progress tasks value for this contract.
+  in_progress_tasks: int64
+  /// completed_tasks is the completed tasks value for this contract.
+  completed_tasks: int64
+  /// overdue_tasks is the overdue tasks value for this contract.
+  overdue_tasks: int64
+  /// total_active is the total active value for this contract.
+  total_active: int64
+}
+
+message RoadmapProject {
+  /// project_id is the project id value for this contract.
+  project_id: int64
+  /// project_name is the project name value for this contract.
+  project_name: string
+  /// status is the current lifecycle state.
+  status: string
+  /// total_tasks is the total tasks value for this contract.
+  total_tasks: int64
+  /// completed_tasks is the completed tasks value for this contract.
+  completed_tasks: int64
+  /// progress_percent is the progress percent value for this contract.
+  progress_percent: float64
+  /// start_date is the start date value for this contract.
+  start_date: string
+  /// due_date is the due date value for this contract.
+  due_date: string
+}
+
+message InsightsMetricCard {
+  /// value is the headline metric value.
+  value: int64
+  /// delta_pct is the period-over-period change percentage.
+  delta_pct: float64
+}
+
+message InsightsPctCard {
+  /// value is the percentage metric value.
+  value: float64
+  /// delta_pct is the period-over-period change percentage.
+  delta_pct: float64
+}
+
+message GetInsightsRequest {}
+
+message GetInsightsResponse {
+  /// total_tasks is the total tasks value for this contract.
+  total_tasks: int64
+  /// completed_tasks is the completed tasks value for this contract.
+  completed_tasks: int64
+  /// in_progress_tasks is the in progress tasks value for this contract.
+  in_progress_tasks: int64
+  /// overdue_tasks is the overdue tasks value for this contract.
+  overdue_tasks: int64
+  /// avg_cycle_time_days is the avg cycle time days value for this contract.
+  avg_cycle_time_days: float64
+  /// velocity is the velocity value for this contract.
+  velocity: int64
+  /// velocity_change is the velocity change value for this contract.
+  velocity_change: int64
+}
+
+message GetRoadmapRequest {}
+
+message GetRoadmapResponse {
+  /// projects is the projects value for this contract.
+  projects: RoadmapProject[]
+}
+
+message GetWorkloadRequest {}
+
+message GetWorkloadResponse {
+  /// workload is the workload value for this contract.
+  workload: WorkloadEntry[]
+}
+
+message GetDashboardSummaryRequest {}
+
+message GetDashboardSummaryResponse {
+  /// revenue is MTD revenue in minor units with delta.
+  revenue: InsightsMetricCard
+  /// customers is MTD customer count with delta.
+  customers: InsightsMetricCard
+  /// orders is MTD order count with delta.
+  orders: InsightsMetricCard
+  /// margin is MTD margin percentage with delta.
+  margin: InsightsPctCard
+}

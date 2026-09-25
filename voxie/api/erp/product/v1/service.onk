@@ -1,0 +1,26 @@
+package erp.product.v1
+
+/// ProductService defines ERP product endpoints.
+service ProductService {
+  listProducts(ListProductsRequest) -> ListProductsResponse @get("/products")
+
+  createProduct(CreateProductRequest) -> CreateProductResponse @post("/products")
+
+  getProductByBarcode(GetProductByBarcodeRequest) -> GetProductByBarcodeResponse @get("/barcodes/{code}/product")
+
+  getProduct(GetProductRequest) -> GetProductResponse @get("/products/{id}")
+
+  getProductFull(GetProductFullRequest) -> GetProductFullResponse @get("/products/{id}/full")
+
+  listProductAttributes(ListProductAttributesRequest) -> ListProductAttributesResponse @get("/products/{id}/attributes")
+
+  updateProduct(UpdateProductRequest) -> UpdateProductResponse @put("/products/{id}") @body("body")
+
+  deleteProduct(DeleteProductRequest) -> DeleteProductResponse @delete("/products/{id}")
+
+  getDashboard(GetDashboardRequest) -> GetDashboardResponse @get("/dashboard")
+
+  listReorderSuggestions(ListReorderSuggestionsRequest) -> ListReorderSuggestionsResponse @get("/reorder-suggestions")
+
+  listExpiringItems(ListExpiringItemsRequest) -> ListExpiringItemsResponse @get("/expiry")
+}

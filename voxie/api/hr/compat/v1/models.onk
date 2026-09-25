@@ -1,0 +1,71 @@
+package hr.compat.v1
+
+message GetStaffDetailRequest {
+  id: string @query("id")
+}
+
+message GetStaffDetailResponse {
+  id: string
+  photo_url: string?
+  bio: string?
+}
+
+message MyEmployee {
+  id: string
+}
+
+message GetMyEmployeeRequest {}
+
+message GetMyEmployeeResponse {
+  employee: MyEmployee
+}
+
+message EmptyRequest {}
+
+message JsonResponse {
+  data: json @unwrap
+}
+
+message QueryRequest {
+  id: string? @query("id")
+  page: int32? @query("page")
+  page_size: int32? @query("page_size")
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+  search: string? @query("search")
+  status: string? @query("status")
+  type: string? @query("type")
+  action: string? @query("action")
+  view: string? @query("view")
+  date: string? @query("date")
+  days: int32? @query("days")
+  start_date: string? @query("start_date")
+  end_date: string? @query("end_date")
+  from_date: string? @query("from")
+  to_date: string? @query("to")
+  employee_id: string? @query("employee_id")
+  department_id: string? @query("department_id")
+  location_id: string? @query("location_id")
+  cycle_id: string? @query("cycle_id")
+  goal_id: string? @query("goal_id")
+  account_id: string? @query("account_id")
+  week_start: string? @query("week_start")
+}
+
+message BodyRequest {
+  body: json
+}
+
+message PathRequest {
+  id: string
+}
+
+message PathBodyRequest {
+  id: string
+  body: json
+}
+
+message QueryPathRequest {
+  id: string
+  status: string? @query("status")
+}

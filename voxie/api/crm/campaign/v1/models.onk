@@ -1,0 +1,131 @@
+package crm.campaign.v1
+
+/// Campaign is a marketing campaign sent to a segment or the full customer base.
+message Campaign {
+  id: int64
+  owner_id: int64
+  name: string
+  description: string
+  /// Delivery channel, e.g. "email" or "sms".
+  channel: string
+  /// Current lifecycle state.
+  status: string
+  segment_id: int64?
+  subject: string
+  content: string
+  scheduled_at: string?
+  sent_at: string?
+  audience_count: int64
+  sent_count: int64
+  delivered_count: int64
+  opened_count: int64
+  clicked_count: int64
+  created_at: string
+  updated_at: string
+}
+
+/// CampaignStats holds delivery and engagement counters for a campaign.
+message CampaignStats {
+  campaign_id: int64
+  audience_count: int64
+  sent_count: int64
+  delivered_count: int64
+  opened_count: int64
+  clicked_count: int64
+  bounced_count: int64
+  failed_count: int64
+}
+
+message CreateCampaignRequest {
+  name: string @required
+  /// Free-text summary. Optional: the server does not require it, and a
+  /// campaign entered without one is valid.
+  description: string
+  channel: string @required
+  segment_id: int64?
+  /// Subject line. Optional because it is channel-specific: an SMS campaign has
+  /// no subject, so requiring it made that channel impossible to save.
+  subject: string
+  content: string @required
+  /// Absent for a draft or an immediate send. A draft has no scheduled time, so
+  /// requiring one forced callers to invent a value, and the server already
+  /// treats an empty scheduled_at as "not scheduled".
+  scheduled_at: string?
+}
+
+message CreateCampaignResponse {
+  campaign_id: int64
+  message: string
+}
+
+message GetCampaignDetailRequest {
+  id: int64 @gt(0)
+}
+
+message GetCampaignDetailResponse {
+  campaign: Campaign
+  stats: CampaignStats
+}
+
+message GetCampaignStatsRequest {
+  /// The live route is GET /campaigns/stats?campaign_id=... (query param,
+  /// not a path segment).
+  campaign_id: int64? @required @gt(0) @query("campaign_id")
+}
+
+message GetCampaignStatsResponse {
+  stats: CampaignStats
+}
+
+message ListCampaignsRequest {
+  /// Filters campaigns by lifecycle state.
+  status: string @query("status")
+  limit: int64 @query("limit")
+  offset: int64 @query("offset")
+}
+
+message ListCampaignsResponse {
+  campaigns: Campaign[]
+  total: int64
+  limit: int64
+  offset: int64
+}
+
+message UpdateCampaignBody {
+  name: string @required
+  /// Free-text summary. Optional: the server does not require it, and a
+  /// campaign entered without one is valid.
+  description: string
+  channel: string @required
+  segment_id: int64?
+  /// Subject line. Optional because it is channel-specific: an SMS campaign has
+  /// no subject, so requiring it made that channel impossible to save.
+  subject: string
+  content: string @required
+  /// Absent for a draft or an immediate send. A draft has no scheduled time, so
+  /// requiring one forced callers to invent a value, and the server already
+  /// treats an empty scheduled_at as "not scheduled".
+  scheduled_at: string?
+}
+
+message UpdateCampaignRequest {
+  id: int64 @gt(0)
+  body: UpdateCampaignBody
+}
+
+message UpdateCampaignResponse {
+  message: string
+}
+
+message UpdateCampaignStatusRequest {
+  id: int64 @gt(0)
+  body: UpdateCampaignStatusBody
+}
+
+message UpdateCampaignStatusBody {
+  status: string @required
+}
+
+message UpdateCampaignStatusResponse {
+  message: string
+}

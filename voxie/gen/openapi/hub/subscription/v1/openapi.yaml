@@ -1,0 +1,514 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hub/subscription/v1/my:
+        get:
+            tags:
+                - SubscriptionService
+            summary: getMySubscription
+            operationId: SubscriptionService_getMySubscription
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.GetMySubscriptionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - SubscriptionService
+            summary: upsertSubscription
+            operationId: SubscriptionService_upsertSubscription
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.subscription.v1.UpsertSubscriptionRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.UpsertSubscriptionResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/subscription/v1/plans:
+        get:
+            tags:
+                - SubscriptionService
+            summary: listPlans
+            operationId: SubscriptionService_listPlans
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.ListPlansResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/subscription/v1/billing:
+        get:
+            tags:
+                - SubscriptionService
+            summary: getBillingDetail
+            operationId: SubscriptionService_getBillingDetail
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.GetBillingDetailResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/subscription/v1/billing/history:
+        get:
+            tags:
+                - SubscriptionService
+            summary: getBillingHistory
+            operationId: SubscriptionService_getBillingHistory
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.GetBillingHistoryResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hub/subscription/v1/checkout:
+        post:
+            tags:
+                - SubscriptionService
+            summary: createCheckout
+            operationId: SubscriptionService_createCheckout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hub.subscription.v1.CreateCheckoutRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hub.subscription.v1.CreateCheckoutResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hub.subscription.v1.GetMySubscriptionRequest:
+            type: object
+        hub.subscription.v1.GetMySubscriptionResponse:
+            type: object
+            properties:
+                subscription:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.subscription.v1.Subscription'
+            required:
+                - subscription
+        hub.subscription.v1.Subscription:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                plan_name:
+                    type: string
+                plan_slug:
+                    type: string
+                apps:
+                    type: array
+                    items:
+                        type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                is_granted:
+                    type: boolean
+                seat_count:
+                    type: integer
+                    format: int32
+                included_seat_limit:
+                    type: integer
+                    format: int32
+                included_seat_count:
+                    type: integer
+                    format: int32
+                billable_seat_count:
+                    type: integer
+                    format: int32
+                grant_expires_at:
+                    type: string
+                trial_ends_at:
+                    type: string
+                next_billing_date:
+                    type: string
+                paddle_subscription_id:
+                    type: string
+            required:
+                - id
+                - plan_name
+                - plan_slug
+                - apps
+                - price_per_seat_cents
+                - status
+                - is_granted
+                - seat_count
+                - included_seat_limit
+                - included_seat_count
+                - billable_seat_count
+                - paddle_subscription_id
+        hub.subscription.v1.ListPlansRequest:
+            type: object
+        hub.subscription.v1.ListPlansResponse:
+            type: object
+            properties:
+                plans:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.Plan'
+            required:
+                - plans
+        hub.subscription.v1.Plan:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                slug:
+                    type: string
+                apps:
+                    type: array
+                    items:
+                        type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                annual_price_per_seat_cents:
+                    type: integer
+                    format: int32
+                trial_days:
+                    type: integer
+                    format: int32
+                tagline:
+                    type: string
+                max_seats:
+                    type: integer
+                    format: int32
+                max_locations:
+                    type: integer
+                    format: int32
+                ai_credits_per_month:
+                    type: integer
+                    format: int32
+                features:
+                    type: array
+                    items:
+                        type: string
+                tier_order:
+                    type: integer
+                    format: int32
+                is_solo:
+                    type: boolean
+                is_featured:
+                    type: boolean
+                is_active:
+                    type: boolean
+            required:
+                - id
+                - name
+                - slug
+                - apps
+                - price_per_seat_cents
+                - annual_price_per_seat_cents
+                - trial_days
+                - tagline
+                - ai_credits_per_month
+                - features
+                - tier_order
+                - is_solo
+                - is_featured
+                - is_active
+        hub.subscription.v1.GetBillingDetailRequest:
+            type: object
+        hub.subscription.v1.GetBillingDetailResponse:
+            type: object
+            properties:
+                billing:
+                    allOf:
+                        - $ref: '#/components/schemas/hub.subscription.v1.BillingDetail'
+            required:
+                - billing
+        hub.subscription.v1.BillingDetail:
+            type: object
+            properties:
+                billing_month:
+                    type: string
+                next_billing_date:
+                    type: string
+                line_items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.BillingLineItem'
+                total_cents:
+                    type: integer
+                    format: int32
+                plan_name:
+                    type: string
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                current_seat_count:
+                    type: integer
+                    format: int32
+                included_seat_limit:
+                    type: integer
+                    format: int32
+                included_seat_count:
+                    type: integer
+                    format: int32
+                billable_seat_count:
+                    type: integer
+                    format: int32
+                seat_discount_cents:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                is_granted:
+                    type: boolean
+                grant_expires_at:
+                    type: string
+                trial_ends_at:
+                    type: string
+                paddle_subscription_id:
+                    type: string
+            required:
+                - billing_month
+                - line_items
+                - total_cents
+                - plan_name
+                - price_per_seat_cents
+                - current_seat_count
+                - included_seat_limit
+                - included_seat_count
+                - billable_seat_count
+                - seat_discount_cents
+                - status
+                - is_granted
+                - paddle_subscription_id
+        hub.subscription.v1.BillingLineItem:
+            type: object
+            properties:
+                period_start:
+                    type: string
+                period_end:
+                    type: string
+                seat_count:
+                    type: integer
+                    format: int32
+                included_seat_limit:
+                    type: integer
+                    format: int32
+                included_seat_count:
+                    type: integer
+                    format: int32
+                billable_seat_count:
+                    type: integer
+                    format: int32
+                included_cents:
+                    type: integer
+                    format: int32
+                price_per_seat_cents:
+                    type: integer
+                    format: int32
+                amount_cents:
+                    type: integer
+                    format: int32
+                type:
+                    type: string
+                description:
+                    type: string
+                is_granted:
+                    type: boolean
+                grant_expires_at:
+                    type: string
+                addon_id:
+                    type: string
+                quantity:
+                    type: integer
+                    format: int32
+                unit_price_cents:
+                    type: integer
+                    format: int32
+            required:
+                - period_start
+                - seat_count
+                - included_seat_limit
+                - included_seat_count
+                - billable_seat_count
+                - included_cents
+                - price_per_seat_cents
+                - amount_cents
+                - type
+                - description
+                - is_granted
+                - addon_id
+                - quantity
+                - unit_price_cents
+        hub.subscription.v1.GetBillingHistoryRequest:
+            type: object
+        hub.subscription.v1.GetBillingHistoryResponse:
+            type: object
+            properties:
+                history:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.BillingHistoryMonth'
+            required:
+                - history
+        hub.subscription.v1.BillingHistoryMonth:
+            type: object
+            properties:
+                month:
+                    type: string
+                total_cents:
+                    type: integer
+                    format: int32
+                line_items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hub.subscription.v1.BillingLineItem'
+                status:
+                    type: string
+            required:
+                - month
+                - total_cents
+                - line_items
+                - status
+        hub.subscription.v1.UpsertSubscriptionRequest:
+            type: object
+            properties:
+                plan_slug:
+                    type: string
+            required:
+                - plan_slug
+        hub.subscription.v1.UpsertSubscriptionResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        hub.subscription.v1.CreateCheckoutRequest:
+            type: object
+            properties:
+                plan_slug:
+                    type: string
+                email:
+                    type: string
+                billing_cycle:
+                    type: string
+                seat_count:
+                    type: integer
+                    format: int32
+                addons:
+                    type: array
+                    items:
+                        type: string
+            required:
+                - plan_slug
+                - email
+                - addons
+        hub.subscription.v1.CreateCheckoutResponse:
+            type: object
+            properties:
+                checkout_url:
+                    type: string
+            required:
+                - checkout_url
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: SubscriptionService

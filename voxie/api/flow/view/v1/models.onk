@@ -1,0 +1,78 @@
+package flow.view.v1
+
+message View {
+  id: int64
+  name: string
+  icon: string
+  /// visibility is "shared" (every colleague in the business can use this view)
+  /// or "private" (only its creator). Empty on create means "shared", which is
+  /// how every view behaved before this field existed, so an older client keeps
+  /// its current behaviour rather than silently making views private.
+  visibility: string
+  /// JSON-encoded filter criteria for this saved view.
+  filters: string
+  group_by: string
+  sort_by: string
+  sort_dir: string
+}
+
+message ListViewsRequest {
+  workspace_id: string @query("workspace_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListViewsResponse {
+  views: View[]
+  pagination: PaginationResponse
+}
+
+message CreateViewRequest {
+  workspace_id: string
+  name: string @required
+  icon: string
+  /// visibility is "shared" (every colleague in the business can use this view)
+  /// or "private" (only its creator). Empty on create means "shared", which is
+  /// how every view behaved before this field existed, so an older client keeps
+  /// its current behaviour rather than silently making views private.
+  visibility: string
+  /// JSON-encoded filter criteria for this saved view.
+  filters: string
+  group_by: string
+  sort_by: string
+  sort_dir: string
+}
+
+message CreateViewResponse {
+  view: View
+}
+
+message UpdateViewRequest {
+  id: int64
+  name: string
+  icon: string
+  /// visibility is "shared" (every colleague in the business can use this view)
+  /// or "private" (only its creator). Empty on create means "shared", which is
+  /// how every view behaved before this field existed, so an older client keeps
+  /// its current behaviour rather than silently making views private.
+  visibility: string
+  /// JSON-encoded filter criteria for this saved view.
+  filters: string
+  group_by: string
+  sort_by: string
+  sort_dir: string
+}
+
+message UpdateViewResponse {}
+
+message DeleteViewRequest {
+  id: int64
+}
+
+message DeleteViewResponse {}

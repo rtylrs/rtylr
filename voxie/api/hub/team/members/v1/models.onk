@@ -1,0 +1,69 @@
+package hub.team.members.v1
+
+message StaffUserPayload {
+  id: int64
+  /// Email address used for lookup or contact.
+  email: string
+  full_name: string
+  /// When the record was created.
+  created_at: string
+  apps: string[]
+  role: string
+  is_active: bool
+  /// Independent Dash role assignment.
+  dash_role: string?
+  /// Independent application role assignments.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Server-resolved effective access.
+  effective_access: hub.user.v1.EffectiveAccess?
+}
+
+message StaffUserWithGroups {
+  id: int64
+  /// Email address used for lookup or contact.
+  email: string
+  full_name: string
+  /// When the record was created.
+  created_at: string
+  apps: string[]
+  role: string
+  is_active: bool
+  /// Independent Dash role assignment.
+  dash_role: string?
+  /// Independent application role assignments.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Server-resolved effective access.
+  effective_access: hub.user.v1.EffectiveAccess?
+  /// Groups the staff user belongs to.
+  groups: GroupSummary[]
+}
+
+message ListTeamRequest {
+  /// page is the 1-based result page to return; defaults to 1.
+  page: int32 @query("page")
+  /// page_size is the maximum number of members per page; server caps at 500.
+  page_size: int32 @query("page_size")
+}
+
+message ListTeamResponse {
+  users: StaffUserPayload[]
+  /// total is the total number of members across all pages, for pagination math.
+  total: int32
+}
+
+message GetMemberRequest {
+  /// Identifies the member to fetch.
+  user_id: int64 @gt(0)
+}
+
+message GetMemberResponse {
+  user: StaffUserWithGroups
+}
+
+message RemoveMemberRequest {
+  user_id: int64 @gt(0)
+}
+
+message RemoveMemberResponse {
+  message: string
+}

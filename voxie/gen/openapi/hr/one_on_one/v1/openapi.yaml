@@ -1,0 +1,161 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/one-on-one/v1/one-on-ones:
+        get:
+            tags:
+                - OneOnOneService
+            summary: listOneOnOnes
+            operationId: OneOnOneService_listOneOnOnes
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.one_on_one.v1.ListOneOnOnesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - OneOnOneService
+            summary: createOneOnOne
+            operationId: OneOnOneService_createOneOnOne
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.one_on_one.v1.CreateOneOnOneRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.one_on_one.v1.CreateOneOnOneResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.one_on_one.v1.ListOneOnOnesRequest:
+            type: object
+        hr.one_on_one.v1.ListOneOnOnesResponse:
+            type: object
+            properties:
+                one_on_ones:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.one_on_one.v1.OneOnOne'
+            required:
+                - one_on_ones
+        hr.one_on_one.v1.OneOnOne:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                manager_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                scheduled_at:
+                    type: string
+                notes:
+                    type: string
+                action_items:
+                    type: string
+                status:
+                    type: string
+                created_at:
+                    type: string
+            required:
+                - id
+                - owner_id
+                - manager_id
+                - staff_id
+                - scheduled_at
+                - notes
+                - action_items
+                - status
+                - created_at
+        hr.one_on_one.v1.CreateOneOnOneRequest:
+            type: object
+            properties:
+                manager_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                staff_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                scheduled_at:
+                    type: string
+                notes:
+                    type: string
+                action_items:
+                    type: string
+                status:
+                    type: string
+            required:
+                - manager_id
+                - staff_id
+                - scheduled_at
+                - notes
+                - action_items
+                - status
+        hr.one_on_one.v1.CreateOneOnOneResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - id
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: OneOnOneService

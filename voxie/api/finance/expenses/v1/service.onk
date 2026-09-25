@@ -1,0 +1,18 @@
+package finance.expenses.v1
+
+/// ExpensesService defines expense tracking endpoints.
+service ExpensesService {
+  listExpenses(ListExpensesRequest) -> ListExpensesResponse @get("/expenses")
+
+  createExpense(CreateExpenseRequest) -> CreateExpenseResponse @post("/expenses")
+
+  updateExpense(UpdateExpenseRequest) -> UpdateExpenseResponse @put("/expenses/{id}") @body("body")
+
+  deleteExpense(DeleteExpenseRequest) -> DeleteExpenseResponse @delete("/expenses/{id}")
+
+  getExpense(GetExpenseRequest) -> GetExpenseResponse @get("/expenses/{id}")
+
+  updateExpenseStatus(UpdateExpenseStatusRequest) -> UpdateExpenseStatusResponse @patch("/expenses/{id}/status") @body("body")
+
+  listExpenseCategories(ListExpenseCategoriesRequest) -> ListExpenseCategoriesResponse @get("/categories")
+}

@@ -1,0 +1,16 @@
+package pos.menu_item.v1
+
+/// MenuItemService defines POS menu item endpoints.
+service MenuItemService {
+  /// Returns menu items for the active business.
+  listMenuItems(ListMenuItemsRequest) -> ListMenuItemsResponse @get("/menu-items")
+
+  /// Returns menu items for anonymous public menu surfaces.
+  listPublicMenuItems(ListPublicMenuItemsRequest) -> ListPublicMenuItemsResponse @get("/menu-items/public")
+
+  /// Creates a new menu item.
+  createMenuItem(CreateMenuItemRequest) -> CreateMenuItemResponse @post("/menu-items")
+
+  /// Updates an existing menu item.
+  updateMenuItem(UpdateMenuItemRequest) -> UpdateMenuItemResponse @put("/menu-items/{id}") @body("body")
+}

@@ -1,0 +1,83 @@
+package crm.segment.v1
+
+/// Segment is a saved customer filter used for targeted campaigns.
+message Segment {
+  id: int64
+  owner_id: int64
+  name: string
+  description: string
+  /// JSON filter definition for this segment.
+  filters: string
+  customer_count: int64
+  last_calculated_at: string?
+  created_at: string
+  updated_at: string
+}
+
+message CreateSegmentRequest {
+  name: string @required
+  description: string @required
+  filters: string @required
+}
+
+message CreateSegmentResponse {
+  segment_id: int64
+  message: string
+}
+
+message DeleteSegmentRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteSegmentResponse {
+  message: string
+}
+
+message GetSegmentCustomersRequest {
+  segment_id: int64 @gt(0)
+  page: int64? @required @gt(0) @query("page")
+  page_size: int64? @required @gt(0) @query("page_size")
+}
+
+message GetSegmentCustomersResponse {
+  /// Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
+  /// projection) so consumers can render loyalty tier/points without a
+  /// second lookup.
+  customers: crm.customer.v1.Customer[]
+  total: int64
+  page: int64
+  page_size: int64
+}
+
+message GetSegmentDetailRequest {
+  id: int64 @gt(0)
+}
+
+message GetSegmentDetailResponse {
+  segment: Segment
+  /// Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
+  /// projection) so consumers can render loyalty tier/points without a
+  /// second lookup.
+  customers: crm.customer.v1.Customer[]
+}
+
+message ListSegmentsRequest {}
+
+message ListSegmentsResponse {
+  segments: Segment[]
+}
+
+message UpdateSegmentBody {
+  name: string @required
+  description: string @required
+  filters: string @required
+}
+
+message UpdateSegmentRequest {
+  id: int64 @gt(0)
+  body: UpdateSegmentBody
+}
+
+message UpdateSegmentResponse {
+  message: string
+}

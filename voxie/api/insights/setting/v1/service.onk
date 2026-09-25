@@ -1,0 +1,10 @@
+package insights.setting.v1
+
+/// SettingService defines insights settings endpoints.
+service SettingService {
+  /// Returns insights configuration.
+  getInsightsSettings(GetInsightsSettingsRequest) -> GetInsightsSettingsResponse @get("/settings")
+
+  /// Replaces insights configuration.
+  updateInsightsSettings(UpdateInsightsSettingsRequest) -> UpdateInsightsSettingsResponse @put("/settings")
+}

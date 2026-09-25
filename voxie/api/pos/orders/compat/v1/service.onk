@@ -1,0 +1,8 @@
+package pos.orders.compat.v1
+
+/// Compatibility contract for Dash's business-wide order listing.
+service CompatibilityService {
+  base_path: "/pos/orders/v1"
+
+  listOrders(ListOrdersRequest) -> ListOrdersResponse @get("/orders")
+}

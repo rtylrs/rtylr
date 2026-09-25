@@ -1,0 +1,28 @@
+package hub.security.v1
+
+/// SecurityService defines hub security endpoints.
+service SecurityService {
+  /// Returns the current security settings.
+  getSecurityState(GetSecurityStateRequest) -> GetSecurityStateResponse @get("/state")
+
+  /// Returns paginated login events for the authenticated user.
+  loginHistory(LoginHistoryRequest) -> LoginHistoryResponse @get("/login-history")
+
+  /// Revokes all active sessions.
+  invalidateSessions(InvalidateSessionsRequest) -> InvalidateSessionsResponse @post("/invalidate-sessions")
+
+  /// Toggles two-factor authentication.
+  update2FA(Update2FARequest) -> Update2FAResponse @patch("/2fa")
+
+  /// Starts a TOTP enrollment and returns the secret once.
+  beginMFAEnrollment(BeginMFAEnrollmentRequest) -> BeginMFAEnrollmentResponse @post("/mfa/enroll")
+
+  /// Confirms a TOTP enrollment and issues one-time recovery codes.
+  completeMFAEnrollment(CompleteMFAEnrollmentRequest) -> CompleteMFAEnrollmentResponse @post("/mfa/enroll/confirm")
+
+  /// Verifies a TOTP code for the current authenticated session.
+  verifyMFA(VerifyMFARequest) -> VerifyMFAResponse @post("/mfa/verify")
+
+  /// Consumes one recovery code for the current authenticated session.
+  useMFARecoveryCode(UseMFARecoveryCodeRequest) -> UseMFARecoveryCodeResponse @post("/mfa/recovery")
+}

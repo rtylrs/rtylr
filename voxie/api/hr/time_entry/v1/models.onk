@@ -1,0 +1,217 @@
+package hr.time_entry.v1
+
+/// TimeEntryPayload is a logged unit of employee work time.
+message TimeEntryPayload {
+  /// Unique identifier for the time entry.
+  id: int64
+  /// Tenant owner this entry belongs to.
+  owner_id: int64
+  /// Employee who logged the time.
+  employee_id: int64
+  /// Associated project; absent if not project-based.
+  project_id: int64?
+  /// Associated task; absent if not task-level tracking.
+  task_id: int64?
+  /// Time category for reporting; absent if uncategorised.
+  category_id: int64?
+  /// Date the work was performed (ISO-8601 format, e.g. "2026-04-14").
+  date: string
+  /// Total duration of work in minutes.
+  duration_minutes: int32
+  /// Clock-in time (ISO-8601 time or datetime); absent if duration-only entry.
+  start_time: string?
+  /// Clock-out time (ISO-8601 time or datetime); absent if duration-only entry.
+  end_time: string?
+  /// Free-text description of the work performed.
+  description: string
+  /// Whether this time is billable to a client.
+  is_billable: bool
+  /// Workflow status (draft | submitted | approved | rejected).
+  status: string
+  /// Reason the entry was rejected; absent unless status is rejected.
+  rejection_reason: string?
+  /// Employee ID of the approver; absent if not yet approved.
+  approved_by: int64?
+  /// How the entry was created (manual | timer | flow_import).
+  source: string
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+/// TimesheetPayload is an employee's time entries grouped over a period.
+message TimesheetPayload {
+  /// Unique identifier for the timesheet.
+  id: int64
+  /// Tenant owner this timesheet belongs to.
+  owner_id: int64
+  /// Employee this timesheet is for.
+  employee_id: int64
+  /// Start of the timesheet period (ISO-8601 date).
+  period_start: string
+  /// End of the timesheet period (ISO-8601 date).
+  period_end: string
+  /// Workflow status (draft | submitted | approved | rejected | locked).
+  status: string
+  /// Current step in a multi-level approval chain.
+  current_approval_level: int32
+  /// Unix timestamp when the timesheet was submitted; absent if still in draft.
+  submitted_at: int64?
+  /// Sum of all entry durations in minutes.
+  total_minutes: int32
+  /// Individual time entries within this timesheet.
+  entries: TimeEntryPayload[]
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+/// ListTimeEntriesRequest selects logged time. Every filter is optional and
+/// they combine with AND. The response is always a page: callers that need
+/// everything must follow offset until total is reached.
+message ListTimeEntriesRequest {
+  /// Filter by employee; absent to include all employees.
+  employee_id: int64? @query("employee_id")
+  /// Filter by exact date; absent to include all dates. Ignored when from_date
+  /// or to_date is supplied.
+  date: string? @query("date")
+  /// Include entries dated on or after this day (ISO-8601, e.g. "2026-04-01");
+  /// absent to leave the range open at the start.
+  from_date: string? @query("from_date")
+  /// Include entries dated on or before this day; absent to leave the range
+  /// open at the end.
+  to_date: string? @query("to_date")
+  /// Filter by the Flow project the time was logged against; absent to include
+  /// all projects and entries with no project.
+  project_id: int64? @query("project_id")
+  /// Filter by billability; absent to include both billable and non-billable
+  /// time.
+  is_billable: bool? @query("is_billable")
+  /// Filter by workflow status (draft | submitted | approved | rejected);
+  /// absent to include all statuses.
+  status: string? @query("status")
+  /// Maximum number of records to return.
+  limit: int32 @query("limit")
+  /// Number of records to skip for pagination.
+  offset: int32 @query("offset")
+}
+
+message ListTimeEntriesResponse {
+  /// Time entries matching the filters.
+  entries: TimeEntryPayload[]
+  /// Total number of matching time entries across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}
+
+message CreateTimeEntryRequest {
+  /// Employee who logged the time.
+  employee_id: int64? @required @gt(0)
+  /// Associated project; absent if not project-based.
+  project_id: int64?
+  /// Associated task; absent if not task-level tracking.
+  task_id: int64?
+  /// Time category for reporting; absent if uncategorised.
+  category_id: int64?
+  /// Date the work was performed (ISO-8601 format).
+  date: string @required
+  /// Total duration of work in minutes.
+  duration_minutes: int32? @required @gt(0)
+  /// Clock-in time; absent if duration-only entry.
+  start_time: string?
+  /// Clock-out time; absent if duration-only entry.
+  end_time: string?
+  /// Free-text description of the work performed.
+  description: string @required
+  /// Whether this time is billable to a client.
+  is_billable: bool
+  /// How the entry was created (manual | timer | flow_import).
+  source: string @required
+}
+
+message CreateTimeEntryResponse {
+  /// The newly created time entry.
+  entry: TimeEntryPayload
+}
+
+message ListTimesheetsRequest {
+  /// Filter by employee; absent to include all employees.
+  employee_id: int64? @query("employee_id")
+  /// Filter by status; absent to include all statuses.
+  status: string? @query("status")
+}
+
+message ListTimesheetsResponse {
+  /// Page of timesheets matching the filters.
+  timesheets: TimesheetPayload[]
+  /// Total number of matching timesheets across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}
+
+message SubmitTimesheetRequest {
+  /// ID of the timesheet to submit for approval.
+  timesheet_id: int64? @required @gt(0)
+}
+
+message SubmitTimesheetResponse {
+  /// Whether the submission was accepted.
+  success: bool
+}
+
+message ApproveTimesheetBody {
+  /// True to approve, false to reject.
+  approved: bool
+  /// Reason for rejection; absent if approving.
+  rejection_reason: string?
+}
+
+message ApproveTimesheetRequest {
+  /// ID of the timesheet being reviewed.
+  id: int64 @gt(0)
+  /// body carries approval decision fields bound from the HTTP payload.
+  body: ApproveTimesheetBody
+}
+
+message ApproveTimesheetResponse {
+  /// Whether the approval action was processed.
+  success: bool
+}
+
+/// MarkTimeEntriesInvoicedRequest records that the listed approved billable
+/// entries are settled by one finance invoice. Idempotent per entry: an entry
+/// already carrying a billable_invoice_id is skipped, never overwritten.
+message MarkTimeEntriesInvoicedRequest {
+  /// ID kept for route symmetry with approveTimesheet; unused by the handler.
+  id: int64
+  /// body carries the batch fields bound from the HTTP payload.
+  body: MarkTimeEntriesInvoicedBody
+}
+
+/// MarkTimeEntriesInvoicedBody is the payload of markTimeEntriesInvoiced.
+message MarkTimeEntriesInvoicedBody {
+  /// entry_ids are the time entries this invoice bills. Every entry must
+  /// belong to the caller's business; foreign or missing ids are counted as
+  /// skipped rather than failing the batch.
+  entry_ids: int64[] @min_items(1)
+  /// invoice_id is the finance invoice that settles them.
+  invoice_id: int64? @required @gt(0)
+}
+
+/// MarkTimeEntriesInvoicedResponse reports how the batch landed, so a caller
+/// can tell "all marked" from "some were already invoiced" without a second
+/// read.
+message MarkTimeEntriesInvoicedResponse {
+  /// marked_count is how many entries now carry this invoice id.
+  marked_count: int32
+  /// skipped_count is how many of entry_ids were already invoiced, not
+  /// approved billable work, or belong to another business.
+  skipped_count: int32
+}

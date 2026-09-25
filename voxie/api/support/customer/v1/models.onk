@@ -1,0 +1,39 @@
+package support.customer.v1
+
+message Customer {
+  id: int64
+  business_id: int64
+  name: string
+  email: string
+  phone: string
+  /// customer_id is the CRM customer this support record refers to; absent
+  /// when the party has not been matched to one. It is nullable because
+  /// support conversations arrive by email from people who may not be
+  /// customers yet: matching on email alone is not reliable enough to assert
+  /// the link, so the server sets it only on a confident match or when a human
+  /// confirms one.
+  customer_id: int64?
+  total_tickets: int32
+  last_ticket_at: string
+  created_at: string
+}
+
+message ListCustomersRequest {
+  page: int32 @query("page")
+  page_size: int32 @query("page_size")
+}
+
+message ListCustomersResponse {
+  customers: Customer[]
+  total: int32
+  page: int32
+  page_size: int32
+}
+
+message GetCustomerRequest {
+  id: int64 @gt(0)
+}
+
+message GetCustomerResponse {
+  customer: Customer
+}

@@ -1,0 +1,23 @@
+package hr.time_entry.v1
+
+/// TimeEntryService defines HR time entry and timesheet endpoints.
+service TimeEntryService {
+  /// Returns time entries with optional filters.
+  listTimeEntries(ListTimeEntriesRequest) -> ListTimeEntriesResponse @get("/time-entries")
+
+  /// Creates a new time entry.
+  createTimeEntry(CreateTimeEntryRequest) -> CreateTimeEntryResponse @post("/time-entries")
+
+  /// Returns timesheets with optional filters.
+  listTimesheets(ListTimesheetsRequest) -> ListTimesheetsResponse @get("/timesheets")
+
+  /// Submits a timesheet for approval.
+  submitTimesheet(SubmitTimesheetRequest) -> SubmitTimesheetResponse @post("/timesheets")
+
+  /// Approves a submitted timesheet.
+  approveTimesheet(ApproveTimesheetRequest) -> ApproveTimesheetResponse @patch("/timesheets/{id}/approve") @body("body")
+
+  /// Records that one finance invoice bills the listed time entries, so
+  /// unbilled-billable queries stop offering hours that have been invoiced.
+  markTimeEntriesInvoiced(MarkTimeEntriesInvoicedRequest) -> MarkTimeEntriesInvoicedResponse @patch("/time-entries/mark-invoiced") @body("body")
+}

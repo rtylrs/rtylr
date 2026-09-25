@@ -1,0 +1,85 @@
+package hub.team.invitations.v1
+
+message InviteUserRequest {
+  email: string @required @email
+  full_name: string @required
+  /// Legacy global role accepted during the migration window.
+  role: string?
+  /// Legacy flat application list accepted during the migration window.
+  apps: string[]
+  /// Independent Dash role assignment.
+  dash_role: string?
+  /// Independent application role assignments.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Groups that provide inherited access.
+  group_ids: int64[]
+  /// Optional user-provided secret; omit it to send an invitation link.
+  password: string?
+  /// Direct credential provisioning uses a write-only temporary secret.
+  username: string?
+  /// Write-only temporary password for direct provisioning.
+  temporary_password: string?
+  /// Invitation or direct-credential provisioning mode.
+  provisioning_mode: string?
+}
+
+message InviteUserResponse {
+  user_id: int64
+  message: string
+}
+
+message BulkInviteRequest {
+  emails: string[] @min_items(1)
+  role: string?
+  apps: string[]
+  /// Independent Dash role assignment shared by all invitees.
+  dash_role: string?
+  /// Independent application role assignments shared by all invitees.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Groups that provide inherited access to all invitees.
+  group_ids: int64[]
+  /// Identifies an optional group to add invitees to.
+  group_id: int64
+}
+
+message BulkInviteResult {
+  email: string
+  user_id: int64
+  status: string
+  message: string
+}
+
+message BulkInviteResponse {
+  /// Per-email invite outcome list.
+  results: BulkInviteResult[]
+  message: string
+}
+
+message VerifyInviteRequest {
+  /// Opaque token used to complete the operation.
+  token: string @required
+}
+
+message VerifyInviteResponse {
+  email: string
+  full_name: string
+  valid: bool
+  /// Lists the app IDs the invited user will have access to, so the
+  /// frontend can redirect to the right app after the invite is accepted.
+  apps: string[]
+  /// Dash role that will become active after acceptance.
+  dash_role: string?
+  /// Application roles that will become active after acceptance.
+  app_assignments: hub.user.v1.AppRoleAssignment[]
+}
+
+message AcceptInviteRequest {
+  /// Opaque token used to complete the operation.
+  token: string @required
+  /// User-provided secret for authentication.
+  password: string @required
+}
+
+message AcceptInviteResponse {
+  message: string
+}

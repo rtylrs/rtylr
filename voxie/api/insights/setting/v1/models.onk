@@ -1,0 +1,32 @@
+package insights.setting.v1
+
+message InsightsSettings {
+  /// default_period is the default period value for this contract.
+  /// this_month, this_quarter, this_year
+  default_period: string
+  /// currency is the currency value for this contract.
+  currency: string
+  /// compare_previous is the compare previous value for this contract.
+  compare_previous: bool
+  /// dashboard_widgets is the dashboard widgets value for this contract.
+  dashboard_widgets: string[]
+  /// favorite_reports is the favorite reports value for this contract.
+  favorite_reports: string[]
+}
+
+message GetInsightsSettingsRequest {}
+
+message GetInsightsSettingsResponse {
+  /// settings is the settings value for this contract.
+  settings: InsightsSettings
+}
+
+message UpdateInsightsSettingsRequest {
+  /// settings is the settings value for this contract.
+  settings: InsightsSettings @required
+}
+
+message UpdateInsightsSettingsResponse {
+  /// settings is the settings value for this contract.
+  settings: InsightsSettings
+}

@@ -1,0 +1,8 @@
+package hub.settings.compat.v1
+
+/// Compatibility contract for the SMTP connection test used by Dash.
+service CompatibilityService {
+  base_path: "/hub/settings"
+
+  testEmail(TestEmailRequest) -> TestEmailResponse @post("/email/test") @body("body")
+}

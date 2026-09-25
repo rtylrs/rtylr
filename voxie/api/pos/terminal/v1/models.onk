@@ -1,0 +1,56 @@
+package pos.terminal.v1
+
+/// Terminal is a registered POS terminal device.
+message Terminal {
+  id: int64
+  business_id: int64
+  branch_id: int64
+  name: string
+  device_id: string?
+  is_active: bool
+  last_seen_at: string?
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message ListTerminalsRequest {}
+
+message ListTerminalsResponse {
+  terminals: Terminal[]
+}
+
+message CreateTerminalRequest {
+  branch_id: int64? @required @gt(0)
+  name: string @required
+  device_id: string @required
+}
+
+message CreateTerminalResponse {
+  terminal_id: int64
+  message: string
+}
+
+message UpdateTerminalBody {
+  branch_id: int64? @required @gt(0)
+  name: string @required
+  device_id: string @required
+  is_active: bool
+}
+
+message UpdateTerminalRequest {
+  id: int64 @gt(0)
+  /// body carries updatable terminal fields bound from the HTTP payload.
+  body: UpdateTerminalBody
+}
+
+message UpdateTerminalResponse {
+  message: string
+}
+
+message HeartbeatTerminalRequest {
+  terminal_id: int64? @required @gt(0)
+}
+
+message HeartbeatTerminalResponse {
+  message: string
+}

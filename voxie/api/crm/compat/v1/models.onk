@@ -1,0 +1,72 @@
+package crm.compat.v1
+
+message EmptyRequest {}
+
+message JsonResponse {
+  data: json @unwrap
+}
+
+message PageRequest {
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+}
+
+message CustomerListRequest {
+  search: string? @query("search")
+  tier: string? @query("tier")
+  tag: string? @query("tag")
+  page: int32? @query("page")
+  page_size: int32? @query("page_size")
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+}
+
+message IdQueryRequest {
+  id: int32? @query("id")
+}
+
+message CustomerTimelineRequest {
+  id: int32? @query("id")
+  customer_id: int32? @query("customer_id")
+  cursor: string? @query("cursor")
+  limit: int32? @query("limit")
+}
+
+message SegmentCustomersRequest {
+  segment_id: int32? @query("segment_id")
+}
+
+message CampaignStatsRequest {
+  campaign_id: int32? @query("campaign_id")
+}
+
+message LoyaltyTransactionsRequest {
+  customer_id: int32? @query("customer_id")
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+}
+
+message ExportCustomerRequest {
+  id: int32? @query("id")
+  customer_id: int32? @query("customer_id")
+}
+
+message ContactsRequest {
+  lead_id: int32? @query("lead_id")
+  customer_id: int32? @query("customer_id")
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+}
+
+message BodyRequest {
+  body: json
+}
+
+message PathRequest {
+  id: string
+}
+
+message PathBodyRequest {
+  id: string
+  body: json
+}

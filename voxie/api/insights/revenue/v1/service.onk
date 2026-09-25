@@ -1,0 +1,13 @@
+package insights.revenue.v1
+
+/// RevenueService defines insights revenue analytics endpoints.
+service RevenueService {
+  /// Returns revenue overview for a period.
+  getRevenueOverview(GetRevenueOverviewRequest) -> GetRevenueOverviewResponse @get("/overview")
+
+  /// Returns revenue broken down by app.
+  getRevenueByApp(GetRevenueByAppRequest) -> GetRevenueByAppResponse @get("/by-app")
+
+  /// Compares revenue across periods.
+  getRevenueComparison(GetRevenueComparisonRequest) -> GetRevenueComparisonResponse @get("/comparison")
+}

@@ -1,0 +1,50 @@
+package pos.audit.v1
+
+/// AuditLog is a recorded POS audit event.
+message AuditLog {
+  id: int64
+  business_id: int64
+  branch_id: int64
+  terminal_id: int64?
+  employee_id: int64
+  action: string
+  entity_type: string
+  entity_id: int64?
+  details: string?
+  ip_address: string?
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message CreateAuditRequest {
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
+  action: string @required
+  entity_type: string @required
+  entity_id: int64? @required @gt(0)
+  details: string @required
+  ip_address: string @required
+}
+
+message CreateAuditResponse {
+  audit_log_id: int64
+  message: string
+}
+
+message ListAuditRequest {
+  action: string @query("action")
+  entity_type: string @query("entity_type")
+  employee_id: int64 @query("employee_id")
+  start_date: string @required @query("start_date")
+  end_date: string @required @query("end_date")
+  /// Maximum records to return. Defaults to 50 and is capped by the server.
+  limit: int32 @query("limit")
+  /// Opaque continuation token from a previous response.
+  cursor: string @query("cursor")
+}
+
+message ListAuditResponse {
+  logs: AuditLog[]
+  next_cursor: string
+}

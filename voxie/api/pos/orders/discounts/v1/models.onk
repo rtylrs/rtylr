@@ -1,0 +1,14 @@
+package pos.orders.discounts.v1
+
+// ── Apply Discount ────────────────────────────────────────────────
+
+message DiscountOrderRequest {
+  order_id: int64 @gt(0)
+  discount_type: string @required
+  discount_value: float64? @required @gte(0)
+  reason: string @required
+}
+
+message DiscountOrderResponse {
+  message: string
+}

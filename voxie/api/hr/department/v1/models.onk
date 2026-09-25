@@ -1,0 +1,61 @@
+package hr.department.v1
+
+/// DepartmentPayload is an HR department record.
+message DepartmentPayload {
+  /// Unique identifier for the department.
+  id: int64
+  /// Tenant owner this department belongs to.
+  owner_id: int64
+  business_id: int64
+  /// Display name of the department.
+  name: string
+  description: string
+  manager_staff_id: int64
+  /// Unix timestamp when this department was created.
+  created_at: int64
+  /// Unix timestamp when this department was last updated.
+  updated_at: int64
+}
+
+message CreateDepartmentRequest {
+  /// Display name of the department.
+  name: string @required
+  description: string
+  manager_staff_id: int64
+}
+
+message CreateDepartmentResponse {
+  id: int64
+}
+
+message DeleteDepartmentRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteDepartmentResponse {
+  success: bool
+}
+
+message ListDepartmentsRequest {}
+
+message ListDepartmentsResponse {
+  departments: DepartmentPayload[]
+}
+
+message UpdateDepartmentBody {
+  /// name is the updated department name.
+  name: string @required
+  description: string
+  manager_staff_id: int64
+}
+
+message UpdateDepartmentRequest {
+  /// ID of the department to update.
+  id: int64 @gt(0)
+  /// body carries updatable department fields bound from the HTTP payload.
+  body: UpdateDepartmentBody
+}
+
+message UpdateDepartmentResponse {
+  success: bool
+}

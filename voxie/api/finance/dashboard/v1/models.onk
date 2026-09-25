@@ -1,0 +1,16 @@
+package finance.dashboard.v1
+
+message GetFinanceDashboardRequest {}
+
+message GetFinanceDashboardResponse {
+  /// total_revenue_mtd is the total revenue month-to-date value for this contract.
+  total_revenue_mtd: float64
+  /// total_receivable is the total receivable value for this contract.
+  total_receivable: float64
+  /// overdue_amount is the overdue amount value for this contract.
+  overdue_amount: float64
+  /// total_expenses_mtd is the total expenses mtd value for this contract.
+  total_expenses_mtd: float64
+  /// net_profit_mtd is the net profit mtd value for this contract.
+  net_profit_mtd: float64
+}

@@ -1,0 +1,67 @@
+package pos.cash.v1
+
+/// CashMovement is a recorded cash drawer movement.
+message CashMovement {
+  id: int64
+  business_id: int64
+  branch_id: int64
+  terminal_id: int64?
+  session_id: int64
+  employee_id: int64
+  type: string
+  amount: float64
+  reason: string?
+  approved_by: int64?
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message CashAdjustRequest {
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  session_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
+  amount: float64? @required @gt(0)
+  reason: string @required
+}
+
+message CashAdjustResponse {
+  movement_id: int64
+  message: string
+}
+
+message CashDropRequest {
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  session_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
+  amount: float64? @required @gt(0)
+  reason: string @required
+}
+
+message CashDropResponse {
+  movement_id: int64
+  message: string
+}
+
+message CashPickupRequest {
+  branch_id: int64? @required @gt(0)
+  terminal_id: int64? @required @gt(0)
+  session_id: int64? @required @gt(0)
+  employee_id: int64? @required @gt(0)
+  amount: float64? @required @gt(0)
+  reason: string @required
+}
+
+message CashPickupResponse {
+  movement_id: int64
+  message: string
+}
+
+message ListCashMovementsRequest {
+  session_id: int64? @required @gt(0) @query("session_id")
+}
+
+message ListCashMovementsResponse {
+  movements: CashMovement[]
+}

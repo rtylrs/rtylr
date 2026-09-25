@@ -1,0 +1,136 @@
+package finance.bill.v1
+
+/// Bill is an accounts-payable bill owed to a supplier.
+message Bill {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  /// supplier_id is the ERP supplier this bill is owed to; absent on bills
+  /// entered before suppliers were linked, and on one-off bills for a party
+  /// with no supplier record. Callers must not invent a value: a bill with no
+  /// known supplier records none.
+  supplier_id: int64?
+  /// supplier_name is the supplier's name as it stood when the bill was
+  /// entered, so a bill list reads correctly without a second request and a
+  /// renamed supplier does not rewrite history. Required: every bill records
+  /// who it is owed to, by reference or by snapshot.
+  supplier_name: string @required
+  /// purchase_order_id is the ERP purchase order this bill settles; absent for
+  /// bills that did not originate from a purchase order.
+  purchase_order_id: int64?
+  /// amount is the amount value for this contract.
+  amount: float64
+  /// currency is the currency value for this contract.
+  currency: string
+  /// due_date is the due date value for this contract.
+  due_date: string
+  /// status is the current lifecycle state.
+  status: string
+  /// description is the description value for this contract.
+  description: string
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+message CreateBillRequest {
+  /// supplier_id is the ERP supplier this bill is owed to. Optional: supply it
+  /// from ERP's supplier list when the party has a record, and omit it for a
+  /// one-off bill. Callers must never send a derived or placeholder value.
+  supplier_id: int64?
+  /// supplier_name is the vendor name as typed or picked at entry time. It is
+  /// the display snapshot for the bill and must always be present even when
+  /// supplier_id is set, so history survives a later rename.
+  supplier_name: string @required
+  /// purchase_order_id links this bill to the ERP purchase order it settles;
+  /// absent when the bill did not originate from a purchase order. The server
+  /// must verify the referenced order belongs to the caller's business.
+  purchase_order_id: int64?
+  /// amount is the amount value for this contract.
+  amount: float64 @gte(0)
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// due_date is the due date value for this contract.
+  due_date: string @required
+  /// status is the current lifecycle state.
+  status: string @required
+  /// description is the description value for this contract.
+  description: string @required
+}
+
+message CreateBillResponse {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// message is a human-readable result message.
+  message: string
+}
+
+message DeleteBillRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteBillResponse {
+  message: string
+}
+
+message GetBillRequest {
+  id: int64 @gt(0)
+}
+
+message GetBillResponse {
+  bill: Bill
+}
+
+message ListBillsRequest {
+  /// supplier_id filters to one ERP supplier's bills; absent to include all.
+  /// Absent supplier links are excluded when this filter is supplied.
+  supplier_id: int64? @query("supplier_id")
+  /// purchase_order_id filters to bills settling one purchase order; absent
+  /// to include all.
+  purchase_order_id: int64? @query("purchase_order_id")
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListBillsResponse {
+  /// bills is the bills value for this contract.
+  bills: Bill[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
+}
+
+message UpdateBillBody {
+  /// supplier_id is the ERP supplier this bill is owed to; absent keeps the
+  /// stored value, and a one-off bill may clear it by sending nothing here.
+  supplier_id: int64?
+  /// supplier_name replaces the vendor snapshot; absent means unchanged.
+  supplier_name: string
+  /// purchase_order_id re-links this bill to an ERP purchase order; absent
+  /// keeps the stored link.
+  purchase_order_id: int64?
+  /// amount is the amount value for this contract.
+  amount: float64 @gte(0)
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// due_date is the due date value for this contract.
+  due_date: string @required
+  /// status is the current lifecycle state.
+  status: string @required
+  /// description is the description value for this contract.
+  description: string @required
+}
+
+message UpdateBillRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+  /// body carries updatable bill fields bound from the HTTP payload.
+  body: UpdateBillBody
+}
+
+message UpdateBillResponse {
+  /// message is a human-readable result message.
+  message: string
+}

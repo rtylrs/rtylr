@@ -1,0 +1,104 @@
+package flow.insights.v1
+
+message VelocityPoint {
+  cycle: string
+  completed: int32
+  total: int32
+  completion_rate: float64
+}
+
+message BurndownPoint {
+  day: int32
+  ideal: float64
+  actual: float64
+}
+
+message MemberTime {
+  id: string
+  name: string
+  hours: float64
+}
+
+message ThroughputPoint {
+  week: string
+  completed: int32
+}
+
+message TeamTaskSummary {
+  id: string
+  title: string
+  status: string
+  priority: string
+  due_date: string
+}
+
+message TeamMemberWorkload {
+  id: string
+  name: string
+  initials: string
+  capacity: int32
+  assigned_hours: float64
+  load: float64
+  tasks: TeamTaskSummary[]
+}
+
+message RoadmapProject {
+  id: string
+  name: string
+  color: string
+  start_date: string
+  target_date: string
+  progress: int32
+  done_count: int32
+  task_count: int32
+  description: string
+  workspace_id: string
+}
+
+message GetInsightsRequest {
+  workspace_id: string @query("workspace_id")
+}
+
+message GetInsightsResponse {
+  velocity: VelocityPoint[]
+  burndown: BurndownPoint[]
+  cycle_time: float64
+  time_by_member: MemberTime[]
+  throughput: ThroughputPoint[]
+  total_tasks: int32
+  done_tasks: int32
+}
+
+message GetTeamWorkloadRequest {
+  workspace_id: string @query("workspace_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message GetTeamWorkloadResponse {
+  members: TeamMemberWorkload[]
+  pagination: PaginationResponse
+}
+
+message GetRoadmapRequest {
+  workspace_id: string @query("workspace_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message GetRoadmapResponse {
+  projects: RoadmapProject[]
+  pagination: PaginationResponse
+}

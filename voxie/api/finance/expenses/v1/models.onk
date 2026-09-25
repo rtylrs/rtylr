@@ -1,0 +1,177 @@
+package finance.expenses.v1
+
+/// Expense is a recorded business expense.
+message Expense {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  /// category_id is the category id value for this contract.
+  category_id: int64?
+  /// amount is the amount value for this contract.
+  amount: float64
+  /// currency is the currency value for this contract.
+  currency: string
+  /// description is the description value for this contract.
+  description: string
+  /// vendor is the vendor value for this contract.
+  vendor: string
+  /// receipt_url is the receipt url value for this contract.
+  receipt_url: string
+  /// payment_method is the canonical payment method for accounting.
+  payment_method: string
+  /// is_tax_deductible indicates whether the expense is tax deductible.
+  is_tax_deductible: bool
+  /// tax_amount is the tax amount recorded for the expense.
+  tax_amount: float64
+  /// notes contains accounting notes for the expense.
+  notes: string
+  /// expense_date is the expense date value for this contract.
+  expense_date: string
+  /// status is the current lifecycle state.
+  status: string
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+/// ExpenseCategory groups expenses for reporting.
+message ExpenseCategory {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  /// name is the name value for this contract.
+  name: string
+  /// color is the color value for this contract.
+  color: string
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message CreateExpenseRequest {
+  /// category_id is the category id value for this contract.
+  category_id: int64?
+  /// amount is the amount value for this contract.
+  amount: float64 @gte(0)
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// description is the description value for this contract.
+  description: string @required
+  /// vendor is the vendor value for this contract.
+  vendor: string @required
+  /// receipt_url is the receipt url value for this contract.
+  receipt_url: string @required
+  /// payment_method is the canonical payment method for accounting.
+  payment_method: string
+  /// is_tax_deductible indicates whether the expense is tax deductible.
+  is_tax_deductible: bool
+  /// tax_amount is the tax amount recorded for the expense.
+  tax_amount: float64
+  /// notes contains accounting notes for the expense.
+  notes: string
+  /// expense_date is the expense date value for this contract.
+  expense_date: string @required
+}
+
+message CreateExpenseResponse {
+  /// expense_id is the expense id value for this contract.
+  expense_id: int64
+  /// message is a human-readable result message.
+  message: string
+}
+
+message DeleteExpenseRequest {
+  /// id is the unique identifier for the expense.
+  id: int64 @gt(0)
+}
+
+message DeleteExpenseResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message GetExpenseRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+}
+
+message GetExpenseResponse {
+  /// expense is the expense value for this contract.
+  expense: Expense
+}
+
+message ListExpenseCategoriesRequest {}
+
+message ListExpenseCategoriesResponse {
+  /// categories is the categories value for this contract.
+  categories: ExpenseCategory[]
+}
+
+message ListExpensesRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListExpensesResponse {
+  /// expenses is the expenses value for this contract.
+  expenses: Expense[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
+}
+
+message UpdateExpenseBody {
+  /// category_id is the category id value for this contract.
+  category_id: int64?
+  /// amount is the amount value for this contract.
+  amount: float64 @gte(0)
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// description is the description value for this contract.
+  description: string @required
+  /// vendor is the vendor value for this contract.
+  vendor: string @required
+  /// receipt_url is the receipt url value for this contract.
+  receipt_url: string @required
+  /// payment_method is the canonical payment method for accounting.
+  payment_method: string
+  /// is_tax_deductible indicates whether the expense is tax deductible.
+  is_tax_deductible: bool
+  /// tax_amount is the tax amount recorded for the expense.
+  tax_amount: float64
+  /// notes contains accounting notes for the expense.
+  notes: string
+  /// expense_date is the expense date value for this contract.
+  expense_date: string @required
+}
+
+message UpdateExpenseRequest {
+  /// id is the unique identifier for the expense.
+  id: int64 @gt(0)
+  /// body carries updatable expense fields bound from the HTTP payload.
+  body: UpdateExpenseBody
+}
+
+message UpdateExpenseResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message UpdateExpenseStatusBody {
+  /// status is the current lifecycle state - "pending", "approved", or "rejected".
+  status: string @required
+}
+
+message UpdateExpenseStatusRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+  /// body carries status update fields bound from the HTTP payload.
+  body: UpdateExpenseStatusBody
+}
+
+message UpdateExpenseStatusResponse {
+  /// message is a human-readable result message.
+  message: string
+}

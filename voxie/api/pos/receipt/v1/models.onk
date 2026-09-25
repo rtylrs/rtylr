@@ -1,0 +1,31 @@
+package pos.receipt.v1
+
+/// Receipt is a completed order receipt.
+message Receipt {
+  id: int64
+  order_number: string
+  customer_name: string
+  total: float64
+  payment_method: string
+  paid_at: string
+}
+
+message EmailReceiptRequest {
+  /// id is the unique identifier for the receipt.
+  id: int64 @gt(0)
+  /// Recipient email address for the receipt.
+  email: string @required
+}
+
+message EmailReceiptResponse {
+  message: string
+}
+
+message ListReceiptsRequest {
+  from_date: string @query("from")
+  to_date: string @query("to")
+}
+
+message ListReceiptsResponse {
+  receipts: Receipt[]
+}

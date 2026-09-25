@@ -1,0 +1,28 @@
+package hub.activity.v1
+
+message ActivityEntry {
+  id: int64
+  owner_id: int64
+  app: string
+  entity_type: string
+  entity_id: int64
+  action: string
+  description: string
+  user_id: int64
+  user_name: string
+  /// When the record was created.
+  created_at: string
+}
+
+message ListActivityRequest {
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// offset is the number of records to skip, for paging through the feed.
+  offset: int32? @query("offset")
+}
+
+message ListActivityResponse {
+  activities: ActivityEntry[]
+  /// total is the total number of matching activity entries, for pagination math.
+  total: int32
+}

@@ -1,0 +1,16 @@
+package insights.dashboard.v1
+
+/// DashboardService defines insights dashboard endpoints.
+service DashboardService {
+  /// Returns high-level insights summary.
+  getInsights(GetInsightsRequest) -> GetInsightsResponse @get("/insights")
+
+  /// Returns the product roadmap view.
+  getRoadmap(GetRoadmapRequest) -> GetRoadmapResponse @get("/roadmap")
+
+  /// Returns team workload metrics.
+  getWorkload(GetWorkloadRequest) -> GetWorkloadResponse @get("/workload")
+
+  /// Returns MTD headline KPI cards for the insights home dashboard.
+  getDashboardSummary(GetDashboardSummaryRequest) -> GetDashboardSummaryResponse @get("/summary")
+}

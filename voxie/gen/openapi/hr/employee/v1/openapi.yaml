@@ -1,0 +1,741 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/employee/v1/employees:
+        get:
+            tags:
+                - EmployeeService
+            summary: listEmployees
+            description: ListEmployees returns employees with optional filters.
+            operationId: EmployeeService_listEmployees
+            parameters:
+                - name: department_id
+                  in: query
+                  description: Filter by department; absent to include all departments.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by department; absent to include all departments.
+                - name: location_id
+                  in: query
+                  description: Filter by location; absent to include all locations.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by location; absent to include all locations.
+                - name: status
+                  in: query
+                  description: Filter by employment status; absent to include all statuses.
+                  required: false
+                  schema:
+                    type: string
+                    description: Filter by employment status; absent to include all statuses.
+                - name: limit
+                  in: query
+                  description: Maximum number of records to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Maximum number of records to return.
+                - name: offset
+                  in: query
+                  description: Number of records to skip for pagination.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Number of records to skip for pagination.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employee.v1.ListEmployeesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - EmployeeService
+            summary: createEmployee
+            description: CreateEmployee creates a new employee.
+            operationId: EmployeeService_createEmployee
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.employee.v1.CreateEmployeeRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employee.v1.CreateEmployeeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/employee/v1/employees/{id}:
+        put:
+            tags:
+                - EmployeeService
+            summary: updateEmployee
+            description: UpdateEmployee updates an existing employee.
+            operationId: EmployeeService_updateEmployee
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the employee ID from the route.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the employee ID from the route.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/hr.employee.v1.UpdateEmployeeBody'
+                            description: body carries updatable employee fields bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employee.v1.UpdateEmployeeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/employee/v1/employees/invite:
+        post:
+            tags:
+                - EmployeeService
+            summary: inviteEmployee
+            description: InviteEmployee sends an employee invitation.
+            operationId: EmployeeService_inviteEmployee
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.employee.v1.InviteEmployeeRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employee.v1.InviteEmployeeResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/employee/v1/employees/invite/accept:
+        post:
+            tags:
+                - EmployeeService
+            summary: acceptInvite
+            description: AcceptInvite accepts an employee invitation.
+            operationId: EmployeeService_acceptInvite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.employee.v1.AcceptInviteRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.employee.v1.AcceptInviteResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.employee.v1.ListEmployeesRequest:
+            type: object
+            properties:
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by department; absent to include all departments.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by location; absent to include all locations.
+                status:
+                    type: string
+                    description: Filter by employment status; absent to include all statuses.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Maximum number of records to return.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Number of records to skip for pagination.
+            required:
+                - limit
+                - offset
+        hr.employee.v1.ListEmployeesResponse:
+            type: object
+            properties:
+                employees:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.employee.v1.EmployeePayload'
+                    description: Page of employee records matching the filters.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of employees matching the filters.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Limit that was applied.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset that was applied.
+            required:
+                - employees
+                - total
+                - limit
+                - offset
+        hr.employee.v1.EmployeePayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the employee record.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this employee belongs to.
+                user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Linked user account ID.
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Department the employee is assigned to.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Work location the employee reports to.
+                manager_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Direct manager; absent if top-level.
+                contract_type:
+                    type: string
+                    description: Employment arrangement (full_time | part_time | freelancer).
+                status:
+                    type: string
+                    description: Current employment status (active | probation | inactive | terminated).
+                hire_date:
+                    type: string
+                    description: Date the employee was hired (ISO-8601 format).
+                probation_end_date:
+                    type: string
+                    description: End of probation period; absent if no probation (ISO-8601 format).
+                termination_date:
+                    type: string
+                    description: Date employment was terminated; absent if still employed (ISO-8601 format).
+                hourly_rate:
+                    type: number
+                    format: double
+                    description: Pay rate per hour for hourly employees; absent if salaried only.
+                monthly_salary:
+                    type: number
+                    format: double
+                    description: Monthly gross salary; absent if hourly only.
+                currency:
+                    type: string
+                    description: ISO-4217 currency code for compensation (e.g. "USD").
+                work_schedule_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Assigned work schedule; absent if using department default.
+                account_creation_mode:
+                    type: string
+                    description: How the employee account was created (hr_created | invite_link).
+                job_title:
+                    type: string
+                    description: Employee's job title or position name.
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - user_id
+                - department_id
+                - location_id
+                - contract_type
+                - status
+                - hire_date
+                - currency
+                - account_creation_mode
+                - job_title
+                - created_at
+                - updated_at
+            description: EmployeePayload is an HR employee record.
+        hr.employee.v1.CreateEmployeeRequest:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: user_id links this employee record to an existing login account; zero leaves it unlinked.
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: department_id is the department assignment; zero leaves it unset.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: location_id is the work location assignment; zero leaves it unset.
+                work_schedule_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: work_schedule_id is the work schedule assignment; zero leaves it unset.
+                first_name:
+                    type: string
+                    description: first_name is the employee's given name.
+                last_name:
+                    type: string
+                    description: last_name is the employee's family name.
+                email:
+                    type: string
+                    format: email
+                    description: email is the employee email address.
+                phone:
+                    type: string
+                    description: phone is the employee phone number.
+                employment_type:
+                    type: string
+                    description: employment_type is the employment type label.
+                salary:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: salary is the monthly or salaried compensation amount.
+                hourly_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: hourly_rate is the employee hourly pay rate.
+                overtime_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: overtime_rate is the employee overtime pay rate.
+                start_date:
+                    type: string
+                    description: start_date is the start date in YYYY-MM-DD format.
+                address:
+                    type: string
+                    description: address is the employee address.
+            required:
+                - user_id
+                - department_id
+                - location_id
+                - work_schedule_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - employment_type
+                - salary
+                - hourly_rate
+                - overtime_rate
+                - start_date
+                - address
+        hr.employee.v1.CreateEmployeeResponse:
+            type: object
+            properties:
+                employee:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.staff.v1.Staff'
+                    description: The newly created employee record.
+            required:
+                - employee
+        hr.staff.v1.Staff:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                manager_staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        manager_staff_id is this person's direct manager, as a STAFF id (not a
+                        user id). Zero means no direct line, which is the common case: a
+                        department manager is resolved separately from hr_departments.
+
+                        Flow's dept-manager visibility proxy unions this with the department
+                        relationship, so setting it widens what that manager can see.
+                first_name:
+                    type: string
+                last_name:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+                role:
+                    type: string
+                employment_type:
+                    type: string
+                status:
+                    type: string
+                    description: The current lifecycle state.
+                salary:
+                    type: number
+                    format: double
+                hourly_rate:
+                    type: number
+                    format: double
+                overtime_rate:
+                    type: number
+                    format: double
+                start_date:
+                    type: string
+                end_date:
+                    type: string
+                address:
+                    type: string
+                emergency_contact_name:
+                    type: string
+                emergency_contact_phone:
+                    type: string
+                apps:
+                    type: string
+                notes:
+                    type: string
+                photo_url:
+                    type: string
+                    description: |-
+                        A URL to the staff member's profile photo. Optional and unset by default:
+                        consumers fall back to the hub account avatar, which is what Flow's profile
+                        screen already does.
+                bio:
+                    type: string
+                    description: |-
+                        A short self-description shown on a profile screen.
+
+                        Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+                        person and must never be rendered as an "About" section; a dead write path
+                        in the HR app mapped bio onto notes, and that mapping was wrong. See
+                        tryrtylr/rtylr#875.
+                created_at:
+                    type: string
+                    description: When the record was created.
+                updated_at:
+                    type: string
+                    description: When the record was last updated.
+            required:
+                - id
+                - owner_id
+                - user_id
+                - department_id
+                - manager_staff_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - role
+                - employment_type
+                - status
+                - salary
+                - hourly_rate
+                - overtime_rate
+                - start_date
+                - end_date
+                - address
+                - emergency_contact_name
+                - emergency_contact_phone
+                - apps
+                - notes
+                - photo_url
+                - bio
+                - created_at
+                - updated_at
+            description: Staff is an HR staff member record.
+        hr.employee.v1.UpdateEmployeeRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the employee ID from the route.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.employee.v1.UpdateEmployeeBody'
+                    description: body carries updatable employee fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+        hr.employee.v1.UpdateEmployeeBody:
+            type: object
+            properties:
+                user_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: user_id links this employee record to an existing login account; zero leaves it unlinked.
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: department_id is the department assignment; zero leaves it unset.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: location_id is the work location assignment; zero leaves it unset.
+                work_schedule_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: work_schedule_id is the work schedule assignment; zero leaves it unset.
+                first_name:
+                    type: string
+                    description: first_name is the employee's given name.
+                last_name:
+                    type: string
+                    description: last_name is the employee's family name.
+                email:
+                    type: string
+                    description: email is the employee email address.
+                phone:
+                    type: string
+                    description: phone is the employee phone number.
+                employment_type:
+                    type: string
+                    description: employment_type is the employment type label.
+                status:
+                    type: string
+                    description: status is the employment status.
+                salary:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: salary is the monthly or salaried compensation amount.
+                hourly_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: hourly_rate is the employee hourly pay rate.
+                overtime_rate:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: overtime_rate is the employee overtime pay rate.
+                start_date:
+                    type: string
+                    description: start_date is the start date in YYYY-MM-DD format.
+                end_date:
+                    type: string
+                    description: end_date is the end date in YYYY-MM-DD format.
+                address:
+                    type: string
+                    description: address is the employee address.
+                emergency_contact_name:
+                    type: string
+                    description: emergency_contact_name is the emergency contact name.
+                emergency_contact_phone:
+                    type: string
+                    description: emergency_contact_phone is the emergency contact phone.
+                notes:
+                    type: string
+                    description: notes are internal employee notes.
+            required:
+                - user_id
+                - department_id
+                - location_id
+                - work_schedule_id
+                - first_name
+                - last_name
+                - email
+                - phone
+                - employment_type
+                - status
+                - salary
+                - hourly_rate
+                - overtime_rate
+                - start_date
+                - end_date
+                - address
+                - emergency_contact_name
+                - emergency_contact_phone
+                - notes
+        hr.employee.v1.UpdateEmployeeResponse:
+            type: object
+            properties:
+                employee:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.staff.v1.Staff'
+                    description: The updated employee record.
+            required:
+                - employee
+        hr.employee.v1.InviteEmployeeRequest:
+            type: object
+            properties:
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: ID of the employee to invite.
+                send_via:
+                    type: string
+                    description: Channel to deliver the invite (email | sms).
+            required:
+                - employee_id
+                - send_via
+        hr.employee.v1.InviteEmployeeResponse:
+            type: object
+            properties:
+                invite_token:
+                    type: string
+                    description: 'Sensitive: do not log this field. One-time invite token for the employee.'
+                expires_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the invite expires.
+            required:
+                - invite_token
+                - expires_at
+        hr.employee.v1.AcceptInviteRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+                    description: 'Sensitive: do not log this field. The invite token received by the employee.'
+                password:
+                    type: string
+                    description: 'Sensitive: do not log this field. Password chosen by the employee.'
+            required:
+                - token
+                - password
+        hr.employee.v1.AcceptInviteResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the invite was accepted successfully.
+            required:
+                - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: EmployeeService
+      description: EmployeeService defines HR employee endpoints.

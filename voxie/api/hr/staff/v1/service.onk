@@ -1,0 +1,31 @@
+package hr.staff.v1
+
+/// StaffService defines HR staff endpoints.
+service StaffService {
+  /// Returns staff members with optional filters.
+  listStaff(ListStaffRequest) -> ListStaffResponse @get("/staff")
+
+  /// Creates a new staff member.
+  createStaff(CreateStaffRequest) -> CreateStaffResponse @post("/staff")
+
+  /// Returns a staff member by ID.
+  getStaff(GetStaffRequest) -> GetStaffResponse @get("/staff/{id}")
+
+  /// Updates an existing staff member.
+  updateStaff(UpdateStaffRequest) -> UpdateStaffResponse @put("/staff/{id}") @body("body")
+
+  /// Removes a staff member by ID.
+  deleteStaff(DeleteStaffRequest) -> DeleteStaffResponse @delete("/staff/{id}")
+
+  /// Records a staff clock-in event.
+  clockIn(ClockInRequest) -> ClockInResponse @post("/staff/clock-in")
+
+  /// Records a staff clock-out event.
+  clockOut(ClockOutRequest) -> ClockOutResponse @post("/staff/clock-out")
+
+  /// Returns the paginated, business-wide staff directory. Gated by both
+  /// the business's directory_enabled config flag and the caller's
+  /// view_directory permission; distinct from listStaff, which serves
+  /// HR's own admin screens with the full Staff shape.
+  listStaffDirectory(ListStaffDirectoryRequest) -> ListStaffDirectoryResponse @get("/staff/directory")
+}

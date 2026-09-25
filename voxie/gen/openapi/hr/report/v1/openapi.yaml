@@ -1,0 +1,131 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/report/v1/reports/generate:
+        post:
+            tags:
+                - ReportService
+            summary: generateReport
+            description: Generates an HR report.
+            operationId: ReportService_generateReport
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.report.v1.GenerateReportRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.report.v1.GenerateReportResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.report.v1.GenerateReportRequest:
+            type: object
+            properties:
+                request:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.report.v1.ReportRequestPayload'
+                    description: Parameters describing the report to generate.
+            required:
+                - request
+        hr.report.v1.ReportRequestPayload:
+            type: object
+            properties:
+                report_type:
+                    type: string
+                    description: Type of report to generate (see report type constants above).
+                date_from:
+                    type: string
+                    description: Start of the reporting period (ISO-8601 date).
+                date_to:
+                    type: string
+                    description: End of the reporting period (ISO-8601 date).
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by location; absent to include all locations.
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by department; absent to include all departments.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by employee; absent to include all employees.
+                format:
+                    type: string
+                    description: Output format (json | csv | pdf).
+            required:
+                - report_type
+                - date_from
+                - date_to
+                - format
+            description: |-
+                ReportRequestPayload describes the parameters for an HR report.
+                Report types: attendance | timesheet | leave_utilization | leave_calendar
+                | overtime | payroll_cost | headcount | turnover
+                | checklist_completion | performance_review_status
+        hr.report.v1.GenerateReportResponse:
+            type: object
+            properties:
+                report:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.report.v1.ReportPayload'
+                    description: The generated report.
+            required:
+                - report
+        hr.report.v1.ReportPayload:
+            type: object
+            properties:
+                report_type:
+                    type: string
+                    description: Type of report that was generated.
+                generated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the report was generated.
+                data:
+                    type: string
+                    format: byte
+                    description: Serialised report content (CSV, JSON, or PDF binary depending on format).
+                format:
+                    type: string
+                    description: Format of the serialised data (json | csv | pdf).
+            required:
+                - report_type
+                - generated_at
+                - data
+                - format
+            description: ReportPayload is a generated HR report.
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ReportService
+      description: ReportService defines HR report generation endpoints.

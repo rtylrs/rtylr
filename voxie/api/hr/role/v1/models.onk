@@ -1,0 +1,78 @@
+package hr.role.v1
+
+/// PermissionPayload is a single grantable permission on a role.
+message PermissionPayload {
+  /// Machine-readable permission identifier (e.g. "hr.employees.create").
+  key: string
+  /// Human-readable label shown in the UI.
+  label: string
+  /// Whether this permission is currently granted.
+  is_granted: bool
+}
+
+/// RolePayload is an HR role with its attached permission set.
+message RolePayload {
+  /// Unique identifier for the role.
+  id: int64
+  /// Tenant owner this role belongs to.
+  owner_id: int64
+  /// Display name of the role.
+  name: string
+  /// Whether this role is the tenant default assigned to new employees.
+  is_default: bool
+  /// Full set of permissions attached to this role.
+  permissions: PermissionPayload[]
+  /// Unix timestamp when this role was created.
+  created_at: int64
+  /// Unix timestamp when this role was last updated.
+  updated_at: int64
+}
+
+/// ListRolesResponse lists all roles for the tenant.
+message ListRolesResponse {
+  /// All roles for the tenant.
+  roles: RolePayload[]
+}
+
+message CreateRoleRequest {
+  /// Display name of the new role.
+  name: string @required
+  /// Permissions to attach to the new role.
+  permissions: PermissionPayload[] @min_items(1)
+}
+
+message CreateRoleResponse {
+  /// The newly created role.
+  role: RolePayload
+}
+
+message UpdateRoleBody {
+  /// New name; absent to keep current.
+  name: string?
+  /// New permission set; if provided, replaces all existing permissions.
+  permissions: PermissionPayload[] @min_items(1)
+}
+
+message UpdateRoleRequest {
+  /// ID of the role to update.
+  id: int64 @gt(0)
+  /// body carries updatable role fields bound from the HTTP payload.
+  body: UpdateRoleBody
+}
+
+message UpdateRoleResponse {
+  /// The updated role.
+  role: RolePayload
+}
+
+message AssignRoleRequest {
+  /// ID of the employee to assign the role to.
+  employee_id: int64? @required @gt(0)
+  /// ID of the role to assign.
+  role_id: int64? @required @gt(0)
+}
+
+message AssignRoleResponse {
+  /// Whether the role was assigned successfully.
+  success: bool
+}

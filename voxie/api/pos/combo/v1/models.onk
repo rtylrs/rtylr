@@ -1,0 +1,64 @@
+package pos.combo.v1
+
+/// Combo is a bundled set of menu items sold as a single offering.
+message Combo {
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  name: string
+  description: string
+  price: float64
+  items: string
+  is_active: bool
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+message CreateComboRequest {
+  name: string @required
+  description: string @required
+  price: float64 @gte(0)
+  items: string @required
+  is_active: bool
+}
+
+message CreateComboResponse {
+  combo_id: int64
+  message: string
+}
+
+message UpdateComboBody {
+  name: string @required
+  description: string @required
+  price: float64 @gte(0)
+  items: string @required
+  is_active: bool
+}
+
+message UpdateComboRequest {
+  /// id is the unique identifier for the combo.
+  id: int64 @gt(0)
+  /// body carries updatable combo fields bound from the HTTP payload.
+  body: UpdateComboBody
+}
+
+message UpdateComboResponse {
+  message: string
+}
+
+message DeleteComboRequest {
+  /// id is the unique identifier for the combo.
+  id: int64 @gt(0)
+}
+
+message DeleteComboResponse {
+  message: string
+}
+
+message ListCombosRequest {}
+
+message ListCombosResponse {
+  combos: Combo[]
+}

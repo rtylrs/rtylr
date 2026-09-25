@@ -1,0 +1,7 @@
+package hr.approval_chain.v1
+
+/// ApprovalChainService defines HR approval chain endpoints.
+service ApprovalChainService {
+  /// UpsertApprovalChain creates or replaces the approval chain configuration.
+  upsertApprovalChain(UpsertApprovalChainRequest) -> UpsertApprovalChainResponse @put("/approval-chains")
+}

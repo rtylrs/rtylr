@@ -1,0 +1,50 @@
+package booking.resource.v1
+
+message Resource {
+  id: int64
+  owner_id: int64
+  business_id: int64
+  name: string
+  type: string
+  capacity: int32
+  is_active: bool
+  created_at: string
+}
+
+message CreateResourceRequest {
+  name: string @required
+  type: string
+  capacity: int32
+  is_active: bool
+}
+
+message CreateResourceResponse {
+  id: int64
+  message: string
+}
+
+message DeleteResourceRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteResourceResponse {
+  message: string
+}
+
+message ListResourcesRequest {}
+
+message ListResourcesResponse {
+  resources: Resource[]
+}
+
+message UpdateResourceRequest {
+  id: int64 @gt(0)
+  name: string
+  type: string
+  capacity: int32
+  is_active: bool
+}
+
+message UpdateResourceResponse {
+  message: string
+}

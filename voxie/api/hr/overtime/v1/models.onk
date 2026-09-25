@@ -1,0 +1,84 @@
+package hr.overtime.v1
+
+/// OvertimeRequestPayload is a single employee's request to work overtime.
+message OvertimeRequestPayload {
+  /// Unique identifier for the overtime request.
+  id: int64? @required @gt(0)
+  /// Tenant owner this request belongs to.
+  owner_id: int64
+  /// Employee requesting overtime.
+  employee_id: int64
+  /// Date the overtime is planned for (ISO-8601 date).
+  date: string
+  /// Number of extra minutes planned beyond the regular shift.
+  planned_extra_minutes: int32
+  /// Justification for the overtime work.
+  reason: string
+  /// Workflow status (pending | approved | rejected | cancelled).
+  status: string
+  /// Current step in a multi-level approval chain.
+  current_approval_level: int32
+  /// Employee ID of the approver; absent if not yet approved.
+  approved_by: int64?
+  /// Pay multiplier applied to the overtime hours (e.g. 1.5); absent if not yet calculated.
+  multiplier_applied: float64?
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+message ListOvertimeRequestsRequest {
+  /// Filter by employee; absent to include all employees.
+  employee_id: int64? @query("employee_id")
+  /// Filter by status; absent to include all statuses.
+  status: string? @query("status")
+}
+
+message ListOvertimeRequestsResponse {
+  /// Page of overtime requests matching the filters.
+  requests: OvertimeRequestPayload[]
+  /// Total number of matching overtime requests across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}
+
+message CreateOvertimeRequestRequest {
+  /// Employee requesting overtime.
+  employee_id: int64? @required @gt(0)
+  /// Date the overtime is planned for (ISO-8601 date).
+  date: string @required
+  /// Number of extra minutes planned beyond the regular shift.
+  planned_extra_minutes: int32? @required @gt(0)
+  /// Justification for the overtime work.
+  reason: string @required
+}
+
+message CreateOvertimeRequestResponse {
+  /// The newly created overtime request.
+  request: OvertimeRequestPayload
+}
+
+/// ApproveOvertimeBody carries approval decision fields bound from the HTTP payload.
+message ApproveOvertimeBody {
+  /// True to approve, false to reject.
+  approved: bool
+  /// Pay multiplier to apply (e.g. 1.5); absent to use the default rate.
+  multiplier_applied: float64?
+  /// Reason for rejection; absent if approving.
+  rejection_reason: string?
+}
+
+message ApproveOvertimeRequest {
+  /// ID of the overtime request being reviewed.
+  overtime_request_id: int64 @gt(0)
+  body: ApproveOvertimeBody
+}
+
+message ApproveOvertimeResponse {
+  /// Whether the approval action was processed.
+  success: bool
+}

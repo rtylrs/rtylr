@@ -1,0 +1,49 @@
+package flow.cycle.v1
+
+message Cycle {
+  id: int64
+  workspace_id: int64
+  name: string
+  start_date: string
+  end_date: string
+  status: string
+  scope: int32
+  completed: int32
+}
+
+message ListCyclesRequest {
+  workspace_id: string @query("workspace_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListCyclesResponse {
+  cycles: Cycle[]
+  pagination: PaginationResponse
+}
+
+message CreateCycleRequest {
+  name: string @required
+  workspace_id: string
+  start_date: string
+  end_date: string
+}
+
+message CreateCycleResponse {
+  cycle: Cycle
+}
+
+message UpdateCycleRequest {
+  id: int64
+  name: string
+  status: string
+  end_date: string
+}
+
+message UpdateCycleResponse {}

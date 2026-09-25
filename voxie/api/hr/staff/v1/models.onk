@@ -1,0 +1,220 @@
+package hr.staff.v1
+
+/// Staff is an HR staff member record.
+message Staff {
+  id: int64
+  owner_id: int64
+  user_id: int64
+  department_id: int64
+  /// manager_staff_id is this person's direct manager, as a STAFF id (not a
+  /// user id). Zero means no direct line, which is the common case: a
+  /// department manager is resolved separately from hr_departments.
+  ///
+  /// Flow's dept-manager visibility proxy unions this with the department
+  /// relationship, so setting it widens what that manager can see.
+  manager_staff_id: int64
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  role: string
+  employment_type: string
+  /// The current lifecycle state.
+  status: string
+  salary: float64
+  hourly_rate: float64
+  overtime_rate: float64
+  start_date: string
+  end_date: string
+  address: string
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  apps: string
+  notes: string
+  /// A URL to the staff member's profile photo. Optional and unset by default:
+  /// consumers fall back to the hub account avatar, which is what Flow's profile
+  /// screen already does.
+  photo_url: string
+  /// A short self-description shown on a profile screen.
+  ///
+  /// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+  /// person and must never be rendered as an "About" section; a dead write path
+  /// in the HR app mapped bio onto notes, and that mapping was wrong. See
+  /// tryrtylr/rtylr#875.
+  bio: string
+  /// When the record was created.
+  created_at: string
+  /// When the record was last updated.
+  updated_at: string
+}
+
+message ListStaffRequest {
+  search: string @query("search")
+  department_id: string @query("department_id")
+  /// The current lifecycle state.
+  status: string @query("status")
+}
+
+message ListStaffResponse {
+  staff: Staff[]
+}
+
+message CreateStaffRequest {
+  user_id: int64? @required @gt(0)
+  department_id: int64? @required @gt(0)
+  /// Optional, unlike department_id: most staff have no explicit manager, and
+  /// @required @gt(0) would force callers to invent one.
+  manager_staff_id: int64
+  first_name: string @required
+  last_name: string @required
+  email: string @required @email
+  phone: string
+  role: string @required
+  employment_type: string @required
+  /// The current lifecycle state.
+  status: string @required
+  salary: float64 @gte(0)
+  hourly_rate: float64 @gte(0)
+  overtime_rate: float64 @gte(0)
+  start_date: string @required
+  /// Empty for anyone still employed, which is why this is not @required.
+  /// Requiring it made every update to an active employee invalid, and the
+  /// rejection happened client side, so the write vanished with no error.
+  end_date: string
+  address: string
+  /// Optional HR detail. Not every record has next of kin on file, and
+  /// blocking an unrelated field update over it is not the way to collect it.
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  /// App access, empty meaning none. Optional for the same reason: a caller
+  /// changing one field should not have to assert app access to do it.
+  apps: string
+  notes: string
+  /// A URL to the staff member's profile photo. Optional and unset by default:
+  /// consumers fall back to the hub account avatar, which is what Flow's profile
+  /// screen already does.
+  photo_url: string
+  /// A short self-description shown on a profile screen.
+  ///
+  /// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+  /// person and must never be rendered as an "About" section; a dead write path
+  /// in the HR app mapped bio onto notes, and that mapping was wrong. See
+  /// tryrtylr/rtylr#875.
+  bio: string
+}
+
+message CreateStaffResponse {
+  id: int64
+}
+
+message GetStaffRequest {
+  id: int64 @gt(0)
+}
+
+message GetStaffResponse {
+  staff: Staff
+}
+
+message UpdateStaffBody {
+  department_id: int64? @required @gt(0)
+  /// Optional for the same reason as on create. Zero clears the reporting line.
+  manager_staff_id: int64
+  first_name: string @required
+  last_name: string @required
+  email: string @required @email
+  phone: string
+  role: string @required
+  employment_type: string @required
+  /// The current lifecycle state.
+  status: string @required
+  salary: float64 @gte(0)
+  hourly_rate: float64 @gte(0)
+  overtime_rate: float64 @gte(0)
+  /// Empty for anyone still employed, which is why this is not @required.
+  /// Requiring it made every update to an active employee invalid, and the
+  /// rejection happened client side, so the write vanished with no error.
+  end_date: string
+  address: string
+  /// Optional HR detail. Not every record has next of kin on file, and
+  /// blocking an unrelated field update over it is not the way to collect it.
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  /// App access, empty meaning none. Optional for the same reason: a caller
+  /// changing one field should not have to assert app access to do it.
+  apps: string
+  notes: string
+  /// A URL to the staff member's profile photo. Optional and unset by default:
+  /// consumers fall back to the hub account avatar, which is what Flow's profile
+  /// screen already does.
+  photo_url: string
+  /// A short self-description shown on a profile screen.
+  ///
+  /// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+  /// person and must never be rendered as an "About" section; a dead write path
+  /// in the HR app mapped bio onto notes, and that mapping was wrong. See
+  /// tryrtylr/rtylr#875.
+  bio: string
+}
+
+message UpdateStaffRequest {
+  id: int64 @gt(0)
+  body: UpdateStaffBody
+}
+
+message UpdateStaffResponse {
+  success: bool
+}
+
+message DeleteStaffRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteStaffResponse {
+  success: bool
+}
+
+message ClockInRequest {
+  staff_id: int64? @required @gt(0)
+}
+
+message ClockInResponse {
+  success: bool
+}
+
+message ClockOutRequest {
+  staff_id: int64? @required @gt(0)
+}
+
+message ClockOutResponse {
+  success: bool
+}
+
+/// DirectoryStaffEntry is the deliberately minimal projection of Staff shown
+/// in the company-wide directory. It never carries salary, hourly_rate,
+/// overtime_rate, address, or emergency_contact_* - those stay HR-admin-only
+/// regardless of caller, enforced here at the contract level rather than
+/// relying solely on runtime field-zeroing.
+message DirectoryStaffEntry {
+  id: int64
+  first_name: string
+  last_name: string
+  department_id: int64
+  role: string
+  employment_type: string
+  /// The current lifecycle state.
+  status: string
+  email: string
+  phone: string
+}
+
+message ListStaffDirectoryRequest {
+  page: int64? @required @gt(0) @query("page")
+  page_size: int64? @required @gt(0) @query("page_size")
+}
+
+message ListStaffDirectoryResponse {
+  staff: DirectoryStaffEntry[]
+  total: int64
+  page: int64
+  page_size: int64
+}

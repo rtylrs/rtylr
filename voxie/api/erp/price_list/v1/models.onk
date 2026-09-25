@@ -1,0 +1,37 @@
+package erp.price_list.v1
+
+message PriceList {
+  id: int64
+  owner_id: int64
+  name: string
+  currency: string
+  is_default: bool
+  created_at: string
+  updated_at: string
+}
+
+message CreatePriceListRequest {
+  name: string @required
+  currency: string
+  is_default: bool
+}
+
+message CreatePriceListResponse {
+  price_list_id: int64
+  message: string
+}
+
+message ListPriceListsRequest {
+  /// Maximum number of price lists to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of price lists to skip.
+  offset: int64 @query("offset") @encode(number)
+}
+
+message ListPriceListsResponse {
+  price_lists: PriceList[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
+}

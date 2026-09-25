@@ -1,0 +1,77 @@
+package hr.benefit.v1
+
+message BenefitPlan {
+  id: int64
+  owner_id: int64
+  name: string
+  type: string
+  provider: string
+  cost_employer: float64
+  cost_employee: float64
+  is_active: bool
+  created_at: string
+}
+
+message CreateBenefitRequest {
+  name: string @required
+  type: string
+  provider: string
+  cost_employer: float64
+  cost_employee: float64
+  is_active: bool
+}
+
+message CreateBenefitResponse {
+  id: int64
+  message: string
+}
+
+message ListBenefitsRequest {}
+
+message ListBenefitsResponse {
+  plans: BenefitPlan[]
+}
+
+message BenefitEnrollment {
+  /// id is the enrollment record's unique identifier.
+  id: int64
+  /// owner_id is the business that owns the underlying BenefitPlan.
+  owner_id: int64
+  /// employee_id is the enrolled employee; always resolved from auth context, never client-supplied.
+  employee_id: int64
+  /// plan_id references the BenefitPlan this enrollment is for.
+  plan_id: int64
+  /// status is the enrollment lifecycle state (active | cancelled).
+  status: string
+  /// enrolled_at is when the employee enrolled, in ISO-8601 format.
+  enrolled_at: string
+  /// cancelled_at is when the enrollment was cancelled, in ISO-8601 format; absent while the enrollment is active.
+  cancelled_at: string?
+}
+
+message EnrollInBenefitRequest {
+  /// plan_id is the BenefitPlan to enroll in. The employee is resolved from auth context, not client-supplied.
+  plan_id: int64? @required
+}
+
+message EnrollInBenefitResponse {
+  /// enrollment is the created BenefitEnrollment record.
+  enrollment: BenefitEnrollment
+}
+
+message ListMyBenefitEnrollmentsRequest {
+  /// page is the current result page.
+  page: int32 @query("page")
+  /// limit is the maximum number of records to return.
+  limit: int32 @query("limit")
+  /// sort_by is the field to sort results by.
+  sort_by: string @query("sort_by")
+  /// sort_dir is the sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
+
+message ListMyBenefitEnrollmentsResponse {
+  /// enrollments are the caller's own BenefitEnrollment records.
+  enrollments: BenefitEnrollment[]
+  pagination: PaginationResponse
+}

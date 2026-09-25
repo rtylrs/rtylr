@@ -1,0 +1,16 @@
+package flow.presence.v1
+
+message PresenceEntry {
+  employee_id: string
+  user_id: string
+  first_name: string?
+  last_name: string?
+  status: string
+}
+
+message GetPresenceRequest {}
+
+message GetPresenceResponse {
+  presence: PresenceEntry[]
+  date: string
+}

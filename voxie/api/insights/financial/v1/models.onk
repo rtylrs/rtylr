@@ -1,0 +1,98 @@
+package insights.financial.v1
+
+message ExpenseAnalytics {
+  /// total is the total number of matching records.
+  total: float64
+  /// change is the change value for this contract.
+  change: float64
+  /// by_category is the by category value for this contract.
+  by_category: ExpenseByCategory[]
+  /// trend is the trend value for this contract.
+  trend: ExpensePoint[]
+}
+
+message ExpenseByCategory {
+  /// category is the category value for this contract.
+  category: string
+  /// amount is the amount value for this contract.
+  amount: float64
+  /// percentage is the percentage value for this contract.
+  percentage: float64
+  /// budget is the budget value for this contract.
+  budget: float64
+  /// utilization is the utilization value for this contract.
+  utilization: float64
+}
+
+message ExpensePoint {
+  /// date is the date value for this contract.
+  date: string
+  /// amount is the amount value for this contract.
+  amount: float64
+}
+
+message InvoiceAgingBucket {
+  /// bucket is the bucket value for this contract.
+  /// current, 1-30, 31-60, 61-90, 90+
+  bucket: string
+  /// count is the count value for this contract.
+  count: int32
+  /// amount is the amount value for this contract.
+  amount: float64
+}
+
+message InvoiceAging {
+  /// total_outstanding is the total outstanding value for this contract.
+  total_outstanding: float64
+  /// buckets is the buckets value for this contract.
+  buckets: InvoiceAgingBucket[]
+}
+
+message CashFlowAnalytics {
+  /// inflows is the inflows value for this contract.
+  inflows: float64
+  /// outflows is the outflows value for this contract.
+  outflows: float64
+  /// net is the net value for this contract.
+  net: float64
+  /// trend is the trend value for this contract.
+  trend: CashFlowPoint[]
+}
+
+message CashFlowPoint {
+  /// date is the date value for this contract.
+  date: string
+  /// inflow is the inflow value for this contract.
+  inflow: float64
+  /// outflow is the outflow value for this contract.
+  outflow: float64
+  /// net is the net value for this contract.
+  net: float64
+}
+
+message GetCashFlowAnalyticsRequest {
+  /// period is the period value for this contract.
+  period: string @query("period")
+}
+
+message GetCashFlowAnalyticsResponse {
+  /// analytics is the analytics value for this contract.
+  analytics: CashFlowAnalytics
+}
+
+message GetExpenseAnalyticsRequest {
+  /// period is the period value for this contract.
+  period: string @query("period")
+}
+
+message GetExpenseAnalyticsResponse {
+  /// analytics is the analytics value for this contract.
+  analytics: ExpenseAnalytics
+}
+
+message GetInvoiceAgingRequest {}
+
+message GetInvoiceAgingResponse {
+  /// aging is the aging value for this contract.
+  aging: InvoiceAging
+}

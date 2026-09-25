@@ -1,0 +1,13 @@
+package pos.session.v1
+
+/// SessionService defines POS register session endpoints.
+service SessionService {
+  /// Returns register sessions for the active business.
+  listSessions(ListSessionsRequest) -> ListSessionsResponse @get("/sessions")
+
+  /// Opens a new register session.
+  openSession(OpenSessionRequest) -> OpenSessionResponse @post("/sessions/open")
+
+  /// Closes an open register session.
+  closeSession(CloseSessionRequest) -> CloseSessionResponse @post("/sessions/{id}/close")
+}

@@ -1,0 +1,16 @@
+package pos.gift_card.v1
+
+/// GiftCardService defines POS gift card endpoints.
+service GiftCardService {
+  /// Returns gift cards for the active business.
+  listGiftCards(ListGiftCardsRequest) -> ListGiftCardsResponse @get("/gift-cards")
+
+  /// Issues a new gift card.
+  createGiftCard(CreateGiftCardRequest) -> CreateGiftCardResponse @post("/gift-cards")
+
+  /// Redeems an amount from a gift card by code.
+  redeemGiftCard(RedeemGiftCardRequest) -> RedeemGiftCardResponse @post("/gift-cards/{code}/redeem")
+
+  /// Returns a gift card by code.
+  getGiftCardByCode(GetGiftCardByCodeRequest) -> GetGiftCardByCodeResponse @get("/gift-cards/{code}")
+}

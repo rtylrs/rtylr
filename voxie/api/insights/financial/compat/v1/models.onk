@@ -1,0 +1,16 @@
+package insights.financial.compat.v1
+
+message CashFlowPoint {
+  date: string
+  inflow_minor_units: float64
+  outflow_minor_units: float64
+}
+
+message GetCashFlowRequest {
+  from_date: string? @query("from")
+  to_date: string? @query("to")
+}
+
+message GetCashFlowResponse {
+  series: CashFlowPoint[]
+}

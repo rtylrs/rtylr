@@ -1,0 +1,22 @@
+package pos.loyalty.v1
+
+/// LoyaltyService defines POS loyalty program endpoints.
+service LoyaltyService {
+  /// Returns the loyalty program configuration for the active business.
+  getLoyaltyConfig(GetLoyaltyConfigRequest) -> GetLoyaltyConfigResponse @get("/config")
+
+  /// Updates the loyalty program configuration.
+  updateLoyaltyConfig(UpdateLoyaltyConfigRequest) -> UpdateLoyaltyConfigResponse @put("/config")
+
+  /// Returns loyalty transactions, optionally filtered by customer.
+  listLoyaltyTransactions(ListLoyaltyTransactionsRequest) -> ListLoyaltyTransactionsResponse @get("/transactions")
+
+  /// Records points earned by a customer for an order.
+  earnPoints(EarnPointsRequest) -> EarnPointsResponse @post("/earn")
+
+  /// Redeems loyalty points for a customer.
+  redeemPoints(RedeemPointsRequest) -> RedeemPointsResponse @post("/redeem")
+
+  /// Returns the loyalty points balance for a customer.
+  getLoyaltyBalance(GetLoyaltyBalanceRequest) -> GetLoyaltyBalanceResponse @get("/balance")
+}

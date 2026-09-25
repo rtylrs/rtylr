@@ -1,0 +1,334 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /flow/cycle/v2/cycles:
+        get:
+            tags:
+                - CycleService
+            summary: listCycles
+            operationId: CycleService_listCycles
+            parameters:
+                - name: project_id
+                  in: query
+                  description: project_id lists the cycles of one project.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: project_id lists the cycles of one project.
+                - name: page
+                  in: query
+                  description: The current result page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                - name: limit
+                  in: query
+                  description: The maximum number of records to return.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                - name: sort_by
+                  in: query
+                  description: The field to sort results by.
+                  required: false
+                  schema:
+                    type: string
+                    description: The field to sort results by.
+                - name: sort_dir
+                  in: query
+                  description: The sort direction ("asc" or "desc").
+                  required: false
+                  schema:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.cycle.v2.ListCyclesResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - CycleService
+            summary: createCycle
+            operationId: CycleService_createCycle
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/flow.cycle.v2.CreateCycleRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.cycle.v2.CreateCycleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /flow/cycle/v2/cycles/{id}:
+        put:
+            tags:
+                - CycleService
+            summary: updateCycle
+            operationId: CycleService_updateCycle
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                status:
+                                    type: string
+                                end_date:
+                                    type: string
+                            required:
+                                - name
+                                - status
+                                - end_date
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/flow.cycle.v2.UpdateCycleResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        flow.cycle.v2.ListCyclesRequest:
+            type: object
+            properties:
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: project_id lists the cycles of one project.
+                page:
+                    type: integer
+                    format: int32
+                    description: The current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: The maximum number of records to return.
+                sort_by:
+                    type: string
+                    description: The field to sort results by.
+                sort_dir:
+                    type: string
+                    description: The sort direction ("asc" or "desc").
+            required:
+                - project_id
+                - page
+                - limit
+                - sort_by
+                - sort_dir
+        flow.cycle.v2.ListCyclesResponse:
+            type: object
+            properties:
+                cycles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/flow.cycle.v2.Cycle'
+                pagination:
+                    allOf:
+                        - $ref: '#/components/schemas/common.pagination.v1.PaginationResponse'
+            required:
+                - cycles
+                - pagination
+        flow.cycle.v2.Cycle:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the resource.
+                project_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        project_id is the project this cycle belongs to. Always set in v2;
+                        workspace-era cycles were migrated onto their filtered project or archived.
+                name:
+                    type: string
+                    description: name is the name value for this contract.
+                start_date:
+                    type: string
+                    description: start_date is the start date value for this contract.
+                end_date:
+                    type: string
+                    description: end_date is the end date value for this contract.
+                status:
+                    type: string
+                    description: status is the current lifecycle state.
+                scope:
+                    type: integer
+                    format: int32
+                    description: scope is the total task count in the cycle. Display projection.
+                completed:
+                    type: integer
+                    format: int32
+                    description: completed is how many of those tasks are done. Display projection.
+            required:
+                - id
+                - project_id
+                - name
+                - start_date
+                - end_date
+                - status
+                - scope
+                - completed
+            description: |-
+                Cycle is a sprint-style time box scoped to ONE project in v2. v1 attached
+                cycles to workspaces with an optional project filter; the removal of
+                workspaces makes the project the only sensible owner.
+        common.pagination.v1.PaginationResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                    description: page is the current result page.
+                limit:
+                    type: integer
+                    format: int32
+                    description: limit is the maximum number of records to return.
+                total:
+                    type: integer
+                    format: int32
+                    description: total is the total number of matching records.
+                total_pages:
+                    type: integer
+                    format: int32
+                    description: total_pages is the total pages value for this contract.
+                has_next:
+                    type: boolean
+                    description: has_next is the has next value for this contract.
+                has_prev:
+                    type: boolean
+                    description: has_prev is the has prev value for this contract.
+            required:
+                - page
+                - limit
+                - total
+                - total_pages
+                - has_next
+                - has_prev
+            description: Standard pagination response metadata.
+        flow.cycle.v2.CreateCycleRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                project_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                start_date:
+                    type: string
+                end_date:
+                    type: string
+            required:
+                - name
+                - project_id
+                - start_date
+                - end_date
+        flow.cycle.v2.CreateCycleResponse:
+            type: object
+            properties:
+                cycle:
+                    allOf:
+                        - $ref: '#/components/schemas/flow.cycle.v2.Cycle'
+            required:
+                - cycle
+        flow.cycle.v2.UpdateCycleRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                status:
+                    type: string
+                end_date:
+                    type: string
+            required:
+                - id
+                - name
+                - status
+                - end_date
+        flow.cycle.v2.UpdateCycleResponse:
+            type: object
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CycleService

@@ -1,0 +1,75 @@
+package pos.table.v1
+
+/// Table is a POS floor table.
+message Table {
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  location_id: int64?
+  label: string
+  seats: int32
+  /// status is the current lifecycle state.
+  status: string
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+message ListTablesRequest {}
+
+message ListTablesResponse {
+  tables: Table[]
+}
+
+message CreateTableRequest {
+  location_id: int64?
+  label: string @required
+  seats: int32? @required @gt(0)
+}
+
+message CreateTableResponse {
+  table_id: int64
+  message: string
+}
+
+message UpdateTableBody {
+  location_id: int64?
+  label: string @required
+  seats: int32? @required @gt(0)
+  /// status is the current lifecycle state.
+  status: string @required
+}
+
+message UpdateTableRequest {
+  id: int64 @gt(0)
+  /// body carries updatable table fields bound from the HTTP payload.
+  body: UpdateTableBody
+}
+
+message UpdateTableResponse {
+  message: string
+}
+
+message UpdateTableStatusBody {
+  /// status is the current lifecycle state.
+  status: string @required
+}
+
+message UpdateTableStatusRequest {
+  id: int64 @gt(0)
+  /// body carries the new table status bound from the HTTP payload.
+  body: UpdateTableStatusBody
+}
+
+message UpdateTableStatusResponse {
+  message: string
+}
+
+message DeleteTableRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteTableResponse {
+  message: string
+}

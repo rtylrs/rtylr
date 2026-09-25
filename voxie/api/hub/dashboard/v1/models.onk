@@ -1,0 +1,12 @@
+package hub.dashboard.v1
+
+message GetKPIsRequest {}
+
+message GetKPIsResponse {
+  revenue: float64
+  order_count: int64
+  staff_count: int64
+  customer_count: int64
+  low_stock_count: int64
+  active_apps: int64
+}

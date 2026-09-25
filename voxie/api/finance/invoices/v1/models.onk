@@ -1,0 +1,356 @@
+package finance.invoices.v1
+
+/// InvoiceItem is a single line item on an invoice.
+message InvoiceItem {
+  /// description is the description value for this contract.
+  description: string
+  /// quantity is the quantity value for this contract.
+  quantity: float64
+  /// unit is the unit value for this contract.
+  unit: string
+  /// unit_price is the unit price value for this contract.
+  unit_price: float64
+  /// tax_rate is the tax rate value for this contract.
+  tax_rate: float64
+  /// discount_pct is the discount pct value for this contract.
+  discount_pct: float64
+  /// sort_order is the sort order value for this contract.
+  sort_order: int64
+  /// total is the total number of matching records.
+  total: float64
+}
+
+/// InvoiceSummary is a compact invoice row for list views.
+message InvoiceSummary {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// invoice_number is the invoice number value for this contract.
+  invoice_number: string
+  /// client_name is the client name value for this contract.
+  client_name: string
+  /// status is the current lifecycle state.
+  status: string
+  /// issue_date is the issue date value for this contract.
+  issue_date: string
+  /// due_date is the due date value for this contract.
+  due_date: string
+  /// paid_date is the paid date value for this contract.
+  paid_date: string
+  /// currency is the currency value for this contract.
+  currency: string
+  /// total is the total number of matching records.
+  total: float64
+  /// amount_paid is the amount paid value for this contract.
+  amount_paid: float64
+  /// amount_due is the amount due value for this contract.
+  amount_due: float64
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+/// BillableTimeEntry is approved billable HR time that has not been linked to
+/// a finance invoice yet.
+message BillableTimeEntry {
+  /// id is the unique identifier for the time entry.
+  id: int64
+  /// employee_id identifies the employee who logged the time.
+  employee_id: int64
+  /// project_id identifies the optional Flow project.
+  project_id: int64?
+  /// task_id identifies the optional Flow task.
+  task_id: int64?
+  /// date is the day on which the time was logged.
+  date: string
+  /// duration_minutes is the approved billable duration.
+  duration_minutes: int64
+  /// description is the time entry description.
+  description: string
+  /// is_billable is always true for this response.
+  is_billable: bool
+  /// status is always approved for this response.
+  status: string
+  /// source identifies the system that recorded the time.
+  source: string
+}
+
+/// InvoiceDetail is the full invoice record.
+message InvoiceDetail {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  /// customer_id links to the CRM customer this invoice was issued to; absent
+  /// on invoices created before customers were linked, and on one-off invoices
+  /// for a party that is not a customer record. The client_* fields stay the
+  /// values printed on the document at issue time and are deliberately not
+  /// re-derived from the customer record.
+  customer_id: int64?
+  /// invoice_number is the invoice number value for this contract.
+  invoice_number: string
+  /// client_name is the client name value for this contract.
+  client_name: string
+  /// client_email is the client email value for this contract.
+  client_email: string
+  /// client_address is the client address value for this contract.
+  client_address: string
+  /// client_tax_id is the client tax id value for this contract.
+  client_tax_id: string
+  /// status is the current lifecycle state.
+  status: string
+  /// issue_date is the issue date value for this contract.
+  issue_date: string
+  /// due_date is the due date value for this contract.
+  due_date: string
+  /// paid_date is the paid date value for this contract.
+  paid_date: string
+  /// currency is the currency value for this contract.
+  currency: string
+  /// subtotal is the subtotal value for this contract.
+  subtotal: float64
+  /// discount_type is the discount type value for this contract.
+  discount_type: string
+  /// discount_value is the discount value value for this contract.
+  discount_value: float64
+  /// discount_amount is the discount amount value for this contract.
+  discount_amount: float64
+  /// tax_rate is the tax rate value for this contract.
+  tax_rate: float64
+  /// tax_amount is the tax amount value for this contract.
+  tax_amount: float64
+  /// total is the total number of matching records.
+  total: float64
+  /// amount_paid is the amount paid value for this contract.
+  amount_paid: float64
+  /// amount_due is the amount due value for this contract.
+  amount_due: float64
+  /// notes is the notes value for this contract.
+  notes: string
+  /// terms is the terms value for this contract.
+  terms: string
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+  /// items is the items value for this contract.
+  items: InvoiceItem[]
+}
+
+/// Payment is a recorded payment applied to an invoice.
+message Payment {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// amount is the amount value for this contract.
+  amount: float64
+  /// currency is the currency value for this contract.
+  currency: string
+  /// payment_date is the payment date value for this contract.
+  payment_date: string
+  /// method is the method value for this contract.
+  method: string
+  /// reference is the reference value for this contract.
+  reference: string
+  /// notes is the notes value for this contract.
+  notes: string
+}
+
+/// RecordPaymentResponsePayload describes a payment just recorded against an invoice.
+message RecordPaymentResponsePayload {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// invoice_id is the invoice id value for this contract.
+  invoice_id: int64
+  /// amount is the amount value for this contract.
+  amount: float64
+  /// currency is the currency value for this contract.
+  currency: string
+  /// payment_date is the payment date value for this contract.
+  payment_date: string
+  /// method is the method value for this contract.
+  method: string
+  /// reference is the reference value for this contract.
+  reference: string
+  /// notes is the notes value for this contract.
+  notes: string
+}
+
+message CreateInvoiceRequest {
+  /// client_name is the client name value for this contract.
+  client_name: string
+  /// client_email is the client email value for this contract.
+  client_email: string @email
+  /// client_address is the client address value for this contract.
+  client_address: string
+  /// client_tax_id is the client tax id value for this contract.
+  client_tax_id: string
+  /// customer_id is the CRM customer to issue to. When supplied the server
+  /// snapshots that customer's name, email, address and tax id onto the
+  /// invoice and the client_* fields above may be omitted. When absent the
+  /// server requires client_name and client_email, which is the existing
+  /// behaviour. The server must verify the referenced customer belongs to
+  /// the caller's business before accepting the link.
+  customer_id: int64?
+  /// issue_date is the issue date value for this contract.
+  issue_date: string @required
+  /// due_date is the due date value for this contract.
+  due_date: string @required
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// discount_type is the discount type value for this contract.
+  discount_type: string @required
+  /// discount_value is the discount value value for this contract.
+  discount_value: float64 @gte(0)
+  /// tax_rate is the tax rate value for this contract.
+  tax_rate: float64 @gte(0)
+  /// notes is the notes value for this contract.
+  notes: string
+  /// terms is the terms value for this contract.
+  terms: string
+  /// items is the items value for this contract.
+  items: InvoiceItem[] @min_items(1)
+}
+
+message CreateInvoiceResponse {
+  /// invoice is the invoice value for this contract.
+  invoice: InvoiceDetail
+}
+
+message DeleteInvoiceRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+}
+
+message DeleteInvoiceResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message GetInvoiceRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+}
+
+message GetInvoiceResponse {
+  /// invoice is the invoice value for this contract.
+  invoice: InvoiceDetail
+  /// payments is the payments value for this contract.
+  payments: Payment[]
+}
+
+message ListInvoicesRequest {
+  /// status filters invoices by lifecycle state.
+  status: string @query("status")
+  /// search filters by customer or invoice number.
+  search: string @query("search")
+  /// customer_id filters by the linked CRM customer; absent to include
+  /// invoices for all customers and invoices with no customer link.
+  customer_id: int64? @query("customer_id")
+  /// date_from is the inclusive start date filter.
+  date_from: string @query("date_from")
+  /// date_to is the inclusive end date filter.
+  date_to: string @query("date_to")
+  /// page is the one-based page number to return.
+  page: int64 @query("page") @encode(number)
+  /// page_size is the maximum number of invoices to return.
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListInvoicesResponse {
+  /// invoices is the invoices value for this contract.
+  invoices: InvoiceSummary[]
+  /// page is the current result page.
+  page: int64 @encode(number)
+  /// page_size is the number of records requested per page.
+  page_size: int64 @encode(number)
+  /// has_more indicates whether additional pages are available.
+  has_more: bool
+}
+
+message ListBillableTimeEntriesRequest {
+  /// page is the one-based page number to return.
+  page: int64 @query("page") @encode(number)
+  /// page_size is the maximum number of time entries to return.
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListBillableTimeEntriesResponse {
+  /// entries contains approved billable time not yet linked to an invoice.
+  entries: BillableTimeEntry[]
+  /// total is the number of matching time entries.
+  total: int64 @encode(number)
+  /// total_minutes is the sum of matching entry durations.
+  total_minutes: int64 @encode(number)
+  /// page is the current result page.
+  page: int64 @encode(number)
+  /// page_size is the number of records requested per page.
+  page_size: int64 @encode(number)
+  /// has_more indicates whether additional pages are available.
+  has_more: bool
+}
+
+message SendInvoiceRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+}
+
+message SendInvoiceResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message UpdateInvoiceBody {
+  /// client_name is the client name value for this contract.
+  client_name: string @required
+  /// client_email is the client email value for this contract.
+  client_email: string @required @email
+  /// client_address is the client address value for this contract.
+  client_address: string
+  /// client_tax_id is the client tax id value for this contract.
+  client_tax_id: string
+  /// issue_date is the issue date value for this contract.
+  issue_date: string @required
+  /// due_date is the due date value for this contract.
+  due_date: string @required
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// discount_type is the discount type value for this contract.
+  discount_type: string @required
+  /// discount_value is the discount value value for this contract.
+  discount_value: float64 @gte(0)
+  /// tax_rate is the tax rate value for this contract.
+  tax_rate: float64 @gte(0)
+  /// notes is the notes value for this contract.
+  notes: string
+  /// terms is the terms value for this contract.
+  terms: string
+  /// items is the items value for this contract.
+  items: InvoiceItem[] @min_items(1)
+}
+
+message UpdateInvoiceRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+  /// body carries updatable invoice fields bound from the HTTP payload.
+  body: UpdateInvoiceBody
+}
+
+message UpdateInvoiceResponse {
+  /// invoice is the invoice value for this contract.
+  invoice: InvoiceDetail
+}
+
+message UpdateInvoiceStatusBody {
+  /// status is the current lifecycle state.
+  status: string @required
+}
+
+message UpdateInvoiceStatusRequest {
+  /// id is the unique identifier for the resource.
+  id: int64 @gt(0)
+  /// body carries status update fields bound from the HTTP payload.
+  body: UpdateInvoiceStatusBody
+}
+
+message UpdateInvoiceStatusResponse {
+  /// message is a human-readable result message.
+  message: string
+}

@@ -1,0 +1,357 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/menu-item/v1/menu-items:
+        get:
+            tags:
+                - MenuItemService
+            summary: listMenuItems
+            description: Returns menu items for the active business.
+            operationId: MenuItemService_listMenuItems
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.menu_item.v1.ListMenuItemsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - MenuItemService
+            summary: createMenuItem
+            description: Creates a new menu item.
+            operationId: MenuItemService_createMenuItem
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/pos.menu_item.v1.CreateMenuItemRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.menu_item.v1.CreateMenuItemResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/menu-item/v1/menu-items/public:
+        get:
+            tags:
+                - MenuItemService
+            summary: listPublicMenuItems
+            description: Returns menu items for anonymous public menu surfaces.
+            operationId: MenuItemService_listPublicMenuItems
+            parameters:
+                - name: business_id
+                  in: query
+                  required: false
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                - name: location_id
+                  in: query
+                  description: Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.menu_item.v1.ListPublicMenuItemsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /pos/menu-item/v1/menu-items/{id}:
+        put:
+            tags:
+                - MenuItemService
+            summary: updateMenuItem
+            description: Updates an existing menu item.
+            operationId: MenuItemService_updateMenuItem
+            parameters:
+                - name: id
+                  in: path
+                  description: id is the unique identifier for the menu item.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the menu item.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            allOf:
+                                - $ref: '#/components/schemas/pos.menu_item.v1.UpdateMenuItemBody'
+                            description: body carries updatable menu item fields bound from the HTTP payload.
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.menu_item.v1.UpdateMenuItemResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.menu_item.v1.ListMenuItemsRequest:
+            type: object
+        pos.menu_item.v1.ListMenuItemsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
+            required:
+                - items
+        pos.menu_item.v1.MenuItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: owner_id identifies the tenant that owns the resource.
+                category_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                name:
+                    type: string
+                sku:
+                    type: string
+                sale_price:
+                    type: number
+                    format: double
+                is_active:
+                    type: boolean
+                created_at:
+                    type: string
+                    description: created_at is when the record was created.
+                updated_at:
+                    type: string
+                    description: updated_at is when the record was last updated.
+                image_url:
+                    type: string
+                    description: Public storefront image for the menu item.
+                category:
+                    type: string
+                    description: Display category name for the menu item.
+                barcode:
+                    type: string
+                    description: Scanned barcode value for the menu item.
+                description:
+                    type: string
+                    description: Customer-facing menu item description.
+                tax_rate:
+                    type: number
+                    format: double
+                    description: Sale tax rate for the menu item.
+                stock:
+                    type: number
+                    format: double
+                    description: Current tracked stock quantity for the menu item.
+                product_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        product_id is the ERP product this item is sold from; absent for items
+                        that are not stocked as a single product. When it is absent, cost and
+                        ERP-side stock for this item are unknown rather than zero. The server
+                        must verify the referenced product belongs to the caller's business.
+                unit_cost:
+                    type: number
+                    format: double
+                    description: |-
+                        unit_cost is the cost of one unit at the time of the read, copied from
+                        the linked ERP product. Absent when product_id is absent. Reported for
+                        display and margin only: the authoritative value is the ERP product's.
+            required:
+                - id
+                - owner_id
+                - category_id
+                - name
+                - sku
+                - sale_price
+                - is_active
+                - created_at
+                - updated_at
+                - image_url
+                - category
+                - barcode
+                - description
+                - tax_rate
+                - stock
+            description: MenuItem is a sellable item on the POS menu.
+        pos.menu_item.v1.ListPublicMenuItemsRequest:
+            type: object
+            properties:
+                business_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Optional. Accepted for multi-location menu URLs; ignored until per-location stock scoping ships.
+            required:
+                - business_id
+                - location_id
+        pos.menu_item.v1.ListPublicMenuItemsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.menu_item.v1.MenuItem'
+            required:
+                - items
+        pos.menu_item.v1.CreateMenuItemRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                sku:
+                    type: string
+                sale_price:
+                    type: number
+                    minimum: 0
+                    format: double
+            required:
+                - name
+                - sku
+                - sale_price
+        pos.menu_item.v1.CreateMenuItemResponse:
+            type: object
+            properties:
+                item_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                message:
+                    type: string
+            required:
+                - item_id
+                - message
+        pos.menu_item.v1.UpdateMenuItemRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: id is the unique identifier for the menu item.
+                body:
+                    allOf:
+                        - $ref: '#/components/schemas/pos.menu_item.v1.UpdateMenuItemBody'
+                    description: body carries updatable menu item fields bound from the HTTP payload.
+            required:
+                - id
+                - body
+        pos.menu_item.v1.UpdateMenuItemBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Display name for the menu item.
+                sale_price:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: Sell price for the menu item.
+                is_active:
+                    type: boolean
+                    description: Controls whether the item can be sold.
+                stock:
+                    type: number
+                    minimum: 0
+                    format: double
+                    description: Current tracked stock quantity for the menu item.
+            required:
+                - name
+                - sale_price
+                - is_active
+                - stock
+        pos.menu_item.v1.UpdateMenuItemResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: MenuItemService
+      description: MenuItemService defines POS menu item endpoints.

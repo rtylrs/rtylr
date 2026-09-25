@@ -1,0 +1,59 @@
+package hub.team.access.v1
+
+message AccessRequest {
+  id: int64
+  /// Identifies the user who requested access.
+  user_id: int64
+  app: string
+  /// Requested normalized role identifiers.
+  role_ids: string[]
+  /// Requested resource scopes.
+  scopes: hub.user.v1.RoleScope[]
+  /// Optional business reason for the request.
+  reason: string?
+  /// Current request lifecycle status.
+  status: string
+  /// User who approved the request, when approved.
+  approver_id: int64?
+  /// Approval timestamp, when approved.
+  approved_at: string?
+  requester_name: string
+  requester_email: string
+  /// When the record was created.
+  created_at: string
+}
+
+message RequestAccessRequest {
+  app: string @required
+  /// Requested normalized role identifiers.
+  role_ids: string[]
+  /// Requested resource scopes.
+  scopes: hub.user.v1.RoleScope[]
+  /// Optional business reason for the request.
+  reason: string?
+}
+
+message RequestAccessResponse {
+  message: string
+}
+
+message ListAccessRequestsRequest {}
+
+message ListAccessRequestsResponse {
+  requests: AccessRequest[]
+}
+
+message ApproveAccessRequestRequest {
+  id: int64 @gt(0)
+  /// Identifies the user being granted access.
+  user_id: int64? @required @gt(0)
+  app: string @required
+  /// Approved normalized role identifiers.
+  role_ids: string[]
+  /// Approved resource scopes.
+  scopes: hub.user.v1.RoleScope[]
+}
+
+message ApproveAccessRequestResponse {
+  message: string
+}

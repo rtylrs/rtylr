@@ -1,0 +1,104 @@
+package erp.purchase_order.v1
+
+message PurchaseOrderItem {
+  id: int64
+  purchase_order_id: int64
+  product_id: int64
+  quantity_ordered: float64
+  quantity_received: float64
+  unit_cost: float64
+  total_cost: float64
+}
+
+message PurchaseOrder {
+  id: int64
+  owner_id: int64
+  supplier_id: int64
+  po_number: string
+  /// Current lifecycle state.
+  status: string
+  subtotal: float64
+  tax_amount: float64
+  total: float64
+  expected_delivery: string?
+  received_at: string?
+  notes: string
+  created_by: int64
+  /// When the record was created.
+  created_at: string
+  /// When the record was last updated.
+  updated_at: string
+  items: PurchaseOrderItem[]
+}
+
+message CreatePurchaseOrderItemRequest {
+  product_id: int64? @required @gt(0)
+  quantity_ordered: float64 @gte(0)
+  unit_cost: float64 @gte(0)
+}
+
+message ListPurchaseOrdersRequest {
+  /// Filters purchase orders by lifecycle state.
+  status: string @query("status")
+  /// The 1-based page number.
+  page: int32 @query("page")
+  /// The number of rows to return.
+  page_size: int32 @query("page_size")
+}
+
+message ListPurchaseOrdersResponse {
+  purchase_orders: PurchaseOrder[]
+  /// True when another page is available.
+  has_more: bool
+  /// The returned 1-based page number.
+  page: int32
+  /// The returned page size.
+  page_size: int32
+}
+
+message CreatePurchaseOrderRequest {
+  supplier_id: int64? @required @gt(0)
+  po_number: string @required
+  tax_amount: float64 @gte(0)
+  expected_delivery: string @required
+  notes: string
+  items: CreatePurchaseOrderItemRequest[] @min_items(1)
+}
+
+message CreatePurchaseOrderResponse {
+  purchase_order_id: int64
+  /// A human-readable result message.
+  message: string
+}
+
+message GetPurchaseOrderRequest {
+  id: int64 @gt(0)
+}
+
+message GetPurchaseOrderResponse {
+  purchase_order: PurchaseOrder
+}
+
+message UpdatePurchaseOrderStatusBody {
+  /// Current lifecycle state.
+  status: string @required
+  /// Per-line quantities submitted by the receiving operator.
+  items: PurchaseOrderItem[]
+}
+
+message UpdatePurchaseOrderStatusRequest {
+  id: int64 @gt(0)
+  body: UpdatePurchaseOrderStatusBody
+}
+
+message UpdatePurchaseOrderStatusResponse {
+  message: string
+}
+
+message ApprovePurchaseOrderRequest {
+  id: int64 @gt(0)
+}
+
+message ApprovePurchaseOrderResponse {
+  message: string
+}

@@ -1,0 +1,25 @@
+package recruit.compat.v1
+
+message EmptyRequest {}
+
+message JsonResponse {
+  data: json @unwrap
+}
+
+message QueryRequest {
+  slug: string? @query("slug")
+  career_slug: string? @query("career_slug")
+  career_id: int32? @query("career_id")
+  submission_id: int32? @query("submission_id")
+  status: string? @query("status")
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+}
+
+message BodyRequest {
+  body: json
+}
+
+message IdQueryRequest {
+  id: string @query("id")
+}

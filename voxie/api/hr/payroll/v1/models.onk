@@ -1,0 +1,48 @@
+package hr.payroll.v1
+
+message PayrollRecord {
+  id: int64 @encode(number)
+  owner_id: int64 @encode(number)
+  staff_id: int64 @encode(number)
+  period_start: string
+  period_end: string
+  period_label: string
+  regular_hours: float64
+  overtime_hours: float64
+  base_pay: float64
+  overtime_pay: float64
+  bonuses: float64
+  deductions: float64
+  tax_withheld: float64
+  net_pay: float64
+  status: string
+  paid_at: string
+  notes: string
+  created_at: string
+}
+
+message ListPayrollRequest {
+  period_label: string @query("period_label")
+}
+
+message ListPayrollResponse {
+  records: PayrollRecord[]
+}
+
+message RunPayrollRequest {
+  period_start: string @required
+  period_end: string @required
+  period_label: string @required
+}
+
+message RunPayrollResponse {
+  records_created: int32
+}
+
+message MarkPayrollPaidRequest {
+  id: int64 @gt(0) @encode(number)
+}
+
+message MarkPayrollPaidResponse {
+  success: bool
+}

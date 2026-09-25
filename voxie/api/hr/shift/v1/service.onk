@@ -1,0 +1,34 @@
+package hr.shift.v1
+
+/// ShiftService defines HR shift and roster endpoints.
+service ShiftService {
+  /// Returns shifts with optional filters.
+  listShifts(ListShiftsRequest) -> ListShiftsResponse @get("/shifts")
+
+  /// Creates a new shift.
+  createShift(CreateShiftRequest) -> CreateShiftResponse @post("/shifts")
+
+  /// Updates an existing shift.
+  updateShift(UpdateShiftRequest) -> UpdateShiftResponse @put("/shifts")
+
+  /// Deletes a shift.
+  deleteShift(DeleteShiftRequest) -> DeleteShiftResponse @delete("/shifts")
+
+  /// Assigns an employee to a shift.
+  createShiftAssignment(CreateShiftAssignmentRequest) -> CreateShiftAssignmentResponse @post("/assignments")
+
+  /// Returns the shift roster for a location and week.
+  getRoster(GetRosterRequest) -> GetRosterResponse @get("/roster/{location_id}")
+
+  /// Publishes the roster for a week.
+  publishRoster(PublishRosterRequest) -> PublishRosterResponse @post("/roster/publish")
+
+  /// Returns staff availability windows with optional filters.
+  listAvailability(ListAvailabilityRequest) -> ListAvailabilityResponse @get("/availability")
+
+  /// Creates or updates one staff availability window.
+  setAvailability(SetAvailabilityRequest) -> SetAvailabilityResponse @post("/availability")
+
+  /// Deletes a staff availability window.
+  deleteAvailability(DeleteAvailabilityRequest) -> DeleteAvailabilityResponse @delete("/availability/{id}")
+}

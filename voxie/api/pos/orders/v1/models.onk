@@ -1,0 +1,223 @@
+package pos.orders.v1
+
+// ── Shared Payloads ───────────────────────────────────────────────
+
+message OrderItem {
+  id: int64
+  order_id: int64
+  menu_item_id: int64
+  name: string
+  sku: string
+  quantity: float64
+  unit_price: float64
+  discount_pct: float64
+  discount_amount: float64
+  tax_rate: float64
+  total: float64
+  notes: string
+  /// status is the current lifecycle state.
+  status: string
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message Order {
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  session_id: int64
+  table_id: int64
+  location_id: int64
+  order_number: string
+  type: string
+  /// status is the current lifecycle state.
+  status: string
+  customer_id: int64
+  customer_name: string
+  staff_id: int64
+  subtotal: float64
+  discount_amount: float64
+  tax_amount: float64
+  total: float64
+  payment_method: string
+  payment_status: string
+  amount_paid: float64
+  change_due: float64
+  notes: string
+  kitchen_notes: string
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+  paid_at: string
+  items: OrderItem[]
+}
+
+// ── Create Order ──────────────────────────────────────────────────
+
+message CreateOrderItemInput {
+  menu_item_id: int64
+  name: string
+  sku: string
+  quantity: float64
+  unit_price: float64
+  discount_pct: float64
+  tax_rate: float64
+  notes: string
+}
+
+message SplitGroup {
+  item_ids: int64[]
+}
+
+message CreateOrderRequest {
+  session_id: int64
+  table_id: int64
+  location_id: int64
+  type: string
+  customer_id: int64
+  customer_name: string
+  payment_method: string
+  notes: string
+  kitchen_notes: string
+  items: CreateOrderItemInput[] @min_items(1)
+}
+
+message CreateOrderResponse {
+  order_id: int64
+  order_number: string
+  message: string
+}
+
+// ── Create Public Order ───────────────────────────────────────────
+
+message PublicOrderItemInput {
+  menu_item_id: int64 @gt(0)
+  name: string
+  quantity: float64 @gt(0)
+  unit_price: float64
+  notes: string
+}
+
+message CreatePublicOrderRequest {
+  owner_id: int64 @gt(0)
+  customer_name: string
+  customer_phone: string
+  customer_email: string
+  notes: string
+  items: PublicOrderItemInput[] @min_items(1)
+}
+
+message CreatePublicOrderResponse {
+  order_id: int64
+  order_number: string
+  status: string
+  /// Opaque credential required to retrieve this order's public status.
+  public_token: string
+}
+
+// ── Get Order Detail ──────────────────────────────────────────────
+
+message GetOrderDetailRequest {
+  order_id: int64 @gt(0)
+}
+
+message GetOrderDetailResponse {
+  order: Order
+}
+
+// ── Get Public Order Status ───────────────────────────────────────
+
+message GetPublicOrderStatusRequest {
+  order_id: int64 @gt(0)
+  /// business_id scopes the lookup to the business the order belongs to,
+  /// preventing cross-tenant order enumeration on this anonymous endpoint.
+  business_id: int64? @required @gt(0) @query("business_id")
+  /// Single-use? No: this credential is scoped to this order and is safe to
+  /// present repeatedly for status polling. It must never be replaced by the
+  /// sequential order ID alone.
+  public_token: string @required @query("public_token")
+}
+
+message GetPublicOrderStatusResponse {
+  order_id: int64
+  order_number: string
+  status: string
+}
+
+// ── List Orders ───────────────────────────────────────────────────
+
+message ListOrdersRequest {
+  session_id: int64? @required @gt(0) @query("session_id")
+  /// status is the current lifecycle state.
+  status: string @query("status")
+  date_from: string @query("date_from")
+  date_to: string @query("date_to")
+  /// search filters orders by order number, customer, or matching text.
+  search: string @query("search")
+  /// page is the one-based page number to return.
+  page: int64 @query("page") @encode(number)
+  /// page_size is the maximum number of orders to return.
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListOrdersResponse {
+  orders: Order[]
+  /// total is the total number of matching records.
+  total: int64 @encode(number)
+  /// has_more indicates another page is available.
+  has_more: bool
+  /// page is the one-based page number returned.
+  page: int64 @encode(number)
+  /// page_size is the page size returned.
+  page_size: int64 @encode(number)
+}
+
+// ── Send To Kitchen ───────────────────────────────────────────────
+
+message SendToKitchenRequest {
+  order_id: int64 @gt(0)
+}
+
+message SendToKitchenResponse {
+  success: bool
+}
+
+// ── Transfer Table ────────────────────────────────────────────────
+
+message TransferTableRequest {
+  order_id: int64 @gt(0)
+  new_table_id: int64? @required @gt(0)
+}
+
+message TransferTableResponse {
+  success: bool
+}
+
+// ── Update Order Status ───────────────────────────────────────────
+
+message UpdateOrderStatusBody {
+  /// status is the current lifecycle state.
+  status: string @required
+}
+
+message UpdateOrderStatusRequest {
+  order_id: int64 @gt(0)
+  /// body carries the new order status bound from the HTTP payload.
+  body: UpdateOrderStatusBody
+}
+
+message UpdateOrderStatusResponse {
+  message: string
+}
+
+// ── Void Order ────────────────────────────────────────────────────
+
+message VoidOrderRequest {
+  order_id: int64 @gt(0)
+  reason: string @required
+}
+
+message VoidOrderResponse {
+  message: string
+}

@@ -1,0 +1,28 @@
+package hr.leave.v1
+
+/// LeaveService defines HR leave endpoints.
+service LeaveService {
+  /// ListLeaveRequests returns leave requests with optional filters.
+  listLeaveRequests(ListLeaveRequestsRequest) -> ListLeaveRequestsResponse @get("/requests")
+
+  /// CreateLeaveRequest submits a leave request.
+  createLeaveRequest(CreateLeaveRequestRequest) -> CreateLeaveRequestResponse @post("/requests")
+
+  /// ApproveLeave approves a leave request.
+  approveLeave(ApproveLeaveRequest) -> ApproveLeaveResponse @patch("/requests/{request_id}/approve") @body("body")
+
+  /// CancelLeaveRequest withdraws the caller's own pending leave request.
+  cancelLeaveRequest(CancelLeaveRequestRequest) -> CancelLeaveResponse @patch("/requests/{request_id}/cancel")
+
+  /// ListLeaveTypes returns configured leave types.
+  listLeaveTypes(ListLeaveTypesRequest) -> ListLeaveTypesResponse @get("/types")
+
+  /// CreateLeaveType creates a leave type.
+  createLeaveType(CreateLeaveTypeRequest) -> CreateLeaveTypeResponse @post("/types")
+
+  /// UpdateLeaveType updates an existing leave type.
+  updateLeaveType(UpdateLeaveTypeRequest) -> UpdateLeaveTypeResponse @put("/types/{id}") @body("body")
+
+  /// ListLeaveBalances returns leave balances with optional filters.
+  listLeaveBalances(ListLeaveBalancesRequest) -> ListLeaveBalancesResponse @get("/balances")
+}

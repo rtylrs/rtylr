@@ -1,0 +1,54 @@
+package finance.reconciliation.v1
+
+message UnmatchedBankTransaction {
+  id: int64
+  bank_account_id: int64
+  amount_minor_units: int64
+  currency: string
+  occurred_at: string
+  description: string
+  external_id: string
+}
+
+message UnmatchedInvoice {
+  id: int64
+  invoice_number: string
+  client_name: string
+  amount_minor_units: int64
+  currency: string
+  issue_date: string
+  due_date: string
+}
+
+message MatchSuggestion {
+  bank_feed_id: int64
+  target_type: string
+  target_id: int64
+  amount_minor_units: int64
+  days_apart: int32
+  score: float64
+}
+
+message GetOverviewRequest {}
+
+message GetOverviewResponse {
+  unmatched_bank_txns: UnmatchedBankTransaction[]
+  unmatched_invoices: UnmatchedInvoice[]
+  suggestions: MatchSuggestion[]
+  /// Overview lists are bounded previews; true means more matching records exist.
+  bank_txns_truncated: bool
+  invoices_truncated: bool
+  expenses_truncated: bool
+  preview_limit: int32
+}
+
+message MatchRequest {
+  bank_feed_id: int64? @required
+  target_type: string @required
+  target_id: int64? @required
+}
+
+message MatchResponse {
+  id: int64
+  message: string
+}

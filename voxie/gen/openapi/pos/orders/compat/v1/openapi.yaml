@@ -1,0 +1,79 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/orders/v1/orders:
+        get:
+            tags:
+                - CompatibilityService
+            summary: listOrders
+            operationId: CompatibilityService_listOrders
+            parameters:
+                - name: limit
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.orders.compat.v1.ListOrdersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.orders.compat.v1.ListOrdersRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                offset:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+        pos.orders.compat.v1.ListOrdersResponse:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items: {}
+            required:
+                - orders
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CompatibilityService
+      description: Compatibility contract for Dash's business-wide order listing.

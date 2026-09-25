@@ -1,0 +1,1117 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /hr/shift/v1/shifts:
+        get:
+            tags:
+                - ShiftService
+            summary: listShifts
+            description: Returns shifts with optional filters.
+            operationId: ShiftService_listShifts
+            parameters:
+                - name: location_id
+                  in: query
+                  description: Filter by location; absent to include all locations.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by location; absent to include all locations.
+                - name: staff_id
+                  in: query
+                  description: Filter to one staff member's attendance rows; absent to include all.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter to one staff member's attendance rows; absent to include all.
+                - name: date
+                  in: query
+                  description: Filter attendance rows to a single date (ISO-8601); absent to include all.
+                  required: false
+                  schema:
+                    type: string
+                    description: Filter attendance rows to a single date (ISO-8601); absent to include all.
+                - name: kind
+                  in: query
+                  description: Restrict to one record kind (template | attendance); absent returns both.
+                  required: false
+                  schema:
+                    type: string
+                    description: Restrict to one record kind (template | attendance); absent returns both.
+                - name: limit
+                  in: query
+                  description: Page size; absent applies the server default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Page size; absent applies the server default.
+                - name: offset
+                  in: query
+                  description: Offset for pagination; absent starts at the first page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Offset for pagination; absent starts at the first page.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.ListShiftsResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        put:
+            tags:
+                - ShiftService
+            summary: updateShift
+            description: Updates an existing shift.
+            operationId: ShiftService_updateShift
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.shift.v1.UpdateShiftRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.UpdateShiftResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - ShiftService
+            summary: createShift
+            description: Creates a new shift.
+            operationId: ShiftService_createShift
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.shift.v1.CreateShiftRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.CreateShiftResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        delete:
+            tags:
+                - ShiftService
+            summary: deleteShift
+            description: Deletes a shift.
+            operationId: ShiftService_deleteShift
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.DeleteShiftResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/shift/v1/assignments:
+        post:
+            tags:
+                - ShiftService
+            summary: createShiftAssignment
+            description: Assigns an employee to a shift.
+            operationId: ShiftService_createShiftAssignment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.shift.v1.CreateShiftAssignmentRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.CreateShiftAssignmentResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/shift/v1/roster/{location_id}:
+        get:
+            tags:
+                - ShiftService
+            summary: getRoster
+            description: Returns the shift roster for a location and week.
+            operationId: ShiftService_getRoster
+            parameters:
+                - name: location_id
+                  in: path
+                  description: Location to fetch the roster for.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Location to fetch the roster for.
+                - name: week_start
+                  in: query
+                  description: Monday of the week to retrieve (ISO-8601 date).
+                  required: true
+                  schema:
+                    type: string
+                    description: Monday of the week to retrieve (ISO-8601 date).
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.GetRosterResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/shift/v1/roster/publish:
+        post:
+            tags:
+                - ShiftService
+            summary: publishRoster
+            description: Publishes the roster for a week.
+            operationId: ShiftService_publishRoster
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.shift.v1.PublishRosterRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.PublishRosterResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/shift/v1/availability:
+        get:
+            tags:
+                - ShiftService
+            summary: listAvailability
+            description: Returns staff availability windows with optional filters.
+            operationId: ShiftService_listAvailability
+            parameters:
+                - name: staff_id
+                  in: query
+                  description: |-
+                    Filter to one staff member; absent returns entries for every staff member
+                    in the tenant, which is what the weekly roster grid loads in one call.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Filter to one staff member; absent returns entries for every staff member
+                        in the tenant, which is what the weekly roster grid loads in one call.
+                - name: day_of_week
+                  in: query
+                  description: |-
+                    Filter recurring patterns to one weekday, 0 = Monday through 6 = Sunday;
+                    absent includes every weekday.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: |-
+                        Filter recurring patterns to one weekday, 0 = Monday through 6 = Sunday;
+                        absent includes every weekday.
+                - name: date_from
+                  in: query
+                  description: |-
+                    Inclusive start of a date range matched against specific_date (ISO-8601);
+                    absent leaves the range open at the start.
+                  required: false
+                  schema:
+                    type: string
+                    description: |-
+                        Inclusive start of a date range matched against specific_date (ISO-8601);
+                        absent leaves the range open at the start.
+                - name: date_to
+                  in: query
+                  description: |-
+                    Inclusive end of a date range matched against specific_date (ISO-8601);
+                    absent leaves the range open at the end.
+                  required: false
+                  schema:
+                    type: string
+                    description: |-
+                        Inclusive end of a date range matched against specific_date (ISO-8601);
+                        absent leaves the range open at the end.
+                - name: limit
+                  in: query
+                  description: Page size; absent applies the server default.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Page size; absent applies the server default.
+                - name: offset
+                  in: query
+                  description: Offset for pagination; absent starts at the first page.
+                  required: false
+                  schema:
+                    type: integer
+                    format: int32
+                    description: Offset for pagination; absent starts at the first page.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.ListAvailabilityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+        post:
+            tags:
+                - ShiftService
+            summary: setAvailability
+            description: Creates or updates one staff availability window.
+            operationId: ShiftService_setAvailability
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/hr.shift.v1.SetAvailabilityRequest'
+                required: true
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.SetAvailabilityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+    /hr/shift/v1/availability/{id}:
+        delete:
+            tags:
+                - ShiftService
+            summary: deleteAvailability
+            description: Deletes a staff availability window.
+            operationId: ShiftService_deleteAvailability
+            parameters:
+                - name: id
+                  in: path
+                  description: Identifier of the availability entry to delete.
+                  required: true
+                  schema:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Identifier of the availability entry to delete.
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/hr.shift.v1.DeleteAvailabilityResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        hr.shift.v1.ListShiftsRequest:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter by location; absent to include all locations.
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Filter to one staff member's attendance rows; absent to include all.
+                date:
+                    type: string
+                    description: Filter attendance rows to a single date (ISO-8601); absent to include all.
+                kind:
+                    type: string
+                    description: Restrict to one record kind (template | attendance); absent returns both.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size; absent applies the server default.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset for pagination; absent starts at the first page.
+        hr.shift.v1.ListShiftsResponse:
+            type: object
+            properties:
+                shifts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.shift.v1.ShiftPayload'
+                    description: Shift templates matching the filter.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of matching shifts across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - shifts
+                - total
+                - limit
+                - offset
+        hr.shift.v1.ShiftPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the shift row.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this shift belongs to.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Location where this shift takes place. Zero on attendance rows, which have
+                        no location; kept non-optional so existing readers see no type change.
+                name:
+                    type: string
+                    description: |-
+                        Human-readable shift name (e.g. "Morning", "Night"). Empty on attendance
+                        rows; kept non-optional so existing readers see no type change.
+                start_time:
+                    type: string
+                    description: Shift start time (HH:MM 24-hour format).
+                end_time:
+                    type: string
+                    description: Shift end time (HH:MM 24-hour format).
+                color:
+                    type: string
+                    description: Hex colour code used to render this shift on the roster (e.g. "#4CAF50").
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Staff member whose worked shift this is; absent on template rows.
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Department the staff member worked under; absent when not tracked.
+                date:
+                    type: string
+                    description: Calendar date this attendance row covers (ISO-8601); absent on template rows.
+                break_duration_minutes:
+                    type: integer
+                    format: int32
+                    description: Unpaid break length in minutes, deducted from worked hours.
+                status:
+                    type: string
+                    description: Lifecycle state (scheduled | in_progress | completed | absent | cancelled).
+                clock_in_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the staff member clocked in; absent until clock-in.
+                clock_out_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when the staff member clocked out; absent until clock-out.
+                hours_worked:
+                    type: number
+                    format: double
+                    description: Hours worked on this shift, computed at clock-out.
+                overtime_hours:
+                    type: number
+                    format: double
+                    description: Hours worked beyond the scheduled window.
+                notes:
+                    type: string
+                    description: Free-text note attached to this shift.
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - location_id
+                - name
+                - start_time
+                - end_time
+                - color
+                - created_at
+                - updated_at
+            description: |-
+                ShiftPayload is a row in the shift table, which holds two kinds of record.
+                A template row is a reusable shift for a location: it carries location_id,
+                name and color, and has no staff_id. An attendance row records one staff
+                member's worked shift: it carries staff_id and date plus the clock and hours
+                fields. The two are told apart by whether staff_id is present.
+        hr.shift.v1.CreateShiftRequest:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Location where this shift takes place; required for a template row.
+                name:
+                    type: string
+                    description: Human-readable shift name; required for a template row.
+                start_time:
+                    type: string
+                    description: Shift start time (HH:MM 24-hour format).
+                end_time:
+                    type: string
+                    description: Shift end time (HH:MM 24-hour format).
+                color:
+                    type: string
+                    description: Hex colour code for roster display; defaults server-side when absent.
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Staff member this attendance row belongs to; required for an attendance row.
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Department the staff member worked under.
+                date:
+                    type: string
+                    description: Calendar date of the attendance row (ISO-8601); required for an attendance row.
+                break_duration_minutes:
+                    type: integer
+                    format: int32
+                    description: Unpaid break length in minutes.
+                status:
+                    type: string
+                    description: Lifecycle state; defaults to "scheduled" when absent.
+                notes:
+                    type: string
+                    description: Free-text note attached to this shift.
+            required:
+                - start_time
+                - end_time
+            description: |-
+                CreateShiftRequest creates either a template row or an attendance row.
+                Supply location_id and name for a template; supply staff_id and date for an
+                attendance row. location_id and name are no longer unconditionally required
+                because attendance rows have neither.
+        hr.shift.v1.CreateShiftResponse:
+            type: object
+            properties:
+                shift:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.shift.v1.ShiftPayload'
+                    description: The newly created shift.
+            required:
+                - shift
+        hr.shift.v1.UpdateShiftRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Identifier of the shift row to update.
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: New location for a template row.
+                name:
+                    type: string
+                    description: New shift name for a template row.
+                start_time:
+                    type: string
+                    description: New start time (HH:MM 24-hour format).
+                end_time:
+                    type: string
+                    description: New end time (HH:MM 24-hour format).
+                color:
+                    type: string
+                    description: New hex colour code for roster display.
+                department_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: New department for an attendance row.
+                date:
+                    type: string
+                    description: New calendar date for an attendance row (ISO-8601).
+                break_duration_minutes:
+                    type: integer
+                    format: int32
+                    description: New unpaid break length in minutes.
+                status:
+                    type: string
+                    description: New lifecycle state.
+                notes:
+                    type: string
+                    description: New free-text note.
+            required:
+                - id
+            description: |-
+                UpdateShiftRequest edits an existing shift row of either kind. Only the
+                fields present are applied; absent fields keep their stored value.
+        hr.shift.v1.UpdateShiftResponse:
+            type: object
+            properties:
+                shift:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.shift.v1.ShiftPayload'
+                    description: The shift as stored after the update.
+            required:
+                - shift
+        hr.shift.v1.DeleteShiftRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Identifier of the shift row to delete.
+            required:
+                - id
+        hr.shift.v1.DeleteShiftResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the shift was deleted.
+            required:
+                - success
+        hr.shift.v1.CreateShiftAssignmentRequest:
+            type: object
+            properties:
+                employee_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee to assign.
+                shift_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Shift template to assign.
+                date:
+                    type: string
+                    description: Date of the assignment (ISO-8601 date).
+            required:
+                - employee_id
+                - shift_id
+                - date
+        hr.shift.v1.CreateShiftAssignmentResponse:
+            type: object
+            properties:
+                assignment:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.shift.v1.ShiftAssignmentPayload'
+                    description: The newly created assignment.
+                warnings:
+                    type: array
+                    items:
+                        type: string
+                    description: |-
+                        Human-readable availability warnings raised against the assignee for this
+                        date (e.g. "Jane Doe is unavailable 09:00-12:00 on 2026-08-20"), read off
+                        the AvailabilityPayload rows in this package.
+
+                        Advisory only. The assignment is still created, because a scheduler
+                        legitimately needs to staff someone against a stated preference: cover for
+                        a no-show, a swap the pair agreed offline, a rush the roster did not
+                        anticipate. A hard block would make those ordinary cases impossible
+                        without first editing the availability record, so the check informs rather
+                        than refuses. Empty when no conflict was found.
+
+                        Mirrors GetRosterResponse.conflicts, which already reports this class of
+                        problem the same non-blocking way.
+            required:
+                - assignment
+                - warnings
+        hr.shift.v1.ShiftAssignmentPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the assignment.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this assignment belongs to.
+                employee_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Employee assigned to the shift.
+                shift_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Shift template being assigned.
+                date:
+                    type: string
+                    description: Date the assignment is for (ISO-8601 date).
+                status:
+                    type: string
+                    description: Assignment status (scheduled | worked | missed | swapped).
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this record was last updated.
+            required:
+                - id
+                - owner_id
+                - employee_id
+                - shift_id
+                - date
+                - status
+                - created_at
+                - updated_at
+            description: ShiftAssignmentPayload assigns an employee to a shift on a given date.
+        hr.shift.v1.GetRosterRequest:
+            type: object
+            properties:
+                location_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Location to fetch the roster for.
+                week_start:
+                    type: string
+                    description: Monday of the week to retrieve (ISO-8601 date).
+            required:
+                - location_id
+                - week_start
+        hr.shift.v1.GetRosterResponse:
+            type: object
+            properties:
+                assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.shift.v1.ShiftAssignmentPayload'
+                    description: All shift assignments for the requested week and location.
+                conflicts:
+                    type: array
+                    items:
+                        type: string
+                    description: 'Human-readable conflict descriptions (e.g. "John Smith: double-booked on 2026-04-15").'
+            required:
+                - assignments
+                - conflicts
+        hr.shift.v1.PublishRosterRequest:
+            type: object
+            properties:
+                location_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Location to publish the roster for. Optional, and currently not used to
+                        scope the publish: a publish covers every location's assignments for the
+                        week, so requiring it rejected callers over a field that had no effect.
+                week_start:
+                    type: string
+                    description: Monday of the week being published (ISO-8601 date).
+            required:
+                - week_start
+        hr.shift.v1.PublishRosterResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the roster was successfully published.
+            required:
+                - success
+        hr.shift.v1.ListAvailabilityRequest:
+            type: object
+            properties:
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Filter to one staff member; absent returns entries for every staff member
+                        in the tenant, which is what the weekly roster grid loads in one call.
+                day_of_week:
+                    type: integer
+                    format: int32
+                    description: |-
+                        Filter recurring patterns to one weekday, 0 = Monday through 6 = Sunday;
+                        absent includes every weekday.
+                date_from:
+                    type: string
+                    description: |-
+                        Inclusive start of a date range matched against specific_date (ISO-8601);
+                        absent leaves the range open at the start.
+                date_to:
+                    type: string
+                    description: |-
+                        Inclusive end of a date range matched against specific_date (ISO-8601);
+                        absent leaves the range open at the end.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size; absent applies the server default.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset for pagination; absent starts at the first page.
+            description: |-
+                ListAvailabilityRequest filters availability entries. Recurring patterns carry
+                no date, so date_from and date_to constrain single-date overrides only and
+                leave recurring rows in the result; narrow those with day_of_week.
+        hr.shift.v1.ListAvailabilityResponse:
+            type: object
+            properties:
+                entries:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/hr.shift.v1.AvailabilityPayload'
+                    description: |-
+                        Availability entries matching the filters, recurring patterns and
+                        single-date overrides alike.
+                total:
+                    type: integer
+                    format: int64
+                    description: Total number of matching entries across all pages.
+                limit:
+                    type: integer
+                    format: int32
+                    description: Page size used for this request.
+                offset:
+                    type: integer
+                    format: int32
+                    description: Offset used for this request.
+            required:
+                - entries
+                - total
+                - limit
+                - offset
+        hr.shift.v1.AvailabilityPayload:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unique identifier for the availability entry.
+                staff_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: |-
+                        Staff member whose availability this is. Matches ShiftPayload.staff_id, not
+                        the older ShiftAssignmentPayload.employee_id in this same package.
+                owner_id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Tenant owner this entry belongs to.
+                day_of_week:
+                    type: integer
+                    format: int32
+                    description: |-
+                        Weekday of a recurring pattern: 0 = Monday through 6 = Sunday. Absent on a
+                        single-date override. Numbered Monday-first so the value indexes the same
+                        week the roster already uses (GetRosterRequest.week_start is a Monday).
+                        This is deliberately not JavaScript's Date.getDay(), where 0 = Sunday.
+                specific_date:
+                    type: string
+                    description: |-
+                        Calendar date a single-date override applies to (ISO-8601, e.g.
+                        "2026-08-17"). Absent on a recurring pattern.
+                start_time:
+                    type: string
+                    description: Start of the window (HH:MM 24-hour format).
+                end_time:
+                    type: string
+                    description: |-
+                        End of the window (HH:MM 24-hour format). An end_time earlier than
+                        start_time means the window crosses midnight and ends the following day,
+                        which is how availability for a night shift is expressed.
+                is_available:
+                    type: boolean
+                    description: |-
+                        Whether the staff member can be scheduled in this window. False marks a
+                        deliberate block, which is how a single-date override withdraws
+                        availability that the recurring pattern would otherwise grant.
+                        Wire note: the generated Go server tags every scalar `omitempty`, so a
+                        false value is dropped from the response body. Read an absent key as false.
+                created_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this entry was created.
+                updated_at:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Unix timestamp when this entry was last updated.
+            required:
+                - id
+                - staff_id
+                - owner_id
+                - start_time
+                - end_time
+                - is_available
+                - created_at
+                - updated_at
+            description: |-
+                AvailabilityPayload is one window in which a staff member can, or explicitly
+                cannot, be scheduled for a shift. A row is either a recurring weekly pattern
+                (day_of_week set, specific_date absent) or a single-date override
+                (specific_date set, day_of_week absent); an override takes precedence over the
+                recurring pattern for the date it names.
+
+                Exactly one of day_of_week and specific_date is set on every stored row. .onk
+                has no cross-field decorator for that constraint (the same gap documented on
+                flow.task.v1.ListTasksRequest), so it is enforced in the onion handler rather
+                than in this schema.
+        hr.shift.v1.SetAvailabilityRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Entry to replace; absent creates the entry or upserts it by natural key.
+                staff_id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Staff member this availability is for.
+                day_of_week:
+                    type: integer
+                    maximum: 6
+                    minimum: 0
+                    format: int32
+                    description: 'Weekday for a recurring pattern: 0 = Monday through 6 = Sunday.'
+                specific_date:
+                    type: string
+                    description: Calendar date for a single-date override (ISO-8601).
+                start_time:
+                    type: string
+                    description: Start of the window (HH:MM 24-hour format).
+                end_time:
+                    type: string
+                    description: |-
+                        End of the window (HH:MM 24-hour format). Earlier than start_time means the
+                        window crosses midnight into the following day.
+                is_available:
+                    type: boolean
+                    description: |-
+                        Whether the staff member can be scheduled in this window. Optional so that
+                        an explicit false arrives as a set value rather than as a decoded zero:
+                        absent means true, the ordinary case of declaring availability, and false
+                        marks a deliberate block. Without that distinction, omitting the field
+                        would silently block the window.
+            required:
+                - staff_id
+                - start_time
+                - end_time
+            description: |-
+                SetAvailabilityRequest creates or updates one availability window. With id
+                present the identified entry is replaced. With id absent the write upserts on
+                owner_id, staff_id, start_time and whichever of day_of_week or specific_date
+                is set, so re-submitting an unchanged window is idempotent instead of
+                producing a duplicate. start_time belongs to that key so one staff member can
+                hold several windows on the same day, for example a split shift of 09:00 to
+                12:00 and 14:00 to 18:00.
+
+                Supply exactly one of day_of_week and specific_date. As on
+                AvailabilityPayload, no decorator can express that, so the handler rejects a
+                request carrying both or neither.
+        hr.shift.v1.SetAvailabilityResponse:
+            type: object
+            properties:
+                entry:
+                    allOf:
+                        - $ref: '#/components/schemas/hr.shift.v1.AvailabilityPayload'
+                    description: The availability entry as stored after the write.
+            required:
+                - entry
+        hr.shift.v1.DeleteAvailabilityRequest:
+            type: object
+            properties:
+                id:
+                    exclusiveMinimum: 0
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                    description: Identifier of the availability entry to delete.
+            required:
+                - id
+        hr.shift.v1.DeleteAvailabilityResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    description: Whether the availability entry was deleted.
+            required:
+                - success
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: ShiftService
+      description: ShiftService defines HR shift and roster endpoints.

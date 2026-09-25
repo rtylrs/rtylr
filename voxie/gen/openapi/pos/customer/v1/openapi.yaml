@@ -1,0 +1,92 @@
+openapi: 3.1.0
+info:
+    title: Voxie API
+    version: 1.0.0
+paths:
+    /pos/customer/v1/customers:
+        get:
+            tags:
+                - CustomerService
+            summary: searchCustomers
+            description: Searches customers by name, email, or phone for POS lookups.
+            operationId: CustomerService_searchCustomers
+            parameters:
+                - name: query
+                  in: query
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/pos.customer.v1.SearchCustomersResponse'
+                "400":
+                    description: Invalid request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/onekit.ErrorMessage'
+components:
+    schemas:
+        pos.customer.v1.SearchCustomersRequest:
+            type: object
+            properties:
+                query:
+                    type: string
+            required:
+                - query
+        pos.customer.v1.SearchCustomersResponse:
+            type: object
+            properties:
+                customers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/pos.customer.v1.Customer'
+            required:
+                - customers
+        pos.customer.v1.Customer:
+            type: object
+            properties:
+                id:
+                    type: string
+                    pattern: ^-?[0-9]+$
+                    format: int64
+                first_name:
+                    type: string
+                last_name:
+                    type: string
+                email:
+                    type: string
+                    description: email is the email address used for lookup or contact.
+                phone:
+                    type: string
+            required:
+                - id
+                - first_name
+                - last_name
+                - email
+                - phone
+            description: |-
+                Customer is a lightweight customer record for POS lookups. Named
+                distinctly from crm.customer.v1's Customer (a genuine cross-directory
+                name collision - see crm/segment/v1/models.onk which references the
+                unqualified "Customer" name expecting the full crm.customer.v1 record).
+        onekit.ErrorMessage:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+tags:
+    - name: CustomerService
+      description: CustomerService defines POS customer lookup endpoints.

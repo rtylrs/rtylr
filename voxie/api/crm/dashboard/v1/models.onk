@@ -1,0 +1,21 @@
+package crm.dashboard.v1
+
+/// TopCustomer is a customer ranked by spend for dashboard summaries.
+message TopCustomer {
+  id: int64
+  first_name: string
+  last_name: string
+  email: string
+  total_spent: float64
+  loyalty_points: int64
+  loyalty_tier: string
+}
+
+message GetDashboardRequest {}
+
+message GetDashboardResponse {
+  total_customers: int64
+  new_this_month: int64
+  active_loyalty_members: int64
+  top_customers: TopCustomer[]
+}

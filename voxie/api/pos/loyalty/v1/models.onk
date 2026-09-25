@@ -1,0 +1,87 @@
+package pos.loyalty.v1
+
+/// LoyaltyConfig is the loyalty program configuration for a business.
+message LoyaltyConfig {
+  id: int64
+  /// business_id identifies the active business.
+  business_id: int64
+  is_enabled: bool
+  points_per_dollar: float64
+  redemption_rate: float64
+  min_redeem_points: int32
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+/// LoyaltyTransaction is a recorded loyalty points earn or redeem event.
+message LoyaltyTransaction {
+  id: int64
+  /// business_id identifies the active business.
+  business_id: int64
+  /// customer_id identifies the linked customer when present.
+  customer_id: int64
+  order_id: int64
+  type: string
+  points: int32
+  balance_after: int32
+  note: string
+  /// created_at is when the record was created.
+  created_at: string
+}
+
+message EarnPointsRequest {
+  customer_id: int64? @required @gt(0)
+  order_id: int64? @required @gt(0)
+  points: int32? @required @gt(0)
+}
+
+message EarnPointsResponse {
+  transaction_id: int64
+  message: string
+}
+
+message GetLoyaltyBalanceRequest {
+  customer_id: int64? @required @gt(0) @query("customer_id")
+}
+
+message GetLoyaltyBalanceResponse {
+  customer_id: int64
+  balance: int32
+}
+
+message GetLoyaltyConfigRequest {}
+
+message GetLoyaltyConfigResponse {
+  config: LoyaltyConfig
+}
+
+message ListLoyaltyTransactionsRequest {
+  customer_id: int64 @query("customer_id")
+}
+
+message ListLoyaltyTransactionsResponse {
+  transactions: LoyaltyTransaction[]
+}
+
+message RedeemPointsRequest {
+  customer_id: int64? @required @gt(0)
+  points: int32? @required @gt(0)
+}
+
+message RedeemPointsResponse {
+  transaction_id: int64
+  message: string
+}
+
+message UpdateLoyaltyConfigRequest {
+  is_enabled: bool
+  points_per_dollar: float64? @required @gt(0)
+  redemption_rate: float64 @gte(0)
+  min_redeem_points: int32? @required @gt(0)
+}
+
+message UpdateLoyaltyConfigResponse {
+  message: string
+}

@@ -1,0 +1,16 @@
+package finance.recurring_invoice.v1
+
+/// RecurringInvoiceService defines recurring invoice endpoints.
+service RecurringInvoiceService {
+  listRecurringInvoices(ListRecurringInvoicesRequest) -> ListRecurringInvoicesResponse @get("/recurring-invoices")
+
+  createRecurringInvoice(CreateRecurringInvoiceRequest) -> CreateRecurringInvoiceResponse @post("/recurring-invoices")
+
+  getRecurringInvoice(GetRecurringInvoiceRequest) -> GetRecurringInvoiceResponse @get("/recurring-invoices/{id}")
+
+  updateRecurringInvoice(UpdateRecurringInvoiceRequest) -> UpdateRecurringInvoiceResponse @put("/recurring-invoices/{id}")
+
+  pauseRecurringInvoice(PauseRecurringInvoiceRequest) -> PauseRecurringInvoiceResponse @patch("/recurring-invoices/{id}/pause")
+
+  resumeRecurringInvoice(ResumeRecurringInvoiceRequest) -> ResumeRecurringInvoiceResponse @patch("/recurring-invoices/{id}/resume")
+}

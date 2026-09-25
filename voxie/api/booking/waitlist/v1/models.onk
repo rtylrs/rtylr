@@ -1,0 +1,50 @@
+package booking.waitlist.v1
+
+message WaitlistEntry {
+  id: int64
+  owner_id: int64
+  business_id: int64
+  service_id: int64
+  customer_name: string
+  customer_email: string
+  customer_phone: string
+  preferred_date: string
+  preferred_time: string
+  status: string
+  created_at: string
+}
+
+message CreateEntryRequest {
+  service_id: int64
+  customer_name: string @required
+  customer_email: string
+  customer_phone: string
+  preferred_date: string
+  preferred_time: string
+}
+
+message CreateEntryResponse {
+  id: int64
+  message: string
+}
+
+message ListEntriesRequest {}
+
+message ListEntriesResponse {
+  entries: WaitlistEntry[]
+}
+
+message UpdateEntryRequest {
+  id: int64 @gt(0)
+  service_id: int64
+  customer_name: string
+  customer_email: string
+  customer_phone: string
+  preferred_date: string
+  preferred_time: string
+  status: string
+}
+
+message UpdateEntryResponse {
+  message: string
+}

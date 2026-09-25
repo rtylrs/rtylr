@@ -1,0 +1,29 @@
+package booking.reminder.v1
+
+message Reminder {
+  id: int64
+  owner_id: int64
+  business_id: int64
+  appointment_id: int64
+  type: string
+  scheduled_at: string
+  sent_at: string
+  created_at: string
+}
+
+message CreateReminderRequest {
+  appointment_id: int64? @required @gt(0)
+  type: string @required
+  scheduled_at: string @required
+}
+
+message CreateReminderResponse {
+  id: int64
+  message: string
+}
+
+message ListRemindersRequest {}
+
+message ListRemindersResponse {
+  reminders: Reminder[]
+}

@@ -1,0 +1,100 @@
+package finance.account.v1
+
+/// Account is a chart-of-accounts ledger account.
+message Account {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  /// name is the name value for this contract.
+  name: string
+  /// type is the type value for this contract.
+  type: string
+  /// currency is the currency value for this contract.
+  currency: string
+  /// balance is the balance value for this contract.
+  balance: float64
+  /// is_active is the is active value for this contract.
+  is_active: bool
+  /// created_at is when the record was created.
+  created_at: string
+  /// code is the optional account code/number.
+  code: string
+}
+
+/// ChartOfAccountsNode is a node in the hierarchical chart of accounts.
+message ChartOfAccountsNode {
+  id: int64
+  name: string
+  code: string
+  type: string
+  children: ChartOfAccountsNode[]
+}
+
+message CreateAccountRequest {
+  /// name is the name value for this contract.
+  name: string @required
+  /// type is the type value for this contract.
+  type: string @required
+  /// currency is the currency value for this contract.
+  currency: string @required
+  /// balance is the balance value for this contract.
+  balance: float64? @required @gte(0)
+  /// is_active is the is active value for this contract.
+  is_active: bool
+  /// code is the optional account code/number.
+  code: string
+}
+
+message CreateAccountResponse {
+  /// id is the unique identifier for the resource.
+  id: int64
+  /// message is a human-readable result message.
+  message: string
+}
+
+message DeleteAccountRequest {
+  id: int64 @gt(0)
+}
+
+message DeleteAccountResponse {
+  message: string
+}
+
+message GetChartOfAccountsRequest {}
+
+message GetChartOfAccountsResponse {
+  tree: ChartOfAccountsNode[]
+}
+
+message ListAccountsRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
+
+message ListAccountsResponse {
+  /// accounts is the accounts value for this contract.
+  accounts: Account[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
+}
+
+message UpdateAccountBody {
+  name: string @required
+  type: string @required
+  currency: string
+  balance: float64 @gte(0)
+  is_active: bool
+  /// code is the optional account code/number.
+  code: string
+}
+
+message UpdateAccountRequest {
+  id: int64 @gt(0)
+  body: UpdateAccountBody
+}
+
+message UpdateAccountResponse {
+  message: string
+}

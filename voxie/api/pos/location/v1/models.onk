@@ -1,0 +1,54 @@
+package pos.location.v1
+
+/// Location is a physical POS location for a business.
+message Location {
+  id: int64
+  /// owner_id identifies the tenant that owns the resource.
+  owner_id: int64
+  name: string
+  address: string
+  phone: string
+  is_active: bool
+  /// created_at is when the record was created.
+  created_at: string
+  /// updated_at is when the record was last updated.
+  updated_at: string
+}
+
+message CreateLocationRequest {
+  name: string @required
+  address: string
+  phone: string
+  /// Defaults to true when absent.
+  is_active: bool?
+}
+
+message CreateLocationResponse {
+  location_id: int64
+  message: string
+}
+
+message ListLocationsRequest {}
+
+message ListLocationsResponse {
+  locations: Location[]
+}
+
+message UpdateLocationBody {
+  name: string @required
+  address: string
+  phone: string
+  /// Unchanged when absent.
+  is_active: bool?
+}
+
+message UpdateLocationRequest {
+  /// id is the unique identifier for the location.
+  id: int64 @gt(0)
+  /// body carries updatable location fields bound from the HTTP payload.
+  body: UpdateLocationBody
+}
+
+message UpdateLocationResponse {
+  message: string
+}

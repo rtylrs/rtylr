@@ -1,0 +1,5 @@
+package booking.dashboard.v1
+
+service DashboardService {
+  getDashboard(GetDashboardRequest) -> GetDashboardResponse @get("/dashboard")
+}

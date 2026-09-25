@@ -1,0 +1,16 @@
+package hub.user.v1
+
+/// UserService defines hub user profile endpoints.
+service UserService {
+  /// Returns the authenticated user profile.
+  getMe(GetMeRequest) -> GetMeResponse @get("/users/me")
+
+  /// Updates the authenticated user profile.
+  updateProfile(UpdateProfileRequest) -> UpdateProfileResponse @patch("/users/me")
+
+  /// Changes the authenticated user password.
+  changePassword(ChangePasswordRequest) -> ChangePasswordResponse @post("/users/password")
+
+  /// Issues a fresh JWT scoped to the selected business.
+  switchBusiness(SwitchBusinessRequest) -> SwitchBusinessResponse @post("/users/switch-business")
+}
