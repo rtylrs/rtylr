@@ -1,0 +1,180 @@
+name: Release
+
+# One release per push to main: a single rtylr-v* tag whose assets contain only
+# the components that changed since the previous release. Nothing here deploys;
+# tryrtylr/deploy promotes a release tag and the deploy adapter builds it.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'clients/**'
+      - 'services/**'
+      - 'voxie/**'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Cut rtylr release
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - name: Checkout history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate next version
+        id: version
+        run: |
+          set -euo pipefail
+          version="$(.github/scripts/next-app-version.sh rtylr 0.1.0)"
+          previous="$(git tag --list 'rtylr-v*' --sort=-v:refname | head -1 || true)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release_tag=rtylr-v$version" >> "$GITHUB_OUTPUT"
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          echo "Cutting rtylr-v$version after ${previous:-<first release>}"
+
+      - name: Collect changed components
+        id: components
+        env:
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "$PREVIOUS" ]; then
+            range="$PREVIOUS..HEAD"
+          else
+            range="HEAD"
+          fi
+
+          component_for() {
+            case "$1" in
+              clients/web/rtylr|clients/web/rtylr/*) echo rtylr ;;
+              clients/web/landing|clients/web/landing/*) echo landing ;;
+              clients/web/docs|clients/web/docs/*) echo docs ;;
+              clients/web/mcp|clients/web/mcp/*) echo mcp ;;
+              clients/pos|clients/pos/*) echo pos ;;
+              clients/packages|clients/packages/*) echo packages ;;
+              clients|clients/*) echo clients ;;
+              services/onion|services/onion/*) echo onion ;;
+              voxie|voxie/*) echo contracts ;;
+              .github|.github/*) echo ci ;;
+              *) echo repo ;;
+            esac
+          }
+
+          files="$(mktemp)"
+          if [ -n "$PREVIOUS" ]; then
+            git diff --name-only "$range" > "$files"
+          else
+            git ls-files > "$files"
+          fi
+
+          changed="$(while IFS= read -r path; do component_for "$path"; done < "$files" | sort -u)"
+          count="$(wc -l < "$files" | tr -d ' ')"
+
+          echo "components=$(printf '%s' "$changed" | tr '\n' ' ' | sed 's/ *$//')" >> "$GITHUB_OUTPUT"
+          echo "files_changed=$count" >> "$GITHUB_OUTPUT"
+
+          if printf '%s\n' $changed | grep -qE '^(rtylr|packages|pos|landing)$'; then
+            echo "publish_images=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish_images=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Changed components: $(printf '%s' "$changed" | tr '\n' ' ')"
+          echo "$changed" | sed '/^$/d' > components.txt
+
+      - name: Build release assets
+        env:
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+
+          component_path() {
+            case "$1" in
+              rtylr) echo clients/web/rtylr ;;
+              landing) echo clients/web/landing ;;
+              docs) echo clients/web/docs ;;
+              mcp) echo clients/web/mcp ;;
+              pos) echo clients/pos ;;
+              packages) echo clients/packages ;;
+              clients) echo clients ;;
+              onion) echo services/onion ;;
+              contracts) echo voxie ;;
+              *) echo "" ;;
+            esac
+          }
+
+          while IFS= read -r component; do
+            [ -n "$component" ] || continue
+            path="$(component_path "$component")"
+            if [ -n "$path" ]; then
+              git archive --format=tar.gz --prefix="$component/" \
+                -o "release-assets/$component.tar.gz" HEAD "$path"
+            fi
+          done < components.txt
+
+          if [ -n "$PREVIOUS" ]; then
+            git diff --name-only "$PREVIOUS..HEAD" > changed-files.txt
+          else
+            git ls-files > changed-files.txt
+          fi
+
+          jq -n \
+            --arg version "${{ steps.version.outputs.version }}" \
+            --arg tag "${{ steps.version.outputs.release_tag }}" \
+            --arg sha "$GITHUB_SHA" \
+            --arg previous "${PREVIOUS:-}" \
+            --argjson files_changed "${{ steps.components.outputs.files_changed }}" \
+            --rawfile files changed-files.txt \
+            '{
+              version: $version,
+              tag: $tag,
+              sha: $sha,
+              previous_tag: (if $previous == "" then null else $previous end),
+              files_changed: $files_changed,
+              files: ($files | split("\n") | map(select(length > 0)))
+            }' > release-assets/release.json
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.release_tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          set -euo pipefail
+          notes="$(printf 'rtylr v%s\n\nChanged components:\n' "$VERSION")"
+          notes="$notes$(sed 's/^/- /' components.txt)"
+          notes="$notes
+          $(if [ -n "$PREVIOUS" ]; then printf '\nFull diff: %s...%s' "$PREVIOUS" "$(git rev-parse --short HEAD)"; fi)"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-assets/* --clobber
+          else
+            gh release create "$TAG" \
+              --title "rtylr v$VERSION" \
+              --target "$GITHUB_SHA" \
+              --notes "$notes" \
+              release-assets/*
+          fi
+
+      - name: Trigger self-host image publishing
+        if: steps.components.outputs.publish_images == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          jq -n --arg version "$VERSION" \
+            '{event_type: "rtylr-release", client_payload: {version: $version}}' \
+            | gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" --input -

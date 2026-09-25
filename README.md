@@ -57,23 +57,26 @@ The last line wires the committed hooks; git does not track `core.hooksPath`.
 
 Nothing in this repository deploys itself:
 
-1. A push to `main` cuts release metadata only — one Version workflow per
-   product (`.github/workflows/ci.yml`, `landing.yml`, `pos.yml`, `docs.yml`),
-   each path-filtered, each with its own tag namespace (`rtylr-v*`, `pos-v*`,
-   `rtylr-landing-v*`, `rtylr-docs-v*`).
+1. A push to `main` cuts one release — `.github/workflows/release.yml` computes
+   the next `rtylr-v*` version, attaches only the components that changed
+   (per-component source archives plus a `release.json` manifest), and creates
+   the tag and GitHub release.
 2. A maintainer promotes one exact release in `tryrtylr/deploy` by editing the
    app's manifest.
 3. `deploy` dispatches back here; `.github/workflows/deploy-release.yml` builds
-   the promoted tag through `tryrtylr/pipelines` and ships it.
+   the promoted tag through `tryrtylr/pipelines` and ships it — Pages apps and
+   ECS services through the same adapter.
 
 Manifests carry `working_directory` (for example `clients/web/rtylr`) plus
 `dist_dir`, so one adapter serves every product.
 
 Other workflows:
 
-- `desktop-release.yml` — Tauri desktop builds and the public downloads site.
+- `desktop-release.yml` — Tauri desktop builds and the public downloads site;
+  installer releases are still tagged `pos-v*` and are separate from source
+  releases.
 - `publish-images.yml` / `publish-images-pos.yml` — the public self-host images,
-  triggered by a version bump in `tryrtylr/rtylr-version`.
+  dispatched by the Release workflow when app sources change (or run manually).
 
 ## Development notes
 

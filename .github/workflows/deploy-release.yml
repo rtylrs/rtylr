@@ -1,16 +1,17 @@
 name: Deploy promoted release
 
-# This adapter is intentionally the only deployment workflow in rtylr. It is
-# reached from tryrtylr/deploy after a manifest promotion, never from a push to
-# main.
+# The only deployment workflow in rtylr. It is reached from tryrtylr/deploy
+# after a manifest promotion, never from a push to main. Pages apps and ECS
+# services share this entrypoint: a manifest with a dockerfile is an ECS
+# service, everything else is a Pages app.
 on:
   repository_dispatch:
     types: [deploy-release]
   workflow_dispatch:
     inputs:
       app:
-        description: App directory, for example dash
-        required: true
+        description: App name, for example dash
+        required: false
         type: string
       version:
         description: Promoted app version
@@ -32,21 +33,58 @@ on:
         type: string
       dist_dir:
         description: Built dist directory, resolved relative to working_directory
-        required: true
+        required: false
+        default: ''
         type: string
       working_directory:
         description: Directory holding the app's pnpm workspace
         required: false
-        default: '.'
+        default: 'clients'
         type: string
       project_name:
         description: Cloudflare Pages project name
-        required: true
+        required: false
+        default: ''
         type: string
       node_version:
         description: Node.js version used for the promoted build
         required: false
         default: '22'
+        type: string
+      dockerfile:
+        description: Dockerfile relative to the repository root (ECS)
+        required: false
+        default: ''
+        type: string
+      image_repository:
+        description: ECR repository path without the registry hostname (ECS)
+        required: false
+        default: ''
+        type: string
+      cluster:
+        description: ECS cluster name (ECS)
+        required: false
+        default: ''
+        type: string
+      service:
+        description: ECS service name (ECS)
+        required: false
+        default: ''
+        type: string
+      container:
+        description: ECS container name to update (ECS)
+        required: false
+        default: ''
+        type: string
+      desired_count:
+        description: Desired ECS service count (ECS)
+        required: false
+        default: '1'
+        type: string
+      health_url:
+        description: Optional HTTP health endpoint checked after stabilization (ECS)
+        required: false
+        default: ''
         type: string
       runs_on:
         description: Runner label
@@ -62,6 +100,7 @@ jobs:
     name: Resolve promoted manifest
     runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
+      type: ${{ steps.values.outputs.type }}
       app: ${{ steps.values.outputs.app }}
       version: ${{ steps.values.outputs.version }}
       release_tag: ${{ steps.values.outputs.release_tag }}
@@ -71,6 +110,13 @@ jobs:
       working_directory: ${{ steps.values.outputs.working_directory }}
       project_name: ${{ steps.values.outputs.project_name }}
       node_version: ${{ steps.values.outputs.node_version }}
+      dockerfile: ${{ steps.values.outputs.dockerfile }}
+      image_repository: ${{ steps.values.outputs.image_repository }}
+      cluster: ${{ steps.values.outputs.cluster }}
+      service: ${{ steps.values.outputs.service }}
+      container: ${{ steps.values.outputs.container }}
+      desired_count: ${{ steps.values.outputs.desired_count }}
+      health_url: ${{ steps.values.outputs.health_url }}
       runs_on: ${{ steps.values.outputs.runs_on }}
     steps:
       - name: Read dispatch or manual inputs
@@ -94,6 +140,20 @@ jobs:
           INPUT_PROJECT_NAME: ${{ inputs.project_name }}
           PAYLOAD_NODE_VERSION: ${{ github.event.client_payload.node_version }}
           INPUT_NODE_VERSION: ${{ inputs.node_version }}
+          PAYLOAD_DOCKERFILE: ${{ github.event.client_payload.dockerfile }}
+          INPUT_DOCKERFILE: ${{ inputs.dockerfile }}
+          PAYLOAD_IMAGE_REPOSITORY: ${{ github.event.client_payload.image_repository }}
+          INPUT_IMAGE_REPOSITORY: ${{ inputs.image_repository }}
+          PAYLOAD_CLUSTER: ${{ github.event.client_payload.cluster }}
+          INPUT_CLUSTER: ${{ inputs.cluster }}
+          PAYLOAD_SERVICE: ${{ github.event.client_payload.service }}
+          INPUT_SERVICE: ${{ inputs.service }}
+          PAYLOAD_CONTAINER: ${{ github.event.client_payload.container }}
+          INPUT_CONTAINER: ${{ inputs.container }}
+          PAYLOAD_DESIRED_COUNT: ${{ github.event.client_payload.desired_count }}
+          INPUT_DESIRED_COUNT: ${{ inputs.desired_count }}
+          PAYLOAD_HEALTH_URL: ${{ github.event.client_payload.health_url }}
+          INPUT_HEALTH_URL: ${{ inputs.health_url }}
           PAYLOAD_RUNS_ON: ${{ github.event.client_payload.runs_on }}
           INPUT_RUNS_ON: ${{ inputs.runs_on }}
         run: |
@@ -104,16 +164,36 @@ jobs:
           app_filter="${PAYLOAD_APP_FILTER:-$INPUT_APP_FILTER}"
           build_script="${PAYLOAD_BUILD_SCRIPT:-${INPUT_BUILD_SCRIPT:-build}}"
           dist_dir="${PAYLOAD_DIST_DIR:-$INPUT_DIST_DIR}"
-          working_directory="${PAYLOAD_WORKING_DIRECTORY:-${INPUT_WORKING_DIRECTORY:-.}}"
+          working_directory="${PAYLOAD_WORKING_DIRECTORY:-${INPUT_WORKING_DIRECTORY:-clients}}"
           project_name="${PAYLOAD_PROJECT_NAME:-$INPUT_PROJECT_NAME}"
           node_version="${PAYLOAD_NODE_VERSION:-${INPUT_NODE_VERSION:-22}}"
+          dockerfile="${PAYLOAD_DOCKERFILE:-$INPUT_DOCKERFILE}"
+          image_repository="${PAYLOAD_IMAGE_REPOSITORY:-$INPUT_IMAGE_REPOSITORY}"
+          cluster="${PAYLOAD_CLUSTER:-$INPUT_CLUSTER}"
+          service="${PAYLOAD_SERVICE:-$INPUT_SERVICE}"
+          container="${PAYLOAD_CONTAINER:-$INPUT_CONTAINER}"
+          desired_count="${PAYLOAD_DESIRED_COUNT:-${INPUT_DESIRED_COUNT:-1}}"
+          health_url="${PAYLOAD_HEALTH_URL:-$INPUT_HEALTH_URL}"
           runs_on="${PAYLOAD_RUNS_ON:-${INPUT_RUNS_ON:-blacksmith-2vcpu-ubuntu-2404}}"
 
-          for value in "$app" "$version" "$release_tag" "$dist_dir" "$project_name" "$build_script" "$node_version"; do
+          for value in "$version" "$release_tag"; do
             [ -n "$value" ] || { echo 'Missing deployment input' >&2; exit 1; }
           done
 
+          if [ -n "$dockerfile" ]; then
+            type=ecs
+            for value in "$dockerfile" "$image_repository" "$cluster" "$service" "$container"; do
+              [ -n "$value" ] || { echo 'Missing ECS deployment input' >&2; exit 1; }
+            done
+          else
+            type=pages
+            for value in "$app" "$dist_dir" "$project_name" "$build_script"; do
+              [ -n "$value" ] || { echo 'Missing Pages deployment input' >&2; exit 1; }
+            done
+          fi
+
           {
+            echo "type=$type"
             echo "app=$app"
             echo "version=$version"
             echo "release_tag=$release_tag"
@@ -123,12 +203,20 @@ jobs:
             echo "working_directory=$working_directory"
             echo "project_name=$project_name"
             echo "node_version=$node_version"
+            echo "dockerfile=$dockerfile"
+            echo "image_repository=$image_repository"
+            echo "cluster=$cluster"
+            echo "service=$service"
+            echo "container=$container"
+            echo "desired_count=$desired_count"
+            echo "health_url=$health_url"
             echo "runs_on=$runs_on"
           } >> "$GITHUB_OUTPUT"
 
-  deploy:
+  deploy-pages:
     name: Deploy ${{ needs.resolve.outputs.app }}
     needs: resolve
+    if: needs.resolve.outputs.type == 'pages'
     uses: tryrtylr/pipelines/.github/workflows/deploy-pages-release.yml@main
     with:
       source_repository: tryrtylr/rtylr
@@ -141,3 +229,25 @@ jobs:
       node_version: ${{ needs.resolve.outputs.node_version }}
       runs_on: ${{ needs.resolve.outputs.runs_on }}
     secrets: inherit
+
+  deploy-ecs:
+    name: Deploy ${{ needs.resolve.outputs.service }}
+    needs: resolve
+    if: needs.resolve.outputs.type == 'ecs'
+    uses: tryrtylr/pipelines/.github/workflows/deploy-ecs-release.yml@main
+    with:
+      source_repository: tryrtylr/rtylr
+      source_ref: ${{ needs.resolve.outputs.release_tag }}
+      version: ${{ needs.resolve.outputs.version }}
+      dockerfile: ${{ needs.resolve.outputs.dockerfile }}
+      image_repository: ${{ needs.resolve.outputs.image_repository }}
+      cluster: ${{ needs.resolve.outputs.cluster }}
+      service: ${{ needs.resolve.outputs.service }}
+      container: ${{ needs.resolve.outputs.container }}
+      desired_count: ${{ needs.resolve.outputs.desired_count }}
+      health_url: ${{ needs.resolve.outputs.health_url }}
+      runs_on: ${{ needs.resolve.outputs.runs_on }}
+    secrets:
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

@@ -1,14 +1,7 @@
 name: Landing
 
-# Two jobs, in order.
-#
-#   checks   every gate the landing has, run on pushes and on pull requests.
-#   version  release metadata, only once checks is green and never on a PR.
-#
-# The gate is the tag. There is no branch protection on this repo, so nothing
-# stops a red merge, but a red run produces no tag and tryrtylr/deploy can
-# only promote a tag. A daily automated publish therefore cannot reach
-# production on a broken build.
+# Every gate the landing has, run on pushes and pull requests. Releases are
+# cut by .github/workflows/release.yml; tryrtylr/deploy promotes a release tag.
 on:
   push:
     branches: [main]
@@ -28,7 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   checks:
@@ -89,35 +82,3 @@ jobs:
           path: clients/web/landing/playwright-report
           retention-days: 7
 
-  version:
-    name: Calculate next landing version
-    needs: checks
-    if: github.event_name != 'pull_request'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    outputs:
-      version: ${{ steps.next.outputs.version }}
-      release_tag: ${{ steps.next.outputs.release_tag }}
-    steps:
-      - name: Checkout history
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Calculate next version
-        id: next
-        run: |
-          set -euo pipefail
-          version="$(.github/scripts/next-app-version.sh rtylr-landing 0.0.1)"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "release_tag=rtylr-landing-v$version" >> "$GITHUB_OUTPUT"
-          echo "Creating repository version rtylr-landing-v$version"
-
-  release:
-    name: Create landing version
-    needs: version
-    uses: tryrtylr/pipelines/.github/workflows/create-release.yml@main
-    with:
-      release_tag: ${{ needs.version.outputs.release_tag }}
-      release_name: rtylr landing v${{ needs.version.outputs.version }}
-      version: ${{ needs.version.outputs.version }}
-      notes: 'Source version for landing at ${{ github.sha }}. Build and deployment are controlled by tryrtylr/deploy.'
