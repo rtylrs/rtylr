@@ -70,9 +70,7 @@ apps/{name}/src/
     stores/                # Zustand stores
   layouts/
     DefaultLayout.tsx      # single file, no wrapper folder
-  routes/
-    AppRoutes.tsx
-  App.tsx
+  router.tsx              # route definitions
   main.tsx
   globals.css
 ```
