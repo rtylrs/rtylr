@@ -90,10 +90,10 @@ func (r *Repository) getItemsForOrders(ctx context.Context, orderIDs []int64) (m
 }
 
 func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {
-	err := r.queries.UpdateKDSItemStatus(ctx, sqlc.UpdateKDSItemStatusParams{
-		Status:  sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(input.Status), Valid: true},
-		OrderID: input.OrderID,
-		ID:      input.ItemID,
+	err := r.queries.UpdateKDSItemStatusByItemID(ctx, sqlc.UpdateKDSItemStatusByItemIDParams{
+		Status:     sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(input.Status), Valid: true},
+		ID:         input.ItemID,
+		BusinessID: input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update KDS item status", logger.Error(err))

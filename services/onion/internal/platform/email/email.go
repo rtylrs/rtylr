@@ -157,32 +157,11 @@ func WithFrom(from string) Option { return func(p *SendParams) { p.From = from }
 // WithReplyTo sets the Reply-To address.
 func WithReplyTo(replyTo string) Option { return func(p *SendParams) { p.ReplyTo = replyTo } }
 
-// SendTemplate renders tmpl with data and sends it immediately via Resend. It is
-// the single entry point for templated email: pass a Template constant from
-// templates.go and its matching data struct (e.g. TemplateWelcome + WelcomeData).
-func SendTemplate(ctx context.Context, to []string, subject string, tmpl Template, data any, opts ...Option) (string, error) {
-	html, err := Render(tmpl, data)
-	if err != nil {
-		return "", err
-	}
-	params := SendParams{To: to, Subject: subject, HTML: html}
-	for _, opt := range opts {
-		opt(&params)
-	}
-	return Send(ctx, params)
-}
-
 // EnqueueTemplate renders tmpl with data and enqueues it on email_jobs at the
 // given priority (PriorityCritical/High/Normal) for the background worker to
 // deliver. Use it instead of SendTemplate when delivery can be deferred/retried.
 func EnqueueTemplate(ctx context.Context, db *sql.DB, priority int, to, subject string, tmpl Template, data any, opts ...Option) error {
 	return enqueueTemplate(ctx, db, priority, to, subject, tmpl, data, opts...)
-}
-
-// EnqueueTemplateTx inserts the rendered job into the caller's transaction so
-// business writes and their notification are committed or rolled back together.
-func EnqueueTemplateTx(ctx context.Context, tx *sql.Tx, priority int, to, subject string, tmpl Template, data any, opts ...Option) error {
-	return enqueueTemplate(ctx, tx, priority, to, subject, tmpl, data, opts...)
 }
 
 type dbtx interface {

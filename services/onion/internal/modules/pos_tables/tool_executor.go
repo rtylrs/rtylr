@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -62,7 +63,7 @@ func (m *Module) executeListPOSTablesTool(ctx context.Context, input map[string]
 	}
 	tables = filterPOSTablesForTool(tables, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(tables))
 	if start > len(tables) {
 		start = len(tables)
 	}

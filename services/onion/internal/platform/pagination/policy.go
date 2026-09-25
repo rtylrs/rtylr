@@ -43,3 +43,13 @@ func (p Policy) Normalize(number, size int64) Page {
 	}
 	return Page{Number: number, Size: size, Offset: offset}
 }
+
+func SliceStart(page, size int64, length int) int {
+	if page <= 1 || size <= 0 || length <= 0 {
+		return 0
+	}
+	if page-1 > int64(length)/size {
+		return length
+	}
+	return int((page - 1) * size)
+}

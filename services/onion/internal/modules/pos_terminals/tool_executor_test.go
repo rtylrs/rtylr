@@ -65,7 +65,7 @@ func TestParseListPOSTerminalsToolInputRejectsBadOnline(t *testing.T) {
 func TestFilterPOSTerminalsForTool(t *testing.T) {
 	active := true
 	online := true
-	lastSeenAt := time.Date(2026, 6, 18, 10, 0, 0, 0, time.UTC)
+	lastSeenAt := time.Now().UTC().Add(-time.Minute)
 	deviceID := "FRONT-1"
 	terminals := []domain.Terminal{
 		{ID: 1, BranchID: 4, Name: "Front Register", DeviceID: &deviceID, IsActive: true, LastSeenAt: &lastSeenAt},
@@ -89,7 +89,7 @@ func TestFilterPOSTerminalsForTool(t *testing.T) {
 
 func TestPOSTerminalToolPayload(t *testing.T) {
 	deviceID := "POS-1"
-	lastSeenAt := time.Date(2026, 6, 18, 10, 0, 0, 0, time.FixedZone("EEST", 3*60*60))
+	lastSeenAt := time.Now().UTC().Add(-time.Minute)
 	payload := posTerminalToolPayload(domain.Terminal{
 		ID:         7,
 		BusinessID: 2,
@@ -107,7 +107,7 @@ func TestPOSTerminalToolPayload(t *testing.T) {
 	if payload["is_online"] != true {
 		t.Fatalf("is_online = %#v", payload["is_online"])
 	}
-	if payload["last_seen_at"] != "2026-06-18T07:00:00Z" {
+	if payload["last_seen_at"] != lastSeenAt.UTC().Format(time.RFC3339) {
 		t.Fatalf("last_seen_at = %#v", payload["last_seen_at"])
 	}
 }

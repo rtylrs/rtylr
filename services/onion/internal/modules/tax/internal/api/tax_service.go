@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"math"
 	"net/http"
 
@@ -33,6 +34,9 @@ func (a *TaxAPI) GetTaxConfig(ctx context.Context, _ *financetaxv1.GetTaxConfigR
 	}
 
 	config, err := a.service.GetConfig(ctx, businessID)
+	if errors.Is(err, domain.ErrTaxConfigNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Tax config not found")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get tax config")
 	}

@@ -179,11 +179,6 @@ func HashKey(rawKey string) string {
 	sum := sha256.Sum256([]byte(strings.TrimSpace(rawKey)))
 	return fmt.Sprintf("%x", sum[:])
 }
-
-func ParseAndVerify(rawKey, rawPublicKey, expectedIssuer string, now time.Time) (*Entitlement, error) {
-	return parseAndVerify(rawKey, rawPublicKey, expectedIssuer, now, 0)
-}
-
 func parseAndVerify(rawKey, rawPublicKey, expectedIssuer string, now time.Time, configuredGracePeriod time.Duration) (*Entitlement, error) {
 	rawKey = strings.TrimSpace(rawKey)
 	if rawKey == "" {

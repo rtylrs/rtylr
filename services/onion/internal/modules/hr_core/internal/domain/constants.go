@@ -15,14 +15,6 @@ const (
 	EmploymentTypeFreelance = "freelance"
 )
 
-// Approval request types used in approval chains.
-const (
-	ApprovalRequestTypeLeave     = "leave"
-	ApprovalRequestTypeOvertime  = "overtime"
-	ApprovalRequestTypeEquipment = "equipment"
-	ApprovalRequestTypePayroll   = "payroll"
-)
-
 // Fine-grained HR permission keys. A role's Permissions JSON (hr_roles.permissions)
 // grants a subset of these; HasPermission checks a key from this set. Keep this
 // list and AllPermissions() (permissions_catalog.go) in sync — SeedDefaultRoles

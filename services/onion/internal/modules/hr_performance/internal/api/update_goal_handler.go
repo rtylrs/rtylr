@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateGoalRoutes() []string { return []string{"/hr/performance/goals/{id}"} }
@@ -43,7 +44,12 @@ func (h *UpdateGoalHandler) Serve(ctx context.Context, req *UpdateGoalRequest) (
 		return UpdateGoalResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.Service.UpdateGoal(ctx, device.User.UserID, req.ID, domain.UpdateGoalParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateGoalResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err := h.Service.UpdateGoal(ctx, businessID, req.ID, domain.UpdateGoalParams{
 		Title:           req.Title,
 		Description:     req.Description,
 		Weight:          req.Weight,

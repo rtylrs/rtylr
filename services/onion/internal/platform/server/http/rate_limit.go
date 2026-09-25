@@ -129,21 +129,6 @@ func (rl *SecurityRateLimiter) Stop() {
 	delete(activeRateLimiters, rl)
 	rateLimiterMu.Unlock()
 }
-
-func StopAllSecurityRateLimiters() {
-	rateLimiterMu.Lock()
-	limiters := make([]*SecurityRateLimiter, 0, len(activeRateLimiters))
-	for limiter := range activeRateLimiters {
-		limiters = append(limiters, limiter)
-		delete(activeRateLimiters, limiter)
-	}
-	rateLimiterMu.Unlock()
-
-	for _, limiter := range limiters {
-		limiter.Stop()
-	}
-}
-
 func RateLimitMiddleware(limit int, window time.Duration) func(http.Handler) http.Handler {
 	limiter := NewSecurityRateLimiter(limit, window)
 	limiter.cleanup()

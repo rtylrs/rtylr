@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 )
 
 const (
@@ -61,7 +62,7 @@ func (m *Module) executeListCashMovementsTool(ctx context.Context, input map[str
 	}
 	movements = filterCashMovementsForTool(movements, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(movements))
 	if start > len(movements) {
 		start = len(movements)
 	}

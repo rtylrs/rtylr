@@ -144,11 +144,6 @@ func DeviceMiddleware() func(http.Handler) http.Handler {
 		})
 	}
 }
-
-func GetDeviceFromRequest(r *http.Request) Device {
-	return DeviceCtx(r.Context())
-}
-
 func IsAuthenticatedDevice(ctx context.Context) bool {
 	device := DeviceCtx(ctx)
 
@@ -169,13 +164,6 @@ func GetLanguageFromDevice(ctx context.Context) string {
 
 	return device.Language
 }
-
-func GetDeviceTypeFromDevice(ctx context.Context) string {
-	device := DeviceCtx(ctx)
-
-	return device.DeviceInfo
-}
-
 func (d *Device) IsDesktopApp() bool {
 	return d.Platform == models.PlatformDesktopApp
 }

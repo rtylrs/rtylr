@@ -86,16 +86,6 @@ type PermissionRecord struct {
 	Description string `json:"description"`
 	Category    string `json:"category"`
 }
-
-type EmployeeRoleRecord struct {
-	ID         int64     `json:"id"`
-	OwnerID    int64     `json:"owner_id"`
-	BusinessID int64     `json:"business_id"`
-	EmployeeID int64     `json:"employee_id"`
-	RoleID     int64     `json:"role_id"`
-	CreatedAt  time.Time `json:"created_at"`
-}
-
 type SetupStepRecord struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`

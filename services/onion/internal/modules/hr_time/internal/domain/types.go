@@ -115,14 +115,3 @@ type ListTimesheetsParams struct {
 	Limit      int32
 	Offset     int32
 }
-
-type BillableExportItem struct {
-	EntryID         int64  `json:"entry_id"`
-	EmployeeID      int64  `json:"employee_id"`
-	ProjectID       int64  `json:"project_id"`
-	TaskID          int64  `json:"task_id"`
-	Date            string `json:"date"`
-	DurationMinutes int32  `json:"duration_minutes"`
-	Description     string `json:"description"`
-	IsBillable      bool   `json:"is_billable"`
-}

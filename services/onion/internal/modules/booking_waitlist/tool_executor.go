@@ -9,6 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const listBookingWaitlistToolName = "booking.list_waitlist"
@@ -51,7 +52,11 @@ func bookingWaitlistToolOwnerID(ctx context.Context) (int64, error) {
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, fmt.Errorf("business scope could not be resolved: %w", err)
+	}
+	return businessID, nil
 }
 
 func firstBookingWaitlistToolValue(input map[string]any, keys ...string) any {

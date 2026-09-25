@@ -159,31 +159,6 @@ func (mr *ModuleRegistry) configureAccessPolicyRecursive(ctx context.Context, va
 		}
 	}
 }
-
-func (mr *ModuleRegistry) GetModuleCount() int {
-	val := reflect.ValueOf(mr.modules).Elem()
-
-	return val.NumField()
-}
-
-func (mr *ModuleRegistry) GetModuleNames() []string {
-	val := reflect.ValueOf(mr.modules).Elem()
-	typ := val.Type()
-
-	var names []string
-
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		fieldName := typ.Field(i).Name
-
-		if isNilableAndNonNil(field) {
-			names = append(names, fieldName)
-		}
-	}
-
-	return names
-}
-
 func isNilableAndNonNil(v reflect.Value) bool {
 	switch v.Kind() {
 	case reflect.Pointer, reflect.Interface, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func:

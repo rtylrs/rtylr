@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/support_settings/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	supportsettingsv1 "github.com/voxire/voxie/gen/go/support/settings/v1"
 )
 
@@ -26,7 +27,11 @@ func (a *SettingsAPI) GetSettings(ctx context.Context, _ *supportsettingsv1.GetS
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	settings, err := a.service.Get(ctx, device.User.BusinessID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	settings, err := a.service.Get(ctx, businessID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get support settings")
 	}
@@ -45,8 +50,12 @@ func (a *SettingsAPI) UpdateSettings(ctx context.Context, req *supportsettingsv1
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	err := a.service.Upsert(ctx, domain.SettingsInput{
-		BusinessID:        device.User.BusinessID,
+		BusinessID:        businessID,
 		AutoAssign:        req.GetAutoAssign(),
 		SLAHours:          int(req.GetSlaHours()),
 		BusinessHours:     req.GetBusinessHours(),

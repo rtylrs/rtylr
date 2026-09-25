@@ -1,11 +1,8 @@
 package domain
 
 import (
-	"errors"
 	"time"
 )
-
-var ErrCashMovementNotFound = errors.New("cash movement not found")
 
 type CashMovement struct {
 	ID         int64     `json:"id"`

@@ -37,11 +37,6 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) DB() *sql.DB { return s.db }
-
-func (s *Service) GetGlobalConfig(ctx context.Context) (domain.Config, error) {
-	return s.GetConfig(ctx, "1")
-}
-
 func (s *Service) GetConfig(ctx context.Context, ownerID string) (domain.Config, error) {
 	idN, err := strconv.ParseInt(ownerID, 10, 64)
 	if err != nil {

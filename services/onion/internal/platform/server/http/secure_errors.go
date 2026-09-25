@@ -10,6 +10,7 @@ import (
 	"github.com/getsentry/sentry-go"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/server/http/httpmetrics"
 )
 
 type SecureErrorResponse struct {
@@ -33,7 +34,7 @@ func SecureErrorMiddleware() func(http.Handler) http.Handler {
 					// Report and account for the terminal request before writing
 					// the sanitized response.
 					reportRecoveredPanic(ctx, r, err)
-					recordRecoveredPanicMetrics(started)
+					httpmetrics.RecordRecoveredPanic(started)
 
 					logger.Ctx(ctx).Error("Panic recovered",
 						logger.Any("error", err),
@@ -84,27 +85,3 @@ func reportRecoveredPanic(ctx context.Context, r *http.Request, recovered any) {
 // cannot reach after its inner handler panics. The request counter is already
 // incremented before MetricsMiddleware calls the handler; only the terminal
 // error and latency accounting needs to be completed here.
-func recordRecoveredPanicMetrics(started time.Time) {
-	totalErrors.Add(1)
-	elapsed := time.Since(started)
-	if elapsed < 0 {
-		elapsed = 0
-	}
-	totalLatency.Add(uint64(elapsed.Microseconds())) // #nosec G115 -- elapsed is non-negative and fits the metric's microsecond duration.
-}
-
-func SanitizeError(err error) error {
-	if err != nil {
-		return &GenericError{message: "An error occurred"}
-	}
-
-	return err
-}
-
-type GenericError struct {
-	message string
-}
-
-func (e *GenericError) Error() string {
-	return e.message
-}

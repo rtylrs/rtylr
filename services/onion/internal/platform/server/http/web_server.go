@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
+	"github.com/voxire/onion/internal/platform/server/http/httpmetrics"
 )
 
 const serverShutdownTimeoutSeconds = 20
@@ -31,7 +32,7 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	// there's no way a module accidentally shadows it. Basic-auth is
 	// enforced inside the handler; the endpoint 404s when
 	// METRICS_USER/METRICS_PASS aren't set, so it stays opt-in.
-	r.Get("/metrics", MetricsHandler())
+	r.Get("/metrics", httpmetrics.Handler())
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -211,7 +212,7 @@ func platformMiddlewares() []MiddlewareFunc {
 		RequestTimeoutMiddleware,
 		// Counter-only middleware — /metrics itself skips it so a scrape doesn't
 		// inflate its own numbers.
-		MetricsMiddleware,
+		httpmetrics.Middleware,
 		// Reports any call to a Flow v1 route that the workspace-removal Phase 4
 		// deletes. RequestLoggerMiddleware only reports 4xx/5xx, so a successful
 		// v1 call was previously invisible and the phase's "zero v1 traffic" gate

@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_categories/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -61,7 +62,7 @@ func (m *Module) executeListStoreCategoriesTool(ctx context.Context, input map[s
 	}
 	categories = filterStoreCategoriesForTool(categories, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(categories))
 	if start > len(categories) {
 		start = len(categories)
 	}

@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func SubmitReviewRoutes() []string { return []string{"/hr/performance/reviews/{id}/submit"} }
@@ -39,7 +40,12 @@ func (h *SubmitReviewHandler) Serve(ctx context.Context, req *SubmitReviewReques
 		return SubmitReviewResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.Service.SubmitReview(ctx, device.User.UserID, req.ID, req.Rating, req.Narrative)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return SubmitReviewResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err := h.Service.SubmitReview(ctx, businessID, req.ID, req.Rating, req.Narrative)
 	if err != nil {
 		if errors.Is(err, domain.ErrReviewNotFound) {
 			return SubmitReviewResponse{}, onekiterrors.New(http.StatusNotFound, "Review not found")

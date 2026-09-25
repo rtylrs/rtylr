@@ -1,9 +1,5 @@
 package domain
 
-import (
-	"database/sql"
-)
-
 type InvoiceItem struct {
 	ID          int64   `json:"id"`
 	InvoiceID   int64   `json:"invoice_id"`
@@ -16,35 +12,6 @@ type InvoiceItem struct {
 	Total       float64 `json:"total"`
 	SortOrder   int     `json:"sort_order"`
 }
-
-func (item *InvoiceItem) FromRow(row *sql.Rows) error {
-	var unit sql.NullString
-
-	err := row.Scan(
-		&item.ID,
-		&item.InvoiceID,
-		&item.Description,
-		&item.Quantity,
-		&unit,
-		&item.UnitPrice,
-		&item.TaxRate,
-		&item.DiscountPct,
-		&item.Total,
-		&item.SortOrder,
-	)
-	if err != nil {
-		return err
-	}
-
-	if unit.Valid {
-		item.Unit = unit.String
-	} else {
-		item.Unit = "unit"
-	}
-
-	return nil
-}
-
 type InvoiceItemInput struct {
 	Description string  `json:"description"`
 	Quantity    float64 `json:"quantity"`

@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 )
@@ -19,42 +18,9 @@ type TaxConfig struct {
 	IsActive   bool      `json:"is_active"`
 	CreatedAt  time.Time `json:"created_at"`
 }
-
-func (t *TaxConfig) FromRow(row *sql.Rows) error {
-	var taxType sql.NullString
-
-	err := row.Scan(
-		&t.ID,
-		&t.OwnerID,
-		&t.BusinessID,
-		&t.Name,
-		&t.Rate,
-		&taxType,
-		&t.IsDefault,
-		&t.IsActive,
-		&t.CreatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if taxType.Valid {
-		t.Type = taxType.String
-	} else {
-		t.Type = "vat"
-	}
-
-	return nil
-}
-
 type TaxConfigInput struct {
 	Name      string  `json:"name"`
 	Rate      float64 `json:"rate"`
 	Type      string  `json:"type"`
 	IsDefault bool    `json:"is_default"`
-}
-
-// CentsToFloat converts integer cents to standard float amount.
-func CentsToFloat(cents int64) float64 {
-	return float64(cents) / 100.0
 }

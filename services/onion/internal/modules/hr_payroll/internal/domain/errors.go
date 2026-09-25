@@ -8,7 +8,6 @@ var (
 	ErrPayrollAlreadyExported        = errors.New("payroll run has already been exported")
 	ErrPayrollExportInProgress       = errors.New("payroll run export is already in progress")
 	ErrPayrollRunAlreadyExists       = errors.New("a payroll run already exists for this period")
-	ErrTimesheetNotApproved          = errors.New("not all timesheets are approved for this period")
 	ErrOvertimeConfigMissing         = errors.New("overtime is enabled but overtime rates are not configured")
 	ErrOvertimeRateMissing           = errors.New("approved overtime has no hourly rate")
 	ErrApprovalChainNotConfigured    = errors.New("approval chain not configured for payroll")

@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 )
 
 const (
@@ -65,7 +66,7 @@ func (m *Module) executeListPOSUsersTool(ctx context.Context, input map[string]a
 	}
 	users = filterPOSUsersForTool(users, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(users))
 	if start > len(users) {
 		start = len(users)
 	}

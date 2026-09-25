@@ -2,11 +2,8 @@ package domain
 
 import (
 	"context"
-	"errors"
 	"time"
 )
-
-var ErrPriceListNotFound = errors.New("price list not found")
 
 type PriceList struct {
 	ID         int64     `json:"id"`

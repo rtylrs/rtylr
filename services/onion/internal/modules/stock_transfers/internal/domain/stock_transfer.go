@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"math"
@@ -35,32 +34,6 @@ type StockTransfer struct {
 	CreatedAt       time.Time           `json:"created_at"`
 	UpdatedAt       time.Time           `json:"updated_at"`
 }
-
-func (s *StockTransfer) FromRow(row *sql.Rows) error {
-	var notes sql.NullString
-
-	err := row.Scan(
-		&s.ID,
-		&s.OwnerID,
-		&s.BusinessID,
-		&s.FromWarehouseID,
-		&s.ToWarehouseID,
-		&s.Status,
-		&notes,
-		&s.CreatedAt,
-		&s.UpdatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if notes.Valid {
-		s.Notes = notes.String
-	}
-
-	return nil
-}
-
 type StockTransferItem struct {
 	ID         int64     `json:"id"`
 	TransferID int64     `json:"transfer_id"`
@@ -68,17 +41,6 @@ type StockTransferItem struct {
 	Quantity   float64   `json:"quantity"`
 	CreatedAt  time.Time `json:"created_at"`
 }
-
-func (i *StockTransferItem) FromRow(row *sql.Rows) error {
-	return row.Scan(
-		&i.ID,
-		&i.TransferID,
-		&i.ProductID,
-		&i.Quantity,
-		&i.CreatedAt,
-	)
-}
-
 type StockTransferInput struct {
 	FromWarehouseID int64                    `json:"from_warehouse_id"`
 	ToWarehouseID   int64                    `json:"to_warehouse_id"`

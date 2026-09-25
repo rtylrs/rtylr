@@ -5,7 +5,6 @@ import (
 )
 
 var (
-	ErrInventoryTransactionFailed = errors.New("inventory transaction failed")
 	// ErrInsufficientStock is returned when an adjustment would drive stock
 	// below zero. Negative stock is treated as data corruption, not a valid state.
 	ErrInsufficientStock = errors.New("insufficient stock: adjustment would result in negative quantity")
@@ -74,9 +73,4 @@ type ValuationPage struct {
 	HasMore    bool            `json:"has_more"`
 	Limit      int64           `json:"limit"`
 	Offset     int64           `json:"offset"`
-}
-
-// CentsToFloat converts integer cents to standard float amount.
-func CentsToFloat(cents int64) float64 {
-	return float64(cents) / 100.0
 }

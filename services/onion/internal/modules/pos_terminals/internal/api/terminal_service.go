@@ -57,8 +57,12 @@ func (a *TerminalAPI) CreateTerminal(ctx context.Context, req *posterminalv1.Cre
 	}
 
 	deviceID := req.GetDeviceId()
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	id, createErr := a.Service.Create(ctx, domain.TerminalInput{
-		BusinessID: user.BusinessID,
+		BusinessID: businessID,
 		BranchID:   req.GetBranchId(),
 		Name:       req.GetName(),
 		DeviceID:   &deviceID,
@@ -81,9 +85,13 @@ func (a *TerminalAPI) UpdateTerminal(ctx context.Context, req *posterminalv1.Upd
 	}
 
 	deviceID := body.GetDeviceId()
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	if updateErr := a.Service.Update(ctx, domain.TerminalUpdateInput{
 		ID:         req.GetId(),
-		BusinessID: user.BusinessID,
+		BusinessID: businessID,
 		BranchID:   body.GetBranchId(),
 		Name:       body.GetName(),
 		DeviceID:   &deviceID,
@@ -103,7 +111,11 @@ func (a *TerminalAPI) HeartbeatTerminal(ctx context.Context, req *posterminalv1.
 		return nil, onekiterrors.New(http.StatusBadRequest, "Terminal ID is required")
 	}
 
-	if heartbeatErr := a.Service.Heartbeat(ctx, req.GetTerminalId(), user.BusinessID); heartbeatErr != nil {
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if heartbeatErr := a.Service.Heartbeat(ctx, req.GetTerminalId(), businessID); heartbeatErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update heartbeat")
 	}
 	return &posterminalv1.HeartbeatTerminalResponse{Message: "Heartbeat updated successfully"}, nil

@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -55,7 +56,7 @@ func (m *Module) executeListSegmentsTool(ctx context.Context, input map[string]a
 	}
 	segments = filterSegmentsForTool(segments, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(segments))
 	if start > len(segments) {
 		start = len(segments)
 	}

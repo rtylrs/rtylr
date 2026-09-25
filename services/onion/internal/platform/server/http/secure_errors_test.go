@@ -2,32 +2,11 @@ package http
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
-
-func TestSanitizeError_NilStaysNil(t *testing.T) {
-	if err := SanitizeError(nil); err != nil {
-		t.Errorf("expected nil, got %v", err)
-	}
-}
-
-func TestSanitizeError_HidesUnderlyingError(t *testing.T) {
-	original := errors.New("connection string admin:secret@db.internal/payroll")
-	sanitized := SanitizeError(original)
-	if errors.Is(sanitized, original) {
-		t.Fatal("expected a new error, got the original (would leak internals)")
-	}
-	if strings.Contains(sanitized.Error(), "secret") || strings.Contains(sanitized.Error(), "internal") {
-		t.Errorf("sanitized error leaked internals: %q", sanitized.Error())
-	}
-	if sanitized.Error() == "" {
-		t.Error("sanitized error should still describe something")
-	}
-}
 
 func TestSecureErrorMiddleware_HappyPath(t *testing.T) {
 	handler := SecureErrorMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

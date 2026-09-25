@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/support_customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_customers/internal/infrastructure/persistence/sqlc"
@@ -75,6 +76,9 @@ func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (*domain
 		BusinessID: businessID,
 		ID:         id,
 	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrCustomerNotFound
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get support customer", logger.Error(err))
 		return nil, err

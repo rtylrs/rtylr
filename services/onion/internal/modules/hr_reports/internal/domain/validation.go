@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	ErrInvalidReportType = errors.New("invalid report type")
 	ErrMissingDateRange  = errors.New("report date range is required")
 	ErrDateRangeInverted = errors.New("report date_from must be before date_to")
 	ErrDateRangeTooLarge = errors.New("report date range exceeds the maximum interactive window")

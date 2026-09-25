@@ -146,8 +146,3 @@ func (a *FinancialAPI) GetInvoiceAging(ctx context.Context, _ *insightsfinancial
 		},
 	}, nil
 }
-
-// CentsToFloat converts integer cents to standard float amount.
-func CentsToFloat(cents int64) float64 {
-	return float64(cents) / 100.0
-}

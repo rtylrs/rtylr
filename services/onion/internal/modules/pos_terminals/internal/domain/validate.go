@@ -1,6 +1,9 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // ValidateTerminalInput returns an error when the create input is malformed.
 func ValidateTerminalInput(input TerminalInput) error {
@@ -32,5 +35,8 @@ func ValidateTerminalUpdateInput(input TerminalUpdateInput) error {
 
 // IsOnline reports whether the terminal has recently been seen (within the last 5 minutes).
 func (t Terminal) IsOnline() bool {
-	return t.LastSeenAt != nil
+	if t.LastSeenAt == nil {
+		return false
+	}
+	return time.Since(*t.LastSeenAt) <= 5*time.Minute
 }

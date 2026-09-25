@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 )
@@ -33,25 +32,6 @@ type AccountTreeNode struct {
 	Type     string             `json:"type"`
 	Children []*AccountTreeNode `json:"children"`
 }
-
-func (a *Account) FromRow(row *sql.Rows) error {
-	var currency sql.NullString
-
-	err := row.Scan(
-		&a.ID, &a.OwnerID, &a.Name, &a.Type, &currency,
-		&a.Balance, &a.IsActive, &a.CreatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if currency.Valid {
-		a.Currency = currency.String
-	}
-
-	return nil
-}
-
 type AccountInput struct {
 	Name     string  `json:"name"`
 	Code     string  `json:"code"`

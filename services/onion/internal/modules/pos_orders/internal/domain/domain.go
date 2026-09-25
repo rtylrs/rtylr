@@ -347,12 +347,6 @@ type DiscountInput struct {
 }
 
 // ─── Transfer Table ──────────────────────────────────────────────────────────
-
-type TransferTableInput struct {
-	OrderID    int64
-	NewTableID int64
-}
-
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 type DashboardStats struct {

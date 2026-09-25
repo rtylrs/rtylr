@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ShareReviewRoutes() []string { return []string{"/hr/performance/reviews/{id}/share"} }
@@ -30,7 +31,12 @@ func (h *ShareReviewHandler) Serve(ctx context.Context, req *ShareReviewRequest)
 		return ShareReviewResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.Service.ShareReviewWithEmployee(ctx, device.User.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ShareReviewResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err := h.Service.ShareReviewWithEmployee(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrReviewNotFound) {
 			return ShareReviewResponse{}, onekiterrors.New(http.StatusNotFound, "Review not found")

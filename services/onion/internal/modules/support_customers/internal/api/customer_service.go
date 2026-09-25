@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -59,6 +60,9 @@ func (a *CustomerAPI) GetCustomer(ctx context.Context, req *supportcustomerv1.Ge
 	}
 
 	customer, err := a.service.GetByID(ctx, businessID, req.GetId())
+	if errors.Is(err, domain.ErrCustomerNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Support customer not found")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get support customer")
 	}

@@ -16,11 +16,6 @@ type ActiveSession struct {
 	CreatedAt time.Time `json:"created_at"`
 	IsCurrent bool      `json:"is_current"`
 }
-
-type TwoFactorInput struct {
-	Enabled bool `json:"enabled"`
-}
-
 type LoginEntry struct {
 	ID        int64     `json:"id"`
 	Email     string    `json:"email"`

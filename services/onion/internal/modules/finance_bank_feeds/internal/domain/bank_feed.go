@@ -1,11 +1,8 @@
 package domain
 
 import (
-	"errors"
 	"time"
 )
-
-var ErrBankFeedTransactionNotFound = errors.New("bank feed transaction not found")
 
 // BankFeedTransaction is a single transaction imported from a bank feed.
 // Amounts are stored as integer minor units (cents for USD, etc.) — never

@@ -26,10 +26,6 @@ type CheckoutCreateInput struct {
 	Total         float64 `json:"total"`
 }
 
-type CheckoutCompleteInput struct {
-	ID int64 `json:"id"`
-}
-
 // CentsToFloat converts integer cents to standard float amount.
 func CentsToFloat(cents int64) float64 {
 	return float64(cents) / 100.0

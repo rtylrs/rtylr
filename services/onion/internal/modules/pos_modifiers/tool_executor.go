@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -61,7 +62,7 @@ func (m *Module) executeListPOSModifiersTool(ctx context.Context, input map[stri
 	}
 	modifiers = filterPOSModifiersForTool(modifiers, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(modifiers))
 	if start > len(modifiers) {
 		start = len(modifiers)
 	}

@@ -235,9 +235,3 @@ func (s *Service) SocialAuthorizationURL(provider string) (string, error) {
 	}
 	return s.workOSProvider.GetAuthorizationURL(provider)
 }
-
-// GoogleAuthorizationURL is the Google-specific shorthand, kept for callers
-// that predate multi-provider support.
-func (s *Service) GoogleAuthorizationURL() (string, error) {
-	return s.SocialAuthorizationURL("google")
-}

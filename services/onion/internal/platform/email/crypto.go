@@ -92,17 +92,6 @@ func parseEncryptionKey(raw string) ([]byte, error) {
 	return nil, errors.New("invalid encryption key")
 }
 
-// encryptionKey is retained for package-local compatibility. New encryption
-// must use encryptionKeys so an invalid current key cannot be mistaken for a
-// valid fallback key.
-func encryptionKey() []byte {
-	keys, _, invalid := encryptionKeys()
-	if invalid || len(keys) == 0 {
-		return nil
-	}
-	return keys[0]
-}
-
 // DecodeHex decodes the hexadecimal key representation accepted by
 // EMAIL_ENCRYPTION_KEY. It is exported for the queue package's compatibility
 // tests and keeps key parsing in one place.

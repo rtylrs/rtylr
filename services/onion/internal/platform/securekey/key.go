@@ -3,7 +3,6 @@ package securekey
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
 	"strings"
@@ -52,12 +51,4 @@ func Generate(opts Options) (Secret, error) {
 func Hash(secret string) string {
 	sum := sha256.Sum256([]byte(strings.TrimSpace(secret)))
 	return hex.EncodeToString(sum[:])
-}
-
-func ConstantTimeEqual(secret, expectedHash string) bool {
-	incoming := Hash(secret)
-	if len(incoming) != len(expectedHash) {
-		return false
-	}
-	return subtle.ConstantTimeCompare([]byte(incoming), []byte(expectedHash)) == 1
 }

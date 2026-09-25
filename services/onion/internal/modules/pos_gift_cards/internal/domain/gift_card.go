@@ -44,8 +44,3 @@ type RedeemInput struct {
 	Code    string  `json:"code"`
 	Amount  float64 `json:"amount"`
 }
-
-// CentsToFloat converts integer cents to standard float amount.
-func CentsToFloat(cents int64) float64 {
-	return float64(cents) / 100.0
-}

@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 )
@@ -27,49 +26,6 @@ type Variant struct {
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
-
-func (v *Variant) FromRow(row *sql.Rows) error {
-	var (
-		sku        sql.NullString
-		barcode    sql.NullString
-		attributes sql.NullString
-	)
-
-	err := row.Scan(
-		&v.ID,
-		&v.OwnerID,
-		&v.BusinessID,
-		&v.ProductID,
-		&v.Name,
-		&sku,
-		&barcode,
-		&v.CostPrice,
-		&v.SalePrice,
-		&v.StockQuantity,
-		&attributes,
-		&v.IsActive,
-		&v.CreatedAt,
-		&v.UpdatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if sku.Valid {
-		v.SKU = sku.String
-	}
-
-	if barcode.Valid {
-		v.Barcode = barcode.String
-	}
-
-	if attributes.Valid {
-		v.Attributes = attributes.String
-	}
-
-	return nil
-}
-
 type VariantInput struct {
 	ProductID     int64   `json:"product_id"`
 	Name          string  `json:"name"`

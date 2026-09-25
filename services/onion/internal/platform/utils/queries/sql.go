@@ -3,10 +3,7 @@ package queries
 import (
 	"database/sql"
 	"reflect"
-	"strconv"
 	"time"
-
-	"github.com/voxire/onion/internal/platform/utils/times"
 )
 
 // NullStringOrEmpty craft sql.NullString object based on the input, if value is empty string set to null.
@@ -25,14 +22,6 @@ func NullStringOrEmpty(value string) sql.NullString {
 func EmptyNullString() sql.NullString {
 	return sql.NullString{
 		Valid: false,
-	}
-}
-
-// Int16 craft sql.NullInt32 object based on the input.
-func Int16(value int16) sql.NullInt16 {
-	return sql.NullInt16{
-		Int16: value,
-		Valid: true,
 	}
 }
 
@@ -70,75 +59,9 @@ func EmptyNullTime() sql.NullTime {
 		Valid: false,
 	}
 }
-
-func NullInt64(value int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: value, Valid: true}
-}
-
-func NullInt16(value int16) sql.NullInt16 {
-	return sql.NullInt16{Int16: value, Valid: true}
-}
-
-func NullInt32(value int32) sql.NullInt32 {
-	return sql.NullInt32{Int32: value, Valid: true}
-}
-
-func StringToNullInt16(value string) sql.NullInt16 {
-	num, err := strconv.ParseInt(value, 10, 16)
-	if err != nil {
-		return sql.NullInt16{}
-	}
-
-	return sql.NullInt16{
-		Int16: int16(num),
-		Valid: true,
-	}
-}
-
-func BoolToNullInt16(b bool) sql.NullInt16 {
-	if b {
-		return sql.NullInt16{Int16: 1, Valid: true}
-	}
-
-	return sql.NullInt16{Int16: 0, Valid: true}
-}
-
-func NullTimeOrZero(t time.Time) sql.NullTime {
-	if t.IsZero() {
-		return sql.NullTime{Valid: false}
-	}
-
-	return sql.NullTime{Time: t, Valid: true}
-}
-
-func StringToNullInt32(value string) sql.NullInt32 {
-	num, err := strconv.ParseInt(value, 10, 32)
-	if err != nil {
-		return sql.NullInt32{}
-	}
-
-	return sql.NullInt32{
-		Int32: int32(num),
-		Valid: true,
-	}
-}
-
 func Bool(value bool) sql.NullBool {
 	return sql.NullBool{
 		Bool:  value,
-		Valid: true,
-	}
-}
-
-// DateTimeStringToNullTime converts a string of 2006-01-02 15:04:05 format to a sql.NullTime object.
-func DateTimeStringToNullTime(value string) sql.NullTime {
-	parsedTime, err := time.Parse(times.FormatWithDateTime, value)
-	if err != nil {
-		return sql.NullTime{}
-	}
-
-	return sql.NullTime{
-		Time:  parsedTime,
 		Valid: true,
 	}
 }

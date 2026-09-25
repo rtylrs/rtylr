@@ -17,10 +17,6 @@ FROM pos_order_items
 WHERE order_id IN (sqlc.slice('order_ids'))
 ORDER BY id;
 
--- name: UpdateKDSItemStatus :exec
--- cross-schema write to pos_order_items (POS orders module) — apply a kitchen status transition to an item.
-UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
-
 -- name: UpdateKDSItemStatusByItemID :exec
 -- cross-schema read from pos_orders and write to pos_order_items (POS orders module) — authorize and apply a kitchen status transition by item ID.
 UPDATE pos_order_items oi

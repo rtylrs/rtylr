@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 )
@@ -21,24 +20,6 @@ type RecurringInvoice struct {
 	EndDate           time.Time `json:"end_date"`
 	IsActive          bool      `json:"is_active"`
 	CreatedAt         time.Time `json:"created_at"`
-}
-
-func (r *RecurringInvoice) FromRow(row *sql.Rows) error {
-	var endDate sql.NullTime
-
-	err := row.Scan(
-		&r.ID, &r.OwnerID, &r.TemplateInvoiceID, &r.Frequency,
-		&r.NextInvoiceDate, &endDate, &r.IsActive, &r.CreatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if endDate.Valid {
-		r.EndDate = endDate.Time
-	}
-
-	return nil
 }
 
 // RecurringInvoiceInput carries the writable recurring invoice fields. The

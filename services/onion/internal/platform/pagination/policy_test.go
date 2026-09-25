@@ -37,3 +37,21 @@ func TestPolicyNormalizeAvoidsOverflowWithoutConfiguredOffsetCap(t *testing.T) {
 		t.Fatalf("normalized offset = %d, want %d", got.Offset, maxInt64)
 	}
 }
+
+func TestSliceStartSaturatesInsteadOfOverflowing(t *testing.T) {
+	for _, tc := range []struct {
+		page, size int64
+		length     int
+		want       int
+	}{
+		{1, 20, 100, 0},
+		{2, 20, 100, 20},
+		{6, 20, 100, 100},
+		{1 << 62, 20, 100, 100},
+		{1 << 62, 1<<62 - 1, 100, 100},
+	} {
+		if got := SliceStart(tc.page, tc.size, tc.length); got != tc.want {
+			t.Fatalf("SliceStart(%d, %d, %d) = %d, want %d", tc.page, tc.size, tc.length, got, tc.want)
+		}
+	}
+}

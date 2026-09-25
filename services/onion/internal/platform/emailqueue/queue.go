@@ -15,7 +15,6 @@ import (
 )
 
 const (
-	PriorityCritical = 10
 	PriorityHigh     = 5
 	PriorityNormal   = 1
 	maxWorkers       = 50

@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 )
 
 const (
@@ -60,7 +61,7 @@ func (m *Module) executeListPOSTerminalsTool(ctx context.Context, input map[stri
 	}
 	terminals = filterPOSTerminalsForTool(terminals, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(terminals))
 	if start > len(terminals) {
 		start = len(terminals)
 	}

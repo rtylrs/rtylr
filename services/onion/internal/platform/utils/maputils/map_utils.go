@@ -47,31 +47,6 @@ func GroupBy[K comparable, V any](items []V, getKey func(V) K) map[K][]V {
 
 	return result
 }
-
-func MapGroupByValue[K comparable, V any, T comparable](source map[K]V, transformer func(V) T) map[T][]K {
-	result := make(map[T][]K)
-
-	for key, value := range source {
-		transformedKey := transformer(value)
-		if !HasKey(result, transformedKey) {
-			result[transformedKey] = []K{}
-		}
-
-		result[transformedKey] = append(result[transformedKey], key)
-	}
-
-	return result
-}
-
-func Values[K comparable, V any](m map[K]V) []V {
-	values := make([]V, 0, len(m))
-	for _, v := range m {
-		values = append(values, v)
-	}
-
-	return values
-}
-
 func Map[K comparable, V, T any](source map[K]V, transformer func(V) T) map[K]T {
 	result := make(map[K]T)
 	for k, v := range source {
@@ -97,17 +72,6 @@ func HasKey[K comparable, V any](source map[K]V, key K) bool {
 
 	return false
 }
-
-func HasAnyKey[K comparable, V any](source map[K]V, keys []K) bool {
-	for _, key := range keys {
-		if _, ok := source[key]; ok {
-			return true
-		}
-	}
-
-	return false
-}
-
 func HasAllKeys[K comparable, V any](source map[K]V, keys []K) bool {
 	for _, key := range keys {
 		if _, ok := source[key]; !ok {
@@ -117,17 +81,6 @@ func HasAllKeys[K comparable, V any](source map[K]V, keys []K) bool {
 
 	return true
 }
-
-func HasAny[K comparable, V any](source map[K]V, keys []K) bool {
-	for _, key := range keys {
-		if HasKey(source, key) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func Filter[K comparable, V any](source map[K]V, filter func(V) bool) map[K]V {
 	result := make(map[K]V)
 

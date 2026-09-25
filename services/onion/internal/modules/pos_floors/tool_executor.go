@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 )
 
 const (
@@ -59,7 +60,7 @@ func (m *Module) executeListPOSFloorsTool(ctx context.Context, input map[string]
 	}
 	floors = filterPOSFloorsForTool(floors, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(floors))
 	if start > len(floors) {
 		start = len(floors)
 	}

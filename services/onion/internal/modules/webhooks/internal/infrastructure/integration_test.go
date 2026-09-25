@@ -253,13 +253,12 @@ func TestWebhooks_List_EachHasNonEmptyURL(t *testing.T) {
 	}
 }
 
-func TestWebhooks_Delete_WrongOwner_NoError(t *testing.T) {
+func TestWebhooks_Delete_UnknownID_ReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	// Deleting against wrong owner or non-existent ID should not error.
 	err := repo.Delete(context.Background(), 9999999, 9999999)
-	if err != nil {
-		t.Fatalf("Delete non-existent: %v", err)
+	if !errors.Is(err, domain.ErrWebhookNotFound) {
+		t.Fatalf("Delete non-existent error = %v, want %v", err, domain.ErrWebhookNotFound)
 	}
 }
 

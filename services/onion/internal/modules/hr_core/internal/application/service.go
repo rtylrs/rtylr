@@ -260,54 +260,6 @@ func (s *Service) ListWorkSchedules(ctx context.Context, ownerID int64, limit, o
 func (s *Service) CountWorkSchedules(ctx context.Context, ownerID int64) (int64, error) {
 	return s.repo.CountWorkSchedules(ctx, ownerID)
 }
-
-func (s *Service) GetEffectiveSchedule(ctx context.Context, ownerID, employeeID int64) (*domain.WorkScheduleRecord, error) {
-	ws, err := s.repo.GetWorkScheduleForEmployee(ctx, ownerID, employeeID)
-	if err != nil {
-		return nil, err
-	}
-	if ws != nil {
-		return ws, nil
-	}
-
-	emp, err := s.repo.GetEmployee(ctx, ownerID, employeeID)
-	if err != nil {
-		return nil, err
-	}
-
-	if emp.DepartmentID > 0 {
-		depts, deptErr := s.repo.ListDepartments(ctx, ownerID, 0)
-		if deptErr == nil {
-			for _, dept := range depts {
-				if dept.ID == emp.DepartmentID && emp.LocationID > 0 {
-					break
-				}
-			}
-		}
-	}
-
-	cfg, err := s.repo.GetHRConfig(ctx, ownerID)
-	if err != nil {
-		return nil, nil
-	}
-	if cfg.DefaultWorkScheduleID > 0 {
-		// Scanning for one id by name order. 500 was this query's previous hard
-		// LIMIT and stays the bound; a tenant with more schedules than that has
-		// a different problem than this lookup.
-		schedules, listErr := s.repo.ListWorkSchedules(ctx, ownerID, 500, 0)
-		if listErr != nil {
-			return nil, nil
-		}
-		for i, sched := range schedules {
-			if sched.ID == cfg.DefaultWorkScheduleID {
-				return &schedules[i], nil
-			}
-		}
-	}
-
-	return nil, nil
-}
-
 func (s *Service) CreateWorkSchedule(ctx context.Context, ownerID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
 	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.CreateWorkSchedule(ctx, ownerID, ws)

@@ -1,0 +1,205 @@
+package config
+
+import (
+	"os"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// envOrDefault returns the env var value, or fallback when it's unset/empty.
+func envOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+// envTrimmedOrDefault is envOrDefault for values where surrounding whitespace is
+// never meaningful, such as a URL. A variable set to spaces by a shell export or
+// a compose file means the same as unset, and passing those spaces through
+// produces an address nothing can reach.
+func envTrimmedOrDefault(key, fallback string) string {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		return v
+	}
+	return fallback
+}
+
+// envFirst returns the value of the first set/non-empty env var in keys, or "".
+// Used to accept a customer-facing name and an internal alias (e.g. the
+// documented RTYLR_LICENSE_KEY plus the legacy LICENSE_KEY).
+func envFirst(keys ...string) string {
+	for _, k := range keys {
+		if v := strings.TrimSpace(os.Getenv(k)); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// envIntOrDefault parses an int env var, returning fallback when unset or
+// unparseable.
+func envIntOrDefault(key string, fallback int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return fallback
+	}
+	return n
+}
+
+func positiveEnvIntOrDefault(key string, fallback int) int {
+	n := envIntOrDefault(key, fallback)
+	if n <= 0 {
+		return fallback
+	}
+	return n
+}
+
+func envDurationOrDefault(key string, fallback time.Duration) time.Duration {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	d, err := time.ParseDuration(v)
+	if err != nil {
+		return fallback
+	}
+	return d
+}
+
+func GetOpenAIAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.OpenAIAPIKey
+	}
+	return os.Getenv(OpenAIAPIKeyEnvVar)
+}
+
+func GetOpenAIOrgID() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.OpenAIOrgID
+	}
+	return os.Getenv(OpenAIOrgIDEnvVar)
+}
+
+func GetOpenAIBaseURL() string {
+	var baseURL string
+	if GlobalConfig != nil {
+		baseURL = GlobalConfig.OpenAIBaseURL
+	} else {
+		baseURL = os.Getenv(OpenAIBaseURLEnvVar)
+	}
+
+	if baseURL == "" {
+		return "https://api.openai.com/v1"
+	}
+
+	return baseURL
+}
+
+func IsOpenAIConfigured() bool {
+	return GetOpenAIAPIKey() != ""
+}
+
+func GetGeminiAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.GeminiAPIKey
+	}
+	return os.Getenv(GeminiAPIKeyEnvVar)
+}
+
+func IsGeminiConfigured() bool {
+	return GetGeminiAPIKey() != ""
+}
+
+func GetOpenCodeAPIKey() string {
+	if GlobalConfig != nil {
+		return strings.TrimSpace(GlobalConfig.OpenCodeAPIKey)
+	}
+	return strings.TrimSpace(os.Getenv(OpenCodeAPIKeyEnvVar))
+}
+
+func GetOpenCodeBaseURL() string { return OpenCodeBaseURL }
+func GetOpenCodeModel() string   { return OpenCodeModel }
+
+func IsOpenCodeConfigured() bool {
+	return GetOpenCodeAPIKey() != ""
+}
+
+func GetDeepSeekAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.DeepSeekAPIKey
+	}
+	return os.Getenv(DeepSeekAPIKeyEnvVar)
+}
+
+// GetDeepSeekBaseURL / GetDeepSeekModel return the hardcoded values — they are
+// intentionally not env-configurable.
+func GetDeepSeekBaseURL() string { return DeepSeekBaseURL }
+func GetDeepSeekModel() string   { return DeepSeekModel }
+
+func IsDeepSeekConfigured() bool {
+	return GetDeepSeekAPIKey() != ""
+}
+
+func GetNvidiaNIMAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.NvidiaNIMAPIKey
+	}
+	return os.Getenv(NvidiaNIMAPIKeyEnvVar)
+}
+
+// GetNvidiaNIMBaseURL / GetNvidiaNIMModel return the hardcoded values.
+func GetNvidiaNIMBaseURL() string { return NvidiaNIMBaseURL }
+func GetNvidiaNIMModel() string   { return NvidiaNIMModel }
+
+func IsNvidiaNIMConfigured() bool {
+	return GetNvidiaNIMAPIKey() != ""
+}
+
+// GetAIPrimaryProvider returns the operator's preferred primary provider
+// ("deepseek" | "nvidia"), or "" for the default priority order.
+func GetAIPrimaryProvider() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.AIPrimaryProvider
+	}
+	return os.Getenv(AIPrimaryProviderEnvVar)
+}
+
+func IsAnyAIConfigured() bool {
+	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
+}
+
+// GetLicenseSigningPrivateKey returns the private key used to sign self-host
+// license keys (license authority runmode).
+func GetLicenseSigningPrivateKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.LicenseSigningPrivateKey
+	}
+	return os.Getenv("LICENSE_SIGNING_PRIVATE_KEY")
+}
+
+// GetLicensePublicKey returns the public key used to verify license keys on
+// self-host deployments.
+func GetLicensePublicKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.LicensePublicKey
+	}
+	return os.Getenv("LICENSE_PUBLIC_KEY")
+}
+
+// GetLicenseIssuer returns the issuer name embedded in generated license keys,
+// defaulting to "voxire" when unset.
+func GetLicenseIssuer() string {
+	if GlobalConfig != nil && GlobalConfig.LicenseIssuer != "" {
+		return GlobalConfig.LicenseIssuer
+	}
+	if v := strings.TrimSpace(os.Getenv("LICENSE_ISSUER")); v != "" {
+		return v
+	}
+	return "voxire"
+}

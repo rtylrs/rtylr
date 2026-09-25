@@ -220,15 +220,6 @@ func Query(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	return rows, nil
 }
 
-// QueryRow runs a single-row query against Trino.
-func QueryRow(ctx context.Context, query string, args ...any) (*sql.Row, error) {
-	db, err := requireDB()
-	if err != nil {
-		return nil, err
-	}
-	return db.QueryRowContext(ctx, query, args...), nil
-}
-
 // Ping checks Trino connectivity with a lightweight query.
 func Ping(ctx context.Context) error {
 	db, err := requireDB()

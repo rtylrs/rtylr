@@ -72,6 +72,28 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 				BusinessID:    row.BusinessID,
 			})
 		}
+	} else if dateTo != "" {
+		end := parseTime(dateTo).AddDate(0, 0, 1)
+		rows, err := r.queries.ListReceiptsWithDateTo(ctx, sqlc.ListReceiptsWithDateToParams{
+			BusinessID: businessID,
+			PaidAt:     sql.NullTime{Time: end, Valid: true},
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
+			return nil, err
+		}
+		receipts = make([]domain.Receipt, 0, len(rows))
+		for _, row := range rows {
+			receipts = append(receipts, domain.Receipt{
+				ID:            row.ID,
+				OrderNumber:   row.OrderNumber,
+				CustomerName:  row.CustomerName.String,
+				Total:         sqlutil.DecimalToFloat(row.Total.String),
+				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
+				PaidAt:        row.PaidAt.Time,
+				BusinessID:    row.BusinessID,
+			})
+		}
 	} else {
 		rows, err := r.queries.ListReceipts(ctx, businessID)
 		if err != nil {

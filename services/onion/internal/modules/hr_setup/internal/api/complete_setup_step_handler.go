@@ -12,6 +12,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CompleteSetupStepRoutes() []string { return []string{"/hr/setup/steps/{stepKey}/complete"} }
@@ -30,7 +31,12 @@ func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupSt
 
 	stepKey := chi.URLParamFromCtx(ctx, "stepKey")
 
-	err := h.Service.CompleteSetupStep(ctx, device.User.UserID, stepKey)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err := h.Service.CompleteSetupStep(ctx, businessID, stepKey)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidStepKey) {
 			return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid step key")

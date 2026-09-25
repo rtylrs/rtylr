@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	posfloorv1 "github.com/voxire/voxie/gen/go/pos/floor/v1"
 )
 
@@ -25,8 +26,12 @@ func (a *FloorAPI) ListFloors(ctx context.Context, req *posfloorv1.ListFloorsReq
 	if err != nil {
 		return nil, err
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	floors, listErr := a.Service.List(ctx, user.BusinessID, req.GetBranchId())
+	floors, listErr := a.Service.List(ctx, businessID, req.GetBranchId())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list floors")
 	}
@@ -44,12 +49,16 @@ func (a *FloorAPI) CreateFloor(ctx context.Context, req *posfloorv1.CreateFloorR
 	if err != nil {
 		return nil, err
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	if strings.TrimSpace(req.GetName()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
 	}
 
 	id, createErr := a.Service.Create(ctx, domain.FloorInput{
-		BusinessID: user.BusinessID,
+		BusinessID: businessID,
 		BranchID:   req.GetBranchId(),
 		Name:       req.GetName(),
 		SortOrder:  int(req.GetSortOrder()),
@@ -66,6 +75,10 @@ func (a *FloorAPI) UpdateFloor(ctx context.Context, req *posfloorv1.UpdateFloorR
 	if err != nil {
 		return nil, err
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	body := req.GetBody()
 	if body == nil || strings.TrimSpace(body.GetName()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
@@ -73,7 +86,7 @@ func (a *FloorAPI) UpdateFloor(ctx context.Context, req *posfloorv1.UpdateFloorR
 
 	if updateErr := a.Service.Update(ctx, domain.FloorUpdateInput{
 		ID:         req.GetId(),
-		BusinessID: user.BusinessID,
+		BusinessID: businessID,
 		Name:       body.GetName(),
 		SortOrder:  int(body.GetSortOrder()),
 	}); updateErr != nil {
@@ -88,8 +101,12 @@ func (a *FloorAPI) DeleteFloor(ctx context.Context, req *posfloorv1.DeleteFloorR
 	if err != nil {
 		return nil, err
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	if deleteErr := a.Service.Delete(ctx, user.BusinessID, req.GetId()); deleteErr != nil {
+	if deleteErr := a.Service.Delete(ctx, businessID, req.GetId()); deleteErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete floor")
 	}
 

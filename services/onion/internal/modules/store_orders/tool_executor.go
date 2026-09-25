@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -66,7 +67,7 @@ func (m *Module) executeListStoreOrdersTool(ctx context.Context, input map[strin
 	}
 	orders = filterStoreOrdersForTool(orders, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(orders))
 	if start > len(orders) {
 		start = len(orders)
 	}

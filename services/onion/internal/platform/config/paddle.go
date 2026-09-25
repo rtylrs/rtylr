@@ -28,14 +28,6 @@ func GetPaddleWebhookSecret() string {
 	}
 	return os.Getenv(PaddleWebhookSecretEnvVar)
 }
-
-func GetPaddleClientToken() string {
-	if GlobalConfig != nil {
-		return GlobalConfig.PaddleClientToken
-	}
-	return os.Getenv(PaddleClientTokenEnvVar)
-}
-
 func IsPaddleSandbox() bool {
 	if GlobalConfig != nil {
 		return GlobalConfig.PaddleSandbox

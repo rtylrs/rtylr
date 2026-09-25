@@ -37,7 +37,7 @@ INSERT INTO hr_employees (
     address, emergency_contact_name, emergency_contact_phone, notes
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: UpdateEmployee :exec
+-- name: UpdateEmployee :execrows
 UPDATE hr_employees
 SET user_id = ?, department_id = ?, location_id = ?, work_schedule_id = ?,
     first_name = ?, last_name = ?, email = ?, phone = ?,

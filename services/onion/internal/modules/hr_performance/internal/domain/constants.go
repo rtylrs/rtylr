@@ -18,13 +18,6 @@ const (
 	CycleTypeAdHoc     = "adhoc"
 )
 
-// Performance review status values.
-const (
-	ReviewStatusDraft     = "draft"
-	ReviewStatusSubmitted = "submitted"
-	ReviewStatusShared    = "shared"
-)
-
 // Review type values.
 const (
 	ReviewTypeSelf    = "self"

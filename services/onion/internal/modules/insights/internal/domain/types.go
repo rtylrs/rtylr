@@ -5,8 +5,6 @@
 // DECIMAL columns in finance/pos/erp happen at the infrastructure boundary.
 package domain
 
-import "time"
-
 // MoneyCard is the shared envelope for a single headline metric card.
 // The frontend renders `{ value, delta_pct }` consistently across widgets.
 type MoneyCard struct {
@@ -38,10 +36,4 @@ type DashboardSnapshot struct {
 type RevenuePoint struct {
 	Date             string `json:"date"`
 	AmountMinorUnits int64  `json:"amount_minor_units"`
-}
-
-// DateRange represents an [from, to] inclusive date window.
-type DateRange struct {
-	From time.Time
-	To   time.Time
 }

@@ -12,8 +12,6 @@ import (
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
-func ClockOutRoutes() []string { return []string{"/hr/attendance/clock-out"} }
-
 type clockOutService interface {
 	ClockOut(ctx context.Context, businessID, employeeID int64) (*domain.AttendanceRecordRecord, error)
 }

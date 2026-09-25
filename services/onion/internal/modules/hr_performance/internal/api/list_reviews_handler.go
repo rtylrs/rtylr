@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
@@ -44,7 +45,12 @@ func (h *ListReviewsHandler) Serve(ctx context.Context, req *ListReviewsRequest)
 		limit = 100
 	}
 
-	reviews, total, err := h.Service.ListReviews(ctx, device.User.UserID, domain.ListReviewsParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListReviewsResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	reviews, total, err := h.Service.ListReviews(ctx, businessID, domain.ListReviewsParams{
 		CycleID:    req.CycleID,
 		EmployeeID: req.EmployeeID,
 		Limit:      limit,

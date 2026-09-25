@@ -40,8 +40,6 @@ type ScheduledReportPage struct {
 	Total int64
 }
 
-var ScheduledReportErrNotFound = infrastructure.ErrScheduledReportNotFound
-
 var validCadences = map[string]bool{
 	"daily": true, "weekly": true, "monthly": true,
 }

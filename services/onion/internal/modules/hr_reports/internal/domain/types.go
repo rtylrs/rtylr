@@ -20,13 +20,6 @@ var SupportedReportTypes = map[string]bool{
 	ReportTypeTimesheetSummary:  true,
 }
 
-type ReportRecord struct {
-	ReportType string                   `json:"report_type"`
-	DateFrom   time.Time                `json:"date_from"`
-	DateTo     time.Time                `json:"date_to"`
-	Rows       []map[string]interface{} `json:"rows"`
-}
-
 type ReportParams struct {
 	ActorID      int64
 	OwnerID      int64

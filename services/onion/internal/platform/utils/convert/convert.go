@@ -58,11 +58,6 @@ func ToStringSlice(raw json.RawMessage) []string {
 
 	return values
 }
-
-func ToTimestamp(t sql.NullTime) sql.NullTime {
-	return t
-}
-
 func BoolToString(b bool) string {
 	if b {
 		return "1"

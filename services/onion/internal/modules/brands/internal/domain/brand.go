@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 )
@@ -19,44 +18,6 @@ type Brand struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
-
-func (b *Brand) FromRow(row *sql.Rows) error {
-	var (
-		logoURL      sql.NullString
-		description  sql.NullString
-		productCount sql.NullInt64
-	)
-
-	err := row.Scan(
-		&b.ID,
-		&b.OwnerID,
-		&b.BusinessID,
-		&b.Name,
-		&logoURL,
-		&description,
-		&productCount,
-		&b.CreatedAt,
-		&b.UpdatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if logoURL.Valid {
-		b.LogoURL = logoURL.String
-	}
-
-	if description.Valid {
-		b.Description = description.String
-	}
-
-	if productCount.Valid {
-		b.ProductCount = productCount.Int64
-	}
-
-	return nil
-}
-
 type BrandInput struct {
 	Name        string `json:"name"`
 	LogoURL     string `json:"logo_url"`

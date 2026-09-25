@@ -13,14 +13,6 @@ import (
 // blank prompt.
 var _ = domain.ConversationContext{}
 
-// MaxContextMessages is retained for compatibility with memory-side prompt
-// helpers. Caret's provider prompt no longer contains historical messages.
-const MaxContextMessages = 12
-
-// MaxMemoriesInPrompt is retained for compatibility with memory-side prompt
-// helpers. Caret's provider prompt no longer contains saved memory values.
-const MaxMemoriesInPrompt = 6
-
 const (
 	maxMessagePromptRunes = 2000
 )

@@ -81,25 +81,3 @@ func GetAuthUser(ctx context.Context) (*AuthUser, bool) {
 
 	return authUser, ok
 }
-
-func IsAuthenticated(ctx context.Context) bool {
-	_, ok := GetAuthUser(ctx)
-
-	return ok
-}
-
-func CopyRequestValues(base, request context.Context) context.Context {
-	if v := request.Value(AuthUserKey); v != nil {
-		base = context.WithValue(base, AuthUserKey, v)
-	}
-
-	if v := request.Value(deviceCtxKey{}); v != nil {
-		base = context.WithValue(base, deviceCtxKey{}, v)
-	}
-
-	if v := request.Value(productPlatformCtxKey{}); v != nil {
-		base = context.WithValue(base, productPlatformCtxKey{}, v)
-	}
-
-	return base
-}

@@ -1,11 +1,8 @@
 package domain
 
 import (
-	"errors"
 	"time"
 )
-
-var ErrFloorNotFound = errors.New("floor not found")
 
 type Floor struct {
 	ID         int64     `json:"id"`

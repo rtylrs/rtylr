@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
@@ -30,39 +29,6 @@ type Bill struct {
 	CreatedAt       time.Time    `json:"created_at"`
 	UpdatedAt       time.Time    `json:"updated_at"`
 }
-
-func (b *Bill) FromRow(row *sql.Rows) error {
-	var (
-		supplierID  sql.NullInt64
-		currency    sql.NullString
-		description sql.NullString
-	)
-
-	var supplierName sql.NullString
-	err := row.Scan(
-		&b.ID, &b.OwnerID, &b.BusinessID, &supplierID, &supplierName, &b.Amount, &currency,
-		&b.DueDate, &b.Status, &description, &b.CreatedAt, &b.UpdatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if supplierID.Valid {
-		b.SupplierID = supplierID.Int64
-	}
-	if supplierName.Valid {
-		b.SupplierName = supplierName.String
-	}
-	if currency.Valid {
-		b.Currency = currency.String
-	}
-	if description.Valid {
-		b.Description = description.String
-	}
-
-	return nil
-}
-
 type BillInput struct {
 	SupplierID      int64        `json:"supplier_id"`
 	SupplierName    string       `json:"supplier_name"`

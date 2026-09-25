@@ -2,13 +2,8 @@ package domain
 
 import (
 	"context"
-	"errors"
 	"time"
 )
-
-// ErrQuotaExceeded is returned when an owner/bucket on a hard-capped plan has
-// spent its monthly token allowance.
-var ErrQuotaExceeded = errors.New("ai monthly token quota exceeded")
 
 // Mode is the per-tenant allocation policy for the monthly AI allowance.
 type Mode string

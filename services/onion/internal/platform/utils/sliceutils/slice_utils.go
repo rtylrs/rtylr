@@ -1,10 +1,6 @@
 package sliceutils
 
 import (
-	cryptorand "crypto/rand"
-	"fmt"
-	"math/big"
-	"strconv"
 	"strings"
 )
 
@@ -16,24 +12,6 @@ func Map[S, T any](source []S, transformer func(S) T) []T {
 
 	return result
 }
-
-func ToBoolMap[K comparable](source []K) map[K]bool {
-	result := map[K]bool{}
-	for _, item := range source {
-		result[item] = true
-	}
-
-	return result
-}
-
-func EmptyIfNil[S any](s []S) []S {
-	if s == nil {
-		return []S{}
-	}
-
-	return s
-}
-
 func Contains[S comparable](s []S, t S) bool {
 	for _, val := range s {
 		if val == t {
@@ -109,22 +87,6 @@ func Equals[S comparable](s, t []S) bool {
 
 	return true
 }
-
-func Unique[S comparable](slice []S) []S {
-	keys := make(map[S]bool, len(slice))
-	list := make([]S, 0)
-
-	for _, entry := range slice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-
-			list = append(list, entry)
-		}
-	}
-
-	return list
-}
-
 func CountIf[T any](slice []T, getField func(T) bool) int {
 	count := 0
 
@@ -222,53 +184,6 @@ func ConcatUnique[V comparable](sources ...[]V) []V {
 
 	return result
 }
-
-func ConcatUniqueAny[V any](sources ...[]V) []V {
-	seen := make(map[string]struct{})
-
-	var result []V
-
-	toKey := func(v V) string {
-		return fmt.Sprintf("%#v", v)
-	}
-
-	for _, source := range sources {
-		for _, v := range source {
-			key := toKey(v)
-			if _, exists := seen[key]; !exists {
-				seen[key] = struct{}{}
-
-				result = append(result, v)
-			}
-		}
-	}
-
-	return result
-}
-
-func Index[V comparable](source []V, target V) (int, bool) {
-	for index, v := range source {
-		if v == target {
-			return index, true
-		}
-	}
-
-	return -1, false
-}
-
-func Shuffle[S any](slice []S) {
-	for i := 1; i < len(slice); i++ {
-		randomIndex, err := cryptorand.Int(cryptorand.Reader, big.NewInt(int64(i+1)))
-		if err != nil {
-			continue
-		}
-		r := int(randomIndex.Int64())
-		if i != r {
-			slice[r], slice[i] = slice[i], slice[r]
-		}
-	}
-}
-
 func Remove[V comparable](source []V, index int) []V {
 	if index >= len(source) || index < 0 {
 		return source
@@ -308,38 +223,6 @@ func Chunk[K any](s []K, chunkSize int) [][]K {
 
 	return chunks
 }
-
-func ToInterface[M comparable](m []M) []any {
-	s := make([]interface{}, len(m))
-	for i, v := range m {
-		s[i] = v
-	}
-
-	return s
-}
-
-func ToAny[T any](items []T) []any {
-	data := make([]any, len(items))
-	for i, v := range items {
-		data[i] = v
-	}
-
-	return data
-}
-
-func ToPlaceholders[M comparable](m []M) string {
-	if len(m) == 0 {
-		return ""
-	}
-
-	placeholders := make([]string, 0, len(m))
-	for range m {
-		placeholders = append(placeholders, "?")
-	}
-
-	return strings.Join(placeholders, ",")
-}
-
 func Insert[V any](slice []V, element V, index int) []V {
 	if index < 0 {
 		index = len(slice) + index + 1
@@ -373,15 +256,6 @@ func RemoveDuplicate[T comparable](t []T) []T {
 
 	return list
 }
-
-func Take[T any](t []T, count int) []T {
-	if len(t) < count {
-		return t
-	}
-
-	return t[:count]
-}
-
 func ToValueCountMap[S comparable](s []S) map[S]int {
 	result := map[S]int{}
 	for _, item := range s {
@@ -390,16 +264,6 @@ func ToValueCountMap[S comparable](s []S) map[S]int {
 
 	return result
 }
-
-func IntToString(intSlice []int) []string {
-	stringSlice := make([]string, len(intSlice))
-	for i, v := range intSlice {
-		stringSlice[i] = strconv.Itoa(v)
-	}
-
-	return stringSlice
-}
-
 func ToLowerStrings(s []string) []string {
 	result := make([]string, len(s))
 	for i, v := range s {

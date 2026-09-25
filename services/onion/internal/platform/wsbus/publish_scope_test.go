@@ -101,12 +101,25 @@ func TestPublishedTopicsHaveAuthorizers(t *testing.T) {
 	}
 	sort.Strings(scopes)
 
-	mainGo, readErr := os.ReadFile(filepath.Join(root, "cmd", "api", "main.go"))
+	apiDir := filepath.Join(root, "cmd", "api")
+	entries, readErr := os.ReadDir(apiDir)
 	if readErr != nil {
-		t.Fatalf("read main.go: %v", readErr)
+		t.Fatalf("read cmd/api: %v", readErr)
+	}
+	var apiSource strings.Builder
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") {
+			continue
+		}
+		raw, fileErr := os.ReadFile(filepath.Join(apiDir, entry.Name()))
+		if fileErr != nil {
+			t.Fatalf("read %s: %v", entry.Name(), fileErr)
+		}
+		apiSource.Write(raw)
+		apiSource.WriteString("\n")
 	}
 	for _, scope := range scopes {
-		if !strings.Contains(string(mainGo), `case "`+scope+`":`) {
+		if !strings.Contains(apiSource.String(), `case "`+scope+`":`) {
 			missingCase = append(missingCase, scope)
 		}
 	}

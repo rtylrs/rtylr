@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
@@ -25,51 +24,6 @@ type BankAccount struct {
 	LastSyncedAt time.Time    `json:"last_synced_at"`
 	CreatedAt    time.Time    `json:"created_at"`
 }
-
-func (b *BankAccount) FromRow(row *sql.Rows) error {
-	var (
-		institution  sql.NullString
-		accountType  sql.NullString
-		lastFour     sql.NullString
-		currency     sql.NullString
-		isPrimary    sql.NullBool
-		isConnected  sql.NullBool
-		lastSyncedAt sql.NullTime
-	)
-
-	err := row.Scan(
-		&b.ID, &b.OwnerID, &b.BusinessID, &b.Name, &institution, &accountType, &lastFour,
-		&b.Balance, &currency, &isPrimary, &isConnected, &lastSyncedAt, &b.CreatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if institution.Valid {
-		b.Institution = institution.String
-	}
-	if accountType.Valid {
-		b.AccountType = accountType.String
-	}
-	if lastFour.Valid {
-		b.LastFour = lastFour.String
-	}
-	if currency.Valid {
-		b.Currency = currency.String
-	}
-	if isPrimary.Valid {
-		b.IsPrimary = isPrimary.Bool
-	}
-	if isConnected.Valid {
-		b.IsConnected = isConnected.Bool
-	}
-	if lastSyncedAt.Valid {
-		b.LastSyncedAt = lastSyncedAt.Time
-	}
-
-	return nil
-}
-
 type BankAccountInput struct {
 	Name        string       `json:"name"`
 	Institution string       `json:"institution"`

@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -61,7 +62,7 @@ func (m *Module) executeListPOSLocationsTool(ctx context.Context, input map[stri
 	}
 	locations = filterPOSLocationsForTool(locations, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(locations))
 	if start > len(locations) {
 		start = len(locations)
 	}

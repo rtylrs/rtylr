@@ -13,8 +13,6 @@ import (
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
-func ClockInRoutes() []string { return []string{"/hr/attendance/clock-in"} }
-
 type ClockInHandler struct{ Service *application.Service }
 
 type ClockInRequest struct {

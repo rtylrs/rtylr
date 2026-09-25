@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/money"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -125,7 +126,11 @@ func hrPayrollToolOwnerID(ctx context.Context) (int64, error) {
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, fmt.Errorf("business scope could not be resolved: %w", err)
+	}
+	return businessID, nil
 }
 
 func hrPayrollToolPagination(input map[string]any) (int32, int32, error) {

@@ -15,7 +15,6 @@ import (
 )
 
 var (
-	ErrDatabasePoolNotAvailable = errors.New("database pool not available")
 	ErrChatSessionNotFound      = errors.New("chat session not found")
 )
 

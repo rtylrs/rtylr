@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func OpenCycleRoutes() []string { return []string{"/hr/performance/cycles/{id}/open"} }
@@ -30,7 +31,12 @@ func (h *OpenCycleHandler) Serve(ctx context.Context, req *OpenCycleRequest) (Op
 		return OpenCycleResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.Service.OpenReviewCycle(ctx, device.User.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return OpenCycleResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err := h.Service.OpenReviewCycle(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrReviewCycleNotFound) {
 			return OpenCycleResponse{}, onekiterrors.New(http.StatusNotFound, "Review cycle not found")

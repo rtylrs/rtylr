@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -61,7 +62,7 @@ func (m *Module) executeListCampaignsTool(ctx context.Context, input map[string]
 	}
 	campaigns = filterCampaignsForTool(campaigns, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(campaigns))
 	if start > len(campaigns) {
 		start = len(campaigns)
 	}

@@ -186,8 +186,3 @@ func daysInYear(year int) int {
 	}
 	return 365
 }
-
-// CentsToFloat converts integer cents to standard float amount.
-func CentsToFloat(cents int64) float64 {
-	return float64(cents) / 100.0
-}

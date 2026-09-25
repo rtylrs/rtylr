@@ -46,4 +46,7 @@ func TestGeneratedServerPreservesOneKitHTTPStatus(t *testing.T) {
 	if res.Code != http.StatusForbidden {
 		t.Fatalf("expected generated server to preserve 403, got %d with body %q", res.Code, res.Body.String())
 	}
+	if body := res.Body.String(); !strings.Contains(body, "business access denied") {
+		t.Fatalf("expected generated server to preserve the handler message, got body %q", body)
+	}
 }

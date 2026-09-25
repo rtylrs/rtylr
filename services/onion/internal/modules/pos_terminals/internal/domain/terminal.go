@@ -1,11 +1,8 @@
 package domain
 
 import (
-	"errors"
 	"time"
 )
-
-var ErrTerminalNotFound = errors.New("terminal not found")
 
 type Terminal struct {
 	ID         int64      `json:"id"`

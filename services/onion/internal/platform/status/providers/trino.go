@@ -70,7 +70,7 @@ func (t *TrinoStatusProvider) GetStatus(ctx context.Context) status.ComponentSta
 	message := "Trino is reachable"
 
 	if pingErr != nil {
-		statusStr = healthyStatus
+		statusStr = "degraded"
 		message = "Trino ping failed (optional analytics): " + pingErr.Error()
 		details["ping_error"] = pingErr.Error()
 	}

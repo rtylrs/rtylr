@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/store_products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -104,7 +105,7 @@ func (m *Module) executeListStoreProductsTool(ctx context.Context, input map[str
 	}
 	products = filterStoreProductsForTool(products, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(products))
 	if start > len(products) {
 		start = len(products)
 	}

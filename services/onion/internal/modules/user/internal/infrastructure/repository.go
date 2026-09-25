@@ -404,8 +404,11 @@ func (r *Repository) GetUserRole(ctx context.Context, businessID, userID int64) 
 		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
 		UserID:     userID,
 	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return "staff", nil
+	}
 	if err != nil {
-		return "staff", nil // default
+		return "", err
 	}
 	return string(role.UserAppPermissionsRole), nil
 }

@@ -59,13 +59,6 @@ func activePatternStrings() []string {
 	return append(append(make([]string, 0, len(productionPatternStrings)+len(developmentPatternStrings)), productionPatternStrings...), developmentPatternStrings...)
 }
 
-// AllowedPatterns returns the browser origins trusted by both HTTP CORS and
-// WebSocket upgrade handling. Patterns are compiled once at package init;
-// localhost entries are present only outside production.
-func AllowedPatterns() []*regexp.Regexp {
-	return activePatterns()
-}
-
 // AllowedPatternStrings returns the same allowlist in path.Match form for APIs
 // that use glob-like patterns, such as WebSocket accept options.
 func AllowedPatternStrings() []string {

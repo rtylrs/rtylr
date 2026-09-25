@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpsertConfigRoutes() []string { return []string{"/hr/performance/config"} }
@@ -40,7 +41,12 @@ func (h *UpsertConfigHandler) Serve(ctx context.Context, req *UpsertConfigReques
 		return UpsertConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	cfg, err := h.Service.UpsertPerformanceConfig(ctx, device.User.UserID, domain.UpsertConfigParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpsertConfigResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	cfg, err := h.Service.UpsertPerformanceConfig(ctx, businessID, domain.UpsertConfigParams{
 		RatingScaleType:     req.RatingScaleType,
 		RatingMin:           req.RatingMin,
 		RatingMax:           req.RatingMax,

@@ -1,12 +1,8 @@
 package domain
 
 import (
-	"database/sql"
-	"errors"
 	"time"
 )
-
-var ErrTimeOffNotFound = errors.New("time off request not found")
 
 type TimeOffRequest struct {
 	ID         int64     `json:"id"`
@@ -25,60 +21,6 @@ type TimeOffRequest struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
-
-func (t *TimeOffRequest) FromRow(row *sql.Rows) error {
-	var (
-		status     sql.NullString
-		reason     sql.NullString
-		approvedBy sql.NullInt64
-		approvedAt sql.NullTime
-		notes      sql.NullString
-	)
-
-	err := row.Scan(
-		&t.ID,
-		&t.OwnerID,
-		&t.BusinessID,
-		&t.StaffID,
-		&t.Type,
-		&t.StartDate,
-		&t.EndDate,
-		&t.DaysCount,
-		&status,
-		&reason,
-		&approvedBy,
-		&approvedAt,
-		&notes,
-		&t.CreatedAt,
-		&t.UpdatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if status.Valid {
-		t.Status = status.String
-	}
-
-	if reason.Valid {
-		t.Reason = reason.String
-	}
-
-	if approvedBy.Valid {
-		t.ApprovedBy = approvedBy.Int64
-	}
-
-	if approvedAt.Valid {
-		t.ApprovedAt = approvedAt.Time
-	}
-
-	if notes.Valid {
-		t.Notes = notes.String
-	}
-
-	return nil
-}
-
 type TimeOffInput struct {
 	OwnerID    int64   `json:"owner_id"`
 	BusinessID int64   `json:"business_id"`

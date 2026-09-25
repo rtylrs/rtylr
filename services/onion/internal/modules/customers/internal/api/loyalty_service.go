@@ -195,43 +195,14 @@ func (a *LoyaltyAPI) UpdateLoyaltyConfig(ctx context.Context, req *crmloyaltyv1.
 	return &crmloyaltyv1.UpdateLoyaltyConfigResponse{Message: "Loyalty config updated successfully"}, nil
 }
 
-func (a *LoyaltyAPI) ListLoyaltyTiers(ctx context.Context, req *crmloyaltyv1.ListLoyaltyTiersRequest) (*crmloyaltyv1.ListLoyaltyTiersResponse, error) {
+func (a *LoyaltyAPI) ListLoyaltyTiers(ctx context.Context, _ *crmloyaltyv1.ListLoyaltyTiersRequest) (*crmloyaltyv1.ListLoyaltyTiersResponse, error) {
 	_, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var (
-		tiers    []domain.LoyaltyTier
-		total    int64
-		page     int
-		pageSize int
-		hasMore  bool
-	)
-	if req == nil || (req.GetPage() == 0 && req.GetPageSize() == 0) {
-		// Older clients predate the pagination fields. Preserve their complete
-		// list contract while new callers can opt into bounded pages.
-		tiers, err = a.Service.ListLoyaltyTiers(ctx, businessID)
-		if err == nil {
-			total = int64(len(tiers))
-			page = 1
-			pageSize = len(tiers)
-		}
-	} else {
-		var result domain.LoyaltyTierPage
-		result, err = a.Service.ListLoyaltyTiersPage(ctx, businessID, int(req.GetPage()), int(req.GetPageSize()))
-		if err == nil {
-			tiers = result.Tiers
-			total = result.Total
-			page = result.Page
-			pageSize = result.PageSize
-			hasMore = result.HasMore
-		}
-	}
-	if err != nil {
-		if errors.Is(err, domain.ErrLoyaltyTierPageOutOfRange) {
-			return nil, onekiterrors.New(http.StatusBadRequest, "Loyalty tier page offset is too large")
-		}
+	tiers, svcErr := a.Service.ListLoyaltyTiers(ctx, businessID)
+	if svcErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty tiers")
 	}
 
@@ -240,13 +211,7 @@ func (a *LoyaltyAPI) ListLoyaltyTiers(ctx context.Context, req *crmloyaltyv1.Lis
 		payloads[i] = newLoyaltyTierProto(t)
 	}
 
-	return &crmloyaltyv1.ListLoyaltyTiersResponse{
-		Tiers:    payloads,
-		Total:    total,
-		Page:     int64(page),
-		PageSize: int64(pageSize),
-		HasMore:  hasMore,
-	}, nil
+	return &crmloyaltyv1.ListLoyaltyTiersResponse{Tiers: payloads}, nil
 }
 
 func (a *LoyaltyAPI) CreateLoyaltyTier(ctx context.Context, req *crmloyaltyv1.CreateLoyaltyTierRequest) (*crmloyaltyv1.CreateLoyaltyTierResponse, error) {

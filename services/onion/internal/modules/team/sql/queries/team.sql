@@ -207,8 +207,8 @@ ORDER BY ar.created_at DESC;
 
 -- cross-schema write to hub — deliver team access notifications through the hub module.
 -- name: CreateHubNotification :exec
-INSERT INTO hub_notifications (owner_id, user_id, title, body, type, link)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO hub_notifications (owner_id, business_id, user_id, title, body, type, link)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- cross-schema write to hr_core — every invited user is also an hr_employees row
 -- cross-schema read from users — attach an invited member to their business.

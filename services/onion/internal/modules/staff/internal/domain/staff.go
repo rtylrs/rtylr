@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 )
@@ -41,113 +40,6 @@ type Staff struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
-
-func (s *Staff) FromRow(row *sql.Rows) error {
-	var (
-		userID                sql.NullInt64
-		departmentID          sql.NullInt64
-		phone                 sql.NullString
-		employmentType        sql.NullString
-		status                sql.NullString
-		salary                sql.NullFloat64
-		hourlyRate            sql.NullFloat64
-		overtimeRate          sql.NullFloat64
-		endDate               sql.NullTime
-		address               sql.NullString
-		emergencyContactName  sql.NullString
-		emergencyContactPhone sql.NullString
-		apps                  sql.NullString
-		notes                 sql.NullString
-	)
-
-	err := row.Scan(
-		&s.ID,
-		&s.OwnerID,
-		&userID,
-		&departmentID,
-		&s.FirstName,
-		&s.LastName,
-		&s.Email,
-		&phone,
-		&s.Role,
-		&employmentType,
-		&status,
-		&salary,
-		&hourlyRate,
-		&overtimeRate,
-		&s.StartDate,
-		&endDate,
-		&address,
-		&emergencyContactName,
-		&emergencyContactPhone,
-		&apps,
-		&notes,
-		&s.CreatedAt,
-		&s.UpdatedAt,
-	)
-	if err != nil {
-		return err
-	}
-
-	if userID.Valid {
-		s.UserID = userID.Int64
-	}
-
-	if departmentID.Valid {
-		s.DepartmentID = departmentID.Int64
-	}
-
-	if phone.Valid {
-		s.Phone = phone.String
-	}
-
-	if employmentType.Valid {
-		s.EmploymentType = employmentType.String
-	}
-
-	if status.Valid {
-		s.Status = status.String
-	}
-
-	if salary.Valid {
-		s.Salary = salary.Float64
-	}
-
-	if hourlyRate.Valid {
-		s.HourlyRate = hourlyRate.Float64
-	}
-
-	if overtimeRate.Valid {
-		s.OvertimeRate = overtimeRate.Float64
-	}
-
-	if endDate.Valid {
-		s.EndDate = endDate.Time
-	}
-
-	if address.Valid {
-		s.Address = address.String
-	}
-
-	if emergencyContactName.Valid {
-		s.EmergencyContactName = emergencyContactName.String
-	}
-
-	if emergencyContactPhone.Valid {
-		s.EmergencyContactPhone = emergencyContactPhone.String
-	}
-
-	if apps.Valid {
-		s.Apps = apps.String
-	}
-
-	if notes.Valid {
-		s.Notes = notes.String
-	}
-
-	return nil
-}
-
 type StaffInput struct {
 	OwnerID               int64   `json:"owner_id"`
 	BusinessID            int64   `json:"business_id"`

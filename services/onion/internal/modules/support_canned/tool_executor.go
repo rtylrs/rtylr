@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/support_canned/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/pagination"
 )
 
 const (
@@ -55,7 +56,7 @@ func (m *Module) executeListSupportCannedResponsesTool(ctx context.Context, inpu
 	}
 	responses = filterSupportCannedResponsesForTool(responses, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(responses))
 	if start > len(responses) {
 		start = len(responses)
 	}

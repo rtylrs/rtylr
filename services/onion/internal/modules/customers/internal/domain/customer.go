@@ -8,7 +8,6 @@ import (
 var (
 	ErrCustomerNotFound    = errors.New("customer not found")
 	ErrInsufficientPoints  = errors.New("insufficient loyalty points")
-	ErrLoyaltyConfigExists = errors.New("loyalty config already exists")
 	ErrSegmentNotFound     = errors.New("segment not found")
 	ErrCampaignNotFound    = errors.New("campaign not found")
 	ErrTierNotFound        = errors.New("loyalty tier not found")

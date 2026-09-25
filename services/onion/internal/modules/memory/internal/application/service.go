@@ -468,8 +468,3 @@ type MemoryItem struct {
 	Value      string  `json:"value"`
 	Confidence float64 `json:"confidence"`
 }
-
-// CentsToFloat converts integer cents to standard float amount.
-func CentsToFloat(cents int64) float64 {
-	return float64(cents) / 100.0
-}

@@ -8,6 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func GetSetupStatusRoutes() []string { return []string{"/hr/setup/status"} }
@@ -32,7 +33,12 @@ func (h *GetSetupStatusHandler) Serve(ctx context.Context, _ *GetSetupStatusRequ
 		return GetSetupStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	steps, isComplete, err := h.Service.GetSetupStatus(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSetupStatusResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	steps, isComplete, err := h.Service.GetSetupStatus(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to get setup status", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return GetSetupStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get setup status")

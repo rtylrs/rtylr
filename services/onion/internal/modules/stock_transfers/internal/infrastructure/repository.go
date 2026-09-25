@@ -308,8 +308,7 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64, 
 	toWH := row.ToWarehouseID
 	curStatus := string(row.Status.ErpStockTransfersStatus)
 	if curStatus == string(domain.StockTransferStatusReceived) {
-		err = nil
-		return nil // idempotent: already received
+		return tx.Commit()
 	}
 	for _, warehouseID := range []int64{fromWH, toWH} {
 		if _, lookupErr := qtx.GetWarehouseReference(ctx, sqlc.GetWarehouseReferenceParams{

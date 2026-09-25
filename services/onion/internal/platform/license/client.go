@@ -30,10 +30,6 @@ type Client struct {
 	httpClient    *http.Client
 }
 
-func NewClient(authorityURL string) *Client {
-	return NewClientWithInternalToken(authorityURL, "")
-}
-
 // NewClientWithInternalToken configures the credential used by the dedicated
 // license authority. It is kept separate from NewClient so callers that only
 // need a public verifier retain the existing constructor contract.

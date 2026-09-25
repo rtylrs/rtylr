@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/reviews/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/pagination"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -58,7 +59,7 @@ func (m *Module) executeListReviewsTool(ctx context.Context, input map[string]an
 	}
 	reviews = filterReviewsForTool(reviews, parsed)
 
-	start := int((parsed.Page - 1) * parsed.Limit)
+	start := pagination.SliceStart(parsed.Page, parsed.Limit, len(reviews))
 	if start > len(reviews) {
 		start = len(reviews)
 	}

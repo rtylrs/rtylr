@@ -26,11 +26,6 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 		CustomDomains: custom_domains.NewAPI(customDomainService),
 	}
 }
-
-func (m *Module) GetService() *application.Service {
-	return m.ConfigService
-}
-
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubconfigv1.RegisterConfigServiceServer(
 		api.NewConfigAPI(m.ConfigService, m.CustomDomains),

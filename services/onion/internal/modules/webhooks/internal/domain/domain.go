@@ -19,8 +19,3 @@ type Webhook struct {
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
 }
-
-type CreateWebhookInput struct {
-	URL    string   `json:"url"`
-	Events []string `json:"events"`
-}

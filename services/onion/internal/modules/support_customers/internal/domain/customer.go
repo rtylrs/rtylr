@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrCustomerNotFound = errors.New("support customer not found")
 
 type Customer struct {
 	ID           int64      `json:"id"`

@@ -26,11 +26,24 @@ func TestUpdateTaskWritesActivityOnlyAfterTheUpdateSucceeds(t *testing.T) {
 		t.Fatal("could not locate the workspaces application package")
 	}
 
-	raw, err := os.ReadFile(filepath.Join(filepath.Dir(sourceFile), "service.go"))
+	dir := filepath.Dir(sourceFile)
+	entries, err := os.ReadDir(dir)
 	if err != nil {
-		t.Fatalf("read service.go: %v", err)
+		t.Fatalf("read application package: %v", err)
 	}
-	source := string(raw)
+	var builder strings.Builder
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") || strings.HasSuffix(entry.Name(), "_test.go") {
+			continue
+		}
+		raw, readErr := os.ReadFile(filepath.Join(dir, entry.Name()))
+		if readErr != nil {
+			t.Fatalf("read %s: %v", entry.Name(), readErr)
+		}
+		builder.Write(raw)
+		builder.WriteString("\n")
+	}
+	source := builder.String()
 
 	const marker = "func (s *Service) UpdateTask("
 	start := strings.Index(source, marker)
