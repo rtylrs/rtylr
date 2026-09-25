@@ -100,6 +100,26 @@ describe('PresenceScreen', () => {
     render(<PresenceScreen />);
     expect(screen.getByText('flow.presence.loadFailedTitle')).toBeInTheDocument();
   });
+
+  it('shows the load-failed state when a denied query is paused after failing', () => {
+    presenceState.value = {
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      isPaused: true,
+      failureCount: 2,
+      refetch: vi.fn(),
+    };
+    render(<PresenceScreen />);
+    expect(screen.getByText('flow.presence.loadFailedTitle')).toBeInTheDocument();
+    expect(screen.queryByText('flow.presence.noResults')).not.toBeInTheDocument();
+  });
+
+  it('does not claim an empty roster before any data has arrived', () => {
+    presenceState.value = { data: undefined, isLoading: false, isError: false, refetch: vi.fn() };
+    render(<PresenceScreen />);
+    expect(screen.queryByText('flow.presence.noResults')).not.toBeInTheDocument();
+  });
 });
 
 describe('PresenceScreen grouping (#1094)', () => {
