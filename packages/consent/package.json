@@ -10,9 +10,6 @@
     "typecheck": "tsc --noEmit",
     "dev": "tsc --noEmit --watch"
   },
-  "dependencies": {
-    "@voxire/observability": "workspace:*"
-  },
   "devDependencies": {
     "@types/react": "19.2.14",
     "react": "19.2.5",

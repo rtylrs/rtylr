@@ -3,10 +3,8 @@
 
 /* v4 auto-detects content relative to this CSS file. We add an
  * explicit @source for the cross-workspace packages we pull classes
- * from (shared components, menu package, etc.). The shared
- * `@voxire/tailwind-config` theme extensions are ported below into
- * v4's native `@theme` block - JS configs via `@config` break v4's
- * auto content scanner in monorepo setups. */
+ * from (shared components, menu package, etc.). The shared theme is imported
+ * directly from packages/tailwind-config/theme.css. */
 @source '../../../../../packages/**/*.{ts,tsx}';
 
 /* ── Border-radius scale (dash) ────────────────────────────────
@@ -135,9 +133,8 @@
 }
 
 /* ── Tailwind colour tokens re-pointed at this app's runtime theme ──────────
- * Ports the overrides from tailwind.config.ts, which v4 does not read.
  * text-primary / bg-primary follow the theme text colour, and the admin
- * surfaces follow the theme, exactly as that config intended. */
+ * surfaces follow the theme. */
 :root {
   --color-primary: var(--hub-text);
   --color-primary-foreground: var(--hub-text);
@@ -240,25 +237,6 @@
 }
 .shepherd-arrow:before {
   background: #fff !important;
-}
-
-/* react-grid-layout overrides */
-.react-grid-item.react-grid-placeholder {
-  background: rgba(69, 131, 196, 0.08) !important;
-  border: 2px dashed rgba(69, 131, 196, 0.3) !important;
-  border-radius: 12px !important;
-  opacity: 1 !important;
-}
-.react-resizable-handle {
-  width: 14px !important;
-  height: 14px !important;
-  opacity: 0.3;
-}
-.react-resizable-handle:hover {
-  opacity: 0.6;
-}
-.react-grid-item > .react-resizable-handle::after {
-  border-color: var(--dash-text-dim) !important;
 }
 
 /* The workspace can become much narrower than the browser viewport when a

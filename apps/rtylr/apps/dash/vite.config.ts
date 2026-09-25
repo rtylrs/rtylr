@@ -77,6 +77,6 @@ export default defineConfig(() => ({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'zustand', 'motion', 'lucide-react'],
-    exclude: ['@voxire/menu', '@voxire/ui', '@voxire/tailwind-config'],
+    exclude: ['@voxire/menu', '@voxire/ui'],
   },
 }));

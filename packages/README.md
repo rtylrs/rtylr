@@ -1,13 +1,12 @@
 # @voxire/packages
 
-Shared frontend packages for the voxire platform. Used as a git submodule in `voxire/rtylr` and `voxire/pos`.
+Shared frontend packages for the voxire platform. This directory is part of the rtylr workspace; only `voxie/` is a git submodule.
 
 ## Packages
 
 | Package                   | Description                                    |
 | ------------------------- | ---------------------------------------------- |
 | `@voxire/api`             | API client, realtime WebSocket, result helpers |
-| `@voxire/assets`          | Icons, global SCSS variables                   |
 | `@voxire/auth`            | Auth store, route guards, cookie helpers       |
 | `@voxire/caret`           | Caret AI chat components and hooks             |
 | `@voxire/components`      | Core UI component library                      |
@@ -18,7 +17,7 @@ Shared frontend packages for the voxire platform. Used as a git submodule in `vo
 | `@voxire/menu`            | Public digital menu components and layouts     |
 | `@voxire/observability`   | Sentry + PostHog boot helpers                  |
 | `@voxire/permissions`     | Role/capability matrix and guards              |
-| `@voxire/tailwind-config` | Shared Tailwind configuration                  |
+| `@voxire/tailwind-config` | Shared Tailwind v4 theme tokens                  |
 | `@voxire/types`           | Shared domain types (business, user, etc.)     |
 | `@voxire/ui`              | Headless UI primitives (shadcn-based)          |
 | `@voxire/utils`           | Formatting, validation, and common hooks       |
@@ -31,38 +30,15 @@ copy contract or generated files into this repository.
 
 ## Usage
 
-This repo is consumed as a git submodule, not published to npm.
-
-### Adding to a repo
+The packages are resolved from the workspace by `pnpm`. Only the Voxie contract submodule needs initialization:
 
 ```bash
-git submodule add https://github.com/voxire/packages.git packages
-git submodule update --init
-```
-
-Your `pnpm-workspace.yaml` must include `packages/*` so pnpm resolves `@voxire/*` imports locally.
-
-### Updating to latest
-
-```bash
-git submodule update --remote packages
-git add packages && git commit -m "chore: bump voxire/packages"
-```
-
-To update the nested contract submodule from this repository:
-
-```bash
-git submodule update --remote voxie
-git add voxie && git commit -m "chore: bump Voxie contract submodule"
-```
-
-### CI (GitHub Actions / Cloud Build)
-
-Use a PAT with `repo` scope stored in your secrets manager. Before running `git submodule update --init`, rewrite HTTPS URLs:
-
-```bash
-git config --global \
-  url."https://x-access-token:${GITHUB_PAT}@github.com/".insteadOf \
-  "https://github.com/"
 git submodule update --init --recursive
+```
+
+### Updating contracts
+
+```bash
+git submodule update --remote packages/voxie
+git add packages/voxie && git commit -m "chore: bump Voxie contract submodule"
 ```

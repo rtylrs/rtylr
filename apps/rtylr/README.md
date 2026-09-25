@@ -45,9 +45,8 @@ touching the others.
 | `@voxire/auth`            | Cookie helpers, `AppGuard` with per-app `apps[]` gating, user store              |
 | `@voxire/utils`           | `useDebounce`, `useMediaQuery`, `useTheme`, formatting, validation               |
 | `@voxire/i18n`            | Shared i18next setup and translation helpers                                     |
-| `@voxire/assets`          | Shared SCSS variables and static assets                                          |
 | `@voxire/menu`            | Customer-facing menu page components                                             |
-| `@voxire/tailwind-config` | Shared Tailwind CSS preset                                                       |
+| `@voxire/tailwind-config` | Shared Tailwind v4 theme tokens                                                 |
 
 ## Project Structure (per app)
 
@@ -71,9 +70,7 @@ apps/{name}/src/
     stores/                # Zustand stores
   layouts/
     DefaultLayout.tsx      # single file, no wrapper folder
-  routes/
-    AppRoutes.tsx
-  App.tsx
+  router.tsx              # route definitions
   main.tsx
   globals.css
 ```
@@ -107,8 +104,8 @@ git submodule update --init --recursive
 # Edit `.onk` files and regenerate in the Voxie repository; commit and push it
 # there. Advance whichever consumer pointers should receive that contract
 # version. Consumers may intentionally remain on older Voxie commits:
-git submodule update --remote packages
-git add packages && git commit -m "chore: bump shared packages"
+git submodule update --remote packages/voxie
+git add packages/voxie && git commit -m "chore: bump Voxie contract submodule"
 ```
 
 ## API Layer
@@ -169,9 +166,9 @@ pnpm --filter @rtylr/crm dev
 pnpm build
 
 # Typecheck all (strict mode)
-pnpm turbo typecheck
+pnpm typecheck
 
-# Run tests (1,250+ unit tests)
+# Run tests
 pnpm test
 
 # Run tests with coverage

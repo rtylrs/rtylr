@@ -1,14 +1,5 @@
 #!/usr/bin/env sh
 
-# `pnpm build`, not `pnpm turbo build`.
-#
-# The root build script is
-#   ./scripts/check-packages-ref.sh && pnpm typecheck && turbo build
-# so invoking turbo directly skipped both the submodule pointer guard and
-# typecheck. turbo.json also gives `build` no `typecheck` edge, and vite strips
-# types rather than checking them, so nothing mechanical checked types before a
-# push. A contract bump that broke two apps reached main that way and needed a
-# human to notice.
 echo "Running tests, typecheck and build before push..."
 cd apps/rtylr
 pnpm test && pnpm build

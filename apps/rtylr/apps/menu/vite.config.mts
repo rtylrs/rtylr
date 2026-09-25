@@ -88,7 +88,6 @@ export default defineConfig(() => ({
       '@voxire/config',
       '@voxire/menu',
       '@voxire/ui',
-      '@voxire/tailwind-config',
     ],
   },
 }));

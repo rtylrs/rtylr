@@ -284,7 +284,7 @@
 /* ── Tailwind colour tokens re-pointed at this app's runtime theme ──────────
  * --accent is set per workspace by FlowLayout, so bg-accent has to follow it
  * rather than the preset's cyan. --flow-on-accent is the near-black foreground.
- * The flow-* colours come from this app's own tailwind.config.ts. */
+ * The flow-* colours are declared by this app's runtime theme. */
 :root {
   --color-accent: var(--accent);
   --color-accent-foreground: var(--flow-on-accent);
@@ -307,7 +307,7 @@
 }
 
 /* ── Type scale ──────────────────────────────────────────────────────
- * One scale, named for the roles design-review-checklist.md G-T2 uses:
+ * One scale, named for the roles the Flow screens use:
  * "screen title 16-20px/600, section 14px/600, body 13-14px/400, meta 12px;
  * nothing at 11px or below except tabular ids."
  *

@@ -1,8 +1,6 @@
 node_modules
 .next
 out
-docs/.vitepress/dist
-docs/.vitepress/cache
 *.tsbuildinfo
 qa-*.png
 *.log

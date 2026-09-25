@@ -20,10 +20,8 @@
     "@voxire/voxie": "workspace:*",
     "@voxire/i18n": "workspace:*",
     "@voxire/permissions": "workspace:*",
-    "@voxire/tailwind-config": "workspace:*",
     "@voxire/types": "workspace:*",
     "@voxire/ui": "workspace:*",
-    "axios": "^1.19.0",
     "i18next": "^26.0.6",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",
@@ -32,7 +30,6 @@
     "react-i18next": "^17.0.4",
     "@tanstack/react-router": "^1.170.8",
     "sonner": "^2.0.7",
-    "tslib": "^2.8.1",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },

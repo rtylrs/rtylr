@@ -8,7 +8,7 @@ Tauri + React POS terminal for rtylr.
 pnpm install
 ```
 
-Copy `.env.example` to `.env` for local overrides. Production builds must provide the Firebase variables when Firebase-backed auth or analytics are enabled.
+Copy `.env.example` to `.env` for local overrides.
 
 ## Verification
 
@@ -40,7 +40,7 @@ The public updater key is stored in `core/tauri.conf.json`; keep the private key
 Before cutting a release:
 
 - Run the full verification command set above.
-- Confirm `.env`/deployment secrets provide `VITE_API_URL`, `VITE_APP_ENV`, Firebase config, and observability keys as needed.
+- Confirm `.env`/deployment secrets provide `VITE_API_URL`, `VITE_APP_ENV`, and observability keys as needed.
 - Verify cash checkout both online and offline: cash sales must create a local receipt, record a cash drawer `sale` movement, and sync queued orders after reconnect.
 - Verify card/QR payments fail closed unless the provider confirms payment.
 - Verify printer and cash drawer hardware on the target register OS.

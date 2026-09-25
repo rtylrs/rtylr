@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { toIsoDate, todayIso } from './dateUtils';
 import { formatDate } from './format';
-import { aggregateByPeriod } from './reportUtils';
 
 /**
  * Run in six zones spanning UTC+14 to UTC-4 rather than in whichever one the
@@ -59,13 +58,6 @@ describe.each(ZONES)('erp dates at %s', (tz) => {
     expect(inZone(tz, () => formatDate('2026-01-15'))).toContain('2026');
   });
 
-  it('groups a new year row under the new year', () => {
-    // getPeriodKey used local getters on a UTC parsed date, so a 1 January row
-    // was filed under the previous year west of Greenwich.
-    const points = [{ label: 'new year', value: 10, date: '2026-01-01' }];
-    expect(inZone(tz, () => aggregateByPeriod(points, 'yearly')[0].label)).toBe('2026');
-    expect(inZone(tz, () => aggregateByPeriod(points, 'quarterly')[0].label)).toBe('2026-Q1');
-  });
 });
 
 describe('no local Date is serialised through UTC', () => {

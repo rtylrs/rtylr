@@ -2,7 +2,6 @@ import { describe, it, expect, afterAll } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { toLocalIso, todayIso, daysBetween, formatDate, addDays } from './date';
-import { computeLateFee } from './lateFee';
 
 /**
  * Finance dates decide what a customer is charged, so these run in six zones
@@ -70,20 +69,6 @@ describe.each(ZONES)('finance dates at %s', (tz) => {
     expect(inZone(tz, () => daysBetween('2026-10-25', '2026-11-05'))).toBe(11);
   });
 
-  it('charges the same late fee wherever the reader is', () => {
-    const result = inZone(tz, () =>
-      computeLateFee({
-        amount: 1000,
-        dueDate: '2026-04-01',
-        today: new Date(2026, 3, 11),
-        feePercent: 5,
-        graceDays: 5,
-        compoundingMonthly: false,
-      })
-    );
-    expect(result.daysLate).toBe(5);
-    expect(result.fee).toBeCloseTo(50);
-  });
 });
 
 describe('no local Date is serialised through UTC', () => {

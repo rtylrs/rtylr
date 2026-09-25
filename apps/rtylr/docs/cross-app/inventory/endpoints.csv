@@ -170,7 +170,6 @@ erp,inventory,response,,InventoryService.getLowStock,GetLowStockRequest,GetLowSt
 erp,inventory,qc,,InventoryService.adjustInventory,AdjustInventoryRequest,AdjustInventoryResponse,['low-stock'],apps/erp/src/features/inventory/useInventory.ts,42,onekit,erp
 erp,price-lists,response,,PriceListService.listPriceLists,ListPriceListsRequest,ListPriceListsResponse,['price-lists'],apps/erp/src/features/price-lists/usePriceLists.ts,21,onekit,erp
 erp,price-lists,qc,,PriceListService.createPriceList,CreatePriceListRequest,CreatePriceListResponse,['price-lists'],apps/erp/src/features/price-lists/usePriceLists.ts,30,onekit,erp
-erp,products,response,,ProductService.getProductByBarcode,GetProductByBarcodeRequest,GetProductByBarcodeResponse,,apps/erp/src/features/products/useBarcodeLookup.ts,12,onekit,erp
 erp,products,response,,ProductService.listProducts,ListProductsRequest,ListProductsResponse,,apps/erp/src/features/products/useProducts.ts,44,onekit,erp
 erp,products,categoryId,,ProductService.listProducts,ListProductsRequest,ListProductsResponse,"['products', { ...filters, search, categoryId, page, pageSize }]",apps/erp/src/features/products/useProducts.ts,84,onekit,erp
 erp,products,response,,ProductService.getProduct,GetProductRequest,GetProductResponse,"['product', id]",apps/erp/src/features/products/useProducts.ts,99,onekit,erp
