@@ -1,0 +1,49 @@
+name: Onion images
+
+# Builds the ECS images without pushing or touching AWS, so the Dockerfiles,
+# in-tree contract generation and sqlc are exercised without credentials. The
+# real deploy path (ECR push + ECS update) is tryrtylr/deploy -> deploy-release.
+
+on:
+  push:
+    paths:
+      - 'services/onion/**'
+      - 'voxie/**'
+      - '.github/workflows/onion-images.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            dockerfile: services/onion/Dockerfile
+          - name: worker
+            dockerfile: services/onion/Dockerfile.worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: |
+          set -euo pipefail
+          docker buildx build \
+            --cache-from type=gha,scope=onion-${{ matrix.name }} \
+            --cache-to type=gha,scope=onion-${{ matrix.name }},mode=max \
+            -f "${{ matrix.dockerfile }}" \
+            --build-arg VERSION=ci \
+            --build-arg COMMIT="$(git rev-parse --short=7 HEAD)" \
+            --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -t "onion-${{ matrix.name }}:ci" \
+            --load \
+            .
