@@ -1,7 +1,11 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-# Onekit v0.19.0: latest release; main CI regenerates and commits output.
+# Onekit CLI version. Generated output is gitignored; see `make generate`.
 ONK_VERSION := v0.19.0
+
+# `go install` writes to GOPATH/bin, which is not guaranteed to be on PATH here.
+GOBIN_DIR := $(shell go env GOPATH)/bin
+export PATH := $(GOBIN_DIR):$(PATH)
 
 # Clean generated code
 clean:
@@ -15,12 +19,12 @@ install-onek:
 install-js:
 	pnpm install --frozen-lockfile
 
-# Regenerate gen/go, gen/ts, and gen/openapi from api/*.onk. Output is committed.
+# Regenerate gen/go, gen/ts, and gen/openapi from api/*.onk. Output is gitignored.
 # onekit.toml sets api/ as the schema root, so generated import paths
 # mirror the schema path exactly (gen/go/hub/business/v1, no "api/" prefix) -
 # matching what every consumer already imports from the pre-onk proto days.
 generate: install-onek install-js
-	rm -rf gen/go gen/ts
+	rm -rf gen
 	python3 scripts/generate_validation_metadata.py --proto-root api --out-dir gen/ts/validation
 	onek build .
 
