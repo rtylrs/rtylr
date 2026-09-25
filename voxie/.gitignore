@@ -13,3 +13,6 @@ GEMINI.md
 .windsurfrules
 .aider*
 .github/copilot-instructions.md
+
+# Generated onekit output (make generate)
+gen/
