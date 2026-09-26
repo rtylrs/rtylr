@@ -40,6 +40,14 @@ describe('resolveDateRange', () => {
     expect(result.from).toBe('2026-05-02');
   });
 
+  it('uses the local calendar day, not the UTC day, just after local midnight', () => {
+    // 00:30 local on 1 June. At UTC+3 that is 21:30 UTC on 31 May, which is
+    // where the UTC getters used to put the boundary (rtylr#1201).
+    vi.setSystemTime(new Date(2026, 5, 1, 0, 30, 0));
+    const result = resolveDateRange(undefined);
+    expect(result.to).toBe('2026-06-01');
+  });
+
   it('returns ISO date strings in YYYY-MM-DD format', () => {
     const result = resolveDateRange({ from: '2025-12-31', to: '2026-01-01' });
     expect(result.from).toMatch(/^\d{4}-\d{2}-\d{2}$/);

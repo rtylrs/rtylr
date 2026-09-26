@@ -8,10 +8,13 @@ export interface DateRangeParams {
   to?: string;
 }
 
+// Local calendar day, not the UTC day. The reporting queries bucket by the
+// dates they are handed, so a UTC boundary labelled "Today" showed yesterday's
+// figures for the first hours of the local day (rtylr#1201).
 function toISODate(d: Date): string {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
 
