@@ -89,3 +89,14 @@ Other workflows:
   `voxie/` is the Go module `github.com/voxire/voxie`, consumed by `onion`
   through a `replace` directive; its TypeScript half is copied into
   `clients/packages/contracts`, which the apps consume as `@voxire/voxie`.
+
+## License
+
+Everything in this repository is source-available under the
+[PolyForm Strict License 1.0.0](./LICENSE). It permits noncommercial use only
+and does not grant the right to distribute the software or make changes or new
+works based on it. Commercial use, self-hosting, redistribution and
+modification require a separate written license from Voxire.
+
+PolyForm Strict has no SPDX license identifier, so package manifests reference
+`SEE LICENSE IN LICENSE` rather than an invented identifier.
