@@ -183,7 +183,7 @@ const AuthShowcase: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <Logo variant="light" className="h-12 w-auto select-none" />
+        <Logo variant="light" className="h-20 w-auto select-none" />
       </motion.div>
 
       {/* Middle: hero copy */}
