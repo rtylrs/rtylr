@@ -25,7 +25,7 @@ jobs:
           - { name: worker, dockerfile: services/onion/Dockerfile.worker, context: ".", public_repo: rtylr/worker }
           # migrate is a client+scripts+sql image (no compilation) for self-host
           # DB bootstrap, so it keeps the service directory as its context.
-          - { name: migrate, dockerfile: Dockerfile.migrate, context: "services/onion", public_repo: rtylr/migrate }
+          - { name: migrate, dockerfile: services/onion/Dockerfile.migrate, context: "services/onion", public_repo: rtylr/migrate }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
