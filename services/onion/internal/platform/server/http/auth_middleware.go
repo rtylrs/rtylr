@@ -190,7 +190,12 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 
 func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, permission string) bool {
 	if appID == authorization.AppHub {
-		return authPkg.HasDashboardPermission(user, permission)
+		// Owners and admins are granted every dashboard permission by the
+		// resolver, but a legacy account with no normalized membership row yet
+		// resolves to no effective access. Fall back to the same owner/admin
+		// boundary the concrete handlers enforce so those accounts are not
+		// denied at the edge before their handler can apply that rule.
+		return authPkg.HasDashboardPermission(user, permission) || authPkg.IsBusinessAdmin(user)
 	}
 	return authPkg.HasAppPermission(user, appID, permission)
 }
