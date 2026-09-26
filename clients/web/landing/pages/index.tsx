@@ -13,7 +13,6 @@ import ProductsSection from '../components/home/ProductsSection/ProductsSection'
 import FeaturesSection from '../components/home/FeaturesSection/FeaturesSection';
 import HowItWorksSection from '../components/home/HowItWorksSection/HowItWorksSection';
 import PricingSection from '../components/home/PricingSection/PricingSection';
-import TestimonialsSection from '../components/home/TestimonialsSection/TestimonialsSection';
 import IntegrationsSection from '../components/home/IntegrationsSection/IntegrationsSection';
 import CTASection from '../components/home/CTASection/CTASection';
 import styles from './index.module.scss';
@@ -68,9 +67,7 @@ const WebsiteContent = (): React.JSX.Element => {
           <FeaturesSection />
           <HowItWorksSection />
           <PricingSection />
-          <TestimonialsSection />
-          {/* Verifiable claims, sitting directly after the quotes. See the
-            component for what was cut from it and why. */}
+          {/* Verifiable claims. See the component for what is in it and why. */}
           <ProductTruthSection />
           <IntegrationsSection />
           <FaqSection title={faq.title} intro={faq.intro} faqs={faq.items} />

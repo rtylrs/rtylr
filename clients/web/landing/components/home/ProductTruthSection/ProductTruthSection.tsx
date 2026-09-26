@@ -7,11 +7,11 @@ import styles from './ProductTruthSection.module.scss';
  * Product truth: claims about rtylr that a reader can check without
  * talking to us.
  *
- * This sits next to the testimonials on purpose. A quote is a claim the
- * reader has to take on trust; everything below is a claim they can
- * verify from a terminal or a browser tab, which is the only kind of
- * proof this site is allowed to publish while there is no customer data
- * and no benchmark of our own.
+ * Everything below is a claim a reader can verify from a terminal or a
+ * browser tab, which is the only kind of proof this site publishes while
+ * there is no customer data and no benchmark of our own. The invented
+ * testimonials that used to sit beside it were removed for the same reason
+ * (rtylr#1357).
  *
  * Every item was read off the build output before it was written here.
  * Two candidates were cut for failing that check:

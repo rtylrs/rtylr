@@ -565,41 +565,6 @@
       "description": "Stripe for payments. QuickBooks for your accountant. Slack for alerts. Connect in minutes. No API keys to chase. No engineer required.",
       "footnote": "See the full directory for everything planned."
     },
-    "testimonials": {
-      "title": "What operators say about it.",
-      "items": [
-        {
-          "quote": "We used to close the books on the 8th of every month. Now we close them on the 2nd - nothing needs reconciling.",
-          "author": "Layla Ahmed",
-          "role": "Owner, Byblos Kitchen"
-        },
-        {
-          "quote": "A customer hit 20 visits and rtylr sent the thank-you email on its own. My manager asked if I set it up. I didn't.",
-          "author": "Karim Mansour",
-          "role": "General Manager, The Terrace"
-        },
-        {
-          "quote": "The internet went down on a Saturday night with 200 tables. The cashier didn't stop. I didn't expect software to handle that.",
-          "author": "Tarek Zein",
-          "role": "Owner, Mountain Café"
-        },
-        {
-          "quote": "Schedules used to live on WhatsApp. Now shifts go out in four taps and payroll runs automatically every Sunday night.",
-          "author": "Sara Halabi",
-          "role": "Operations Manager, Urban Chain"
-        },
-        {
-          "quote": "Switching from the old system saved us roughly $600 per branch per month. And that's before I count the add-ons.",
-          "author": "Nadine Farhat",
-          "role": "Founder, Fresh Market"
-        },
-        {
-          "quote": "The task is linked to the invoice, the customer, the shift. I stopped opening four tabs for four apps - I just open Flow.",
-          "author": "Jad Maalof",
-          "role": "Manager, Tech Store Pro"
-        }
-      ]
-    },
     "truth": {
       "badge": "Checkable",
       "title": "What we can prove.",
@@ -649,20 +614,20 @@
       "demoLineLink": "book a demo",
       "stats": [
         {
-          "number": "50K+",
-          "label": "Daily Transactions"
+          "number": "One login",
+          "label": "POS, ERP, CRM, HR and Finance"
         },
         {
-          "number": "99.9%",
-          "label": "Uptime"
+          "number": "Self-host",
+          "label": "Runs on your own servers"
         },
         {
-          "number": "20+",
-          "label": "Countries"
+          "number": "Lebanon",
+          "label": "Built in Lebanon"
         },
         {
-          "number": "24/7",
-          "label": "Support"
+          "number": "3",
+          "label": "App languages"
         },
         {
           "number": "Offline",
@@ -911,7 +876,12 @@
       "title": "The register\nthat keeps up.",
       "subtitle": "Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift cards, house accounts. Keep running when the WiFi goes down. Built for the pace of real service, not a demo video.",
       "receipt": {
-        "items": ["Margherita Pizza", "House Salad", "Sparkling Water", "Espresso"],
+        "items": [
+          "Margherita Pizza",
+          "House Salad",
+          "Sparkling Water",
+          "Espresso"
+        ],
         "order": "Order #{{orderId}} · Table {{table}}",
         "live": "LIVE",
         "venue": "rtylr · Terrace",
@@ -1451,7 +1421,7 @@
       "breachLabel": "Breach notification commitment",
       "penTestLabel": "Annual third-party pen test",
       "breachValue": "< 72h",
-      "uptimeValue": "99.99%"
+      "uptimeValue": "100%"
     }
   },
   "hardware": {
