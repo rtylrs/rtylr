@@ -3,7 +3,7 @@ import { isOverdue } from '../lib/dateUtils';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarGrid, todayISODate } from '@voxire/ui';
-import { formatDate } from '../lib/utils';
+import { formatShortDate } from '../lib/utils';
 import { toLocalIso } from '../lib/dateUtils';
 
 interface DueDatePickerProps {
@@ -43,7 +43,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
           className="flex items-center gap-1.5 px-2 py-1 rounded-sm transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
         >
           <CalendarIcon size={12} />
-          {value ? formatDate(value) : t('common.datePicker.setDate')}
+          {value ? formatShortDate(value, t('common.dateLocale')) : t('common.datePicker.setDate')}
         </button>
         {value && !disabled && (
           <button

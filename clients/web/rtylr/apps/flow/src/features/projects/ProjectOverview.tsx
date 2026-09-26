@@ -16,7 +16,7 @@ import { EmptyState } from '@voxire/ui';
 import { useProjectOverview } from './useProjectOverview';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
-import { formatDate } from '../../shared/lib/utils';
+import { formatDueDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
@@ -198,7 +198,7 @@ const ProjectOverview: React.FC = () => {
                       {m.name}
                     </span>
                     <span className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
-                      {formatDate(m.targetDate)}
+                      {formatDueDate(m.targetDate, t)}
                     </span>
                   </div>
                   <div

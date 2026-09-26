@@ -123,16 +123,6 @@ export function daysUntil(date: string, from?: string): number {
   return daysBetween(base, date);
 }
 
-/** Returns a human-readable relative label: "Today", "Tomorrow", "Yesterday", or "N days". */
-export function relativeDayLabel(date: string, from?: string): string {
-  const diff = daysUntil(date, from);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  if (diff === -1) return 'Yesterday';
-  if (diff > 0) return `In ${diff} days`;
-  return `${Math.abs(diff)} days ago`;
-}
-
 /** Returns true if the date falls within the given number of days from now. */
 export function isWithinDays(date: string, days: number, from?: string): boolean {
   const diff = daysUntil(date, from);

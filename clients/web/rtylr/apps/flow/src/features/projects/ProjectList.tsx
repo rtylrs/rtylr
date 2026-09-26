@@ -16,7 +16,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
-import { cn, formatDate } from '../../shared/lib/utils';
+import { cn, formatDueDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
@@ -163,7 +163,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
         style={{ color: 'var(--flow-text-dim)' }}
       >
         <Calendar size={11} />
-        {formatDate(task.dueDate)}
+        {formatDueDate(task.dueDate, t)}
       </span>
 
       {/* More */}

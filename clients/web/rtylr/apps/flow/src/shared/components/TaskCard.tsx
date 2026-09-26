@@ -5,8 +5,9 @@ import { motion } from 'motion/react';
 import { Calendar, MessageSquare, Paperclip, GitBranch } from 'lucide-react';
 import { Task, useFlowStore } from '../stores/flowStore';
 import { useLabels } from '../../features/tasks/useLabels';
+import { useTranslation } from 'react-i18next';
 import { labelsForTask } from '../lib/taskLabelUtils';
-import { formatDate, cn } from '../lib/utils';
+import { formatDueDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
@@ -41,6 +42,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   controls,
   dimmed,
 }) => {
+  const { t } = useTranslation();
   const openTask = useOpenTask();
   const { comments, attachments, subtasks, projects } = useFlowStore();
   // Labels come from the query, not the store. `setLabels` has no call site
@@ -240,7 +242,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               }}
             >
               <Calendar size={10} />
-              {formatDate(task.dueDate)}
+              {formatDueDate(task.dueDate, t)}
             </span>
           )}
         </div>
