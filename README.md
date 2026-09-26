@@ -98,5 +98,7 @@ and does not grant the right to distribute the software or make changes or new
 works based on it. Commercial use, self-hosting, redistribution and
 modification require a separate written license from Voxire.
 
-PolyForm Strict has no SPDX license identifier, so package manifests reference
-`SEE LICENSE IN LICENSE` rather than an invented identifier.
+This single LICENSE at the repository root covers every path. PolyForm Strict
+has no SPDX license identifier, so do not invent one in package manifests, and
+any artifact distributed outside this repository — an npm tarball, a Go module
+zip, a container image — must include a copy of this LICENSE.

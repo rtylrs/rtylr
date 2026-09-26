@@ -121,4 +121,4 @@ RTYLR_API_URL=http://localhost:9999 npm run dev
 
 ## License
 
-[PolyForm Strict 1.0.0](https://polyformproject.org/licenses/strict/1.0.0) — see [LICENSE](./LICENSE). Built by [Voxire](https://voxire.com).
+[PolyForm Strict 1.0.0](https://polyformproject.org/licenses/strict/1.0.0) — see the repository [LICENSE](../../../LICENSE). Built by [Voxire](https://voxire.com).

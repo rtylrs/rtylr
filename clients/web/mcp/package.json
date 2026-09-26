@@ -1,6 +1,7 @@
 {
   "name": "@rtylr/mcp",
   "version": "0.1.0",
+  "private": true,
   "description": "MCP server for rtylr — gives AI agents access to Flow, CRM, Finance, ERP, POS",
   "type": "module",
   "main": "./dist/index.js",
@@ -37,5 +38,5 @@
   "engines": {
     "node": ">=18"
   },
-  "license": "SEE LICENSE IN LICENSE"
+  "license": "UNLICENSED"
 }
