@@ -47,7 +47,7 @@ const clearTokenCookie = (): void => {
 };
 
 const getAuthBaseUrl = (): string => {
-  // Self-host uses the runtime auth URL; hosted keeps localhost/auth.rtylr.com.
+  // Self-host uses the runtime auth URL; hosted uses sso.rtylr.com.
   return isLocalDevHost(window.location.hostname) ? 'http://localhost:5176' : resolveAuthUrl();
 };
 

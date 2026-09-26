@@ -8,7 +8,7 @@ import type { AppId } from './types';
  * and redirects to auth with ?redirect= so the user can sign in again for this app.
  *
  * `resolveAuthUrl()` returns the runtime auth URL in self-host deployments and
- * the static `auth.rtylr.com` default everywhere else, so hosted is unchanged.
+ * the static `sso.rtylr.com` default everywhere else.
  */
 export function signOut(appId: AppId): void {
   removeCookie('token', { domain: getDefaultCookieDomain() });

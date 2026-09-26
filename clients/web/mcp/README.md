@@ -59,7 +59,7 @@ The server communicates over stdio using the standard MCP protocol. Point any MC
 Authorization uses [PKCE OAuth 2.0](https://oauth.net/2/pkce/) — no client secret required.
 
 On first use:
-1. Your browser opens to `auth.rtylr.com` for login + consent
+1. Your browser opens to `sso.rtylr.com` for login + consent
 2. You approve the requested permissions
 3. The token is saved to `~/.rtylr-mcp/config.json` (readable only by you)
 4. Tokens refresh automatically

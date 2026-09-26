@@ -3,7 +3,7 @@ import { test, expect } from './fixtures';
 /**
  * Logout regression spec. The bug from commit c81034fc shipped a
  * silent failure: clicking Sign out cleared a host-only cookie but
- * left the `.rtylr.com` parent-domain cookie alive, so auth.rtylr.com
+ * left the `.rtylr.com` parent-domain cookie alive, so sso.rtylr.com
  * saw the token on the next navigation and bounced the user right
  * back in. This spec asserts the user-visible behavior - cookie is
  * gone after click, the URL navigates away from dash, and reloading
@@ -118,7 +118,7 @@ test.describe('Sign out clears the auth cookie', () => {
 
     // The handler navigates via window.location.href to AUTH_URL.
     // Wait for the navigation rather than racing it - dash redirects
-    // to auth.rtylr.com (or AUTH_URL in dev), so URL pattern is
+    // to sso.rtylr.com (or AUTH_URL in dev), so URL pattern is
     // "anywhere except dash".
     await page.waitForURL((url) => !url.toString().startsWith(DASH_URL), { timeout: 15_000 });
 
