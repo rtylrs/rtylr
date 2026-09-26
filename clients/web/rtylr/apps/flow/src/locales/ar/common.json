@@ -53,6 +53,13 @@
     "labelAdded": "أضاف تسمية {{detail}}",
     "attachment": "أرفق {{detail}}"
   },
+  "dateLocale": "ar",
+  "dueDateLabel": {
+    "today": "اليوم",
+    "tomorrow": "غداً",
+    "yesterday": "أمس",
+    "overdue": "متأخر بـ{{days}} يوم"
+  },
   "datePicker": {
     "today": "اليوم",
     "tomorrow": "غداً",

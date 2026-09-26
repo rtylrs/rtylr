@@ -8,7 +8,7 @@ import { HelmetContainer } from '@voxire/components';
 import { DatePicker, EmptyState } from '@voxire/ui';
 import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
-import { formatDate } from '../../shared/lib/utils';
+import { formatShortDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
 import { useProjects } from '../projects/useProjects';
 import GateNotice from '../../shared/components/GateNotice';
@@ -267,9 +267,9 @@ const Cycles: React.FC = () => {
                 className="flex items-center gap-2 text-meta"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                <span>{formatDate(active.startDate)}</span>
+                <span>{formatShortDate(active.startDate, i18n.language)}</span>
                 <ArrowRight size={10} />
-                <span>{formatDate(active.endDate)}</span>
+                <span>{formatShortDate(active.endDate, i18n.language)}</span>
               </div>
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-1.5">
@@ -337,8 +337,8 @@ const CycleSection: React.FC<{ title: string; cycles: ApiCycle[] }> = ({ title, 
               </div>
               <p className="text-meta" style={{ color: 'var(--flow-text-dim)' }}>
                 {t('flow.cycles.dateRange', {
-                  start: formatDate(c.startDate),
-                  end: formatDate(c.endDate),
+                  start: formatShortDate(c.startDate, t('common.dateLocale')),
+                  end: formatShortDate(c.endDate, t('common.dateLocale')),
                 })}
               </p>
             </div>

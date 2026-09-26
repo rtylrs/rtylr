@@ -49,6 +49,13 @@
     "labelAdded": "added label {{detail}}",
     "attachment": "attached {{detail}}"
   },
+  "dateLocale": "en-US",
+  "dueDateLabel": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "overdue": "{{days}}d overdue"
+  },
   "datePicker": {
     "today": "Today",
     "tomorrow": "Tomorrow",

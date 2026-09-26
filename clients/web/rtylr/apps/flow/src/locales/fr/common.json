@@ -50,6 +50,13 @@
     "labelAdded": "a ajouté l'étiquette {{detail}}",
     "attachment": "a joint {{detail}}"
   },
+  "dateLocale": "fr-FR",
+  "dueDateLabel": {
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "yesterday": "Hier",
+    "overdue": "{{days}} j de retard"
+  },
   "datePicker": {
     "today": "Aujourd'hui",
     "tomorrow": "Demain",

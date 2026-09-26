@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Task, useFlowStore } from '../stores/flowStore';
 import { useLabels } from '../../features/tasks/useLabels';
 import { labelsForTask } from '../lib/taskLabelUtils';
-import { formatDate, cn } from '../lib/utils';
+import { formatDueDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
 import StatusIcon from './StatusIcon';
 import AssigneeAvatar from './AssigneeAvatar';
@@ -185,7 +185,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
                     : 'var(--flow-text-muted)',
             }}
           >
-            {formatDate(task.dueDate)}
+            {formatDueDate(task.dueDate, t)}
           </span>
         )}
         <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={20} />

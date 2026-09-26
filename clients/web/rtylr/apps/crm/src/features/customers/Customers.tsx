@@ -78,7 +78,7 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
             </p>
             <p style={{ fontSize: '13px', color: 'var(--hub-text)' }}>
               {t('crm.customers.lifetimeSpend', {
-                amount: `$${customer.totalSpent.toLocaleString()}`,
+                amount: customer.totalSpent.toLocaleString(),
               })}
             </p>
             <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
@@ -549,7 +549,7 @@ const Customers: React.FC = () => {
                                 color: 'var(--hub-text)',
                               }}
                             >
-                              ${c.totalSpent.toLocaleString()}
+                              {c.totalSpent.toLocaleString()}
                             </td>
                             <td
                               style={{

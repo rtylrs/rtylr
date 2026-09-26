@@ -72,6 +72,45 @@ describe('CreateCustomer step-0 cancel (B57-R01)', () => {
   });
 });
 
+describe('CreateCustomer consent defaults (rtylr#1320)', () => {
+  it('leaves every consent channel opt-in for an untouched form', async () => {
+    mocks.createCustomer.mockResolvedValue({ customerId: 5 });
+    renderWizard();
+
+    fillWizardAndSubmit();
+
+    await waitFor(() => expect(mocks.createCustomer).toHaveBeenCalledTimes(1));
+    expect(mocks.createCustomer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consent: { email: false, sms: false, marketing: false },
+      })
+    );
+  });
+
+  it('sends consent true only for a channel the operator ticked', async () => {
+    mocks.createCustomer.mockResolvedValue({ customerId: 5 });
+    renderWizard();
+
+    fireEvent.change(screen.getByLabelText('crm.createCustomer.fullName'), {
+      target: { value: 'Jane Doe' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /crm\.createCustomer\.next/ }));
+    fireEvent.change(screen.getByLabelText('common.email'), {
+      target: { value: 'jane@example.com' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /crm\.createCustomer\.next/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /crm\.createCustomer\.emailUpdates/ }));
+    fireEvent.click(screen.getByRole('button', { name: /crm\.createCustomer\.submit/ }));
+
+    await waitFor(() => expect(mocks.createCustomer).toHaveBeenCalledTimes(1));
+    expect(mocks.createCustomer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consent: { email: true, sms: false, marketing: false },
+      })
+    );
+  });
+});
+
 describe('CreateCustomer submit notifications (B57-R01)', () => {
   it('shows the created notification once', async () => {
     mocks.createCustomer.mockResolvedValue({ customerId: 5 });

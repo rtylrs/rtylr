@@ -4,7 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useRoadmap } from './useRoadmap';
-import { formatDate } from '../../shared/lib/utils';
+import { formatDueDate, formatShortDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
@@ -121,10 +121,10 @@ const Roadmap: React.FC = () => {
                   style={{ color: 'var(--flow-text-dim)' }}
                 >
                   <span>
-                    {t('flow.roadmap.start')} {formatDate(p.startDate)}
+                    {t('flow.roadmap.start')} {formatShortDate(p.startDate, t('common.dateLocale'))}
                   </span>
                   <span>
-                    {t('flow.roadmap.target')} {formatDate(p.targetDate)}
+                    {t('flow.roadmap.target')} {formatDueDate(p.targetDate, t)}
                   </span>
                 </div>
               </Link>

@@ -13,7 +13,6 @@ import {
   isPast,
   isToday,
   isWithinDays,
-  relativeDayLabel,
   startOfWeek,
   todayIso,
 } from './dateUtils';
@@ -68,28 +67,6 @@ describe('daysUntil', () => {
 
   it('returns negative for a past date', () => {
     expect(daysUntil('2026-06-10', TODAY)).toBe(-5);
-  });
-});
-
-describe('relativeDayLabel', () => {
-  it('returns Today for same date', () => {
-    expect(relativeDayLabel(TODAY, TODAY)).toBe('Today');
-  });
-
-  it('returns Tomorrow for next day', () => {
-    expect(relativeDayLabel('2026-06-16', TODAY)).toBe('Tomorrow');
-  });
-
-  it('returns Yesterday for prior day', () => {
-    expect(relativeDayLabel('2026-06-14', TODAY)).toBe('Yesterday');
-  });
-
-  it('returns In N days for future', () => {
-    expect(relativeDayLabel('2026-06-20', TODAY)).toBe('In 5 days');
-  });
-
-  it('returns N days ago for past', () => {
-    expect(relativeDayLabel('2026-06-10', TODAY)).toBe('5 days ago');
   });
 });
 

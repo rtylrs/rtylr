@@ -31,7 +31,7 @@ const CreateCustomer: React.FC = () => {
     phone: '',
     birthday: '',
     address: '',
-    consentEmail: true,
+    consentEmail: false,
     consentSms: false,
     consentMarketing: false,
   });

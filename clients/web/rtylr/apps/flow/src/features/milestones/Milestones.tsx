@@ -9,7 +9,7 @@ import { useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useMilestones, useCreateMilestone } from './useMilestones';
 import { canFlowPermission } from '../../shared/lib/roleUtils';
 import { ACCENT_DEFAULT } from '../../shared/lib/colorUtils';
-import { formatDate } from '../../shared/lib/utils';
+import { formatDueDate } from '../../shared/lib/utils';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import { useProjects, useCreateProject } from '../projects/useProjects';
 import GateNotice from '../../shared/components/GateNotice';
@@ -425,7 +425,7 @@ const Milestones: React.FC = () => {
               >
                 <span>{t('flow.milestones.noTasksHint')}</span>
                 <span>
-                  {t('flow.milestones.target')} {formatDate(m.targetDate)}
+                  {t('flow.milestones.target')} {formatDueDate(m.targetDate, t)}
                 </span>
               </div>
             </motion.div>

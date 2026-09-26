@@ -11,7 +11,7 @@ import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { isDueToday } from '../../shared/lib/lifeRhythm';
 import { isTaskMine } from '../../shared/lib/currentUser';
 import { formatEffortMinutes } from '../../shared/lib/effortPresets';
-import { formatDate } from '../../shared/lib/utils';
+import { formatDueDate } from '../../shared/lib/utils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
@@ -219,7 +219,7 @@ const FocusRow: React.FC<{
                 <span>
                   {isDueToday(task.dueDate)
                     ? t('common.focusToday.dueToday')
-                    : formatDate(task.dueDate)}
+                    : formatDueDate(task.dueDate, t)}
                 </span>
               </>
             )}

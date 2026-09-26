@@ -66,13 +66,15 @@ export function toUpdateLoyaltyConfigRequest(
 function toLoyaltyTierRequest(tier: Partial<LoyaltyTier>): Record<string, unknown> {
   return {
     name: tier.name ?? '',
-    minPoints: String(Math.max(1, tier.threshold ?? 1)),
+    // Zero is valid on all three fields: an entry tier starting at zero
+    // points, a perks-only tier at 0% discount, and sort order zero (rtylr#1023).
+    minPoints: String(Math.max(0, tier.threshold ?? 0)),
     // The tier form edits `multiplier` (labelled "Discount (%)") and the cache
     // merge keeps the old `discountPct` alongside it, so preferring the stale
     // schema-derived copy discarded the edit (B45-R03).
-    discountPct: Math.max(1, tier.multiplier ?? tier.discountPct ?? 1),
+    discountPct: Math.max(0, tier.multiplier ?? tier.discountPct ?? 0),
     perks: JSON.stringify(tier.perks ?? []),
-    sortOrder: String(Math.max(1, tier.sortOrder ?? 1)),
+    sortOrder: String(Math.max(0, tier.sortOrder ?? 0)),
   };
 }
 
