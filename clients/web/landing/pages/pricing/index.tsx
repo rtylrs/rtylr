@@ -63,14 +63,14 @@ const FeatureCell = ({
 }): React.JSX.Element => {
   if (value === true) {
     return (
-      <span className={styles.checkIcon} aria-label={labels.included}>
+      <span className={styles.checkIcon} role="img" aria-label={labels.included}>
         <Check size={16} strokeWidth={2.5} />
       </span>
     );
   }
   if (value === false) {
     return (
-      <span className={styles.dashIcon} aria-label={labels.notIncluded}>
+      <span className={styles.dashIcon} role="img" aria-label={labels.notIncluded}>
         <Minus size={16} strokeWidth={2} />
       </span>
     );

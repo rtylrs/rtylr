@@ -42,12 +42,6 @@ const dmSans = DM_Sans({
 // Latin ones that will never paint a single Arabic glyph. Without the preload
 // the browser still fetches it as soon as Arabic text needs it, driven by the
 // unicode-range on the generated @font-face.
-//
-// Verify it rather than trust it: scripts/verify-arabic-font.mjs renders the
-// same Arabic string twice, once with this face and once with its src
-// emptied, and fails if the two renders match. Naming a family that is not
-// there substitutes silently, which is the failure this repo has already had
-// once with cover images.
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
   weight: ['400', '500', '600', '700'],
