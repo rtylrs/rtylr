@@ -1,9 +1,9 @@
 name: Publish public images
 
 # Builds the PUBLIC self-host frontend images docker.io/rtylr/<app> for the 10
-# rtylr apps. Triggered by a version bump in tryrtylr/rtylr-version
-# (repository_dispatch "rtylr-release") or manually with a version. NOT on normal
-# pushes — day-to-day CI deploys to Cloudflare Pages and never publishes images.
+# rtylr apps. Triggered by the Release workflow (repository_dispatch
+# "rtylr-release") or manually with a version. NOT on normal pushes — day-to-day
+# CI deploys to Cloudflare Pages and never publishes images.
 on:
   repository_dispatch:
     types: [rtylr-release]

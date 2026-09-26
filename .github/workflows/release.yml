@@ -84,7 +84,7 @@ jobs:
           echo "components=$(printf '%s' "$changed" | tr '\n' ' ' | sed 's/ *$//')" >> "$GITHUB_OUTPUT"
           echo "files_changed=$count" >> "$GITHUB_OUTPUT"
 
-          if printf '%s\n' $changed | grep -qE '^(rtylr|packages|pos|landing)$'; then
+          if printf '%s\n' $changed | grep -qE '^(rtylr|packages|pos|landing|onion|contracts)$'; then
             echo "publish_images=true" >> "$GITHUB_OUTPUT"
           else
             echo "publish_images=false" >> "$GITHUB_OUTPUT"
