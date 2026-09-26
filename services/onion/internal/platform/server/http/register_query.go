@@ -1,21 +1,16 @@
 package http
 
 import (
-	"bytes"
 	"context"
 	"encoding"
+	"encoding/json"
 	stdErrors "errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
-
-	onekithttp "github.com/corezio/onekit/http"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -216,33 +211,26 @@ func parseQueryPrimitive(value string) any {
 func WriteOneKitError(ctx context.Context, w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var statusCode int
-	var response proto.Message
+	statusCode := http.StatusInternalServerError
+	message := "Internal server error"
 
-	var validationErr *onekithttp.ValidationError
-	if stdErrors.As(err, &validationErr) {
-		statusCode = http.StatusBadRequest
-		response = validationErr
-	} else {
-		var oneKitErr *onekithttp.Error
-		if !stdErrors.As(err, &oneKitErr) {
-			logger.Ctx(ctx).Error("Unhandled internal error", logger.Error(err))
-			oneKitErr = onekithttp.NewError(http.StatusInternalServerError, "Internal server error")
+	var statusErr interface{ HTTPStatusCode() int }
+	if stdErrors.As(err, &statusErr) {
+		if candidate := statusErr.HTTPStatusCode(); candidate >= 100 && candidate <= 599 {
+			statusCode = candidate
 		}
-		statusCode = oneKitErr.HTTPStatusCode()
-		response = oneKitErr
-	}
-
-	payload, marshalErr := protojson.MarshalOptions{EmitUnpopulated: false}.Marshal(response)
-	if marshalErr != nil {
-		logger.Ctx(ctx).Error("Failed to encode error response", logger.Error(marshalErr))
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-
-		return
+		var public interface{ PublicMessage() string }
+		if stdErrors.As(err, &public) && public.PublicMessage() != "" {
+			message = public.PublicMessage()
+		} else if text := http.StatusText(statusCode); text != "" {
+			message = text
+		}
+	} else {
+		logger.Ctx(ctx).Error("Unhandled internal error", logger.Error(err))
 	}
 
 	w.WriteHeader(statusCode)
-	if _, writeErr := io.Copy(w, bytes.NewReader(payload)); writeErr != nil {
-		logger.Ctx(ctx).Error("Failed to write error response", logger.Error(writeErr))
+	if encodeErr := json.NewEncoder(w).Encode(map[string]string{"message": message}); encodeErr != nil {
+		logger.Ctx(ctx).Error("Failed to write error response", logger.Error(encodeErr))
 	}
 }

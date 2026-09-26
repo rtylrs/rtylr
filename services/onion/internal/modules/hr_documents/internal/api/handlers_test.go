@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	onekithttp "github.com/corezio/onekit/http"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // UploadDocumentHandler.Validate is the only pure validation entry point in

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	onekithttp "github.com/corezio/onekit/http"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	onekithttp "github.com/corezio/onekit/http"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"

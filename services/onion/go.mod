@@ -22,8 +22,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.16
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.1
-	github.com/coder/websocket v1.8.14
-	github.com/corezio/onekit v0.3.5
+	github.com/coder/websocket v1.8.15
 	github.com/fogleman/gg v1.3.0
 	github.com/getsentry/sentry-go v0.45.1
 	github.com/go-playground/validator/v10 v10.30.2
@@ -73,6 +72,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/moby/sys/user v0.4.1 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
+	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/samber/lo v1.53.0 // indirect
 	github.com/samber/slog-common v0.21.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect

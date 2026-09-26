@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	onekithttp "github.com/corezio/onekit/http"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/benefits/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"

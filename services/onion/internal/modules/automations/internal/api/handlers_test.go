@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	onkithttp "github.com/corezio/onekit/http"
+	onkithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"

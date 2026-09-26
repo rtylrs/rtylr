@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	onekithttp "github.com/corezio/onekit/http"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"

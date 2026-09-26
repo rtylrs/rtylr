@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	onekithttp "github.com/corezio/onekit/http"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/platform/stock_core"

@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"testing"
 
-	onekithttp "github.com/corezio/onekit/http"
 	"github.com/go-chi/chi/v5"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
