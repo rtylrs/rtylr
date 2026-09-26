@@ -377,9 +377,11 @@ describe('security headers', () => {
     for (const [name, value] of Object.entries(REQUIRED)) {
       assert.equal(res.headers.get(name), value, `${what} is missing ${name}`);
     }
-    assert.ok(
+    assert.ok(res.headers.get('content-security-policy'), `${what} is missing the CSP`);
+    assert.equal(
       res.headers.get('content-security-policy-report-only'),
-      `${what} is missing the report-only CSP`
+      null,
+      `${what} still carries the report-only header`
     );
   };
 
@@ -431,11 +433,14 @@ describe('security headers', () => {
     assert.ok(!/preload/i.test(res.headers.get('strict-transport-security')));
   });
 
-  it('the CSP is report-only, not enforcing', async () => {
+  it('the CSP is enforcing, not report-only', async () => {
     const res = await worker.fetch(req('/pricing/'), env);
-    assert.equal(res.headers.get('content-security-policy'), null);
-    const policy = res.headers.get('content-security-policy-report-only');
+    assert.equal(res.headers.get('content-security-policy-report-only'), null);
+    const policy = res.headers.get('content-security-policy');
     assert.match(policy, /default-src 'self'/);
     assert.match(policy, /https:\/\/www\.googletagmanager\.com/);
+    // The variant lookup in lib/featureVariant.ts calls api.voxire.com, so the
+    // policy has to allow it or every visitor is pinned to the default.
+    assert.match(policy, /connect-src[^;]*https:\/\/api\.voxire\.com/);
   });
 });

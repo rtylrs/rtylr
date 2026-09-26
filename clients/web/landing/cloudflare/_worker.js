@@ -239,12 +239,15 @@ const CONTENT_SECURITY_POLICY = [
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
-  "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
+  // api.voxire.com carries the A/B variant lookup (`/features`) that
+  // lib/featureVariant.ts makes on every page load. Enforcing without it would
+  // silently pin every visitor to the default variant (rtylr#1369).
+  "connect-src 'self' https://api.voxire.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
 ].join('; ');
 
 function applySecurityHeaders(headers) {
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) headers.set(name, value);
-  headers.set('Content-Security-Policy-Report-Only', CONTENT_SECURITY_POLICY);
+  headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
 }
 
 // ---------------------------------------------------------------------------
