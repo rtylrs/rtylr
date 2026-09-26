@@ -1,79 +1,80 @@
--- Sales Pipeline add-on tables (CRM module extension)
--- All tables are tenant-scoped via owner_id.
+CREATE TABLE IF NOT EXISTS `crm_leads` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `company_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `industry` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `size` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'cold_email',
+  `stage` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'cold',
+  `assigned_to` bigint DEFAULT NULL,
+  `mrr_potential` decimal(10,2) DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_crm_leads_owner` (`owner_id`),
+  KEY `idx_crm_leads_stage` (`owner_id`,`stage`),
+  KEY `idx_crm_leads_assigned` (`owner_id`,`assigned_to`),
+  KEY `idx_crm_leads_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS crm_leads (
-  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-  owner_id      BIGINT NOT NULL,
-  business_id   BIGINT NOT NULL DEFAULT 0,
-  company_name  VARCHAR(255) NOT NULL,
-  industry      VARCHAR(100) NULL,
-  size          VARCHAR(50) NULL,
-  source        VARCHAR(50) NOT NULL DEFAULT 'cold_email',
-  stage         VARCHAR(50) NOT NULL DEFAULT 'cold',
-  assigned_to   BIGINT NULL,
-  mrr_potential DECIMAL(10,2) NULL,
-  notes         TEXT NULL,
-  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_crm_leads_owner (owner_id),
-  INDEX idx_crm_leads_stage (owner_id, stage),
-  INDEX idx_crm_leads_assigned (owner_id, assigned_to),
-  INDEX idx_crm_leads_business (business_id)
-);
+CREATE TABLE IF NOT EXISTS `crm_contacts` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `lead_id` bigint NOT NULL,
+  `customer_id` bigint DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `linkedin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_primary` tinyint(1) NOT NULL DEFAULT '0',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_crm_contacts_owner` (`owner_id`),
+  KEY `idx_crm_contacts_lead` (`lead_id`),
+  KEY `idx_crm_contacts_customer` (`owner_id`,`customer_id`),
+  KEY `idx_crm_contacts_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS crm_contacts (
-  id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-  owner_id   BIGINT NOT NULL,
-  business_id BIGINT NOT NULL DEFAULT 0,
-  lead_id    BIGINT NOT NULL,
-  customer_id BIGINT NULL,
-  name       VARCHAR(255) NOT NULL,
-  role       VARCHAR(100) NULL,
-  email      VARCHAR(255) NULL,
-  phone      VARCHAR(50) NULL,
-  linkedin   VARCHAR(255) NULL,
-  is_primary BOOLEAN NOT NULL DEFAULT FALSE,
-  notes      TEXT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_crm_contacts_owner (owner_id),
-  INDEX idx_crm_contacts_lead (lead_id),
-  INDEX idx_crm_contacts_customer (owner_id, customer_id),
-  INDEX idx_crm_contacts_business (business_id)
-);
+CREATE TABLE IF NOT EXISTS `crm_touchpoints` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `lead_id` bigint NOT NULL,
+  `contact_id` bigint DEFAULT NULL,
+  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'call',
+  `outcome` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'other',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `next_follow_up` date DEFAULT NULL,
+  `created_by` bigint NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_crm_touchpoints_owner` (`owner_id`),
+  KEY `idx_crm_touchpoints_lead` (`lead_id`),
+  KEY `idx_crm_touchpoints_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS crm_touchpoints (
-  id             BIGINT AUTO_INCREMENT PRIMARY KEY,
-  owner_id       BIGINT NOT NULL,
-  business_id    BIGINT NOT NULL DEFAULT 0,
-  lead_id        BIGINT NOT NULL,
-  contact_id     BIGINT NULL,
-  type           VARCHAR(50) NOT NULL DEFAULT 'call',
-  outcome        VARCHAR(50) NOT NULL DEFAULT 'other',
-  notes          TEXT NULL,
-  next_follow_up DATE NULL,
-  created_by     BIGINT NOT NULL,
-  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_crm_touchpoints_owner (owner_id),
-  INDEX idx_crm_touchpoints_lead (lead_id),
-  INDEX idx_crm_touchpoints_business (business_id)
-);
-
-CREATE TABLE IF NOT EXISTS crm_contracts (
-  id             BIGINT AUTO_INCREMENT PRIMARY KEY,
-  owner_id       BIGINT NOT NULL,
-  business_id    BIGINT NOT NULL DEFAULT 0,
-  lead_id        BIGINT NOT NULL,
-  plan           VARCHAR(50) NOT NULL DEFAULT 'pro',
-  mrr            DECIMAL(10,2) NOT NULL DEFAULT 0,
-  seats          INT NOT NULL DEFAULT 1,
-  signed_at      DATE NULL,
-  signed_by_name VARCHAR(255) NULL,
-  closed_by      BIGINT NULL,
-  notes          TEXT NULL,
-  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_crm_contracts_owner (owner_id),
-  INDEX idx_crm_contracts_lead (lead_id),
-  INDEX idx_crm_contracts_business (business_id)
-);
+CREATE TABLE IF NOT EXISTS `crm_contracts` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `lead_id` bigint NOT NULL,
+  `plan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pro',
+  `mrr` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `seats` int NOT NULL DEFAULT '1',
+  `signed_at` date DEFAULT NULL,
+  `signed_by_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `closed_by` bigint DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_crm_contracts_owner` (`owner_id`),
+  KEY `idx_crm_contracts_lead` (`lead_id`),
+  KEY `idx_crm_contracts_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

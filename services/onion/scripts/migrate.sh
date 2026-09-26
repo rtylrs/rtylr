@@ -78,8 +78,6 @@ OUTPUT_FILE="$(mktemp)"
 trap 'rm -f "$OUTPUT_FILE"' EXIT
 
 deferred_migrations=(
-    "hr_time/zz_flow_client_key_tenant_scope.sql"
-    "shared/zz_role_access_v2_integrity.sql"
 )
 
 # Files that cannot run against this database at all, as opposed to files that

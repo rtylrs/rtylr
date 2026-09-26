@@ -1,14 +1,16 @@
-CREATE TABLE IF NOT EXISTS crm_templates (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(255) NOT NULL,
-    type ENUM('email','sms','push') NOT NULL,
-    subject VARCHAR(500),
-    body TEXT NOT NULL,
-    variables JSON,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    KEY idx_crm_templates_business (business_id)
-);
+CREATE TABLE IF NOT EXISTS `crm_templates` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('email','sms','push') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `body` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `variables` json DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_crm_templates_business` (`business_id`),
+  KEY `idx_crm_templates_business_created` (`business_id`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

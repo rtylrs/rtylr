@@ -1,14 +1,24 @@
-CREATE TABLE IF NOT EXISTS careers (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    title VARCHAR(255) NOT NULL,
-    department VARCHAR(100) NULL,
-    location VARCHAR(100) NULL,
-    employment_type VARCHAR(50) NULL,
-    work_mode VARCHAR(20) NULL,
-    seniority VARCHAR(50) NULL,
-    details TEXT NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `careers` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `department` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employment_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `work_mode` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `seniority` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `owner_id` bigint NOT NULL DEFAULT '0',
+  `slug` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `requirements` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `salary_min` decimal(12,2) DEFAULT NULL,
+  `salary_max` decimal(12,2) DEFAULT NULL,
+  `salary_currency` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_careers_owner_slug` (`owner_id`,`slug`),
+  KEY `idx_careers_owner` (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

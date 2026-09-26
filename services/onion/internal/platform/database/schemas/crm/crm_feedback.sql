@@ -1,12 +1,13 @@
-CREATE TABLE IF NOT EXISTS crm_feedback (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    customer_id BIGINT NOT NULL,
-    type ENUM('nps','review') NOT NULL,
-    score INT DEFAULT 0,
-    comment TEXT,
-    source VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    KEY idx_crm_feedback_business (business_id)
-);
+CREATE TABLE IF NOT EXISTS `crm_feedback` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `customer_id` bigint NOT NULL,
+  `type` enum('nps','review') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `score` int DEFAULT '0',
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `source` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_crm_feedback_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
