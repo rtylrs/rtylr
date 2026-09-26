@@ -57,17 +57,17 @@ func locationFromRow(row sqlc.HrLocation) domain.LocationRecord {
 	}
 }
 
-func departmentFromRow(row sqlc.HrDepartment) domain.DepartmentRecord {
+func departmentFromRow(row sqlc.ListHRDepartmentsRow) domain.DepartmentRecord {
 	return domain.DepartmentRecord{
 		ID:                    row.ID,
 		OwnerID:               row.OwnerID,
 		BusinessID:            row.BusinessID,
-		LocationID:            row.LocationID,
+		LocationID:            row.LocationID.Int64,
 		ParentDepartmentID:    row.ParentDepartmentID.Int64,
 		Name:                  row.Name,
 		DefaultWorkScheduleID: row.DefaultWorkScheduleID.Int64,
-		CreatedAt:             row.CreatedAt,
-		UpdatedAt:             row.UpdatedAt,
+		CreatedAt:             row.CreatedAt.Time,
+		UpdatedAt:             row.UpdatedAt.Time,
 	}
 }
 
