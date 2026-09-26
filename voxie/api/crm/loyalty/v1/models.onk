@@ -64,9 +64,11 @@ message CreateLoyaltyTierRequest {
   /// Points threshold at which this tier starts applying. Zero is valid and
   /// means an entry tier every customer qualifies for from their first point.
   min_points: int64? @required @gte(0)
-  discount_pct: float64? @required @gt(0)
+  /// Percentage discount for the tier. Zero is valid and means perks only.
+  discount_pct: float64? @required @gte(0)
   perks: string @required
-  sort_order: int64? @required @gt(0)
+  /// Display order. Zero is valid and means first.
+  sort_order: int64? @required @gte(0)
 }
 
 message CreateLoyaltyTierResponse {
@@ -136,9 +138,11 @@ message UpdateLoyaltyTierBody {
   /// Points threshold at which this tier starts applying. Zero is valid and
   /// means an entry tier every customer qualifies for from their first point.
   min_points: int64? @required @gte(0)
-  discount_pct: float64? @required @gt(0)
+  /// Percentage discount for the tier. Zero is valid and means perks only.
+  discount_pct: float64? @required @gte(0)
   perks: string @required
-  sort_order: int64? @required @gt(0)
+  /// Display order. Zero is valid and means first.
+  sort_order: int64? @required @gte(0)
 }
 
 message UpdateLoyaltyTierRequest {
