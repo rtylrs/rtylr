@@ -75,7 +75,7 @@ const MergeCustomers: React.FC = () => {
             {
               id: 'totalSpent',
               label: t('crm.customers.stats.totalSpent'),
-              value: `$${merged.totalSpent.toLocaleString()}`,
+              value: merged.totalSpent.toLocaleString(),
             },
             { id: 'visits', label: t('crm.customers.stats.visits'), value: merged.visits },
             {

@@ -359,7 +359,7 @@ const CustomerProfile: React.FC = () => {
                 {
                   id: 'totalSpent',
                   label: t('crm.customers.stats.totalSpent'),
-                  value: `$${customer.totalSpent.toLocaleString()}`,
+                  value: customer.totalSpent.toLocaleString(),
                 },
                 { id: 'visits', label: t('crm.customers.stats.visits'), value: customer.visits },
                 {
