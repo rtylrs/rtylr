@@ -9,6 +9,7 @@
     "start": "next start",
     "typecheck": "tsc --build --force tsconfig.app.json",
     "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:lib": "vitest run",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "next-sitemap": "^4.2.3",
     "sass": "1.99.0",
     "serve": "^14.2.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   }
 }
