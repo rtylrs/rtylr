@@ -9,6 +9,7 @@ import { navigateExternal } from '../../../../lib/navigation';
 import { SplitWords } from '../../../motion/SplitWords';
 import { SPRING_SNAPPY } from '../../../../lib/animations';
 import { localeFromPath, navPath } from '../../../../lib/locales';
+import { track, EV_SIGNUP_CLICK, EV_CTA_CLICK } from '../../../../lib/analytics';
 import styles from '../HeroSection.module.scss';
 
 const MainHero: React.FC = (): React.JSX.Element => {
@@ -18,6 +19,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
   const [prompt, setPrompt] = useState('');
 
   const goToRegister = (): void => {
+    track(EV_SIGNUP_CLICK, { source: 'hero' });
     const trimmed = prompt.trim();
     const target = trimmed
       ? `${APP_URLS.auth}/register?prompt=${encodeURIComponent(trimmed)}`
@@ -135,7 +137,11 @@ const MainHero: React.FC = (): React.JSX.Element => {
         transition={{ delay: 0.85, duration: 0.7 }}
       >
         {t('home.hero.demoLinePrefix')}{' '}
-        <a href="/demo" className={styles.demoLineAnchor}>
+        <a
+            href="/demo"
+            className={styles.demoLineAnchor}
+            onClick={() => track(EV_CTA_CLICK, { cta: 'demo', page: router.pathname })}
+          >
           {t('home.hero.demoLineLink')}
         </a>
       </motion.p>
