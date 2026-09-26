@@ -8,7 +8,7 @@ import { getCookie, getDefaultCookieDomain, removeCookie, setCookie } from './co
  * attribute when given one, and the canonical logout pattern is two
  * calls (cross-domain + host-only). A plain `document.cookie =
  * 'token=; Path=/'` without Domain leaves the parent-domain cookie
- * alive on .rtylr.com, and auth.rtylr.com bounces the user right
+ * alive on .rtylr.com, and sso.rtylr.com bounces the user right
  * back in.
  *
  * happy-dom doesn't enforce the Domain= cross-host semantics that bit

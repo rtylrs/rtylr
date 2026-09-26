@@ -61,7 +61,7 @@ let lastDeletePayload: Record<string, unknown> | null = null;
 async function seedAuth(page: Page): Promise<void> {
   // Seed the cookie before first navigation so AppGuard's synchronous
   // token check passes on the very first render - otherwise it would
-  // redirect to auth.rtylr.com and the test would leave the CRM origin.
+  // redirect to sso.rtylr.com and the test would leave the CRM origin.
   await page.context().addCookies([
     {
       name: 'token',

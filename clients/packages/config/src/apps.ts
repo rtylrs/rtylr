@@ -20,7 +20,7 @@ export const APP_URLS: Record<AppId, string> & {
   console: string;
 } = {
   dash: IS_LOCAL ? "http://localhost:5175" : "https://dash.rtylr.com",
-  auth: IS_LOCAL ? "http://localhost:5176" : "https://auth.rtylr.com",
+  auth: IS_LOCAL ? "http://localhost:5176" : "https://sso.rtylr.com",
   menu: IS_LOCAL ? "http://localhost:5174" : "https://menu.rtylr.com",
   pos: IS_LOCAL ? "http://localhost:5178" : "https://pos.rtylr.com",
   erp: IS_LOCAL ? "http://localhost:5179" : "https://erp.rtylr.com",

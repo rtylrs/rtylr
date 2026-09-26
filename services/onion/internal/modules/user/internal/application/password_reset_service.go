@@ -50,7 +50,7 @@ func (s *Service) RequestPasswordReset(ctx context.Context, emailAddr string) er
 	}
 	cache.Put(ctx, resetCacheKey(token), []byte(fmt.Sprintf("%d", user.ID)), resetTokenTTL)
 
-	authAppURL := "https://auth.rtylr.com"
+	authAppURL := "https://sso.rtylr.com"
 	if config.GlobalConfig != nil && config.GlobalConfig.AuthAppURL != "" {
 		authAppURL = config.GlobalConfig.AuthAppURL
 	}
