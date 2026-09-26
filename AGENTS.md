@@ -17,7 +17,6 @@ This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch,
 | `clients/packages/` | Shared `@voxire/*` libraries and the generated contracts package; changes can affect multiple products |
 | `voxie/`           | API contracts (`.onk`) and the generated Go/TypeScript/OpenAPI output consumed on both sides  |
 | `services/onion/`  | Go backend: modules, platform packages, sqlc, worker                                         |
-| `docs/legal/`      | Legal-readiness review, draft DPA and operational guidance                                   |
 | `.github/`         | Release and deployment automation                                                            |
 
 Deployment repositories (`tryrtylr/deploy`, `tryrtylr/infra`, `tryrtylr/pipelines`) are separate. A frontend change does not establish that the backend supports a field, enforces a permission or implements a retention policy.
@@ -97,7 +96,7 @@ pnpm filters are relative to the workspace root at `clients/`. Some aggregate sc
 
 - Keep secrets and customer data out of code, logs, fixtures and commits. Use synthetic test data and existing configuration mechanisms.
 - Optional analytics must respect both acceptance and withdrawal. Do not enable session recording through a generic analytics choice or add tracking that bypasses shared consent handling.
-- Consult `docs/legal/README.md` when changing public policies, data collection, vendors, retention, billing promises or security claims. Keep localized policies consistent with actual behavior.
+- Consult `tryrtylr/vault` (`rtylr/legal/README.md`) when changing public policies, data collection, vendors, retention, billing promises or security claims. Keep localized policies consistent with actual behavior.
 - Do not invent an operating entity, jurisdiction, certification, audit result, signed agreement, deletion guarantee or transfer safeguard. Clearly distinguish drafts and proposed controls from completed agreements and deployed controls.
 - Preserve existing customer commitments and required notice/versioning when changing terms. A page edit is not proof that customers received or accepted an amendment.
 - Respect repository and dependency licenses; do not relicense code or promise commercial/self-host rights without verifying authorization.
