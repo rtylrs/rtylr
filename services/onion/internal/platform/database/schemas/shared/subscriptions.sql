@@ -1,58 +1,59 @@
-CREATE TABLE IF NOT EXISTS plans (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    slug VARCHAR(50) NOT NULL UNIQUE,
-    apps JSON NOT NULL COMMENT 'Array of app IDs included in plan',
-    price_per_seat_cents INT NOT NULL DEFAULT 0,
-    paddle_price_id VARCHAR(100) NULL,
-    trial_days INT NOT NULL DEFAULT 14,
-    tagline VARCHAR(200) NOT NULL DEFAULT '',
-    annual_price_per_seat_cents INT NOT NULL DEFAULT 0,
-    max_seats INT NULL,
-    max_locations INT NULL,
-    ai_credits_per_month INT NOT NULL DEFAULT 0,
-    features JSON NULL,
-    tier_order INT NOT NULL DEFAULT 100,
-    is_solo BOOLEAN NOT NULL DEFAULT FALSE,
-    is_featured BOOLEAN NOT NULL DEFAULT FALSE,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `plans` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `apps` json NOT NULL COMMENT 'Array of app IDs included in plan',
+  `price_per_seat_cents` int NOT NULL DEFAULT '0',
+  `paddle_price_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `trial_days` int NOT NULL DEFAULT '14',
+  `tagline` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `annual_price_per_seat_cents` int NOT NULL DEFAULT '0',
+  `max_seats` int DEFAULT NULL,
+  `max_locations` int DEFAULT NULL,
+  `ai_credits_per_month` int NOT NULL DEFAULT '0',
+  `features` json DEFAULT NULL,
+  `tier_order` int NOT NULL DEFAULT '100',
+  `is_solo` tinyint(1) NOT NULL DEFAULT '0',
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS subscriptions (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL UNIQUE,
-    plan_id BIGINT NOT NULL,
-    status ENUM('active','trial','past_due','cancelled','expired') DEFAULT 'trial',
-    seat_count INT NOT NULL DEFAULT 1,
-    trial_ends_at TIMESTAMP NULL,
-    next_billing_date DATE NULL,
-    current_period_ends_at TIMESTAMP NULL,
-    paddle_subscription_id VARCHAR(100) NULL,
-    paddle_customer_id VARCHAR(100) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_sub_owner (owner_id),
-    INDEX idx_sub_plan (plan_id)
-);
+CREATE TABLE IF NOT EXISTS `subscriptions` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `plan_id` bigint NOT NULL,
+  `status` enum('active','trial','past_due','cancelled','expired') COLLATE utf8mb4_unicode_ci DEFAULT 'trial',
+  `seat_count` int NOT NULL DEFAULT '1',
+  `trial_ends_at` timestamp NULL DEFAULT NULL,
+  `next_billing_date` date DEFAULT NULL,
+  `current_period_ends_at` timestamp NULL DEFAULT NULL,
+  `paddle_subscription_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `paddle_customer_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `owner_id` (`owner_id`),
+  KEY `idx_sub_owner` (`owner_id`),
+  KEY `idx_sub_plan` (`plan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tracks each contiguous period of seat usage (Google Workspace model).
--- When seat count changes mid-month the current period is closed (period_end set)
--- and a new period opens (period_end NULL). The invoice for a billing month is
--- computed by summing: seat_count * days_in_period * (price_per_seat_cents / days_in_month).
-CREATE TABLE IF NOT EXISTS seat_periods (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    subscription_id BIGINT NOT NULL,
-    owner_id BIGINT NOT NULL,
-    seat_count INT NOT NULL,
-    price_per_seat_cents INT NOT NULL,
-    period_start DATE NOT NULL,
-    period_end DATE NULL COMMENT 'NULL = currently active period',
-    billing_month DATE NOT NULL COMMENT 'First day of the month this period belongs to',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_sp_subscription (subscription_id),
-    INDEX idx_sp_owner_month (owner_id, billing_month)
-);
+CREATE TABLE IF NOT EXISTS `seat_periods` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `subscription_id` bigint NOT NULL,
+  `owner_id` bigint NOT NULL,
+  `seat_count` int NOT NULL,
+  `price_per_seat_cents` int NOT NULL,
+  `period_start` date NOT NULL,
+  `period_end` date DEFAULT NULL COMMENT 'NULL = currently active period',
+  `billing_month` date NOT NULL COMMENT 'First day of the month this period belongs to',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_sp_subscription` (`subscription_id`),
+  KEY `idx_sp_owner_month` (`owner_id`,`billing_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Retire old tier names ─────────────────────────────────────────────────
 UPDATE plans SET is_active = FALSE WHERE slug IN ('starter', 'enterprise');

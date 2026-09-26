@@ -1,12 +1,14 @@
-CREATE TABLE IF NOT EXISTS hub_integrations (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    provider VARCHAR(50) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'connected',
-    config JSON NOT NULL DEFAULT (JSON_OBJECT()),
-    connected_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `hub_integrations` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `provider` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'connected',
+  `config` json NOT NULL DEFAULT (json_object()),
+  `connected_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_hub_integrations_owner_id` (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX idx_hub_integrations_owner_id ON hub_integrations(owner_id);
+

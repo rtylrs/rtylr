@@ -1,15 +1,20 @@
-CREATE TABLE IF NOT EXISTS businesses (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    owner_id BIGINT NOT NULL,
-    industry VARCHAR(100),
-    country VARCHAR(100),
-    timezone VARCHAR(50) DEFAULT 'UTC',
-    currency VARCHAR(10) DEFAULT 'USD',
-    logo_url VARCHAR(512),
-    slug VARCHAR(80) NULL UNIQUE,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_business_owner (owner_id)
-);
+CREATE TABLE IF NOT EXISTS `businesses` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner_id` bigint NOT NULL,
+  `parent_id` bigint DEFAULT NULL,
+  `industry` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `timezone` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'UTC',
+  `currency` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `logo_url` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `idx_business_owner` (`owner_id`),
+  KEY `idx_businesses_parent` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

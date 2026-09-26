@@ -1,15 +1,16 @@
-CREATE TABLE IF NOT EXISTS custom_domains (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL,
-    domain VARCHAR(255) NOT NULL,
-    verification_token VARCHAR(128) NOT NULL,
-    status VARCHAR(32) NOT NULL DEFAULT 'pending_verification',
-    ssl_status VARCHAR(32) NOT NULL DEFAULT 'pending',
-    verified_at TIMESTAMP NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_custom_domains_domain (domain),
-    UNIQUE KEY uk_custom_domains_business (business_id),
-    INDEX idx_custom_domains_status (status)
-);
+CREATE TABLE IF NOT EXISTS `custom_domains` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL,
+  `domain` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `verification_token` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending_verification',
+  `ssl_status` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `verified_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_custom_domains_domain` (`domain`),
+  UNIQUE KEY `uk_custom_domains_business` (`business_id`),
+  KEY `idx_custom_domains_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

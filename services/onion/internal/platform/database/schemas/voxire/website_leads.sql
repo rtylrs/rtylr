@@ -1,12 +1,13 @@
-CREATE TABLE IF NOT EXISTS voxire_website_leads (
-    id          BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name        VARCHAR(255) NOT NULL,
-    email       VARCHAR(255) NOT NULL,
-    phone       VARCHAR(50),
-    company     VARCHAR(255),
-    service     VARCHAR(100),
-    project     TEXT,
-    budget      VARCHAR(50),
-    source      VARCHAR(100),
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `voxire_website_leads` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `company` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `service` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `project` text COLLATE utf8mb4_unicode_ci,
+  `budget` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

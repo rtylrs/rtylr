@@ -25,9 +25,5 @@ WHERE id IN (
       AND INDEX_NAME = 'uq_finance_invoices_business_number'
 );
 
-SET @sql := IF(
-  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'finance_invoices' AND INDEX_NAME = 'uq_finance_invoices_business_number') = 0,
-  'ALTER TABLE finance_invoices ADD UNIQUE KEY uq_finance_invoices_business_number (business_id, invoice_number)',
-  'SELECT 1'
-);
-PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+  

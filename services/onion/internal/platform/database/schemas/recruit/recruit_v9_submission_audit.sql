@@ -1,16 +1,15 @@
--- Immutable tenant-scoped audit events for candidate lifecycle changes.
-
-CREATE TABLE IF NOT EXISTS careers_submission_events (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    submission_id BIGINT NOT NULL,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    actor_id BIGINT NOT NULL DEFAULT 0,
-    event_type VARCHAR(64) NOT NULL,
-    from_status VARCHAR(32) NULL,
-    to_status VARCHAR(32) NULL,
-    metadata_json JSON NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_submission_events_submission (submission_id, created_at, id),
-    INDEX idx_submission_events_business (business_id, created_at)
-);
+CREATE TABLE IF NOT EXISTS `careers_submission_events` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `submission_id` bigint NOT NULL,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `actor_id` bigint NOT NULL DEFAULT '0',
+  `event_type` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `from_status` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `to_status` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `metadata_json` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_submission_events_submission` (`submission_id`,`created_at`,`id`),
+  KEY `idx_submission_events_business` (`business_id`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

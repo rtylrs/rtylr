@@ -1,17 +1,4 @@
--- Backfill mappings for legacy payroll accounts that this application created.
--- They remain ordinary tenant accounts and can be renamed or replaced; the
--- journal no longer creates any account implicitly.
-CREATE TABLE IF NOT EXISTS finance_payroll_account_mappings (
-    business_id BIGINT NOT NULL PRIMARY KEY,
-    expense_account_id BIGINT NOT NULL,
-    payable_account_id BIGINT NOT NULL,
-    deductions_payable_account_id BIGINT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_finance_payroll_mapping_expense (expense_account_id),
-    INDEX idx_finance_payroll_mapping_payable (payable_account_id),
-    INDEX idx_finance_payroll_mapping_deductions (deductions_payable_account_id)
-);
+
 
 INSERT INTO finance_payroll_account_mappings (
     business_id, expense_account_id, payable_account_id, deductions_payable_account_id

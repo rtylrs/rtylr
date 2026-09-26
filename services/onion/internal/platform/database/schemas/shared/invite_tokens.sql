@@ -1,12 +1,14 @@
-CREATE TABLE IF NOT EXISTS invite_tokens (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NULL,
-    token VARCHAR(64) NOT NULL UNIQUE,
-    expires_at TIMESTAMP NOT NULL,
-    used_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_invite_token (token),
-    INDEX idx_invite_user (user_id)
-);
+CREATE TABLE IF NOT EXISTS `invite_tokens` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint DEFAULT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expires_at` timestamp NOT NULL,
+  `used_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token` (`token`),
+  KEY `idx_invite_token` (`token`),
+  KEY `idx_invite_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

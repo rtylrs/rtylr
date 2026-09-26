@@ -1,21 +1,23 @@
-CREATE TABLE IF NOT EXISTS erp_stock_takes (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    warehouse_id BIGINT,
-    status ENUM('draft','in_progress','completed') DEFAULT 'draft',
-    notes TEXT,
-    started_at TIMESTAMP NULL,
-    completed_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `erp_stock_takes` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `warehouse_id` bigint DEFAULT NULL,
+  `status` enum('draft','in_progress','completed') COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `started_at` timestamp NULL DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS erp_stock_take_items (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    stock_take_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
-    expected_qty DECIMAL(10,3) NOT NULL DEFAULT 0,
-    counted_qty DECIMAL(10,3) NULL,
-    variance DECIMAL(10,3) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `erp_stock_take_items` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `stock_take_id` bigint NOT NULL,
+  `product_id` bigint NOT NULL,
+  `expected_qty` decimal(10,3) NOT NULL DEFAULT '0.000',
+  `counted_qty` decimal(10,3) DEFAULT NULL,
+  `variance` decimal(10,3) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

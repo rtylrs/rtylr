@@ -1,60 +1,68 @@
-CREATE TABLE IF NOT EXISTS hr_onboarding_checklist_templates (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(255) NOT NULL,
-    trigger_type VARCHAR(50) NOT NULL DEFAULT 'onboarding',
-    role_id BIGINT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_template_name (owner_id, name),
-    INDEX idx_onboarding_templates_owner (owner_id)
-);
+CREATE TABLE IF NOT EXISTS `hr_onboarding_checklist_templates` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trigger_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'onboarding',
+  `role_id` bigint DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_template_name` (`owner_id`,`name`),
+  KEY `idx_onboarding_templates_owner` (`owner_id`),
+  KEY `idx_hr_onboarding_templates_business_name` (`business_id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS hr_onboarding_checklist_items (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    template_id BIGINT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    assignee_role VARCHAR(100) NOT NULL DEFAULT 'employee',
-    due_offset_days INT NOT NULL DEFAULT 0,
-    requires_attachment BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_onboarding_items_owner (owner_id),
-    INDEX idx_onboarding_items_template (owner_id, template_id)
-);
+CREATE TABLE IF NOT EXISTS `hr_onboarding_checklist_items` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `template_id` bigint NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `assignee_role` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'employee',
+  `due_offset_days` int NOT NULL DEFAULT '0',
+  `requires_attachment` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_onboarding_items_owner` (`owner_id`),
+  KEY `idx_onboarding_items_template` (`owner_id`,`template_id`),
+  KEY `idx_hr_onboarding_items_business_template` (`business_id`,`template_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS hr_onboarding_employee_checklists (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    employee_id BIGINT NOT NULL,
-    template_id BIGINT NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'in_progress',
-    triggered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_onboarding_emp_checklists_owner (owner_id),
-    INDEX idx_onboarding_emp_checklists_employee (owner_id, employee_id)
-);
+CREATE TABLE IF NOT EXISTS `hr_onboarding_employee_checklists` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `employee_id` bigint NOT NULL,
+  `template_id` bigint NOT NULL,
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'in_progress',
+  `triggered_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_onboarding_emp_checklists_owner` (`owner_id`),
+  KEY `idx_onboarding_emp_checklists_employee` (`owner_id`,`employee_id`),
+  KEY `idx_hr_onboarding_employee_checklists_business_employee_status` (`business_id`,`employee_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS hr_onboarding_employee_checklist_items (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    employee_checklist_id BIGINT NOT NULL,
-    checklist_item_id BIGINT NOT NULL,
-    assigned_to_employee_id BIGINT NOT NULL DEFAULT 0,
-    due_date DATE NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'incomplete',
-    completed_at TIMESTAMP,
-    completed_by BIGINT,
-    attachment_url TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_onboarding_emp_items_owner (owner_id),
-    INDEX idx_onboarding_emp_items_checklist (owner_id, employee_checklist_id)
-);
+CREATE TABLE IF NOT EXISTS `hr_onboarding_employee_checklist_items` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `employee_checklist_id` bigint NOT NULL,
+  `checklist_item_id` bigint NOT NULL,
+  `assigned_to_employee_id` bigint NOT NULL DEFAULT '0',
+  `due_date` date NOT NULL,
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'incomplete',
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `completed_by` bigint DEFAULT NULL,
+  `attachment_url` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_onboarding_emp_items_owner` (`owner_id`),
+  KEY `idx_onboarding_emp_items_checklist` (`owner_id`,`employee_checklist_id`),
+  KEY `idx_hr_onboarding_employee_items_business_checklist_status_due` (`business_id`,`employee_checklist_id`,`status`,`due_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
