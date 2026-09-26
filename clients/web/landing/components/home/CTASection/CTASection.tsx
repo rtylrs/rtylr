@@ -14,6 +14,7 @@ import { SplitWords } from '../../motion/SplitWords';
 import { navigateExternal } from '../../../lib/navigation';
 import CTAGraphic from './CTAGraphic';
 import Lines from '../../text/Lines';
+import { track, EV_SIGNUP_CLICK, EV_CTA_CLICK } from '../../../lib/analytics';
 import styles from './CTASection.module.scss';
 
 const CTASection: React.FC = (): React.JSX.Element => {
@@ -21,10 +22,12 @@ const CTASection: React.FC = (): React.JSX.Element => {
   const router = useRouter();
 
   const handleBookDemo = (): void => {
+    track(EV_CTA_CLICK, { cta: 'demo', page: router.pathname });
     void router.push('/demo');
   };
 
   const handleGetStarted = (): void => {
+    track(EV_SIGNUP_CLICK, { source: 'cta' });
     navigateExternal(`${APP_URLS.auth}/register`);
   };
 

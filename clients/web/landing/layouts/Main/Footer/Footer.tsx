@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
 import { localeFromPath, localisePath, navPath } from '../../../lib/locales';
+import { track, EV_SIGNUP_CLICK, EV_CTA_CLICK } from '../../../lib/analytics';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
@@ -22,10 +23,12 @@ const Footer: React.FC = () => {
   const locale = localeFromPath(router.asPath).code;
 
   const handleSignupClick = () => {
+    track(EV_SIGNUP_CLICK, { source: 'footer' });
     navigateExternal(`${resolveAuthUrl()}/register`);
   };
 
   const handleBookDemoClick = () => {
+    track(EV_CTA_CLICK, { cta: 'demo', page: router.pathname });
     router.push('/demo');
   };
 

@@ -65,6 +65,9 @@ jobs:
       - name: Unit tests
         run: pnpm --filter @rtylr/landing test:unit
 
+      - name: Library tests
+        run: pnpm --filter @rtylr/landing test:lib
+
       - name: Open Graph images are current
         run: node web/landing/scripts/generate-og-images.mjs --check
 

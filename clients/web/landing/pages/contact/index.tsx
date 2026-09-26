@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import {
   slideInLeft,
   slideInRight,
 } from '../../lib/animations';
+import { track, EV_FORM_START, EV_GENERATE_LEAD } from '../../lib/analytics';
 import styles from './contact.module.scss';
 
 interface ContactForm {
@@ -46,6 +47,13 @@ const ContactPage = (): React.JSX.Element => {
   const [form, setForm] = useState<ContactForm>({ name: '', email: '', company: '', message: '' });
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const formStarted = useRef(false);
+
+  const markFormStart = (): void => {
+    if (formStarted.current) return;
+    formStarted.current = true;
+    track(EV_FORM_START, { form: 'contact' });
+  };
 
   const validate = (): boolean => {
     const next: ContactFormErrors = {};
@@ -78,6 +86,7 @@ const ContactPage = (): React.JSX.Element => {
       `Name: ${form.name}\nEmail: ${form.email}${form.company ? `\nCompany: ${form.company}` : ''}\n\n${form.message}`
     );
     window.location.href = `mailto:info@voxire.com?subject=${subject}&body=${body}`;
+    track(EV_GENERATE_LEAD, { form: 'contact' });
     setSubmitted(true);
   };
 
@@ -220,7 +229,7 @@ const ContactPage = (): React.JSX.Element => {
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className={styles.form} noValidate>
+                  <form onSubmit={handleSubmit} onInput={markFormStart} className={styles.form} noValidate>
                     <h2 className={styles.formTitle}>{t('contact.form.title')}</h2>
 
                     <div className={styles.fieldRow}>

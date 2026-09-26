@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import AppLayout from '../../components/Layout/AppLayout';
@@ -13,6 +13,7 @@ import FaqSection from '../../components/FaqSection/FaqSection';
 import { useFaq } from '../../lib/faqs';
 import { blurFadeIn, staggerBlur } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
+import { track, EV_FORM_START, EV_GENERATE_LEAD } from '../../lib/analytics';
 import styles from './demo.module.scss';
 
 // Register English locale for country names
@@ -39,6 +40,13 @@ const DemoPage = (): React.JSX.Element => {
   // Rendered as an inline success block instead of alert() so the
   // form doesn't yank the user's attention with a native dialog.
   const [submitted, setSubmitted] = useState(false);
+  const formStarted = useRef(false);
+
+  const markFormStart = (): void => {
+    if (formStarted.current) return;
+    formStarted.current = true;
+    track(EV_FORM_START, { form: 'demo' });
+  };
 
   // Generate country options from i18n-iso-countries
   const countryOptions = useMemo(() => {
@@ -112,6 +120,7 @@ const DemoPage = (): React.JSX.Element => {
       `Email: ${formData.email}\nCountry: ${formData.country}\nCompany size: ${formData.companySize}\nReason: ${formData.reason}`
     );
     window.location.href = `mailto:sales@rtylr.com?subject=${subject}&body=${body}`;
+    track(EV_GENERATE_LEAD, { form: 'demo' });
     setSubmitted(true);
     setFormData({ email: '', country: '', reason: '', companySize: '' });
     setIsSubmitting(false);
@@ -165,7 +174,12 @@ const DemoPage = (): React.JSX.Element => {
                     {t('demo.directAnswer.body')}
                   </DirectAnswer>
 
-                  <motion.form onSubmit={handleSubmit} className={styles.form} variants={blurFadeIn}>
+                  <motion.form
+                    onSubmit={handleSubmit}
+                    onInput={markFormStart}
+                    className={styles.form}
+                    variants={blurFadeIn}
+                  >
                     <div className={styles.formGroup}>
                       <Input
                         type="email"

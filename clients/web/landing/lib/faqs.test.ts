@@ -1,128 +1,72 @@
-import { describe, it, expect } from 'vitest';
-import {
-  GLOBAL_FAQS,
-  POS_FAQS,
-  FLOW_FAQS,
-  HR_FAQS,
-  CRM_FAQS,
-  FINANCE_FAQS,
-  ERP_FAQS,
-} from './faqs';
+import { describe, expect, it } from 'vitest';
 
-describe('GLOBAL_FAQS', () => {
-  it('is a non-empty array', () => {
-    expect(Array.isArray(GLOBAL_FAQS)).toBe(true);
-    expect(GLOBAL_FAQS.length).toBeGreaterThan(0);
-  });
+import en from '../locales/en.json';
+import type { FaqSection } from './faqs';
 
-  it('every entry has a question string', () => {
-    for (const faq of GLOBAL_FAQS) {
-      expect(typeof faq.question).toBe('string');
-      expect(faq.question.length).toBeGreaterThan(0);
-    }
-  });
+/**
+ * The FAQ copy lives in the locale files, so these assert the editorial rules
+ * documented at the top of lib/faqs.ts against the English source of truth.
+ * The old version of this file read the seven module-scope arrays the copy
+ * moved out of; it tested a shape that no longer exists (rtylr#1361).
+ */
 
-  it('every entry has a non-empty answer string', () => {
-    for (const faq of GLOBAL_FAQS) {
-      expect(typeof faq.answer).toBe('string');
-      expect(faq.answer.length).toBeGreaterThan(0);
-    }
-  });
+const SECTIONS: FaqSection[] = [
+  'home',
+  'pricing',
+  'pos',
+  'erp',
+  'crm',
+  'hr',
+  'finance',
+  'flow',
+  'demo',
+];
 
-  it('contains a question about what rtylr is', () => {
-    const found = GLOBAL_FAQS.some((f) => f.question.toLowerCase().includes('what is rtylr'));
-    expect(found).toBe(true);
-  });
+interface FaqEntry {
+  question: string;
+  answer: string;
+}
 
-  it('contains a question about pricing', () => {
-    const found = GLOBAL_FAQS.some((f) => f.question.toLowerCase().includes('cost'));
-    expect(found).toBe(true);
-  });
-});
-
-describe('POS_FAQS', () => {
-  it('is a non-empty array', () => {
-    expect(POS_FAQS.length).toBeGreaterThan(0);
-  });
-
-  it('contains an offline question', () => {
-    const found = POS_FAQS.some((f) => f.question.toLowerCase().includes('offline'));
-    expect(found).toBe(true);
-  });
-});
-
-describe('FLOW_FAQS', () => {
-  it('is a non-empty array', () => {
-    expect(FLOW_FAQS.length).toBeGreaterThan(0);
-  });
-
-  it('contains a question about what Flow is', () => {
-    const found = FLOW_FAQS.some((f) => f.question.toLowerCase().includes('flow'));
-    expect(found).toBe(true);
-  });
-});
-
-describe('HR_FAQS', () => {
-  it('is a non-empty array', () => {
-    expect(HR_FAQS.length).toBeGreaterThan(0);
-  });
-
-  it('every entry has both question and answer', () => {
-    for (const faq of HR_FAQS) {
-      expect(faq.question).toBeTruthy();
-      expect(faq.answer).toBeTruthy();
-    }
-  });
-});
-
-describe('CRM_FAQS', () => {
-  it('is a non-empty array', () => {
-    expect(CRM_FAQS.length).toBeGreaterThan(0);
-  });
-});
-
-describe('FINANCE_FAQS', () => {
-  it('is a non-empty array', () => {
-    expect(FINANCE_FAQS.length).toBeGreaterThan(0);
-  });
-
-  it('contains a currency question', () => {
-    const found = FINANCE_FAQS.some(
-      (f) =>
-        f.question.toLowerCase().includes('currency') || f.answer.toLowerCase().includes('currency')
-    );
-    expect(found).toBe(true);
-  });
-});
-
-describe('ERP_FAQS', () => {
-  it('is a non-empty array', () => {
-    expect(ERP_FAQS.length).toBeGreaterThan(0);
-  });
-
-  it('contains an inventory-related question', () => {
-    const found = ERP_FAQS.some(
-      (f) =>
-        f.question.toLowerCase().includes('inventory') ||
-        f.question.toLowerCase().includes('warehouse')
-    );
-    expect(found).toBe(true);
-  });
-});
+function items(section: FaqSection): FaqEntry[] {
+  return (en.faq as Record<string, { items: FaqEntry[] }>)[section].items;
+}
 
 describe('FAQ structure', () => {
-  const allFaqSets = [GLOBAL_FAQS, POS_FAQS, FLOW_FAQS, HR_FAQS, CRM_FAQS, FINANCE_FAQS, ERP_FAQS];
+  it.each(SECTIONS)('%s has a non-empty item list', (section) => {
+    expect(items(section).length).toBeGreaterThan(0);
+  });
 
-  it('no FAQ set is empty', () => {
-    for (const set of allFaqSets) {
-      expect(set.length).toBeGreaterThan(0);
+  it.each(SECTIONS)('%s questions are questions and answers are answers', (section) => {
+    for (const entry of items(section)) {
+      expect(entry.question.trim().endsWith('?'), entry.question).toBe(true);
+      expect(entry.answer.trim().length).toBeGreaterThan(0);
     }
   });
 
-  it('all questions end with a question mark', () => {
-    for (const set of allFaqSets) {
-      for (const faq of set) {
-        expect(faq.question.trim().endsWith('?')).toBe(true);
+  it.each(SECTIONS)('%s carries no em dash or hyphen standing in for one', (section) => {
+    for (const entry of items(section)) {
+      expect(entry.answer).not.toContain('—');
+      expect(entry.answer).not.toContain(' - ');
+      expect(entry.question).not.toContain('—');
+      expect(entry.question).not.toContain(' - ');
+    }
+  });
+
+  it.each(SECTIONS)('%s publishes no price', (section) => {
+    for (const entry of items(section)) {
+      expect(entry.answer).not.toMatch(/[$€£]\s?\d/);
+      expect(entry.answer.toLowerCase()).not.toMatch(/\b\d+\s?(usd|eur|gbp)\b/);
+    }
+  });
+
+  it('answers are long enough to survive snippet extraction', () => {
+    // The rule in lib/faqs.ts is roughly 40 to 80 words. The pricing section
+    // is deliberately shorter (the plan data is the authority on pricing), so
+    // the floor here is the floor that holds for every section.
+    for (const section of SECTIONS) {
+      for (const entry of items(section)) {
+        const words = entry.answer.trim().split(/\s+/).length;
+        expect(words, `${section}: ${entry.question}`).toBeGreaterThanOrEqual(15);
       }
     }
   });
