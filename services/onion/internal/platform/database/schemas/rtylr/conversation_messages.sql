@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS `conversation_messages` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `session_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `session_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` int NOT NULL,
-  `role` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tokens_used` int DEFAULT NULL,
   `metadata` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

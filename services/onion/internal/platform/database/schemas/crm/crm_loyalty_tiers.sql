@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS `crm_loyalty_tiers` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL DEFAULT '0',
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `min_points` int DEFAULT '0',
   `discount_pct` decimal(5,2) DEFAULT '0.00',
   `perks` json DEFAULT NULL,

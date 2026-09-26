@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `inventory_cost_layers` (
   `unit_cost` decimal(18,6) NOT NULL,
   `received_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `reference_id` bigint DEFAULT NULL,
-  `reference_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_cost_layers_owner_product_location` (`owner_id`,`product_id`,`location_id`),

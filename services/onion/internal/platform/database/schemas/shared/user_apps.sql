@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `user_app_permissions` (
   `owner_id` bigint NOT NULL,
   `user_id` bigint NOT NULL,
   `apps` json NOT NULL COMMENT 'Array of app IDs: pos, erp, hr, crm, finance, flow',
-  `role` enum('owner','admin','operator','billing','menu_manager','store_manager','staff','viewer') COLLATE utf8mb4_unicode_ci DEFAULT 'staff',
+  `role` enum('owner','admin','operator','billing','menu_manager','store_manager','staff','viewer') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'staff',
   `is_active` tinyint(1) DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

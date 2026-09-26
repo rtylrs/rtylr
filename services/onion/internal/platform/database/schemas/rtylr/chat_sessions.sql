@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS `chat_sessions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
-  `session_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `title` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `summary` text COLLATE utf8mb4_unicode_ci,
+  `session_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `summary` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `metadata` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

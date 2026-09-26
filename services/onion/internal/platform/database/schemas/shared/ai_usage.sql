@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `ai_usage_monthly` (
 
 CREATE TABLE IF NOT EXISTS `ai_quota_settings` (
   `owner_id` bigint NOT NULL COMMENT 'Canonical tenant = businesses.owner_id',
-  `mode` enum('pool','per_person') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pool',
+  `mode` enum('pool','per_person') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pool',
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

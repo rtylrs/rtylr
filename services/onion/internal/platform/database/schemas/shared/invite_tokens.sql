@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `invite_tokens` (
   `user_id` bigint NOT NULL,
   `owner_id` bigint NOT NULL,
   `business_id` bigint DEFAULT NULL,
-  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expires_at` timestamp NOT NULL,
   `used_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

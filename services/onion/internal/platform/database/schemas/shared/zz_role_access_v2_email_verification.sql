@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS `user_email_verification_tokens` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint NOT NULL,
-  `token_hash` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expires_at` timestamp NOT NULL,
   `consumed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

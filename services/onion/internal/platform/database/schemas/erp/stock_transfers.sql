@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS `erp_stock_transfers` (
   `business_id` bigint NOT NULL DEFAULT '0',
   `from_warehouse_id` bigint NOT NULL,
   `to_warehouse_id` bigint NOT NULL,
-  `status` enum('draft','in_transit','received','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `status` enum('draft','in_transit','received','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
