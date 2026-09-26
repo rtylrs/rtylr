@@ -77,6 +77,9 @@ func (b *securityBatcher) flush() {
 		return
 	}
 
+	// One aggregate record per IP per window. Logging each blocked request
+	// individually produced thousands of near-identical lines per flush under
+	// scanner traffic, so the per-request record is deliberately not emitted.
 	ctx := context.Background()
 	for ip, reqs := range snapshot {
 		logger.Ctx(ctx).Warn("blocked suspicious requests batch",
@@ -85,13 +88,6 @@ func (b *securityBatcher) flush() {
 		)
 		for _, req := range reqs {
 			slack.Post(slack.Suspicious, fmt.Sprintf("⚠️ blocked request · %s %s · %s · %s", req.Method, req.Path, req.Reason, req.IP))
-			logger.Ctx(ctx).Warn("blocked suspicious request",
-				logger.String("ip", req.IP),
-				logger.String("reason", req.Reason),
-				logger.String("method", req.Method),
-				logger.String("path", req.Path),
-				logger.String("user_agent", req.UserAgent),
-			)
 		}
 	}
 }
