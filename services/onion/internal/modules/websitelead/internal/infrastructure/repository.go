@@ -51,3 +51,43 @@ func (r *Repository) CreateSubscriber(ctx context.Context, input domain.Subscrib
 	}
 	return result.LastInsertId()
 }
+
+// PendingSubscriber is a row still missing from the Resend audience.
+type PendingSubscriber struct {
+	ID    int64
+	Email string
+}
+
+// ListUnsyncedSubscribers returns rows never mirrored into the Resend
+// audience that have failed fewer than maxAttempts times, oldest first.
+func (r *Repository) ListUnsyncedSubscribers(ctx context.Context, maxAttempts, limit int) ([]PendingSubscriber, error) {
+	rows, err := r.queries.ListUnsyncedNewsletterSubscribers(ctx, sqlc.ListUnsyncedNewsletterSubscribersParams{
+		ResendSyncAttempts: int32(maxAttempts),
+		Limit:              int32(limit),
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]PendingSubscriber, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, PendingSubscriber{ID: row.ID, Email: row.Email})
+	}
+	return out, nil
+}
+
+func (r *Repository) MarkSubscriberSynced(ctx context.Context, id int64, contactID string) error {
+	return r.queries.MarkNewsletterSubscriberSynced(ctx, sqlc.MarkNewsletterSubscriberSyncedParams{
+		ResendContactID: sql.NullString{String: contactID, Valid: contactID != ""},
+		ID:              id,
+	})
+}
+
+func (r *Repository) MarkSubscriberSyncFailed(ctx context.Context, id int64, reason string) error {
+	if len(reason) > 255 {
+		reason = reason[:255]
+	}
+	return r.queries.MarkNewsletterSubscriberSyncFailed(ctx, sqlc.MarkNewsletterSubscriberSyncFailedParams{
+		ResendSyncError: sql.NullString{String: reason, Valid: reason != ""},
+		ID:              id,
+	})
+}
