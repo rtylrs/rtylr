@@ -47,8 +47,16 @@ type ProvisioningStatusResolver interface {
 	GetProvisioningStatus(ctx context.Context, userID int64) (*authorization.ProvisioningStatus, error)
 }
 
+type BusinessProvisioningStatusResolver interface {
+	GetProvisioningStatusForBusiness(ctx context.Context, businessID, userID int64) (*authorization.ProvisioningStatus, error)
+}
+
 type MFAVerifiedResolver interface {
 	IsMFAVerified(ctx context.Context, userID int64) (bool, error)
+}
+
+type BusinessMFAVerifiedResolver interface {
+	IsMFAVerifiedForBusiness(ctx context.Context, businessID, userID int64) (bool, error)
 }
 
 type ProvisioningStateStore interface {

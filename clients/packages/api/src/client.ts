@@ -1,5 +1,10 @@
 import axios, { type AxiosInstance } from 'axios';
-import { resolveApiBase, resolveAuthUrl, resolveCookieDomain } from '@voxire/config';
+import {
+  resolveApiBase,
+  resolveAppUrl,
+  resolveAuthUrl,
+  resolveCookieDomain,
+} from '@voxire/config';
 import { safeFetch } from './result';
 
 const getBaseUrl = (): string => {
@@ -52,6 +57,29 @@ const getAuthBaseUrl = (): string => {
 };
 
 const getAuthUrl = (appId: string): string => `${getAuthBaseUrl()}?redirect=${appId}`;
+
+const isMFARequiredResponse = (data: unknown): boolean => {
+  if (!data || typeof data !== 'object' || !('message' in data)) return false;
+  const message = (data as { message?: unknown }).message;
+  return message === 'MFA enrollment required' || message === 'MFA verification required';
+};
+
+const redirectToSecuritySettings = (): void => {
+  const dashboardUrl = new URL(resolveAppUrl('dash'), window.location.href);
+  const dashboardPath = dashboardUrl.pathname.replace(/\/+$/, '');
+  const securityPath = `${dashboardPath}/security`;
+  if (
+    window.location.origin === dashboardUrl.origin &&
+    (window.location.pathname === securityPath ||
+      window.location.pathname.startsWith(`${securityPath}/`))
+  ) {
+    return;
+  }
+  dashboardUrl.pathname = securityPath;
+  dashboardUrl.search = '';
+  dashboardUrl.hash = '';
+  window.location.href = dashboardUrl.toString();
+};
 
 // True when the current page IS the auth app. A 401 there (e.g. a wrong
 // password on the login screen, or an expired cookie during the login page's
@@ -203,9 +231,13 @@ export function createApiClient(appId: string): AxiosInstance {
         error.response.data = convertKeys(error.response.data);
       }
       if (error.response?.status === 401) {
-        clearTokenCookie();
-        if (!isOnAuthApp()) {
-          window.location.href = getAuthUrl(appId);
+        if (isMFARequiredResponse(error.response.data)) {
+          redirectToSecuritySettings();
+        } else {
+          clearTokenCookie();
+          if (!isOnAuthApp()) {
+            window.location.href = getAuthUrl(appId);
+          }
         }
       }
       return Promise.reject(error);
@@ -251,9 +283,14 @@ export function createOneKitFetch(appId: string): typeof fetch {
     });
 
     if (response.status === 401) {
-      clearTokenCookie();
-      if (!isOnAuthApp()) {
-        window.location.href = getAuthUrl(appId);
+      const errorData = await response.clone().json().catch(() => null);
+      if (isMFARequiredResponse(errorData)) {
+        redirectToSecuritySettings();
+      } else {
+        clearTokenCookie();
+        if (!isOnAuthApp()) {
+          window.location.href = getAuthUrl(appId);
+        }
       }
     }
 
