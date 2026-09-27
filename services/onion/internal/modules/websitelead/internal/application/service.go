@@ -21,6 +21,9 @@ import (
 type Notify struct {
 	LeadEmails       []string
 	NewsletterEmails []string
+	// AudienceID is the Resend audience newsletter subscribers are mirrored
+	// into by the worker job. Empty disables the mirror.
+	AudienceID string
 }
 
 // sendEmail is the outbound seam. Tests replace it to capture what would have
@@ -33,8 +36,9 @@ type repository interface {
 }
 
 type Service struct {
-	repo   repository
-	notify Notify
+	repo       repository
+	notify     Notify
+	audienceID string
 }
 
 const asyncLeadTaskTimeout = 10 * time.Second
@@ -45,8 +49,9 @@ func asyncLeadContext(ctx context.Context) (context.Context, context.CancelFunc)
 
 func NewService(_ context.Context, db *sql.DB, notify Notify) *Service {
 	return &Service{
-		repo:   infrastructure.NewRepository(db),
-		notify: notify,
+		repo:       infrastructure.NewRepository(db),
+		notify:     notify,
+		audienceID: notify.AudienceID,
 	}
 }
 
