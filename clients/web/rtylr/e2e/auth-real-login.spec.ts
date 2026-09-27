@@ -236,6 +236,15 @@ test.describe('Auth real-backend login + tenant isolation', () => {
     const vToken = (await login.json()).token as string;
     const auth = { Authorization: `Bearer ${vToken}` };
 
+    // Reads the viewer is entitled to must succeed: crm.viewer carries
+    // crm:customers:view. This is the regression guard for the app-list gate —
+    // when a member has no user_app_permissions row the app list resolves
+    // empty and this 403s even though the role and license are both correct.
+    const read = await request.get(`${REAL_API}/crm/customers?page_size=5`, {
+      headers: auth,
+    });
+    expect(read.status(), 'a viewer was denied a read it is entitled to').toBe(200);
+
     // Writes must be refused: the viewer role has no :create/:edit/:delete.
     const write = await request.post(`${REAL_API}/crm/customers`, {
       headers: auth,

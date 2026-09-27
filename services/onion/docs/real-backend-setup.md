@@ -148,14 +148,31 @@ FROM users u JOIN (SELECT 'crm' app_id UNION ALL SELECT 'hr' UNION ALL SELECT 'f
 WHERE u.email = 'viewer@example.test'
   AND NOT EXISTS (SELECT 1 FROM authorization_license_assignments l
                   WHERE l.user_id = u.id AND l.app_id = t.app_id);
+
+-- REQUIRED for a non-owner: the app list the app-access gate is evaluated
+-- against. `GetMeByBusiness` -> `GetPermissionByBusiness` reads exactly this
+-- row (SELECT ... FROM user_app_permissions WHERE business_id = ? AND user_id
+-- = ?), and a missing row yields an empty app list, so the member is denied
+-- every app route even while holding a valid role and license. `role` is an
+-- enum here, so use one of owner/admin/operator/billing/menu_manager/
+-- store_manager/staff/viewer -- 'member' is rejected by the column.
+INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
+VALUES (1, 1001, (SELECT id FROM users WHERE email='viewer@example.test'),
+        '["dash","crm","hr","flow"]', 'staff', 1)
+ON DUPLICATE KEY UPDATE apps = VALUES(apps), role = VALUES(role), is_active = 1;
 ```
 
-Known gap worth knowing: a member's readable app list is derived from the
-*owner's* rows in `user_app_permissions` (see `GetOwnerApps`). The shipped
-fixtures leave that table without rows for the owner, so a non-owner member can
-resolve to an empty app list and be denied even a role it legitimately holds.
-An owner is unaffected because they take the `isOwner` shortcut. Populate the
-owner's `user_app_permissions` if you need a member's read access to work.
+Two things to know about the owner/member split:
+
+- **A member's** readable apps come from its own `user_app_permissions` row
+  (`GetPermissionByBusiness`). The fixtures create that table but do not give
+  the seeded users rows, so a member resolves to an empty app list and is denied
+  every app route. Seed the row above.
+- **An owner's** apps come from a different path: `GetOwnerApps` joins
+  `subscriptions` to `plans` for the owner, and falls back to
+  `defaultFreePlanApps` when there is no subscription. Owners are therefore
+  unaffected by the missing `user_app_permissions` rows, which is why an
+  owner-only run hides this entirely.
 
 Restart the API after changing authorization rows: `EffectiveAccess` is resolved
 per request but the surrounding profile is cached in-process, so a running
