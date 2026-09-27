@@ -8,6 +8,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/api"
 	"github.com/voxire/onion/internal/modules/websitelead/internal/application"
+	internaljobs "github.com/voxire/onion/internal/modules/websitelead/internal/jobs"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 )
 
 // Notify re-exports the recipient configuration so cmd/api does not import the
@@ -26,6 +28,11 @@ func NewModule(ctx context.Context, db *sql.DB, notify Notify) *Module {
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
+}
+
+// RegisterJobs adds the Resend audience mirror to the worker scheduler.
+func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
+	internaljobs.Register(ctx, registry, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
