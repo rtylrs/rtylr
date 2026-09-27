@@ -14,6 +14,9 @@ service SecurityService {
   /// Toggles two-factor authentication.
   update2FA(Update2FARequest) -> Update2FAResponse @patch("/2fa")
 
+  /// Sets whether every member in the current business must enroll in MFA.
+  updateOrganizationMFAEnforcement(UpdateOrganizationMFAEnforcementRequest) -> UpdateOrganizationMFAEnforcementResponse @patch("/organization/mfa")
+
   /// Starts a TOTP enrollment and returns the secret once.
   beginMFAEnrollment(BeginMFAEnrollmentRequest) -> BeginMFAEnrollmentResponse @post("/mfa/enroll")
 

@@ -68,6 +68,21 @@ func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled boo
 		_ = tx.Rollback()
 		return cause
 	}
+	if !enabled {
+		var organizationEnforced bool
+		err := tx.QueryRowContext(ctx, `
+			SELECT COALESCE(b.mfa_enforced, FALSE)
+			FROM user_provisioning_states AS provisioning
+			JOIN businesses AS b ON b.id = provisioning.business_id
+			WHERE provisioning.user_id = ?
+			FOR UPDATE`, userID).Scan(&organizationEnforced)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) && !authorizationSchemaUnavailable(err) {
+			return rollback(err)
+		}
+		if organizationEnforced {
+			return rollback(domain.ErrMFAEnforcedByOrganization)
+		}
+	}
 	if err := sqlc.New(tx).SetTwoFactor(ctx, sqlc.SetTwoFactorParams{
 		TwoFactorEnabled: enabled,
 		ID:               userID,
@@ -75,14 +90,52 @@ func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled boo
 		logger.Ctx(ctx).Error("Failed to set 2FA", logger.Error(err))
 		return rollback(err)
 	}
+	if !enabled {
+		if _, err := tx.ExecContext(ctx, `
+			UPDATE user_mfa_enrollments
+			SET is_active = FALSE, revoked_at = NOW()
+			WHERE user_id = ? AND is_active = TRUE`, userID); err != nil {
+			return rollback(err)
+		}
+	}
 	_, stateErr := tx.ExecContext(ctx, `
 		UPDATE user_provisioning_states
-		SET mfa_required = ?, updated_at = NOW()
-		WHERE user_id = ?`, enabled, userID)
+		SET mfa_required = ?,
+		    mfa_enrolled = CASE WHEN ? THEN mfa_enrolled ELSE FALSE END,
+		    recovery_available = CASE WHEN ? THEN recovery_available ELSE FALSE END,
+		    updated_at = NOW()
+		WHERE user_id = ?`, enabled, enabled, enabled, userID)
 	if stateErr != nil && !authorizationSchemaUnavailable(stateErr) {
 		return rollback(stateErr)
 	}
 	return tx.Commit()
+}
+
+func (r *Repository) GetOrganizationMFAEnforced(ctx context.Context, businessID int64) (bool, error) {
+	var enforced bool
+	err := r.db.QueryRowContext(ctx, `
+		SELECT mfa_enforced
+		FROM businesses
+		WHERE id = ?`, businessID).Scan(&enforced)
+	return enforced, err
+}
+
+func (r *Repository) SetOrganizationMFAEnforced(ctx context.Context, businessID int64, enforced bool) error {
+	result, err := r.db.ExecContext(ctx, `
+		UPDATE businesses
+		SET mfa_enforced = ?, updated_at = NOW()
+		WHERE id = ?`, enforced, businessID)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (r *Repository) BeginMFAEnrollment(ctx context.Context, userID int64, encryptedSecret []byte) error {
@@ -166,7 +219,7 @@ func (r *Repository) MarkMFAVerified(ctx context.Context, userID int64) error {
 	result, err := r.db.ExecContext(ctx, `
 		UPDATE user_provisioning_states
 		SET last_mfa_verified_at = NOW(), updated_at = NOW()
-		WHERE user_id = ? AND mfa_required = TRUE AND mfa_enrolled = TRUE`, userID)
+		WHERE user_id = ? AND mfa_enrolled = TRUE`, userID)
 	if err != nil {
 		return err
 	}

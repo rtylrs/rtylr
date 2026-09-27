@@ -1585,19 +1585,20 @@ type AutomationRun struct {
 }
 
 type Business struct {
-	ID        int64          `db:"id" json:"id"`
-	Name      string         `db:"name" json:"name"`
-	OwnerID   int64          `db:"owner_id" json:"owner_id"`
-	ParentID  sql.NullInt64  `db:"parent_id" json:"parent_id"`
-	Industry  sql.NullString `db:"industry" json:"industry"`
-	Country   sql.NullString `db:"country" json:"country"`
-	Timezone  sql.NullString `db:"timezone" json:"timezone"`
-	Currency  sql.NullString `db:"currency" json:"currency"`
-	LogoUrl   sql.NullString `db:"logo_url" json:"logo_url"`
-	Slug      sql.NullString `db:"slug" json:"slug"`
-	IsActive  sql.NullBool   `db:"is_active" json:"is_active"`
-	CreatedAt sql.NullTime   `db:"created_at" json:"created_at"`
-	UpdatedAt sql.NullTime   `db:"updated_at" json:"updated_at"`
+	ID          int64          `db:"id" json:"id"`
+	Name        string         `db:"name" json:"name"`
+	OwnerID     int64          `db:"owner_id" json:"owner_id"`
+	ParentID    sql.NullInt64  `db:"parent_id" json:"parent_id"`
+	Industry    sql.NullString `db:"industry" json:"industry"`
+	Country     sql.NullString `db:"country" json:"country"`
+	Timezone    sql.NullString `db:"timezone" json:"timezone"`
+	Currency    sql.NullString `db:"currency" json:"currency"`
+	LogoUrl     sql.NullString `db:"logo_url" json:"logo_url"`
+	Slug        sql.NullString `db:"slug" json:"slug"`
+	IsActive    sql.NullBool   `db:"is_active" json:"is_active"`
+	CreatedAt   sql.NullTime   `db:"created_at" json:"created_at"`
+	UpdatedAt   sql.NullTime   `db:"updated_at" json:"updated_at"`
+	MfaEnforced bool           `db:"mfa_enforced" json:"mfa_enforced"`
 }
 
 type BusinessAddon struct {
@@ -2269,7 +2270,6 @@ type UserProvisioningState struct {
 	State                    UserProvisioningStatesState `db:"state" json:"state"`
 	EmailVerified            bool                        `db:"email_verified" json:"email_verified"`
 	PasswordChangeRequired   bool                        `db:"password_change_required" json:"password_change_required"`
-	MfaRequired              bool                        `db:"mfa_required" json:"mfa_required"`
 	MfaEnrolled              bool                        `db:"mfa_enrolled" json:"mfa_enrolled"`
 	RecoveryAvailable        bool                        `db:"recovery_available" json:"recovery_available"`
 	ActivationTokenHash      sql.NullString              `db:"activation_token_hash" json:"activation_token_hash"`
@@ -2278,6 +2278,7 @@ type UserProvisioningState struct {
 	LastMfaVerifiedAt        sql.NullTime                `db:"last_mfa_verified_at" json:"last_mfa_verified_at"`
 	CreatedAt                sql.NullTime                `db:"created_at" json:"created_at"`
 	UpdatedAt                sql.NullTime                `db:"updated_at" json:"updated_at"`
+	MfaRequired              bool                        `db:"mfa_required" json:"mfa_required"`
 }
 
 type UserSession struct {

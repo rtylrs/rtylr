@@ -42,6 +42,19 @@
     "invalidCode": "Saisissez un code valide à six chiffres.",
     "verified": "MFA vérifiée pour cette session."
   },
+  "securityPolicy": {
+    "organizationTitle": "Politique MFA de l’entreprise",
+    "organizationDescription": "Lorsqu’elle est activée, chaque membre de cette entreprise doit configurer la MFA avant d’accéder à Rtylr.",
+    "organizationEnabled": "La configuration de la MFA est requise pour chaque membre de cette entreprise.",
+    "organizationDisabled": "Les membres peuvent choisir d’utiliser ou non la MFA.",
+    "requireForEveryone": "Exiger la MFA pour tout le monde",
+    "stopRequiring": "Ne plus exiger la MFA",
+    "requiredByOrganization": "Exigée par votre entreprise",
+    "organizationRequiredDescription": "Votre entreprise exige que vous configuriez la MFA pour continuer.",
+    "accountRequiredDescription": "Votre compte exige la configuration de la MFA pour continuer.",
+    "enrollmentRequired": "Configuration requise",
+    "setupRequired": "Configurer la MFA"
+  },
   "roleLabels": {
     "owner": "Propriétaire",
     "admin": "Administrateur",
@@ -61,6 +74,9 @@
     "twoFactorEnabled": "Authentification à deux facteurs activée",
     "twoFactorDisabled": "Authentification à deux facteurs désactivée",
     "failedTwoFactorUpdate": "Échec de la mise à jour des paramètres 2FA",
+    "organizationMfaEnabled": "La MFA est obligatoire pour toute l’entreprise",
+    "organizationMfaDisabled": "L’obligation de MFA pour l’entreprise a été désactivée",
+    "failedOrganizationMfaUpdate": "Échec de la mise à jour de la politique MFA de l’entreprise",
     "signedOutSessions": "Déconnexion de toutes les sessions réussie",
     "failedSignOutSessions": "Échec de la déconnexion des sessions",
     "groupCreated": "Groupe créé",

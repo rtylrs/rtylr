@@ -83,7 +83,7 @@ func hubFeaturePermission(method, path string) (string, bool) {
 		return "hub:hierarchy:manage", true
 	case strings.HasPrefix(path, "/hub/audit"):
 		return "hub:audit:view", true
-	case strings.HasPrefix(path, "/hub/security"):
+	case path == "/hub/security/v1/organization/mfa":
 		return "hub:security:manage", true
 	case strings.HasPrefix(path, "/hub/api-keys"), strings.HasPrefix(path, "/hub/api_keys"):
 		return "hub:api_keys:manage", true

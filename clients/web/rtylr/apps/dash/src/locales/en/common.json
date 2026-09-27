@@ -42,6 +42,19 @@
     "invalidCode": "Enter a valid six-digit code.",
     "verified": "MFA verified for this session."
   },
+  "securityPolicy": {
+    "organizationTitle": "Organization MFA policy",
+    "organizationDescription": "When enabled, every member of this business must enroll in MFA before accessing Rtylr.",
+    "organizationEnabled": "MFA enrollment is required for every member of this business.",
+    "organizationDisabled": "Members can choose whether to use MFA.",
+    "requireForEveryone": "Require MFA for everyone",
+    "stopRequiring": "Stop requiring MFA",
+    "requiredByOrganization": "Required by your organization",
+    "organizationRequiredDescription": "Your organization requires you to enroll in MFA before you can continue.",
+    "accountRequiredDescription": "Your account requires MFA enrollment before you can continue.",
+    "enrollmentRequired": "Enrollment required",
+    "setupRequired": "Set up MFA"
+  },
   "roleLabels": {
     "owner": "Owner",
     "admin": "Admin",
@@ -58,6 +71,9 @@
     "twoFactorEnabled": "Two-factor enabled",
     "twoFactorDisabled": "Two-factor disabled",
     "failedTwoFactorUpdate": "Failed to update two-factor settings",
+    "organizationMfaEnabled": "Organization-wide MFA is required",
+    "organizationMfaDisabled": "Organization-wide MFA requirement disabled",
+    "failedOrganizationMfaUpdate": "Failed to update organization MFA policy",
     "signedOutSessions": "Signed out of all sessions",
     "failedSignOutSessions": "Failed to sign out sessions",
     "groupCreated": "Group created",

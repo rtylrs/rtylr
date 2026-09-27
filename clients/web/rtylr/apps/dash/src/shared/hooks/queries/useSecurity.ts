@@ -38,6 +38,28 @@ export const useToggleTwoFactor = () => {
   });
 };
 
+export const useUpdateOrganizationMFAEnforcement = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const response = await securityClient.updateOrganizationMFAEnforcement({ enabled });
+      return response.enforced ?? enabled;
+    },
+    onSuccess: (enforced) => {
+      toast.success(
+        i18next.t(
+          enforced
+            ? 'common.toasts.organizationMfaEnabled'
+            : 'common.toasts.organizationMfaDisabled'
+        )
+      );
+      qc.invalidateQueries({ queryKey: ['security'] });
+    },
+    onError: () =>
+      toast.error(i18next.t('common.toasts.failedOrganizationMfaUpdate')),
+  });
+};
+
 export const useBeginMFAEnrollment = () => {
   return useMutation({
     mutationFn: async () => {
