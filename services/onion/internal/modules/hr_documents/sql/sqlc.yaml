@@ -4,7 +4,7 @@ sql:
     queries: "queries"
     schema:
       - "../../../../internal/platform/database/schemas/shared"
-      - "../../../../internal/platform/database/schemas/hr_documents"
+      - "../../../../internal/platform/database/schemas/hr"
     gen:
       go:
         package: "sqlc"

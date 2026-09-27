@@ -96,7 +96,7 @@ func (r *Repository) CreateLeaveRequestWithBalance(ctx context.Context, ownerID 
 		if balanceErr != nil {
 			return nil, balanceErr
 		}
-		balance := leaveBalanceFromRow(row)
+		balance := leaveBalanceFromRow(sqlc.GetLeaveBalanceRow(row))
 		if balance.EntitledDays-balance.UsedDays-balance.PendingDays < allocation.Days {
 			return nil, domain.ErrInsufficientLeaveBalance
 		}

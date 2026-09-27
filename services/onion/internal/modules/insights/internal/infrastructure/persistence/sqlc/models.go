@@ -1746,6 +1746,54 @@ func (ns NullPosSessionsStatus) Value() (driver.Value, error) {
 	return string(ns.PosSessionsStatus), nil
 }
 
+type PosStockMovementsType string
+
+const (
+	PosStockMovementsTypeSale        PosStockMovementsType = "sale"
+	PosStockMovementsTypeReturnStock PosStockMovementsType = "return_stock"
+	PosStockMovementsTypeReceive     PosStockMovementsType = "receive"
+	PosStockMovementsTypeTransferIn  PosStockMovementsType = "transfer_in"
+	PosStockMovementsTypeTransferOut PosStockMovementsType = "transfer_out"
+	PosStockMovementsTypeAdjust      PosStockMovementsType = "adjust"
+	PosStockMovementsTypeWaste       PosStockMovementsType = "waste"
+	PosStockMovementsTypeStockCount  PosStockMovementsType = "stock_count"
+)
+
+func (e *PosStockMovementsType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PosStockMovementsType(s)
+	case string:
+		*e = PosStockMovementsType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PosStockMovementsType: %T", src)
+	}
+	return nil
+}
+
+type NullPosStockMovementsType struct {
+	PosStockMovementsType PosStockMovementsType `json:"pos_stock_movements_type"`
+	Valid                 bool                  `json:"valid"` // Valid is true if PosStockMovementsType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPosStockMovementsType) Scan(value interface{}) error {
+	if value == nil {
+		ns.PosStockMovementsType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PosStockMovementsType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPosStockMovementsType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PosStockMovementsType), nil
+}
+
 type PosTablesStatus string
 
 const (
@@ -2287,13 +2335,16 @@ type ActivityLog struct {
 	OwnerID    int64 `db:"owner_id" json:"owner_id"`
 	BusinessID int64 `db:"business_id" json:"business_id"`
 	// Which app: hub, pos, erp, hr, crm, finance, flow
-	App         string         `db:"app" json:"app"`
-	EntityType  string         `db:"entity_type" json:"entity_type"`
-	EntityID    sql.NullInt64  `db:"entity_id" json:"entity_id"`
-	Action      string         `db:"action" json:"action"`
-	Description sql.NullString `db:"description" json:"description"`
-	UserID      sql.NullInt64  `db:"user_id" json:"user_id"`
-	CreatedAt   sql.NullTime   `db:"created_at" json:"created_at"`
+	App         string          `db:"app" json:"app"`
+	EntityType  string          `db:"entity_type" json:"entity_type"`
+	EntityID    sql.NullInt64   `db:"entity_id" json:"entity_id"`
+	Action      string          `db:"action" json:"action"`
+	Description sql.NullString  `db:"description" json:"description"`
+	UserID      sql.NullInt64   `db:"user_id" json:"user_id"`
+	OldValues   json.RawMessage `db:"old_values" json:"old_values"`
+	NewValues   json.RawMessage `db:"new_values" json:"new_values"`
+	IpAddress   sql.NullString  `db:"ip_address" json:"ip_address"`
+	CreatedAt   sql.NullTime    `db:"created_at" json:"created_at"`
 }
 
 type Addon struct {
@@ -2480,6 +2531,7 @@ type Business struct {
 	ID        int64          `db:"id" json:"id"`
 	Name      string         `db:"name" json:"name"`
 	OwnerID   int64          `db:"owner_id" json:"owner_id"`
+	ParentID  sql.NullInt64  `db:"parent_id" json:"parent_id"`
 	Industry  sql.NullString `db:"industry" json:"industry"`
 	Country   sql.NullString `db:"country" json:"country"`
 	Timezone  sql.NullString `db:"timezone" json:"timezone"`
@@ -2773,21 +2825,22 @@ type ErpProduct struct {
 }
 
 type ErpPurchaseOrder struct {
-	ID               int64                       `db:"id" json:"id"`
-	OwnerID          int64                       `db:"owner_id" json:"owner_id"`
-	BusinessID       int64                       `db:"business_id" json:"business_id"`
-	SupplierID       int64                       `db:"supplier_id" json:"supplier_id"`
-	PoNumber         string                      `db:"po_number" json:"po_number"`
-	Status           NullErpPurchaseOrdersStatus `db:"status" json:"status"`
-	Subtotal         sql.NullString              `db:"subtotal" json:"subtotal"`
-	TaxAmount        sql.NullString              `db:"tax_amount" json:"tax_amount"`
-	Total            sql.NullString              `db:"total" json:"total"`
-	ExpectedDelivery sql.NullTime                `db:"expected_delivery" json:"expected_delivery"`
-	ReceivedAt       sql.NullTime                `db:"received_at" json:"received_at"`
-	Notes            sql.NullString              `db:"notes" json:"notes"`
-	CreatedBy        sql.NullInt64               `db:"created_by" json:"created_by"`
-	CreatedAt        sql.NullTime                `db:"created_at" json:"created_at"`
-	UpdatedAt        sql.NullTime                `db:"updated_at" json:"updated_at"`
+	ID                    int64                       `db:"id" json:"id"`
+	OwnerID               int64                       `db:"owner_id" json:"owner_id"`
+	BusinessID            int64                       `db:"business_id" json:"business_id"`
+	SupplierID            int64                       `db:"supplier_id" json:"supplier_id"`
+	PoNumber              string                      `db:"po_number" json:"po_number"`
+	Status                NullErpPurchaseOrdersStatus `db:"status" json:"status"`
+	Subtotal              sql.NullString              `db:"subtotal" json:"subtotal"`
+	TaxAmount             sql.NullString              `db:"tax_amount" json:"tax_amount"`
+	Total                 sql.NullString              `db:"total" json:"total"`
+	ExpectedDelivery      sql.NullTime                `db:"expected_delivery" json:"expected_delivery"`
+	ReceivedAt            sql.NullTime                `db:"received_at" json:"received_at"`
+	Notes                 sql.NullString              `db:"notes" json:"notes"`
+	CreatedBy             sql.NullInt64               `db:"created_by" json:"created_by"`
+	CreatedAt             sql.NullTime                `db:"created_at" json:"created_at"`
+	UpdatedAt             sql.NullTime                `db:"updated_at" json:"updated_at"`
+	DestinationLocationID sql.NullInt64               `db:"destination_location_id" json:"destination_location_id"`
 }
 
 type ErpPurchaseOrderItem struct {
@@ -3110,18 +3163,6 @@ type HrCompanyConfig struct {
 	UpdatedAt             time.Time     `db:"updated_at" json:"updated_at"`
 }
 
-type HrDepartment struct {
-	ID                    int64         `db:"id" json:"id"`
-	OwnerID               int64         `db:"owner_id" json:"owner_id"`
-	BusinessID            int64         `db:"business_id" json:"business_id"`
-	LocationID            int64         `db:"location_id" json:"location_id"`
-	ParentDepartmentID    sql.NullInt64 `db:"parent_department_id" json:"parent_department_id"`
-	Name                  string        `db:"name" json:"name"`
-	DefaultWorkScheduleID sql.NullInt64 `db:"default_work_schedule_id" json:"default_work_schedule_id"`
-	CreatedAt             time.Time     `db:"created_at" json:"created_at"`
-	UpdatedAt             time.Time     `db:"updated_at" json:"updated_at"`
-}
-
 type HrEmployee struct {
 	ID                    int64          `db:"id" json:"id"`
 	OwnerID               int64          `db:"owner_id" json:"owner_id"`
@@ -3178,6 +3219,8 @@ type HrLeaveBalance struct {
 	BusinessID       int64     `db:"business_id" json:"business_id"`
 	EmployeeID       int64     `db:"employee_id" json:"employee_id"`
 	LeaveTypeID      int64     `db:"leave_type_id" json:"leave_type_id"`
+	Balance          string    `db:"balance" json:"balance"`
+	Used             string    `db:"used" json:"used"`
 	Year             int32     `db:"year" json:"year"`
 	EntitledDays     string    `db:"entitled_days" json:"entitled_days"`
 	UsedDays         string    `db:"used_days" json:"used_days"`
@@ -3435,6 +3478,17 @@ type PlatformEvent struct {
 	CreatedAt    time.Time       `db:"created_at" json:"created_at"`
 }
 
+type PosBranchInventory struct {
+	ID              int64          `db:"id" json:"id"`
+	BusinessID      int64          `db:"business_id" json:"business_id"`
+	BranchID        int64          `db:"branch_id" json:"branch_id"`
+	ProductID       int64          `db:"product_id" json:"product_id"`
+	Quantity        string         `db:"quantity" json:"quantity"`
+	ReorderPoint    sql.NullString `db:"reorder_point" json:"reorder_point"`
+	ReorderQuantity sql.NullString `db:"reorder_quantity" json:"reorder_quantity"`
+	UpdatedAt       time.Time      `db:"updated_at" json:"updated_at"`
+}
+
 type PosBusinessSetting struct {
 	ID              int64                              `db:"id" json:"id"`
 	BusinessID      int64                              `db:"business_id" json:"business_id"`
@@ -3586,6 +3640,7 @@ type PosOrder struct {
 	VoidedBy            sql.NullInt64              `db:"voided_by" json:"voided_by"`
 	VoidedAt            sql.NullTime               `db:"voided_at" json:"voided_at"`
 	ExchangeOrderID     sql.NullInt64              `db:"exchange_order_id" json:"exchange_order_id"`
+	PosUserID           sql.NullInt64              `db:"pos_user_id" json:"pos_user_id"`
 	PaddleTransactionID sql.NullString             `db:"paddle_transaction_id" json:"paddle_transaction_id"`
 }
 
@@ -3604,6 +3659,9 @@ type PosOrderItem struct {
 	Notes          sql.NullString          `db:"notes" json:"notes"`
 	Status         NullPosOrderItemsStatus `db:"status" json:"status"`
 	CreatedAt      sql.NullTime            `db:"created_at" json:"created_at"`
+	Modifiers      json.RawMessage         `db:"modifiers" json:"modifiers"`
+	ComboID        sql.NullInt64           `db:"combo_id" json:"combo_id"`
+	VariantName    sql.NullString          `db:"variant_name" json:"variant_name"`
 }
 
 type PosRefund struct {
@@ -3621,6 +3679,7 @@ type PosSession struct {
 	ID               int64                 `db:"id" json:"id"`
 	OwnerID          int64                 `db:"owner_id" json:"owner_id"`
 	BusinessID       int64                 `db:"business_id" json:"business_id"`
+	PosUserID        sql.NullInt64         `db:"pos_user_id" json:"pos_user_id"`
 	LocationID       sql.NullInt64         `db:"location_id" json:"location_id"`
 	StaffID          int64                 `db:"staff_id" json:"staff_id"`
 	TerminalID       sql.NullInt64         `db:"terminal_id" json:"terminal_id"`
@@ -3640,6 +3699,20 @@ type PosSession struct {
 	Notes            sql.NullString        `db:"notes" json:"notes"`
 }
 
+type PosStockMovement struct {
+	ID            int64                 `db:"id" json:"id"`
+	BusinessID    int64                 `db:"business_id" json:"business_id"`
+	BranchID      int64                 `db:"branch_id" json:"branch_id"`
+	ProductID     int64                 `db:"product_id" json:"product_id"`
+	Type          PosStockMovementsType `db:"type" json:"type"`
+	Quantity      string                `db:"quantity" json:"quantity"`
+	ReferenceID   sql.NullInt64         `db:"reference_id" json:"reference_id"`
+	ReferenceType sql.NullString        `db:"reference_type" json:"reference_type"`
+	Note          sql.NullString        `db:"note" json:"note"`
+	EmployeeID    sql.NullInt64         `db:"employee_id" json:"employee_id"`
+	CreatedAt     time.Time             `db:"created_at" json:"created_at"`
+}
+
 type PosTable struct {
 	ID                    int64               `db:"id" json:"id"`
 	OwnerID               int64               `db:"owner_id" json:"owner_id"`
@@ -3652,6 +3725,8 @@ type PosTable struct {
 	QrCodeUrl             sql.NullString      `db:"qr_code_url" json:"qr_code_url"`
 	CreatedAt             sql.NullTime        `db:"created_at" json:"created_at"`
 	UpdatedAt             sql.NullTime        `db:"updated_at" json:"updated_at"`
+	FloorID               sql.NullInt64       `db:"floor_id" json:"floor_id"`
+	SortOrder             sql.NullInt32       `db:"sort_order" json:"sort_order"`
 }
 
 type PosUser struct {
@@ -3710,18 +3785,20 @@ type SelfHostLicense struct {
 }
 
 type Subscription struct {
-	ID                   int64                   `db:"id" json:"id"`
-	OwnerID              int64                   `db:"owner_id" json:"owner_id"`
-	PlanID               int64                   `db:"plan_id" json:"plan_id"`
-	Status               NullSubscriptionsStatus `db:"status" json:"status"`
-	SeatCount            int32                   `db:"seat_count" json:"seat_count"`
-	TrialEndsAt          sql.NullTime            `db:"trial_ends_at" json:"trial_ends_at"`
-	NextBillingDate      sql.NullTime            `db:"next_billing_date" json:"next_billing_date"`
-	CurrentPeriodEndsAt  sql.NullTime            `db:"current_period_ends_at" json:"current_period_ends_at"`
-	PaddleSubscriptionID sql.NullString          `db:"paddle_subscription_id" json:"paddle_subscription_id"`
-	PaddleCustomerID     sql.NullString          `db:"paddle_customer_id" json:"paddle_customer_id"`
-	CreatedAt            sql.NullTime            `db:"created_at" json:"created_at"`
-	UpdatedAt            sql.NullTime            `db:"updated_at" json:"updated_at"`
+	ID                      int64                   `db:"id" json:"id"`
+	OwnerID                 int64                   `db:"owner_id" json:"owner_id"`
+	PlanID                  int64                   `db:"plan_id" json:"plan_id"`
+	Status                  NullSubscriptionsStatus `db:"status" json:"status"`
+	SeatCount               int32                   `db:"seat_count" json:"seat_count"`
+	PricePerSeatCents       int32                   `db:"price_per_seat_cents" json:"price_per_seat_cents"`
+	AnnualPricePerSeatCents int32                   `db:"annual_price_per_seat_cents" json:"annual_price_per_seat_cents"`
+	TrialEndsAt             sql.NullTime            `db:"trial_ends_at" json:"trial_ends_at"`
+	NextBillingDate         sql.NullTime            `db:"next_billing_date" json:"next_billing_date"`
+	CurrentPeriodEndsAt     sql.NullTime            `db:"current_period_ends_at" json:"current_period_ends_at"`
+	PaddleSubscriptionID    sql.NullString          `db:"paddle_subscription_id" json:"paddle_subscription_id"`
+	PaddleCustomerID        sql.NullString          `db:"paddle_customer_id" json:"paddle_customer_id"`
+	CreatedAt               sql.NullTime            `db:"created_at" json:"created_at"`
+	UpdatedAt               sql.NullTime            `db:"updated_at" json:"updated_at"`
 }
 
 type Theme struct {
@@ -3885,6 +3962,16 @@ type UserSession struct {
 	RevokedAt sql.NullTime   `db:"revoked_at" json:"revoked_at"`
 }
 
+type VoxhireApplicationEvent struct {
+	ID            int64          `db:"id" json:"id"`
+	ApplicationID int64          `db:"application_id" json:"application_id"`
+	AdminID       sql.NullInt64  `db:"admin_id" json:"admin_id"`
+	Kind          string         `db:"kind" json:"kind"`
+	Title         string         `db:"title" json:"title"`
+	Detail        sql.NullString `db:"detail" json:"detail"`
+	CreatedAt     sql.NullTime   `db:"created_at" json:"created_at"`
+}
+
 type VoxhireCompanyLead struct {
 	ID           int64          `db:"id" json:"id"`
 	CompanyName  string         `db:"company_name" json:"company_name"`
@@ -3900,6 +3987,35 @@ type VoxhireCompanyLead struct {
 	AgencyOptIn  bool           `db:"agency_opt_in" json:"agency_opt_in"`
 	Status       string         `db:"status" json:"status"`
 	CreatedAt    sql.NullTime   `db:"created_at" json:"created_at"`
+}
+
+type VoxhireFollowUpTask struct {
+	ID            int64        `db:"id" json:"id"`
+	ApplicationID int64        `db:"application_id" json:"application_id"`
+	Title         string       `db:"title" json:"title"`
+	Status        string       `db:"status" json:"status"`
+	DueAt         sql.NullTime `db:"due_at" json:"due_at"`
+	CompletedAt   sql.NullTime `db:"completed_at" json:"completed_at"`
+	CreatedAt     sql.NullTime `db:"created_at" json:"created_at"`
+}
+
+type VoxhireShortlist struct {
+	ID        int64          `db:"id" json:"id"`
+	JobID     int64          `db:"job_id" json:"job_id"`
+	Name      string         `db:"name" json:"name"`
+	Status    string         `db:"status" json:"status"`
+	Notes     sql.NullString `db:"notes" json:"notes"`
+	CreatedAt sql.NullTime   `db:"created_at" json:"created_at"`
+	UpdatedAt sql.NullTime   `db:"updated_at" json:"updated_at"`
+}
+
+type VoxhireShortlistItem struct {
+	ID            int64          `db:"id" json:"id"`
+	ShortlistID   int64          `db:"shortlist_id" json:"shortlist_id"`
+	ApplicationID int64          `db:"application_id" json:"application_id"`
+	SortOrder     int32          `db:"sort_order" json:"sort_order"`
+	Notes         sql.NullString `db:"notes" json:"notes"`
+	CreatedAt     sql.NullTime   `db:"created_at" json:"created_at"`
 }
 
 type VoxhireTalentApplication struct {
@@ -3920,6 +4036,18 @@ type VoxhireTalentApplication struct {
 	CvKey              sql.NullString `db:"cv_key" json:"cv_key"`
 	Status             string         `db:"status" json:"status"`
 	CreatedAt          sql.NullTime   `db:"created_at" json:"created_at"`
+	CurrentRole        sql.NullString `db:"current_role" json:"current_role"`
+	DesiredRoles       sql.NullString `db:"desired_roles" json:"desired_roles"`
+	SalaryExpectation  sql.NullString `db:"salary_expectation" json:"salary_expectation"`
+	WorkAuthorization  sql.NullString `db:"work_authorization" json:"work_authorization"`
+	WorkHistory        sql.NullString `db:"work_history" json:"work_history"`
+	Education          sql.NullString `db:"education" json:"education"`
+	CvProcessingStatus string         `db:"cv_processing_status" json:"cv_processing_status"`
+	CvProcessingError  sql.NullString `db:"cv_processing_error" json:"cv_processing_error"`
+	CvExtractedText    sql.NullString `db:"cv_extracted_text" json:"cv_extracted_text"`
+	CvSummary          sql.NullString `db:"cv_summary" json:"cv_summary"`
+	CvProcessedAt      sql.NullTime   `db:"cv_processed_at" json:"cv_processed_at"`
+	CvProfileJson      sql.NullString `db:"cv_profile_json" json:"cv_profile_json"`
 }
 
 type Waitlist struct {
