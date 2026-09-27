@@ -42,11 +42,19 @@ const enabled = Boolean(REAL_API && OWNER_EMAIL && OWNER_PASSWORD && OTHER_EMAIL
 
 interface Tenant {
   token: string;
-  me: { id: number; business_id: string; business_name: string; email: string; is_owner: boolean };
+  me: {
+    id: number;
+    business_id: string;
+    business_name: string;
+    email: string;
+    is_owner: boolean;
+    apps?: string[];
+  };
 }
 
 let owner: Tenant;
 let other: Tenant;
+let grantedApps: string[] = [];
 
 async function loginAs(
   request: APIRequestContext,
@@ -83,6 +91,7 @@ test.describe('Auth real-backend login + tenant isolation', () => {
     );
     owner = await loginAs(request, OWNER_EMAIL!, OWNER_PASSWORD!);
     other = await loginAs(request, OTHER_EMAIL!, OTHER_PASSWORD!);
+    grantedApps = owner.me.apps ?? [];
   });
 
   test.beforeEach(async ({ page }) => {
@@ -178,5 +187,34 @@ test.describe('Auth real-backend login + tenant isolation', () => {
       ownIds.has(String(c.id))
     );
     expect(leaked, 'a customer owned by one tenant appeared in another tenant list').toEqual([]);
+  });
+
+  test('every licensed app opens its data plane for the owner', async ({ request }) => {
+    // One real read route per app, taken from the generated contracts. A 403
+    // here means the app is licensed in the manifest but the resolver still
+    // denies it — the entitlement boundary failing, which is the bug this
+    // guards against. Anything that is not 403 proves the app's HTTP boundary
+    // let a genuine owner through (a 200 with data, or a 404/400 for an empty
+    // or under-filled route, both of which mean the request reached the app).
+    const routes: Array<[string, string]> = [
+      ['pos', '/pos/loyalty/v1/balance'],
+      ['erp', '/erp/warehouse/v1/warehouses'],
+      ['hr', '/hr/work-schedule/v1/work-schedules'],
+      ['finance', '/finance/tax/v1/tax'],
+      ['insights', '/insights/dashboard/v1/summary'],
+      ['recruit', '/recruit/career/v1/submissions'],
+      ['menu', '/hub/menu/v1/menu'],
+      ['crm', '/crm/customers?page_size=1'],
+      ['flow', '/flow/task/v2/tasks/my'],
+    ];
+    const denied: string[] = [];
+    for (const [app, path] of routes) {
+      if (!grantedApps.includes(app)) continue;
+      const res = await request.get(`${REAL_API}${path}`, {
+        headers: { Authorization: `Bearer ${owner.token}` },
+      });
+      if (res.status() === 403) denied.push(`${app} (${path})`);
+    }
+    expect(denied, 'licensed apps still denied by the app-access boundary').toEqual([]);
   });
 });

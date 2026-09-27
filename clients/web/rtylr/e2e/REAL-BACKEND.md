@@ -8,10 +8,19 @@ authorization boundary actually work end to end.
 
 ## What these specs prove
 
-| Spec                      | Checks                                                                                                                                                                                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auth-real-login.spec.ts` | a seeded user signs in through the real form; the JWT session carries the right business; a wrong password is rejected (401); one tenant cannot read another's business; one tenant's CRM customer list contains none of the other tenant's rows |
-| `app-shells-real.spec.ts` | the `dash`, `flow` and `crm` shells open for a genuinely signed-in owner (they are behind `AppGuard`/`BusinessRoute` and redirect to the auth app when the session is not real)                                                                  |
+| Spec                      | Checks                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth-real-login.spec.ts` | a seeded user signs in through the real form; the JWT session carries the right business; a wrong password is rejected (401); one tenant cannot read another's business; one tenant's CRM customer list contains none of the other tenant's rows; **every licensed app (pos, erp, hr, finance, insights, recruit, menu, crm, flow) opens its data plane for a licensed owner** — none returns 403 |
+| `app-shells-real.spec.ts` | the `dash`, `crm`, `flow`, `hr`, `erp`, `finance`, `menu`, `recruit` and `insights` shells open for a genuinely signed-in owner (they sit behind `AppGuard`/`BusinessRoute` and redirect to the auth app when the session is not real). POS has no Pages target, so it is covered at the API layer instead                                                                                        |
+
+## Coverage notes
+
+The shell checks assert that a real session hydrates and the guard lets the app
+through; they are a session/guard check, **not** an exhaustive per-button walk of
+every screen. Object storage (S3/floci), image transforms (media-engine), email
+delivery, realtime/websockets and Redis cache behaviour are **not** exercised —
+they need services this harness does not stand up. See
+`services/onion/docs/real-backend-setup.md`.
 
 ## Running them
 
