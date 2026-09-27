@@ -73,7 +73,7 @@ func (r *Repository) UpdateLocation(ctx context.Context, businessID int64, loc d
 func (r *Repository) ListDepartments(ctx context.Context, businessID, locationID int64) ([]domain.DepartmentRecord, error) {
 	rows, err := r.queries.ListHRDepartments(ctx, sqlc.ListHRDepartmentsParams{
 		BusinessID: businessID,
-		LocationID: locationID,
+		LocationID: sql.NullInt64{Int64: locationID, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list departments", logger.Any("business_id", businessID), logger.Error(err))
@@ -90,7 +90,7 @@ func (r *Repository) CreateDepartment(ctx context.Context, businessID int64, dep
 	result, err := r.queries.CreateHRDepartment(ctx, sqlc.CreateHRDepartmentParams{
 		OwnerID:               businessID,
 		BusinessID:            businessID,
-		LocationID:            dept.LocationID,
+		LocationID:            sqlutil.NullInt64(dept.LocationID),
 		ParentDepartmentID:    sqlutil.NullInt64(dept.ParentDepartmentID),
 		Name:                  dept.Name,
 		DefaultWorkScheduleID: sqlutil.NullInt64(dept.DefaultWorkScheduleID),
@@ -111,7 +111,7 @@ func (r *Repository) CreateDepartment(ctx context.Context, businessID int64, dep
 
 func (r *Repository) UpdateDepartment(ctx context.Context, businessID int64, dept domain.DepartmentRecord) (*domain.DepartmentRecord, error) {
 	result, err := r.queries.UpdateHRDepartment(ctx, sqlc.UpdateHRDepartmentParams{
-		LocationID:            dept.LocationID,
+		LocationID:            sqlutil.NullInt64(dept.LocationID),
 		ParentDepartmentID:    sqlutil.NullInt64(dept.ParentDepartmentID),
 		Name:                  dept.Name,
 		DefaultWorkScheduleID: sqlutil.NullInt64(dept.DefaultWorkScheduleID),
