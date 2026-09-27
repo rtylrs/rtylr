@@ -38,11 +38,13 @@ func Initialize() {
 	}
 	if apiKey == "" {
 		logger.Global().Warn("RESEND_API_KEY not set, email sending will be disabled")
+		initAudienceClient()
 		return
 	}
 
 	client = resend.NewClient(apiKey)
 	logger.Global().Info("Resend email client initialized")
+	initAudienceClient()
 }
 
 func IsEnabled() bool {
