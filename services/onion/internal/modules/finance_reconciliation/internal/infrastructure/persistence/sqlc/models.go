@@ -1392,13 +1392,16 @@ type ActivityLog struct {
 	OwnerID    int64 `db:"owner_id" json:"owner_id"`
 	BusinessID int64 `db:"business_id" json:"business_id"`
 	// Which app: hub, pos, erp, hr, crm, finance, flow
-	App         string         `db:"app" json:"app"`
-	EntityType  string         `db:"entity_type" json:"entity_type"`
-	EntityID    sql.NullInt64  `db:"entity_id" json:"entity_id"`
-	Action      string         `db:"action" json:"action"`
-	Description sql.NullString `db:"description" json:"description"`
-	UserID      sql.NullInt64  `db:"user_id" json:"user_id"`
-	CreatedAt   sql.NullTime   `db:"created_at" json:"created_at"`
+	App         string          `db:"app" json:"app"`
+	EntityType  string          `db:"entity_type" json:"entity_type"`
+	EntityID    sql.NullInt64   `db:"entity_id" json:"entity_id"`
+	Action      string          `db:"action" json:"action"`
+	Description sql.NullString  `db:"description" json:"description"`
+	UserID      sql.NullInt64   `db:"user_id" json:"user_id"`
+	OldValues   json.RawMessage `db:"old_values" json:"old_values"`
+	NewValues   json.RawMessage `db:"new_values" json:"new_values"`
+	IpAddress   sql.NullString  `db:"ip_address" json:"ip_address"`
+	CreatedAt   sql.NullTime    `db:"created_at" json:"created_at"`
 }
 
 type Addon struct {
@@ -1585,6 +1588,7 @@ type Business struct {
 	ID        int64          `db:"id" json:"id"`
 	Name      string         `db:"name" json:"name"`
 	OwnerID   int64          `db:"owner_id" json:"owner_id"`
+	ParentID  sql.NullInt64  `db:"parent_id" json:"parent_id"`
 	Industry  sql.NullString `db:"industry" json:"industry"`
 	Country   sql.NullString `db:"country" json:"country"`
 	Timezone  sql.NullString `db:"timezone" json:"timezone"`
@@ -2111,18 +2115,20 @@ type SelfHostLicense struct {
 }
 
 type Subscription struct {
-	ID                   int64                   `db:"id" json:"id"`
-	OwnerID              int64                   `db:"owner_id" json:"owner_id"`
-	PlanID               int64                   `db:"plan_id" json:"plan_id"`
-	Status               NullSubscriptionsStatus `db:"status" json:"status"`
-	SeatCount            int32                   `db:"seat_count" json:"seat_count"`
-	TrialEndsAt          sql.NullTime            `db:"trial_ends_at" json:"trial_ends_at"`
-	NextBillingDate      sql.NullTime            `db:"next_billing_date" json:"next_billing_date"`
-	CurrentPeriodEndsAt  sql.NullTime            `db:"current_period_ends_at" json:"current_period_ends_at"`
-	PaddleSubscriptionID sql.NullString          `db:"paddle_subscription_id" json:"paddle_subscription_id"`
-	PaddleCustomerID     sql.NullString          `db:"paddle_customer_id" json:"paddle_customer_id"`
-	CreatedAt            sql.NullTime            `db:"created_at" json:"created_at"`
-	UpdatedAt            sql.NullTime            `db:"updated_at" json:"updated_at"`
+	ID                      int64                   `db:"id" json:"id"`
+	OwnerID                 int64                   `db:"owner_id" json:"owner_id"`
+	PlanID                  int64                   `db:"plan_id" json:"plan_id"`
+	Status                  NullSubscriptionsStatus `db:"status" json:"status"`
+	SeatCount               int32                   `db:"seat_count" json:"seat_count"`
+	PricePerSeatCents       int32                   `db:"price_per_seat_cents" json:"price_per_seat_cents"`
+	AnnualPricePerSeatCents int32                   `db:"annual_price_per_seat_cents" json:"annual_price_per_seat_cents"`
+	TrialEndsAt             sql.NullTime            `db:"trial_ends_at" json:"trial_ends_at"`
+	NextBillingDate         sql.NullTime            `db:"next_billing_date" json:"next_billing_date"`
+	CurrentPeriodEndsAt     sql.NullTime            `db:"current_period_ends_at" json:"current_period_ends_at"`
+	PaddleSubscriptionID    sql.NullString          `db:"paddle_subscription_id" json:"paddle_subscription_id"`
+	PaddleCustomerID        sql.NullString          `db:"paddle_customer_id" json:"paddle_customer_id"`
+	CreatedAt               sql.NullTime            `db:"created_at" json:"created_at"`
+	UpdatedAt               sql.NullTime            `db:"updated_at" json:"updated_at"`
 }
 
 type Theme struct {
@@ -2286,6 +2292,16 @@ type UserSession struct {
 	RevokedAt sql.NullTime   `db:"revoked_at" json:"revoked_at"`
 }
 
+type VoxhireApplicationEvent struct {
+	ID            int64          `db:"id" json:"id"`
+	ApplicationID int64          `db:"application_id" json:"application_id"`
+	AdminID       sql.NullInt64  `db:"admin_id" json:"admin_id"`
+	Kind          string         `db:"kind" json:"kind"`
+	Title         string         `db:"title" json:"title"`
+	Detail        sql.NullString `db:"detail" json:"detail"`
+	CreatedAt     sql.NullTime   `db:"created_at" json:"created_at"`
+}
+
 type VoxhireCompanyLead struct {
 	ID           int64          `db:"id" json:"id"`
 	CompanyName  string         `db:"company_name" json:"company_name"`
@@ -2301,6 +2317,35 @@ type VoxhireCompanyLead struct {
 	AgencyOptIn  bool           `db:"agency_opt_in" json:"agency_opt_in"`
 	Status       string         `db:"status" json:"status"`
 	CreatedAt    sql.NullTime   `db:"created_at" json:"created_at"`
+}
+
+type VoxhireFollowUpTask struct {
+	ID            int64        `db:"id" json:"id"`
+	ApplicationID int64        `db:"application_id" json:"application_id"`
+	Title         string       `db:"title" json:"title"`
+	Status        string       `db:"status" json:"status"`
+	DueAt         sql.NullTime `db:"due_at" json:"due_at"`
+	CompletedAt   sql.NullTime `db:"completed_at" json:"completed_at"`
+	CreatedAt     sql.NullTime `db:"created_at" json:"created_at"`
+}
+
+type VoxhireShortlist struct {
+	ID        int64          `db:"id" json:"id"`
+	JobID     int64          `db:"job_id" json:"job_id"`
+	Name      string         `db:"name" json:"name"`
+	Status    string         `db:"status" json:"status"`
+	Notes     sql.NullString `db:"notes" json:"notes"`
+	CreatedAt sql.NullTime   `db:"created_at" json:"created_at"`
+	UpdatedAt sql.NullTime   `db:"updated_at" json:"updated_at"`
+}
+
+type VoxhireShortlistItem struct {
+	ID            int64          `db:"id" json:"id"`
+	ShortlistID   int64          `db:"shortlist_id" json:"shortlist_id"`
+	ApplicationID int64          `db:"application_id" json:"application_id"`
+	SortOrder     int32          `db:"sort_order" json:"sort_order"`
+	Notes         sql.NullString `db:"notes" json:"notes"`
+	CreatedAt     sql.NullTime   `db:"created_at" json:"created_at"`
 }
 
 type VoxhireTalentApplication struct {
@@ -2321,6 +2366,18 @@ type VoxhireTalentApplication struct {
 	CvKey              sql.NullString `db:"cv_key" json:"cv_key"`
 	Status             string         `db:"status" json:"status"`
 	CreatedAt          sql.NullTime   `db:"created_at" json:"created_at"`
+	CurrentRole        sql.NullString `db:"current_role" json:"current_role"`
+	DesiredRoles       sql.NullString `db:"desired_roles" json:"desired_roles"`
+	SalaryExpectation  sql.NullString `db:"salary_expectation" json:"salary_expectation"`
+	WorkAuthorization  sql.NullString `db:"work_authorization" json:"work_authorization"`
+	WorkHistory        sql.NullString `db:"work_history" json:"work_history"`
+	Education          sql.NullString `db:"education" json:"education"`
+	CvProcessingStatus string         `db:"cv_processing_status" json:"cv_processing_status"`
+	CvProcessingError  sql.NullString `db:"cv_processing_error" json:"cv_processing_error"`
+	CvExtractedText    sql.NullString `db:"cv_extracted_text" json:"cv_extracted_text"`
+	CvSummary          sql.NullString `db:"cv_summary" json:"cv_summary"`
+	CvProcessedAt      sql.NullTime   `db:"cv_processed_at" json:"cv_processed_at"`
+	CvProfileJson      sql.NullString `db:"cv_profile_json" json:"cv_profile_json"`
 }
 
 type Waitlist struct {
