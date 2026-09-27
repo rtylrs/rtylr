@@ -362,6 +362,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		WebsiteLead: websitelead.NewModule(ctx, dbclient.Pool(), websitelead.Notify{
 			LeadEmails:       platformConfig.GlobalConfig.LeadNotifyEmails,
 			NewsletterEmails: platformConfig.GlobalConfig.NewsletterNotifyEmails,
+			AudienceID:       platformConfig.GlobalConfig.ResendAudienceID,
 		}),
 		Workspaces: workspacesModule,
 	}

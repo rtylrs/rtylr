@@ -22,6 +22,7 @@ import (
 	"github.com/voxire/onion/internal/modules/team"
 	"github.com/voxire/onion/internal/modules/voxhire"
 	"github.com/voxire/onion/internal/modules/webhooks"
+	"github.com/voxire/onion/internal/modules/websitelead"
 	"github.com/voxire/onion/internal/modules/workspaces"
 	platformcache "github.com/voxire/onion/internal/platform/cache"
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
@@ -249,6 +250,7 @@ type jobModules struct {
 	RecurringInvoices *recurringinvoices.Module
 	Subscriptions     *subscriptions.Module
 	Team              *team.Module
+	WebsiteLead       *websitelead.Module
 }
 
 func initializeJobModules(ctx context.Context) *jobModules {
@@ -276,5 +278,10 @@ func initializeJobModules(ctx context.Context) *jobModules {
 		RecurringInvoices: recurringinvoices.NewModule(ctx, db),
 		Subscriptions:     subscriptions.NewModule(ctx, db),
 		Team:              team.NewModule(ctx, db),
+		WebsiteLead: websitelead.NewModule(ctx, db, websitelead.Notify{
+			LeadEmails:       platformConfig.GlobalConfig.LeadNotifyEmails,
+			NewsletterEmails: platformConfig.GlobalConfig.NewsletterNotifyEmails,
+			AudienceID:       platformConfig.GlobalConfig.ResendAudienceID,
+		}),
 	}
 }
