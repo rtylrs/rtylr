@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `user_provisioning_states` (
   `state` enum('pending_invitation','pending_activation','active','suspended','revoked') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending_activation',
   `email_verified` tinyint(1) NOT NULL DEFAULT '0',
   `password_change_required` tinyint(1) NOT NULL DEFAULT '0',
-  `mfa_required` tinyint(1) NOT NULL DEFAULT '1',
+  `mfa_required` tinyint(1) NOT NULL DEFAULT '0',
   `mfa_enrolled` tinyint(1) NOT NULL DEFAULT '0',
   `recovery_available` tinyint(1) NOT NULL DEFAULT '1',
   `activation_token_hash` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
