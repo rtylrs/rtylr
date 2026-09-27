@@ -87,6 +87,7 @@ type AppConfig struct {
 	ResendKey              string
 	LeadNotifyEmails       []string
 	NewsletterNotifyEmails []string
+	ResendAudienceID       string
 	AppEnv                 string
 	AppRelease             string
 	DeploymentMode         string
