@@ -19,6 +19,11 @@ CREATE TABLE IF NOT EXISTS voxire_newsletter_subscribers (
     post_title    VARCHAR(255),
     post_category VARCHAR(100),
     language      VARCHAR(5)   NOT NULL DEFAULT 'en',
+    resend_contact_id    VARCHAR(64) NULL,
+    resend_synced_at     TIMESTAMP NULL,
+    resend_sync_attempts INT NOT NULL DEFAULT 0,
+    resend_sync_error    VARCHAR(255) NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_newsletter_email (email)
+    INDEX idx_newsletter_email (email),
+    INDEX idx_newsletter_resend_pending (resend_synced_at, resend_sync_attempts)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
