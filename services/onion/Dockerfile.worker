@@ -25,7 +25,7 @@ RUN set -eux; \
 # Generated contract output is gitignored, so produce it from the pinned onek
 # release before Go compiles against it.
 COPY voxie/ ./voxie/
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.19.2 && \
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.19.3 && \
     cd /src/voxie && onek build .
 COPY services/onion/ ./services/onion/
 WORKDIR /src/services/onion
