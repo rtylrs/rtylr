@@ -217,4 +217,42 @@ test.describe('Auth real-backend login + tenant isolation', () => {
     }
     expect(denied, 'licensed apps still denied by the app-access boundary').toEqual([]);
   });
+
+  test('a limited (viewer) user is denied writes and unlicensed apps', async ({ request }) => {
+    // A viewer exercises the deny paths an owner never can. This test needs a
+    // third seeded identity; skip (not fail) when it is absent so a narrower
+    // fixture set does not go red.
+    const viewerEmail = process.env.REAL_VIEWER_EMAIL;
+    const viewerPassword = process.env.REAL_VIEWER_PASSWORD;
+    test.skip(!viewerEmail || !viewerPassword, 'set REAL_VIEWER_* for a limited-role user');
+
+    const login = await request.post(`${REAL_API}/common/auth/v1/login`, {
+      data: { email: viewerEmail, password: viewerPassword },
+    });
+    if (login.status() !== 200) {
+      test.skip(true, `viewer login unavailable (${login.status()})`);
+      return;
+    }
+    const vToken = (await login.json()).token as string;
+    const auth = { Authorization: `Bearer ${vToken}` };
+
+    // Writes must be refused: the viewer role has no :create/:edit/:delete.
+    const write = await request.post(`${REAL_API}/crm/customers`, {
+      headers: auth,
+      data: { first_name: 'Nope', last_name: 'Nope', email: 'nope@viewer.test' },
+    });
+    expect(write.status(), 'a viewer was allowed to create a customer').toBe(403);
+
+    // An app the viewer is not licensed for must be refused.
+    const unlicensed = await request.get(`${REAL_API}/erp/warehouse/v1/warehouses`, {
+      headers: auth,
+    });
+    expect(unlicensed.status(), 'a viewer reached an unlicensed app').toBe(403);
+
+    // And the viewer must not be an owner of the tenant. The field is omitted
+    // (undefined) rather than false for a non-owner, so assert falsy.
+    const me = await request.get(`${REAL_API}/hub/user/v1/users/me`, { headers: auth });
+    const body = await me.json();
+    expect(Boolean(body.is_owner), 'a viewer was reported as the tenant owner').toBe(false);
+  });
 });

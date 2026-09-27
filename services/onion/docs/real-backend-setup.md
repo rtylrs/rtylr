@@ -112,6 +112,51 @@ committed fixture:
 passwordutils.HashPassword("TestPass!123")
 ```
 
+### A limited (viewer) user, to exercise the deny paths
+
+An owner holds every permission, so an owner-only run never exercises a denial.
+Add a viewer in the same business with read-only roles and a deliberately
+narrow license set, so the permission boundary is actually tested:
+
+```sql
+INSERT INTO users (business_id, email, password_hash, full_name, onboarded, is_console_admin, auth_provider)
+VALUES (1, 'viewer@example.test', '<bcrypt>', 'Dummy Viewer', 1, 0, 'password')
+ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash);
+
+-- a member, not an owner
+INSERT INTO authorization_business_members
+  (business_id, user_id, dash_role_id, dash_role_key, status, authorization_version)
+VALUES (1, (SELECT id FROM users WHERE email='viewer@example.test'), 4, 'dash.member', 'active', 1)
+ON DUPLICATE KEY UPDATE status = 'active';
+
+-- read-only roles: crm.viewer has crm:customers:view but no :create/:edit/:delete
+INSERT INTO authorization_role_assignments
+  (business_id, user_id, app_id, role_id, source, status, is_primary, granted_by)
+SELECT 1, u.id, r.app_id, r.id, 'explicit', 'active', 1, 1001
+FROM users u JOIN authorization_roles r ON r.role_key IN ('crm.viewer','hr.viewer','flow.viewer')
+WHERE u.email = 'viewer@example.test'
+  AND NOT EXISTS (SELECT 1 FROM authorization_role_assignments a
+                  WHERE a.user_id = u.id AND a.app_id = r.app_id);
+
+-- licensed for crm/hr/flow/dash only; erp, finance, pos, insights, menu and
+-- recruit are left unlicensed on purpose so those routes must be denied
+INSERT INTO authorization_license_assignments
+  (business_id, user_id, app_id, source, status, granted_by)
+SELECT 1, u.id, t.app_id, 'explicit', 'active', 1001
+FROM users u JOIN (SELECT 'crm' app_id UNION ALL SELECT 'hr' UNION ALL SELECT 'flow'
+                   UNION ALL SELECT 'dash') t
+WHERE u.email = 'viewer@example.test'
+  AND NOT EXISTS (SELECT 1 FROM authorization_license_assignments l
+                  WHERE l.user_id = u.id AND l.app_id = t.app_id);
+```
+
+Known gap worth knowing: a member's readable app list is derived from the
+*owner's* rows in `user_app_permissions` (see `GetOwnerApps`). The shipped
+fixtures leave that table without rows for the owner, so a non-owner member can
+resolve to an empty app list and be denied even a role it legitimately holds.
+An owner is unaffected because they take the `isOwner` shortcut. Populate the
+owner's `user_app_permissions` if you need a member's read access to work.
+
 Restart the API after changing authorization rows: `EffectiveAccess` is resolved
 per request but the surrounding profile is cached in-process, so a running
 server keeps serving the pre-change access until it restarts.

@@ -8,10 +8,10 @@ authorization boundary actually work end to end.
 
 ## What these specs prove
 
-| Spec                      | Checks                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth-real-login.spec.ts` | a seeded user signs in through the real form; the JWT session carries the right business; a wrong password is rejected (401); one tenant cannot read another's business; one tenant's CRM customer list contains none of the other tenant's rows; **every licensed app (pos, erp, hr, finance, insights, recruit, menu, crm, flow) opens its data plane for a licensed owner** — none returns 403 |
-| `app-shells-real.spec.ts` | the `dash`, `crm`, `flow`, `hr`, `erp`, `finance`, `menu`, `recruit` and `insights` shells open for a genuinely signed-in owner (they sit behind `AppGuard`/`BusinessRoute` and redirect to the auth app when the session is not real). POS has no Pages target, so it is covered at the API layer instead                                                                                        |
+| Spec                      | Checks                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth-real-login.spec.ts` | a seeded user signs in through the real form; the JWT session carries the right business; a wrong password is rejected (401); one tenant cannot read another's business; one tenant's CRM customer list contains none of the other tenant's rows; **every licensed app (pos, erp, hr, finance, insights, recruit, menu, crm, flow) opens its data plane for a licensed owner** — none returns 403; **a limited (viewer) user is denied writes and unlicensed apps** |
+| `app-shells-real.spec.ts` | the `dash`, `crm`, `flow`, `hr`, `erp`, `finance`, `menu`, `recruit` and `insights` shells open for a genuinely signed-in owner (they sit behind `AppGuard`/`BusinessRoute` and redirect to the auth app when the session is not real). POS has no Pages target, so it is covered at the API layer instead                                                                                                                                                          |
 
 ## Coverage notes
 
@@ -36,8 +36,13 @@ REAL_API=http://127.0.0.1:9999 \
 AUTH_URL=http://127.0.0.1:5176 \
 REAL_OWNER_EMAIL=owner@example.test  REAL_OWNER_PASSWORD=… \
 REAL_OTHER_EMAIL=other@example.test  REAL_OTHER_PASSWORD=… \
+REAL_VIEWER_EMAIL=viewer@example.test REAL_VIEWER_PASSWORD=… \
   npx playwright test e2e/auth-real-login.spec.ts
 ```
+
+`REAL_VIEWER_*` is optional: without it the limited-role checks skip. The
+viewer identity and the owner-app rows it depends on are described in
+`services/onion/docs/real-backend-setup.md`.
 
 `app-shells-real.spec.ts` additionally reads `REAL_DASH_URL`, `REAL_FLOW_URL`
 and `REAL_CRM_URL` (defaults `5175`, `5183`, `5181`) — the ports the Playwright
