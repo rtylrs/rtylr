@@ -1,26 +1,18 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Real-backend app-shell check for every deployable app, opt-in via REAL_API.
+ * Real-backend app-shell check, opt-in via REAL_API and the REAL_OWNER_EMAIL,
+ * REAL_OWNER_PASSWORD credentials.
  *
- * `dash`, `flow`, `crm`, `hr`, `erp`, `finance`, `menu`, `recruit` and
- * `insights` are all behind `AppGuard`/`BusinessRoute`: they read a `token`
- * cookie, call `GET /hub/user/v1/users/me` to hydrate the user store, and
- * redirect to the auth app when that fails. Every other spec in this folder
- * stubs the API, so none of them prove a guarded shell actually opens against
- * a real backend for a real tenant session.
+ * Every other spec in this folder stubs the API, so none of them prove that a
+ * shell behind `AppGuard`/`BusinessRoute` actually opens for a real tenant
+ * session. This primes the `token` cookie with a genuine login and asserts each
+ * app renders its shell instead of bouncing to the auth origin.
  *
- * This primes the `token` cookie with a genuine login and asserts each app
- * renders its shell for that tenant instead of bouncing to login. POS has no
- * Pages target in the Playwright `webServer` array, so it is covered by
- * `auth-real-login.spec.ts` (its API) rather than here.
- *
- * It runs on the desktop project only (single-instance local API) and skips
- * without the harness env, so a default `test:e2e` stays green.
- *
- * Usage:
- *   REAL_API=http://127.0.0.1:9999 REAL_OWNER_EMAIL=… REAL_OWNER_PASSWORD=… \
- *     npx playwright test e2e/app-shells-real.spec.ts
+ * Desktop project only, against a single-instance local API whose login route
+ * allows 5 requests/minute per IP, so the token is fetched once in `beforeAll`
+ * and a 429 is retried once. POS has no Pages target here, so its API is
+ * covered by `auth-real-login.spec.ts`.
  */
 const REAL_API = process.env.REAL_API;
 const OWNER_EMAIL = process.env.REAL_OWNER_EMAIL;

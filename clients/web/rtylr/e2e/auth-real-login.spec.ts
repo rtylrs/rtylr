@@ -7,35 +7,18 @@ import {
 } from '@playwright/test';
 
 /**
- * Real-backend auth + tenant-isolation integration, opt-in via REAL_API.
+ * Real-backend auth + tenant-isolation check, opt-in via REAL_API plus the
+ * REAL_OWNER_EMAIL, REAL_OWNER_PASSWORD, REAL_OTHER_EMAIL, REAL_OTHER_PASSWORD
+ * and optional REAL_VIEWER_EMAIL, REAL_VIEWER_PASSWORD credentials. It skips
+ * without them, so a default `test:e2e` stays green and no secret is committed.
  *
- * The other auth spec stubs `page.route`, which proves the form works in
- * isolation but never exercises bcrypt, the JWT tenant claim, or the
- * users↔business membership the authorization resolver reads. This spec runs
- * against a real API so a seeded user signs in for real and the session is
- * checked to carry the right tenant, then proves one tenant cannot read
- * another's business.
+ * Imports `test` from `@playwright/test` rather than `./fixtures` on purpose:
+ * the shared fixture routes anything reaching `localhost:9999` to `TEST_LEAK`,
+ * which would abort the very request under test. Isolation is re-established
+ * per test by aborting non-local hosts, so this can never contact production.
  *
- * It deliberately imports `test` from `@playwright/test` rather than
- * `./fixtures`. The shared fixture installs a context route that returns
- * `TEST_LEAK` for anything reaching `localhost:9999` — correct for the
- * stubbed suite but fatal here, because it would abort the very request under
- * test. Isolation is re-established by blocking non-local hosts, which is the
- * property that actually matters: never contact production.
- *
- * Tokens are fetched once in `beforeAll` and reused, because the login route
- * is rate limited per IP (5/min) and the suite runs under two browser
- * projects; logging in per-test would 429 against a local single-instance API.
- *
- * Usage:
- *   REAL_API=http://127.0.0.1:9999 AUTH_URL=http://localhost:5176 \
- *   REAL_OWNER_EMAIL=… REAL_OWNER_PASSWORD=… \
- *   REAL_OTHER_EMAIL=… REAL_OTHER_PASSWORD=… \
- *     npx playwright test e2e/auth-real-login.spec.ts
- *
- * Credentials come from the environment (no secret is committed) and the whole
- * file skips when the harness is absent, so a default `test:e2e` on a machine
- * without a backend stays green.
+ * The login route allows 5 requests/minute per IP, so every credential login
+ * happens in `beforeAll` and a 429 is retried once after `retry_after`.
  */
 const REAL_API = process.env.REAL_API;
 const AUTH_URL = process.env.AUTH_URL ?? 'http://localhost:5176';
@@ -294,9 +277,9 @@ test.describe('Auth real-backend login + tenant isolation', () => {
     const auth = { Authorization: `Bearer ${viewer.token}` };
 
     // Reads the viewer is entitled to must succeed: crm.viewer carries
-    // crm:customers:view. This is the regression guard for the app-list gate —
-    // when a member has no user_app_permissions row the app list resolves
-    // empty and this 403s even though the role and license are both correct.
+    // crm:customers:view. This is the regression guard for the entitlement
+    // source, which must be the member's role assignments rather than the
+    // legacy user_app_permissions.apps column.
     const read = await request.get(`${REAL_API}/crm/customers?page_size=5`, {
       headers: auth,
     });
