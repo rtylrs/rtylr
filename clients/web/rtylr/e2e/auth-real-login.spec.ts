@@ -1,4 +1,10 @@
-import { test, expect, type Route, type APIRequestContext } from '@playwright/test';
+import {
+  test,
+  expect,
+  type Route,
+  type APIRequestContext,
+  type APIResponse,
+} from '@playwright/test';
 
 /**
  * Real-backend auth + tenant-isolation integration, opt-in via REAL_API.
@@ -37,6 +43,8 @@ const OWNER_EMAIL = process.env.REAL_OWNER_EMAIL;
 const OWNER_PASSWORD = process.env.REAL_OWNER_PASSWORD;
 const OTHER_EMAIL = process.env.REAL_OTHER_EMAIL;
 const OTHER_PASSWORD = process.env.REAL_OTHER_PASSWORD;
+const VIEWER_EMAIL = process.env.REAL_VIEWER_EMAIL;
+const VIEWER_PASSWORD = process.env.REAL_VIEWER_PASSWORD;
 
 const enabled = Boolean(REAL_API && OWNER_EMAIL && OWNER_PASSWORD && OTHER_EMAIL && OTHER_PASSWORD);
 
@@ -54,20 +62,49 @@ interface Tenant {
 
 let owner: Tenant;
 let other: Tenant;
+let viewer: Tenant | undefined;
 let grantedApps: string[] = [];
+
+// The login route is limited to 5 requests/minute per IP
+// (PerRouteRateLimit(5, time.Minute)). This file needs several logins in a
+// single run, so a 429 is an expected environmental condition rather than a
+// broken fixture. Retrying once after the advertised retry_after keeps the
+// suite reliable; every other status is returned immediately, so bad
+// credentials or a backend regression still fail loudly instead of skipping.
+const LOGIN_RATE_LIMIT_WAIT_MS = 61_000;
+
+async function postLogin(
+  request: APIRequestContext,
+  email: string,
+  password: string
+): Promise<APIResponse> {
+  let res = await request.post(`${REAL_API}/common/auth/v1/login`, {
+    data: { email, password },
+  });
+  if (res.status() === 429) {
+    await new Promise((resolve) => setTimeout(resolve, LOGIN_RATE_LIMIT_WAIT_MS));
+    res = await request.post(`${REAL_API}/common/auth/v1/login`, {
+      data: { email, password },
+    });
+  }
+  return res;
+}
 
 async function loginAs(
   request: APIRequestContext,
   email: string,
   password: string
 ): Promise<Tenant> {
-  const res = await request.post(`${REAL_API}/common/auth/v1/login`, {
-    data: { email, password },
-  });
+  const res = await postLogin(request, email, password);
   if (res.status() !== 200) {
     throw new Error(`login failed for ${email}: ${res.status()} ${await res.text()}`);
   }
-  const { token } = await res.json();
+  // A 200 without a usable token would otherwise become `Bearer undefined` and
+  // the protected assertions would run against an anonymous path.
+  const { token } = (await res.json()) as { token?: unknown };
+  if (typeof token !== 'string' || token.length === 0) {
+    throw new Error(`login for ${email} returned no usable token`);
+  }
   const meRes = await request.get(`${REAL_API}/hub/user/v1/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -81,16 +118,22 @@ test.describe('Auth real-backend login + tenant isolation', () => {
   test.skip(!enabled, 'set REAL_API + REAL_* credentials to run against a live API');
 
   test.beforeAll(async ({ request }, testInfo) => {
-    // A single-instance local API is rate limited per IP, and this file logs in
-    // from beforeAll plus the UI test. Running it under the 390px project too
-    // would double the logins and 429 that limit, so it runs once, on the
-    // desktop project. Viewport is not what is under test here.
+    // A single-instance local API is rate limited to 5 logins/min per IP. Every
+    // credential login therefore happens here, back to back, so the count is
+    // fixed and known rather than depending on test order. Running it under the
+    // 390px project too would double the logins and 429 that limit, so it runs
+    // once, on the desktop project. Viewport is not what is under test here.
+    // A rate-limited retry can wait past the 60s default hook timeout.
+    test.setTimeout(180_000);
     test.skip(
       testInfo.project.name !== 'chromium',
       'desktop project only; single-instance local API'
     );
     owner = await loginAs(request, OWNER_EMAIL!, OWNER_PASSWORD!);
     other = await loginAs(request, OTHER_EMAIL!, OTHER_PASSWORD!);
+    if (VIEWER_EMAIL && VIEWER_PASSWORD) {
+      viewer = await loginAs(request, VIEWER_EMAIL, VIEWER_PASSWORD);
+    }
     grantedApps = owner.me.apps ?? [];
   });
 
@@ -105,6 +148,7 @@ test.describe('Auth real-backend login + tenant isolation', () => {
 
   test('a seeded user signs in through the real form and the session carries the tenant', async ({
     page,
+    request,
   }) => {
     const failures: string[] = [];
     page.on('console', (m) => {
@@ -132,16 +176,34 @@ test.describe('Auth real-backend login + tenant isolation', () => {
       })
       .toBeTruthy();
 
-    // The caller is an owner of a real business, not a console admin.
-    expect(owner.me.email).toBe(OWNER_EMAIL);
+    // Bind the assertion to the session this form just created. Checking the
+    // cookie exists is not enough: an arbitrary or stale value would satisfy
+    // the poll above, and `owner.me` came from a separate API login in
+    // beforeAll, so neither proves the form's cookie authenticates. Exchange the
+    // browser's own cookie for an identity and assert it is the owner tenant.
+    const browserToken = (await page.context().cookies()).find((c) => c.name === 'token')?.value;
+    const browserMe = await request.get(`${REAL_API}/hub/user/v1/users/me`, {
+      headers: { Authorization: `Bearer ${browserToken}` },
+    });
+    expect(
+      browserMe.status(),
+      `the cookie written by the sign-in form did not authenticate: ${await browserMe.text()}`
+    ).toBe(200);
+    const browserIdentity = (await browserMe.json()) as {
+      email: string;
+      business_id: string;
+    };
+    expect(browserIdentity.email, 'the browser session is not the owner').toBe(OWNER_EMAIL);
+    expect(
+      browserIdentity.business_id,
+      'the browser session did not resolve to the owner tenant'
+    ).toBe(owner.me.business_id);
     expect(owner.me.is_owner).toBe(true);
     expect(Number(owner.me.business_id)).toBeGreaterThan(0);
   });
 
   test('a wrong password is rejected by the real API', async ({ request }) => {
-    const res = await request.post(`${REAL_API}/common/auth/v1/login`, {
-      data: { email: OWNER_EMAIL, password: 'definitely-not-the-password' },
-    });
+    const res = await postLogin(request, OWNER_EMAIL!, 'definitely-not-the-password');
     expect(res.status()).toBe(401);
   });
 
@@ -158,12 +220,13 @@ test.describe('Auth real-backend login + tenant isolation', () => {
     );
     expect(ownRes.status()).toBe(200);
 
-    // The other tenant cannot: a non-2xx that discloses nothing.
+    // The other tenant cannot. Assert the exact authorization response: a bare
+    // `>= 400` would accept a 500/502 panic or outage as proof of isolation.
     const crossRes = await request.get(
       `${REAL_API}/hub/business/v1/businesses/${owner.me.business_id}`,
       { headers: { Authorization: `Bearer ${other.token}` } }
     );
-    expect(crossRes.status()).toBeGreaterThanOrEqual(400);
+    expect(crossRes.status(), 'cross-tenant business read was not refused with 403').toBe(403);
     const crossBody = await crossRes.text();
     expect(crossBody).not.toContain(owner.me.business_name);
   });
@@ -221,20 +284,14 @@ test.describe('Auth real-backend login + tenant isolation', () => {
   test('a limited (viewer) user is denied writes and unlicensed apps', async ({ request }) => {
     // A viewer exercises the deny paths an owner never can. This test needs a
     // third seeded identity; skip (not fail) when it is absent so a narrower
-    // fixture set does not go red.
-    const viewerEmail = process.env.REAL_VIEWER_EMAIL;
-    const viewerPassword = process.env.REAL_VIEWER_PASSWORD;
-    test.skip(!viewerEmail || !viewerPassword, 'set REAL_VIEWER_* for a limited-role user');
-
-    const login = await request.post(`${REAL_API}/common/auth/v1/login`, {
-      data: { email: viewerEmail, password: viewerPassword },
-    });
-    if (login.status() !== 200) {
-      test.skip(true, `viewer login unavailable (${login.status()})`);
-      return;
+    // fixture set does not go red. When REAL_VIEWER_* *is* set the login already
+    // happened in beforeAll and loginAs throws on failure, so a broken fixture
+    // or a backend regression fails the suite instead of being skipped.
+    test.skip(!VIEWER_EMAIL || !VIEWER_PASSWORD, 'set REAL_VIEWER_* for a limited-role user');
+    if (!viewer) {
+      throw new Error('viewer token missing: beforeAll did not authenticate the configured viewer');
     }
-    const vToken = (await login.json()).token as string;
-    const auth = { Authorization: `Bearer ${vToken}` };
+    const auth = { Authorization: `Bearer ${viewer.token}` };
 
     // Reads the viewer is entitled to must succeed: crm.viewer carries
     // crm:customers:view. This is the regression guard for the app-list gate —
