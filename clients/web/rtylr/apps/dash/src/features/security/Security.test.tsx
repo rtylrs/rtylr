@@ -34,6 +34,7 @@ vi.mock('../../shared/hooks/queries/useSecurity', () => ({
   useVerifyMFA: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useMFARecoveryCode: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useRevokeAllSessions: () => revokeAllSessions,
+  useUpdateOrganizationMFAEnforcement: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/stores/userStore', () => ({
