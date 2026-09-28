@@ -104,7 +104,7 @@ func TestExpensesAPIRequiresPermissionBeforeServiceAccess(t *testing.T) {
 	}
 }
 
-func TestRequireExpensePermissionChecksFinanceAppAndLicense(t *testing.T) {
+func TestRequireExpensePermissionChecksFinanceAppAndResolvedAccess(t *testing.T) {
 	ctx := authPkg.WithAuthUser(context.Background(), expenseUser("finance:expenses:view"))
 	if err := requireExpensePermission(ctx, "finance:expenses:view"); err != nil {
 		t.Fatalf("granted Finance permission rejected: %v", err)
@@ -116,9 +116,16 @@ func TestRequireExpensePermissionChecksFinanceAppAndLicense(t *testing.T) {
 		t.Fatalf("wrong app permission status = %d, want %d", expensePermissionStatus(err), http.StatusForbidden)
 	}
 
+	noAccess := expenseUser("finance:expenses:view")
+	noAccess.EffectiveAccess.Apps[0].HasAccess = false
+	if err := requireExpensePermission(authPkg.WithAuthUser(context.Background(), noAccess), "finance:expenses:view"); expensePermissionStatus(err) != http.StatusForbidden {
+		t.Fatalf("app without access permission status = %d, want %d", expensePermissionStatus(err), http.StatusForbidden)
+	}
+
+	// A license row is plan metadata and must not change the decision.
 	unlicensed := expenseUser("finance:expenses:view")
 	unlicensed.EffectiveAccess.Apps[0].Licensed = false
-	if err := requireExpensePermission(authPkg.WithAuthUser(context.Background(), unlicensed), "finance:expenses:view"); expensePermissionStatus(err) != http.StatusForbidden {
-		t.Fatalf("unlicensed permission status = %d, want %d", expensePermissionStatus(err), http.StatusForbidden)
+	if err := requireExpensePermission(authPkg.WithAuthUser(context.Background(), unlicensed), "finance:expenses:view"); err != nil {
+		t.Fatalf("a license row must not gate finance:expenses:view: %v", err)
 	}
 }

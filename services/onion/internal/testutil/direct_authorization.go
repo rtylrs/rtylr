@@ -104,7 +104,10 @@ func RunDirectAuthorizationCases(t *testing.T, cases []DirectAuthorizationCase) 
 				{name: "deactivated user", user: directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningRevoked, allowedPermissions...)},
 				{name: "terminated employee", user: directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningRevoked, allowedPermissions...)},
 			}
-			if tc.App == authorization.AppPOS || tc.App == authorization.AppHR || tc.App == authorization.AppFlow {
+			// Only POS and Flow model resource scopes, so only they get a
+			// "resource scope denial" variant. Every other app is bounded by the
+			// business_id predicate instead, which the wrong-tenant variant proves.
+			if tc.App == authorization.AppPOS || tc.App == authorization.AppFlow {
 				lifecycleVariants = append([]struct {
 					name string
 					user *authpkg.AuthUser
@@ -241,14 +244,18 @@ func directAuthorizationUserWithNoPermission(app authorization.AppID, role strin
 	return user
 }
 
+// directAuthorizationScopes returns scopes the assignment table can actually
+// store. chk_auth_assignment_scope_type permits only pos_location and
+// flow_project; the earlier `location`/`terminal`/`project`/`workspace`/
+// `department` values here could never be persisted, so this suite was
+// exercising states the product cannot produce. Apps that model no scope
+// return none, which is what makes them tenant-wide.
 func directAuthorizationScopes(app authorization.AppID) []authorization.Scope {
 	switch app {
 	case authorization.AppPOS:
-		return []authorization.Scope{{Type: "location", ID: "3001"}, {Type: "terminal", ID: "1"}}
-	case authorization.AppHR:
-		return []authorization.Scope{{Type: "department", ID: "4001"}, {Type: "location", ID: "3001"}}
+		return []authorization.Scope{{Type: "pos_location", ID: "3001"}}
 	case authorization.AppFlow:
-		return []authorization.Scope{{Type: "project", ID: "1"}, {Type: "workspace", ID: "1"}}
+		return []authorization.Scope{{Type: "flow_project", ID: "1"}}
 	default:
 		return []authorization.Scope{}
 	}

@@ -68,6 +68,13 @@ func UserMeForBusiness(userID, businessID int64) string {
 	return fmt.Sprintf("%suser:%d:business:%d:me", Namespace, userID, businessID)
 }
 
+// BusinessUserMePrefix matches the cached /me payload for every user of a
+// business. The /me key is user-scoped, so BusinessPrefix cannot reach it and
+// a business-wide change that alters effective access must use this instead.
+func BusinessUserMePrefix(businessID int64) string {
+	return fmt.Sprintf("%suser:*:business:%d:me", Namespace, businessID)
+}
+
 func UserPermissions(userID int64) string {
 	return fmt.Sprintf("%suser:%d:permissions", Namespace, userID)
 }

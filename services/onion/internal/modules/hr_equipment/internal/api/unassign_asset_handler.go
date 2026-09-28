@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UnassignAssetRoutes() []string { return []string{"/hr/equipment/assets/{id}/unassign"} }
@@ -37,7 +38,16 @@ func (h *UnassignAssetHandler) Serve(ctx context.Context, _ *UnassignAssetReques
 		return UnassignAssetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid asset id")
 	}
 
-	err := h.Service.UnassignAsset(ctx, device.User.UserID, assetID)
+	// ResolveBusinessID, not UserID: UnassignAsset scopes the update with
+	// `WHERE business_id = ?`, so passing a user id either matched nothing (for
+	// any member, since users.id and businesses.id are independent sequences) or
+	// mutated an unrelated business's asset when the ids happened to collide.
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UnassignAssetResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err := h.Service.UnassignAsset(ctx, businessID, assetID)
 	if err != nil {
 		if errors.Is(err, domain.ErrAssetNotFound) {
 			return UnassignAssetResponse{}, onekiterrors.New(http.StatusNotFound, "Asset not found")

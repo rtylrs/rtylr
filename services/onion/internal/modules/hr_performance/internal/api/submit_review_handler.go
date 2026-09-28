@@ -39,6 +39,9 @@ func (h *SubmitReviewHandler) Serve(ctx context.Context, req *SubmitReviewReques
 	if device.IsAnonymous || device.User == nil {
 		return SubmitReviewResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePerformanceManagePermission(ctx); err != nil {
+		return SubmitReviewResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

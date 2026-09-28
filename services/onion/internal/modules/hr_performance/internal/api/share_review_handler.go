@@ -30,6 +30,9 @@ func (h *ShareReviewHandler) Serve(ctx context.Context, req *ShareReviewRequest)
 	if device.IsAnonymous || device.User == nil {
 		return ShareReviewResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePerformanceManagePermission(ctx); err != nil {
+		return ShareReviewResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

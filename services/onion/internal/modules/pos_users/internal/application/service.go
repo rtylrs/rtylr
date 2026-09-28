@@ -199,7 +199,7 @@ func hasPOSPermission(access *authorization.EffectiveAccess, permission string) 
 		return false
 	}
 	for _, app := range access.Apps {
-		if app.AppID != authorization.AppPOS || !app.Licensed || !app.HasAccess {
+		if app.AppID != authorization.AppPOS || !app.HasAccess {
 			continue
 		}
 		for _, granted := range app.Permissions {

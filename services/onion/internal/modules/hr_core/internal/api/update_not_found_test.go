@@ -43,7 +43,7 @@ func hrRouteContext(businessID, userID int64, param, value string) context.Conte
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: []string{"hr:roles:manage"},
-				Scopes:      []authorization.Scope{{Type: "location", ID: "1"}},
+				Scopes:      nil,
 			}},
 		},
 	}

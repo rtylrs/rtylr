@@ -48,6 +48,9 @@ func (a *DepartmentAPI) CreateDepartment(ctx context.Context, req *hrdepartmentv
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	if err := requireDepartmentManagePermission(ctx); err != nil {
+		return nil, err
+	}
 	if strings.TrimSpace(req.GetName()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
@@ -73,6 +76,9 @@ func (a *DepartmentAPI) UpdateDepartment(ctx context.Context, req *hrdepartmentv
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := requireDepartmentManagePermission(ctx); err != nil {
+		return nil, err
 	}
 	if req.GetId() <= 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "id is required")
@@ -101,6 +107,9 @@ func (a *DepartmentAPI) DeleteDepartment(ctx context.Context, req *hrdepartmentv
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := requireDepartmentManagePermission(ctx); err != nil {
+		return nil, err
 	}
 	if req.GetId() <= 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "id is required")

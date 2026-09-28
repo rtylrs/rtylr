@@ -86,6 +86,9 @@ func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupSt
 	if device.IsAnonymous || device.User == nil {
 		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return CompleteSetupStepResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()

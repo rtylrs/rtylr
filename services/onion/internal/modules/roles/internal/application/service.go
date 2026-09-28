@@ -52,11 +52,13 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateRolesScope(ctx context.Context, businessID int64) {
-	// Role changes affect every user's effective permissions, so wipe
-	// the whole business scope (cached /me, team, etc.).
+	// Role changes affect every user's effective permissions, so wipe the whole
+	// business scope. The cached /me payload holds EffectiveAccess and is keyed
+	// per user, so it needs its own pattern: BusinessPrefix does not match it.
 	cacher.InvalidateScope(ctx,
 		cacheKeys.ScopedPrefix(rolesScope, businessID),
 		cacheKeys.BusinessPrefix(businessID),
+		cacheKeys.BusinessUserMePrefix(businessID),
 	)
 }
 

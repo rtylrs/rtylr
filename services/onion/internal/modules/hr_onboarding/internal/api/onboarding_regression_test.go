@@ -31,7 +31,7 @@ func authContext(userID, businessID int64, permissions ...string) context.Contex
 			Apps: []authorization.EffectiveAppAccess{{
 				AppID: authorization.AppHR, Licensed: true, HasAccess: true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "department", ID: "1"}},
+				Scopes:      nil,
 			}},
 		},
 	})

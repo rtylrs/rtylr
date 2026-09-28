@@ -96,6 +96,9 @@ func (h *CreateHRCoreDepartmentHandler) Serve(ctx context.Context, req *CreateHR
 	if device.IsAnonymous || device.User == nil {
 		return CreateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return CreateHRCoreDepartmentResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return CreateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
@@ -140,6 +143,9 @@ func (h *UpdateHRCoreDepartmentHandler) Serve(ctx context.Context, req *UpdateHR
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return UpdateHRCoreDepartmentResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

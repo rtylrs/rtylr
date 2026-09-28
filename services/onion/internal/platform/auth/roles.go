@@ -34,13 +34,15 @@ func IsBusinessAdmin(user *AuthUser) bool {
 }
 
 // HasAppPermission checks only server-resolved app access. It deliberately
-// does not fall back to the legacy role field.
+// does not fall back to the legacy role field. Licensing is plan metadata and
+// is not part of this decision: access comes from the member's role
+// assignments, which the resolver has already turned into an app entry.
 func HasAppPermission(user *AuthUser, appID authorization.AppID, permission string) bool {
 	if !hasActiveProvisioning(user) || user.EffectiveAccess == nil {
 		return false
 	}
 	for _, app := range user.EffectiveAccess.Apps {
-		if app.AppID != appID || !app.Licensed || !app.HasAccess {
+		if app.AppID != appID || !app.HasAccess {
 			continue
 		}
 		if LegacyAuthorizationMode() {
@@ -64,7 +66,7 @@ func HasAppAccess(user *AuthUser, appID authorization.AppID) bool {
 		return false
 	}
 	for _, app := range user.EffectiveAccess.Apps {
-		if app.AppID == appID && app.Licensed && app.HasAccess {
+		if app.AppID == appID && app.HasAccess {
 			return true
 		}
 	}
@@ -83,16 +85,30 @@ func HasDashboardPermission(user *AuthUser, permission string) bool {
 	return false
 }
 
-// HasAnyAppScope reports whether a normalized app assignment has at least one
-// resource scope. A zero authorization version is the legacy compatibility
-// shape used while an installation is being migrated, so it retains the
-// existing business-level behavior until normalized access is available.
+// appRequiresScope reports whether an app's assignments are resource scoped.
+// Only POS (locations) and Flow (projects) model scopes today, and the
+// chk_auth_assignment_scope_type constraint permits no other scope type, so
+// requiring a scope on any other app could never be satisfied and would lock
+// every non-owner member out of it. The allowlist is deliberately explicit:
+// adding an app here without adding a permitted scope type would deny access
+// rather than widen it.
+func appRequiresScope(appID authorization.AppID) bool {
+	return appID == authorization.AppPOS || appID == authorization.AppFlow
+}
+
+// HasAnyAppScope reports whether an assignment for a resource scoped app
+// carries at least one scope. For apps that model no scopes it reports true
+// once the app is resolved, leaving per-feature permissions and the
+// business_id predicate as the boundary. A zero authorization version is the
+// legacy compatibility shape used while an installation is being migrated, so
+// it retains the existing business-level behavior until normalized access is
+// available.
 func HasAnyAppScope(user *AuthUser, appID authorization.AppID) bool {
 	if !hasActiveProvisioning(user) || user == nil || user.EffectiveAccess == nil {
 		return false
 	}
 	for _, app := range user.EffectiveAccess.Apps {
-		if app.AppID != appID || !app.Licensed || !app.HasAccess {
+		if app.AppID != appID || !app.HasAccess {
 			continue
 		}
 		if user.EffectiveAccess.AuthorizationVersion == 0 {
@@ -102,6 +118,9 @@ func HasAnyAppScope(user *AuthUser, appID authorization.AppID) bool {
 		// permission without creating scoped assignments. HasAccess is only true
 		// for them when their membership is active, so this cannot widen access.
 		if user.EffectiveAccess.IsOwner || user.EffectiveAccess.IsAdmin {
+			return true
+		}
+		if !appRequiresScope(appID) {
 			return true
 		}
 		return len(app.Scopes) > 0
