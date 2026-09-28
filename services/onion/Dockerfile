@@ -27,7 +27,7 @@ RUN set -eux; \
 # Layer 3: generated contract output is gitignored, so produce it from the
 # pinned onek release before Go compiles against it.
 COPY voxie/ ./voxie/
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.19.1 && \
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.19.3 && \
     cd /src/voxie && onek build .
 
 # Layer 4: the service, plus the SQL schemas and email templates it embeds.

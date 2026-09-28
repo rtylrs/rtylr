@@ -20,26 +20,46 @@ func NewSecurityAPI(service *application.Service) *SecurityAPI {
 	return &SecurityAPI{Service: service}
 }
 
-func requireSecurityPermission(ctx context.Context) (*authPkg.AuthUser, error) {
+func requireAuthenticatedSecurityUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil || !authPkg.HasDashboardPermission(device.User, "hub:security:manage") {
-		return nil, onekiterrors.PermissionDenied()
+	if device.User == nil {
+		return nil, onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
 	return device.User, nil
 }
 
+func canManageOrganizationMFA(user *authPkg.AuthUser) bool {
+	return authPkg.HasDashboardPermission(user, "hub:security:manage") || authPkg.IsBusinessAdmin(user)
+}
+
+func requireOrganizationSecurityPermission(ctx context.Context) (*authPkg.AuthUser, error) {
+	user, err := requireAuthenticatedSecurityUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !canManageOrganizationMFA(user) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	return user, nil
+}
+
 func (a *SecurityAPI) GetSecurityState(ctx context.Context, _ *hubsecurityv1.GetSecurityStateRequest) (*hubsecurityv1.GetSecurityStateResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}
-	if _, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID); businessErr != nil {
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
 	settings, err := a.Service.GetSettings(ctx, user.UserID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get security settings")
+	}
+	organizationMFAEnforced, err := a.Service.GetOrganizationMFAEnforced(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get organization security settings")
 	}
 
 	sessions := make([]*hubsecurityv1.ActiveSession, 0, len(settings.ActiveSessions))
@@ -55,16 +75,18 @@ func (a *SecurityAPI) GetSecurityState(ctx context.Context, _ *hubsecurityv1.Get
 
 	return &hubsecurityv1.GetSecurityStateResponse{
 		State: &hubsecurityv1.SecurityState{
-			TwoFactorEnabled: settings.TwoFactorEnabled,
-			MfaRequired:      settings.MFARequired,
-			MfaEnrolled:      settings.MFAEnrolled,
-			ActiveSessions:   sessions,
+			TwoFactorEnabled:         settings.TwoFactorEnabled,
+			MfaRequired:              settings.MFARequired || organizationMFAEnforced,
+			MfaEnrolled:              settings.MFAEnrolled,
+			OrganizationMfaEnforced:  organizationMFAEnforced,
+			CanManageOrganizationMfa: canManageOrganizationMFA(user),
+			ActiveSessions:           sessions,
 		},
 	}, nil
 }
 
 func (a *SecurityAPI) LoginHistory(ctx context.Context, req *hubsecurityv1.LoginHistoryRequest) (*hubsecurityv1.LoginHistoryResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}
@@ -101,7 +123,7 @@ func (a *SecurityAPI) LoginHistory(ctx context.Context, req *hubsecurityv1.Login
 }
 
 func (a *SecurityAPI) InvalidateSessions(ctx context.Context, _ *hubsecurityv1.InvalidateSessionsRequest) (*hubsecurityv1.InvalidateSessionsResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}
@@ -114,12 +136,28 @@ func (a *SecurityAPI) InvalidateSessions(ctx context.Context, _ *hubsecurityv1.I
 }
 
 func (a *SecurityAPI) Update2FA(ctx context.Context, req *hubsecurityv1.Update2FARequest) (*hubsecurityv1.Update2FAResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}
+	if !req.GetEnabled() {
+		businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+		if businessErr != nil {
+			return nil, onekiterrors.PermissionDenied()
+		}
+		organizationMFAEnforced, policyErr := a.Service.GetOrganizationMFAEnforced(ctx, businessID)
+		if policyErr != nil {
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get organization security settings")
+		}
+		if organizationMFAEnforced {
+			return nil, onekiterrors.New(http.StatusConflict, "MFA is required by your organization")
+		}
+	}
 
 	if err := a.Service.SetTwoFactor(ctx, user.UserID, req.GetEnabled()); err != nil {
+		if application.IsMFAEnforcedByOrganization(err) {
+			return nil, onekiterrors.New(http.StatusConflict, "MFA is required by your organization")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update 2FA settings")
 	}
 
@@ -131,8 +169,23 @@ func (a *SecurityAPI) Update2FA(ctx context.Context, req *hubsecurityv1.Update2F
 	return &hubsecurityv1.Update2FAResponse{Message: msg}, nil
 }
 
+func (a *SecurityAPI) UpdateOrganizationMFAEnforcement(ctx context.Context, req *hubsecurityv1.UpdateOrganizationMFAEnforcementRequest) (*hubsecurityv1.UpdateOrganizationMFAEnforcementResponse, error) {
+	user, authErr := requireOrganizationSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := a.Service.SetOrganizationMFAEnforced(ctx, businessID, req.GetEnabled()); err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update organization MFA policy")
+	}
+	return &hubsecurityv1.UpdateOrganizationMFAEnforcementResponse{Enforced: req.GetEnabled()}, nil
+}
+
 func (a *SecurityAPI) BeginMFAEnrollment(ctx context.Context, _ *hubsecurityv1.BeginMFAEnrollmentRequest) (*hubsecurityv1.BeginMFAEnrollmentResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}
@@ -145,7 +198,7 @@ func (a *SecurityAPI) BeginMFAEnrollment(ctx context.Context, _ *hubsecurityv1.B
 }
 
 func (a *SecurityAPI) CompleteMFAEnrollment(ctx context.Context, req *hubsecurityv1.CompleteMFAEnrollmentRequest) (*hubsecurityv1.CompleteMFAEnrollmentResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}
@@ -161,7 +214,7 @@ func (a *SecurityAPI) CompleteMFAEnrollment(ctx context.Context, req *hubsecurit
 }
 
 func (a *SecurityAPI) VerifyMFA(ctx context.Context, req *hubsecurityv1.VerifyMFARequest) (*hubsecurityv1.VerifyMFAResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}
@@ -176,7 +229,7 @@ func (a *SecurityAPI) VerifyMFA(ctx context.Context, req *hubsecurityv1.VerifyMF
 }
 
 func (a *SecurityAPI) UseMFARecoveryCode(ctx context.Context, req *hubsecurityv1.UseMFARecoveryCodeRequest) (*hubsecurityv1.UseMFARecoveryCodeResponse, error) {
-	user, authErr := requireSecurityPermission(ctx)
+	user, authErr := requireAuthenticatedSecurityUser(ctx)
 	if authErr != nil {
 		return nil, authErr
 	}

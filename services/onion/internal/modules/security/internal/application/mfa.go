@@ -74,6 +74,7 @@ func (s *Service) CompleteMFAEnrollment(ctx context.Context, userID int64, code 
 	if err := s.repo.CompleteMFAEnrollment(ctx, userID, recoveryHashes); err != nil {
 		return nil, err
 	}
+	invalidateSecurityScope(ctx, userID)
 	return recoveryCodes, nil
 }
 

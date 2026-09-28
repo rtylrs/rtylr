@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,6 +16,8 @@ import (
 // Security data is per-user; everything lives under cacheKeys.UserPrefix so
 // the public /invalidate-cache?type=user&id=X path wipes it for free.
 const securityTTL = 5 * time.Minute
+
+var ErrMFAEnforcedByOrganization = domain.ErrMFAEnforcedByOrganization
 
 const (
 	defaultLoginHistoryPageSize int64 = 20
@@ -51,6 +54,18 @@ func (s *Service) SetTwoFactor(ctx context.Context, userID int64, enabled bool) 
 	}
 	invalidateSecurityScope(ctx, userID)
 	return nil
+}
+
+func (s *Service) GetOrganizationMFAEnforced(ctx context.Context, businessID int64) (bool, error) {
+	return s.repo.GetOrganizationMFAEnforced(ctx, businessID)
+}
+
+func (s *Service) SetOrganizationMFAEnforced(ctx context.Context, businessID int64, enforced bool) error {
+	return s.repo.SetOrganizationMFAEnforced(ctx, businessID, enforced)
+}
+
+func IsMFAEnforcedByOrganization(err error) bool {
+	return errors.Is(err, ErrMFAEnforcedByOrganization)
 }
 
 type loginHistoryPage struct {

@@ -203,8 +203,20 @@ func (s *Service) GetProvisioningStatus(ctx context.Context, userID int64) (*aut
 	return status, nil
 }
 
+func (s *Service) GetProvisioningStatusForBusiness(ctx context.Context, businessID, userID int64) (*authorization.ProvisioningStatus, error) {
+	status, found, err := s.repo.GetProvisioningStatusForBusiness(ctx, businessID, userID)
+	if err != nil || !found {
+		return nil, err
+	}
+	return status, nil
+}
+
 func (s *Service) IsMFAVerified(ctx context.Context, userID int64) (bool, error) {
 	return s.repo.IsMFAVerified(ctx, userID)
+}
+
+func (s *Service) IsMFAVerifiedForBusiness(ctx context.Context, businessID, userID int64) (bool, error) {
+	return s.repo.IsMFAVerifiedForBusiness(ctx, businessID, userID)
 }
 
 func (s *Service) MarkPasswordChanged(ctx context.Context, userID int64) error {

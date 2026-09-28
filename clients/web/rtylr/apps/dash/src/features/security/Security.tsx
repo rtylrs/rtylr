@@ -18,6 +18,7 @@ import { SettingSection, SkeletonList, ConfirmDialog } from '../../shared/compon
 import {
   useSecurity,
   useToggleTwoFactor,
+  useUpdateOrganizationMFAEnforcement,
   useBeginMFAEnrollment,
   useCompleteMFAEnrollment,
   useVerifyMFA,
@@ -77,6 +78,7 @@ const Security: React.FC = () => {
   const currentUser = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const toggle2fa = useToggleTwoFactor();
+  const updateOrganizationMFA = useUpdateOrganizationMFAEnforcement();
   const beginMFA = useBeginMFAEnrollment();
   const completeMFA = useCompleteMFAEnrollment();
   const verifyMFA = useVerifyMFA();
@@ -115,6 +117,15 @@ const Security: React.FC = () => {
     }
   };
   const mfaEnabled = data?.mfaEnrolled || data?.twoFactorEnabled;
+  const mfaButtonLabel = data?.mfaRequired
+    ? mfaEnabled && data.organizationMfaEnforced
+      ? t('common.securityPolicy.requiredByOrganization')
+      : mfaEnabled
+        ? 'Disable MFA'
+        : t('common.securityPolicy.setupRequired')
+    : mfaEnabled
+      ? 'Disable MFA'
+      : 'Enable MFA';
   const needsMFAChallenge =
     data?.mfaRequired && data.mfaEnrolled && currentUser?.provisioningStatus?.mfaVerified !== true;
 
@@ -252,7 +263,13 @@ const Security: React.FC = () => {
 
         <SettingSection
           title="Two-factor authentication"
-          description="Add an extra layer of security to your account."
+          description={
+            data.mfaRequired
+              ? data.organizationMfaEnforced
+                ? t('common.securityPolicy.organizationRequiredDescription')
+                : t('common.securityPolicy.accountRequiredDescription')
+              : 'Add an extra layer of security to your account.'
+          }
           footer={
             <Button
               size="sm"
@@ -264,9 +281,13 @@ const Security: React.FC = () => {
                   handleStartEnable();
                 }
               }}
-              disabled={toggle2fa.isPending || beginMFA.isPending}
+              disabled={
+                (mfaEnabled && data.organizationMfaEnforced) ||
+                toggle2fa.isPending ||
+                beginMFA.isPending
+              }
             >
-              {mfaEnabled ? 'Disable MFA' : 'Enable MFA'}
+              {mfaButtonLabel}
             </Button>
           }
         >
@@ -281,16 +302,49 @@ const Security: React.FC = () => {
             </div>
             <div>
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                {mfaEnabled ? 'Enabled' : 'Not enabled'}
+                {mfaEnabled
+                  ? 'Enabled'
+                  : data.organizationMfaEnforced
+                    ? t('common.securityPolicy.enrollmentRequired')
+                    : 'Not enabled'}
               </p>
               <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
                 {mfaEnabled
                   ? 'Using an authenticator app with one-time recovery codes'
-                  : 'Protect your account against password theft.'}
+                  : data.mfaRequired
+                    ? data.organizationMfaEnforced
+                      ? t('common.securityPolicy.organizationRequiredDescription')
+                      : t('common.securityPolicy.accountRequiredDescription')
+                    : 'Protect your account against password theft.'}
               </p>
             </div>
           </div>
         </SettingSection>
+
+        {data.canManageOrganizationMfa && (
+          <SettingSection
+            title={t('common.securityPolicy.organizationTitle')}
+            description={t('common.securityPolicy.organizationDescription')}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                {data.organizationMfaEnforced
+                  ? t('common.securityPolicy.organizationEnabled')
+                  : t('common.securityPolicy.organizationDisabled')}
+              </p>
+              <Button
+                size="sm"
+                variant={data.organizationMfaEnforced ? 'secondary' : 'default'}
+                onClick={() => updateOrganizationMFA.mutate(!data.organizationMfaEnforced)}
+                disabled={updateOrganizationMFA.isPending}
+              >
+                {data.organizationMfaEnforced
+                  ? t('common.securityPolicy.stopRequiring')
+                  : t('common.securityPolicy.requireForEveryone')}
+              </Button>
+            </div>
+          </SettingSection>
+        )}
 
         {/* 2FA Setup Modal */}
         <Dialog open={setupModalOpen} onOpenChange={(open) => !open && setSetupModalOpen(false)}>

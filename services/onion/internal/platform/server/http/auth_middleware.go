@@ -144,7 +144,13 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 					return
 				}
 				if statusResolver, ok := accessResolver.(authPkg.ProvisioningStatusResolver); ok {
-					status, statusErr := statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
+					var status *authorization.ProvisioningStatus
+					var statusErr error
+					if businessResolver, scoped := accessResolver.(authPkg.BusinessProvisioningStatusResolver); scoped {
+						status, statusErr = businessResolver.GetProvisioningStatusForBusiness(ctx, authUser.BusinessID, authUser.UserID)
+					} else {
+						status, statusErr = statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
+					}
 					if statusErr != nil {
 						logger.Ctx(ctx).Warn("Provisioning status resolution failed", logger.Error(statusErr), logger.String("path", path))
 						writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
@@ -171,7 +177,13 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 									writeUnauthorizedResponse(ctx, w, "MFA verification unavailable")
 									return
 								}
-								verified, verifyErr := mfaResolver.IsMFAVerified(ctx, authUser.UserID)
+								var verified bool
+								var verifyErr error
+								if businessResolver, scoped := accessResolver.(authPkg.BusinessMFAVerifiedResolver); scoped {
+									verified, verifyErr = businessResolver.IsMFAVerifiedForBusiness(ctx, authUser.BusinessID, authUser.UserID)
+								} else {
+									verified, verifyErr = mfaResolver.IsMFAVerified(ctx, authUser.UserID)
+								}
 								if verifyErr != nil || !verified {
 									writeUnauthorizedResponse(ctx, w, "MFA verification required")
 									return
