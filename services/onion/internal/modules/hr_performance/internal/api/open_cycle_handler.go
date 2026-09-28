@@ -30,6 +30,9 @@ func (h *OpenCycleHandler) Serve(ctx context.Context, req *OpenCycleRequest) (Op
 	if device.IsAnonymous || device.User == nil {
 		return OpenCycleResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePerformanceManagePermission(ctx); err != nil {
+		return OpenCycleResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

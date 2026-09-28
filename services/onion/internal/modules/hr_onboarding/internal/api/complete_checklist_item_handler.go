@@ -90,6 +90,9 @@ func (h *CompleteChecklistItemHandler) Serve(ctx context.Context, req *CompleteC
 	if device.IsAnonymous || device.User == nil {
 		return CompleteChecklistItemResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireOnboardingManagePermission(ctx); err != nil {
+		return CompleteChecklistItemResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

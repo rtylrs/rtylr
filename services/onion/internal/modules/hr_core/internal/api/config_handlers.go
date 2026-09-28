@@ -112,6 +112,9 @@ func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRe
 	if device.IsAnonymous || device.User == nil {
 		return UpsertHRConfigResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return UpsertHRConfigResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return UpsertHRConfigResponse{}, onekiterrors.PermissionDenied()

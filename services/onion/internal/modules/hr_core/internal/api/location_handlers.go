@@ -108,6 +108,9 @@ func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateLocationResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return CreateLocationResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return CreateLocationResponse{}, onekiterrors.PermissionDenied()
@@ -158,6 +161,9 @@ func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRe
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateLocationResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return UpdateLocationResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

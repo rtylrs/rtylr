@@ -40,6 +40,9 @@ func (h *UpsertConfigHandler) Serve(ctx context.Context, req *UpsertConfigReques
 	if device.IsAnonymous || device.User == nil {
 		return UpsertConfigResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePerformanceManagePermission(ctx); err != nil {
+		return UpsertConfigResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

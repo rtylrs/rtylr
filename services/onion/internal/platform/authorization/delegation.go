@@ -17,7 +17,7 @@ func CanDelegatePermissions(access *EffectiveAccess, appID AppID, permissions []
 		appFound := false
 		granted = nil
 		for _, app := range access.Apps {
-			if app.AppID == appID && app.Licensed && app.HasAccess {
+			if app.AppID == appID && app.HasAccess {
 				appFound = true
 				granted = app.Permissions
 				break

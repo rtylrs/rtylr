@@ -247,6 +247,12 @@ func LegacyAccess(businessID int64, apps []string, role string) EffectiveAccess 
 	return access
 }
 
+// resolveApp reports one app's effective access. Role assignments are the
+// authorization boundary: a license row is plan metadata and never grants or
+// denies access, because a self-hosted install can legitimately have no license
+// rows at all. The owner/admin system path grants the full catalog for every
+// app the caller is already entitled to; which apps those are is decided by
+// the caller's app set, not by licensing.
 func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwner, isAdmin bool) EffectiveAppAccess {
 	licensed := false
 	sources := make([]AssignmentSource, 0, 2)
@@ -256,10 +262,6 @@ func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwne
 		}
 		licensed = true
 		sources = appendUniqueSource(sources, license.Source)
-	}
-	if snapshot.MembershipActive && (isOwner || isAdmin) {
-		licensed = true
-		sources = appendUniqueSource(sources, SourceSystem)
 	}
 
 	access := EffectiveAppAccess{
@@ -272,7 +274,7 @@ func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwne
 		Permissions:       []string{},
 		PermissionSources: map[string][]string{},
 	}
-	if !licensed || !snapshot.MembershipActive {
+	if !snapshot.MembershipActive {
 		return access
 	}
 

@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/roles/internal/domain"
+	"github.com/voxire/onion/internal/platform/authorization"
 )
 
 func validateRolePermissions(ctx context.Context, executor interface {
@@ -104,29 +104,13 @@ func insertAssignmentScopes(ctx context.Context, tx *sql.Tx, businessID, assignm
 }
 
 func validateAssignmentScope(ctx context.Context, tx *sql.Tx, businessID int64, scopeType, scopeID string) error {
-	id, err := strconv.ParseInt(scopeID, 10, 64)
-	if err != nil || id <= 0 {
-		return domain.ErrInvalidScope
-	}
-	switch scopeType {
-	case "business":
-		if id != businessID {
+	if err := authorization.ValidateAssignmentScope(ctx, tx, businessID, scopeType, scopeID); err != nil {
+		if errors.Is(err, authorization.ErrInvalidScope) {
 			return domain.ErrInvalidScope
 		}
-		return nil
-	case "pos_location":
-		var found int
-		err = tx.QueryRowContext(ctx, `SELECT 1 FROM pos_locations WHERE business_id = ? AND id = ? LIMIT 1`, businessID, id).Scan(&found)
-	case "flow_project":
-		var found int
-		err = tx.QueryRowContext(ctx, `SELECT 1 FROM flow_projects WHERE business_id = ? AND id = ? LIMIT 1`, businessID, id).Scan(&found)
-	default:
-		return domain.ErrInvalidScope
+		return err
 	}
-	if errors.Is(err, sql.ErrNoRows) {
-		return domain.ErrInvalidScope
-	}
-	return err
+	return nil
 }
 
 func insertAuditEvent(ctx context.Context, tx *sql.Tx, businessID, actorID int64, action, appID string, roleID, targetUserID, targetGroupID *int64, beforeJSON, afterJSON, reason string) error {

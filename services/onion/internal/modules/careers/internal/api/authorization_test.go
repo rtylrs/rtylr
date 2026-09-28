@@ -91,17 +91,24 @@ func TestRecruitCareerOperationsRequireExactPermissionBeforeServiceAccess(t *tes
 	}
 }
 
-func TestRecruitPermissionHelperRejectsWrongAppAndUnlicensedUsers(t *testing.T) {
+func TestRecruitPermissionHelperRejectsWrongAppAndMembersWithoutAccess(t *testing.T) {
 	wrongApp := &authPkg.AuthUser{BusinessID: 9, UserID: 7, EffectiveAccess: &authorization.EffectiveAccess{
-		Apps: []authorization.EffectiveAppAccess{{AppID: authorization.AppHR, Licensed: true, HasAccess: true, Permissions: []string{"recruit:jobs:view"}}},
+		Apps: []authorization.EffectiveAppAccess{{AppID: authorization.AppHR, HasAccess: true, Permissions: []string{"recruit:jobs:view"}}},
 	}}
 	if _, err := requireRecruitPermission(authPkg.WithAuthUser(context.Background(), wrongApp), "recruit:jobs:view"); recruitStatus(err) != http.StatusForbidden {
 		t.Fatalf("wrong app returned %v, want 403", err)
 	}
+	noAccess := &authPkg.AuthUser{BusinessID: 9, UserID: 7, EffectiveAccess: &authorization.EffectiveAccess{
+		Apps: []authorization.EffectiveAppAccess{{AppID: authorization.AppRecruit, HasAccess: false, Permissions: []string{"recruit:jobs:view"}}},
+	}}
+	if _, err := requireRecruitPermission(authPkg.WithAuthUser(context.Background(), noAccess), "recruit:jobs:view"); recruitStatus(err) != http.StatusForbidden {
+		t.Fatalf("app without access returned %v, want 403", err)
+	}
+	// A license row is plan metadata and must not change the decision.
 	unlicensed := &authPkg.AuthUser{BusinessID: 9, UserID: 7, EffectiveAccess: &authorization.EffectiveAccess{
 		Apps: []authorization.EffectiveAppAccess{{AppID: authorization.AppRecruit, Licensed: false, HasAccess: true, Permissions: []string{"recruit:jobs:view"}}},
 	}}
-	if _, err := requireRecruitPermission(authPkg.WithAuthUser(context.Background(), unlicensed), "recruit:jobs:view"); recruitStatus(err) != http.StatusForbidden {
-		t.Fatalf("unlicensed app returned %v, want 403", err)
+	if _, err := requireRecruitPermission(authPkg.WithAuthUser(context.Background(), unlicensed), "recruit:jobs:view"); err != nil {
+		t.Fatalf("a license row must not gate recruit:jobs:view: %v", err)
 	}
 }

@@ -43,6 +43,9 @@ func (h *UpdateGoalHandler) Serve(ctx context.Context, req *UpdateGoalRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return UpdateGoalResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePerformanceManagePermission(ctx); err != nil {
+		return UpdateGoalResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
