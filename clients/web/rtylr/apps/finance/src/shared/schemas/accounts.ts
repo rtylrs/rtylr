@@ -97,7 +97,3 @@ export const chartOfAccountSchema = z
     balance: z.number().optional().nullable(),
   })
   .passthrough();
-
-export type BankAccountRaw = z.infer<typeof bankAccountSchema>;
-export type BankTransactionRaw = z.infer<typeof bankTransactionSchema>;
-export type ChartOfAccountRaw = z.infer<typeof chartOfAccountSchema>;

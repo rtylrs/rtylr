@@ -11,9 +11,6 @@ import { withErpListBounds } from '../../shared/lib/erpListBounds';
 
 const priceListClient = createOneKitClient(PriceListServiceClient, 'erp');
 
-export type PriceListRow = PriceList;
-export type CreatePriceListInput = CreatePriceListRequest;
-
 export function usePriceLists() {
   return useQuery<PriceList[]>({
     queryKey: ['price-lists'],

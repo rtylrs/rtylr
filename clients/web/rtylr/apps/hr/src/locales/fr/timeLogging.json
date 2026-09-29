@@ -3,7 +3,6 @@
   "subtitle": "Semaine du {{start}} – {{end}} · {{total}} enregistré",
   "addEntry": "Ajouter une entrée",
   "created": "Entrée de temps créée",
-  "updated": "Entrée de temps mise à jour",
   "deleted": "Entrée de temps supprimée",
   "employeeLookupFailed": "Votre profil employé n'a pas pu être chargé",
   "noDescription": "Pas de description",

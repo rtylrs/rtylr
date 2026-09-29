@@ -211,7 +211,6 @@
       "deleted": "Entrepôt supprimé"
     },
     "createFailed": "Échec de la création de l'entrepôt",
-    "updateFailed": "Échec de la mise à jour de l'entrepôt",
     "deleteFailed": "Échec de la suppression de l'entrepôt"
   },
   "receiving": {

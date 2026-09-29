@@ -8,7 +8,6 @@ import type {
   CreateTimeEntryRequest,
   CreateTimeEntryResponse,
 } from '@voxire/voxie/hr/time_entry/v1/types';
-import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -42,31 +41,6 @@ export const useCreateTimeEntry = () => {
       queryClient.invalidateQueries({ queryKey: ['time-entries'] });
       queryClient.invalidateQueries({ queryKey: ['timesheets'] });
       toast.success(t('timeLogging.created'));
-    },
-    onError: () => {
-      toast.error(t('errors.generic'));
-    },
-  });
-};
-
-export const useUpdateTimeEntry = () => {
-  const queryClient = useQueryClient();
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async (
-      data: Partial<CreateTimeEntryRequest> & { id: number }
-    ): Promise<TimeEntryPayload> => {
-      const { id, ...body } = data;
-      const res = await unwrap(
-        hrTransport.put<{ entry: TimeEntryPayload }>(`/hr/time-entries/${id}`, body)
-      );
-      return (res as { entry: TimeEntryPayload }).entry;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
-      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
-      toast.success(t('timeLogging.updated'));
     },
     onError: () => {
       toast.error(t('errors.generic'));

@@ -21,11 +21,6 @@ import type { Customer } from '../../schemas/customers';
 
 const segmentClient = createOneKitClient(SegmentServiceClient, 'crm');
 
-interface UpdateSegmentPayload {
-  id: string;
-  data: Partial<Segment>;
-}
-
 function fromApiSegment(s: ApiSegment): Segment {
   return segmentSchema.parse({
     id: s.id,
@@ -173,42 +168,6 @@ export const useCreateSegment = (): UseMutationResult<Segment, unknown, Partial<
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-segments'] });
       toast.success(t('crm.segments.created'));
-    },
-    onError: (error): void => {
-      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
-    },
-  });
-};
-
-export const useUpdateSegment = (): UseMutationResult<Segment, unknown, UpdateSegmentPayload> => {
-  const qc = useQueryClient();
-  const { t } = useTranslation();
-  return useMutation<Segment, unknown, UpdateSegmentPayload>({
-    mutationFn: async (payload: UpdateSegmentPayload): Promise<Segment> => {
-      await segmentClient.updateSegment({
-        id: payload.id,
-        body: {
-          name: payload.data.name ?? '',
-          description: payload.data.description ?? '',
-          filters: rulesToFilters(payload.data.rules, payload.data.filters),
-        },
-      });
-      return segmentSchema.parse({
-        id: payload.id,
-        name: payload.data.name ?? '',
-        description: payload.data.description ?? '',
-        filters: rulesToFilters(payload.data.rules, payload.data.filters),
-        customerCount: payload.data.customerCount ?? 0,
-        color: payload.data.color,
-        rules: payload.data.rules,
-        trend: payload.data.trend,
-        trendUp: payload.data.trendUp,
-      });
-    },
-    onSuccess: (_data: Segment, variables: UpdateSegmentPayload): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-segments'] });
-      void qc.invalidateQueries({ queryKey: ['crm-segment', variables.id] });
-      toast.success(t('crm.segments.updated'));
     },
     onError: (error): void => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));

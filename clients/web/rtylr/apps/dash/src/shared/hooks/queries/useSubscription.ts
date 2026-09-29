@@ -1,5 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { subscriptionClient } from '../../lib/clients';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -388,10 +387,6 @@ interface BillingDetailResponse {
   billing: RawBillingDetailPayload | null;
 }
 
-interface SetSubscriptionRequest {
-  planSlug: string;
-}
-
 interface CheckoutRequest {
   planSlug: string;
   billingCycle?: 'monthly' | 'yearly';
@@ -434,24 +429,6 @@ export const useBillingHistory = () =>
         normalizeBillingHistory(month as unknown as RawBillingHistoryMonth)
       ),
   });
-
-import i18next from 'i18next';
-
-export const useSetSubscription = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: SetSubscriptionRequest) =>
-      subscriptionClient.upsertSubscription({ planSlug: data.planSlug }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      toast.success(i18next.t('common.toasts.subscriptionUpdated', 'Subscription updated'));
-    },
-    onError: () =>
-      toast.error(
-        i18next.t('common.toasts.failedUpdateSubscription', 'Failed to update subscription')
-      ),
-  });
-};
 
 /** Initiates a Paddle checkout and returns the hosted checkout URL. */
 export const useCheckout = () =>

@@ -22,5 +22,3 @@ export const journalEntrySchema = z
   .passthrough();
 
 export type JournalLine = z.infer<typeof journalLineSchema>;
-
-export type JournalEntryRaw = z.infer<typeof journalEntrySchema>;

@@ -20,7 +20,3 @@ export const plReportSchema = z.object({
   grossProfit: z.number().default(0),
   netProfit: z.number().default(0),
 });
-
-export type TaxConfigRaw = z.infer<typeof taxConfigSchema>;
-export type TaxReportRaw = z.infer<typeof taxReportSchema>;
-export type PLReportRaw = z.infer<typeof plReportSchema>;

@@ -22,11 +22,9 @@
   "endBreak": "Fin de la pause impossible",
   "saveSettings": "Enregistrement des paramètres impossible",
   "createDepartment": "Création du service impossible",
-  "updateDepartment": "Mise à jour du service impossible",
   "createReviewCycle": "Création du cycle d'évaluation impossible",
   "shareReview": "Partage de l'évaluation impossible",
   "assignShift": "Attribution du poste impossible",
   "publishRoster": "Publication du planning impossible",
-  "createShift": "Création du poste impossible",
-  "updateShift": "Mise à jour du poste impossible"
+  "createShift": "Création du poste impossible"
 }

@@ -3,10 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
-import type {
-  CreateDepartmentRequest,
-  UpdateDepartmentBody,
-} from '@voxire/voxie/hr/department/v1/types';
+import type { CreateDepartmentRequest } from '@voxire/voxie/hr/department/v1/types';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { departmentSchema, type Department } from '../../shared/schemas/departments';
 
@@ -63,16 +60,5 @@ export function useCreateDepartment() {
     mutationFn: (data: CreateDepartmentRequest) => departmentClient.createDepartment(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
     onError: () => toast.error(t('errors.createDepartment')),
-  });
-}
-
-export function useUpdateDepartment() {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { id: string; body: UpdateDepartmentBody }) =>
-      departmentClient.updateDepartment(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
-    onError: () => toast.error(t('errors.updateDepartment')),
   });
 }

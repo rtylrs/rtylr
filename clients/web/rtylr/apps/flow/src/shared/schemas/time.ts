@@ -15,5 +15,3 @@ export const myDaySearchSchema = z.object({
   project: z.string().optional().catch(undefined),
   task: z.string().optional().catch(undefined),
 });
-
-export type MyDaySearch = z.infer<typeof myDaySearchSchema>;

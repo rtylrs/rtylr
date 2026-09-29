@@ -35,8 +35,7 @@
     "createdWithId": "تم إنشاء {{id}}"
   },
   "comment": {
-    "postFailed": "تعذّر نشر التعليق",
-    "deleteFailed": "تعذّر حذف التعليق"
+    "postFailed": "تعذّر نشر التعليق"
   },
   "subtask": {
     "addFailed": "تعذّر إضافة المهمة الفرعية",
@@ -56,7 +55,6 @@
   "label": {
     "created": "تم إنشاء التسمية",
     "createFailed": "تعذّر إنشاء التسمية",
-    "updateFailed": "فشل تحديث التسمية",
     "deleted": "تم حذف التسمية",
     "deleteFailed": "تعذّر حذف التسمية",
     "setFailed": "فشل تعيين تسميات المهمة"
@@ -73,7 +71,6 @@
     "nameRequired": "اسم العمود مطلوب"
   },
   "projectMember": {
-    "addFailed": "فشل إضافة العضو",
     "removeFailed": "فشل إزالة العضو",
     "roleUpdateFailed": "فشل تحديث الدور",
     "transferFailed": "فشل نقل الملكية",

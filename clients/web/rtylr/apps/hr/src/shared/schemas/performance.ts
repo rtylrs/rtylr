@@ -14,11 +14,7 @@ export const goalFormSchema = z.object({
   weight: z.number().min(0).max(100).optional(),
 });
 
-export type GoalFormData = z.infer<typeof goalFormSchema>;
-
 export const myReviewSchema = z.object({
   overallRating: z.string().min(1),
   narrative: z.string().min(50),
 });
-
-export type MyReviewForm = z.infer<typeof myReviewSchema>;

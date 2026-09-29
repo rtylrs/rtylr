@@ -13,5 +13,3 @@ export const appContractSchema = z
     ...a,
     isEnabled: a.isEnabled ?? a.is_enabled ?? true,
   }));
-
-export type AppContract = z.infer<typeof appContractSchema>;

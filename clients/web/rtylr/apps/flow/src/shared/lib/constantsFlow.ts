@@ -55,17 +55,8 @@ export const MAX_TASK_TITLE_LENGTH = 255;
 /** Maximum allowed project name length. */
 export const MAX_PROJECT_NAME_LENGTH = 100;
 
-/** Maximum allowed comment body length. */
-export const MAX_COMMENT_BODY_LENGTH = 5000;
-
-/** Maximum allowed members per workspace. */
-export const MAX_WORKSPACE_MEMBERS = 1000;
-
 /** Effort bucket sizes in minutes for quick selection. */
 export const EFFORT_BUCKETS_MINUTES = [15, 30, 60, 120, 240] as const;
-
-/** Maximum estimate hours per task. */
-export const MAX_ESTIMATE_HOURS = 200;
 
 /** Default cycle length in days. */
 export const DEFAULT_CYCLE_DAYS = 14;

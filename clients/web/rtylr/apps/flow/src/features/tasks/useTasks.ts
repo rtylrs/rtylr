@@ -280,19 +280,6 @@ export function useAddComment() {
   });
 }
 
-export function useDeleteComment() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => {
-      return unwrap(flowApi.deleteComment(id));
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['task'] });
-    },
-    onError: () => toast.error(t('toasts.comment.deleteFailed')),
-  });
-}
-
 export function useAddSubtask() {
   const qc = useQueryClient();
   return useMutation({

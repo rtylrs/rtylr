@@ -31,18 +31,6 @@ interface RejectTimesheetRequest {
   rejectionReason?: string;
 }
 
-export const useGetCurrentTimesheet = () => {
-  return useQuery<TimesheetPayload>({
-    queryKey: ['timesheets', 'current'],
-    queryFn: async (): Promise<TimesheetPayload> => {
-      const res = await unwrap(
-        hrTransport.get<{ timesheet: TimesheetPayload }>('/hr/timesheets/current')
-      );
-      return (res as { timesheet: TimesheetPayload }).timesheet;
-    },
-  });
-};
-
 export const useListTimesheets = (params: ListTimesheetsRequest) => {
   return useQuery<ListTimesheetsResponse>({
     queryKey: ['timesheets', 'filter', params],

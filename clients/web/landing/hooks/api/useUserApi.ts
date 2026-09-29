@@ -50,17 +50,3 @@ export const useLogin = () => {
     },
   });
 };
-
-// Logout mutation
-export const useLogout = () => {
-  const { logout } = useUserStore();
-
-  return useMutation({
-    mutationFn: async () => {
-      await api.post('/auth/logout');
-    },
-    onSuccess: () => {
-      logout();
-    },
-  });
-};

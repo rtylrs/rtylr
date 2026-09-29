@@ -19,5 +19,3 @@ export const billSchema = z
     issuedDate: z.string().optional().nullable(),
   })
   .passthrough();
-
-export type BillRaw = z.infer<typeof billSchema>;

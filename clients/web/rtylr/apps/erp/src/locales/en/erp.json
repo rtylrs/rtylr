@@ -209,7 +209,6 @@
       "deleted": "Warehouse deleted"
     },
     "createFailed": "Failed to create warehouse",
-    "updateFailed": "Failed to update warehouse",
     "deleteFailed": "Failed to delete warehouse"
   },
   "receiving": {

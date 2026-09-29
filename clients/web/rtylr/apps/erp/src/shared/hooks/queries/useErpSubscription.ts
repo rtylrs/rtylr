@@ -7,8 +7,6 @@ import type { Subscription, BillingDetail } from '@voxire/voxie/hub/subscription
 
 export type ErpSubscription = Subscription;
 export type ErpBillingDetail = BillingDetail;
-export type ErpBillingLineItem = NonNullable<BillingDetail['lineItems']>[number];
-
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'erp');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

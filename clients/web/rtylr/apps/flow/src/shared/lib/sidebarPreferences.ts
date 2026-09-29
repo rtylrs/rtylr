@@ -470,14 +470,6 @@ export const updatePreferencesCopy = (current: SidebarPreferences): SidebarPrefe
   items: current.items.map((item) => ({ ...item })),
 });
 
-export const moveId = (ids: string[], id: string, destination: number): string[] => {
-  const currentIndex = ids.indexOf(id);
-  if (currentIndex < 0) return ids;
-  const next = ids.filter((entry) => entry !== id);
-  next.splice(Math.max(0, Math.min(destination, next.length)), 0, id);
-  return next;
-};
-
 export const recordRecentSidebarPage = (
   current: SidebarPreferences,
   route: string,

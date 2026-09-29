@@ -380,17 +380,6 @@ const toUserSettingsPayload = (data: ApiUserSettings) => {
   };
 };
 
-export interface ApiWorkspaceMember {
-  id: string;
-  workspaceId: string;
-  userId: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'member' | 'viewer';
-  invitedBy?: string;
-  joinedAt: string;
-}
-
 /**
  * A member's role on a single project, backed by the `flow_project_members.role`
  * enum. Distinct from the business-wide team role (`Member['role']` in flowStore),

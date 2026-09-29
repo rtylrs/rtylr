@@ -27,8 +27,7 @@
     "createdWithId": "Created {{id}}"
   },
   "comment": {
-    "postFailed": "Failed to post comment",
-    "deleteFailed": "Failed to delete comment"
+    "postFailed": "Failed to post comment"
   },
   "subtask": {
     "addFailed": "Failed to add subtask",
@@ -48,7 +47,6 @@
   "label": {
     "created": "Label created",
     "createFailed": "Failed to create label",
-    "updateFailed": "Failed to update label",
     "deleted": "Label deleted",
     "deleteFailed": "Failed to delete label",
     "setFailed": "Failed to set task labels"
@@ -65,7 +63,6 @@
     "nameRequired": "Column name is required"
   },
   "projectMember": {
-    "addFailed": "Failed to add member",
     "removeFailed": "Failed to remove member",
     "roleUpdateFailed": "Failed to update role",
     "transferFailed": "Failed to transfer ownership",

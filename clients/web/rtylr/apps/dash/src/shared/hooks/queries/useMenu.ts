@@ -101,7 +101,3 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
 
   return query;
 };
-
-export const useGetMenuById = (menuId: string | null) => {
-  return useGetMenu(menuId);
-};

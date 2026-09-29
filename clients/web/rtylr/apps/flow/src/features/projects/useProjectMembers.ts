@@ -26,17 +26,6 @@ export function useProjectMembers(projectId?: string) {
   return useQuery<ApiProjectMember[]>(projectMembersQueryOptions(projectId));
 }
 
-export function useAddProjectMember(projectId: string) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { project_id: number; user_id: number; role?: string }) =>
-      unwrap(flowApi.addProjectMember(data)).then(() => {}),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['project-members', projectId] }),
-    onError: () => toast.error(t('toasts.projectMember.addFailed')),
-  });
-}
-
 export function useRemoveProjectMember(projectId: string) {
   const { t } = useTranslation();
   const qc = useQueryClient();

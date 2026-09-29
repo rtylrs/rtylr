@@ -1,4 +1,4 @@
-import { createOneKitClient, unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { OnboardingServiceClient } from '@voxire/voxie/hr/onboarding/v1/client';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
@@ -8,9 +8,7 @@ import type {
   CreateChecklistTemplateResponse,
   ListEmployeeChecklistsResponse,
   EmployeeChecklistPayload,
-  CompleteChecklistItemResponse,
 } from '@voxire/voxie/hr/onboarding/v1/types';
-import { hrTransport } from '../../lib/clients';
 import { todayIso } from '../../lib/dateUtils';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -26,14 +24,6 @@ const staffClient = createOneKitClient(StaffServiceClient, 'hr');
 export interface ListEmployeeChecklistSummariesParams {
   limit: number;
   offset: number;
-}
-
-// The generated CompleteChecklistItemRequest body is intentionally empty —
-// the item id travels in the URL path, not the body. attachmentUrl is an
-// optional body field. Model the call inputs locally.
-interface CompleteChecklistItemInput {
-  itemId: number;
-  attachmentUrl?: string;
 }
 
 function today(): string {
@@ -140,33 +130,6 @@ export const useListEmployeeChecklistSummaries = (params: ListEmployeeChecklistS
         limit: params.limit,
         offset: params.offset,
       });
-    },
-  });
-};
-
-export const useCompleteChecklistItem = () => {
-  const queryClient = useQueryClient();
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async (
-      data: CompleteChecklistItemInput
-    ): Promise<CompleteChecklistItemResponse> => {
-      const res = await unwrap(
-        hrTransport.post<CompleteChecklistItemResponse>(
-          `/hr/onboarding/checklists/items/${data.itemId}/complete`,
-          data
-        )
-      );
-      return res as CompleteChecklistItemResponse;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employee-checklists'] });
-      queryClient.invalidateQueries({ queryKey: ['employee-checklist-summaries'] });
-      toast.success(t('onboardingMgmt.itemCompleted'));
-    },
-    onError: () => {
-      toast.error(t('errors.generic'));
     },
   });
 };

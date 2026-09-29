@@ -6,7 +6,6 @@ const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 export type SocialProvider = 'google' | 'github' | 'microsoft' | 'apple';
 
-export const SOCIAL_PROVIDERS: SocialProvider[] = ['google', 'github', 'microsoft', 'apple'];
 export const SOCIAL_AUTH_REDIRECT_KEY = 'social_auth_redirect';
 export const SOCIAL_AUTH_BUSINESS_NAME_KEY = 'social_auth_business_name';
 

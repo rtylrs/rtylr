@@ -82,5 +82,3 @@ export const receiptSchema = z.preprocess((value) => {
         : []),
   };
 }, receiptObjectSchema);
-
-export type ReceiptRaw = z.infer<typeof receiptSchema>;

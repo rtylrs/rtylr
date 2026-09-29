@@ -7,8 +7,6 @@ import type {
   CreateBrandRequest,
   CreateBrandResponse,
   DeleteBrandResponse,
-  UpdateBrandRequest,
-  UpdateBrandResponse,
 } from '@voxire/voxie/erp/brand/v1/types';
 import { ERP_LIST_LIMIT } from '../../shared/lib/erpListBounds';
 
@@ -57,14 +55,5 @@ export function useDeleteBrand() {
     mutationFn: (id) => brandClient.deleteBrand({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
     onError: () => toast.error('Failed to delete brand'),
-  });
-}
-
-export function useUpdateBrand() {
-  const qc = useQueryClient();
-  return useMutation<UpdateBrandResponse, Error, UpdateBrandRequest>({
-    mutationFn: (data) => brandClient.updateBrand(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
-    onError: () => toast.error('Failed to update brand'),
   });
 }

@@ -40,10 +40,6 @@ export function useProject(projectId: string | undefined) {
   });
 }
 
-export interface ArchivedProject {
-  project: Project;
-}
-
 export function useArchivedProjects(page = 1, limit = 20) {
   return useQuery<{ projects: Project[]; total: number }>({
     queryKey: ['archived-projects', page, limit],

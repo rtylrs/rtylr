@@ -26,17 +26,6 @@ export function useCreateLabel() {
   });
 }
 
-export function useUpdateLabel() {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { id: number; name: string; color: string }) =>
-      unwrap(flowApi.updateLabel(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
-    onError: () => toast.error(t('toasts.label.updateFailed')),
-  });
-}
-
 export function useDeleteLabel() {
   const { t } = useTranslation();
   const qc = useQueryClient();

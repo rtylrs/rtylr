@@ -79,5 +79,3 @@ export const dashboardStatsSchema = z
     overdueInvoices: raw.overdueInvoices ?? raw.overdue_invoices ?? [],
     barData: raw.barData ?? raw.bar_data ?? [],
   }));
-
-export type DashboardStatsRaw = z.infer<typeof dashboardStatsSchema>;

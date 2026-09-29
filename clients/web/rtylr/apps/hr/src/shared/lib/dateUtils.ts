@@ -74,17 +74,6 @@ export function addDays(isoDate: string, days: number): string {
 }
 
 /**
- * Returns the ISO week number (1-53) for an ISO date string.
- */
-export function isoWeekNumber(isoDate: string): number {
-  const d = new Date(isoDate);
-  const dayOfWeek = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayOfWeek);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-}
-
-/**
  * Returns the Monday of the week containing the given ISO date.
  */
 export function weekStart(isoDate: string): string {

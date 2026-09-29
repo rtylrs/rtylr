@@ -217,7 +217,6 @@
       "deleted": "تم حذف المستودع"
     },
     "createFailed": "تعذر إنشاء المستودع",
-    "updateFailed": "تعذر تحديث المستودع",
     "deleteFailed": "تعذر حذف المستودع"
   },
   "receiving": {

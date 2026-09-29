@@ -53,18 +53,6 @@ interface CreateGoalResponse {
   goal?: ReviewGoalPayload;
 }
 
-interface UpdateGoalRequest {
-  goalId: number;
-  title?: string;
-  description?: string;
-  weight?: number;
-  status?: string;
-}
-
-interface UpdateGoalResponse {
-  goal?: ReviewGoalPayload;
-}
-
 interface ShareReviewRequest {
   reviewId: number;
 }
@@ -183,36 +171,6 @@ export const useCreateGoal = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['review-goals'] });
       toast.success(t('performance.goalCreated'));
-    },
-    onError: () => {
-      toast.error(t('errors.generic'));
-    },
-  });
-};
-
-export const useUpdateGoal = () => {
-  const queryClient = useQueryClient();
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async (data: UpdateGoalRequest): Promise<ReviewGoalPayload> => {
-      const goalId = requiredPositiveInteger(data.goalId, 'goalId');
-      const source = data as UpdateGoalRequest & { successCriteria?: string };
-      const res = await unwrap(
-        hrTransport.put<UpdateGoalResponse>(`/hr/performance/goals/${goalId}`, {
-          id: goalId,
-          title: data.title,
-          description: data.description,
-          weight: data.weight,
-          successCriteria: source.successCriteria,
-          status: data.status,
-        })
-      );
-      return (res as UpdateGoalResponse).goal as ReviewGoalPayload;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['review-goals'] });
-      toast.success(t('performance.goalUpdated'));
     },
     onError: () => {
       toast.error(t('errors.generic'));

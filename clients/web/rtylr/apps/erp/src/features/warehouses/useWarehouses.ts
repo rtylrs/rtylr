@@ -8,7 +8,6 @@ import type {
   CreateWarehouseResponse,
   DeleteWarehouseResponse,
   UpdateWarehouseRequest,
-  UpdateWarehouseResponse,
   Warehouse,
 } from '@voxire/voxie/erp/warehouse/v1/types';
 import { withErpListBounds } from '../../shared/lib/erpListBounds';
@@ -38,16 +37,6 @@ export function useCreateWarehouse() {
     mutationFn: (data) => warehouseClient.createWarehouse(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
     onError: () => toast.error(t('erp.warehouses.createFailed')),
-  });
-}
-
-export function useUpdateWarehouse() {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  return useMutation<UpdateWarehouseResponse, Error, UpdateWarehouseRequest>({
-    mutationFn: (data) => warehouseClient.updateWarehouse(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
-    onError: () => toast.error(t('erp.warehouses.updateFailed')),
   });
 }
 

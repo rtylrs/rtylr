@@ -217,25 +217,6 @@ func bankAccountSortColumn(sortBy string) string {
 	}
 }
 
-func bankAccountFromSqlc(row sqlc.FinanceBankAccount) domain.BankAccount {
-	ba := domain.BankAccount{
-		ID:          row.ID,
-		OwnerID:     row.OwnerID,
-		BusinessID:  row.BusinessID,
-		Name:        row.Name,
-		Institution: nullStr(row.Institution),
-		AccountType: nullStr(row.AccountType),
-		Balance:     parseMoneyNull(row.Balance),
-		Currency:    nullStr(row.Currency),
-		IsConnected: nullBool(row.IsConnected),
-		CreatedAt:   nullTime(row.CreatedAt),
-	}
-	if row.LastSyncedAt.Valid {
-		ba.LastSyncedAt = row.LastSyncedAt.Time
-	}
-	return ba
-}
-
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------

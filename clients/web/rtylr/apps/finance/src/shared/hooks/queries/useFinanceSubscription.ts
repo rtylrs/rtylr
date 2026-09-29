@@ -7,8 +7,6 @@ import type { Subscription, BillingDetail } from '@voxire/voxie/hub/subscription
 
 export type FinanceSubscription = Subscription;
 export type FinanceBillingDetail = BillingDetail;
-export type FinanceBillingLineItem = NonNullable<BillingDetail['lineItems']>[number];
-
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'finance');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
