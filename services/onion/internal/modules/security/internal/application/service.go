@@ -22,7 +22,26 @@ const (
 )
 
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
+}
+
+// repository is the persistence surface the service depends on. The step-up
+// gate in front of every second-factor mutation has to be exercisable without
+// a database, so the concrete infrastructure type is held behind this
+// interface rather than as a struct field.
+type repository interface {
+	GetSecuritySettings(ctx context.Context, userID int64) (domain.SecuritySettings, error)
+	SetTwoFactor(ctx context.Context, userID int64, enabled bool) error
+	GetLoginHistory(ctx context.Context, userID int64, limit, offset int) ([]domain.LoginEntry, int64, error)
+	InvalidateAllSessions(ctx context.Context, userID int64) error
+	RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error
+	BeginMFAEnrollment(ctx context.Context, userID int64, encryptedSecret []byte) error
+	GetMFASecret(ctx context.Context, userID int64, active bool) ([]byte, error)
+	CompleteMFAEnrollment(ctx context.Context, userID int64, recoveryHashes [][]byte) error
+	MarkMFAVerified(ctx context.Context, userID int64) error
+	GetMFAFactorState(ctx context.Context, userID int64) (domain.MFAFactorState, error)
+	ListRecoveryCodes(ctx context.Context, userID int64) ([]infrastructure.RecoveryCodeRow, error)
+	ConsumeRecoveryCode(ctx context.Context, userID, id int64) error
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -46,6 +65,9 @@ func (s *Service) GetSettings(ctx context.Context, userID int64) (domain.Securit
 }
 
 func (s *Service) SetTwoFactor(ctx context.Context, userID int64, enabled bool) error {
+	if err := s.requireStepUp(ctx, userID); err != nil {
+		return err
+	}
 	if err := s.repo.SetTwoFactor(ctx, userID, enabled); err != nil {
 		return err
 	}
@@ -101,6 +123,12 @@ func (s *Service) GetLoginHistory(ctx context.Context, userID, page, pageSize in
 }
 
 func (s *Service) InvalidateAllSessions(ctx context.Context, userID int64) error {
+	// Revoking every session is a credential-adjacent mutation: it is also the
+	// cheapest way for a stolen token to lock the legitimate user out, so it
+	// sits behind the same step-up as the factor itself.
+	if err := s.requireStepUp(ctx, userID); err != nil {
+		return err
+	}
 	if err := s.repo.InvalidateAllSessions(ctx, userID); err != nil {
 		return err
 	}

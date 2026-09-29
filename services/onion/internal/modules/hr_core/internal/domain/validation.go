@@ -64,6 +64,17 @@ func ValidateWorkSchedule(ws WorkScheduleRecord) error {
 	return nil
 }
 
+// SameEmailAddress reports whether two addresses denote the same mailbox. An
+// invite names the address it was sent to and acceptance compares it with the
+// signed-in account, so the comparison has to ignore the case and surrounding
+// whitespace a person can type. An empty address on either side never matches:
+// an invite row with no address must not be claimable by any account.
+func SameEmailAddress(a, b string) bool {
+	a = strings.TrimSpace(a)
+	b = strings.TrimSpace(b)
+	return a != "" && b != "" && strings.EqualFold(a, b)
+}
+
 // IsValidEmploymentStatus returns true when the status is a recognised value.
 func IsValidEmploymentStatus(status string) bool {
 	switch status {

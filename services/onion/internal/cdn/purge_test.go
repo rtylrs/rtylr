@@ -69,13 +69,26 @@ func TestPurgeUploadURLRejectsNestedUploadURL(t *testing.T) {
 	req := httptest.NewRequest("PURGE", "/upload?url="+url.QueryEscape(target), nil)
 	rec := httptest.NewRecorder()
 
-	c.purgeUploadURL(rec, req)
+	c.purgeUploadURL(rec, asService(req))
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, want %d (body %q)", rec.Code, http.StatusBadRequest, rec.Body.String())
 	}
 	if body := strings.TrimSpace(rec.Body.String()); body != "invalid purge request" {
 		t.Fatalf("body = %q, want %q", body, "invalid purge request")
+	}
+}
+
+// A purge with no principal at all is refused before any target is inspected.
+func TestPurgeRequiresAPrincipal(t *testing.T) {
+	c := &CDN{baseURL: "https://cdn.voxire.com", db: testutil.OpenDB(t)}
+	req := httptest.NewRequest("PURGE", "/files/4c85c397-9fc3-4bd8-adf5-9d1ef64f5e8b", nil)
+	rec := httptest.NewRecorder()
+
+	c.purgeFileVariants(rec, req)
+
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d (body %q)", rec.Code, http.StatusForbidden, rec.Body.String())
 	}
 }
 
@@ -90,7 +103,7 @@ func TestPurgeUploadURLMissingFileIsNotFound(t *testing.T) {
 	req := httptest.NewRequest("PURGE", "/upload?url="+url.QueryEscape(target), nil)
 	rec := httptest.NewRecorder()
 
-	c.purgeUploadURL(rec, req)
+	c.purgeUploadURL(rec, asService(req))
 
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("status = %d, want %d (body %q)", rec.Code, http.StatusNotFound, rec.Body.String())

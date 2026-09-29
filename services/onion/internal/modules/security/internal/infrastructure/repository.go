@@ -85,6 +85,34 @@ func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled boo
 	return tx.Commit()
 }
 
+// GetMFAFactorState reports whether the user holds an active TOTP factor and
+// when they last proved it. Every error is returned to the caller: the step-up
+// gate must deny when this read fails rather than read an unknown state as
+// "no factor to protect". The absent provisioning row is the one benign case —
+// nothing has been verified yet, so LastVerifiedAt stays nil.
+func (r *Repository) GetMFAFactorState(ctx context.Context, userID int64) (domain.MFAFactorState, error) {
+	var state domain.MFAFactorState
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT EXISTS(
+			SELECT 1 FROM user_mfa_enrollments
+			WHERE user_id = ? AND method = 'totp' AND is_active = TRUE)`, userID).Scan(&state.FactorEnrolled); err != nil {
+		return domain.MFAFactorState{}, err
+	}
+	var lastVerified sql.NullTime
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT last_mfa_verified_at FROM user_provisioning_states WHERE user_id = ?`, userID).Scan(&lastVerified); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return state, nil
+		}
+		return domain.MFAFactorState{}, err
+	}
+	if lastVerified.Valid {
+		verified := lastVerified.Time
+		state.LastVerifiedAt = &verified
+	}
+	return state, nil
+}
+
 func (r *Repository) BeginMFAEnrollment(ctx context.Context, userID int64, encryptedSecret []byte) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -125,6 +153,15 @@ func (r *Repository) CompleteMFAEnrollment(ctx context.Context, userID int64, re
 	rollback := func(cause error) error {
 		_ = tx.Rollback()
 		return cause
+	}
+	// Retire the outgoing factor before the new one goes live. Activating the
+	// pending row alone left the previous TOTP secret active as well, so a
+	// rotation produced two valid secrets and only the newest was ever checked.
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE user_mfa_enrollments
+		SET is_active = FALSE, revoked_at = NOW()
+		WHERE user_id = ? AND method = 'totp' AND is_active = TRUE`, userID); err != nil {
+		return rollback(err)
 	}
 	result, err := tx.ExecContext(ctx, `
 		UPDATE user_mfa_enrollments

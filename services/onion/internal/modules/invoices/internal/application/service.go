@@ -234,18 +234,22 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 
 	invoiceNumber := fmt.Sprintf("INV-%d-%04d", year, seq+1)
 
-	// Calculate line-item totals
-	var subtotal float64
-	var itemTaxAmount float64
+	// Line bases, the header discount, the taxable base, every tax layer and the
+	// rounding: all of it lives in computeInvoiceTotals. See money.go for the
+	// order of operations; do not re-derive it here.
+	discountType := input.DiscountType
+	if discountType == "" {
+		discountType = "fixed"
+	}
+
+	totals, err := computeInvoiceTotals(input.Items, input.TaxRate, discountType, input.DiscountValue)
+	if err != nil {
+		return nil, err
+	}
 
 	items := make([]domain.InvoiceItem, 0, len(input.Items))
 
 	for i, itemInput := range input.Items {
-		lineTotal := itemInput.CalculateTotal()
-		lineComponents := itemInput.CalculateComponents()
-		subtotal += lineComponents.Base
-		itemTaxAmount += lineComponents.Tax
-
 		unit := itemInput.Unit
 		if unit == "" {
 			unit = "unit"
@@ -258,30 +262,10 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 			UnitPrice:   itemInput.UnitPrice,
 			TaxRate:     itemInput.TaxRate,
 			DiscountPct: itemInput.DiscountPct,
-			Total:       lineTotal,
+			Total:       totals.LineTotal(i),
 			SortOrder:   i,
 		})
 	}
-
-	// Apply header-level discount
-	var discountAmount float64
-
-	discountType := input.DiscountType
-	if discountType == "" {
-		discountType = "fixed"
-	}
-
-	discountAmount, err = applyHeaderDiscount(subtotal, discountType, input.DiscountValue)
-	if err != nil {
-		return nil, err
-	}
-
-	afterDiscount := subtotal - discountAmount
-
-	// Header-level tax applies once to the discounted pre-tax base; item tax
-	// is carried separately so it is never taxed or discounted twice.
-	taxAmount := afterDiscount*(input.TaxRate/100) + itemTaxAmount
-	total := afterDiscount + taxAmount
 
 	currency := input.Currency
 	if currency == "" {
@@ -299,15 +283,15 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 		IssueDate:      issueDate,
 		DueDate:        dueDate,
 		Currency:       currency,
-		Subtotal:       subtotal,
+		Subtotal:       totals.Subtotal,
 		DiscountType:   discountType,
 		DiscountValue:  input.DiscountValue,
-		DiscountAmount: discountAmount,
+		DiscountAmount: totals.DiscountAmount,
 		TaxRate:        input.TaxRate,
-		TaxAmount:      taxAmount,
-		Total:          total,
+		TaxAmount:      totals.TaxAmount,
+		Total:          totals.Total,
 		AmountPaid:     0,
-		AmountDue:      total,
+		AmountDue:      totals.Total,
 		Notes:          input.Notes,
 		Terms:          input.Terms,
 	}

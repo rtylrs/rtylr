@@ -23,7 +23,8 @@ func (m *Module) SchemaPrompt() string {
 }
 
 // RunJSON validates an LLM-produced query spec and runs it for the caller's
-// tenant (resolved from businessID), returning rows and the compiled SQL.
+// business (resolved and access-checked from businessID), returning rows and
+// the compiled SQL.
 func (m *Module) RunJSON(ctx context.Context, businessID, userID int64, specJSON string) ([]map[string]any, string, error) {
 	return m.service.RunJSON(ctx, businessID, userID, specJSON)
 }

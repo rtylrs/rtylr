@@ -1,10 +1,11 @@
 import type { PaymentEntry } from '../../shared/types/pos';
 import type { ProcessPaymentRequest } from '@voxire/voxie/pos/orders/payments/v1/types';
+import type { ChargeOrderRequest } from './checkoutWorkflow';
 
 interface FinalizeMultiPaymentParams {
   orderId: string | undefined;
   payments: PaymentEntry[];
-  chargeOrder: (payload: ProcessPaymentRequest) => Promise<void>;
+  chargeOrder: (request: ChargeOrderRequest) => Promise<void>;
 }
 
 function parseOrderId(orderId: string | undefined): number {
@@ -62,5 +63,10 @@ export async function finalizeMultiPayment({
   chargeOrder,
 }: FinalizeMultiPaymentParams): Promise<void> {
   const parsedOrderId = parseOrderId(orderId);
-  await chargeOrder(collapsePayments(String(parsedOrderId), payments));
+  // One key per Finalize press, carried by the request so a retry of the same
+  // press is deduped while the next sale gets its own.
+  await chargeOrder({
+    ...collapsePayments(String(parsedOrderId), payments),
+    idempotencyKey: crypto.randomUUID(),
+  });
 }

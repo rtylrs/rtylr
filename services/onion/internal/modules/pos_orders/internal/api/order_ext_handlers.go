@@ -158,6 +158,24 @@ func VoidOrderRoutes() []string { return []string{"/pos/orders/void", "/pos/orde
 
 type VoidOrderHandler struct{ Service *application.Service }
 
+// voidOrderError maps a void refusal onto an HTTP status. Shared by all three
+// void entry points so a typed refusal cannot be rendered as a 500 by one of
+// them: a void the repository refuses because the order already took money or
+// is no longer editable is a conflict with the order's state, and the till
+// needs to see that as 409 rather than "Failed to void order".
+func voidOrderError(err error) error {
+	switch {
+	case errors.Is(err, domain.ErrOrderNotFound):
+		return onekiterrors.New(http.StatusNotFound, "Order not found")
+	case errors.Is(err, domain.ErrOrderAlreadyPaid):
+		return onekiterrors.New(http.StatusConflict, "Order is already paid")
+	case errors.Is(err, domain.ErrOrderNotEditable):
+		return onekiterrors.New(http.StatusConflict, "Order cannot be voided in its current status")
+	default:
+		return onekiterrors.New(http.StatusInternalServerError, "Failed to void order")
+	}
+}
+
 type VoidOrderRequest struct {
 	OrderID int64  `json:"order_id"`
 	Reason  string `json:"reason"`
@@ -193,10 +211,7 @@ func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (Vo
 	}
 
 	if err := h.Service.VoidOrder(ctx, businessID, orderID, req.Reason); err != nil {
-		if errors.Is(err, domain.ErrOrderNotFound) {
-			return VoidOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
-		}
-		return VoidOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to void order")
+		return VoidOrderResponse{}, voidOrderError(err)
 	}
 	return VoidOrderResponse{Message: "Order voided successfully"}, nil
 }

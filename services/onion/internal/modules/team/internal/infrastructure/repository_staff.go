@@ -145,12 +145,17 @@ func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, 
 
 // ─── Invite Tokens ──────────────────────────────────────────────────────────
 
-func (r *Repository) CreateInviteToken(ctx context.Context, userID, ownerID int64, token string, expiresAt time.Time) error {
+// CreateInviteToken records the business the invitation grants access in, so
+// the accept path resolves the tenant from the invitation itself instead of
+// re-deriving it from the owner (a `LIMIT 1` lookup that picks the wrong
+// business for an owner who has more than one).
+func (r *Repository) CreateInviteToken(ctx context.Context, userID, ownerID, businessID int64, token string, expiresAt time.Time) error {
 	err := r.queries.CreateInviteToken(ctx, sqlc.CreateInviteTokenParams{
-		UserID:    userID,
-		OwnerID:   ownerID,
-		Token:     token,
-		ExpiresAt: expiresAt,
+		UserID:     userID,
+		OwnerID:    ownerID,
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: businessID > 0},
+		Token:      token,
+		ExpiresAt:  expiresAt,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create invite token", logger.Error(err))
@@ -158,21 +163,28 @@ func (r *Repository) CreateInviteToken(ctx context.Context, userID, ownerID int6
 	return err
 }
 
-func (r *Repository) GetInviteToken(ctx context.Context, token string) (int64, int64, time.Time, error) {
+func (r *Repository) GetInviteToken(ctx context.Context, token string) (domain.InviteToken, error) {
 	row, err := r.queries.GetInviteToken(ctx, token)
 	if err != nil {
-		return 0, 0, time.Time{}, err
+		return domain.InviteToken{}, err
 	}
 
 	if row.UsedAt.Valid {
-		return 0, 0, time.Time{}, domain.ErrTokenAlreadyUsed
+		return domain.InviteToken{}, domain.ErrTokenAlreadyUsed
 	}
 
 	if time.Now().After(row.ExpiresAt) {
-		return 0, 0, time.Time{}, domain.ErrTokenExpired
+		return domain.InviteToken{}, domain.ErrTokenExpired
 	}
 
-	return row.UserID, row.OwnerID, row.ExpiresAt, nil
+	// BusinessID is NULL on rows written before the business was recorded; the
+	// accept path treats that as "not resolved yet" rather than as business 0.
+	return domain.InviteToken{
+		UserID:     row.UserID,
+		OwnerID:    row.OwnerID,
+		BusinessID: row.BusinessID.Int64,
+		ExpiresAt:  row.ExpiresAt,
+	}, nil
 }
 
 func (r *Repository) MarkInviteTokenUsed(ctx context.Context, token string) error {

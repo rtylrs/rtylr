@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/security/internal/application"
+	"github.com/voxire/onion/internal/modules/security/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -13,7 +14,21 @@ import (
 )
 
 type SecurityAPI struct {
-	Service *application.Service
+	Service securityService
+}
+
+// securityService is the application surface the handlers call. It is held
+// behind an interface so the step-up responses can be asserted without a
+// database.
+type securityService interface {
+	GetSettings(ctx context.Context, userID int64) (domain.SecuritySettings, error)
+	GetLoginHistory(ctx context.Context, userID int64, page, pageSize int64) ([]domain.LoginEntry, int64, bool, error)
+	InvalidateAllSessions(ctx context.Context, userID int64) error
+	SetTwoFactor(ctx context.Context, userID int64, enabled bool) error
+	BeginMFAEnrollment(ctx context.Context, userID int64) (string, string, error)
+	CompleteMFAEnrollment(ctx context.Context, userID int64, code string) ([]string, error)
+	VerifyMFA(ctx context.Context, userID int64, code string) error
+	UseMFARecoveryCode(ctx context.Context, userID int64, code string) error
 }
 
 func NewSecurityAPI(service *application.Service) *SecurityAPI {
@@ -26,6 +41,24 @@ func requireSecurityPermission(ctx context.Context) (*authPkg.AuthUser, error) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return device.User, nil
+}
+
+// securityGuardError maps the step-up and attempt-limit failures raised before
+// any state change to the status the client sees. A caller holding a valid
+// session but no factor proof is forbidden, not unauthenticated, and a state
+// read that could not be completed is a dependency outage rather than a
+// permission problem. Every other error is left to the handler's own mapping.
+func securityGuardError(err error) error {
+	switch {
+	case errors.Is(err, application.ErrStepUpRequired):
+		return onekiterrors.New(http.StatusForbidden, "Recent MFA verification required before changing security settings")
+	case errors.Is(err, application.ErrStepUpUnavailable):
+		return onekiterrors.New(http.StatusServiceUnavailable, "Security settings are temporarily unavailable")
+	case errors.Is(err, application.ErrMFAAttemptsExceeded):
+		return onekiterrors.New(http.StatusTooManyRequests, "Too many MFA code attempts, try again later")
+	default:
+		return nil
+	}
 }
 
 func (a *SecurityAPI) GetSecurityState(ctx context.Context, _ *hubsecurityv1.GetSecurityStateRequest) (*hubsecurityv1.GetSecurityStateResponse, error) {
@@ -107,6 +140,9 @@ func (a *SecurityAPI) InvalidateSessions(ctx context.Context, _ *hubsecurityv1.I
 	}
 
 	if err := a.Service.InvalidateAllSessions(ctx, user.UserID); err != nil {
+		if guardErr := securityGuardError(err); guardErr != nil {
+			return nil, guardErr
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to invalidate sessions")
 	}
 
@@ -120,6 +156,9 @@ func (a *SecurityAPI) Update2FA(ctx context.Context, req *hubsecurityv1.Update2F
 	}
 
 	if err := a.Service.SetTwoFactor(ctx, user.UserID, req.GetEnabled()); err != nil {
+		if guardErr := securityGuardError(err); guardErr != nil {
+			return nil, guardErr
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update 2FA settings")
 	}
 
@@ -139,6 +178,9 @@ func (a *SecurityAPI) BeginMFAEnrollment(ctx context.Context, _ *hubsecurityv1.B
 
 	secret, uri, err := a.Service.BeginMFAEnrollment(ctx, user.UserID)
 	if err != nil {
+		if guardErr := securityGuardError(err); guardErr != nil {
+			return nil, guardErr
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to begin MFA enrollment")
 	}
 	return &hubsecurityv1.BeginMFAEnrollmentResponse{Secret: secret, OtpauthUri: uri}, nil
@@ -152,6 +194,9 @@ func (a *SecurityAPI) CompleteMFAEnrollment(ctx context.Context, req *hubsecurit
 
 	recoveryCodes, err := a.Service.CompleteMFAEnrollment(ctx, user.UserID, req.GetCode())
 	if err != nil {
+		if guardErr := securityGuardError(err); guardErr != nil {
+			return nil, guardErr
+		}
 		if errors.Is(err, application.ErrMFAInvalidCode) || errors.Is(err, application.ErrMFAEnrollmentMissing) {
 			return nil, onekiterrors.New(http.StatusBadRequest, "MFA code is invalid or enrollment has expired")
 		}
@@ -167,6 +212,9 @@ func (a *SecurityAPI) VerifyMFA(ctx context.Context, req *hubsecurityv1.VerifyMF
 	}
 
 	if err := a.Service.VerifyMFA(ctx, user.UserID, req.GetCode()); err != nil {
+		if errors.Is(err, application.ErrMFAAttemptsExceeded) {
+			return nil, onekiterrors.New(http.StatusTooManyRequests, "Too many MFA code attempts, try again later")
+		}
 		if errors.Is(err, application.ErrMFAInvalidCode) {
 			return nil, onekiterrors.New(http.StatusUnauthorized, "MFA code is invalid")
 		}
@@ -182,6 +230,9 @@ func (a *SecurityAPI) UseMFARecoveryCode(ctx context.Context, req *hubsecurityv1
 	}
 
 	if err := a.Service.UseMFARecoveryCode(ctx, user.UserID, req.GetCode()); err != nil {
+		if errors.Is(err, application.ErrMFAAttemptsExceeded) {
+			return nil, onekiterrors.New(http.StatusTooManyRequests, "Too many MFA code attempts, try again later")
+		}
 		if errors.Is(err, application.ErrMFAInvalidCode) {
 			return nil, onekiterrors.New(http.StatusUnauthorized, "MFA recovery code is invalid")
 		}

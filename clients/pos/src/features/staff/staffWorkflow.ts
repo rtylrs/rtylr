@@ -1,4 +1,5 @@
 import type { POSUser, UpdatePOSUserRequest } from '@voxire/voxie/pos/user/v1/types';
+import { PIN_MAX_LENGTH, PIN_MIN_LENGTH, isNewPin } from '../login/pinPolicy';
 
 // Pure helpers for the staff-management screen.
 
@@ -65,16 +66,16 @@ export interface StaffEdits {
  * hourlyRate is omitted too: the list response carries no rate, and sending a
  * hardcoded 0 would zero out the employee's real rate on every role/PIN edit.
  */
-export const STAFF_PIN_LENGTH = 4;
-
 export function buildStaffUpdate(
   user: StaffUser,
   edits: StaffEdits
 ): UpdatePOSUserRequest {
   const pin = (edits.newPin ?? '').trim();
-  // A manager-typed 1-3 digit PIN would lock the employee out on next login.
-  if (pin && pin.length !== STAFF_PIN_LENGTH) {
-    throw new Error(`PIN must be exactly ${STAFF_PIN_LENGTH} digits.`);
+  // Same policy the server enforces on rotation, so a manager is told here
+  // rather than after a round trip. A 4-digit PIN cannot be set any more, but
+  // one that already exists still verifies: this only ever rejects a new PIN.
+  if (pin && !isNewPin(pin)) {
+    throw new Error(`PIN must be between ${PIN_MIN_LENGTH} and ${PIN_MAX_LENGTH} digits.`);
   }
   return {
     id: String(user.id),

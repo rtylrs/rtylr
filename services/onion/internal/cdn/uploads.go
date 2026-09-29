@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -21,9 +22,10 @@ func (c *CDN) fileURL(fileUUID string) string {
 	return fmt.Sprintf("%s/files/%s", c.baseURL, fileUUID)
 }
 
-// uploadFile validates, stores the bytes in S3, and records the metadata row.
-// It returns the persisted File (CreatedAt populated from the DB).
-func (c *CDN) uploadFile(ctx context.Context, filename, mimeType string, size int64, body io.Reader) (*File, error) {
+// uploadFile validates, stores the bytes in S3, and records the metadata row
+// under businessID. It returns the persisted File (CreatedAt populated from
+// the DB).
+func (c *CDN) uploadFile(ctx context.Context, businessID int64, filename, mimeType string, size int64, body io.Reader, public bool) (*File, error) {
 	if size > c.maxUpload {
 		return nil, fmt.Errorf("file exceeds maximum upload size of %d bytes", c.maxUpload)
 	}
@@ -58,13 +60,13 @@ func (c *CDN) uploadFile(ctx context.Context, filename, mimeType string, size in
 		return nil, fmt.Errorf("uploading to storage: %w", err)
 	}
 
-	id, err := c.insertFile(ctx, fileUUID, storageKey, mimeType, filename, size)
+	id, err := c.insertFile(ctx, businessID, fileUUID, storageKey, mimeType, filename, size, public)
 	if err != nil {
 		c.cleanupUploadedObject(ctx, storageKey)
 		return nil, err
 	}
 
-	uploaded, err := c.fileByID(ctx, id)
+	uploaded, err := c.fileByID(ctx, businessID, id)
 	if err != nil {
 		c.cleanupUploadedObject(ctx, storageKey)
 		return nil, err
@@ -92,7 +94,15 @@ func (c *CDN) cleanupUploadedObject(ctx context.Context, storageKey string) {
 const maxInMemoryUpload = 16 << 20 // 16 MiB
 
 // upload handles POST /upload — a multipart form with a single "file" field.
+// The file is recorded against the caller's resolved business. Visibility
+// defaults to private: the uploader must opt in with visibility=public for the
+// asset to be served to unauthenticated callers.
 func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
+	businessID, ok := requireTenantScope(w, r)
+	if !ok {
+		return
+	}
+
 	// Cap the whole request body so a client can't exhaust disk/memory by
 	// streaming past maxUpload — ParseMultipartForm alone only bounds the
 	// in-memory portion and spills the rest to temp files.
@@ -126,7 +136,9 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 		mimeType = "application/octet-stream"
 	}
 
-	uploaded, err := c.uploadFile(r.Context(), header.Filename, mimeType, header.Size, file)
+	public := uploadVisibility(r) == visibilityPublic
+
+	uploaded, err := c.uploadFile(r.Context(), businessID, header.Filename, mimeType, header.Size, file, public)
 	if err != nil {
 		if errors.Is(err, errCDNStorageNotConfigured) {
 			http.Error(w, "file uploads are not configured on this server", http.StatusNotImplemented)
@@ -149,28 +161,57 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(uploadResponse{
-		ID:   uploaded.FileUUID,
-		URL:  c.fileURL(uploaded.FileUUID),
-		MIME: uploaded.MIMEType,
-		Size: uploaded.Size,
+		ID:         uploaded.FileUUID,
+		URL:        c.fileURL(uploaded.FileUUID),
+		MIME:       uploaded.MIMEType,
+		Size:       uploaded.Size,
+		Visibility: visibilityLabel(public),
 	}); err != nil {
 		logger.Ctx(r.Context()).Warn("cdn: failed to encode upload response", logger.Error(err))
 	}
 }
 
+const (
+	visibilityPrivate = "private"
+	visibilityPublic  = "public"
+)
+
+// uploadVisibility reads the opt-in that decides whether a freshly uploaded
+// asset is served to unauthenticated callers. Anything other than an explicit
+// "public" is private, so a client that does not know about the field cannot
+// accidentally publish.
+func uploadVisibility(r *http.Request) string {
+	value := strings.ToLower(strings.TrimSpace(r.FormValue("visibility")))
+	if value == visibilityPublic {
+		return visibilityPublic
+	}
+	return visibilityPrivate
+}
+
+func visibilityLabel(public bool) string {
+	if public {
+		return visibilityPublic
+	}
+	return visibilityPrivate
+}
+
 // uploadResponse is the JSON body returned by a successful POST /upload. MIME
 // is the type detected from the bytes (not necessarily what the client sent).
+// Visibility tells the caller whether the returned URL is anonymously
+// readable; a private asset needs a bearer token or a signed delivery URL.
 type uploadResponse struct {
-	ID   string `json:"id"`
-	URL  string `json:"url"`
-	MIME string `json:"mime"`
-	Size int64  `json:"size"`
+	ID         string `json:"id"`
+	URL        string `json:"url"`
+	MIME       string `json:"mime"`
+	Size       int64  `json:"size"`
+	Visibility string `json:"visibility"`
 }
 
 // serveFile handles GET /files/{id} — streams the original bytes back with an
 // immutable cache header (the UUID namespace means content never changes).
 func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
-	if !c.validateSignedDelivery(w, r) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
 		return
 	}
 
@@ -180,7 +221,7 @@ func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	meta, err := c.fileByUUID(r.Context(), id)
+	meta, err := c.fileForRead(r.Context(), scope, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "file not found", http.StatusNotFound)

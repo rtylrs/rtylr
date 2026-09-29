@@ -25,6 +25,13 @@ type getProductToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	required, dispatched := productToolPermissions[name]
+	if !dispatched {
+		return nil, false, nil
+	}
+	if err := requireProductToolPermission(ctx, required); err != nil {
+		return nil, true, err
+	}
 	switch name {
 	case getProductToolName:
 		output, err := m.executeGetProductTool(ctx, input)
@@ -42,7 +49,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		output, err := m.executeDeleteProductTool(ctx, input)
 		return output, true, err
 	default:
-		return nil, false, nil
+		return nil, true, fmt.Errorf("product tool %q has no executor", name)
 	}
 }
 

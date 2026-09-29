@@ -7,7 +7,9 @@ import { UserServiceClient } from '@voxire/voxie/pos/user/v1/client';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
-import { isCompletePin, PIN_LENGTH, type RosterMember } from './rosterWorkflow';
+import { normalizeDigits } from '../../shared/utils/digits';
+import { PIN_MAX_LENGTH, PIN_MIN_LENGTH, isNewPin, isVerifiablePin } from './pinPolicy';
+import type { RosterMember } from './rosterWorkflow';
 
 const accessClient = createOneKitClient(AccessServiceClient, 'pos');
 const userClient = createOneKitClient(UserServiceClient, 'pos');
@@ -159,19 +161,20 @@ const PinLogin: React.FC = () => {
     }
   }, [authenticatePin, confirmPin, flashShake, locationId, member, pin]);
 
-  // Auto-submit when a PIN field fills.
-  useEffect(() => {
-    if (busy || submittingRef.current) return;
-    if (step === 'enter' && isCompletePin(pin)) void submitEnter(pin);
-  }, [busy, pin, step, submitEnter]);
+  // A PIN is 4-12 digits now, so no single "field is full" length exists to
+  // submit on: submitting at 4 would truncate a 6-12 digit PIN and submitting at
+  // 6 would lock out a legacy 4-digit one. Both steps confirm explicitly.
+  const isSetup = step === 'setup';
+  const canSubmit = isSetup ? isNewPin(pin) && isNewPin(confirmPin) : isVerifiablePin(pin);
 
-  useEffect(() => {
-    if (busy || submittingRef.current) return;
-    if (step === 'setup' && isCompletePin(pin) && isCompletePin(confirmPin)) void submitSetup();
-  }, [busy, pin, confirmPin, step, submitSetup]);
+  const confirmSubmit = useCallback(() => {
+    if (busy || submittingRef.current || !canSubmit) return;
+    if (isSetup) void submitSetup();
+    else void submitEnter(pin);
+  }, [busy, canSubmit, isSetup, pin, submitEnter, submitSetup]);
 
   // The active field for the keypad: PIN first, then confirm during setup.
-  const activeValue = step === 'setup' && isCompletePin(pin) ? confirmPin : pin;
+  const activeValue = isSetup && isNewPin(pin) ? confirmPin : pin;
 
   useEffect(() => {
     if (step !== 'setup' || activeValue.length === 0) {
@@ -183,8 +186,9 @@ const PinLogin: React.FC = () => {
     return () => window.clearTimeout(timeout);
   }, [activeValue, step]);
 
+  // The keypad writes to the confirm field once the first field is a whole PIN.
   const setActive = (updater: (prev: string) => string): void => {
-    if (step === 'setup' && isCompletePin(pin)) setConfirmPin(updater);
+    if (isSetup && isNewPin(pin)) setConfirmPin(updater);
     else setPin(updater);
   };
 
@@ -192,7 +196,7 @@ const PinLogin: React.FC = () => {
     (d: string) => {
       if (busy) return;
       clearError();
-      setActive((p) => (p.length < PIN_LENGTH ? p + d : p));
+      setActive((p) => (p.length < PIN_MAX_LENGTH ? p + d : p));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [busy, clearError, step, pin]
@@ -208,14 +212,18 @@ const PinLogin: React.FC = () => {
   useEffect(() => {
     if (step === 'roster' || busy) return;
     const onKey = (e: KeyboardEvent): void => {
-      if (e.key >= '0' && e.key <= '9') pushDigit(e.key);
+      // An Arabic-locale keyboard reports ٤ rather than 4; comparing the raw
+      // key against '0'-'9' would drop the keystroke and the PIN never fills.
+      const digit = normalizeDigits(e.key);
+      if (digit.length === 1 && digit >= '0' && digit <= '9') pushDigit(digit);
       if (e.key === 'Backspace') deleteDigit();
+      if (e.key === 'Enter') confirmSubmit();
       if (e.key === 'Escape') resetToRoster();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, busy, pushDigit, deleteDigit]);
+  }, [step, busy, pushDigit, deleteDigit, confirmSubmit]);
 
   const handleKey = (key: string): void => {
     if (busy) return;
@@ -289,8 +297,7 @@ const PinLogin: React.FC = () => {
   }
 
   // ── PIN entry / setup step ─────────────────────────────────────
-  const isSetup = step === 'setup';
-  const confirming = isSetup && isCompletePin(pin);
+  const confirming = isSetup && isNewPin(pin);
   const title = isSetup
     ? confirming
       ? 'Confirm your PIN'
@@ -299,7 +306,7 @@ const PinLogin: React.FC = () => {
   const subtitle = isSetup
     ? confirming
       ? 'Re-enter to confirm'
-      : `Pick a ${PIN_LENGTH}-digit PIN for this location`
+      : `Pick a ${PIN_MIN_LENGTH}-${PIN_MAX_LENGTH} digit PIN for this location`
     : 'Enter your PIN';
   const busyTitle = settingPin ? 'Setting up PIN' : 'Verifying PIN';
   const busySubtitle = settingPin ? 'Saving this PIN and signing you in' : 'Checking your PIN';
@@ -308,7 +315,7 @@ const PinLogin: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-pos-bg">
-      <div className="w-full max-w-xs bg-pos-card border border-pos-border rounded-2xl p-8 flex flex-col items-center gap-6">
+      <div className="w-full max-w-sm bg-pos-card border border-pos-border rounded-2xl p-8 flex flex-col items-center gap-6">
         <button
           onClick={resetToRoster}
           disabled={busy}
@@ -333,11 +340,11 @@ const PinLogin: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className={`flex gap-2 ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
-              {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+            <div className={`flex w-full gap-2 ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+              {Array.from({ length: PIN_MAX_LENGTH }).map((_, i) => (
                 <span
                   key={i}
-                  className={`w-11 h-12 rounded-xl border flex items-center justify-center text-lg font-bold tabular-nums transition-colors ${
+                  className={`flex-1 h-12 rounded-xl border flex items-center justify-center text-lg font-bold tabular-nums transition-colors ${
                     error
                       ? 'border-destructive bg-destructive/15 text-destructive'
                       : i < activeValue.length
@@ -375,6 +382,14 @@ const PinLogin: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            <button
+              onClick={confirmSubmit}
+              disabled={!canSubmit}
+              className="w-full h-11 rounded-xl text-sm font-semibold bg-pos-text text-pos-bg disabled:opacity-40"
+            >
+              {isSetup ? 'Set PIN' : 'Sign in'}
+            </button>
           </>
         )}
       </div>

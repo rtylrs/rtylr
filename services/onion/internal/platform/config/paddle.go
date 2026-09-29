@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"strings"
 )
 
 const (
@@ -40,11 +39,7 @@ func IsPaddleConfigured() bool {
 }
 
 func IsProduction() bool {
-	env := strings.ToLower(strings.TrimSpace(os.Getenv("APP_ENV")))
-	if GlobalConfig != nil {
-		env = strings.ToLower(strings.TrimSpace(GlobalConfig.AppEnv))
-	}
-	return env == "production" || env == "prod"
+	return !IsNonProduction()
 }
 
 func GetPaddleBaseURL() string {

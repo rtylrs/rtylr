@@ -119,12 +119,21 @@ func (r *Repository) LookupBySlug(ctx context.Context, slug string) (domain.Slug
 	return out, nil
 }
 
-func (r *Repository) UpdateSlug(ctx context.Context, businessID int64, slug string) error {
+// UpdateSlug sets the storefront slug of businessID. The row is addressed by
+// the caller-supplied owner id, never by the slug itself, so a caller that does
+// not own the business updates nothing and reports false.
+func (r *Repository) UpdateSlug(ctx context.Context, businessID, ownerUserID int64, slug string) (bool, error) {
 	// cross-schema write to businesses (shared) — set storefront slug
-	return r.queries.UpdateBusinessSlug(ctx, sqlc.UpdateBusinessSlugParams{
-		Slug: sql.NullString{String: slug, Valid: slug != ""},
-		ID:   businessID,
+	result, err := r.queries.UpdateBusinessSlug(ctx, sqlc.UpdateBusinessSlugParams{
+		Slug:    sql.NullString{String: slug, Valid: slug != ""},
+		ID:      businessID,
+		OwnerID: ownerUserID,
 	})
+	if err != nil {
+		return false, err
+	}
+	affected, err := result.RowsAffected()
+	return affected > 0, err
 }
 
 func (r *Repository) RenameBusiness(ctx context.Context, businessID, ownerUserID int64, name string) (bool, error) {

@@ -118,7 +118,7 @@ func TestUpload_BlockedImageReturns422(t *testing.T) {
 	req.Header.Set("Content-Type", ct)
 	rec := httptest.NewRecorder()
 
-	c.upload(rec, req)
+	c.upload(rec, asTenant(req, 4242))
 
 	if rec.Code != http.StatusUnprocessableEntity {
 		t.Errorf("expected 422 for blocked image, got %d: %s", rec.Code, rec.Body.String())

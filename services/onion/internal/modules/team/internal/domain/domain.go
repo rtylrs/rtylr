@@ -90,6 +90,17 @@ type StaffUser struct {
 	Groups    []GroupSummary
 }
 
+// InviteToken is the authoritative binding carried by an outstanding
+// invitation: the member, the owner who issued it, and the business it granted
+// access in. Accepting must resolve the tenant from this row, never from the
+// invitee's own default business.
+type InviteToken struct {
+	UserID     int64
+	OwnerID    int64
+	BusinessID int64
+	ExpiresAt  time.Time
+}
+
 type InviteUserInput struct {
 	Email            string
 	Username         string

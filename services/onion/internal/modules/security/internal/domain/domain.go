@@ -16,6 +16,15 @@ type ActiveSession struct {
 	CreatedAt time.Time `json:"created_at"`
 	IsCurrent bool      `json:"is_current"`
 }
+
+// MFAFactorState is what a step-up decision is made from: whether the user
+// currently holds an active second factor, and when they last proved it.
+// LastVerifiedAt is nil when nothing has ever been verified, which is not the
+// same thing as a failed read.
+type MFAFactorState struct {
+	FactorEnrolled bool
+	LastVerifiedAt *time.Time
+}
 type LoginEntry struct {
 	ID        int64     `json:"id"`
 	Email     string    `json:"email"`

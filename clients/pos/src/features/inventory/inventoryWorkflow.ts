@@ -41,6 +41,37 @@ export type BuiltStockAction =
   | { payload: WasteStockRequest; action: 'waste' }
   | { payload: TransferStockRequest; action: 'transfer' };
 
+/**
+ * One stock movement, identified by the operator action that recorded it.
+ *
+ * `Idempotency-Key` is a required header on the transfer route (the server
+ * answers 428 without it) and is also what dedups a retry, so it belongs to the
+ * action rather than to the request: every attempt of this action sends the
+ * same key, and a later, different movement gets its own. It travels in the
+ * same object as the request so no transport can drop it on the floor.
+ */
+export type StockActionSubmission =
+  | { payload: ReceiveStockRequest; action: 'receive'; idempotencyKey: string }
+  | { payload: AdjustStockRequest; action: 'adjust'; idempotencyKey: string }
+  | { payload: WasteStockRequest; action: 'waste'; idempotencyKey: string }
+  | { payload: TransferStockRequest; action: 'transfer'; idempotencyKey: string };
+
+/**
+ * Hands one operator action to the stock client under a single key.
+ *
+ * The key is minted ONCE, above every retry. Generating it per attempt would
+ * give a double-tap or a retried submission two keys, so both would execute
+ * and the server's fingerprint check could not tell them apart from two real
+ * movements.
+ */
+export function submitStockAction(
+  action: BuiltStockAction,
+  send: (submission: StockActionSubmission) => Promise<unknown>,
+): Promise<unknown> {
+  const idempotencyKey = crypto.randomUUID();
+  return send({ ...action, idempotencyKey });
+}
+
 function parsePositiveQuantity(input: string): number {
   const qty = Number(input);
   if (!Number.isFinite(qty) || qty <= 0) {

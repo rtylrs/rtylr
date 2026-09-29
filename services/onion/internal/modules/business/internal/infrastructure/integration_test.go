@@ -217,14 +217,19 @@ func TestUpdateSlug_RoundTrip(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	ownerID := businessOwner(t, db, 1)
 
 	// Read the current slug so we can restore it.
 	var original sql.NullString
 	_ = db.QueryRowContext(ctx, `SELECT slug FROM businesses WHERE id = 1 LIMIT 1`).Scan(&original)
 
 	testSlug := "integration-test-slug-tmp"
-	if err := repo.UpdateSlug(ctx, 1, testSlug); err != nil {
+	updated, err := repo.UpdateSlug(ctx, 1, ownerID, testSlug)
+	if err != nil {
 		t.Fatalf("UpdateSlug set: %v", err)
+	}
+	if !updated {
+		t.Fatal("owner-scoped slug update reported no rows updated")
 	}
 
 	var got string
@@ -240,7 +245,70 @@ func TestUpdateSlug_RoundTrip(t *testing.T) {
 	if original.Valid {
 		restore = original.String
 	}
-	_ = repo.UpdateSlug(ctx, 1, restore)
+	_, _ = repo.UpdateSlug(ctx, 1, ownerID, restore)
+}
+
+// The slug update addresses the row by id alone unless the owner is part of the
+// statement, so a caller that owns no part of the business must match nothing:
+// 0 rows affected, and the other tenant's slug left untouched.
+func TestUpdateSlug_CrossTenantUpdateDenied(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	suffix := time.Now().UnixNano()
+	foreign := insertTestBusiness(t, db, testutil.OtherOwnerID, fmt.Sprintf("Slug Tenant B %d", suffix), fmt.Sprintf("slug-tenant-b-%d", suffix))
+
+	updated, err := repo.UpdateSlug(ctx, foreign, testutil.OwnerID, "hijacked-slug")
+	if err != nil {
+		t.Fatalf("UpdateSlug: %v", err)
+	}
+	if updated {
+		t.Fatal("cross-tenant slug update reported success")
+	}
+
+	var got string
+	if err := db.QueryRowContext(ctx, `SELECT slug FROM businesses WHERE id = ?`, foreign).Scan(&got); err != nil {
+		t.Fatalf("read slug: %v", err)
+	}
+	if got != fmt.Sprintf("slug-tenant-b-%d", suffix) {
+		t.Fatalf("cross-tenant write changed the other tenant's slug to %q", got)
+	}
+}
+
+func TestUpdateSlug_SameTenantUpdateSucceeds(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	suffix := time.Now().UnixNano()
+	own := insertTestBusiness(t, db, testutil.OwnerID, fmt.Sprintf("Slug Tenant A %d", suffix), fmt.Sprintf("slug-tenant-a-%d", suffix))
+
+	updated, err := repo.UpdateSlug(ctx, own, testutil.OwnerID, "renamed-by-owner")
+	if err != nil {
+		t.Fatalf("UpdateSlug: %v", err)
+	}
+	if !updated {
+		t.Fatal("owner's slug update reported no rows updated")
+	}
+
+	var got string
+	if err := db.QueryRowContext(ctx, `SELECT slug FROM businesses WHERE id = ?`, own).Scan(&got); err != nil {
+		t.Fatalf("read slug: %v", err)
+	}
+	if got != "renamed-by-owner" {
+		t.Errorf("expected slug=%q, got %q", "renamed-by-owner", got)
+	}
+}
+
+func businessOwner(t *testing.T, db *sql.DB, businessID int64) int64 {
+	t.Helper()
+
+	var ownerID int64
+	if err := db.QueryRowContext(context.Background(), `SELECT owner_id FROM businesses WHERE id = ?`, businessID).Scan(&ownerID); err != nil {
+		t.Fatalf("read owner of business %d: %v", businessID, err)
+	}
+	return ownerID
 }
 
 func TestGetPublicBusiness_SlugField(t *testing.T) {
@@ -376,13 +444,18 @@ func TestUpdateSlug_ChangesSlug(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	ownerID := businessOwner(t, db, 1)
 
 	var original sql.NullString
 	_ = db.QueryRowContext(ctx, `SELECT slug FROM businesses WHERE id = 1 LIMIT 1`).Scan(&original)
 
 	newSlug := "updated-slug-test-12345"
-	if err := repo.UpdateSlug(ctx, 1, newSlug); err != nil {
+	updated, err := repo.UpdateSlug(ctx, 1, ownerID, newSlug)
+	if err != nil {
 		t.Fatalf("UpdateSlug: %v", err)
+	}
+	if !updated {
+		t.Fatal("owner-scoped slug update reported no rows updated")
 	}
 
 	var got string
@@ -398,7 +471,7 @@ func TestUpdateSlug_ChangesSlug(t *testing.T) {
 	if original.Valid {
 		restore = original.String
 	}
-	_ = repo.UpdateSlug(ctx, 1, restore)
+	_, _ = repo.UpdateSlug(ctx, 1, ownerID, restore)
 }
 
 func TestGetProfile_ContactEmailPresent2(t *testing.T) {

@@ -173,7 +173,7 @@ func TestTeam_CreateInviteToken_NoError(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", "test-invite-token-xyz")
 	})
-	err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID,
+	err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID, testutil.BusinessID,
 		"test-invite-token-xyz", time.Now().Add(24*time.Hour))
 	if err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
@@ -188,19 +188,24 @@ func TestTeam_GetInviteToken_ReturnsData(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
 	})
-	if err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID, token, expiry); err != nil {
+	if err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID, testutil.BusinessID, token, expiry); err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
 
-	userID, ownerID, _, err := repo.GetInviteToken(context.Background(), token)
+	invite, err := repo.GetInviteToken(context.Background(), token)
 	if err != nil {
 		t.Fatalf("GetInviteToken: %v", err)
 	}
-	if userID != teamStaffUserID {
-		t.Errorf("expected user_id %d, got %d", teamStaffUserID, userID)
+	if invite.UserID != teamStaffUserID {
+		t.Errorf("expected user_id %d, got %d", teamStaffUserID, invite.UserID)
 	}
-	if ownerID != testutil.OwnerID {
-		t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, ownerID)
+	if invite.OwnerID != testutil.OwnerID {
+		t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, invite.OwnerID)
+	}
+	// The accept path resolves the tenant from this column, so a round-trip
+	// that loses it would silently fall back to the inviter's business.
+	if invite.BusinessID != testutil.BusinessID {
+		t.Errorf("expected business_id %d, got %d", testutil.BusinessID, invite.BusinessID)
 	}
 }
 
@@ -227,7 +232,7 @@ func TestTeam_MarkInviteTokenUsed_IsSingleUse(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
 	})
-	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, token, time.Now().Add(1*time.Hour)); err != nil {
+	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, testutil.BusinessID, token, time.Now().Add(1*time.Hour)); err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
 
@@ -247,7 +252,7 @@ func TestTeam_MarkInviteTokenUsed_RejectsExpired(t *testing.T) {
 	t.Cleanup(func() {
 		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
 	})
-	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, token, time.Now().Add(-1*time.Hour)); err != nil {
+	if err := repo.CreateInviteToken(ctx, teamStaffUserID, testutil.OwnerID, testutil.BusinessID, token, time.Now().Add(-1*time.Hour)); err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
 

@@ -76,7 +76,7 @@ services:
   upload:
     build:
       context: ..
-      dockerfile: Dockerfile.upload
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
       - path: .env.example
@@ -127,7 +127,7 @@ services:
   license:
     build:
       context: ..
-      dockerfile: Dockerfile.license
+      dockerfile: Dockerfile
       args:
         DEPLOYMENT_MODE: self_hosted
         LICENSE_VENDOR_PUBLIC_KEY: ${LICENSE_VENDOR_PUBLIC_KEY:-}

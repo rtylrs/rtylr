@@ -245,19 +245,88 @@ func perRouteRateLimitWithKeyFn(limit int, window time.Duration, keyFn func(*htt
 	}
 }
 
-// authRouteLimiters pins the anonymous brute-force-sensitive auth routes to
-// tight per-IP budgets, closing the gap between the 1000 req/s global
-// guardrail and what a login endpoint may absorb. Budgets follow the rollout
-// table on PerRouteRateLimit: login and password-reset confirm allow 5/min/IP,
-// register variants 3/min/IP. Password-reset request and invite acceptance
-// sit at 5/min because both mint account-access tokens.
+// authRouteLimiters pins the anonymous and credential-bearing routes to tight
+// per-IP budgets, closing the gap between the 1000 req/s global guardrail and
+// what a credential endpoint may absorb. Budgets follow the rollout table on
+// PerRouteRateLimit: login and password-reset confirm allow 5/min/IP, register
+// variants 3/min/IP. Password-reset request and invite acceptance sit at
+// 5/min because both mint account-access tokens.
+//
+// Short-secret endpoints get budgets sized to the secret's search space, not
+// to a single copy-pasted 5. At 5/min an attacker spends 12 attempts/hour/IP
+// on a 6-digit code; the whole 1e6 space needs ~833 hours from one IP, which a
+// botnet of a few thousand hosts finishes inside the 10-minute code TTL. The
+// 1e6-space entries are therefore cut to 3/min and the 1e4-space (POS PIN)
+// entries to 5/min, so the sweep is bounded above the TTL at any realistic
+// botnet size. None of this is a hard bound — see the limitation note below.
+//
+// Limitations, stated plainly rather than implied away:
+//   - The key is the client IP only. A distributed attacker rotates source
+//     addresses and gets a fresh bucket per address, so the effective ceiling
+//     is limit x (number of distinct IPs), not limit.
+//   - Buckets are in-process (map + mutex on SecurityRateLimiter). With N
+//     replicas behind a load balancer each replica allows the full budget, so
+//     the real ceiling is limit x N for a client that spreads requests across
+//     them. Nothing here is shared state; there is no Redis bucket.
+//   - getClientKey only honours CF-Connecting-IP from a trusted proxy CIDR, so
+//     a directly-reachable self-host listener cannot be given fresh buckets by
+//     rotating a header — but it also means every client behind one corporate
+//     NAT or CGNAT egress shares a single bucket.
 var authRouteLimiters = map[string]func(http.Handler) http.Handler{
-	"/common/auth/v1/login":                          PerRouteRateLimit(5, time.Minute),
-	"/common/auth/v1/register":                       PerRouteRateLimit(3, time.Minute),
-	"/common/auth/v1/register/google":                PerRouteRateLimit(3, time.Minute),
-	"/common/auth/v1/password-reset/request":         PerRouteRateLimit(5, time.Minute),
-	"/common/auth/v1/password-reset/confirm":         PerRouteRateLimit(5, time.Minute),
-	"/common/auth/v1/invite/accept":                  PerRouteRateLimit(5, time.Minute),
+	// --- account credentials ---
+	"/common/auth/v1/login":                  PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/register":               PerRouteRateLimit(3, time.Minute),
+	"/common/auth/v1/register/google":        PerRouteRateLimit(3, time.Minute),
+	"/common/auth/v1/password-reset/request": PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/password-reset/confirm": PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/invite/accept":          PerRouteRateLimit(5, time.Minute),
+	// The HR invite routes, which were removed from the anonymous route list and
+	// so now run behind the bearer gate. Both take a 72h invite token disclosed
+	// to the inviter in the creation response, and accept is the step that binds
+	// an account to a business. The token is a uuid, so this is not a search-
+	// space bound and the single-use plus recipient checks are the real defence;
+	// 5/min is a cheap brake on a stolen-token replay loop that would otherwise
+	// run at the global guardrail, and it matches the account invite above.
+	"/hr/employees/invite/accept": PerRouteRateLimit(5, time.Minute),
+	"/hr/employees/invite/verify": PerRouteRateLimit(5, time.Minute),
+
+	// --- short secrets, sized to their search space ---
+	// Anonymous and unauthenticated: a code here flips user_provisioning_states
+	// and activates authorization_business_members, so a sweep is an
+	// account-takeover primitive, not just a nuisance. 3/min on a 1e6 code.
+	"/common/auth/v1/verify-email": PerRouteRateLimit(3, time.Minute),
+	// 4-digit POS PIN (1e4 space) but authenticated and location-scoped, and a
+	// sibling lockout covers the per-account dimension. 5/min keeps the whole
+	// space at ~3.3 hours/IP, so a sweep needs a large fleet; the per-account
+	// lockout, not this bucket, is the real control there.
+	"/pos/user/v1/users/verify-pin": PerRouteRateLimit(5, time.Minute),
+	// Manager override PIN, same 1e4 floor as above: PINs issued under the
+	// pre-policy 4-8 digit rule still verify, so 1e4 is the real space to sweep
+	// even though new ones must be 6+. The two POS PIN surfaces must not end up
+	// with different budgets. The durable per-business counter is the control
+	// that survives a bucket reset; this is the per-IP brake in front of it.
+	"/pos/manager/v1/verify": PerRouteRateLimit(5, time.Minute),
+	// 6-digit TOTP with a ±1 step window, and success mints a 5-minute
+	// verified state (team repository_authorization.go IsMFAVerified). Two
+	// codes are live per 30s step, so 5/min would cost an attacker nothing
+	// while locking out a user with a clumsy authenticator. 10/min still caps
+	// one IP at 14400 attempts/day against a 1e6 space.
+	"/hub/security/v1/mfa/verify":   PerRouteRateLimit(10, time.Minute),
+	"/hub/security/v1/mfa/recovery": PerRouteRateLimit(10, time.Minute),
+
+	// --- anonymous oracles, not brute force ---
+	// Unauthenticated user-enumeration: {"exists":true} for a known address
+	// is a password-spray oracle, so the budget is the enumeration budget, not
+	// a credential one. 20/min still confirms one targeted address quickly and
+	// is too slow (28,800/day/IP) for a bulk dump.
+	"/common/auth/v1/email-exists": PerRouteRateLimit(20, time.Minute),
+	// Anonymous presigned-URL mint: each call is a free R2 upload slot plus a
+	// storage-abuse lever, and unlike SubmitApplication (5/min) it had no
+	// per-route limit at all. The legitimate flow is a handful of presigns
+	// during one application, so 10/min leaves generous headroom.
+	"/recruit/public/resume-upload-url": PerRouteRateLimit(10, time.Minute),
+
+	// --- public read surfaces (unchanged) ---
 	"/pos/orders/v1/orders/public":                   PerRouteRateLimit(10, time.Minute),
 	"/pos/orders/v1/orders/{order_id}/public-status": PerRouteRateLimit(60, time.Minute),
 	"/pos/menu-item/v1/menu-items/public":            PerRouteRateLimit(60, time.Minute),

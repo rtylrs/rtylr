@@ -11,6 +11,11 @@ var (
 	ErrInvoiceNotDraft      = errors.New("invoice is not in draft status")
 	ErrInvalidInvoiceDate   = errors.New("due date must be on or after issue date")
 	ErrDiscountExceedsTotal = errors.New("discount must not exceed the invoice subtotal")
+
+	ErrInvalidInvoiceStatus = errors.New("invoice status is not a known status")
+	// ErrInvoiceStatusNotSettable reports a status-only write aimed at a status
+	// that is derived from the recorded payments.
+	ErrInvoiceStatusNotSettable = errors.New("invoice status is set by recording a payment")
 )
 
 type Invoice struct {

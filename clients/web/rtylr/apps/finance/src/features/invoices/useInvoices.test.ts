@@ -250,7 +250,8 @@ describe('useRecordPayment', () => {
       })
     );
     expect(mockPaymentsClient.recordPayment).toHaveBeenCalledWith(
-      expect.objectContaining({ invoiceId: '42', amount: 250 })
+      expect.objectContaining({ invoiceId: '42', amount: 250 }),
+      { headers: { 'Idempotency-Key': expect.any(String) } }
     );
   });
 });

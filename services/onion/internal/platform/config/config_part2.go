@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -236,5 +237,35 @@ func LoadAndValidate() (*AppConfig, error) {
 	}
 
 	GlobalConfig = cfg
+	assertAppEnvIsUnderstood(cfg.AppEnv)
 	return cfg, nil
+}
+
+// assertAppEnvIsUnderstood reports the resolved environment at boot.
+//
+// It warns rather than returning an error on purpose. APP_ENV now defaults to
+// production, so an unrecognised value is the safe direction and refusing to
+// start would turn a security fix into an outage for any deployment whose
+// label this build has not been taught. A loud, greppable line at boot is what
+// makes the default visible; silence is what let this class of bug survive.
+func assertAppEnvIsUnderstood(raw string) {
+	env := NormalizeAppEnv(raw)
+
+	switch {
+	case env == "":
+		slog.Warn("APP_ENV is not set; defaulting to production. " +
+			"Development-only endpoints, CORS origins and unauthenticated webhook handling are disabled. " +
+			"Set APP_ENV=development for a local machine.")
+	case isUnrecognizedEnv(env):
+		slog.Warn("APP_ENV is not a recognised environment; defaulting to production. "+
+			"Development-only endpoints, CORS origins and unauthenticated webhook handling are disabled. "+
+			"Known development values: dev, development, local, test.",
+			slog.String("app_env", raw))
+	case isNonProductionEnv(env):
+		slog.Info("APP_ENV resolved to a development environment; "+
+			"development-only endpoints and localhost CORS origins are enabled",
+			slog.String("app_env", env))
+	default:
+		slog.Info("APP_ENV resolved to production", slog.String("app_env", env))
+	}
 }

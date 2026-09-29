@@ -81,11 +81,13 @@ func (s *licenseAuthorityServer) verify(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *licenseAuthorityServer) activate(w http.ResponseWriter, r *http.Request) {
-	// Activation mutates the authority ledger. When an internal token is
-	// configured, require it as an additional capability check; never turn an
-	// anonymous request into a valid activation by falling back to the server's
-	// configured license key.
-	if s.internalTokenConfigured() && !hasValidInternalTokenForConfig(r, s.cfg) {
+	// Activation mutates the authority ledger, so the internal token is
+	// required unconditionally — never "when configured". Gating the check on
+	// internalTokenConfigured() made an authority with no token configured
+	// accept anonymous activations. hasValidInternalTokenForConfig already
+	// denies when no token is configured, so an unconfigured authority serves
+	// no activations at all.
+	if !hasValidInternalTokenForConfig(r, s.cfg) {
 		writeLicenseJSON(w, http.StatusUnauthorized, map[string]string{"error": "internal authority token required"})
 		return
 	}
@@ -126,13 +128,6 @@ func (s *licenseAuthorityServer) now() time.Time {
 		return s.clock.Now()
 	}
 	return time.Now().UTC()
-}
-
-func (s *licenseAuthorityServer) internalTokenConfigured() bool {
-	if s.cfg != nil && strings.TrimSpace(s.cfg.InternalToken) != "" {
-		return true
-	}
-	return internalToken() != ""
 }
 
 func (s *licenseAuthorityServer) applyDBRevocation(ctx context.Context, rawKey string, report license.StatusReport) license.StatusReport {

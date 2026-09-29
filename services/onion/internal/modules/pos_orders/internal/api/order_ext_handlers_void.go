@@ -35,10 +35,7 @@ func serveVoidOrderWithPermission(ctx context.Context, req *VoidOrderApprovalReq
 		return VoidOrderApprovalResponse{}, orderErr
 	}
 	if err := service.VoidOrder(ctx, businessID, orderID, req.Reason); err != nil {
-		if errors.Is(err, domain.ErrOrderNotFound) {
-			return VoidOrderApprovalResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
-		}
-		return VoidOrderApprovalResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to void order")
+		return VoidOrderApprovalResponse{}, voidOrderError(err)
 	}
 	return VoidOrderApprovalResponse{Message: "Order voided successfully"}, nil
 }

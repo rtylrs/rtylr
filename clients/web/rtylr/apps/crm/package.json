@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
     "@voxire/api": "workspace:*",

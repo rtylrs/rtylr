@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
@@ -43,10 +44,24 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 	if order.PaymentStatus.Valid {
 		status = string(order.PaymentStatus.PosOrdersPaymentStatus)
 	}
-	if status != "paid" && status != "refunded" {
-		err = domain.ErrOrderNotPaid
+	// The same locked read covers the order's workflow status: payment_status
+	// alone cannot tell a live sale from one that was voided or cancelled,
+	// because those writes leave payment_status untouched.
+	var orderStatus string
+	if err = tx.QueryRowContext(ctx,
+		`SELECT status FROM pos_orders WHERE business_id = ? AND id = ?`,
+		businessID, orderID).Scan(&orderStatus); err != nil {
+		logger.Ctx(ctx).Error("Failed to read order status for refund", logger.Error(err))
 		return 0, err
 	}
+	if err = checkRefundable(domain.OrderStatus(orderStatus), domain.PaymentStatus(status)); err != nil {
+		logger.Ctx(ctx).Warn("CreateRefund rejected: order is not refundable",
+			logger.Any("order_id", orderID), logger.Any("status", orderStatus))
+		return 0, err
+	}
+	// Read inside the same transaction that holds the order's row lock, so two
+	// concurrent refunds cannot both see the same prior total and each believe
+	// it fits under the cap.
 	prevRefunds, err := qtx.SumRefundsForOrder(ctx, sqlc.SumRefundsForOrderParams{
 		BusinessID: businessID,
 		OrderID:    orderID,
@@ -55,7 +70,36 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 		logger.Ctx(ctx).Error("Failed to sum prior refunds", logger.Error(err))
 		return 0, err
 	}
-	if interfaceToFloat(prevRefunds)+amount > sqlutil.DecimalToFloat(order.Total.String) {
+
+	// Every comparison below is integer cents. The float64 form refused a
+	// legitimate full refund: 0.03 + 0.27 is 0.30000000000000004 in binary
+	// floating point, which is greater than 0.30, so the last cent of a
+	// perfectly valid refund was answered with a 400.
+	capCents, capErr := refundCapCents(order)
+	if capErr != nil {
+		logger.Ctx(ctx).Error("Failed to compute refundable cap",
+			logger.Error(capErr), logger.Any("order_id", orderID))
+		return 0, capErr
+	}
+
+	priorCents, err := sumRefundCents(prevRefunds)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read prior refund total", logger.Error(err))
+		return 0, err
+	}
+
+	// Round once, here, and reuse the rounded value for both the cap check and
+	// the stored DECIMAL, so the amount guarded against and the amount written
+	// are the same number rather than two roundings that may disagree.
+	refundCents := money.Amount(money.DollarsToCents(amount))
+	if refundCents <= 0 {
+		// A sub-cent request would otherwise be stored as a 0.00 pos_refunds
+		// row and bump the session's total_refunds by nothing.
+		return 0, errors.New("refund amount must be at least one cent")
+	}
+
+	totalRefunded := priorCents + refundCents
+	if totalRefunded > capCents {
 		err = domain.ErrRefundExceedsTotal
 		return 0, err
 	}
@@ -64,7 +108,7 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 		OwnerID:    businessID,
 		BusinessID: businessID,
 		OrderID:    orderID,
-		Amount:     sqlutil.FloatToDecimal(amount),
+		Amount:     refundCents.String(),
 		Reason:     sqlutil.NullString(reason),
 		RefundedBy: sqlutil.NullInt64(refundedBy),
 	})
@@ -78,13 +122,21 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 		return 0, err
 	}
 
-	err = qtx.MarkOrderRefunded(ctx, sqlc.MarkOrderRefundedParams{
-		BusinessID: businessID,
-		ID:         orderID,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to mark order refunded", logger.Error(err))
-		return 0, err
+	// Only a refund that reaches the cap retires the sale. A smaller one
+	// leaves the order exactly as it was, so the session and dashboard totals
+	// still count the goods the customer took. Note the enum's 'partial' value
+	// is deliberately not written here: every revenue query keys on
+	// payment_status = 'paid', so 'partial' would drop the sale from those
+	// reports exactly as 'refunded' does. The part refund is recorded in
+	// pos_refunds and added to the session's total_refunds.
+	if refundPaymentStatusFor(totalRefunded, capCents) == domain.PaymentStatusRefunded {
+		if err = qtx.MarkOrderRefunded(ctx, sqlc.MarkOrderRefundedParams{
+			BusinessID: businessID,
+			ID:         orderID,
+		}); err != nil {
+			logger.Ctx(ctx).Error("Failed to mark order refunded", logger.Error(err))
+			return 0, err
+		}
 	}
 
 	if err = tx.Commit(); err != nil {

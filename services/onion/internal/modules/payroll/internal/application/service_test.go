@@ -54,6 +54,252 @@ func (m *mockRepo) GetStaffPayRatesByIDs(_ context.Context, _ int64, staffIDs []
 	return out, nil
 }
 
+// inMemoryRepo models the parts of the payroll store a re-run depends on: one
+// row per (staff, period), the unique key, and paid records that a re-run must
+// never overwrite. It lets the service-level idempotency contract be exercised
+// without a database.
+type inMemoryRepo struct {
+	mockRepo
+
+	businessID  int64
+	rows        []domain.PayrollRecord
+	runs        int
+	createCalls int
+	paid        map[int64]bool
+	nextID      int64
+}
+
+func newInMemoryRepo(businessID int64) *inMemoryRepo {
+	return &inMemoryRepo{businessID: businessID, paid: map[int64]bool{}}
+}
+
+func (m *inMemoryRepo) CreatePayrollRecords(_ context.Context, businessID int64, records []domain.PayrollRecordInput) (int, error) {
+	m.runs++
+	m.createCalls++
+
+	label := records[0].PeriodLabel
+	for _, row := range m.rows {
+		if row.BusinessID == businessID && row.PeriodLabel == label && m.paid[row.ID] {
+			return 0, domain.ErrPayrollPeriodAlreadyPaid
+		}
+	}
+
+	kept := m.rows[:0]
+	for _, row := range m.rows {
+		if row.BusinessID == businessID && row.PeriodLabel == label {
+			continue
+		}
+		kept = append(kept, row)
+	}
+	m.rows = kept
+
+	for _, record := range records {
+		m.nextID++
+		m.rows = append(m.rows, domain.PayrollRecord{
+			ID:          m.nextID,
+			BusinessID:  businessID,
+			StaffID:     record.StaffID,
+			PeriodStart: record.PeriodStart,
+			PeriodEnd:   record.PeriodEnd,
+			PeriodLabel: record.PeriodLabel,
+			BasePay:     record.BasePay,
+			OvertimePay: record.OvertimePay,
+			NetPay:      record.NetPay,
+			Status:      "draft",
+		})
+	}
+	return len(records), nil
+}
+
+func (m *inMemoryRepo) MarkPayrollPaid(_ context.Context, _ int64, payrollID int64) error {
+	for _, row := range m.rows {
+		if row.ID == payrollID {
+			m.paid[payrollID] = true
+			return nil
+		}
+	}
+	return domain.ErrPayrollRecordNotFound
+}
+
+func (m *inMemoryRepo) forPeriod(label string) []domain.PayrollRecord {
+	var out []domain.PayrollRecord
+	for _, row := range m.rows {
+		if row.BusinessID == m.businessID && row.PeriodLabel == label {
+			out = append(out, row)
+		}
+	}
+	return out
+}
+
+func (m *inMemoryRepo) netPayTotal(label string) float64 {
+	var total float64
+	for _, row := range m.forPeriod(label) {
+		total += row.NetPay
+	}
+	return total
+}
+
+func hourlyRepo(businessID int64) *inMemoryRepo {
+	m := newInMemoryRepo(businessID)
+	m.shifts = []domain.ShiftSummary{
+		{StaffID: 4101, TotalHours: 40, TotalOvertimeHours: 0},
+		{StaffID: 4102, TotalHours: 40, TotalOvertimeHours: 4},
+	}
+	m.rates = domain.StaffPayRates{HourlyRate: 20, OvertimeRate: 30}
+	return m
+}
+
+// legacyRepo models the repository as it behaved before the fix: a bare
+// multi-row INSERT with no uniqueness and no paid-record check. It exists so
+// this file can show that the assertions below actually detect the duplication
+// they guard against, rather than passing vacuously.
+type legacyRepo struct {
+	mockRepo
+	businessID int64
+	rows       []domain.PayrollRecord
+	nextID     int64
+}
+
+func (m *legacyRepo) CreatePayrollRecords(_ context.Context, businessID int64, records []domain.PayrollRecordInput) (int, error) {
+	for _, record := range records {
+		m.nextID++
+		m.rows = append(m.rows, domain.PayrollRecord{
+			ID:          m.nextID,
+			BusinessID:  businessID,
+			StaffID:     record.StaffID,
+			PeriodStart: record.PeriodStart,
+			PeriodEnd:   record.PeriodEnd,
+			PeriodLabel: record.PeriodLabel,
+			NetPay:      record.NetPay,
+			Status:      "draft",
+		})
+	}
+	return len(records), nil
+}
+
+func TestLegacyRepositoryReproducesTheDuplicationTheseTestsGuardAgainst(t *testing.T) {
+	m := &legacyRepo{}
+	m.shifts = []domain.ShiftSummary{
+		{StaffID: 4101, TotalHours: 40, TotalOvertimeHours: 0},
+		{StaffID: 4102, TotalHours: 40, TotalOvertimeHours: 4},
+	}
+	m.rates = domain.StaffPayRates{HourlyRate: 20, OvertimeRate: 30}
+	s := &Service{repo: m}
+	input := domain.PayrollRunInput{PeriodStart: "2026-04-01", PeriodEnd: "2026-04-30", PeriodLabel: "2026-04"}
+
+	periodNet := func() float64 {
+		var total float64
+		for _, row := range m.rows {
+			if row.PeriodLabel == input.PeriodLabel {
+				total += row.NetPay
+			}
+		}
+		return total
+	}
+	if _, err := s.RunPayroll(context.Background(), 901, input); err != nil {
+		t.Fatalf("first RunPayroll: %v", err)
+	}
+	rowsAfterFirst, netAfterFirst := len(m.rows), periodNet()
+
+	if _, err := s.RunPayroll(context.Background(), 901, input); err != nil {
+		t.Fatalf("re-run RunPayroll: %v", err)
+	}
+
+	// These are the exact symptoms the fix removes: a second run doubles both
+	// the row count and the money the period reports.
+	if len(m.rows) != rowsAfterFirst*2 {
+		t.Errorf("legacy repository did not duplicate rows as expected: %d -> %d", rowsAfterFirst, len(m.rows))
+	}
+	if got := periodNet(); got != netAfterFirst*2 {
+		t.Errorf("legacy repository did not double net_pay as expected: %v -> %v", netAfterFirst, got)
+	}
+	t.Logf("pre-fix behaviour: %d rows and %.2f net_pay after one run, %d rows and %.2f after two",
+		rowsAfterFirst, netAfterFirst, len(m.rows), periodNet())
+}
+
+func TestRunPayrollReRunSamePeriodKeepsRowsAndTotals(t *testing.T) {
+	m := hourlyRepo(901)
+	s := &Service{repo: m}
+	input := domain.PayrollRunInput{PeriodStart: "2026-04-01", PeriodEnd: "2026-04-30", PeriodLabel: "2026-04"}
+
+	firstCount, err := s.RunPayroll(context.Background(), 901, input)
+	if err != nil {
+		t.Fatalf("first RunPayroll: %v", err)
+	}
+	firstRows := len(m.forPeriod("2026-04"))
+	firstNet := m.netPayTotal("2026-04")
+	if firstCount != 2 || firstRows != 2 {
+		t.Fatalf("first run: count=%d rows=%d, want 2 and 2", firstCount, firstRows)
+	}
+
+	secondCount, err := s.RunPayroll(context.Background(), 901, input)
+	if err != nil {
+		t.Fatalf("re-run RunPayroll: %v", err)
+	}
+	if secondCount != 2 {
+		t.Errorf("re-run reported %d records, want 2", secondCount)
+	}
+	if rows := len(m.forPeriod("2026-04")); rows != firstRows {
+		t.Errorf("re-run changed the period's row count: %d -> %d", firstRows, rows)
+	}
+	if net := m.netPayTotal("2026-04"); net != firstNet {
+		t.Errorf("re-run changed the period's net_pay total: %v -> %v", firstNet, net)
+	}
+	// 4101: 40 regular x 20 = 800. 4102: 36 regular x 20 = 720 plus 4 OT x 30 = 120.
+	if firstNet != 800+840 {
+		t.Errorf("net_pay total = %v, want %v", firstNet, 800+840)
+	}
+}
+
+func TestRunPayrollDifferentPeriodLeavesOtherPeriodIntact(t *testing.T) {
+	m := hourlyRepo(901)
+	s := &Service{repo: m}
+	ctx := context.Background()
+
+	if _, err := s.RunPayroll(ctx, 901, domain.PayrollRunInput{PeriodStart: "2026-04-01", PeriodEnd: "2026-04-30", PeriodLabel: "2026-04"}); err != nil {
+		t.Fatalf("April RunPayroll: %v", err)
+	}
+	mayRows := len(m.forPeriod("2026-05"))
+	mayNet := m.netPayTotal("2026-05")
+
+	if _, err := s.RunPayroll(ctx, 901, domain.PayrollRunInput{PeriodStart: "2026-04-01", PeriodEnd: "2026-04-30", PeriodLabel: "2026-04"}); err != nil {
+		t.Fatalf("April re-run: %v", err)
+	}
+	if got := len(m.forPeriod("2026-05")); got != mayRows {
+		t.Errorf("May row count changed: %d -> %d", mayRows, got)
+	}
+	if got := m.netPayTotal("2026-05"); got != mayNet {
+		t.Errorf("May net_pay total changed: %v -> %v", mayNet, got)
+	}
+}
+
+func TestRunPayrollAfterPartialPaymentIsRefused(t *testing.T) {
+	m := hourlyRepo(901)
+	s := &Service{repo: m}
+	ctx := context.Background()
+	input := domain.PayrollRunInput{PeriodStart: "2026-04-01", PeriodEnd: "2026-04-30", PeriodLabel: "2026-04"}
+
+	if _, err := s.RunPayroll(ctx, 901, input); err != nil {
+		t.Fatalf("first RunPayroll: %v", err)
+	}
+	paidID := m.forPeriod("2026-04")[0].ID
+	if err := s.MarkPayrollPaid(ctx, 901, paidID); err != nil {
+		t.Fatalf("MarkPayrollPaid: %v", err)
+	}
+	rowsBefore := len(m.forPeriod("2026-04"))
+	netBefore := m.netPayTotal("2026-04")
+
+	if _, err := s.RunPayroll(ctx, 901, input); !errors.Is(err, domain.ErrPayrollPeriodAlreadyPaid) {
+		t.Fatalf("re-run after partial payment: err = %v, want ErrPayrollPeriodAlreadyPaid", err)
+	}
+	if got := len(m.forPeriod("2026-04")); got != rowsBefore {
+		t.Errorf("refused re-run changed row count: %d -> %d", rowsBefore, got)
+	}
+	if got := m.netPayTotal("2026-04"); got != netBefore {
+		t.Errorf("refused re-run changed net_pay total: %v -> %v", netBefore, got)
+	}
+}
+
 func (m *mockRepo) GetDefaultOvertimeMultiplier(_ context.Context, _ int64) (float64, bool, error) {
 	m.multiplierAsk++
 	return m.otMultiplier, m.otConfigured, m.otErr

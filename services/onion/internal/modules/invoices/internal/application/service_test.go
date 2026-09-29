@@ -35,6 +35,8 @@ type mockRepo struct {
 
 	updateWithItemsCalls int
 	lastUpdatedItems     []domain.InvoiceItem
+	statusWrites         int
+	lastStatusWrite      string
 	sumCalls             atomic.Int64
 	delay                time.Duration
 	activeCalls          atomic.Int64
@@ -84,7 +86,11 @@ func (m *mockRepo) UpdateInvoiceWithItems(_ context.Context, _ int64, _ domain.I
 	return m.err
 }
 
-func (m *mockRepo) UpdateInvoiceStatus(_ context.Context, _, _ int64, _ string) error { return m.err }
+func (m *mockRepo) UpdateInvoiceStatus(_ context.Context, _, _ int64, status string) error {
+	m.statusWrites++
+	m.lastStatusWrite = status
+	return m.err
+}
 
 func (m *mockRepo) UpdateInvoicePaymentTotals(_ context.Context, _, _ int64, _, _ float64, _ string, _ *time.Time) error {
 	return m.err

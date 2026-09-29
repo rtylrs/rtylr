@@ -43,7 +43,8 @@ func TestAcceptInvite_PreservesInvitedEmployeeFields(t *testing.T) {
 	})
 
 	const acceptedUserID int64 = 900847
-	if err := svc.AcceptInvite(ctx, invited, acceptedUserID); err != nil {
+	createAcceptingAccount(t, db, acceptedUserID, "invite.preserved.847@example.com")
+	if err := svc.AcceptInviteForCaller(ctx, invited, acceptedUserID); err != nil {
 		t.Fatalf("AcceptInvite: %v", err)
 	}
 

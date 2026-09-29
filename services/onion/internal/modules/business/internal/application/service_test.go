@@ -8,16 +8,23 @@ import (
 	"github.com/voxire/onion/internal/modules/business/internal/domain"
 )
 
+// slugUpdateCall records what the repository was asked to write. rows is the
+// row count the fake database reports, so a test can reproduce the 0-rows
+// outcome the owner predicate produces for another tenant's business.
+type slugUpdateCall struct {
+	businessID int64
+	ownerID    int64
+	slug       string
+	rows       int64
+}
+
 type mockRepo struct {
 	profile domain.BusinessProfile
 	err     error
 	got     int64
 	gets    int
-	updated struct {
-		ownerID int64
-		slug    string
-	}
-	rename struct {
+	updated slugUpdateCall
+	rename  struct {
 		businessID int64
 		ownerID    int64
 		name       string
@@ -48,10 +55,11 @@ func (m *mockRepo) LookupBySlug(_ context.Context, _ string) (domain.SlugLookupR
 	return domain.SlugLookupResult{}, m.err
 }
 
-func (m *mockRepo) UpdateSlug(_ context.Context, ownerID int64, slug string) error {
+func (m *mockRepo) UpdateSlug(_ context.Context, businessID, ownerID int64, slug string) (bool, error) {
+	m.updated.businessID = businessID
 	m.updated.ownerID = ownerID
 	m.updated.slug = slug
-	return m.err
+	return m.updated.rows > 0, m.err
 }
 
 func (m *mockRepo) ListUserBusinesses(_ context.Context, _ int64) ([]domain.OwnedBusiness, error) {
@@ -120,11 +128,15 @@ func TestGetProfile_PropagatesError(t *testing.T) {
 
 func TestUpdateSlug_InvalidatesLocalCachedProfile(t *testing.T) {
 	ctx := context.Background()
-	ownerID := int64(424242)
-	repo := &mockRepo{profile: domain.BusinessProfile{SiteName: "Before", Currency: "USD"}}
+	businessID := int64(424242)
+	ownerID := int64(424243)
+	repo := &mockRepo{
+		profile: domain.BusinessProfile{SiteName: "Before", Currency: "USD"},
+		updated: slugUpdateCall{rows: 1},
+	}
 	s := &Service{repo: repo}
 
-	first, err := s.GetProfile(ctx, ownerID)
+	first, err := s.GetProfile(ctx, businessID)
 	if err != nil {
 		t.Fatalf("prime cache: %v", err)
 	}
@@ -134,11 +146,11 @@ func TestUpdateSlug_InvalidatesLocalCachedProfile(t *testing.T) {
 
 	repo.profile = domain.BusinessProfile{SiteName: "After", Currency: "USD"}
 
-	if err := s.UpdateSlug(ctx, ownerID, "voxire"); err != nil {
+	if err := s.UpdateSlug(ctx, businessID, ownerID, "voxire"); err != nil {
 		t.Fatalf("update slug: %v", err)
 	}
 
-	after, err := s.GetProfile(ctx, ownerID)
+	after, err := s.GetProfile(ctx, businessID)
 	if err != nil {
 		t.Fatalf("reload profile: %v", err)
 	}
@@ -148,8 +160,33 @@ func TestUpdateSlug_InvalidatesLocalCachedProfile(t *testing.T) {
 	if repo.gets != 2 {
 		t.Fatalf("expected repository to be hit twice, got %d", repo.gets)
 	}
-	if repo.updated.ownerID != ownerID || repo.updated.slug != "voxire" {
+	if repo.updated.businessID != businessID || repo.updated.ownerID != ownerID || repo.updated.slug != "voxire" {
 		t.Fatalf("unexpected update args: %+v", repo.updated)
+	}
+}
+
+// The owner predicate lives in SQL, so a write against another tenant's
+// business matches no row. The service must report that instead of returning
+// success, which is what used to let a cross-tenant rename look accepted.
+func TestUpdateSlug_ForeignBusinessReportsNotOwned(t *testing.T) {
+	repo := &mockRepo{} // rows == 0: the owner predicate rejected the write
+	s := &Service{repo: repo}
+
+	err := s.UpdateSlug(context.Background(), 992001, 1001, "hijacked")
+	if !errors.Is(err, ErrBusinessNotOwned) {
+		t.Fatalf("expected ErrBusinessNotOwned, got %v", err)
+	}
+	if repo.updated.ownerID != 1001 || repo.updated.businessID != 992001 {
+		t.Fatalf("write was not scoped to the caller: %+v", repo.updated)
+	}
+}
+
+func TestUpdateSlug_PropagatesRepositoryError(t *testing.T) {
+	want := errors.New("db down")
+	s := &Service{repo: &mockRepo{err: want}}
+
+	if err := s.UpdateSlug(context.Background(), 12, 34, "voxire"); !errors.Is(err, want) {
+		t.Fatalf("expected repository error, got %v", err)
 	}
 }
 

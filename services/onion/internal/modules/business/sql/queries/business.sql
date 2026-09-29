@@ -48,8 +48,10 @@ WHERE business_id = ? AND is_active = TRUE
 ORDER BY is_default DESC, name ASC
 LIMIT 100;
 
--- name: UpdateBusinessSlug :exec
-UPDATE businesses SET slug = ? WHERE id = ?;
+-- name: UpdateBusinessSlug :execresult
+UPDATE businesses
+SET slug = ?
+WHERE id = ? AND owner_id = ? AND is_active = TRUE;
 
 -- name: RenameBusiness :execresult
 UPDATE businesses

@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -118,14 +117,7 @@ func (h *UpdateInvoiceHandler) Serve(ctx context.Context, req *UpdateInvoiceRequ
 
 	inv, err := h.FinanceService.UpdateInvoice(ctx, businessID, req.ID, input)
 	if err != nil {
-		if errors.Is(err, domain.ErrInvoiceNotFound) {
-			return UpdateInvoiceResponse{}, onekiterrors.New(http.StatusNotFound, "Invoice not found")
-		}
-		if errors.Is(err, domain.ErrInvoiceNotDraft) {
-			return UpdateInvoiceResponse{}, onekiterrors.New(http.StatusConflict, "Only draft invoices can be edited")
-		}
-
-		return UpdateInvoiceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update invoice")
+		return UpdateInvoiceResponse{}, invoiceServiceError(err, "Failed to update invoice")
 	}
 
 	return UpdateInvoiceResponse{Invoice: newInvoiceDetailPayload(inv)}, nil

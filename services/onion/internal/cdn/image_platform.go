@@ -61,12 +61,16 @@ type imageVariantsResponse struct {
 }
 
 func (c *CDN) imagePlan(w http.ResponseWriter, r *http.Request) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
+		return
+	}
 	id := chi.URLParam(r, "id")
 	if _, err := uuid.Parse(id); err != nil {
 		http.Error(w, "invalid image id", http.StatusBadRequest)
 		return
 	}
-	meta, err := c.fileByUUID(r.Context(), id)
+	meta, err := c.fileForRead(r.Context(), scope, id)
 	if err != nil {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return
@@ -81,12 +85,16 @@ func (c *CDN) imagePlan(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CDN) uploadPlan(w http.ResponseWriter, r *http.Request) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
+		return
+	}
 	if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
 		if _, err := uuid.Parse(id); err != nil {
 			http.Error(w, "invalid file id", http.StatusBadRequest)
 			return
 		}
-		meta, err := c.fileByUUID(r.Context(), id)
+		meta, err := c.fileForRead(r.Context(), scope, id)
 		if err != nil {
 			http.Error(w, "file not found", http.StatusNotFound)
 			return
@@ -193,12 +201,16 @@ func (c *CDN) planUploadSource(raw string, source uploadURLSource, query url.Val
 }
 
 func (c *CDN) imageVariants(w http.ResponseWriter, r *http.Request) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
+		return
+	}
 	id := chi.URLParam(r, "id")
 	if _, err := uuid.Parse(id); err != nil {
 		http.Error(w, "invalid image id", http.StatusBadRequest)
 		return
 	}
-	if _, err := c.fileByUUID(r.Context(), id); err != nil {
+	if _, err := c.fileForRead(r.Context(), scope, id); err != nil {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return
 	}

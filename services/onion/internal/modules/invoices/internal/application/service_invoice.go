@@ -54,17 +54,21 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 		return nil, domain.ErrInvalidInvoiceDate
 	}
 
-	var subtotal float64
-	var itemTaxAmount float64
+	// Same money path as create, so a re-priced draft cannot diverge from the
+	// totals it was created with. See money.go for the order of operations.
+	discountType := input.DiscountType
+	if discountType == "" {
+		discountType = "fixed"
+	}
+
+	totals, err := computeInvoiceTotals(input.Items, input.TaxRate, discountType, input.DiscountValue)
+	if err != nil {
+		return nil, err
+	}
 
 	items := make([]domain.InvoiceItem, 0, len(input.Items))
 
 	for i, itemInput := range input.Items {
-		lineTotal := itemInput.CalculateTotal()
-		lineComponents := itemInput.CalculateComponents()
-		subtotal += lineComponents.Base
-		itemTaxAmount += lineComponents.Tax
-
 		unit := itemInput.Unit
 		if unit == "" {
 			unit = "unit"
@@ -78,24 +82,10 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 			UnitPrice:   itemInput.UnitPrice,
 			TaxRate:     itemInput.TaxRate,
 			DiscountPct: itemInput.DiscountPct,
-			Total:       lineTotal,
+			Total:       totals.LineTotal(i),
 			SortOrder:   i,
 		})
 	}
-
-	discountType := input.DiscountType
-	if discountType == "" {
-		discountType = "fixed"
-	}
-
-	discountAmount, err := applyHeaderDiscount(subtotal, discountType, input.DiscountValue)
-	if err != nil {
-		return nil, err
-	}
-
-	afterDiscount := subtotal - discountAmount
-	taxAmount := afterDiscount*(input.TaxRate/100) + itemTaxAmount
-	total := afterDiscount + taxAmount
 
 	currency := input.Currency
 	if currency == "" {
@@ -110,14 +100,14 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	existing.IssueDate = issueDate
 	existing.DueDate = dueDate
 	existing.Currency = currency
-	existing.Subtotal = subtotal
+	existing.Subtotal = totals.Subtotal
 	existing.DiscountType = discountType
 	existing.DiscountValue = input.DiscountValue
-	existing.DiscountAmount = discountAmount
+	existing.DiscountAmount = totals.DiscountAmount
 	existing.TaxRate = input.TaxRate
-	existing.TaxAmount = taxAmount
-	existing.Total = total
-	existing.AmountDue = total - existing.AmountPaid
+	existing.TaxAmount = totals.TaxAmount
+	existing.Total = totals.Total
+	existing.AmountDue = roundMoney(totals.Total - existing.AmountPaid)
 	existing.Notes = input.Notes
 	existing.Terms = input.Terms
 
@@ -130,14 +120,23 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	return existing, nil
 }
 
+// UpdateInvoiceStatus applies a status-only change. "paid" and "partial" are
+// derived from money and are refused here: only RecordPayment computes them,
+// under a row lock, in integer cents. Accepting them would move the same
+// amount out of receivables and into revenue with nothing collected.
 func (s *Service) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error {
 	defer invalidateInvoicesScope(ctx, businessID)
+	// Checked before the read so a money-derived or unknown status is a bad
+	// request whatever state the invoice is in, and so no write is attempted.
+	if err := domain.ValidateSettableInvoiceStatus(status); err != nil {
+		return err
+	}
 	existing, err := s.repo.GetInvoiceByID(ctx, businessID, invoiceID)
 	if err != nil {
 		return err
 	}
-	if domain.IsTerminal(existing.Status) || (status == domain.StatusDraft && existing.Status != domain.StatusDraft) {
-		return domain.ErrInvoiceNotDraft
+	if err := domain.CanTransitionInvoiceStatus(existing.Status, status); err != nil {
+		return err
 	}
 	return s.repo.UpdateInvoiceStatus(ctx, businessID, invoiceID, status)
 }

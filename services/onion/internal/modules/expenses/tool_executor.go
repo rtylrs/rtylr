@@ -41,6 +41,13 @@ type listExpensesToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	required, dispatched := expenseToolPermissions[name]
+	if !dispatched {
+		return nil, false, nil
+	}
+	if err := requireExpenseToolPermission(ctx, required); err != nil {
+		return nil, true, err
+	}
 	switch name {
 	case listExpensesToolName:
 		output, err := m.executeListExpensesTool(ctx, input)
@@ -55,7 +62,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		output, err := m.executeRecordExpenseTool(ctx, input)
 		return output, true, err
 	default:
-		return nil, false, nil
+		return nil, true, fmt.Errorf("expense tool %q has no executor", name)
 	}
 }
 

@@ -34,6 +34,13 @@ type listCustomersToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	required, dispatched := customerToolPermissions[name]
+	if !dispatched {
+		return nil, false, nil
+	}
+	if err := requireCustomerToolPermission(ctx, required); err != nil {
+		return nil, true, err
+	}
 	switch name {
 	case listCustomersToolName:
 		output, err := m.executeListCustomersTool(ctx, input)
@@ -45,7 +52,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		output, err := m.executeCreateCustomerTool(ctx, input)
 		return output, true, err
 	default:
-		return nil, false, nil
+		return nil, true, fmt.Errorf("customer tool %q has no executor", name)
 	}
 }
 

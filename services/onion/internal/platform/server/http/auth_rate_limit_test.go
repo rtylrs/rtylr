@@ -49,8 +49,11 @@ func TestAuthRouteRateLimit_OtherPathsUnaffected(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
+	// A route that is genuinely not in the table. email-exists used to stand
+	// in for one; it now has a budget of its own, so the pass-through case is
+	// anchored on /common/auth/v1/social/authorize, which has none.
 	for i := 0; i < 50; i++ {
-		req := httptest.NewRequest(http.MethodGet, "/common/auth/v1/email-exists", nil)
+		req := httptest.NewRequest(http.MethodGet, "/common/auth/v1/social/authorize", nil)
 		req.RemoteAddr = remoteAddr
 		rec := httptest.NewRecorder()
 		handler.ServeHTTP(rec, req)

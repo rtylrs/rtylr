@@ -17,8 +17,12 @@ import (
 )
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "finance.create_quote" {
+	required, dispatched := quoteToolPermissions[name]
+	if !dispatched {
 		return nil, false, nil
+	}
+	if err := requireQuoteToolPermission(ctx, required); err != nil {
+		return nil, true, err
 	}
 	output, err := m.executeCreateQuoteTool(ctx, input)
 	return output, true, err

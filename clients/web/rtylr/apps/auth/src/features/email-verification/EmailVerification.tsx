@@ -5,6 +5,7 @@ import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import Logo from '../../shared/components/Logo';
 import { Button, HelmetContainer } from '@voxire/components';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useEmailVerification } from './useEmailVerification';
 
 const EmailVerification = () => {
@@ -22,7 +23,7 @@ const EmailVerification = () => {
     done.current = true;
 
     if (!token) {
-      setMessage('Email verification failed. Please try again.');
+      setMessage(t('auth.verify.tokenMissing'));
       setSuccess(false);
       setLoading(false);
       return;
@@ -39,8 +40,11 @@ const EmailVerification = () => {
           setSuccess(true);
         }
       })
-      .catch(() => {
-        setMessage('Email verification failed. Please try again.');
+      .catch((error: unknown) => {
+        // The server distinguishes a code that is too old (request a new one)
+        // from a wrong one; its own wording is what the user needs here, and
+        // this component cannot translate it.
+        setMessage(getOneKitErrorMessage(error, t('auth.verify.defaultFailure')));
         setSuccess(false);
       })
       .finally(() => setLoading(false));

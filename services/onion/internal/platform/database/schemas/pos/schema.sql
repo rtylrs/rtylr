@@ -214,12 +214,15 @@ CREATE TABLE IF NOT EXISTS pos_gift_card_transactions (
     INDEX idx_pos_gift_card_transactions_order_ref (business_id, order_ref)
 );
 
+-- A manager override PIN is a bcrypt hash, never plaintext. `pin_hash` mirrors
+-- the pos_users POS PIN credential; the legacy plaintext `pin` column is dropped
+-- by zz_pos_manager_pins_hash.sql for deployments that predate it.
 CREATE TABLE IF NOT EXISTS pos_manager_pins (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     business_id BIGINT NOT NULL DEFAULT 0,
     staff_id BIGINT NOT NULL,
-    pin VARCHAR(10) NOT NULL,
+    pin_hash VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_pos_manager_pins_owner_staff (owner_id, staff_id)
 );

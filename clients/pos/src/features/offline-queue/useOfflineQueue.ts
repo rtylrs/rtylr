@@ -1,23 +1,15 @@
-import { createOneKitClient } from '@voxire/api';
-import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
-import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 import { useCallback } from 'react';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
 import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
 import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueueStore';
 import { syncQueuedOrders } from './syncOfflineQueue';
+import { replayQueuedOrder } from './offlineQueueSync';
 import {
   retrySessionClose,
   syncAllSessionCloses,
   syncPendingSessionCloses,
 } from '../close-session/sessionCloseQueueSync';
 import { retryCashMovement, syncAllCashMovements } from '../cash-drop/cashMovementQueueSync';
-
-const orderClient = createOneKitClient(OrderServiceClient, 'pos');
-
-const syncOrder = async (order: CreateOrderRequest): Promise<void> => {
-  await orderClient.createOrder(order);
-};
 
 export function useOfflineQueue() {
   const store = useOfflineQueueStore();
@@ -26,10 +18,11 @@ export function useOfflineQueue() {
 
   const flush = useCallback(async () => {
     const ordersResult = await (async () => {
-      const { queue, retry, markSynced, markFailed } = useOfflineQueueStore.getState();
+      const { retry, markSynced, markFailed } = useOfflineQueueStore.getState();
+      const entries = useOfflineQueueStore.getState().queue;
       return syncQueuedOrders({
-        entries: queue,
-        syncOrder,
+        entries,
+        syncOrder: replayQueuedOrder,
         retry,
         markSynced,
         markFailed,
@@ -51,7 +44,7 @@ export function useOfflineQueue() {
     const { retry, markSynced, markFailed } = useOfflineQueueStore.getState();
     const result = await syncQueuedOrders({
       entries: [entry],
-      syncOrder,
+      syncOrder: replayQueuedOrder,
       retry,
       markSynced,
       markFailed,
@@ -70,6 +63,8 @@ export function useOfflineQueue() {
     retry: retryOne,
     retrySessionClose,
     retryCashMovement,
+    // Discarding the orders discards the tenders and keys that would have
+    // settled them, in the same write.
     clear: () => {
       store.clear();
       sessionCloseStore.clear();

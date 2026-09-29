@@ -49,8 +49,10 @@ type QuotaStatus struct {
 // mode, and tracks token usage per bucket.
 type Repository interface {
 	// ResolveOwnerID maps a caller's business_id to the canonical tenant id
-	// (businesses.owner_id). Falls back to fallbackUserID when unresolved.
-	ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64
+	// (businesses.owner_id). It returns an error rather than falling back to
+	// fallbackUserID: the id scopes quota reads and token-usage writes, so an
+	// unverified owner must never be substituted.
+	ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error)
 	GetEntitlement(ctx context.Context, ownerID int64) (Entitlement, error)
 	GetMode(ctx context.Context, ownerID int64) (Mode, error)
 	SetMode(ctx context.Context, ownerID int64, mode Mode) error

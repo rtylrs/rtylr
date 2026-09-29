@@ -3,6 +3,7 @@ package purchase_orders
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -26,6 +27,13 @@ type listPurchaseOrdersToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	required, dispatched := purchaseOrderToolPermissions[name]
+	if !dispatched {
+		return nil, false, nil
+	}
+	if err := requirePurchaseOrderToolPermission(ctx, required); err != nil {
+		return nil, true, err
+	}
 	switch name {
 	case listPurchaseOrdersToolName:
 		output, err := m.executeListPurchaseOrdersTool(ctx, input)
@@ -43,7 +51,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		output, err := m.executeReceivePurchaseOrderTool(ctx, input)
 		return output, true, err
 	default:
-		return nil, false, nil
+		return nil, true, fmt.Errorf("purchase order tool %q has no executor", name)
 	}
 }
 

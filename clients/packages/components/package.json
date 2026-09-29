@@ -9,7 +9,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "tsc --noEmit --watch"
+    "dev": "tsc --noEmit --watch",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

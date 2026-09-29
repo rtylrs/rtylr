@@ -146,7 +146,10 @@ func (a *BusinessAPI) SetSlug(ctx context.Context, req *hubbusinessv1.SetSlugReq
 	}
 
 	slug := strings.ToLower(strings.TrimSpace(req.GetSlug()))
-	if err := a.Service.UpdateSlug(ctx, businessID, slug); err != nil {
+	if err := a.Service.UpdateSlug(ctx, businessID, device.User.UserID, slug); err != nil {
+		if errors.Is(err, application.ErrBusinessNotOwned) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		if strings.Contains(err.Error(), "Duplicate") {
 			return nil, onekiterrors.New(http.StatusConflict, "That slug is taken.")
 		}

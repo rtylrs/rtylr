@@ -5,24 +5,40 @@ import { Check } from 'lucide-react';
 interface QrPayPanelProps {
   orderId: string;
   amount: number;
-  /** Fires when the QR code has been scanned and payment confirmed */
-  onConfirmed?: () => void;
+  /** Fires when the operator attests they checked the payment elsewhere. */
+  onAttested?: () => void;
+  /** Fires when the operator revokes a previous attestation. */
+  onReset?: () => void;
 }
 
 /**
- * Generates a QR code encoding a payment URL for this order.
- * The URL format is: https://pay.api.voxire.com/checkout?ref={orderId}&amount={amount}
- * A real payment gateway backend would serve that URL and POST back a webhook on completion.
+ * Renders a QR code for this order's amount plus the operator's manual
+ * attestation control.
+ *
+ * The encoded URL is not served by anything: there is no payment gateway
+ * backend and no webhook, so the app never learns that the customer paid. The
+ * "attest" button therefore records the operator's word, not a provider
+ * confirmation, and the label says so. Wiring a real gateway means replacing
+ * this control with the gateway's callback, not enabling it.
  */
-const QrPayPanel: React.FC<QrPayPanelProps> = ({ orderId, amount, onConfirmed }) => {
+const QrPayPanel: React.FC<QrPayPanelProps> = ({
+  orderId,
+  amount,
+  onAttested,
+  onReset,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [url, setUrl] = useState('');
   const [copied, setCopied] = useState(false);
+  const [attested, setAttested] = useState(false);
 
   const paymentUrl = `https://pay.api.voxire.com/checkout?ref=${encodeURIComponent(orderId)}&amount=${amount.toFixed(2)}`;
 
   useEffect(() => {
     setUrl(paymentUrl);
+    // The amount is part of the URL, so this also clears an attestation made
+    // for a previous amount.
+    setAttested(false);
     if (canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, paymentUrl, {
         width: 220,
@@ -59,7 +75,7 @@ const QrPayPanel: React.FC<QrPayPanelProps> = ({ orderId, amount, onConfirmed })
         <span className="font-semibold text-pos-text">
           ${amount.toFixed(2)}
         </span>
-        . Confirm once payment notification arrives.
+        . Nothing on this page confirms the payment back to the register.
       </p>
       <div className="flex gap-2">
         <button
@@ -70,13 +86,24 @@ const QrPayPanel: React.FC<QrPayPanelProps> = ({ orderId, amount, onConfirmed })
           {copied && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
           {copied ? 'Copied' : 'Copy link'}
         </button>
-        {onConfirmed && (
+        {onAttested && (
           <button
             type="button"
-            onClick={onConfirmed}
-            className="h-9 px-4 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors"
+            aria-pressed={attested}
+            onClick={() => {
+              setAttested((v) => {
+                if (v) onReset?.();
+                else onAttested();
+                return !v;
+              });
+            }}
+            className={`h-9 px-4 rounded-lg text-xs font-semibold transition-colors ${
+              attested
+                ? 'bg-pos-text text-pos-bg'
+                : 'border border-pos-border text-pos-muted hover:border-white/20'
+            }`}
           >
-            Confirm payment
+            {attested ? 'Attested paid' : 'I checked this payment elsewhere'}
           </button>
         )}
       </div>

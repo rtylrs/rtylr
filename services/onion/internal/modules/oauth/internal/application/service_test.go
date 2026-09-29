@@ -370,3 +370,33 @@ func TestVerifyPKCE_PlainMethodReturnsFalseOnMismatch(t *testing.T) {
 		t.Error("expected false for plain method with mismatching values")
 	}
 }
+
+func TestVerifyPKCE_AcceptsMatchingS256Verifier(t *testing.T) {
+	verifier := "sBQnbGvZ_lfS3E1AeSfL0jnKL0b1lZKwPMQVzY5XnQU"
+	sum := sha256.Sum256([]byte(verifier))
+	challenge := base64.RawURLEncoding.EncodeToString(sum[:])
+
+	if !verifyPKCE(verifier, challenge, "S256") {
+		t.Fatal("a verifier whose S256 digest is the stored challenge must be accepted")
+	}
+}
+
+// The challenge is the only secret in the PKCE exchange, so the comparison has
+// to be constant-time. A `==` here leaks the length of the matching prefix,
+// which is what turns verifier guessing into a byte-at-a-time search. A partial
+// match must be rejected, and the rejection must not depend on where the
+// strings first differ.
+func TestVerifyPKCE_RejectsPartialChallengePrefix(t *testing.T) {
+	verifier := "verifier-value-that-is-long-enough"
+	sum := sha256.Sum256([]byte(verifier))
+	full := base64.RawURLEncoding.EncodeToString(sum[:])
+
+	for cut := 1; cut < len(full); cut++ {
+		if verifyPKCE(verifier, full[:cut], "S256") {
+			t.Fatalf("a %d-byte prefix of the challenge must not verify", cut)
+		}
+	}
+	if !verifyPKCE(verifier, full, "S256") {
+		t.Fatal("the complete challenge must verify")
+	}
+}

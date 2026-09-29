@@ -21,16 +21,12 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(db), pool: db}
 }
 
-func (r *Repository) ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64 {
-	ownerID, err := tenant.ResolveOwnerID(ctx, businessID, fallbackUserID)
-	if err != nil {
-		logger.Ctx(ctx).Warn("failed to resolve owner for AI quota",
-			logger.Any("business_id", businessID),
-			logger.Error(err),
-		)
-		return fallbackUserID
-	}
-	return ownerID
+// ResolveOwnerID verifies the business owner id used to scope quota reads and
+// token-usage writes. The platform resolver already fails closed; swallowing
+// its error and returning fallbackUserID here would reintroduce that fallback
+// one layer up, so the error is propagated unchanged and the caller must deny.
+func (r *Repository) ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error) {
+	return tenant.ResolveOwnerID(ctx, businessID, fallbackUserID)
 }
 
 func (r *Repository) GetEntitlement(ctx context.Context, ownerID int64) (domain.Entitlement, error) {

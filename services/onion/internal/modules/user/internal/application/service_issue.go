@@ -2,33 +2,71 @@ package application
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
+	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+// IssueEmailVerificationCode mails a fresh code and its link form.
+//
+// The code is ten digits and the token carries the user id with it, so a client
+// that only accepts six digits (the auth web app's typed-entry field does) can
+// no longer submit what is in the email body. The link is therefore the primary
+// call to action and the code is secondary copy: a user who follows the link
+// never has to type. See the migration note on formatEmailVerificationToken.
 func (s *Service) IssueEmailVerificationCode(ctx context.Context, emailAddress string) error {
-	code, err := s.repo.CreateEmailVerificationCode(ctx, emailAddress)
+	issued, err := s.repo.CreateEmailVerificationCode(ctx, emailAddress)
 	if err != nil {
 		return err
 	}
+
+	authAppURL := config.AuthAppURL
+	if config.GlobalConfig != nil && config.GlobalConfig.AuthAppURL != "" {
+		authAppURL = config.GlobalConfig.AuthAppURL
+	}
+	verifyLink := strings.TrimSuffix(authAppURL, "/") + "/verify?token=" + url.QueryEscape(issued.Token)
+
 	_, err = email.Send(ctx, email.SendParams{
 		To:      []string{strings.ToLower(strings.TrimSpace(emailAddress))},
-		Subject: "Your rtylr email verification code",
-		HTML:    fmt.Sprintf("<p>Your rtylr email verification code is <strong>%s</strong>.</p><p>This code expires in 10 minutes and can only be used once.</p>", code),
-		Text:    fmt.Sprintf("Your rtylr email verification code is %s. It expires in 10 minutes and can only be used once.", code),
+		Subject: "Verify your rtylr email address",
+		HTML: fmt.Sprintf(
+			"<p>Confirm your email address to finish setting up your rtylr account.</p>"+
+				"<p><a href=\"%s\">Verify my email</a></p>"+
+				"<p>Or enter this code on the verification page: <strong>%s</strong></p>"+
+				"<p>This expires in 10 minutes and can only be used once.</p>",
+			verifyLink, issued.Code),
+		Text: fmt.Sprintf(
+			"Confirm your email address to finish setting up your rtylr account.\n\nVerify my email: %s\n\nOr enter this code on the verification page: %s\n\nThis expires in 10 minutes and can only be used once.",
+			verifyLink, issued.Code),
 	})
 	return err
 }
 
-func (s *Service) VerifyEmailCode(ctx context.Context, code string) error {
-	if err := s.repo.ConsumeEmailVerificationCode(ctx, code); err != nil {
+// VerifyEmailCode spends a verification token. The three failure modes are kept
+// apart only where the message can help the legitimate holder: a code issued
+// before the user binding existed needs a *new* code rather than a retry, and an
+// exhausted attempt budget needs a new code too. Everything else collapses to
+// one error so the anonymous endpoint cannot be used to probe which accounts
+// have a pending code.
+func (s *Service) VerifyEmailCode(ctx context.Context, token string) error {
+	err := s.repo.ConsumeEmailVerificationCode(ctx, token)
+	switch {
+	case err == nil:
+		return nil
+	case errors.Is(err, infrastructure.ErrSupersededEmailVerificationCode):
+		return ErrEmailCodeSuperseded
+	case errors.Is(err, infrastructure.ErrTooManyEmailVerificationAttempts):
+		return ErrTooManyEmailCodeAttempts
+	default:
 		return ErrInvalidEmailCode
 	}
-	return nil
 }
 
 // CreateBusinessForUser creates a new business and assigns the user as owner.

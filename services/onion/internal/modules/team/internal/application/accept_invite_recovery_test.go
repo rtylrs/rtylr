@@ -54,12 +54,12 @@ func insertInvitee(t *testing.T, db *sql.DB, businessID *int64) int64 {
 	return userID
 }
 
-func createInviteTokenFor(t *testing.T, db *sql.DB, userID, ownerID int64) string {
+func createInviteTokenFor(t *testing.T, db *sql.DB, userID, ownerID int64, businessID *int64) string {
 	t.Helper()
 	token := fmt.Sprintf("accept-invite-token-%d", time.Now().UnixNano())
 	if _, err := db.ExecContext(context.Background(),
-		`INSERT INTO invite_tokens (user_id, owner_id, token, expires_at) VALUES (?, ?, ?, ?)`,
-		userID, ownerID, token, time.Now().Add(time.Hour)); err != nil {
+		`INSERT INTO invite_tokens (user_id, owner_id, business_id, token, expires_at) VALUES (?, ?, ?, ?, ?)`,
+		userID, ownerID, businessID, token, time.Now().Add(time.Hour)); err != nil {
 		t.Fatalf("insert invite token: %v", err)
 	}
 	return token
@@ -74,21 +74,24 @@ func TestAcceptInviteFailsWhenBusinessCannotBeResolved(t *testing.T) {
 	service := NewService(ctx, db)
 
 	userID := insertInvitee(t, db, nil)
-	token := createInviteTokenFor(t, db, userID, ghostOwnerID(t, db))
+	token := createInviteTokenFor(t, db, userID, ghostOwnerID(t, db), nil)
 
 	if _, err := service.AcceptInvite(ctx, token, acceptInvitePassword); err == nil {
 		t.Fatal("AcceptInvite succeeded with no resolvable business, want error")
 	}
 
 	// The claim must be released so the invitee can retry after the failure.
-	if _, _, _, err := service.repo.GetInviteToken(ctx, token); err != nil {
+	if _, err := service.repo.GetInviteToken(ctx, token); err != nil {
 		t.Fatalf("invite token is no longer usable after failed accept: %v", err)
 	}
 }
 
-// The member's users.business_id is the fallback when the owner lookup fails,
-// so a valid invite still activates instead of silently doing nothing.
-func TestAcceptInviteActivatesViaMemberBusinessWhenOwnerLookupFails(t *testing.T) {
+// The member's own users.business_id is NOT the invitation's business: it is
+// whatever tenant their session already resolved to. It used to be substituted
+// whenever the owner lookup failed, and the accept then activated the member
+// and granted its authorization in that unrelated business. The accept has to
+// refuse instead, leaving the invitation retryable and writing nothing.
+func TestAcceptInviteRefusesMemberBusinessWhenOwnerLookupFails(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	service := NewService(ctx, db)
@@ -98,12 +101,56 @@ func TestAcceptInviteActivatesViaMemberBusinessWhenOwnerLookupFails(t *testing.T
 	// re-seed it (without deleting it) before writing rows that reference it.
 	testutil.EnsureBusiness(t, db, businessID, testutil.OwnerID)
 	userID := insertInvitee(t, db, &businessID)
-	token := createInviteTokenFor(t, db, userID, ghostOwnerID(t, db))
+	token := createInviteTokenFor(t, db, userID, ghostOwnerID(t, db), nil)
 
+	if _, err := service.AcceptInvite(ctx, token, acceptInvitePassword); err == nil {
+		t.Fatal("AcceptInvite succeeded on users.business_id after the owner lookup failed, want error")
+	}
+
+	if status, found, err := service.repo.GetProvisioningStatus(ctx, userID); err != nil {
+		t.Fatalf("GetProvisioningStatus: %v", err)
+	} else if found && status != nil {
+		t.Fatalf("provisioning state was written for a business the invitation does not name: %+v", status)
+	}
+
+	if _, err := service.repo.GetInviteToken(ctx, token); err != nil {
+		t.Fatalf("invite token is no longer usable after refused accept: %v", err)
+	}
+}
+
+// The invitation's own business is the binding: a member who already belongs to
+// another business is activated in the business they were invited to, and that
+// other business is never written to.
+func TestAcceptInviteActivatesInTheInviteBusinessNotTheMemberDefault(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	service := NewService(ctx, db)
+
+	inviteBusinessID := testutil.BusinessID
+	testutil.EnsureBusiness(t, db, inviteBusinessID, testutil.OwnerID)
+
+	var otherBusinessID int64
+	if err := db.QueryRowContext(ctx, "SELECT id FROM businesses WHERE id <> ? LIMIT 1", inviteBusinessID).Scan(&otherBusinessID); err != nil {
+		t.Skipf("no second business available to build a cross-tenant case: %v", err)
+	}
+
+	userID := insertInvitee(t, db, &otherBusinessID)
+	token := createInviteTokenFor(t, db, userID, testutil.OwnerID, &inviteBusinessID)
+
+	// The rows the invite created in the invited business, both still pending.
 	if _, err := db.ExecContext(ctx,
 		`INSERT INTO authorization_business_members (business_id, user_id, status) VALUES (?, ?, 'pending')`,
-		businessID, userID); err != nil {
+		inviteBusinessID, userID); err != nil {
 		t.Fatalf("insert pending membership: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx,
+			`DELETE FROM user_app_permissions WHERE owner_id = ? AND user_id = ?`, testutil.OwnerID, userID)
+	})
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role) VALUES (?, ?, ?, '[]', 'staff')`,
+		inviteBusinessID, testutil.OwnerID, userID); err != nil {
+		t.Fatalf("insert app permission: %v", err)
 	}
 
 	if _, err := service.AcceptInvite(ctx, token, acceptInvitePassword); err != nil {
@@ -125,10 +172,20 @@ func TestAcceptInviteActivatesViaMemberBusinessWhenOwnerLookupFails(t *testing.T
 	var membershipStatus string
 	if err := db.QueryRowContext(ctx,
 		`SELECT status FROM authorization_business_members WHERE business_id = ? AND user_id = ?`,
-		businessID, userID).Scan(&membershipStatus); err != nil {
+		inviteBusinessID, userID).Scan(&membershipStatus); err != nil {
 		t.Fatalf("read membership status: %v", err)
 	}
 	if membershipStatus != "active" {
 		t.Fatalf("membership status = %q, want active", membershipStatus)
+	}
+
+	var rowsInOtherBusiness int
+	if err := db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM authorization_business_members WHERE business_id = ? AND user_id = ?`,
+		otherBusinessID, userID).Scan(&rowsInOtherBusiness); err != nil {
+		t.Fatalf("count memberships in the member's default business: %v", err)
+	}
+	if rowsInOtherBusiness != 0 {
+		t.Fatalf("accept wrote %d membership rows in the member's unrelated business %d", rowsInOtherBusiness, otherBusinessID)
 	}
 }

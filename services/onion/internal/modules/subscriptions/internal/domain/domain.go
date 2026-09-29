@@ -144,10 +144,15 @@ type Repository interface {
 	// Seat period management
 	GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]SeatPeriod, error)
 	GetAddonPeriodsForMonth(ctx context.Context, ownerID, businessID int64, month time.Time) ([]AddonBillingPeriod, error)
-	GetActivePeriod(ctx context.Context, subscriptionID int64) (*SeatPeriod, error)
-	CloseActivePeriod(ctx context.Context, subscriptionID int64, periodEnd time.Time) error
-	OpenPeriod(ctx context.Context, subscriptionID, ownerID int64, seatCount, pricePerSeatCents int, periodStart, billingMonth time.Time) error
-	UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error
+	// ReconcileSeatBilling is the only writer of seat_periods and
+	// subscriptions.seat_count. It creates the subscription row for an owner
+	// that has none, using defaultPlanID/defaultTrialDays, and then rolls the
+	// seat ledger forward to asOf. It takes a row lock on the subscription, so
+	// concurrent callers serialise rather than each opening a period.
+	ReconcileSeatBilling(ctx context.Context, ownerID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error
+	// ListOwnerIDsForReconciliation pages the owner ids that may need a seat
+	// ledger, ascending and strictly greater than afterOwnerID.
+	ListOwnerIDsForReconciliation(ctx context.Context, afterOwnerID int64, limit int) ([]int64, error)
 	GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]BillingHistoryMonth, error)
 	UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) (bool, error)
 	ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time, fallbackOwnerID int64, paddleCustID, status string) (bool, int64, error)

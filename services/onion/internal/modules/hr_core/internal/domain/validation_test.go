@@ -131,6 +131,26 @@ func TestValidateWorkSchedule_ValidName(t *testing.T) {
 	}
 }
 
+func TestSameEmailAddress_RecipientComparison(t *testing.T) {
+	cases := []struct {
+		name     string
+		invited  string
+		caller   string
+		wantSame bool
+	}{
+		{name: "identical", invited: "invitee@example.com", caller: "invitee@example.com", wantSame: true},
+		{name: "different case and padding", invited: " Invitee@Example.com ", caller: "invitee@example.com", wantSame: true},
+		{name: "another mailbox", invited: "invitee@example.com", caller: "attacker@example.com"},
+		{name: "invite without an address", invited: "", caller: "invitee@example.com"},
+		{name: "account without an address", invited: "invitee@example.com", caller: ""},
+	}
+	for _, tc := range cases {
+		if got := domain.SameEmailAddress(tc.invited, tc.caller); got != tc.wantSame {
+			t.Errorf("%s: SameEmailAddress(%q, %q) = %v, want %v", tc.name, tc.invited, tc.caller, got, tc.wantSame)
+		}
+	}
+}
+
 func TestIsValidEmploymentStatus_Active(t *testing.T) {
 	if !domain.IsValidEmploymentStatus(domain.EmploymentStatusActive) {
 		t.Error("expected 'active' to be valid")

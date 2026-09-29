@@ -60,10 +60,14 @@ UPDATE finance_invoices SET
 WHERE id = ? AND business_id = ? AND status = 'draft';
 
 -- name: UpdateInvoiceStatus :execresult
+-- Status-only write. "paid" and "partial" are derived from finance_payments and
+-- are rejected here as well as in the application layer: writing either without
+-- a payment would report collected money that does not exist.
 UPDATE finance_invoices
 SET status = sqlc.arg(status)
 WHERE id = ? AND business_id = ?
   AND status NOT IN ('paid', 'void', 'cancelled')
+  AND sqlc.arg(status) NOT IN ('partial', 'paid')
   AND (sqlc.arg(status) <> 'draft' OR status = 'draft');
 
 -- name: UpdateInvoicePaymentTotalsWithPaidDate :exec

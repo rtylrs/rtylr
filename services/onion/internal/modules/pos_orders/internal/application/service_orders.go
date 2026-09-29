@@ -60,12 +60,10 @@ func (s *Service) CreateOrder(ctx context.Context, businessID, ownerID, staffID 
 		input.PaymentMethod = domain.PaymentMethodCash
 	}
 
-	orderNumber, err := s.repo.GenerateOrderNumber(ctx, ownerID)
-	if err != nil {
-		return 0, err
-	}
-
-	orderID, err := s.repo.CreateOrder(ctx, ownerID, staffID, orderNumber, input)
+	// The order number is generated inside the insert transaction, not here:
+	// generating it on a separate connection let two concurrent sales pick the
+	// same number, and the loser of uq_pos_orders_number lost the whole create.
+	orderID, err := s.repo.CreateOrder(ctx, ownerID, staffID, "", input)
 	if err != nil {
 		return 0, err
 	}

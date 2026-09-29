@@ -23,8 +23,11 @@ var errCDNStorageNotConfigured = errors.New("cdn: object storage is not configur
 
 // transform returns a transformed image, generating it via the media-engine on
 // a cache miss and persisting the result to S3 + cdn_transformations. fileID is
-// the BIGINT key; fileUUID is the public id used for cache keys and storage paths.
-func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalStorageKey string, p Params) (io.ReadCloser, int64, string, error) {
+// the BIGINT key; fileUUID is the public id used for cache keys and storage
+// paths. businessID is the owning tenant, taken from the file row the caller
+// was already authorized to read, so every cache and derivative lookup below is
+// pinned to that tenant instead of trusting the cache key.
+func (c *CDN) transform(ctx context.Context, businessID, fileID int64, fileUUID, originalStorageKey string, p Params) (io.ReadCloser, int64, string, error) {
 	p.Defaults()
 	if err := p.Validate(); err != nil {
 		return nil, 0, "", fmt.Errorf("invalid params: %w", err)
@@ -37,7 +40,7 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 	mimeType := mimeForFormat(p.Format)
 
 	// Cache hit — stream the already-transformed asset straight from S3.
-	cached, err := c.transformationByCacheKey(ctx, key)
+	cached, err := c.transformationByCacheKey(ctx, businessID, key)
 	if err == nil {
 		reader, size, dlErr := c.storage.Download(ctx, cached.StorageKey)
 		if dlErr != nil {
@@ -54,14 +57,14 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 	// would all fail with it. Each waiter still honors its own ctx below.
 	genCtx := context.WithoutCancel(ctx)
 	resultCh := c.transformGroup.DoChan(key, func() (any, error) {
-		cached, err := c.transformationByCacheKey(genCtx, key)
+		cached, err := c.transformationByCacheKey(genCtx, businessID, key)
 		if err == nil {
 			return cached.StorageKey, nil
 		}
 		if !errors.Is(err, sql.ErrNoRows) {
 			return "", fmt.Errorf("checking transformation cache: %w", err)
 		}
-		return c.generateTransformation(genCtx, fileID, fileUUID, originalStorageKey, key, mimeType, p)
+		return c.generateTransformation(genCtx, businessID, fileID, fileUUID, originalStorageKey, key, mimeType, p)
 	})
 
 	var transformedKey string
@@ -86,7 +89,7 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 	return reader, size, mimeType, nil
 }
 
-func (c *CDN) generateTransformation(ctx context.Context, fileID int64, fileUUID, originalStorageKey, key, mimeType string, p Params) (string, error) {
+func (c *CDN) generateTransformation(ctx context.Context, businessID, fileID int64, fileUUID, originalStorageKey, key, mimeType string, p Params) (string, error) {
 	// Cache miss — pull the original to a temp file, run the media-engine,
 	// upload the result, and record it.
 	tmpIn, tmpOut, cleanup, err := c.stageOriginal(ctx, originalStorageKey)
@@ -121,7 +124,7 @@ func (c *CDN) generateTransformation(ctx context.Context, fileID int64, fileUUID
 	if err := c.storage.Upload(ctx, transformedKey, mimeType, resultFile); err != nil {
 		return "", fmt.Errorf("uploading transformation: %w", err)
 	}
-	if err := c.insertTransformation(ctx, fileID, key, transformedKey, p); err != nil {
+	if err := c.insertTransformation(ctx, businessID, fileID, key, transformedKey, p); err != nil {
 		return "", err
 	}
 
@@ -176,7 +179,8 @@ func (c *CDN) stageOriginal(ctx context.Context, originalStorageKey string) (inP
 // serveTransformed handles GET /images/{id}?w=&h=&fit=&format=&q=&t=
 // where t= is an optional Cloudinary-style transformation chain.
 func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
-	if !c.validateSignedDelivery(w, r) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
 		return
 	}
 
@@ -199,7 +203,7 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	}
 	p := parsed.params
 
-	meta, err := c.fileByUUID(r.Context(), fileUUID)
+	meta, err := c.fileForRead(r.Context(), scope, fileUUID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "file not found", http.StatusNotFound)
@@ -226,7 +230,7 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reader, size, mimeType, err := c.transform(r.Context(), meta.ID, meta.FileUUID, meta.StorageKey, p)
+	reader, size, mimeType, err := c.transform(r.Context(), meta.BusinessID, meta.ID, meta.FileUUID, meta.StorageKey, p)
 	if err != nil {
 		if errors.Is(err, errCDNStorageNotConfigured) {
 			http.Error(w, "image storage is not configured", http.StatusNotImplemented)

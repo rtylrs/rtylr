@@ -95,6 +95,10 @@ func (c *CDN) imageInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CDN) imageAnalyze(w http.ResponseWriter, r *http.Request) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
+		return
+	}
 	id := chi.URLParam(r, "id")
 	metric := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("metric")))
 	if metric == "" {
@@ -107,7 +111,7 @@ func (c *CDN) imageAnalyze(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	meta, err := c.fileByUUID(r.Context(), id)
+	meta, err := c.fileForRead(r.Context(), scope, id)
 	if err != nil {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return
@@ -203,8 +207,12 @@ func (c *CDN) runImageAnalysis(r *http.Request, storageKey, metric string) ([]by
 }
 
 func (c *CDN) imageResponsive(w http.ResponseWriter, r *http.Request) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
+		return
+	}
 	id := chi.URLParam(r, "id")
-	if _, err := c.fileByUUID(r.Context(), id); err != nil {
+	if _, err := c.fileForRead(r.Context(), scope, id); err != nil {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return
 	}

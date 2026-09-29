@@ -209,7 +209,14 @@ func (a *AuthAPI) VerifyEmail(ctx context.Context, req *commonauthv1.VerifyEmail
 		return nil, onekithttp.NewError(http.StatusBadRequest, "token is required")
 	}
 	if err := a.UserService.VerifyEmailCode(ctx, req.GetToken()); err != nil {
-		return nil, onekithttp.NewError(http.StatusBadRequest, "Invalid or expired email verification code")
+		switch {
+		case errors.Is(err, application.ErrEmailCodeSuperseded):
+			return nil, onekithttp.NewError(http.StatusBadRequest, "This verification code is too old. Please request a new one.")
+		case errors.Is(err, application.ErrTooManyEmailCodeAttempts):
+			return nil, onekithttp.NewError(http.StatusTooManyRequests, "Too many attempts. Please request a new verification code.")
+		default:
+			return nil, onekithttp.NewError(http.StatusBadRequest, "Invalid or expired email verification code")
+		}
 	}
 	return &commonauthv1.VerifyEmailResponse{Verified: true, Message: "Email verified"}, nil
 }

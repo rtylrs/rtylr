@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -48,7 +49,10 @@ func (h *SetSlugHandler) Serve(ctx context.Context, req *SetSlugRequest) (SetSlu
 		return SetSlugResponse{}, onekiterrors.New(http.StatusBadRequest, "No business attached to this user")
 	}
 	slug := strings.ToLower(strings.TrimSpace(req.Slug))
-	if err := h.Service.UpdateSlug(ctx, businessID, slug); err != nil {
+	if err := h.Service.UpdateSlug(ctx, businessID, device.User.UserID, slug); err != nil {
+		if errors.Is(err, application.ErrBusinessNotOwned) {
+			return SetSlugResponse{}, onekiterrors.PermissionDenied()
+		}
 		if strings.Contains(err.Error(), "Duplicate") {
 			return SetSlugResponse{}, onekiterrors.New(http.StatusConflict, "That slug is taken.")
 		}

@@ -23,7 +23,6 @@ type mockRepo struct {
 	ownerApps           []string
 	billingHistory      []domain.BillingHistoryMonth
 	addonPeriods        []domain.AddonBillingPeriod
-	activePeriod        *domain.SeatPeriod
 	ownerID             int64
 	upsertOwnerID       int64
 	upsertPlanID        int64
@@ -39,12 +38,13 @@ type mockRepo struct {
 	getPeriodsErr       error
 	getAddonPeriodsErr  error
 	getActivePeriodErr  error
-	closePeriodErr      error
-	openPeriodErr       error
-	updateSeatErr       error
 	billingHistErr      error
 	paddleUpdateErr     error
 	paddleOwnerErr      error
+	reconcileCalls      int
+	reconcileErr        error
+	ownerIDs            []int64
+	listOwnersErr       error
 }
 
 func (m *mockRepo) ListPlans(_ context.Context) ([]domain.Plan, error) {
@@ -106,20 +106,13 @@ func (m *mockRepo) GetAddonPeriodsForMonth(_ context.Context, _, _ int64, _ time
 	return m.addonPeriods, m.getAddonPeriodsErr
 }
 
-func (m *mockRepo) GetActivePeriod(_ context.Context, _ int64) (*domain.SeatPeriod, error) {
-	return m.activePeriod, m.getActivePeriodErr
+func (m *mockRepo) ReconcileSeatBilling(_ context.Context, _, _ int64, _, _ int, _ time.Time) error {
+	m.reconcileCalls++
+	return m.reconcileErr
 }
 
-func (m *mockRepo) CloseActivePeriod(_ context.Context, _ int64, _ time.Time) error {
-	return m.closePeriodErr
-}
-
-func (m *mockRepo) OpenPeriod(_ context.Context, _, _ int64, _, _ int, _, _ time.Time) error {
-	return m.openPeriodErr
-}
-
-func (m *mockRepo) UpdateSeatCount(_ context.Context, _ int64, _ int) error {
-	return m.updateSeatErr
+func (m *mockRepo) ListOwnerIDsForReconciliation(_ context.Context, _ int64, _ int) ([]int64, error) {
+	return m.ownerIDs, m.listOwnersErr
 }
 
 func (m *mockRepo) GetBillingHistory(_ context.Context, _ int64, _ int) ([]domain.BillingHistoryMonth, error) {
@@ -225,16 +218,31 @@ func TestComputeLineItem_OpenEndedUsesNow(t *testing.T) {
 	}
 }
 
-func TestComputeLineItem_NeverNegativeOrTooSmall(t *testing.T) {
+// A period whose end precedes its start never covered a day, so it must bill
+// zero rather than the old one-day floor. The floor charged a phantom day for
+// every duplicate open period the reconciler collapses, which double-billed the
+// day its replacement already covers.
+func TestComputeLineItem_InvertedPeriodBillsNothing(t *testing.T) {
 	billing := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
-	// Start AFTER end -> daysUsed bottoms out at 1.
+	// Start AFTER end: no day was ever covered.
 	start := time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC)
 
 	li := computeLineItem(12, 3000, start, &end, billing)
-	// Bottoms out at 1 day: 2 billable seats x 1 x 3000 / 30 = 200.
+	if li.AmountCents != 0 || li.IncludedCents != 0 {
+		t.Fatalf("inverted period billed amount=%d included=%d, want 0", li.AmountCents, li.IncludedCents)
+	}
+}
+
+// A single-day period is legitimate: start == end covers exactly one day.
+func TestComputeLineItem_SingleDayPeriodBillsOneDay(t *testing.T) {
+	billing := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	day := time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC)
+
+	li := computeLineItem(12, 3000, day, &day, billing)
+	// 2 billable seats x 1 day x 3000 / 30 = 200.
 	if li.AmountCents != 200 {
-		t.Errorf("expected 200 cents (1-day floor), got %d", li.AmountCents)
+		t.Fatalf("single-day period billed %d cents, want 200", li.AmountCents)
 	}
 }
 
@@ -272,11 +280,14 @@ func TestGetMySubscription_ReturnsSubscription(t *testing.T) {
 	}
 }
 
-func TestGetMySubscription_CreatesFreeWhenMissing(t *testing.T) {
+// A GET must not create the subscription row. It projects the default plan so
+// the response is unchanged, and the background job is what persists it.
+func TestGetMySubscription_ProjectsDefaultWithoutWriting(t *testing.T) {
 	repo := &mockRepo{
 		plan:         &domain.Plan{ID: 42, Slug: "free", TrialDays: 0},
-		subscription: &domain.Subscription{ID: 99, PlanName: "Free", PlanSlug: "free", Status: "active"},
+		activeSeats:  4,
 		getSubErr:    domain.ErrSubscriptionNotFound,
+		reconcileErr: errors.New("a read must never reach the reconciler"),
 	}
 	s := &Service{repo: repo}
 
@@ -287,14 +298,14 @@ func TestGetMySubscription_CreatesFreeWhenMissing(t *testing.T) {
 	if got == nil || got.PlanSlug != "free" || got.Status != "active" {
 		t.Fatalf("expected active free subscription, got %+v", got)
 	}
+	if got.SeatCount != 4 {
+		t.Fatalf("expected the current active seat count, got %d", got.SeatCount)
+	}
 	if repo.planSlug != defaultPlanSlug {
 		t.Fatalf("expected default plan slug %q, got %q", defaultPlanSlug, repo.planSlug)
 	}
-	if repo.upsertOwnerID != 98765 || repo.upsertPlanID != 42 || repo.upsertTrialDays != 0 {
-		t.Fatalf("unexpected upsert args owner=%d plan=%d trial=%d", repo.upsertOwnerID, repo.upsertPlanID, repo.upsertTrialDays)
-	}
-	if repo.getSubCalls != 5 {
-		t.Fatalf("expected initial miss, upsert verification reads, and final read, got %d calls", repo.getSubCalls)
+	if repo.upsertOwnerID != 0 || repo.reconcileCalls != 0 {
+		t.Fatalf("read wrote: upsertOwner=%d reconcileCalls=%d", repo.upsertOwnerID, repo.reconcileCalls)
 	}
 }
 

@@ -1,5 +1,9 @@
 // Package emailtest exposes authenticated non-production endpoints for manually
 // testing email template enqueueing end-to-end.
+//
+// The endpoints only exist for a run that has explicitly declared a
+// development environment; anything else, including an unset or unrecognised
+// APP_ENV, resolves to production and the routes 404.
 package emailtest
 
 import (
@@ -119,8 +123,18 @@ func badRequest(msg string) error {
 	return onekiterrors.New(http.StatusBadRequest, msg)
 }
 
+// requireAuthenticatedNonProduction refuses the request unless the run has
+// explicitly declared itself a development environment. It asks the allowlist
+// question directly (config.IsNonProduction) rather than negating
+// config.IsProduction so that the safety of this endpoint does not depend on
+// the polarity of the production check staying correct elsewhere.
+//
+// This matters more than the usual dev-only endpoint: /test/email renders the
+// real branded templates through the platform's sending domain and posts them
+// to a caller-supplied address, so treating an unset or misspelled APP_ENV as
+// development is a phishing primitive rather than a small convenience leak.
 func requireAuthenticatedNonProduction(ctx context.Context) error {
-	if config.IsProduction() {
+	if !config.IsNonProduction() {
 		return onekiterrors.New(http.StatusNotFound, "Not found")
 	}
 	device := authPkg.DeviceCtx(ctx)

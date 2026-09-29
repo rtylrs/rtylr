@@ -128,6 +128,25 @@ func (r *Repository) GetInviteByToken(ctx context.Context, token string) (*domai
 	}, nil
 }
 
+// GetAccountEmail reads the email of the account an invite acceptance will
+// link. An invite is addressed to an hr_employees email, so telling the
+// recipient apart from any other account needs the account side of the pair.
+// users is shared platform state; hr_core reads it for that comparison only.
+func (r *Repository) GetAccountEmail(ctx context.Context, userID int64) (string, error) {
+	var email string
+	if err := r.pool.QueryRowContext(ctx, "SELECT email FROM users WHERE id = ?", userID).Scan(&email); err != nil {
+		// An account that does not exist is reported exactly like a wrong
+		// recipient, so acceptance cannot be used to probe which user ids
+		// have accounts.
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", domain.ErrInviteRecipientMismatch
+		}
+		logger.Ctx(ctx).Error("failed to read account email for invite acceptance", logger.Any("user_id", userID), logger.Error(err))
+		return "", err
+	}
+	return email, nil
+}
+
 // AcceptInvite consumes the invite token and links the user to the invited
 // employee in a single transaction. Consuming the token before the link would
 // burn it when the link cannot succeed - the user_id already belongs to

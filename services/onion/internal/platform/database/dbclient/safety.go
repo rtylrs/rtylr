@@ -76,7 +76,11 @@ func checkProductionSafety(role, dsn string) error {
 		return nil
 	}
 
-	if config.IsProduction() || productionDBAllowed() {
+	// IsDeclaredProduction, not IsProduction: this guard needs a declaration
+	// that the operator means production. IsProduction() answers "not
+	// development", which is true for an unset, empty or unrecognised APP_ENV
+	// and would open the production host to exactly the runs this refuses.
+	if config.IsDeclaredProduction() || productionDBAllowed() {
 		return nil
 	}
 
@@ -87,16 +91,8 @@ func checkProductionSafety(role, dsn string) error {
 			"If this is another tier (staging, release candidate) that intentionally "+
 			"targets the production database, set %s=true.\n"+
 			"If this is a local/dev run, point DATABASE_URL/DB_HOST at a local database (see .env.example)",
-		role, host, currentAppEnv(), envAllowProductionDB,
+		role, host, config.CurrentAppEnv(), envAllowProductionDB,
 	)
-}
-
-func currentAppEnv() string {
-	if config.GlobalConfig != nil {
-		return config.GlobalConfig.AppEnv
-	}
-
-	return os.Getenv("APP_ENV")
 }
 
 // isLocalDBHost reports whether host (with or without a ":port" suffix) is on
@@ -142,7 +138,7 @@ func isLocalDBHost(host string) bool {
 // caught is a file that says "development" while pointing somewhere else, so the
 // declaration is the trigger.
 func isDevelopmentEnv() bool {
-	env := strings.ToLower(strings.TrimSpace(currentAppEnv()))
+	env := strings.ToLower(strings.TrimSpace(config.CurrentAppEnv()))
 
 	return env == "development" || env == "dev"
 }
@@ -191,7 +187,7 @@ func checkDevelopmentSafety(role, dsn string) error {
 			"copy .env.example (DB_HOST=localhost, DB_NAME=onion_dev).\n"+
 			"If this tier is not development, set APP_ENV to the tier it is.\n"+
 			"If a development run is genuinely meant to reach this database, set %s=true",
-		currentAppEnv(), role, host, envAllowRemoteDB,
+		config.CurrentAppEnv(), role, host, envAllowRemoteDB,
 	)
 }
 

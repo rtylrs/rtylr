@@ -14,8 +14,7 @@ import (
 )
 
 func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]domain.BillingHistoryMonth, error) {
-	now := time.Now().UTC()
-	currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+	currentMonth := domain.FirstOfUTCMonth(time.Now().UTC())
 
 	rows, err := r.queries.GetBillingHistoryPeriods(ctx, sqlc.GetBillingHistoryPeriodsParams{
 		OwnerID:      ownerID,
@@ -75,12 +74,13 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		effectiveEnd = *end
 	}
 
-	firstOfNextMonth := time.Date(billingMonth.Year(), billingMonth.Month()+1, 1, 0, 0, 0, 0, time.UTC)
-	daysInMonth := int(firstOfNextMonth.Sub(billingMonth).Hours() / 24)
+	daysInMonth := domain.DaysInUTCMonth(billingMonth)
 
-	daysUsed := int(effectiveEnd.Sub(start).Hours()/24) + 1
-	if daysUsed < 1 {
-		daysUsed = 1
+	// A period closed before it started covers no day and bills nothing; see the
+	// same rule in the application service layer.
+	daysUsed := 0
+	if !effectiveEnd.Before(start) {
+		daysUsed = int(effectiveEnd.Sub(start).Hours()/24) + 1
 	}
 	if daysUsed > daysInMonth {
 		daysUsed = daysInMonth

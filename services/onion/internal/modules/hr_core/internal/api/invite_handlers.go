@@ -92,22 +92,28 @@ type VerifyInviteRequest struct {
 	Token string `json:"token"`
 }
 
+// VerifyInviteResponse reports only whether a token can still be accepted. The
+// employee and business a token points at are tenant join keys, and a token is
+// readable by everyone it was ever shown to, so answering with those ids would
+// hand that caller another tenant's internal records.
 type VerifyInviteResponse struct {
-	Valid      bool  `json:"valid"`
-	EmployeeID int64 `json:"employee_id"`
-	OwnerID    int64 `json:"owner_id"`
+	Valid bool `json:"valid"`
 }
 
 func (h *VerifyInviteHandler) Serve(ctx context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, error) {
-	invite, err := h.Service.VerifyInviteToken(ctx, req.Token)
-	if err != nil {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return VerifyInviteResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	if _, err := h.Service.VerifyInviteToken(ctx, req.Token); err != nil {
 		if errors.Is(err, domain.ErrInviteTokenInvalid) || errors.Is(err, domain.ErrInviteTokenExpired) {
 			return VerifyInviteResponse{Valid: false}, nil
 		}
 		return VerifyInviteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to verify invite")
 	}
 
-	return VerifyInviteResponse{Valid: true, EmployeeID: invite.EmployeeID, OwnerID: invite.OwnerID}, nil
+	return VerifyInviteResponse{Valid: true}, nil
 }
 
 // --- Accept Invite ---
@@ -116,9 +122,10 @@ func AcceptInviteRoutes() []string { return []string{"/hr/employees/invite/accep
 
 type AcceptInviteHandler struct{ Service *application.Service }
 
+// AcceptInviteRequest carries the token only. The account that becomes the
+// employee is the authenticated caller's, so no request field can select it.
 type AcceptInviteRequest struct {
-	Token  string `json:"token"`
-	UserID int64  `json:"user_id"`
+	Token string `json:"token"`
 }
 
 type AcceptInviteResponse struct {
@@ -129,22 +136,30 @@ func (h *AcceptInviteHandler) Validate(_ context.Context, req *AcceptInviteReque
 	if req.Token == "" {
 		return onekiterrors.New(http.StatusBadRequest, "token is required")
 	}
-	if req.UserID == 0 {
-		return onekiterrors.New(http.StatusBadRequest, "user_id is required")
-	}
 	return nil
 }
 
 func (h *AcceptInviteHandler) Serve(ctx context.Context, req *AcceptInviteRequest) (AcceptInviteResponse, error) {
-	err := h.Service.AcceptInvite(ctx, req.Token, req.UserID)
-	if err != nil {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return AcceptInviteResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	if err := h.Service.AcceptInviteForCaller(ctx, req.Token, device.User.UserID); err != nil {
 		if errors.Is(err, domain.ErrInviteTokenInvalid) {
 			return AcceptInviteResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid invite token")
 		}
 		if errors.Is(err, domain.ErrInviteTokenExpired) {
 			return AcceptInviteResponse{}, onekiterrors.New(http.StatusGone, "Invite token has expired")
 		}
-		logger.Ctx(ctx).Error("failed to accept invite", logger.String("token", req.Token), logger.Error(err))
+		if errors.Is(err, domain.ErrInviteRecipientMismatch) {
+			return AcceptInviteResponse{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrUserAlreadyLinked) || errors.Is(err, domain.ErrEmployeeNotFound) {
+			return AcceptInviteResponse{}, onekiterrors.New(http.StatusConflict, "Invite cannot be accepted")
+		}
+		// The token is a credential, so it is not part of the log line.
+		logger.Ctx(ctx).Error("failed to accept invite", logger.Error(err))
 		return AcceptInviteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to accept invite")
 	}
 

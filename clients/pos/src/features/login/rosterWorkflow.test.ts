@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mapRoster, extractRoster, isCompletePin } from './rosterWorkflow';
+import { mapRoster, extractRoster } from './rosterWorkflow';
 
 describe('extractRoster', () => {
   it('reads the roster envelope', () => {
@@ -52,17 +52,5 @@ describe('mapRoster', () => {
   it('treats a member with no PIN as needing setup', () => {
     const out = mapRoster({ roster: [{ user_id: 9, name: 'New', has_pin: false }] });
     expect(out[0].hasPin).toBe(false);
-  });
-});
-
-describe('isCompletePin', () => {
-  it('accepts exactly 4 digits', () => {
-    expect(isCompletePin('1234')).toBe(true);
-  });
-  it('rejects wrong length or non-digits', () => {
-    expect(isCompletePin('123')).toBe(false);
-    expect(isCompletePin('12345')).toBe(false);
-    expect(isCompletePin('12a4')).toBe(false);
-    expect(isCompletePin('')).toBe(false);
   });
 });

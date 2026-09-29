@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -92,18 +91,7 @@ func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequ
 
 	p, err := h.FinanceService.RecordPayment(ctx, businessID, input)
 	if err != nil {
-		if errors.Is(err, domain.ErrInvoiceNotFound) {
-			return RecordPaymentResponse{}, onekiterrors.New(http.StatusNotFound, "Invoice not found")
-		}
-
-		if errors.Is(err, domain.ErrInvalidPaymentAmount) {
-			return RecordPaymentResponse{}, onekiterrors.New(http.StatusBadRequest, "Amount must be greater than zero")
-		}
-		if errors.Is(err, domain.ErrPaymentExceedsBalance) {
-			return RecordPaymentResponse{}, onekiterrors.New(http.StatusBadRequest, "Payment cannot exceed the remaining amount due")
-		}
-
-		return RecordPaymentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to record payment")
+		return RecordPaymentResponse{}, invoiceServiceError(err, "Failed to record payment")
 	}
 
 	return RecordPaymentResponse{

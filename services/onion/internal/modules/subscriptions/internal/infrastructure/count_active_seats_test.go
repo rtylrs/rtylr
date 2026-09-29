@@ -84,7 +84,7 @@ func insertTenantMember(t *testing.T, db *sql.DB, businessID int64, permission s
 	return userID
 }
 
-// CountActiveSeats feeds syncSubscriptionBillingState, so a deactivated member
+// CountActiveSeats feeds the seat reconciler, so a deactivated member
 // must stop counting even though users.business_id keeps pointing at the
 // business. Before the fix the third UNION branch counted them forever.
 func TestSubscriptions_CountActiveSeats_DeactivatedMemberFreesSeat(t *testing.T) {

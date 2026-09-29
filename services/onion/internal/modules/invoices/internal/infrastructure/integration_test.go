@@ -339,7 +339,11 @@ func TestGetInvoiceItems_ReturnsItems(t *testing.T) {
 	}
 }
 
-func TestUpdateInvoiceStatus_ToPaid(t *testing.T) {
+// A status-only write must never be able to mark an invoice paid: "paid" adds
+// total to revenue and drops the invoice out of receivables, so doing it
+// without a payment makes the books balance with both sides wrong. Only
+// RecordPayment computes it.
+func TestUpdateInvoiceStatus_CannotMarkInvoicePaid(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -351,24 +355,35 @@ func TestUpdateInvoiceStatus_ToPaid(t *testing.T) {
 		DueDate:       time.Now().Add(30 * 24 * time.Hour),
 		Currency:      "USD",
 		Status:        "draft",
+		Total:         1085.00,
+		AmountDue:     1085.00,
 	})
 	if err != nil {
 		t.Fatalf("CreateInvoice: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM finance_payments WHERE invoice_id = ?", invID)
 		db.ExecContext(ctx, "DELETE FROM finance_invoices WHERE id = ?", invID)
 	})
 
-	if err := repo.UpdateInvoiceStatus(ctx, testutil.OwnerID, invID, "paid"); err != nil {
-		t.Fatalf("UpdateInvoiceStatus: %v", err)
+	for _, status := range []string{domain.StatusPaid, domain.StatusPartial} {
+		if err := repo.UpdateInvoiceStatus(ctx, testutil.OwnerID, invID, status); !errors.Is(err, domain.ErrInvoiceStatusNotSettable) {
+			t.Fatalf("UpdateInvoiceStatus(%q) = %v, want ErrInvoiceStatusNotSettable", status, err)
+		}
 	}
 
 	inv, err := repo.GetInvoiceByID(ctx, testutil.OwnerID, invID)
 	if err != nil {
-		t.Fatalf("GetInvoiceByID after status update: %v", err)
+		t.Fatalf("GetInvoiceByID after status write: %v", err)
 	}
-	if inv.Status != "paid" {
-		t.Errorf("Status = %q after UpdateInvoiceStatus, want 'paid'", inv.Status)
+	if inv.Status != domain.StatusDraft {
+		t.Errorf("status = %q after a status-only write, want %q", inv.Status, domain.StatusDraft)
+	}
+	if inv.PaidDate != nil {
+		t.Errorf("paid_date = %v, want NULL", inv.PaidDate)
+	}
+	if inv.AmountPaid != 0 {
+		t.Errorf("amount_paid = %v, want 0", inv.AmountPaid)
 	}
 }
 
@@ -391,12 +406,19 @@ func TestInvoiceLifecycle_PreventsReopeningAndEditingPaidInvoice(t *testing.T) {
 		t.Fatalf("CreateInvoice: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM finance_payments WHERE invoice_id = ?", invID)
 		db.ExecContext(ctx, "DELETE FROM finance_invoice_items WHERE invoice_id = ?", invID)
 		db.ExecContext(ctx, "DELETE FROM finance_invoices WHERE id = ?", invID)
 	})
 
-	if err := repo.UpdateInvoiceStatus(ctx, testutil.OwnerID, invID, domain.StatusPaid); err != nil {
-		t.Fatalf("mark invoice paid: %v", err)
+	// A recorded payment, not a status write, is what makes an invoice paid.
+	if _, err := repo.RecordPayment(ctx, testutil.OwnerID, domain.PaymentInput{
+		InvoiceID:   invID,
+		Amount:      100,
+		PaymentDate: time.Now().Format("2006-01-02"),
+		Method:      "card",
+	}); err != nil {
+		t.Fatalf("record payment: %v", err)
 	}
 	if err := repo.UpdateInvoiceStatus(ctx, testutil.OwnerID, invID, domain.StatusDraft); err != nil {
 		t.Fatalf("attempt to reopen paid invoice: %v", err)

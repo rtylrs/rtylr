@@ -2,11 +2,7 @@ package infrastructure
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/sha256"
 	"database/sql"
-	"encoding/binary"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -120,37 +116,70 @@ func (r *Repository) GetUserByIdentifier(ctx context.Context, identifier string)
 	), nil
 }
 
-func (r *Repository) CreateEmailVerificationCode(ctx context.Context, email string) (string, error) {
+// CreateEmailVerificationCode issues a code for the account owning email. The
+// stored digest is an HMAC over the user id and the code, so the code only ever
+// verifies the account it was issued for.
+func (r *Repository) CreateEmailVerificationCode(ctx context.Context, email string) (*EmailVerification, error) {
 	user, err := r.GetUserByEmail(ctx, strings.ToLower(strings.TrimSpace(email)))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	var randomBytes [4]byte
-	if _, err := rand.Read(randomBytes[:]); err != nil {
-		return "", err
+	code, err := newEmailVerificationCode()
+	if err != nil {
+		return nil, err
 	}
-	code := fmt.Sprintf("%06d", binary.BigEndian.Uint32(randomBytes[:])%1_000_000)
-	hash := sha256.Sum256([]byte(code))
+	hash, err := emailVerificationHash(user.ID, code)
+	if err != nil {
+		return nil, err
+	}
 	_, err = r.db.ExecContext(ctx, `
 		INSERT INTO user_email_verification_tokens (user_id, token_hash, expires_at)
 		VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
-		user.ID, hex.EncodeToString(hash[:]))
+		user.ID, hash)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return code, nil
+	// A new code starts with a full attempt budget; a user who exhausted the
+	// previous one is not locked out by asking for a fresh code.
+	emailVerificationAttempts.resetUser(strconv.FormatInt(user.ID, 10))
+
+	return &EmailVerification{
+		UserID: user.ID,
+		Code:   code,
+		Token:  formatEmailVerificationToken(user.ID, code),
+	}, nil
 }
 
+// ConsumeEmailVerificationCode spends the code carried by token. The token is
+// self-describing ("<userID>.<code>"), which is what lets the anonymous
+// endpoint recompute the user-bound digest: a code issued for user A cannot
+// verify user B, and a code issued for A cannot be replayed after B's
+// provisioning rows are touched.
+//
+// Codes issued before the user binding existed (six digits, stored as an
+// unkeyed sha256) are refused outright rather than honoured, because the only
+// way to verify them is a digest-only lookup — the exact lookup that lets a
+// guessed code spend an unrelated account's row. They are at most ten minutes
+// old, and resend-verification mints a replacement in one click.
 func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token string) error {
-	code := strings.TrimSpace(token)
-	if len(code) != 6 {
-		return errors.New("invalid email verification code")
+	userID, code, ok := parseEmailVerificationToken(token)
+	if !ok {
+		if isLegacyEmailVerificationCode(token) {
+			return ErrSupersededEmailVerificationCode
+		}
+		return ErrInvalidEmailVerificationCode
 	}
-	if _, err := strconv.Atoi(code); err != nil {
-		return errors.New("invalid email verification code")
+
+	hash, err := emailVerificationHash(userID, code)
+	if err != nil {
+		return err
 	}
-	hash := sha256.Sum256([]byte(code))
-	hashText := hex.EncodeToString(hash[:])
+	userKey := strconv.FormatInt(userID, 10)
+	codeKey := userKey + "|" + hash
+	if !emailVerificationAttempts.check(userKey, codeKey) {
+		return ErrTooManyEmailVerificationAttempts
+	}
+
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -159,17 +188,20 @@ func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token str
 		_ = tx.Rollback()
 		return cause
 	}
-	var userID int64
 	var tokenID int64
+	// user_id is in the predicate as well as inside the digest, so the row this
+	// spends is the one the code was issued for and not merely the one whose
+	// digest collides.
 	err = tx.QueryRowContext(ctx, `
-		SELECT id, user_id
+		SELECT id
 		FROM user_email_verification_tokens
-		WHERE token_hash = ? AND consumed_at IS NULL AND expires_at > NOW()
+		WHERE user_id = ? AND token_hash = ? AND consumed_at IS NULL AND expires_at > NOW()
 		ORDER BY id DESC
 		LIMIT 1
-		FOR UPDATE`, hashText).Scan(&tokenID, &userID)
+		FOR UPDATE`, userID, hash).Scan(&tokenID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return rollback(errors.New("invalid or expired email verification code"))
+		emailVerificationAttempts.recordFailure(userKey, codeKey)
+		return rollback(ErrInvalidEmailVerificationCode)
 	}
 	if err != nil {
 		return rollback(err)
@@ -192,7 +224,12 @@ func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token str
 		WHERE user_id = ? AND status IN ('pending', 'suspended')`, userID); err != nil {
 		return rollback(err)
 	}
-	return tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	emailVerificationAttempts.resetUser(userKey)
+
+	return nil
 }
 
 // EnsureOwnerAuthorizationMembership writes the business owner's row in

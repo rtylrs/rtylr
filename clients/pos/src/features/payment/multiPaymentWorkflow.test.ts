@@ -68,6 +68,12 @@ describe('finalizeMultiPayment', () => {
       chargeOrder,
     });
 
-    expect(chargeOrder).toHaveBeenCalledWith({ orderId: '42', paymentMethod: 'card', amountPaid: 20 });
+    expect(chargeOrder).toHaveBeenCalledWith({
+      orderId: '42',
+      paymentMethod: 'card',
+      amountPaid: 20,
+      // Required on this route; the server answers 428 without it.
+      idempotencyKey: expect.any(String),
+    });
   });
 });

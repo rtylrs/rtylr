@@ -210,7 +210,10 @@ func TestCreateInvoice_Totals_Table(t *testing.T) {
 			want: domain.Invoice{Subtotal: 100, DiscountAmount: 0, TaxAmount: 20, Total: 120},
 		},
 		{
-			name: "header discount applies to pre-tax base only",
+			// A $10 discount leaves $90 payable, so the $10 item tax and the
+			// $10 header tax are each 10% of $90. Taxing the item on the
+			// undiscounted $100 would declare $19 of tax on $90 of revenue.
+			name: "header discount also reduces the item tax base",
 			in: domain.InvoiceInput{
 				IssueDate:     "2024-06-15",
 				DueDate:       "2024-06-20",
@@ -221,7 +224,7 @@ func TestCreateInvoice_Totals_Table(t *testing.T) {
 					{Quantity: 1, UnitPrice: 100, TaxRate: 10},
 				},
 			},
-			want: domain.Invoice{Subtotal: 100, DiscountAmount: 10, TaxAmount: 19, Total: 109},
+			want: domain.Invoice{Subtotal: 100, DiscountAmount: 10, TaxAmount: 18, Total: 108},
 		},
 		{
 			name: "no item tax keeps legacy behavior",
@@ -236,6 +239,9 @@ func TestCreateInvoice_Totals_Table(t *testing.T) {
 			want: domain.Invoice{Subtotal: 200, DiscountAmount: 0, TaxAmount: 10, Total: 210},
 		},
 		{
+			// $20 off a $150 basket leaves $130 payable, split $86.67/$43.33
+			// across the lines. Only the second line is taxed, on its own
+			// $43.33 share: 4.33, not 10% of the undiscounted $50.
 			name: "fixed discount with mixed item tax rates",
 			in: domain.InvoiceInput{
 				IssueDate:     "2024-06-15",
@@ -246,7 +252,7 @@ func TestCreateInvoice_Totals_Table(t *testing.T) {
 					{Quantity: 1, UnitPrice: 50, TaxRate: 10},
 				},
 			},
-			want: domain.Invoice{Subtotal: 150, DiscountAmount: 20, TaxAmount: 5, Total: 135},
+			want: domain.Invoice{Subtotal: 150, DiscountAmount: 20, TaxAmount: 4.33, Total: 134.33},
 		},
 	}
 

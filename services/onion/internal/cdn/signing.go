@@ -4,8 +4,10 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/subtle"
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -41,10 +45,20 @@ func (c *CDN) signDelivery(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "signing is not configured", http.StatusServiceUnavailable)
 		return
 	}
+	scope, ok := callerScope(r)
+	if !ok {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
 
 	var req signDeliveryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid sign request", http.StatusBadRequest)
+		return
+	}
+
+	if err := c.authorizeSignTarget(r, scope, req); err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -64,6 +78,60 @@ func (c *CDN) signDelivery(w http.ResponseWriter, r *http.Request) {
 		ExpiresAt: expiresAt,
 		Signature: u.Query().Get("sig"),
 	}, "no-store")
+}
+
+// authorizeSignTarget holds a sign request to the caller's own assets. A
+// signature is a bearer credential for the file it names, so minting one for
+// another tenant's uuid would be a cross-tenant read. Targets that name no
+// stored file (a proxied remote image, for example) are not tenant data and
+// pass through; a target that does name one is checked against the caller.
+func (c *CDN) authorizeSignTarget(r *http.Request, scope mutationScope, req signDeliveryRequest) error {
+	target := strings.TrimSpace(req.ID)
+	if target == "" {
+		raw := strings.TrimSpace(req.URL)
+		if raw == "" {
+			raw = strings.TrimSpace(req.Path)
+		}
+		if id, found := fileUUIDFromCanonicalURL(raw); found {
+			target = id
+		} else if id, found := storageKeyFileUUID(uploadURLStorageKeyFromTarget(raw)); found {
+			target = id
+		}
+	}
+	if target == "" {
+		return nil
+	}
+	// A file in another tenant is reported exactly like one that does not
+	// exist, so signing cannot be used to probe for ids.
+	if _, err := c.fileForRead(r.Context(), scope.read(), target); err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(r.Context()).Error("cdn: sign authorization failed",
+				logger.String("file_uuid", target), logger.Error(err))
+		}
+		return errors.New("file not found")
+	}
+	return nil
+}
+
+// uploadURLStorageKeyFromTarget pulls a CDN storage key out of a `?url=`
+// purge/sign target, so originals/<uuid> and transformed/<uuid>/ are subject
+// to the same ownership check as /files/<uuid>.
+func uploadURLStorageKeyFromTarget(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+	if u, err := url.Parse(raw); err == nil {
+		if key := u.Query().Get("url"); key != "" {
+			if inner, err := url.Parse(key); err == nil && inner.Path != "" {
+				return strings.TrimPrefix(inner.Path, "/")
+			}
+		}
+		if u.Path != "" {
+			return strings.TrimPrefix(u.Path, "/")
+		}
+	}
+	return strings.TrimPrefix(raw, "/")
 }
 
 func (c *CDN) signableURL(req signDeliveryRequest) (string, error) {
@@ -145,39 +213,42 @@ func (c *CDN) signedURL(raw string, expiresAt int64, secret string) (*url.URL, e
 	return u, nil
 }
 
-func (c *CDN) validateSignedDelivery(w http.ResponseWriter, r *http.Request) bool {
+// validateSignedDelivery checks a delivery signature and returns the read scope
+// it grants. An unsigned request keeps the scope the caller already had — the
+// anonymous/public surface or their own tenant — so signing stays an optional
+// cache and expiry control rather than the only way to reach a private asset.
+func (c *CDN) validateSignedDelivery(w http.ResponseWriter, r *http.Request) (readScope, bool) {
+	base := deliveryScopeFrom(r.Context())
 	query := r.URL.Query()
 	sig := strings.TrimSpace(query.Get("sig"))
 	expires := strings.TrimSpace(query.Get("expires"))
 	if sig == "" && expires == "" {
-		// Public delivery remains supported; signing is an optional cache and
-		// expiry control for assets that need it.
-		return true
+		return base, true
 	}
 	if sig == "" || expires == "" {
 		http.Error(w, "invalid signed url", http.StatusForbidden)
-		return false
+		return base, false
 	}
 	secret := c.signingSecret()
 	if secret == "" {
 		http.Error(w, "signed delivery is not configured", http.StatusForbidden)
-		return false
+		return base, false
 	}
 	exp, err := strconv.ParseInt(expires, 10, 64)
 	if err != nil || exp <= 0 {
 		http.Error(w, "invalid signed url expiry", http.StatusForbidden)
-		return false
+		return base, false
 	}
 	if time.Now().Unix() > exp {
 		http.Error(w, "signed url expired", http.StatusForbidden)
-		return false
+		return base, false
 	}
 	expected := signDeliveryPath(secret, r.URL.Path, query)
 	if subtle.ConstantTimeCompare([]byte(sig), []byte(expected)) != 1 {
 		http.Error(w, "invalid signed url", http.StatusForbidden)
-		return false
+		return base, false
 	}
-	return true
+	return signedRead(), true
 }
 
 func deliveryCacheControl(r *http.Request) string {

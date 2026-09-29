@@ -15,6 +15,83 @@ import (
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
+// ─── Order state machine ──────────────────────────────────────────────────────
+//
+// pos_orders.status (workflow) and pos_orders.payment_status (money) are
+// independent columns, and each of the payment/refund/void writes below sets
+// only one of them. Without a shared guard the same order can be paid, then
+// relabelled voided, then paid out again: a void erases the sale from the
+// record while the cash stays in the drawer and the stock movement stays
+// deducted, and a second charge on a refunded order is money the customer pays
+// twice while the shift close still subtracts the earlier refund. The three
+// helpers hold the legal transitions in one place; every repository calls them
+// with the row's locked state before it writes anything.
+
+// errOrderAlreadyVoided marks the idempotent re-send of a void. Reporting
+// success without writing keeps a second reason out of the audit trail, the
+// same way UpdateOrderStatus treats a same-value status write.
+var errOrderAlreadyVoided = errors.New("order is already voided")
+
+// moneyMoved reports whether money has been taken or returned against the
+// order. 'partial' is in the column's enum even though no write path sets it
+// yet, so a deposit recorded there is still cash in the drawer.
+func moneyMoved(paymentStatus domain.PaymentStatus) bool {
+	switch paymentStatus {
+	case domain.PaymentStatusPartial, domain.PaymentStatusPaid, domain.PaymentStatusRefunded:
+		return true
+	default:
+		return false
+	}
+}
+
+// checkVoidable allows a void only while the order is still editable and no
+// money has moved: a paid or refunded order must be settled by refunding or
+// cashing out, not by relabelling the sale.
+func checkVoidable(status domain.OrderStatus, paymentStatus domain.PaymentStatus) error {
+	if moneyMoved(paymentStatus) || status == domain.OrderStatusPaid || status == domain.OrderStatusRefunded {
+		return domain.ErrOrderAlreadyPaid
+	}
+	if status == domain.OrderStatusCancelled {
+		return domain.ErrOrderNotEditable
+	}
+	if status == domain.OrderStatusVoided {
+		return errOrderAlreadyVoided
+	}
+	return nil
+}
+
+// checkPayable allows a charge only while the order is an open, unpaid sale.
+// Voiding or cancelling an order ends it, and a settled one is never chargeable
+// again.
+func checkPayable(status domain.OrderStatus, paymentStatus domain.PaymentStatus) error {
+	if paymentStatus == domain.PaymentStatusPaid || status == domain.OrderStatusPaid {
+		return domain.ErrOrderAlreadyPaid
+	}
+	switch status {
+	case domain.OrderStatusVoided, domain.OrderStatusCancelled, domain.OrderStatusRefunded:
+		return domain.ErrOrderNotEditable
+	}
+	if paymentStatus == domain.PaymentStatusRefunded {
+		return domain.ErrOrderNotEditable
+	}
+	return nil
+}
+
+// checkRefundable allows a refund only for an order that took money and is not
+// already closed. A voided or cancelled order is refused even when its
+// payment_status still reads paid: rows voided before the void guard existed
+// carry exactly that shape and must not be paid out a second time.
+func checkRefundable(status domain.OrderStatus, paymentStatus domain.PaymentStatus) error {
+	switch status {
+	case domain.OrderStatusVoided, domain.OrderStatusCancelled:
+		return domain.ErrOrderNotEditable
+	}
+	if paymentStatus != domain.PaymentStatusPaid && paymentStatus != domain.PaymentStatusRefunded {
+		return domain.ErrOrderNotPaid
+	}
+	return nil
+}
+
 func (r *Repository) UpdateOrderStatus(ctx context.Context, businessID, orderID int64, status domain.OrderStatus) error {
 	result, err := r.queries.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
 		Status:     sqlc.NullPosOrdersStatus{PosOrdersStatus: sqlc.PosOrdersStatus(status), Valid: true},
@@ -137,6 +214,22 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 	}
 	if paymentRow.PaymentStatus.Valid && paymentRow.PaymentStatus.PosOrdersPaymentStatus == sqlc.PosOrdersPaymentStatusPaid {
 		return domain.ErrOrderAlreadyPaid
+	}
+
+	// MarkOrderPaid keys its own guard off payment_status alone, so a voided,
+	// cancelled, or refunded order would be resurrected as a live sale here.
+	// The row is already locked by the read above.
+	var orderStatus string
+	if err = tx.QueryRowContext(ctx,
+		`SELECT status FROM pos_orders WHERE business_id = ? AND id = ?`,
+		businessID, orderID).Scan(&orderStatus); err != nil {
+		logger.Ctx(ctx).Error("Failed to read order status for payment", logger.Error(err))
+		return err
+	}
+	if err := checkPayable(domain.OrderStatus(orderStatus), domain.PaymentStatus(paymentRow.PaymentStatus.PosOrdersPaymentStatus)); err != nil {
+		logger.Ctx(ctx).Warn("ProcessPayment rejected: order is not payable",
+			logger.Any("order_id", orderID), logger.Any("status", orderStatus))
+		return err
 	}
 
 	total := sqlutil.DecimalToFloat(paymentRow.Total.String)

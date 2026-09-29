@@ -126,8 +126,13 @@ WHERE business_id = ? AND id = ? AND payment_status <> 'paid';
 -- name: GetOrderForPayment :one
 SELECT total, table_id, type, payment_status FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
 
+-- The refundable cap is GREATEST(total, amount_paid - change_due): the net cash
+-- this order actually left with the merchant. amount_paid alone would include
+-- change already handed back, and total alone would refuse a tip that was
+-- genuinely retained. The locked read carries all three so the cap is decided
+-- on the row the caller is about to write.
 -- name: GetOrderForRefund :one
-SELECT total, payment_status FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
+SELECT total, amount_paid, change_due, payment_status FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
 
 -- name: SumRefundsForOrder :one
 SELECT COALESCE(SUM(amount), 0) AS refunded FROM pos_refunds WHERE business_id = ? AND order_id = ?;
@@ -136,6 +141,17 @@ SELECT COALESCE(SUM(amount), 0) AS refunded FROM pos_refunds WHERE business_id =
 INSERT INTO pos_refunds (owner_id, business_id, order_id, amount, reason, refunded_by)
 VALUES (?, ?, ?, ?, ?, ?);
 
+-- Retires the sale: only reached once the cumulative refunds have met the
+-- refundable cap the caller computed from the locked row. A refund below the
+-- cap must NOT call this; it leaves the order at payment_status 'paid' so the
+-- goods the customer took stay in GetSessionTotals and the dashboard.
+--
+-- Note the enum's 'partial' value is deliberately not used for a part-returned
+-- order. Every revenue query keys on payment_status = 'paid'
+-- (GetSessionTotals below, plus pos_day_summary, pos_receipts and insights),
+-- so writing 'partial' would drop the sale from those reports exactly as
+-- 'refunded' does. The partial refund is recorded in pos_refunds and rolled
+-- into the session's total_refunds instead.
 -- name: MarkOrderRefunded :exec
 UPDATE pos_orders SET status = 'refunded', payment_status = 'refunded'
 WHERE business_id = ? AND id = ?;

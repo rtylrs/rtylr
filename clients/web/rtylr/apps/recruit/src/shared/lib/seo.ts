@@ -1,3 +1,5 @@
+import { readConsent } from '@voxire/consent';
+
 import type { Customization, RecruitCareer } from './types';
 
 /**
@@ -80,39 +82,118 @@ export function applySEO(
 }
 
 /**
+ * Analytics identifiers are free text in the admin form and in the database
+ * (VARCHAR(32), no server-side format check), so the format is pinned here:
+ * GA4 measurement IDs are `G-` followed by alphanumerics, Meta pixel IDs are
+ * digits. Anything else is dropped, not escaped - an identifier that is not
+ * in the documented format emits no analytics at all.
+ */
+const GA_MEASUREMENT_ID = /^G-[A-Za-z0-9]{1,29}$/;
+const META_PIXEL_ID = /^\d{1,32}$/;
+
+const CONSENT_EVENT = 'rtylr-consent-change';
+
+/**
+ * The inline bodies are static strings. The identifier travels in a data
+ * attribute and is read back through `document.currentScript`, so nothing a
+ * business types is ever concatenated into script source - the scripts cannot
+ * be broken out of even if the patterns above are loosened later.
+ */
+const GA_INIT_SOURCE =
+  '(function(){var el=document.currentScript;var id=el&&el.getAttribute("data-recruit-ga");' +
+  'if(!id)return;window.dataLayer=window.dataLayer||[];' +
+  'function gtag(){window.dataLayer.push(arguments);}window.gtag=gtag;' +
+  'gtag("js",new Date());gtag("config",id);})();';
+
+const PIXEL_INIT_SOURCE =
+  '(function(){var el=document.currentScript;var id=el&&el.getAttribute("data-recruit-pixel");' +
+  'if(!id)return;' +
+  '!function(f,b,e,v,n,t){if(f.fbq)return;n=f.fbq=function(){' +
+  'n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};' +
+  'if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];' +
+  't=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];' +
+  's.parentNode.insertBefore(t,s)}' +
+  '(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");' +
+  'window.fbq("init",id);window.fbq("track","PageView");})();';
+
+function validAnalyticsId(raw: string | null | undefined, pattern: RegExp): string | null {
+  const value = (raw ?? '').trim();
+  return pattern.test(value) ? value : null;
+}
+
+function removeAnalyticsScripts(): void {
+  document
+    .querySelectorAll('script[id^="recruit-ga-"], script[id^="recruit-pixel-"]')
+    .forEach((el) => el.remove());
+}
+
+function injectGA(gaID: string): void {
+  const markerID = `recruit-ga-${gaID}`;
+  if (document.getElementById(markerID)) return;
+
+  const loader = document.createElement('script');
+  loader.id = markerID;
+  loader.async = true;
+  loader.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaID)}`;
+  document.head.appendChild(loader);
+
+  const init = document.createElement('script');
+  init.id = `${markerID}-init`;
+  init.setAttribute('data-recruit-ga', gaID);
+  init.text = GA_INIT_SOURCE;
+  document.head.appendChild(init);
+}
+
+function injectMetaPixel(pixelID: string): void {
+  const markerID = `recruit-pixel-${pixelID}`;
+  if (document.getElementById(markerID)) return;
+
+  const script = document.createElement('script');
+  script.id = markerID;
+  script.setAttribute('data-recruit-pixel', pixelID);
+  script.text = PIXEL_INIT_SOURCE;
+  document.head.appendChild(script);
+}
+
+/** Tracking loads only on an explicit opt-in, and is torn down on withdrawal. */
+function syncAnalytics(customization: Customization): void {
+  if (readConsent() !== 'granted') {
+    removeAnalyticsScripts();
+    return;
+  }
+
+  const gaID = validAnalyticsId(customization.gaMeasurementId, GA_MEASUREMENT_ID);
+  if (gaID) injectGA(gaID);
+
+  const pixelID = validAnalyticsId(customization.metaPixelId, META_PIXEL_ID);
+  if (pixelID) injectMetaPixel(pixelID);
+}
+
+let watchedCustomization: Customization | null = null;
+let watchingConsent = false;
+
+/**
  * loadAnalytics injects GA4 and / or Meta Pixel loaders based on the
  * customization. Each is gated by a marker id so repeat calls across
  * route changes don't re-add the script tags.
+ *
+ * Nothing is emitted until the visitor has granted cookie consent: the ids
+ * are business-controlled and the careers pages are anonymous, so firing
+ * them pre-consent would be tracking without a lawful basis. Consent can be
+ * given or withdrawn after this call, so the loader also listens for the
+ * shared consent event and re-syncs.
  */
 export function loadAnalytics(customization: Customization): void {
   if (typeof document === 'undefined') return;
 
-  if (customization.gaMeasurementId) {
-    const gaID = customization.gaMeasurementId.trim();
-    const markerID = `recruit-ga-${gaID}`;
-    if (!document.getElementById(markerID)) {
-      const loader = document.createElement('script');
-      loader.id = markerID;
-      loader.async = true;
-      loader.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaID)}`;
-      document.head.appendChild(loader);
-
-      const init = document.createElement('script');
-      init.text = `window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '${gaID}');`;
-      document.head.appendChild(init);
-    }
+  watchedCustomization = customization;
+  if (!watchingConsent) {
+    watchingConsent = true;
+    window.addEventListener(CONSENT_EVENT, () => {
+      if (watchedCustomization) syncAnalytics(watchedCustomization);
+    });
   }
-
-  if (customization.metaPixelId) {
-    const pixelID = customization.metaPixelId.trim();
-    const markerID = `recruit-pixel-${pixelID}`;
-    if (!document.getElementById(markerID)) {
-      const script = document.createElement('script');
-      script.id = markerID;
-      script.text = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init', '${pixelID}');fbq('track', 'PageView');`;
-      document.head.appendChild(script);
-    }
-  }
+  syncAnalytics(customization);
 }
 
 /**
