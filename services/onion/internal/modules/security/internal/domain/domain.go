@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrMFAEnforcedByOrganization = errors.New("MFA is required by the organization")
 
 type SecuritySettings struct {
 	TwoFactorEnabled bool            `json:"two_factor_enabled"`

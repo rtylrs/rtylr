@@ -129,3 +129,39 @@ func TestFeaturePermissionForRequestDoesNotGuessUnmappedRoutes(t *testing.T) {
 		t.Fatalf("unmapped route returned (%q, %q, true)", app, permission)
 	}
 }
+
+func TestHubFeaturePermissionFallsBackToOwnerAdminWithoutEffectiveAccess(t *testing.T) {
+	cases := []struct {
+		name string
+		user *authPkg.AuthUser
+		want bool
+	}{
+		{
+			name: "owner without normalized membership row",
+			user: &authPkg.AuthUser{UserID: 1, BusinessID: 1, Role: "owner"},
+			want: true,
+		},
+		{
+			name: "console admin without normalized membership row",
+			user: &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "console_admin"},
+			want: true,
+		},
+		{
+			name: "admin without normalized membership row",
+			user: &authPkg.AuthUser{UserID: 3, BusinessID: 1, Role: "admin"},
+			want: true,
+		},
+		{
+			name: "member without normalized membership row",
+			user: &authPkg.AuthUser{UserID: 4, BusinessID: 1, Role: "member"},
+			want: false,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := hasFeaturePermission(tc.user, authorization.AppHub, "hub:team:invite"); got != tc.want {
+				t.Fatalf("hasFeaturePermission(role=%q) = %v, want %v", tc.user.Role, got, tc.want)
+			}
+		})
+	}
+}

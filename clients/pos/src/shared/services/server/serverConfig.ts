@@ -22,7 +22,7 @@ export type ServerMode = 'hosted' | 'self_host';
 export const SERVER_STORE_KEY = 'pos-server-config';
 
 export const HOSTED_API_URL = 'https://api.voxire.com/';
-export const HOSTED_AUTH_URL = 'https://auth.rtylr.com';
+export const HOSTED_AUTH_URL = 'https://sso.rtylr.com';
 
 export function isHostedPosOrigin(): boolean {
   if (typeof window === 'undefined') return false;

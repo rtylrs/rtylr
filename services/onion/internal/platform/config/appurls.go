@@ -5,7 +5,7 @@ package config
 // anywhere in the codebase. (AuthAppURL is also the default for the optionally
 // env-overridable Config.AuthAppURL field.)
 const (
-	AuthAppURL     = "https://auth.rtylr.com"
+	AuthAppURL     = "https://sso.rtylr.com"
 	HubAppURL      = "https://dash.rtylr.com"
 	POSAppURL      = "https://pos.rtylr.com"
 	ERPAppURL      = "https://erp.rtylr.com"

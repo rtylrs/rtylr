@@ -42,6 +42,19 @@
     "invalidCode": "أدخل رمزاً صحيحاً مؤلفاً من ستة أرقام.",
     "verified": "تم التحقق من المصادقة متعددة العوامل لهذه الجلسة."
   },
+  "securityPolicy": {
+    "organizationTitle": "سياسة المصادقة متعددة العوامل للمؤسسة",
+    "organizationDescription": "عند تفعيلها، يجب على كل عضو في هذه المؤسسة إعداد المصادقة متعددة العوامل قبل الوصول إلى Rtylr.",
+    "organizationEnabled": "إعداد المصادقة متعددة العوامل مطلوب لكل عضو في هذه المؤسسة.",
+    "organizationDisabled": "يمكن للأعضاء اختيار استخدام المصادقة متعددة العوامل.",
+    "requireForEveryone": "فرض المصادقة متعددة العوامل على الجميع",
+    "stopRequiring": "إيقاف فرض المصادقة متعددة العوامل",
+    "requiredByOrganization": "مطلوبة من مؤسستك",
+    "organizationRequiredDescription": "تفرض مؤسستك إعداد المصادقة متعددة العوامل قبل المتابعة.",
+    "accountRequiredDescription": "يتطلب حسابك إعداد المصادقة متعددة العوامل قبل المتابعة.",
+    "enrollmentRequired": "الإعداد مطلوب",
+    "setupRequired": "إعداد المصادقة متعددة العوامل"
+  },
   "roleLabels": {
     "owner": "المالك",
     "admin": "المسؤول",
@@ -62,6 +75,9 @@
     "twoFactorEnabled": "تم تفعيل المصادقة الثنائية",
     "twoFactorDisabled": "تم تعطيل المصادقة الثنائية",
     "failedTwoFactorUpdate": "فشل تحديث إعدادات المصادقة الثنائية",
+    "organizationMfaEnabled": "أصبحت المصادقة متعددة العوامل مطلوبة للمؤسسة",
+    "organizationMfaDisabled": "تم إيقاف فرض المصادقة متعددة العوامل للمؤسسة",
+    "failedOrganizationMfaUpdate": "تعذر تحديث سياسة المصادقة متعددة العوامل للمؤسسة",
     "signedOutSessions": "تم تسجيل الخروج من جميع الجلسات",
     "failedSignOutSessions": "فشل تسجيل الخروج من الجلسات",
     "groupCreated": "تم إنشاء المجموعة",

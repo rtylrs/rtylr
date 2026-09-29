@@ -1,47 +1,47 @@
--- Available addons (system catalog)
-CREATE TABLE IF NOT EXISTS addons (
-    id VARCHAR(50) NOT NULL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    icon VARCHAR(50),
-    price DECIMAL(10,2) DEFAULT 0.00,
-    is_free BOOLEAN DEFAULT FALSE,
-    is_default_enabled BOOLEAN DEFAULT FALSE,
-    sort_order INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `addons` (
+  `id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT '0.00',
+  `is_free` tinyint(1) DEFAULT '0',
+  `is_default_enabled` tinyint(1) DEFAULT '0',
+  `sort_order` int DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Addons enabled per business
-CREATE TABLE IF NOT EXISTS business_addons (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
-    addon_id VARCHAR(50) NOT NULL,
-    is_enabled BOOLEAN DEFAULT TRUE,
-    enabled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    disabled_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_business_addon (business_id, addon_id),
-    INDEX idx_business_addons_business (business_id)
-);
+CREATE TABLE IF NOT EXISTS `business_addons` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `addon_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_enabled` tinyint(1) DEFAULT '1',
+  `enabled_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `disabled_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_business_addon` (`business_id`,`addon_id`),
+  KEY `idx_business_addons_business` (`business_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Manual addon grants: free addon access created from the console.
-CREATE TABLE IF NOT EXISTS manual_addon_grants (
-    id                 BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id            BIGINT NOT NULL COMMENT 'organization owner user_id',
-    business_id        BIGINT NOT NULL,
-    addon_id           VARCHAR(50) NOT NULL,
-    granted_by         BIGINT NOT NULL COMMENT 'console admin user_id who created the grant',
-    note               TEXT NULL,
-    expires_at         TIMESTAMP NULL COMMENT 'NULL = never expires',
-    revoked_at         TIMESTAMP NULL,
-    enabled_by_grant   BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'true when the grant turned the addon on',
-    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_manual_addon_grants_user (user_id),
-    INDEX idx_manual_addon_grants_business (business_id),
-    INDEX idx_manual_addon_grants_lookup (business_id, addon_id, revoked_at, expires_at)
-);
+CREATE TABLE IF NOT EXISTS `manual_addon_grants` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL COMMENT 'organization owner user_id',
+  `business_id` bigint NOT NULL,
+  `addon_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `granted_by` bigint NOT NULL COMMENT 'console admin user_id who created the grant',
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `expires_at` timestamp NULL DEFAULT NULL COMMENT 'NULL = never expires',
+  `revoked_at` timestamp NULL DEFAULT NULL,
+  `enabled_by_grant` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'true when the grant turned the addon on',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_manual_addon_grants_user` (`user_id`),
+  KEY `idx_manual_addon_grants_business` (`business_id`),
+  KEY `idx_manual_addon_grants_lookup` (`business_id`,`addon_id`,`revoked_at`,`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Seed the menu addon (disabled by default)
 INSERT IGNORE INTO addons (id, name, description, icon, price, is_free, is_default_enabled, sort_order)

@@ -74,10 +74,22 @@ func TestRequireInvoiceToolPermissionRejectsLegacyRoleAndMissingAuth(t *testing.
 		t.Fatal("a legacy owner role authorized an invoice send")
 	}
 
-	unlicensed := invoiceToolUser("finance:invoices:send")
-	unlicensed.EffectiveAccess.Apps[0].Licensed = false
-	if err := requireInvoiceToolPermission(authPkg.WithAuthUser(context.Background(), unlicensed), required); err == nil {
-		t.Fatal("an unlicensed finance app authorized an invoice send")
+	// Assignment, not licensing. HasAppPermission and HasAppAccess both gate on
+	// HasAccess and neither reads EffectiveAppAccess.Licensed, so an unassigned
+	// tenant is denied here exactly as the HTTP twin denies it. The Licensed flag
+	// is surfaced to clients but enforced by no authorization gate in the
+	// codebase, HTTP or AI; asserting it here would assert a product change
+	// rather than this fix.
+	unassigned := invoiceToolUser("finance:invoices:send")
+	unassigned.EffectiveAccess.Apps[0].HasAccess = false
+	if err := requireInvoiceToolPermission(authPkg.WithAuthUser(context.Background(), unassigned), required); err == nil {
+		t.Fatal("an unassigned finance app authorized an invoice send")
+	}
+
+	suspended := invoiceToolUser("finance:invoices:send")
+	suspended.ProvisioningStatus = &authorization.ProvisioningStatus{State: authorization.ProvisioningSuspended}
+	if err := requireInvoiceToolPermission(authPkg.WithAuthUser(context.Background(), suspended), required); err == nil {
+		t.Fatal("a suspended user authorized an invoice send")
 	}
 
 	if err := requireInvoiceToolPermission(context.Background(), required); err == nil {

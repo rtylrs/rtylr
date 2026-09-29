@@ -31,7 +31,7 @@ func (h *AuthorizeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	authFrontend := h.AuthAppURL
 	if authFrontend == "" {
-		authFrontend = "https://auth.rtylr.com"
+		authFrontend = "https://sso.rtylr.com"
 	}
 
 	u, err := url.Parse(authFrontend + "/oauth")

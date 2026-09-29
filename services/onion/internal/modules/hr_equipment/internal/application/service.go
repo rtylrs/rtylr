@@ -330,6 +330,9 @@ func (s *Service) updateEquipmentRequestStatus(
 }
 
 func (s *Service) CreateAsset(ctx context.Context, businessID int64, params domain.CreateAssetParams) (*domain.AssetRecord, error) {
+	if err := requireEquipmentManager(ctx); err != nil {
+		return nil, err
+	}
 	params.Condition = strings.TrimSpace(params.Condition)
 	if params.Condition == "" {
 		params.Condition = domain.AssetConditionGood
@@ -394,6 +397,9 @@ func (s *Service) ListAssets(ctx context.Context, businessID int64, params domai
 }
 
 func (s *Service) AssignAsset(ctx context.Context, businessID, assetID, employeeID int64) error {
+	if err := requireEquipmentManager(ctx); err != nil {
+		return err
+	}
 	asset, err := s.repo.GetAsset(ctx, businessID, assetID)
 	if err != nil {
 		return err
@@ -409,6 +415,9 @@ func (s *Service) AssignAsset(ctx context.Context, businessID, assetID, employee
 }
 
 func (s *Service) UnassignAsset(ctx context.Context, businessID, assetID int64) error {
+	if err := requireEquipmentManager(ctx); err != nil {
+		return err
+	}
 	if _, err := s.repo.GetAsset(ctx, businessID, assetID); err != nil {
 		return err
 	}
@@ -416,5 +425,17 @@ func (s *Service) UnassignAsset(ctx context.Context, businessID, assetID int64) 
 		return err
 	}
 	invalidateHREquipmentScope(ctx, businessID)
+	return nil
+}
+
+// requireEquipmentManager guards the asset mutators, which change which
+// employee holds company property. They previously authenticated the caller but
+// applied no permission check, so any member with HR app access could reassign
+// or unassign assets across the tenant.
+func requireEquipmentManager(ctx context.Context) error {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil || !equipmentUserCanManage(device.User) {
+		return ErrEquipmentAccessDenied
+	}
 	return nil
 }

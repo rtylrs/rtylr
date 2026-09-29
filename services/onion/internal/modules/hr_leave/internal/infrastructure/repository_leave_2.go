@@ -26,7 +26,7 @@ func (r *Repository) ListLeaveBalances(ctx context.Context, ownerID, employeeID 
 
 	balances := make([]domain.LeaveBalanceRecord, 0, len(rows))
 	for _, row := range rows {
-		balances = append(balances, leaveBalanceFromRow(row))
+		balances = append(balances, leaveBalanceFromRow(sqlc.GetLeaveBalanceRow(row)))
 	}
 	return balances, nil
 }
@@ -58,7 +58,7 @@ func (r *Repository) GetLeaveBalance(ctx context.Context, ownerID, employeeID, l
 		}
 		return nil, err
 	}
-	bal := leaveBalanceFromRow(row)
+	bal := leaveBalanceFromRow(sqlc.GetLeaveBalanceRow(row))
 	return &bal, nil
 }
 
@@ -152,7 +152,7 @@ func (r *Repository) ListBalancesForAccrual(ctx context.Context, ownerID int64, 
 	}
 	balances := make([]domain.LeaveBalanceRecord, 0, len(rows))
 	for _, row := range rows {
-		balances = append(balances, leaveBalanceFromRow(row))
+		balances = append(balances, leaveBalanceFromRow(sqlc.GetLeaveBalanceRow(row)))
 	}
 	return balances, nil
 }
@@ -224,7 +224,7 @@ func leaveRequestFromRow(row sqlc.HrLeaveRequest) domain.LeaveRequestRecord {
 	}
 }
 
-func leaveBalanceFromRow(row sqlc.HrLeaveBalance) domain.LeaveBalanceRecord {
+func leaveBalanceFromRow(row sqlc.GetLeaveBalanceRow) domain.LeaveBalanceRecord {
 	return domain.LeaveBalanceRecord{
 		ID:               row.ID,
 		OwnerID:          row.OwnerID,

@@ -183,7 +183,7 @@ const AuthShowcase: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <Logo variant="light" className="h-8 w-auto select-none" />
+        <Logo variant="light" className="h-20 w-auto select-none" />
       </motion.div>
 
       {/* Middle: hero copy */}
@@ -210,30 +210,8 @@ const AuthShowcase: React.FC = () => {
           />
         </h1>
         <p className="mt-6 text-base xl:text-lg text-white/65 max-w-lg leading-relaxed">
-          POS, ERP, HR, CRM, Finance, Flow, and Insights. Everything you need to run your operation,
-          unified in a single beautiful workspace.
+          {t('auth.showcase.tagline')}
         </p>
-
-        {/* Product chips — glow on hover */}
-        <div className="mt-8 flex flex-wrap gap-2">
-          {['POS', 'ERP', 'HR', 'CRM', 'Finance', 'Flow', 'Insights'].map((p, i) => (
-            <motion.span
-              key={p}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.35 + i * 0.05 }}
-              whileHover={{
-                scale: 1.08,
-                backgroundColor: 'rgba(69,131,196,0.18)',
-                borderColor: 'rgba(69,131,196,0.5)',
-              }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium text-white/85 border border-white/10 bg-white/[0.04] backdrop-blur-sm cursor-default"
-              style={{ transition: 'box-shadow 0.2s' }}
-            >
-              {p}
-            </motion.span>
-          ))}
-        </div>
       </motion.div>
 
       {/* Bottom: testimonial */}

@@ -1,140 +1,161 @@
--- Role and Access Control V2.
---
--- This migration is additive. Legacy user_app_permissions, user_groups, and
--- hub_roles remain readable during the migration window. The normalized tables
--- below are the source of truth for new writes and effective-access reads.
+CREATE TABLE IF NOT EXISTS `authorization_permission_catalog` (
+  `permission_key` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `app_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_sensitive` tinyint(1) NOT NULL DEFAULT '0',
+  `is_high_risk` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`permission_key`),
+  KEY `idx_auth_permission_app` (`app_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_permission_catalog (
-    permission_key VARCHAR(128) NOT NULL PRIMARY KEY,
-    app_id VARCHAR(32) NOT NULL,
-    action VARCHAR(32) NOT NULL,
-    is_sensitive BOOLEAN NOT NULL DEFAULT FALSE,
-    is_high_risk BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_auth_permission_app (app_id)
-);
+CREATE TABLE IF NOT EXISTS `authorization_roles` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL DEFAULT '0' COMMENT '0 means a global system role',
+  `app_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'dash',
+  `role_key` varchar(96) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `display_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `scope_rules` json DEFAULT NULL,
+  `level` int NOT NULL DEFAULT '0',
+  `parent_role_id` bigint DEFAULT NULL,
+  `assignment_mode` enum('many','one','primary_plus_addons') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'many',
+  `is_system` tinyint(1) NOT NULL DEFAULT '0',
+  `is_archived` tinyint(1) NOT NULL DEFAULT '0',
+  `lifecycle` enum('draft','active','archived','replaced') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `version` bigint NOT NULL DEFAULT '1',
+  `created_by` bigint DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_auth_role_scope_key` (`business_id`,`app_id`,`role_key`),
+  KEY `idx_auth_roles_business_app` (`business_id`,`app_id`),
+  KEY `idx_auth_roles_parent` (`parent_role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_roles (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL DEFAULT 0 COMMENT '0 means a global system role',
-    app_id VARCHAR(32) NOT NULL DEFAULT 'dash',
-    role_key VARCHAR(96) NOT NULL,
-    display_name VARCHAR(128) NOT NULL,
-    description TEXT NULL,
-    scope_rules JSON NULL,
-    level INT NOT NULL DEFAULT 0,
-    parent_role_id BIGINT NULL,
-    assignment_mode ENUM('many','one','primary_plus_addons') NOT NULL DEFAULT 'many',
-    is_system BOOLEAN NOT NULL DEFAULT FALSE,
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
-    lifecycle ENUM('draft','active','archived','replaced') NOT NULL DEFAULT 'active',
-    version BIGINT NOT NULL DEFAULT 1,
-    created_by BIGINT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_auth_role_scope_key (business_id, app_id, role_key),
-    INDEX idx_auth_roles_business_app (business_id, app_id),
-    INDEX idx_auth_roles_parent (parent_role_id)
-);
+CREATE TABLE IF NOT EXISTS `authorization_role_permissions` (
+  `role_id` bigint NOT NULL,
+  `permission_key` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`role_id`,`permission_key`),
+  KEY `idx_auth_role_permissions_key` (`permission_key`),
+  CONSTRAINT `fk_auth_role_permissions_permission` FOREIGN KEY (`permission_key`) REFERENCES `authorization_permission_catalog` (`permission_key`),
+  CONSTRAINT `fk_auth_role_permissions_role` FOREIGN KEY (`role_id`) REFERENCES `authorization_roles` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_role_permissions (
-    role_id BIGINT NOT NULL,
-    permission_key VARCHAR(128) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (role_id, permission_key),
-    INDEX idx_auth_role_permissions_key (permission_key)
-);
+CREATE TABLE IF NOT EXISTS `authorization_business_members` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `dash_role_id` bigint DEFAULT NULL,
+  `dash_role_key` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'member',
+  `status` enum('pending','active','suspended','revoked') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `authorization_version` bigint NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_auth_member_business_user` (`business_id`,`user_id`),
+  KEY `idx_auth_member_user` (`user_id`),
+  KEY `idx_auth_member_status` (`business_id`,`status`),
+  CONSTRAINT `fk_auth_member_business` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`),
+  CONSTRAINT `fk_auth_member_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_business_members (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    dash_role_id BIGINT NULL,
-    dash_role_key VARCHAR(64) NOT NULL DEFAULT 'member',
-    status ENUM('pending','active','suspended','revoked') NOT NULL DEFAULT 'active',
-    authorization_version BIGINT NOT NULL DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_auth_member_business_user (business_id, user_id),
-    INDEX idx_auth_member_user (user_id),
-    INDEX idx_auth_member_status (business_id, status)
-);
+CREATE TABLE IF NOT EXISTS `authorization_license_assignments` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `user_id` bigint DEFAULT NULL,
+  `group_id` bigint DEFAULT NULL,
+  `app_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `source` enum('explicit','dash_default','group','system') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'explicit',
+  `status` enum('pending','active','revoked','archived') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `granted_by` bigint DEFAULT NULL,
+  `granted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `revoked_by` bigint DEFAULT NULL,
+  `revoked_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_auth_active_direct_license` (`business_id`,`user_id`,`app_id`,`status`),
+  KEY `idx_auth_license_user` (`business_id`,`user_id`,`status`),
+  KEY `idx_auth_license_group` (`business_id`,`group_id`,`status`),
+  KEY `idx_auth_license_app` (`business_id`,`app_id`,`status`),
+  KEY `fk_auth_license_user` (`user_id`),
+  KEY `fk_auth_license_group` (`group_id`),
+  CONSTRAINT `fk_auth_license_business` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`),
+  CONSTRAINT `fk_auth_license_group` FOREIGN KEY (`group_id`) REFERENCES `user_groups` (`id`),
+  CONSTRAINT `fk_auth_license_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `chk_auth_license_assignment_one_target` CHECK ((((`user_id` is not null) and (`group_id` is null)) or ((`user_id` is null) and (`group_id` is not null))))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_license_assignments (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
-    user_id BIGINT NULL,
-    group_id BIGINT NULL,
-    app_id VARCHAR(32) NOT NULL,
-    source ENUM('explicit','dash_default','group','system') NOT NULL DEFAULT 'explicit',
-    status ENUM('pending','active','revoked','archived') NOT NULL DEFAULT 'active',
-    granted_by BIGINT NULL,
-    granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    revoked_by BIGINT NULL,
-    revoked_at TIMESTAMP NULL,
-    INDEX idx_auth_license_user (business_id, user_id, status),
-    INDEX idx_auth_license_group (business_id, group_id, status),
-    INDEX idx_auth_license_app (business_id, app_id, status)
-);
+CREATE TABLE IF NOT EXISTS `authorization_role_assignments` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `user_id` bigint DEFAULT NULL,
+  `group_id` bigint DEFAULT NULL,
+  `app_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role_id` bigint NOT NULL,
+  `source` enum('explicit','dash_default','group','system') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'explicit',
+  `status` enum('pending','active','revoked','archived') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `is_primary` tinyint(1) NOT NULL DEFAULT '0',
+  `granted_by` bigint DEFAULT NULL,
+  `granted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `revoked_by` bigint DEFAULT NULL,
+  `revoked_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_auth_active_direct_role` (`business_id`,`user_id`,`app_id`,`role_id`,`status`),
+  KEY `idx_auth_role_assignment_user` (`business_id`,`user_id`,`app_id`,`status`),
+  KEY `idx_auth_role_assignment_group` (`business_id`,`group_id`,`app_id`,`status`),
+  KEY `idx_auth_role_assignment_role` (`role_id`,`status`),
+  KEY `fk_auth_role_assignment_user` (`user_id`),
+  KEY `fk_auth_role_assignment_group` (`group_id`),
+  CONSTRAINT `fk_auth_role_assignment_business` FOREIGN KEY (`business_id`) REFERENCES `businesses` (`id`),
+  CONSTRAINT `fk_auth_role_assignment_group` FOREIGN KEY (`group_id`) REFERENCES `user_groups` (`id`),
+  CONSTRAINT `fk_auth_role_assignment_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `fk_auth_role_assignments_role` FOREIGN KEY (`role_id`) REFERENCES `authorization_roles` (`id`),
+  CONSTRAINT `chk_auth_role_assignment_one_target` CHECK ((((`user_id` is not null) and (`group_id` is null)) or ((`user_id` is null) and (`group_id` is not null))))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_role_assignments (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
-    user_id BIGINT NULL,
-    group_id BIGINT NULL,
-    app_id VARCHAR(32) NOT NULL,
-    role_id BIGINT NOT NULL,
-    source ENUM('explicit','dash_default','group','system') NOT NULL DEFAULT 'explicit',
-    status ENUM('pending','active','revoked','archived') NOT NULL DEFAULT 'active',
-    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
-    granted_by BIGINT NULL,
-    granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    revoked_by BIGINT NULL,
-    revoked_at TIMESTAMP NULL,
-    INDEX idx_auth_role_assignment_user (business_id, user_id, app_id, status),
-    INDEX idx_auth_role_assignment_group (business_id, group_id, app_id, status),
-    INDEX idx_auth_role_assignment_role (role_id, status)
-);
+CREATE TABLE IF NOT EXISTS `authorization_role_assignment_scopes` (
+  `assignment_id` bigint NOT NULL,
+  `scope_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `scope_id` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`assignment_id`,`scope_type`,`scope_id`),
+  KEY `idx_auth_assignment_scope` (`scope_type`,`scope_id`),
+  CONSTRAINT `fk_auth_assignment_scopes_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `authorization_role_assignments` (`id`),
+  CONSTRAINT `chk_auth_assignment_scope_type` CHECK (((`scope_type` in (_utf8mb4'pos_location',_utf8mb4'flow_project')) and regexp_like(`scope_id`,_utf8mb4'^[1-9][0-9]*$')))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_role_assignment_scopes (
-    assignment_id BIGINT NOT NULL,
-    scope_type VARCHAR(32) NOT NULL,
-    scope_id VARCHAR(128) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (assignment_id, scope_type, scope_id),
-    INDEX idx_auth_assignment_scope (scope_type, scope_id)
-);
+CREATE TABLE IF NOT EXISTS `authorization_dash_app_defaults` (
+  `dash_role_id` bigint NOT NULL,
+  `app_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `default_role_id` bigint DEFAULT NULL,
+  `default_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`dash_role_id`,`app_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS authorization_dash_app_defaults (
-    dash_role_id BIGINT NOT NULL,
-    app_id VARCHAR(32) NOT NULL,
-    default_role_id BIGINT NULL,
-    default_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (dash_role_id, app_id)
-);
-
-CREATE TABLE IF NOT EXISTS authorization_audit_events (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
-    actor_user_id BIGINT NULL,
-    target_user_id BIGINT NULL,
-    target_group_id BIGINT NULL,
-    action VARCHAR(96) NOT NULL,
-    app_id VARCHAR(32) NULL,
-    role_id BIGINT NULL,
-    before_json JSON NULL,
-    after_json JSON NULL,
-    reason TEXT NULL,
-    approval_ref VARCHAR(128) NULL,
-    request_id VARCHAR(128) NULL,
-    correlation_id VARCHAR(128) NULL,
-    source_client ENUM('dash','pos','mobile','app','api') NOT NULL DEFAULT 'api',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_auth_audit_business_time (business_id, created_at),
-    INDEX idx_auth_audit_target (business_id, target_user_id, created_at),
-    INDEX idx_auth_audit_action (business_id, action, created_at)
-);
+CREATE TABLE IF NOT EXISTS `authorization_audit_events` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `business_id` bigint NOT NULL,
+  `actor_user_id` bigint DEFAULT NULL,
+  `target_user_id` bigint DEFAULT NULL,
+  `target_group_id` bigint DEFAULT NULL,
+  `action` varchar(96) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `app_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role_id` bigint DEFAULT NULL,
+  `before_json` json DEFAULT NULL,
+  `after_json` json DEFAULT NULL,
+  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `approval_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `request_id` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `correlation_id` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source_client` enum('dash','pos','mobile','app','api') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'api',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_auth_audit_business_time` (`business_id`,`created_at`),
+  KEY `idx_auth_audit_target` (`business_id`,`target_user_id`,`created_at`),
+  KEY `idx_auth_audit_action` (`business_id`,`action`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO authorization_permission_catalog
     (permission_key, app_id, action, is_sensitive, is_high_risk)

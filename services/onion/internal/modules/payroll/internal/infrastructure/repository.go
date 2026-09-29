@@ -183,7 +183,7 @@ func (r *Repository) MarkPayrollPaid(ctx context.Context, businessID, payrollID 
 
 	qtx := r.queries.WithTx(tx)
 
-	periodStart, periodEnd, err := qtx.GetPayrollRecordPeriod(ctx, sqlc.GetPayrollRecordPeriodParams{
+	recordPeriod, err := qtx.GetPayrollRecordPeriod(ctx, sqlc.GetPayrollRecordPeriodParams{
 		ID:         payrollID,
 		BusinessID: businessID,
 	})
@@ -193,6 +193,7 @@ func (r *Repository) MarkPayrollPaid(ctx context.Context, businessID, payrollID 
 		}
 		return err
 	}
+	periodStart, periodEnd := recordPeriod.PeriodStart, recordPeriod.PeriodEnd
 
 	rows, err := qtx.ListPayrollPeriodRowsForUpdate(ctx, sqlc.ListPayrollPeriodRowsForUpdateParams{
 		BusinessID:  businessID,
@@ -388,10 +389,14 @@ func (r *Repository) GetDefaultOvertimeMultiplier(ctx context.Context, businessI
 func periodRows(rows []sqlc.ListPayrollPeriodRowsForUpdateRow) []domain.PeriodRow {
 	out := make([]domain.PeriodRow, 0, len(rows))
 	for _, row := range rows {
+		status := ""
+		if row.Status.Valid {
+			status = string(row.Status.HrPayrollRecordsStatus)
+		}
 		out = append(out, domain.PeriodRow{
 			ID:      row.ID,
 			StaffID: row.StaffID,
-			Status:  string(row.Status),
+			Status:  status,
 		})
 	}
 	return out

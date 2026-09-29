@@ -10,7 +10,6 @@ import (
 	"github.com/voxire/onion/internal/modules/security/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
-	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hubsecurityv1 "github.com/voxire/voxie/gen/go/hub/security/v1"
 )
 
@@ -58,6 +57,18 @@ func (s *stubSecurityService) UseMFARecoveryCode(context.Context, int64, string)
 	return s.recovery
 }
 
+func (s *stubSecurityService) GetOrganizationMFAEnforced(context.Context, int64) (bool, error) {
+	return false, nil
+}
+
+func (s *stubSecurityService) SetOrganizationMFAEnforced(context.Context, int64, bool) error {
+	return nil
+}
+
+// Update2FA is exercised on the enable path. Disabling 2FA first resolves the
+// caller's business to read the organization MFA policy, which needs a
+// database; that path is covered by the DB-backed tests. Both paths reach
+// the same requireStepUp guard, which is what this file asserts.
 func securityManagerContext() context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     42,
@@ -98,7 +109,7 @@ func TestSecurityMutationsRejectMissingStepUp(t *testing.T) {
 
 	calls := map[string]func() error{
 		"Update2FA": func() error {
-			_, err := api.Update2FA(ctx, &hubsecurityv1.Update2FARequest{Enabled: false})
+			_, err := api.Update2FA(ctx, &hubsecurityv1.Update2FARequest{Enabled: true})
 			return err
 		},
 		"InvalidateSessions": func() error {
@@ -135,7 +146,7 @@ func TestSecurityMutationsRejectUnreadableStepUpState(t *testing.T) {
 	}}
 	ctx := securityManagerContext()
 
-	if _, err := api.Update2FA(ctx, &hubsecurityv1.Update2FARequest{Enabled: false}); statusOf(t, err) != http.StatusServiceUnavailable {
+	if _, err := api.Update2FA(ctx, &hubsecurityv1.Update2FARequest{Enabled: true}); statusOf(t, err) != http.StatusServiceUnavailable {
 		t.Fatalf("Update2FA: status = %d, want %d", statusOf(t, err), http.StatusServiceUnavailable)
 	}
 	if _, err := api.BeginMFAEnrollment(ctx, &hubsecurityv1.BeginMFAEnrollmentRequest{}); statusOf(t, err) != http.StatusServiceUnavailable {
@@ -170,14 +181,17 @@ func TestSecurityGuardErrorIgnoresUnrelatedFailures(t *testing.T) {
 }
 
 // Losing the permission must still win over the step-up mapping.
-func TestSecurityMutationsStillRequireTheManagePermission(t *testing.T) {
+// Update2FA is self-scoped: it passes user.UserID from the verified auth
+// context, so it needs authentication but no hub:security:manage grant — that
+// permission is not mapped for this path and the operation is not an
+// administrative one. What must hold is that an anonymous caller is refused
+// before any state is touched.
+func TestUpdate2FARequiresAnAuthenticatedCaller(t *testing.T) {
 	api := &SecurityAPI{Service: &stubSecurityService{}}
-	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
-		UserID:             42,
-		ProvisioningStatus: &authorization.ProvisioningStatus{State: authorization.ProvisioningActive},
-	})
-	_, err := api.Update2FA(ctx, &hubsecurityv1.Update2FARequest{Enabled: false})
-	if !errors.Is(err, onekiterrors.PermissionDenied()) && statusOf(t, err) != http.StatusForbidden {
-		t.Fatalf("Update2FA without hub:security:manage: status = %d, want %d", statusOf(t, err), http.StatusForbidden)
+
+	_, err := api.Update2FA(context.Background(), &hubsecurityv1.Update2FARequest{Enabled: true})
+	if statusOf(t, err) != http.StatusUnauthorized {
+		t.Fatalf("Update2FA without an authenticated caller: status = %d, want %d",
+			statusOf(t, err), http.StatusUnauthorized)
 	}
 }

@@ -37,7 +37,7 @@ func memberCtx(ctx context.Context) context.Context {
 			Apps: []authorization.EffectiveAppAccess{{
 				AppID: authorization.AppHR, Licensed: true, HasAccess: true,
 				Permissions: []string{"hr:employees:manage"},
-				Scopes:      []authorization.Scope{{Type: "department", ID: "1"}},
+				Scopes:      nil,
 			}},
 		},
 	})

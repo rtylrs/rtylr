@@ -213,6 +213,18 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
               >
                 {t('common.accountSettings')}
               </a>
+              <a
+                href="/security"
+                style={{
+                  display: 'block',
+                  padding: '10px 16px',
+                  fontSize: 13,
+                  color: 'var(--dash-text, #333)',
+                  textDecoration: 'none',
+                }}
+              >
+                {t('common.nav.security')}
+              </a>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -567,8 +579,8 @@ function BusinessRoute(): React.JSX.Element | null {
       // below would restrict a legacy owner whose marker was never set.
       role === 'admin' || role === 'owner' || dashRole === 'admin' || dashRole === 'owner';
   const staffAllowedPaths = user?.effectiveAccess
-    ? ['/settings/account']
-    : ['/settings/account', ...(ROLE_SCOPED_PATHS[role] ?? [])];
+    ? ['/settings/account', '/security']
+    : ['/settings/account', '/security', ...(ROLE_SCOPED_PATHS[role] ?? [])];
 
   // `!== true`, not `=== false`. StoredUser.isOwner is optional, so a hydrated
   // user like { role: 'staff', isOwner: undefined, effectiveAccess: undefined }

@@ -86,16 +86,22 @@ func TestPOSOrderOperationsRequireExactPermissionBeforeServiceAccess(t *testing.
 	}
 }
 
-func TestPOSOrderPermissionHelperRejectsWrongAppAndUnlicensedUsers(t *testing.T) {
+func TestPOSOrderPermissionHelperRejectsWrongAppAndMembersWithoutAccess(t *testing.T) {
 	wrongApp := &auth.AuthUser{BusinessID: 9, UserID: 7, EffectiveAccess: &authorization.EffectiveAccess{
-		Apps: []authorization.EffectiveAppAccess{{AppID: authorization.AppFinance, Licensed: true, HasAccess: true, Permissions: []string{"pos:orders:view"}}},
+		Apps: []authorization.EffectiveAppAccess{{AppID: authorization.AppFinance, HasAccess: true, Permissions: []string{"pos:orders:view"}}},
 	}}
 	if _, err := requirePOSPermission(auth.WithAuthUser(context.Background(), wrongApp), "pos:orders:view"); posOrdersStatus(err) != http.StatusForbidden {
 		t.Fatalf("wrong app returned %v, want 403", err)
 	}
+	noAccess := posOrdersUser("pos:orders:view")
+	noAccess.EffectiveAccess.Apps[0].HasAccess = false
+	if _, err := requirePOSPermission(auth.WithAuthUser(context.Background(), noAccess), "pos:orders:view"); posOrdersStatus(err) != http.StatusForbidden {
+		t.Fatalf("app without access returned %v, want 403", err)
+	}
+	// A license row is plan metadata and must not change the decision.
 	unlicensed := posOrdersUser("pos:orders:view")
 	unlicensed.EffectiveAccess.Apps[0].Licensed = false
-	if _, err := requirePOSPermission(auth.WithAuthUser(context.Background(), unlicensed), "pos:orders:view"); posOrdersStatus(err) != http.StatusForbidden {
-		t.Fatalf("unlicensed app returned %v, want 403", err)
+	if _, err := requirePOSPermission(auth.WithAuthUser(context.Background(), unlicensed), "pos:orders:view"); err != nil {
+		t.Fatalf("a license row must not gate pos:orders:view: %v", err)
 	}
 }

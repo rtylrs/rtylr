@@ -177,9 +177,11 @@ func TestFeatureMatrixPermissionsEnforceAppLicenseAndExactPermission(t *testing.
 func TestFeatureMatrixPermissionsFailClosedForLifecycleAndGroupStates(t *testing.T) {
 	for _, entry := range featureMatrixPermissions {
 		t.Run(entry.permission, func(t *testing.T) {
+			// There is deliberately no "removed license" case: a license row is
+			// plan metadata and no longer revokes access, so revocation is
+			// covered by the assignment and membership cases below.
 			cases := map[string]authorization.Snapshot{
 				"revoked assignment":   featureMatrixSnapshot(entry, true, false, true, true, false, false),
-				"removed license":      featureMatrixSnapshot(entry, false, true, true, true, false, false),
 				"deactivated user":     featureMatrixSnapshot(entry, true, true, false, true, false, false),
 				"terminated employee":  featureMatrixSnapshot(entry, true, true, false, true, false, false),
 				"invalid group source": featureMatrixSnapshot(entry, true, true, true, true, true, false),
@@ -192,6 +194,20 @@ func TestFeatureMatrixPermissionsFailClosedForLifecycleAndGroupStates(t *testing
 				}
 			}
 		})
+	}
+}
+
+// A license row must not be able to add an app the member has no role for, and
+// must not be able to remove one they do. Entitlements come from assignments.
+func TestFeatureMatrixLicenseRowsDoNotGateAppAccess(t *testing.T) {
+	entry := featureMatrixPermissions[0]
+	licensed := authorization.Resolve(featureMatrixSnapshot(entry, true, true, true, true, false, false))
+	unlicensed := authorization.Resolve(featureMatrixSnapshot(entry, false, true, true, true, false, false))
+	if !licensed.Apps[0].HasAccess || !unlicensed.Apps[0].HasAccess {
+		t.Fatalf("license state must not change app access: licensed=%#v unlicensed=%#v", licensed.Apps[0], unlicensed.Apps[0])
+	}
+	if !licensed.Apps[0].Licensed || unlicensed.Apps[0].Licensed {
+		t.Fatalf("license state must still be reported: licensed=%#v unlicensed=%#v", licensed.Apps[0], unlicensed.Apps[0])
 	}
 }
 

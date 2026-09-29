@@ -1,5 +1,10 @@
 import axios, { type AxiosInstance } from 'axios';
-import { resolveApiBase, resolveAuthUrl, resolveCookieDomain } from '@voxire/config';
+import {
+  resolveApiBase,
+  resolveAppUrl,
+  resolveAuthUrl,
+  resolveCookieDomain,
+} from '@voxire/config';
 import { safeFetch } from './result';
 import { markCredential, sentCredential, shouldEndSharedSession } from './session';
 
@@ -48,11 +53,34 @@ const clearTokenCookie = (): void => {
 };
 
 const getAuthBaseUrl = (): string => {
-  // Self-host uses the runtime auth URL; hosted keeps localhost/auth.rtylr.com.
+  // Self-host uses the runtime auth URL; hosted uses sso.rtylr.com.
   return isLocalDevHost(window.location.hostname) ? 'http://localhost:5176' : resolveAuthUrl();
 };
 
 const getAuthUrl = (appId: string): string => `${getAuthBaseUrl()}?redirect=${appId}`;
+
+const isMFARequiredResponse = (data: unknown): boolean => {
+  if (!data || typeof data !== 'object' || !('message' in data)) return false;
+  const message = (data as { message?: unknown }).message;
+  return message === 'MFA enrollment required' || message === 'MFA verification required';
+};
+
+const redirectToSecuritySettings = (): void => {
+  const dashboardUrl = new URL(resolveAppUrl('dash'), window.location.href);
+  const dashboardPath = dashboardUrl.pathname.replace(/\/+$/, '');
+  const securityPath = `${dashboardPath}/security`;
+  if (
+    window.location.origin === dashboardUrl.origin &&
+    (window.location.pathname === securityPath ||
+      window.location.pathname.startsWith(`${securityPath}/`))
+  ) {
+    return;
+  }
+  dashboardUrl.pathname = securityPath;
+  dashboardUrl.search = '';
+  dashboardUrl.hash = '';
+  window.location.href = dashboardUrl.toString();
+};
 
 // True when the current page IS the auth app. A 401 there (e.g. a wrong
 // password on the login screen, or an expired cookie during the login page's
@@ -276,14 +304,20 @@ export function createApiClient(appId: string): AxiosInstance {
         error.response.data = convertKeys(error.response.data);
       }
       if (error.response?.status === 401) {
-        // Never awaited: the caller's rejection must not wait on the sign-out
-        // decision, and the decision handles its own failures.
-        void shouldEndSharedSession(
-          sentCredential(error.config),
-          isSessionRejection(error.response.data),
-          getToken,
-          () => endSharedSession(appId)
-        );
+        // An MFA-required 401 is a step-up prompt, not a dead session: signing
+        // out would discard a valid token and strand the user mid-sign-in.
+        if (isMFARequiredResponse(error.response.data)) {
+          redirectToSecuritySettings();
+        } else {
+          // Never awaited: the caller's rejection must not wait on the sign-out
+          // decision, and the decision handles its own failures.
+          void shouldEndSharedSession(
+            sentCredential(error.config),
+            isSessionRejection(error.response.data),
+            getToken,
+            () => endSharedSession(appId)
+          );
+        }
       }
       return Promise.reject(error);
     }
@@ -341,12 +375,19 @@ export function createOneKitFetch(appId: string): typeof fetch {
     });
 
     if (response.status === 401) {
-      await shouldEndSharedSession(
-        token,
-        isSessionRejection(await readUnauthorizedBody(response)),
-        getToken,
-        () => endSharedSession(appId)
-      );
+      // An MFA-required 401 is a step-up prompt, not a dead session: sending the
+      // user to the sign-in page would discard a perfectly valid token.
+      const unauthorizedBody = await readUnauthorizedBody(response);
+      if (isMFARequiredResponse(unauthorizedBody)) {
+        redirectToSecuritySettings();
+      } else {
+        await shouldEndSharedSession(
+          token,
+          isSessionRejection(unauthorizedBody),
+          getToken,
+          () => endSharedSession(appId)
+        );
+      }
     }
 
     return response;

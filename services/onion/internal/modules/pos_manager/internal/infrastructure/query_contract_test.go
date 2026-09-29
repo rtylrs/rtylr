@@ -70,12 +70,23 @@ func TestBaseSchemaDeclaresNoPlaintextManagerPINColumn(t *testing.T) {
 // assertions above read the table and not the surrounding schema.
 func posManagerPinsTable(t *testing.T, schema string) string {
 	t.Helper()
-	_, after, found := strings.Cut(schema, "CREATE TABLE IF NOT EXISTS pos_manager_pins")
+	// Every table in this file is declared with backticked identifiers, so match
+	// that form and tolerate the bare form rather than pinning one spelling.
+	const quoted = "CREATE TABLE IF NOT EXISTS `pos_manager_pins`"
+	const bare = "CREATE TABLE IF NOT EXISTS pos_manager_pins"
+	_, after, found := strings.Cut(schema, quoted)
+	if !found {
+		_, after, found = strings.Cut(schema, bare)
+	}
 	if !found {
 		t.Fatal("the base schema does not define pos_manager_pins at all")
 	}
-	block, _, _ := strings.Cut(after, ");")
-	return block
+	// The statement ends at its first semicolon: a backticked table ends with the
+	// ENGINE clause, not with the ");" a plain block would.
+	if end := strings.Index(after, ";"); end >= 0 {
+		return after[:end]
+	}
+	return after
 }
 
 // The migration that introduces the hash and removes the plaintext column must

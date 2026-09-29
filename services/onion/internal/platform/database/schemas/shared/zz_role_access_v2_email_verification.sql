@@ -1,10 +1,11 @@
-CREATE TABLE IF NOT EXISTS user_email_verification_tokens (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    token_hash CHAR(64) NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
-    consumed_at TIMESTAMP NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_user_email_verification_tokens_lookup (token_hash, consumed_at, expires_at),
-    INDEX idx_user_email_verification_tokens_user (user_id)
-);
+CREATE TABLE IF NOT EXISTS `user_email_verification_tokens` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `token_hash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expires_at` timestamp NOT NULL,
+  `consumed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_email_verification_tokens_lookup` (`token_hash`,`consumed_at`,`expires_at`),
+  KEY `idx_user_email_verification_tokens_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

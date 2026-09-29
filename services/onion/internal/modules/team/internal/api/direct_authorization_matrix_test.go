@@ -34,7 +34,8 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 					AppId:            "dash",
 					RoleIds:          []string{"7305"},
 					AssignmentSource: string(authorization.SourceExplicit),
-					Scopes:           []*hubuserv1.RoleScope{{ScopeType: "business", ScopeId: "1001"}},
+					// No scope: dash is not a resource scoped app, and
+					// chk_auth_assignment_scope_type cannot store a dash scope.
 				}},
 				GroupIds: []int64{},
 			})
@@ -58,4 +59,40 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 	}
 	testutil.RunDirectAuthorizationCases(t, cases)
+
+	// A scope the assignment table cannot store must be rejected before any
+	// write. The normalized team writer revokes the member's licenses and role
+	// assignments in the same transaction, so an unvalidated scope used to roll
+	// the whole authorization back and return an opaque 500.
+	t.Run("invalid assignment scope is rejected without a partial rewrite", func(t *testing.T) {
+		caseCtx := context.Background()
+		db := testutil.DirectAuthorizationDB(caseCtx)
+		role := "staff"
+		fullName := "Direct Authorization Staff"
+		_, err := NewPermissionsAPI(application.NewService(caseCtx, db)).UpdatePermissions(caseCtx, &hubteampermissionsv1.UpdatePermissionsRequest{
+			UserId:   1002,
+			Role:     &role,
+			FullName: &fullName,
+			AppAssignments: []*hubuserv1.AppRoleAssignment{{
+				AppId:            "pos",
+				RoleIds:          []string{"7305"},
+				AssignmentSource: string(authorization.SourceExplicit),
+				Scopes:           []*hubuserv1.RoleScope{{ScopeType: "business", ScopeId: "1001"}},
+			}},
+			GroupIds: []int64{},
+		})
+		if err == nil {
+			t.Fatal("expected a business scope to be rejected")
+		}
+		var rowCount int
+		if scanErr := db.QueryRowContext(caseCtx, `
+			SELECT COUNT(*) FROM authorization_role_assignment_scopes s
+			JOIN authorization_role_assignments a ON a.id = s.assignment_id
+			WHERE a.user_id = 1002 AND s.scope_type = 'business'`).Scan(&rowCount); scanErr != nil {
+			t.Fatalf("count scopes: %v", scanErr)
+		}
+		if rowCount != 0 {
+			t.Fatalf("a rejected scope left %d rows behind", rowCount)
+		}
+	})
 }

@@ -31,7 +31,7 @@ func (r *Repository) GetWidgets(ctx context.Context, businessID int64) ([]*domai
 			ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID,
 			RoleID: row.RoleID, WidgetType: row.WidgetType,
 			PositionX: row.PositionX, PositionY: row.PositionY, Width: row.Width, Height: row.Height,
-			CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
+			CreatedAt: row.CreatedAt.Time, UpdatedAt: row.UpdatedAt.Time,
 		}
 		if len(row.Config) > 0 {
 			w.Config = row.Config

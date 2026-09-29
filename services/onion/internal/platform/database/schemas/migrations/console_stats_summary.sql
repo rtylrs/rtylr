@@ -1,18 +1,4 @@
--- This migration lives outside SQLC schema inputs because it installs triggers.
--- Backfill the singleton once for existing installations. Subsequent writes are
--- tracked by the triggers below, so console stats are O(1) to read.
-CREATE TABLE IF NOT EXISTS console_stats (
-    id TINYINT NOT NULL PRIMARY KEY,
-    total_users BIGINT NOT NULL DEFAULT 0,
-    banned_users BIGINT NOT NULL DEFAULT 0,
-    total_businesses BIGINT NOT NULL DEFAULT 0,
-    active_subs BIGINT NOT NULL DEFAULT 0,
-    trial_subs BIGINT NOT NULL DEFAULT 0,
-    manual_grants BIGINT NOT NULL DEFAULT 0,
-    manual_addon_grants BIGINT NOT NULL DEFAULT 0,
-    console_admins BIGINT NOT NULL DEFAULT 0,
-    CHECK (id = 1)
-);
+
 
 INSERT INTO console_stats (
     id, total_users, banned_users, total_businesses, active_subs, trial_subs,

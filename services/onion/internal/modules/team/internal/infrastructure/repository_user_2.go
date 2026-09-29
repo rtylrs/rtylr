@@ -127,12 +127,30 @@ func (r *Repository) GetAuthorizationSnapshot(ctx context.Context, businessID, u
 		return authorization.Snapshot{}, false, err
 	}
 
+	// The app set is the union of the caller's plan-derived apps (owners, whose
+	// access is the system path) and the apps this member actually holds a role
+	// assignment for. Members and admins are bounded by their assignments
+	// alone, so a stale legacy user_app_permissions.apps row can no longer add
+	// an app nobody assigned them.
 	apps := make([]authorization.AppID, 0, len(subscribedApps))
-	for _, app := range subscribedApps {
-		if app == "" || app == "dash" {
-			continue
+	seenApps := make(map[authorization.AppID]struct{}, len(subscribedApps)+len(assignments))
+	appendApp := func(appID authorization.AppID) {
+		if appID == "" || appID == "dash" {
+			return
 		}
-		apps = append(apps, authorization.AppID(app))
+		if _, seen := seenApps[appID]; seen {
+			return
+		}
+		seenApps[appID] = struct{}{}
+		apps = append(apps, appID)
+	}
+	for _, app := range subscribedApps {
+		appendApp(authorization.AppID(app))
+	}
+	for _, assignment := range assignments {
+		if assignment.Active {
+			appendApp(assignment.AppID)
+		}
 	}
 
 	return authorization.Snapshot{

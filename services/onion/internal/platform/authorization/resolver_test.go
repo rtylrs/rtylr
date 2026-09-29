@@ -2,7 +2,7 @@ package authorization
 
 import "testing"
 
-func TestResolveIndependentAppRolesAndLicenseRevocation(t *testing.T) {
+func TestResolveIndependentAppRolesAndLicenseReporting(t *testing.T) {
 	flow := AppID("flow")
 	finance := AppID("finance")
 	flowRole := int64(10)
@@ -25,13 +25,36 @@ func TestResolveIndependentAppRolesAndLicenseRevocation(t *testing.T) {
 			{ID: financeRole, AppID: &finance, Key: "finance.viewer", DisplayName: "Viewer", Permissions: []string{"finance:reports:view"}},
 		},
 	})
+	// Licensing is plan metadata, so an inactive license row is reported but no
+	// longer removes the access its role assignment grants. Revoking the
+	// assignment is the revocation mechanism.
 	financeAccess := appAccessByID(t, access, finance)
-	if financeAccess.Licensed || financeAccess.HasAccess {
-		t.Fatalf("expected finance role to remain history-only after license removal: %#v", access.Apps)
+	if !financeAccess.HasAccess {
+		t.Fatalf("expected the finance role assignment to grant access: %#v", financeAccess)
+	}
+	if financeAccess.Licensed {
+		t.Fatalf("expected finance to still be reported as unlicensed: %#v", financeAccess)
 	}
 	flowAccess := appAccessByID(t, access, flow)
 	if !flowAccess.HasAccess || flowAccess.DisplayRole != "Manager" {
 		t.Fatalf("expected independent Flow access: %#v", flowAccess)
+	}
+}
+
+func TestResolveRevokedAssignmentRemovesAccess(t *testing.T) {
+	flow := AppID("flow")
+	roleID := int64(11)
+	access := Resolve(Snapshot{
+		BusinessID:       7,
+		DashRole:         "manager",
+		MembershipActive: true,
+		SubscribedApps:   []AppID{flow},
+		Licenses:         []License{{AppID: flow, Source: SourceExplicit, Active: true}},
+		Assignments:      []RoleAssignment{{AppID: flow, RoleIDs: []int64{roleID}, Source: SourceExplicit, Active: false}},
+		Roles:            []Role{{ID: roleID, AppID: &flow, Permissions: []string{"flow:tasks:edit"}}},
+	})
+	if appAccessByID(t, access, flow).HasAccess {
+		t.Fatalf("a revoked role assignment must remove access: %#v", access.Apps)
 	}
 }
 
@@ -59,8 +82,8 @@ func TestResolveGroupAndDirectAssignmentsUnionPermissionsAndScopes(t *testing.T)
 		SubscribedApps:   []AppID{flow},
 		Licenses:         []License{{AppID: flow, Source: SourceGroup, GroupID: int64Pointer(22), Active: true}},
 		Assignments: []RoleAssignment{
-			{AppID: flow, RoleIDs: []int64{managerID}, Source: SourceExplicit, Scopes: []Scope{{Type: "project", ID: "1"}}, Active: true},
-			{AppID: flow, GroupID: int64Pointer(22), RoleIDs: []int64{contributorID}, Source: SourceGroup, Scopes: []Scope{{Type: "project", ID: "2"}}, Active: true},
+			{AppID: flow, RoleIDs: []int64{managerID}, Source: SourceExplicit, Scopes: []Scope{{Type: "flow_project", ID: "1"}}, Active: true},
+			{AppID: flow, GroupID: int64Pointer(22), RoleIDs: []int64{contributorID}, Source: SourceGroup, Scopes: []Scope{{Type: "flow_project", ID: "2"}}, Active: true},
 		},
 		Roles: []Role{
 			{ID: managerID, AppID: &flow, Key: "flow.manager", Permissions: []string{"flow:projects:manage"}},
@@ -76,8 +99,12 @@ func TestResolveGroupAndDirectAssignmentsUnionPermissionsAndScopes(t *testing.T)
 	}
 }
 
-func TestResolveOwnerAndAdminRequireSubscriptionEntitlement(t *testing.T) {
+func TestResolveOwnerAndAdminAccessFollowsTheAppSetNotLicensing(t *testing.T) {
 	flow := AppID("flow")
+	// An admin takes the system path for the apps it is already entitled to.
+	// Entitlement is the caller's app set (an owner's plan, a member's role
+	// assignments), so a missing license row neither blocks nor is waived: it is
+	// reported as plan metadata.
 	access := Resolve(Snapshot{
 		BusinessID:       11,
 		DashRole:         "admin",
@@ -85,13 +112,16 @@ func TestResolveOwnerAndAdminRequireSubscriptionEntitlement(t *testing.T) {
 		SubscribedApps:   []AppID{flow},
 		AllPermissions:   []string{"flow:tasks:edit"},
 	})
-	if !access.Apps[0].HasAccess || !access.Apps[0].Licensed {
-		t.Fatalf("expected subscribed app override for admin: %#v", access.Apps[0])
+	if !access.Apps[0].HasAccess {
+		t.Fatalf("expected the admin system path to grant an entitled app: %#v", access.Apps[0])
+	}
+	if access.Apps[0].Licensed {
+		t.Fatalf("licensing must be reported rather than waived for admins: %#v", access.Apps[0])
 	}
 
-	noSubscription := Resolve(Snapshot{BusinessID: 11, DashRole: "admin", MembershipActive: true})
-	if len(noSubscription.Apps) != 0 {
-		t.Fatalf("expected no app access without entitlement: %#v", noSubscription.Apps)
+	noApps := Resolve(Snapshot{BusinessID: 11, DashRole: "admin", MembershipActive: true})
+	if len(noApps.Apps) != 0 {
+		t.Fatalf("expected no app access without an entitled app set: %#v", noApps.Apps)
 	}
 }
 
@@ -112,19 +142,20 @@ func TestResolveArchivedRoleAndInactiveMembershipFailClosed(t *testing.T) {
 	}
 }
 
-func TestResolveRejectsInvalidSourceTargets(t *testing.T) {
+func TestResolveRejectsInvalidAssignmentSourceTargets(t *testing.T) {
 	flow := AppID("flow")
 	roleID := int64(4)
+	// Only a malformed *assignment* denies access. The license row is plan
+	// metadata, so a malformed license alongside a valid assignment is allowed
+	// and covered separately below.
 	cases := []struct {
 		name      string
 		source    AssignmentSource
 		licenseID *int64
 		roleID    *int64
 	}{
-		{name: "group license without group", source: SourceGroup, licenseID: nil, roleID: int64Pointer(22)},
 		{name: "group role without group", source: SourceGroup, licenseID: int64Pointer(22), roleID: nil},
 		{name: "unknown source", source: AssignmentSource("invalid"), licenseID: nil, roleID: nil},
-		{name: "explicit license with group", source: SourceExplicit, licenseID: int64Pointer(22), roleID: nil},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -139,6 +170,29 @@ func TestResolveRejectsInvalidSourceTargets(t *testing.T) {
 				t.Fatalf("invalid source target retained app access: %#v", access.Apps[0])
 			}
 		})
+	}
+}
+
+func TestResolveAllowsValidAssignmentWithMalformedLicense(t *testing.T) {
+	flow := AppID("flow")
+	roleID := int64(5)
+	// A group-sourced license missing its group is a reporting defect, not an
+	// access decision: the role assignment still governs.
+	access := Resolve(Snapshot{
+		BusinessID:       14,
+		DashRole:         "member",
+		MembershipActive: true,
+		SubscribedApps:   []AppID{flow},
+		Licenses:         []License{{AppID: flow, Source: SourceGroup, Active: true}},
+		Assignments:      []RoleAssignment{{AppID: flow, GroupID: int64Pointer(22), RoleIDs: []int64{roleID}, Source: SourceGroup, Active: true}},
+		Roles:            []Role{{ID: roleID, AppID: &flow, Permissions: []string{"flow:tasks:edit"}}},
+	})
+	app := access.Apps[0]
+	if !app.HasAccess {
+		t.Fatalf("a valid group assignment must not be denied by a malformed license: %#v", app)
+	}
+	if app.Licensed {
+		t.Fatalf("a malformed license must not be reported as licensed: %#v", app)
 	}
 }
 

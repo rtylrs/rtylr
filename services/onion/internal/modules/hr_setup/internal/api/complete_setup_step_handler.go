@@ -28,6 +28,9 @@ func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupSt
 	if device.IsAnonymous || device.User == nil {
 		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRSetupManagePermission(ctx); err != nil {
+		return CompleteSetupStepResponse{}, err
+	}
 
 	stepKey := chi.URLParamFromCtx(ctx, "stepKey")
 

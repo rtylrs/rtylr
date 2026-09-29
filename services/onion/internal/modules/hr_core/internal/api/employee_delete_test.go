@@ -54,7 +54,7 @@ func deleteEmployeeContext(businessID, userID, employeeID int64) context.Context
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: []string{"hr:employees:manage"},
-				Scopes:      []authorization.Scope{{Type: "location", ID: "1"}},
+				Scopes:      nil,
 			}},
 		},
 	}

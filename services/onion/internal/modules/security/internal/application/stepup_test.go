@@ -92,6 +92,14 @@ func (f *fakeSecurityRepo) ConsumeRecoveryCode(context.Context, int64, int64) er
 	return nil
 }
 
+func (f *fakeSecurityRepo) GetOrganizationMFAEnforced(context.Context, int64) (bool, error) {
+	return false, nil
+}
+
+func (f *fakeSecurityRepo) SetOrganizationMFAEnforced(context.Context, int64, bool) error {
+	return nil
+}
+
 func serviceWithRepo(repo repository) *Service {
 	return &Service{repo: repo}
 }

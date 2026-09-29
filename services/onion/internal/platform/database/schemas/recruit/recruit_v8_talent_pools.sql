@@ -1,39 +1,39 @@
--- Candidate organization for the recruit ATS: reusable tags and
--- tenant-scoped talent pools with explicit membership rows.
+CREATE TABLE IF NOT EXISTS `careers_submission_tags` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `submission_id` bigint NOT NULL,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `normalized_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_submission_tags_name` (`business_id`,`submission_id`,`normalized_name`),
+  KEY `idx_submission_tags_submission` (`submission_id`,`created_at`),
+  KEY `idx_submission_tags_business_name` (`business_id`,`normalized_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS careers_submission_tags (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    submission_id BIGINT NOT NULL,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(64) NOT NULL,
-    normalized_name VARCHAR(64) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_submission_tags_name (business_id, submission_id, normalized_name),
-    INDEX idx_submission_tags_submission (submission_id, created_at),
-    INDEX idx_submission_tags_business_name (business_id, normalized_name)
-);
+CREATE TABLE IF NOT EXISTS `careers_talent_pools` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_talent_pools_business_name` (`business_id`,`name`),
+  KEY `idx_talent_pools_business` (`business_id`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS careers_talent_pools (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(120) NOT NULL,
-    description VARCHAR(500) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_talent_pools_business_name (business_id, name),
-    INDEX idx_talent_pools_business (business_id, created_at)
-);
-
-CREATE TABLE IF NOT EXISTS careers_talent_pool_members (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    pool_id BIGINT NOT NULL,
-    submission_id BIGINT NOT NULL,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_talent_pool_membership (pool_id, submission_id),
-    INDEX idx_talent_pool_members_business (business_id, pool_id),
-    INDEX idx_talent_pool_members_submission (business_id, submission_id)
-);
+CREATE TABLE IF NOT EXISTS `careers_talent_pool_members` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `pool_id` bigint NOT NULL,
+  `submission_id` bigint NOT NULL,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_talent_pool_membership` (`pool_id`,`submission_id`),
+  KEY `idx_talent_pool_members_business` (`business_id`,`pool_id`),
+  KEY `idx_talent_pool_members_submission` (`business_id`,`submission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

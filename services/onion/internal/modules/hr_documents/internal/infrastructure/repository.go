@@ -233,8 +233,8 @@ func documentFromRow(row sqlc.HrEmployeeDocument) domain.EmployeeDocumentRecord 
 		ExternalURL:  row.ExternalUrl.String,
 		ExpiryDate:   expiryDate,
 		UploadedBy:   row.UploadedBy,
-		CreatedAt:    row.CreatedAt,
-		UpdatedAt:    row.UpdatedAt,
+		CreatedAt:    row.CreatedAt.Time,
+		UpdatedAt:    row.UpdatedAt.Time,
 	}
 }
 

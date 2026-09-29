@@ -1,233 +1,265 @@
-CREATE TABLE IF NOT EXISTS finance_accounts (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(255) NOT NULL,
-    code VARCHAR(32) NULL,
-    parent_id BIGINT NULL,
-    type ENUM('asset','liability','equity','revenue','expense') NOT NULL,
-    currency VARCHAR(10) DEFAULT 'USD',
-    balance DECIMAL(15,2) DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_finance_accounts_parent (parent_id),
-    CONSTRAINT chk_finance_accounts_balance_non_negative CHECK (balance >= 0)
-);
+CREATE TABLE IF NOT EXISTS `finance_accounts` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parent_id` bigint DEFAULT NULL,
+  `type` enum('asset','liability','equity','revenue','expense') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `balance` decimal(15,2) DEFAULT '0.00',
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_accounts_parent` (`parent_id`),
+  CONSTRAINT `chk_finance_accounts_balance_non_negative` CHECK ((`balance` >= 0))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tenant-selected accounts used when posting payroll. Payroll must not invent
--- chart-of-accounts entries; the accounts module owns this configuration.
-CREATE TABLE IF NOT EXISTS finance_payroll_account_mappings (
-    business_id BIGINT NOT NULL PRIMARY KEY,
-    expense_account_id BIGINT NOT NULL,
-    payable_account_id BIGINT NOT NULL,
-    deductions_payable_account_id BIGINT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_finance_payroll_mapping_expense (expense_account_id),
-    INDEX idx_finance_payroll_mapping_payable (payable_account_id),
-    INDEX idx_finance_payroll_mapping_deductions (deductions_payable_account_id)
-);
+CREATE TABLE IF NOT EXISTS `finance_payroll_account_mappings` (
+  `business_id` bigint NOT NULL,
+  `expense_account_id` bigint NOT NULL,
+  `payable_account_id` bigint NOT NULL,
+  `deductions_payable_account_id` bigint DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`business_id`),
+  KEY `idx_finance_payroll_mapping_expense` (`expense_account_id`),
+  KEY `idx_finance_payroll_mapping_payable` (`payable_account_id`),
+  KEY `idx_finance_payroll_mapping_deductions` (`deductions_payable_account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_invoices (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    invoice_number VARCHAR(100) NOT NULL,
-    client_name VARCHAR(255) NOT NULL,
-    client_email VARCHAR(255),
-    client_address TEXT,
-    client_tax_id VARCHAR(100),
-    customer_id BIGINT NULL,
-    status ENUM('draft','sent','viewed','partial','paid','overdue','cancelled','void') DEFAULT 'draft',
-    issue_date DATE NOT NULL,
-    due_date DATE NOT NULL,
-    paid_date DATE,
-    reporting_date DATE GENERATED ALWAYS AS (COALESCE(paid_date, issue_date)) STORED,
-    currency VARCHAR(10) DEFAULT 'USD',
-    subtotal DECIMAL(10,2) DEFAULT 0,
-    discount_type ENUM('fixed','percentage') DEFAULT 'fixed',
-    discount_value DECIMAL(10,2) DEFAULT 0,
-    discount_amount DECIMAL(10,2) DEFAULT 0,
-    tax_rate DECIMAL(5,2) DEFAULT 0,
-    tax_amount DECIMAL(10,2) DEFAULT 0,
-    total DECIMAL(10,2) DEFAULT 0,
-    amount_paid DECIMAL(10,2) DEFAULT 0,
-    amount_due DECIMAL(10,2) DEFAULT 0,
-    notes TEXT,
-    terms TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    -- idx_finance_invoices_business_created / _business_status_created and the
-    -- FULLTEXT search index are added by zz_finance_search_indexes.sql;
-    -- declaring them here as well fails a fresh migration run with
-    -- duplicate-key errors. The same applies to uq_finance_invoices_business_number
-    -- and _business_status_reporting_date: zz_finance_invoice_number_unique.sql
-    -- and zz_finance_reporting_date_live_repair.sql own those.
-    INDEX idx_finance_invoices_business_status_reporting_date (business_id, status, reporting_date)
-);
+CREATE TABLE IF NOT EXISTS `finance_invoices` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `invoice_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `client_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `client_tax_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_id` bigint DEFAULT NULL,
+  `status` enum('draft','sent','viewed','partial','paid','overdue','cancelled','void') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `issue_date` date NOT NULL,
+  `due_date` date NOT NULL,
+  `paid_date` date DEFAULT NULL,
+  `reporting_date` date GENERATED ALWAYS AS (coalesce(`paid_date`,`issue_date`)) STORED,
+  `currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `subtotal` decimal(10,2) DEFAULT '0.00',
+  `discount_type` enum('fixed','percentage') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'fixed',
+  `discount_value` decimal(10,2) DEFAULT '0.00',
+  `discount_amount` decimal(10,2) DEFAULT '0.00',
+  `tax_rate` decimal(5,2) DEFAULT '0.00',
+  `tax_amount` decimal(10,2) DEFAULT '0.00',
+  `total` decimal(10,2) DEFAULT '0.00',
+  `amount_paid` decimal(10,2) DEFAULT '0.00',
+  `amount_due` decimal(10,2) DEFAULT '0.00',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `terms` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_finance_invoices_business_number` (`business_id`,`invoice_number`),
+  KEY `idx_finance_invoices_business_status_reporting_date` (`business_id`,`status`,`reporting_date`),
+  KEY `idx_finance_invoices_business_customer` (`business_id`,`customer_id`),
+  KEY `idx_finance_invoices_business_created` (`business_id`,`created_at`),
+  KEY `idx_finance_invoices_business_status_created` (`business_id`,`status`,`created_at`),
+  KEY `idx_finance_invoices_owner` (`owner_id`),
+  KEY `idx_finance_invoices_owner_status` (`owner_id`,`status`),
+  KEY `idx_finance_invoices_owner_created` (`owner_id`,`created_at`),
+  FULLTEXT KEY `idx_finance_invoices_search` (`invoice_number`,`client_name`,`client_email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_invoice_items (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    invoice_id BIGINT NOT NULL,
-    description VARCHAR(500) NOT NULL,
-    quantity DECIMAL(10,3) NOT NULL DEFAULT 1,
-    unit VARCHAR(50) DEFAULT 'unit',
-    unit_price DECIMAL(10,2) NOT NULL,
-    tax_rate DECIMAL(5,2) DEFAULT 0,
-    discount_pct DECIMAL(5,2) DEFAULT 0,
-    total DECIMAL(10,2) NOT NULL,
-    sort_order INT DEFAULT 0
-);
+CREATE TABLE IF NOT EXISTS `finance_invoice_items` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `invoice_id` bigint NOT NULL,
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` decimal(10,3) NOT NULL DEFAULT '1.000',
+  `unit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'unit',
+  `unit_price` decimal(10,2) NOT NULL,
+  `tax_rate` decimal(5,2) DEFAULT '0.00',
+  `discount_pct` decimal(5,2) DEFAULT '0.00',
+  `total` decimal(10,2) NOT NULL,
+  `sort_order` int DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_invoice_items_invoice` (`invoice_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_payments (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    invoice_id BIGINT NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    currency VARCHAR(10) DEFAULT 'USD',
-    payment_date DATE NOT NULL,
-    method ENUM('cash','bank_transfer','card','cheque','online','other') NOT NULL,
-    reference VARCHAR(255),
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `finance_payments` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `invoice_id` bigint NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `payment_date` date NOT NULL,
+  `method` enum('cash','bank_transfer','card','cheque','online','other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reference` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_finance_payments_business_invoice_reference` (`business_id`,`invoice_id`,`reference`),
+  KEY `idx_finance_payments_owner` (`owner_id`),
+  KEY `idx_finance_payments_invoice` (`invoice_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_expense_categories (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(255) NOT NULL,
-    color VARCHAR(20),
-    icon VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `finance_expense_categories` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_expense_categories_owner` (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_expenses (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    category_id BIGINT,
-    description VARCHAR(500) NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    currency VARCHAR(10) DEFAULT 'USD',
-    expense_date DATE NOT NULL,
-    vendor VARCHAR(255),
-    payment_method ENUM('cash','card','bank_transfer','other') DEFAULT 'cash',
-    receipt_url TEXT,
-    is_tax_deductible BOOLEAN DEFAULT FALSE,
-    tax_amount DECIMAL(10,2) DEFAULT 0,
-    notes TEXT,
-    status VARCHAR(50) DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    -- idx_finance_expenses_business_date / _business_category_date and the
-    -- FULLTEXT search index are added by zz_finance_search_indexes.sql;
-    -- declaring them here as well fails a fresh migration run with
-    -- duplicate-key errors.
-);
+CREATE TABLE IF NOT EXISTS `finance_expenses` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `category_id` bigint DEFAULT NULL,
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `expense_date` date NOT NULL,
+  `vendor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_method` enum('cash','card','bank_transfer','other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'cash',
+  `receipt_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `is_tax_deductible` tinyint(1) DEFAULT '0',
+  `tax_amount` decimal(10,2) DEFAULT '0.00',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_expenses_business_date` (`business_id`,`expense_date`),
+  KEY `idx_finance_expenses_business_category_date` (`business_id`,`category_id`,`expense_date`),
+  KEY `idx_finance_expenses_owner` (`owner_id`),
+  KEY `idx_finance_expenses_owner_category` (`owner_id`,`category_id`),
+  FULLTEXT KEY `idx_finance_expenses_search` (`description`,`vendor`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_tax_config (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL UNIQUE,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(100) NOT NULL DEFAULT '',
-    rate DECIMAL(5,2) NOT NULL DEFAULT 0,
-    type ENUM('vat','sales_tax','gst','other') DEFAULT 'vat',
-    is_default BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN DEFAULT TRUE,
-    tax_name VARCHAR(100),
-    tax_rate DECIMAL(5,2) DEFAULT 0,
-    is_inclusive BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `finance_tax_config` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `rate` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `type` enum('vat','sales_tax','gst','other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'vat',
+  `is_default` tinyint(1) DEFAULT '0',
+  `is_active` tinyint(1) DEFAULT '1',
+  `tax_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tax_rate` decimal(5,2) DEFAULT '0.00',
+  `is_inclusive` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_finance_tax_config_business_name_type` (`business_id`,`name`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_recurring_invoices (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    template_invoice_id BIGINT NOT NULL,
-    frequency ENUM('weekly','monthly','quarterly','yearly') NOT NULL,
-    next_invoice_date DATE NOT NULL,
-    end_date DATE,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `finance_recurring_invoices` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `template_invoice_id` bigint NOT NULL,
+  `frequency` enum('weekly','monthly','quarterly','yearly') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `next_invoice_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_recurring_invoices_owner` (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_quotes (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    customer_name VARCHAR(255) NOT NULL,
-    customer_email VARCHAR(255),
-    status ENUM('draft','sent','accepted','rejected','expired','converted') DEFAULT 'draft',
-    items JSON DEFAULT (JSON_ARRAY()),
-    subtotal DECIMAL(10,2) DEFAULT 0,
-    tax DECIMAL(10,2) DEFAULT 0,
-    discount DECIMAL(10,2) DEFAULT 0,
-    total DECIMAL(10,2) DEFAULT 0,
-    valid_until DATE,
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+CREATE TABLE IF NOT EXISTS `finance_quotes` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `customer_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('draft','sent','accepted','rejected','expired','converted') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'draft',
+  `items` json DEFAULT (json_array()),
+  `subtotal` decimal(10,2) DEFAULT '0.00',
+  `tax` decimal(10,2) DEFAULT '0.00',
+  `discount` decimal(10,2) DEFAULT '0.00',
+  `total` decimal(10,2) DEFAULT '0.00',
+  `valid_until` date DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_quotes_owner` (`owner_id`),
+  KEY `idx_finance_quotes_owner_status` (`owner_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_bills (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    supplier_id BIGINT,
-    supplier_name VARCHAR(255) NOT NULL DEFAULT '',
-    purchase_order_id BIGINT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    currency VARCHAR(10) DEFAULT 'USD',
-    due_date DATE NOT NULL,
-    status ENUM('pending','paid','overdue') DEFAULT 'pending',
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_finance_bills_business_due (business_id, due_date, id),
-    INDEX idx_finance_bills_business_status (business_id, status)
-);
+CREATE TABLE IF NOT EXISTS `finance_bills` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `supplier_id` bigint DEFAULT NULL,
+  `supplier_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `purchase_order_id` bigint DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `due_date` date NOT NULL,
+  `status` enum('pending','paid','overdue') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_bills_business_due` (`business_id`,`due_date`,`id`),
+  KEY `idx_finance_bills_business_status` (`business_id`,`status`),
+  KEY `idx_finance_bills_business_po` (`business_id`,`purchase_order_id`),
+  KEY `idx_finance_bills_owner` (`owner_id`),
+  KEY `idx_finance_bills_owner_status` (`owner_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_bank_accounts (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    name VARCHAR(255) NOT NULL,
-    institution VARCHAR(255),
-    account_type VARCHAR(50),
-    last_four VARCHAR(4) NULL,
-    balance DECIMAL(15,2) DEFAULT 0,
-    currency VARCHAR(10) DEFAULT 'USD',
-    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
-    is_connected BOOLEAN DEFAULT FALSE,
-    last_synced_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_finance_bank_accounts_business (business_id)
-);
+CREATE TABLE IF NOT EXISTS `finance_bank_accounts` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `institution` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `account_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_four` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `balance` decimal(15,2) DEFAULT '0.00',
+  `currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `is_primary` tinyint(1) NOT NULL DEFAULT '0',
+  `is_connected` tinyint(1) DEFAULT '0',
+  `last_synced_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_bank_accounts_business` (`business_id`),
+  KEY `idx_finance_bank_accounts_owner` (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_journal_entries (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    date DATE NOT NULL,
-    description TEXT,
-    status VARCHAR(20) NOT NULL DEFAULT 'draft',
-    source_type VARCHAR(32) NULL,
-    source_id BIGINT NULL,
-    posted_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_finance_journal_entries_business_date (business_id, date, id),
-    INDEX idx_finance_journal_entries_business_status (business_id, status),
-    UNIQUE KEY uq_finance_journal_entries_source (business_id, source_type, source_id)
-);
+CREATE TABLE IF NOT EXISTS `finance_journal_entries` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `owner_id` bigint NOT NULL,
+  `business_id` bigint NOT NULL DEFAULT '0',
+  `date` date NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `source_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `source_id` bigint DEFAULT NULL,
+  `posted_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_finance_journal_entries_source` (`business_id`,`source_type`,`source_id`),
+  KEY `idx_finance_journal_entries_business_date` (`business_id`,`date`,`id`),
+  KEY `idx_finance_journal_entries_business_status` (`business_id`,`status`),
+  KEY `idx_finance_journal_entries_owner` (`owner_id`),
+  KEY `idx_finance_journal_entries_owner_status` (`owner_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS finance_journal_lines (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    entry_id BIGINT NOT NULL,
-    account_id BIGINT NOT NULL,
-    debit DECIMAL(15,2) DEFAULT 0,
-    credit DECIMAL(15,2) DEFAULT 0
-);
+CREATE TABLE IF NOT EXISTS `finance_journal_lines` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `entry_id` bigint NOT NULL,
+  `account_id` bigint NOT NULL,
+  `debit` decimal(15,2) DEFAULT '0.00',
+  `credit` decimal(15,2) DEFAULT '0.00',
+  PRIMARY KEY (`id`),
+  KEY `idx_finance_journal_lines_entry` (`entry_id`),
+  KEY `idx_finance_journal_lines_account` (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

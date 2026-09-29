@@ -144,7 +144,13 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 					return
 				}
 				if statusResolver, ok := accessResolver.(authPkg.ProvisioningStatusResolver); ok {
-					status, statusErr := statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
+					var status *authorization.ProvisioningStatus
+					var statusErr error
+					if businessResolver, scoped := accessResolver.(authPkg.BusinessProvisioningStatusResolver); scoped {
+						status, statusErr = businessResolver.GetProvisioningStatusForBusiness(ctx, authUser.BusinessID, authUser.UserID)
+					} else {
+						status, statusErr = statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
+					}
 					if statusErr != nil {
 						logger.Ctx(ctx).Warn("Provisioning status resolution failed", logger.Error(statusErr), logger.String("path", path))
 						writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
@@ -171,7 +177,13 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 									writeUnauthorizedResponse(ctx, w, "MFA verification unavailable")
 									return
 								}
-								verified, verifyErr := mfaResolver.IsMFAVerified(ctx, authUser.UserID)
+								var verified bool
+								var verifyErr error
+								if businessResolver, scoped := accessResolver.(authPkg.BusinessMFAVerifiedResolver); scoped {
+									verified, verifyErr = businessResolver.IsMFAVerifiedForBusiness(ctx, authUser.BusinessID, authUser.UserID)
+								} else {
+									verified, verifyErr = mfaResolver.IsMFAVerified(ctx, authUser.UserID)
+								}
 								if verifyErr != nil || !verified {
 									writeUnauthorizedResponse(ctx, w, "MFA verification required")
 									return
@@ -190,7 +202,12 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 
 func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, permission string) bool {
 	if appID == authorization.AppHub {
-		return authPkg.HasDashboardPermission(user, permission)
+		// Owners and admins are granted every dashboard permission by the
+		// resolver, but a legacy account with no normalized membership row yet
+		// resolves to no effective access. Fall back to the same owner/admin
+		// boundary the concrete handlers enforce so those accounts are not
+		// denied at the edge before their handler can apply that rule.
+		return authPkg.HasDashboardPermission(user, permission) || authPkg.IsBusinessAdmin(user)
 	}
 	return authPkg.HasAppPermission(user, appID, permission)
 }

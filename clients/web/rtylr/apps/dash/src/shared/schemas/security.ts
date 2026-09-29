@@ -47,6 +47,10 @@ export const securityStateSchema = z
     mfa_required: z.boolean().optional(),
     mfaEnrolled: z.boolean().optional(),
     mfa_enrolled: z.boolean().optional(),
+    organizationMfaEnforced: z.boolean().optional(),
+    organization_mfa_enforced: z.boolean().optional(),
+    canManageOrganizationMfa: z.boolean().optional(),
+    can_manage_organization_mfa: z.boolean().optional(),
     recoveryAvailable: z.boolean().optional(),
     recovery_available: z.boolean().optional(),
     twoFactorMethod: z.enum(['app', 'sms']).nullable().default(null),
@@ -62,6 +66,10 @@ export const securityStateSchema = z
     mfaRequired: s.mfaRequired ?? s.mfa_required ?? false,
     mfaEnrolled:
       s.mfaEnrolled ?? s.mfa_enrolled ?? s.twoFactorEnabled ?? s.two_factor_enabled ?? false,
+    organizationMfaEnforced:
+      s.organizationMfaEnforced ?? s.organization_mfa_enforced ?? false,
+    canManageOrganizationMfa:
+      s.canManageOrganizationMfa ?? s.can_manage_organization_mfa ?? false,
     recoveryAvailable: s.recoveryAvailable ?? s.recovery_available ?? false,
     twoFactorMethod: s.twoFactorMethod,
     sessions: s.sessions ?? s.activeSessions ?? s.active_sessions ?? [],

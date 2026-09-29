@@ -151,6 +151,14 @@ func (r *Repository) UpsertProvisioningState(ctx context.Context, userID, busine
 }
 
 func (r *Repository) GetProvisioningStatus(ctx context.Context, userID int64) (*authorization.ProvisioningStatus, bool, error) {
+	return r.getProvisioningStatus(ctx, 0, userID)
+}
+
+func (r *Repository) GetProvisioningStatusForBusiness(ctx context.Context, businessID, userID int64) (*authorization.ProvisioningStatus, bool, error) {
+	return r.getProvisioningStatus(ctx, businessID, userID)
+}
+
+func (r *Repository) getProvisioningStatus(ctx context.Context, businessID, userID int64) (*authorization.ProvisioningStatus, bool, error) {
 	var (
 		mode, state                                 string
 		emailVerified, passwordChangeRequired       bool
@@ -158,10 +166,12 @@ func (r *Repository) GetProvisioningStatus(ctx context.Context, userID int64) (*
 		lastMFAVerified                             sql.NullTime
 	)
 	err := r.pool.QueryRowContext(ctx, `
-		SELECT mode, state, email_verified, password_change_required,
-		       mfa_required, mfa_enrolled, recovery_available, last_mfa_verified_at
-		FROM user_provisioning_states
-		WHERE user_id = ?`, userID).Scan(
+		SELECT provisioning.mode, provisioning.state, provisioning.email_verified, provisioning.password_change_required,
+		       (provisioning.mfa_required OR COALESCE(business.mfa_enforced, FALSE)),
+		       provisioning.mfa_enrolled, provisioning.recovery_available, provisioning.last_mfa_verified_at
+		FROM user_provisioning_states AS provisioning
+		LEFT JOIN businesses AS business ON business.id = CASE WHEN ? > 0 THEN ? ELSE provisioning.business_id END
+		WHERE provisioning.user_id = ?`, businessID, businessID, userID).Scan(
 		&mode, &state, &emailVerified, &passwordChangeRequired,
 		&mfaRequired, &mfaEnrolled, &recoveryAvailable, &lastMFAVerified,
 	)
@@ -188,12 +198,22 @@ func (r *Repository) GetProvisioningStatus(ctx context.Context, userID int64) (*
 }
 
 func (r *Repository) IsMFAVerified(ctx context.Context, userID int64) (bool, error) {
+	return r.isMFAVerified(ctx, 0, userID)
+}
+
+func (r *Repository) IsMFAVerifiedForBusiness(ctx context.Context, businessID, userID int64) (bool, error) {
+	return r.isMFAVerified(ctx, businessID, userID)
+}
+
+func (r *Repository) isMFAVerified(ctx context.Context, businessID, userID int64) (bool, error) {
 	var required, enrolled bool
 	var lastVerified sql.NullTime
 	err := r.pool.QueryRowContext(ctx, `
-		SELECT mfa_required, mfa_enrolled, last_mfa_verified_at
-		FROM user_provisioning_states
-		WHERE user_id = ?`, userID).Scan(&required, &enrolled, &lastVerified)
+		SELECT (provisioning.mfa_required OR COALESCE(business.mfa_enforced, FALSE)),
+		       provisioning.mfa_enrolled, provisioning.last_mfa_verified_at
+		FROM user_provisioning_states AS provisioning
+		LEFT JOIN businesses AS business ON business.id = CASE WHEN ? > 0 THEN ? ELSE provisioning.business_id END
+		WHERE provisioning.user_id = ?`, businessID, businessID, userID).Scan(&required, &enrolled, &lastVerified)
 	if errors.Is(err, sql.ErrNoRows) || authorizationSchemaUnavailable(err) {
 		return false, nil
 	}

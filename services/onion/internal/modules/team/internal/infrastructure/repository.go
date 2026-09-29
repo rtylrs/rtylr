@@ -306,6 +306,14 @@ func (r *Repository) UpsertNormalizedAuthorization(ctx context.Context, business
 					return rollback(err)
 				}
 				for _, scope := range assignment.Scopes {
+					// Validate before inserting. The scopes table's CHECK constraint
+					// would reject the row too late: by this point the member's
+					// licenses and role assignments have already been revoked in this
+					// same transaction, so a bad scope would roll back their whole
+					// authorization and surface as an opaque 500.
+					if err = authorization.ValidateAssignmentScope(ctx, tx, businessID, scope.Type, scope.ID); err != nil {
+						return rollback(fmt.Errorf("invalid scope %q:%q: %w", scope.Type, scope.ID, err))
+					}
 					if _, err = tx.ExecContext(ctx, `
 						INSERT INTO authorization_role_assignment_scopes
 							(assignment_id, scope_type, scope_id)

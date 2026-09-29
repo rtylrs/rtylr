@@ -75,7 +75,17 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 	}
 
 	var effectiveAccess *authorization.EffectiveAccess
-	if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, apps); snapshotErr == nil && found {
+	// Owners resolve through the system path and take their app set from the
+	// business plan. Everyone else is bounded by their normalized role
+	// assignments, so the legacy apps column must not reach the resolver: it is
+	// written by a separate, partially migrated path and a stale row there
+	// would otherwise grant an app (and, for an admin, the whole permission
+	// catalog) that no role assignment backs.
+	entitledApps := apps
+	if !isOwner {
+		entitledApps = nil
+	}
+	if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, entitledApps); snapshotErr == nil && found {
 		resolved := authorization.Resolve(snapshot)
 		effectiveAccess = &resolved
 		if resolved.DashRole != "" {

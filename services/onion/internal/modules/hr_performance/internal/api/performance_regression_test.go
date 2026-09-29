@@ -40,7 +40,7 @@ func performanceAuthContext(userID, businessID int64, permissions ...string) con
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "business", ID: fmt.Sprintf("%d", businessID)}},
+				Scopes:      nil,
 			}},
 		},
 	})
