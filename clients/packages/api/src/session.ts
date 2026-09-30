@@ -25,20 +25,25 @@
  *    the race itself, not evidence of a dead session.
  */
 
-/** Where a request's credential is recorded once the interceptor attaches it. */
-const CREDENTIAL_KEY = Symbol.for('rtylr.credential');
+/**
+ * Credential each request carried, keyed on the config object the interceptor
+ * already passes to both hooks (axios hands the same object back as
+ * `error.config`). A WeakMap keeps this off the config itself: the request
+ * config is Axios's to shape, and a symbol-keyed property written from here is
+ * invisible to its types, so reading it back needs an unchecked assertion.
+ */
+const credentials = new WeakMap<object, string | null>();
 
 /** Record the credential a request is carrying, for the 401 handler to read. */
 export function markCredential(config: unknown, token: string | null): void {
   if (!config || typeof config !== 'object') return;
-  (config as Record<symbol, string | null>)[CREDENTIAL_KEY] = token;
+  credentials.set(config, token);
 }
 
 /** The credential a request carried, or null when it sent none. */
 export function sentCredential(config: unknown): string | null {
   if (!config || typeof config !== 'object') return null;
-  const recorded = (config as Record<symbol, string | null>)[CREDENTIAL_KEY];
-  return typeof recorded === 'string' && recorded ? recorded : null;
+  return credentials.get(config) ?? null;
 }
 
 /** The session check a 401 is allowed to run before any sign-out. */

@@ -5,7 +5,6 @@ import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
 import type { OfflineQueueEntryMeta } from '../../shared/stores/offlineQueueStore';
 import type { OfflineQueuedOrder } from '../../shared/types/pos';
-import { roundCents } from '../../shared/utils/orderCalc';
 import { syncQueuedOrders, type SyncOrder } from './syncOfflineQueue';
 import { runExclusiveDrain } from './drainGuard';
 
@@ -26,17 +25,34 @@ function isAlreadyPaid(error: unknown): boolean {
 
 /**
  * Total the server will compute from the same line items, used for entries
- * persisted before the tender moved onto the queue entry. Mirrors ComputeTotals
- * in services/onion/internal/modules/pos_orders/internal/domain.
+ * persisted before the tender moved onto the queue entry.
+ *
+ * Mirrors ComputeTotals in services/onion/internal/modules/pos_orders/internal/
+ * domain/order_totals.go operation for operation, because the two have to agree
+ * to the cent: the server compares this figure against its own total with no
+ * tolerance (ComputeChange rejects amountPaid < total), so a cent out in either
+ * direction either strands the sale as "payment insufficient" or overstates the
+ * change due. The algebraically equivalent `x * (1 - p)` / `x * (1 + t)` form
+ * this replaces rounded differently from the server's
+ * `subtotal - subtotal * p` / `subtotal + tax`, which is what let the two drift
+ * across a half-cent boundary. The server's flat-discount term is left out
+ * because CreateOrderItemInput carries no discount_amount, so that branch is
+ * unreachable for this payload.
+ *
+ * The server persists the total as DECIMAL via fmt.Sprintf("%.2f"), so the
+ * figure is converted to a 2-decimal number the same way rather than by
+ * Math.round(x * 100), whose double rounding can land a cent away.
  */
 function payloadOrderTotal(order: CreateOrderRequest): number {
-  let total = 0;
+  let subtotal = 0;
+  let taxAmount = 0;
   for (const item of order.items ?? []) {
-    const line = (item.unitPrice ?? 0) * (item.quantity ?? 0);
-    const afterDiscount = line * (1 - (item.discountPct ?? 0) / 100);
-    total += afterDiscount * (1 + (item.taxRate ?? 0) / 100);
+    const lineSubtotal = (item.unitPrice ?? 0) * (item.quantity ?? 0);
+    const lineAfterPercentage = lineSubtotal - lineSubtotal * ((item.discountPct ?? 0) / 100);
+    subtotal += lineAfterPercentage;
+    taxAmount += lineAfterPercentage * ((item.taxRate ?? 0) / 100);
   }
-  return roundCents(total);
+  return Number((subtotal + taxAmount).toFixed(2));
 }
 
 /**
