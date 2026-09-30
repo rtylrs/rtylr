@@ -43,19 +43,21 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 	isOwner := isPrimaryOwner || isCoOwner
 
 	var planSlug, subscriptionStatus string
+	// Resolve the business's plan entitlement for every member, not just the
+	// owner: a dash admin is a tenant administrator and inherits the whole plan
+	// by default. Which apps a member actually receives is decided in the
+	// repository, where the normalized role is known.
+	billingID := businessOwnerID
+	if isPrimaryOwner {
+		billingID = userID
+	}
+	businessApps, appsErr := s.GetOwnerApps(ctx, billingID)
+	if appsErr != nil || len(businessApps) == 0 {
+		businessApps = append([]string(nil), defaultFreePlanApps...)
+	}
 	if isOwner {
 		role = domain.RoleOwner
-		// Always use the primary owner's subscription for entitlements.
-		billingID := businessOwnerID
-		if isPrimaryOwner {
-			billingID = userID
-		}
-		ownerApps, appsErr := s.GetOwnerApps(ctx, billingID)
-		if appsErr != nil || len(ownerApps) == 0 {
-			apps = append([]string(nil), defaultFreePlanApps...)
-		} else {
-			apps = ownerApps
-		}
+		apps = businessApps
 		if slug, status, subErr := s.GetOwnerSubscriptionInfo(ctx, billingID); subErr == nil {
 			planSlug = slug
 			subscriptionStatus = status
@@ -75,29 +77,24 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 	}
 
 	var effectiveAccess *authorization.EffectiveAccess
-	// Owners resolve through the system path and take their app set from the
-	// business plan. Everyone else is bounded by their normalized role
-	// assignments, so the legacy apps column must not reach the resolver: it is
-	// written by a separate, partially migrated path and a stale row there
-	// would otherwise grant an app (and, for an admin, the whole permission
-	// catalog) that no role assignment backs.
-	entitledApps := apps
-	if !isOwner {
-		entitledApps = nil
-	}
-	if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, entitledApps); snapshotErr == nil && found {
+	// The legacy apps column is deliberately not passed through: it is written
+	// by a separate, partially migrated path, so a stale row there would grant
+	// an app that no assignment backs. Owners and admins inherit the plan in the
+	// repository; everyone else is bounded by their own role assignments.
+	if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, businessApps); snapshotErr == nil && found {
 		resolved := authorization.Resolve(snapshot)
 		effectiveAccess = &resolved
 		if resolved.DashRole != "" {
 			role = domain.Role(resolved.DashRole)
 		}
 		isOwner = isOwner || resolved.IsOwner
-		if len(resolved.SubscribedApps) > 0 {
-			apps = make([]string, 0, len(resolved.SubscribedApps)+1)
-			apps = append(apps, "dash")
-			for _, appID := range resolved.SubscribedApps {
-				apps = append(apps, string(appID))
-			}
+		// Always restate the response from the resolver, so the sidebar lists
+		// exactly the apps the member can open rather than whatever the legacy
+		// column happens to hold.
+		apps = make([]string, 0, len(resolved.SubscribedApps)+1)
+		apps = append(apps, "dash")
+		for _, appID := range resolved.SubscribedApps {
+			apps = append(apps, string(appID))
 		}
 	}
 	var provisioningStatus *authorization.ProvisioningStatus

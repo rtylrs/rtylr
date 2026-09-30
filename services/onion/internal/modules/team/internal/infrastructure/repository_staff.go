@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
@@ -19,9 +20,10 @@ import (
 // from the business's owner.
 func (r *Repository) ListStaffUsersByBusinessID(ctx context.Context, businessID int64, limit, offset int32) ([]domain.StaffUser, error) {
 	rows, err := r.queries.ListStaffUsersByBusinessID(ctx, sqlc.ListStaffUsersByBusinessIDParams{
-		BusinessID: sqlnull.Int64(businessID),
-		Limit:      limit,
-		Offset:     offset,
+		BusinessID:   sqlnull.Int64(businessID),
+		BusinessID_2: businessID,
+		Limit:        limit,
+		Offset:       offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list staff users by business", logger.Error(err))
@@ -39,12 +41,10 @@ func (r *Repository) ListStaffUsersByBusinessID(ctx context.Context, businessID 
 		if row.CreatedAt.Valid {
 			su.CreatedAt = row.CreatedAt.Time
 		}
-		su.Role = domain.Role(row.Role.UserAppPermissionsRole)
-		if row.IsActive.Valid {
-			su.IsActive = row.IsActive.Bool
-		}
+		su.Role = staffRole(row)
+		su.IsActive = staffIsActive(row)
 
-		if err := json.Unmarshal(row.Apps, &su.Apps); err != nil {
+		if err := json.Unmarshal(row.LegacyApps, &su.Apps); err != nil {
 			su.Apps = []string{}
 		}
 
@@ -71,7 +71,10 @@ func (r *Repository) ListStaffUsersByBusinessID(ctx context.Context, businessID 
 }
 
 func (r *Repository) CountStaffUsersByBusinessID(ctx context.Context, businessID int64) (int64, error) {
-	return r.queries.CountStaffUsersByBusinessID(ctx, sqlnull.Int64(businessID))
+	return r.queries.CountStaffUsersByBusinessID(ctx, sqlc.CountStaffUsersByBusinessIDParams{
+		BusinessID:   sqlnull.Int64(businessID),
+		BusinessID_2: businessID,
+	})
 }
 
 // groupsForUsers batches group lookups for many users into a single query,
@@ -317,3 +320,26 @@ func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────
+
+// staffRole prefers the normalized dash role, falling back to the legacy column
+// for members that have not been backfilled yet. A member with neither is
+// reported as "member", which is what the dash role vocabulary calls them.
+func staffRole(row sqlc.ListStaffUsersByBusinessIDRow) domain.Role {
+	if key := strings.TrimPrefix(row.DashRoleKey, "dash."); key != "" {
+		return domain.Role(key)
+	}
+	if row.LegacyRole.Valid && string(row.LegacyRole.UserAppPermissionsRole) != "" {
+		return domain.Role(row.LegacyRole.UserAppPermissionsRole)
+	}
+	return domain.Role("member")
+}
+
+// staffIsActive prefers the normalized membership status, so a member revoked
+// through the v2 path is not reported active just because a legacy row is still
+// flagged on.
+func staffIsActive(row sqlc.ListStaffUsersByBusinessIDRow) bool {
+	if row.MemberStatus.Valid {
+		return string(row.MemberStatus.AuthorizationBusinessMembersStatus) == "active"
+	}
+	return row.LegacyIsActive.Valid && row.LegacyIsActive.Bool
+}

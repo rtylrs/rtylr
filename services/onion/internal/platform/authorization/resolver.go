@@ -263,6 +263,19 @@ func resolveApp(snapshot Snapshot, rolesByID map[int64]Role, appID AppID, isOwne
 		licensed = true
 		sources = appendUniqueSource(sources, license.Source)
 	}
+	// An owner or admin is entitled to the whole business plan, and their app
+	// set is drawn from that plan, so every app they resolve is covered by it.
+	// Without this the reported metadata contradicts the entitlement: the app
+	// carries HasAccess but Licensed=false, and consumers that require both
+	// (the Dash sidebar) then hide it.
+	//
+	// This is reporting only and cannot widen access: the caller's app set is
+	// already bounded to the plan, and an inactive membership returns below
+	// before either flag is set.
+	if snapshot.MembershipActive && (isOwner || isAdmin) {
+		licensed = true
+		sources = appendUniqueSource(sources, SourceSystem)
+	}
 
 	access := EffectiveAppAccess{
 		AppID:             appID,
