@@ -33,7 +33,7 @@ export const APP_URLS: Record<AppId, string> & {
   landing: IS_LOCAL ? "http://localhost:4200" : "https://rtylr.com",
   api: "https://api.voxire.com",
   status: "https://status.rtylr.com",
-  console: "https://console.voxire.com",
+  console: "https://voxire.partials.app",
 };
 
 /**

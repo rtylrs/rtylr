@@ -1,4 +1,4 @@
--- Internal console admin account for console.voxire.com
+-- Internal console admin account for voxire.partials.app
 -- Password omitted; fixture authentication is disabled.
 INSERT INTO users (email, password_hash, full_name, onboarded, is_console_admin)
 VALUES (
