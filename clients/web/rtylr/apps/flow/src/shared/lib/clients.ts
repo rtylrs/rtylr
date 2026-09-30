@@ -7,7 +7,6 @@ import { SettingServiceClient } from '@voxire/voxie/flow/setting/v1/client';
 // v2: business-scoped contracts (workspace removal)
 import { ProjectServiceClient as ProjectServiceV2 } from '@voxire/voxie/flow/project/v2/client';
 import { TaskServiceClient as TaskServiceV2 } from '@voxire/voxie/flow/task/v2/client';
-import { DashboardServiceClient as DashboardServiceV2 } from '@voxire/voxie/flow/dashboard/v2/client';
 import { LabelServiceClient as LabelServiceV2 } from '@voxire/voxie/flow/label/v2/client';
 import { MilestoneServiceClient as MilestoneServiceV2 } from '@voxire/voxie/flow/milestone/v2/client';
 import { CycleServiceClient as CycleServiceV2 } from '@voxire/voxie/flow/cycle/v2/client';
@@ -25,7 +24,6 @@ export const settingClient = createOneKitClient(SettingServiceClient, 'flow');
 // ── v2 instances (Phase 2 swaps in; v1 stays until Phase 3 removes) ────────
 export const projectV2 = createOneKitClient(ProjectServiceV2, 'flow');
 export const taskV2 = createOneKitClient(TaskServiceV2, 'flow');
-export const dashboardV2 = createOneKitClient(DashboardServiceV2, 'flow');
 export const labelV2 = createOneKitClient(LabelServiceV2, 'flow');
 export const milestoneV2 = createOneKitClient(MilestoneServiceV2, 'flow');
 export const cycleV2 = createOneKitClient(CycleServiceV2, 'flow');

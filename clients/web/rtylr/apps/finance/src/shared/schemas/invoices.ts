@@ -35,5 +35,3 @@ export const invoiceSchema = z.object({
   number: z.string().optional().nullable(),
   history: z.array(historyEntrySchema).optional().nullable(),
 });
-
-export type InvoiceRaw = z.infer<typeof invoiceSchema>;

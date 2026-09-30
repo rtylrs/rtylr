@@ -16,5 +16,3 @@ export const timeEntryFormSchema = z.object({
   // when Flow logs a work-day line; this schema validates form input.
   source: z.enum(['manual', 'timer']),
 });
-
-export type TimeEntryFormData = z.infer<typeof timeEntryFormSchema>;

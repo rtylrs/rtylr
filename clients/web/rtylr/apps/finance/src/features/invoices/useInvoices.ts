@@ -89,13 +89,6 @@ interface UseInvoicesParams {
   status?: string;
 }
 
-export interface InvoiceListResult {
-  invoices: Invoice[];
-  hasMore: boolean;
-  page: number;
-  pageSize: number;
-}
-
 export function useInvoices(params: UseInvoicesParams = {}) {
   const { page = 1, pageSize = 50, status } = params;
   const query = useListInvoices({ page, pageSize, status });

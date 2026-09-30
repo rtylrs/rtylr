@@ -16,14 +16,6 @@ interface UnitSelectorProps {
   onChange: (value: string) => void;
 }
 
-export function convertUnits(value: number, from: string, to: string): number {
-  const rates: Record<string, number> = { kg: 1000, g: 1, L: 1000, mL: 1 };
-  if (rates[from] && rates[to]) {
-    return (value * rates[from]) / rates[to];
-  }
-  return value;
-}
-
 const UnitSelector: React.FC<UnitSelectorProps> = ({ value, onChange }) => {
   return (
     <select

@@ -46,5 +46,3 @@ export const taskDrawerSearchSchema = z.object({
     .optional()
     .catch(undefined),
 });
-
-export type TaskDrawerSearch = z.infer<typeof taskDrawerSearchSchema>;

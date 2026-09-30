@@ -2,8 +2,6 @@
 import type { CSSProperties } from 'react';
 
 export const ACCENT = 'var(--finance-accent)';
-export const ACCENT_SOFT = 'var(--finance-accent-soft)';
-
 export const cardStyle: CSSProperties = {
   background: 'var(--hub-card)',
   border: '1px solid var(--hub-border)',

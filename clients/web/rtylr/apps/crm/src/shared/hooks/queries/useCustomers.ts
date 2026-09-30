@@ -97,11 +97,6 @@ function toCustomerWireInput(input: CustomerInput): CustomerWireInput {
   };
 }
 
-function normalizeCustomerResponse(value: unknown): Customer {
-  const envelope = (value ?? {}) as { customer?: unknown };
-  return customerSchema.parse(envelope.customer ?? value);
-}
-
 export interface CustomerTimelinePage {
   entries: TimelineEntry[];
   nextCursor?: string;
@@ -129,16 +124,6 @@ export const useListCustomers = (
       return z.array(customerSchema).parse(unwrapList(res, 'customers'));
     },
     enabled,
-  });
-
-export const useGetCustomer = (id: number | undefined): UseQueryResult<Customer> =>
-  useQuery<Customer>({
-    queryKey: ['crm-customer', id],
-    queryFn: async (): Promise<Customer> => {
-      const res = await unwrap(crmApi.getCustomerDetail(id ?? 0));
-      return normalizeCustomerResponse(res);
-    },
-    enabled: !!id,
   });
 
 export const useGetCustomerFull = (id: number | undefined): UseQueryResult<CustomerFullPayload> =>

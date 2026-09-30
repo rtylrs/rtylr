@@ -20,9 +20,7 @@ import type {
   UpdateLeadRequest,
   CreateTouchpointRequest,
   CreateContactRequest,
-  UpdateContactRequest,
   CreateContractRequest,
-  UpdateContractRequest,
 } from '../../services/crmApi';
 
 // ── Re-exports ────────────────────────────────────────────────────
@@ -243,33 +241,6 @@ export const useCreateContact = (): UseMutationResult<
   });
 };
 
-interface UpdateContactPayload {
-  id: number;
-  leadId: number;
-  data: UpdateContactRequest;
-}
-
-export const useUpdateContact = (): UseMutationResult<
-  SalesContact,
-  unknown,
-  UpdateContactPayload
-> => {
-  const qc = useQueryClient();
-  return useMutation<SalesContact, unknown, UpdateContactPayload>({
-    mutationFn: async (payload: UpdateContactPayload): Promise<SalesContact> => {
-      const res = await unwrap(crmApi.updateContact(payload.id, payload.data));
-      return res as SalesContact;
-    },
-    onSuccess: (_data: SalesContact, _variables: UpdateContactPayload): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
-      toast.success(i18next.t('crm.sales.contactUpdated'));
-    },
-    onError: (): void => {
-      toast.error(i18next.t('crm.sales.contactUpdateFailed'));
-    },
-  });
-};
-
 interface DeleteContactPayload {
   id: number;
   leadId: number;
@@ -311,17 +282,6 @@ export const useContracts = (limit = 100, offset = 0): UseQueryResult<Contract[]
     },
   });
 
-export const useContract = (id: number | undefined): UseQueryResult<Contract> =>
-  useQuery<Contract>({
-    queryKey: ['crm-sales-contract', id],
-    queryFn: async (): Promise<Contract> => {
-      const res = await unwrap(crmApi.getContract(id ?? 0));
-      const envelope = (res ?? {}) as { contract?: Contract };
-      return parseContract((envelope.contract ?? res) as Contract);
-    },
-    enabled: !!id,
-  });
-
 export const useCreateContract = (): UseMutationResult<
   Contract,
   unknown,
@@ -341,34 +301,6 @@ export const useCreateContract = (): UseMutationResult<
     },
     onError: (): void => {
       toast.error(i18next.t('crm.contracts.createFailed'));
-    },
-  });
-};
-
-interface UpdateContractPayload {
-  id: number;
-  data: UpdateContractRequest;
-}
-
-export const useUpdateContract = (): UseMutationResult<
-  Contract,
-  unknown,
-  UpdateContractPayload
-> => {
-  const qc = useQueryClient();
-  return useMutation<Contract, unknown, UpdateContractPayload>({
-    mutationFn: async (payload: UpdateContractPayload): Promise<Contract> => {
-      const res = await unwrap(crmApi.updateContract(payload.id, payload.data));
-      const envelope = (res ?? {}) as { contract?: Contract };
-      return parseContract((envelope.contract ?? res) as Contract);
-    },
-    onSuccess: (_data: Contract, variables: UpdateContractPayload): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contracts'] });
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contract', variables.id] });
-      toast.success(i18next.t('crm.sales.contractUpdated'));
-    },
-    onError: (): void => {
-      toast.error(i18next.t('crm.sales.contractUpdateFailed'));
     },
   });
 };

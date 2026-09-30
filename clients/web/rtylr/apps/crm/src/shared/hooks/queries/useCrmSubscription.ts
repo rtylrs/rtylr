@@ -4,9 +4,6 @@ import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/cli
 import type { Subscription, BillingDetail } from '@voxire/voxie/hub/subscription/v1/types';
 
 export type CrmSubscription = Subscription;
-export type CrmBillingDetail = BillingDetail;
-export type CrmBillingLineItem = NonNullable<BillingDetail['lineItems']>[number];
-
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

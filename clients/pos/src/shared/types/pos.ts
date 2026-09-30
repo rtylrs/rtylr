@@ -149,11 +149,3 @@ export interface OfflineQueuedOrder {
   lastError?: string;
   status: 'pending' | 'syncing' | 'failed';
 }
-
-export interface ManagerOverride {
-  id: string;
-  managerId: string;
-  reason: string;
-  action: string;
-  createdAt: string;
-}

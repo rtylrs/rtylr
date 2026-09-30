@@ -48,10 +48,6 @@ function emit() {
   listeners.forEach((fn) => fn());
 }
 
-export function getLifePreferences(): LifePreferences {
-  return cache;
-}
-
 export function setLifePreferences(patch: Partial<LifePreferences>): void {
   cache = { ...cache, ...patch };
   save(cache);

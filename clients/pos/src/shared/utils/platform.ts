@@ -65,22 +65,6 @@ export const platformConfig = {
   capabilities: getPlatformCapabilities(),
 };
 
-// Utility to conditionally execute code based on platform
-export const whenPlatform = <T>(platform: PlatformType, callback: () => T): T | undefined => {
-  return getPlatform() === platform ? callback() : undefined;
-};
-
-// Utility to run different code for each platform
-export const platformSwitch = <T>(handlers: {
-  tauri?: () => T;
-  web?: () => T;
-  default?: () => T;
-}): T | undefined => {
-  const platform = getPlatform();
-  const handler = handlers[platform] || handlers.default;
-  return handler ? handler() : undefined;
-};
-
 // Declare global Tauri object for TypeScript
 declare global {
   interface Window {

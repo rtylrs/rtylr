@@ -156,11 +156,7 @@ export const AUTOMATION_TRIGGERS = [
   'points_threshold',
   'inactivity',
 ] as const;
-export type AutomationTrigger = (typeof AUTOMATION_TRIGGERS)[number];
-
 export const AUTOMATION_STATUSES = ['active', 'paused', 'draft'] as const;
-export type AutomationStatus = (typeof AUTOMATION_STATUSES)[number];
-
 // -- Type guards --------------------------------------------------------------
 
 export function isAutomationActive(automation: Automation): boolean {

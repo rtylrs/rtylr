@@ -8,7 +8,6 @@ import type {
   ListSuppliersResponse,
   Supplier,
   UpdateSupplierRequest,
-  UpdateSupplierResponse,
 } from '@voxire/voxie/erp/supplier/v1/types';
 
 const supplierClient = createOneKitClient(SupplierServiceClient, 'erp');
@@ -73,18 +72,6 @@ export function useCreateSupplier() {
     onError: () => {
       void qc.invalidateQueries({ queryKey: ['suppliers'] });
       toast.error('Failed to create supplier');
-    },
-  });
-}
-
-export function useUpdateSupplier() {
-  const qc = useQueryClient();
-  return useMutation<UpdateSupplierResponse, Error, UpdateSupplierRequest>({
-    mutationFn: (data) => supplierClient.updateSupplier(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['suppliers'] }),
-    onError: () => {
-      void qc.invalidateQueries({ queryKey: ['suppliers'] });
-      toast.error('Failed to update supplier');
     },
   });
 }

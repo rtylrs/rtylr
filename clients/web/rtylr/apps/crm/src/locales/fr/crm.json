@@ -139,8 +139,6 @@
     "emptyDescription": "Créez-en un pour commencer.",
     "new": "Nouveau modèle",
     "created": "Modèle créé",
-    "updated": "Modèle mis à jour",
-    "deleted": "Modèle supprimé",
     "pageTitle": "Modèles",
     "libraryTitle": "Bibliothèque de modèles",
     "librarySubtitle": "Modèles d’e-mail et de SMS réutilisables",
@@ -215,7 +213,6 @@
   "segments": {
     "created": "Segment created",
     "createFailed": "Failed to create segment",
-    "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
     "deleteConfirmTitle": "Delete segment?",
@@ -542,13 +539,9 @@
     "touchpointDeleted": "Point de contact supprimé",
     "touchpointDeleteFailed": "Échec de la suppression du point de contact",
     "contactAdded": "Contact ajouté",
-    "contactUpdated": "Contact mis à jour",
-    "contactUpdateFailed": "Échec de la mise à jour du contact",
     "contactRemoved": "Contact retiré",
     "contactRemoveFailed": "Échec du retrait du contact",
-    "contractCreated": "Contrat créé",
-    "contractUpdated": "Contrat mis à jour",
-    "contractUpdateFailed": "Échec de la mise à jour du contrat"
+    "contractCreated": "Contrat créé"
   },
   "segmentOperators": {
     "gt": "supérieur à",

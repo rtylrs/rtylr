@@ -136,8 +136,6 @@
     "emptyDescription": "Create one to get started.",
     "new": "New template",
     "created": "Template created",
-    "updated": "Template updated",
-    "deleted": "Template deleted",
     "pageTitle": "Templates",
     "libraryTitle": "Templates library",
     "librarySubtitle": "Reusable email and SMS templates",
@@ -211,7 +209,6 @@
   "segments": {
     "created": "Segment created",
     "createFailed": "Failed to create segment",
-    "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
     "deleteConfirmTitle": "Delete segment?",
@@ -536,13 +533,9 @@
     "touchpointDeleted": "Touchpoint deleted",
     "touchpointDeleteFailed": "Failed to delete touchpoint",
     "contactAdded": "Contact added",
-    "contactUpdated": "Contact updated",
-    "contactUpdateFailed": "Failed to update contact",
     "contactRemoved": "Contact removed",
     "contactRemoveFailed": "Failed to remove contact",
-    "contractCreated": "Contract created",
-    "contractUpdated": "Contract updated",
-    "contractUpdateFailed": "Failed to update contract"
+    "contractCreated": "Contract created"
   },
   "segmentOperators": {
     "gt": "greater than",

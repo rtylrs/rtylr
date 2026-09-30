@@ -3,11 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EmployeePayload } from '@voxire/voxie/hr/employee/v1/types';
 import type { ListEmployeesResponse } from '@voxire/voxie/hr/employee/v1/types';
 import type { CreateEmployeeResponse } from '@voxire/voxie/hr/employee/v1/types';
-import type { UpdateEmployeeResponse } from '@voxire/voxie/hr/employee/v1/types';
-import type {
-  InviteEmployeeRequest,
-  InviteEmployeeResponse,
-} from '@voxire/voxie/hr/employee/v1/types';
 import type { EmployeeFormData } from '../../schemas/employeeSchema';
 import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
@@ -33,12 +28,6 @@ export interface CreateEmployeePayload {
   salary?: number;
   hourlyRate?: number;
   startDate: string;
-}
-
-export interface UpdateEmployeePayload extends Partial<CreateEmployeePayload> {
-  id: number;
-  status?: string;
-  endDate?: string;
 }
 
 export const toCreateEmployeePayload = (data: EmployeeFormData): CreateEmployeePayload => ({
@@ -90,67 +79,6 @@ export const useCreateEmployee = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       toast.success(t('employees.created'));
-    },
-    onError: () => {
-      toast.error(t('errors.generic'));
-    },
-  });
-};
-
-export const useUpdateEmployee = () => {
-  const queryClient = useQueryClient();
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async (data: UpdateEmployeePayload): Promise<UpdateEmployeeResponse> => {
-      const { id, ...body } = data;
-      const res = await unwrap(
-        hrTransport.put<UpdateEmployeeResponse>(`/hr/employees/${id}`, body)
-      );
-      return res as UpdateEmployeeResponse;
-    },
-    onSuccess: (_data: UpdateEmployeeResponse, variables: UpdateEmployeePayload) => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      queryClient.invalidateQueries({ queryKey: ['employee', variables.id] });
-      toast.success(t('employees.updated'));
-    },
-    onError: () => {
-      toast.error(t('errors.generic'));
-    },
-  });
-};
-
-export const useInviteEmployee = () => {
-  const queryClient = useQueryClient();
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async (data: InviteEmployeeRequest): Promise<InviteEmployeeResponse> => {
-      const source = data as InviteEmployeeRequest & {
-        firstName?: string;
-        lastName?: string;
-        email?: string;
-        phone?: string;
-        employmentType?: string;
-        departmentId?: number;
-        locationId?: number;
-      };
-      const res = await unwrap(
-        hrTransport.post<InviteEmployeeResponse>('/hr/employees/invite', {
-          firstName: source.firstName,
-          lastName: source.lastName,
-          email: source.email,
-          phone: source.phone,
-          employmentType: source.employmentType,
-          departmentId: source.departmentId,
-          locationId: source.locationId,
-        })
-      );
-      return res as InviteEmployeeResponse;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      toast.success(t('employees.inviteSent'));
     },
     onError: () => {
       toast.error(t('errors.generic'));

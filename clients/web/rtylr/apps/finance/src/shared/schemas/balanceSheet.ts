@@ -16,5 +16,3 @@ export const balanceSheetSchema = z
     totalEquity: z.number().optional().nullable(),
   })
   .passthrough();
-
-export type BalanceSheetRaw = z.infer<typeof balanceSheetSchema>;

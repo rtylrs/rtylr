@@ -12,5 +12,3 @@ export const quoteSchema = z
     expiresAt: z.string().optional().nullable(),
   })
   .passthrough();
-
-export type QuoteRaw = z.infer<typeof quoteSchema>;

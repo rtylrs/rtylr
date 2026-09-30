@@ -93,12 +93,6 @@ export interface Segment {
   trendUp: boolean;
 }
 
-export interface SegmentRuleObj {
-  field: string;
-  operator: string;
-  value: string | number;
-}
-
 export interface Campaign {
   id: number;
   name: string;

@@ -148,8 +148,6 @@
     "emptyDescription": "أنشئ قالبًا للبدء.",
     "new": "قالب جديد",
     "created": "تم إنشاء القالب",
-    "updated": "تم تحديث القالب",
-    "deleted": "تم حذف القالب",
     "pageTitle": "القوالب",
     "libraryTitle": "مكتبة القوالب",
     "librarySubtitle": "قوالب بريد ورسائل نصية قابلة لإعادة الاستخدام",
@@ -227,7 +225,6 @@
   "segments": {
     "created": "Segment created",
     "createFailed": "Failed to create segment",
-    "updated": "Segment updated",
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
     "deleteConfirmTitle": "Delete segment?",
@@ -560,13 +557,9 @@
     "touchpointDeleted": "حُذفت نقطة التواصل",
     "touchpointDeleteFailed": "تعذّر حذف نقطة التواصل",
     "contactAdded": "أُضيفت جهة الاتصال",
-    "contactUpdated": "حُدّثت جهة الاتصال",
-    "contactUpdateFailed": "تعذّر تحديث جهة الاتصال",
     "contactRemoved": "أُزيلت جهة الاتصال",
     "contactRemoveFailed": "تعذّرت إزالة جهة الاتصال",
-    "contractCreated": "أُنشئ العقد",
-    "contractUpdated": "حُدّث العقد",
-    "contractUpdateFailed": "تعذّر تحديث العقد"
+    "contractCreated": "أُنشئ العقد"
   },
   "segmentOperators": {
     "gt": "أكبر من",

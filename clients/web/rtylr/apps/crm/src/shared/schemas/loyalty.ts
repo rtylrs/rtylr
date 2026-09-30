@@ -242,9 +242,6 @@ export type LoyaltyReward = z.infer<typeof loyaltyRewardSchema>;
 // -- Domain constants ---------------------------------------------------------
 
 export const LOYALTY_TRANSACTION_TYPES = ['earn', 'redeem', 'upgrade'] as const;
-export type LoyaltyTransactionType =
-  (typeof LOYALTY_TRANSACTION_TYPES)[number] | 'adjust' | 'expire' | 'award';
-
 // -- Helpers ------------------------------------------------------------------
 
 export function isEarnTransaction(tx: LoyaltyTransaction): boolean {
@@ -261,10 +258,6 @@ export function getTransactionIcon(type: LoyaltyTransaction['type']): string {
   return 'arrow-up';
 }
 
-export function isUpgradeTransaction(tx: LoyaltyTransaction): boolean {
-  return tx.type === 'upgrade';
-}
-
 export function getTransactionLabel(type: LoyaltyTransaction['type']): string {
   if (type === 'earn') return 'Points Earned';
   if (type === 'redeem') return 'Points Redeemed';
@@ -273,21 +266,4 @@ export function getTransactionLabel(type: LoyaltyTransaction['type']): string {
   if (type === 'expire') return 'Points Expired';
   if (type === 'upgrade') return 'Tier Upgrade';
   return String(type);
-}
-
-export function isActiveMember(member: LoyaltyMember, atRiskDays = 90): boolean {
-  const last = new Date(member.lastActive);
-  const now = new Date();
-  const diffMs = now.getTime() - last.getTime();
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  return diffDays <= atRiskDays;
-}
-
-export function memberInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
 }

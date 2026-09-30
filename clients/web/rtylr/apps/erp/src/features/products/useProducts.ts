@@ -143,18 +143,6 @@ export function useProducts(filters?: ProductFilters) {
   };
 }
 
-export function useProduct(id: string | undefined) {
-  return useQuery<Product | null>({
-    queryKey: ['product', id],
-    enabled: !!id,
-    queryFn: async () => {
-      if (!id) return null;
-      const response = await productClient.getProduct({ id });
-      return response.product ?? null;
-    },
-  });
-}
-
 export function useProductFull(id: string | undefined) {
   return useQuery<FullProduct | null>({
     queryKey: ['product-full', id],

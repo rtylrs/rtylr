@@ -3,7 +3,6 @@
   "subtitle": "Week of {{start}} – {{end}} · {{total}} logged",
   "addEntry": "Add Entry",
   "created": "Time entry created",
-  "updated": "Time entry updated",
   "deleted": "Time entry deleted",
   "employeeLookupFailed": "Your employee profile could not be loaded",
   "noDescription": "No description",

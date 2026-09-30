@@ -70,7 +70,3 @@ export const useUserStore = create<UserState>()(
     }
   )
 );
-
-// Selectors for compatibility with existing code
-export const selectIsAuthenticated = () => useUserStore.getState().isAuthenticated;
-export const selectRole = () => useUserStore.getState().role;

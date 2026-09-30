@@ -1,8 +1,6 @@
 /** Quick effort chips (minutes), pick a small win when energy is low. */
 export const EFFORT_PRESETS = [15, 30, 60, 120, 240] as const;
 
-export type EffortPreset = (typeof EFFORT_PRESETS)[number];
-
 export function formatEffortMinutes(m: number | undefined): string {
   if (m == null || m <= 0) return '-';
   if (m < 60) return `${m}m`;

@@ -16,5 +16,3 @@ export const recurringInvoiceSchema = z
     createdAt: z.string().optional().nullable(),
   })
   .passthrough();
-
-export type RecurringInvoiceRaw = z.infer<typeof recurringInvoiceSchema>;

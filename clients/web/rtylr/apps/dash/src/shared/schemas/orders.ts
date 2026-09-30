@@ -60,8 +60,6 @@ export const dashOrderItemSchema = z
     };
   });
 
-export type HubOrderItem = z.infer<typeof dashOrderItemSchema>;
-
 export const dashOrderSchema = z
   .object({
     id: z.union([z.string(), z.number()]).transform(String),

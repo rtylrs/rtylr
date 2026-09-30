@@ -2,8 +2,6 @@
   "title": "Employees",
   "newEmployee": "New Employee",
   "created": "Employee created successfully",
-  "updated": "Employee updated successfully",
-  "inviteSent": "Invite sent successfully",
   "directory": "Employee Directory",
   "addNew": "Add new employee",
   "search": "Search employees…",

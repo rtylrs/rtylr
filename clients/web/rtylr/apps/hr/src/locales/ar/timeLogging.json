@@ -3,7 +3,6 @@
   "subtitle": "أسبوع {{start}} – {{end}} · {{total}} مسجّل",
   "addEntry": "إضافة إدخال",
   "created": "تم إنشاء إدخال الوقت",
-  "updated": "تم تحديث إدخال الوقت",
   "deleted": "تم حذف إدخال الوقت",
   "employeeLookupFailed": "تعذر تحميل ملف الموظف الخاص بك",
   "noDescription": "بدون وصف",

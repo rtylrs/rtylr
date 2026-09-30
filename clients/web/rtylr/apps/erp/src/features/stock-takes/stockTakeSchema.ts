@@ -76,8 +76,3 @@ export function stockTakeProgress(items: Array<Pick<StockTakeItem, 'countedQty'>
   const pct = total > 0 ? Math.round((counted / total) * 100) : 0;
   return { counted, total, pct };
 }
-
-/** Net variance across all counted items. */
-export function stockTakeVariance(items: Array<Pick<StockTakeItem, 'variance'>>): number {
-  return items.reduce((sum, item) => sum + item.variance, 0);
-}

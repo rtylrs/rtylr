@@ -27,9 +27,3 @@ export const cashFlowPointSchema = z.object({
   inflow: z.number().default(0),
   outflow: z.number().default(0),
 });
-
-export const cashFlowSchema = cashFlowPointSchema;
-
-export type CashFlowTrendPointRaw = z.infer<typeof cashFlowTrendPointSchema>;
-export type CashFlowPointRaw = z.infer<typeof cashFlowPointSchema>;
-export type CashFlowRaw = CashFlowPointRaw;
