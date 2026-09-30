@@ -55,19 +55,39 @@ WHERE p.owner_id = ?
 ORDER BY u.created_at DESC, u.id DESC
 LIMIT ? OFFSET ?;
 
+-- The team list is a list of business *members*, so it is sourced from both the
+-- normalized membership table and the legacy permission table. Sourcing it from
+-- user_app_permissions alone silently hid every member without a legacy row,
+-- including the owner (who never gets one), so the owner could not see
+-- themselves in their own team.
+--
+-- Both sources are selected separately and reconciled in Go: the normalized
+-- dash_role_key and status win, with the legacy columns as the fallback for
+-- members that have not been backfilled yet.
 -- name: ListStaffUsersByBusinessID :many
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
-       p.apps, p.role, p.is_active
-FROM user_app_permissions p
-JOIN users u ON u.id = p.user_id
-WHERE p.business_id = ?
+       COALESCE(member.dash_role_key, '') AS dash_role_key,
+       permissions.role AS legacy_role,
+       permissions.apps AS legacy_apps,
+       member.status AS member_status,
+       permissions.is_active AS legacy_is_active
+FROM users AS u
+LEFT JOIN user_app_permissions AS permissions
+       ON permissions.user_id = u.id AND permissions.business_id = ?
+LEFT JOIN authorization_business_members AS member
+       ON member.user_id = u.id AND member.business_id = ?
+WHERE permissions.user_id IS NOT NULL OR member.user_id IS NOT NULL
 ORDER BY u.created_at DESC, u.id DESC
 LIMIT ? OFFSET ?;
 
 -- name: CountStaffUsersByBusinessID :one
 SELECT COUNT(*)
-FROM user_app_permissions
-WHERE business_id = ?;
+FROM users AS u
+LEFT JOIN user_app_permissions AS permissions
+       ON permissions.user_id = u.id AND permissions.business_id = ?
+LEFT JOIN authorization_business_members AS member
+       ON member.user_id = u.id AND member.business_id = ?
+WHERE permissions.user_id IS NOT NULL OR member.user_id IS NOT NULL;
 
 -- name: GetStaffUserByID :one
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
