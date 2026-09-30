@@ -99,12 +99,13 @@ func TestResolveGroupAndDirectAssignmentsUnionPermissionsAndScopes(t *testing.T)
 	}
 }
 
-func TestResolveOwnerAndAdminAccessFollowsTheAppSetNotLicensing(t *testing.T) {
+func TestResolveOwnerAndAdminReportPlanAppsAsLicensed(t *testing.T) {
 	flow := AppID("flow")
-	// An admin takes the system path for the apps it is already entitled to.
-	// Entitlement is the caller's app set (an owner's plan, a member's role
-	// assignments), so a missing license row neither blocks nor is waived: it is
-	// reported as plan metadata.
+	// An owner or admin takes the system path for the apps the business plan
+	// entitles them to, and those apps are covered by the plan by definition, so
+	// they must be reported Licensed as well as HasAccess. Consumers that require
+	// both (the Dash sidebar) otherwise hide the app from an owner whose business
+	// has no per-member license rows.
 	access := Resolve(Snapshot{
 		BusinessID:       11,
 		DashRole:         "admin",
@@ -112,16 +113,29 @@ func TestResolveOwnerAndAdminAccessFollowsTheAppSetNotLicensing(t *testing.T) {
 		SubscribedApps:   []AppID{flow},
 		AllPermissions:   []string{"flow:tasks:edit"},
 	})
-	if !access.Apps[0].HasAccess {
-		t.Fatalf("expected the admin system path to grant an entitled app: %#v", access.Apps[0])
-	}
-	if access.Apps[0].Licensed {
-		t.Fatalf("licensing must be reported rather than waived for admins: %#v", access.Apps[0])
+	if !access.Apps[0].HasAccess || !access.Apps[0].Licensed {
+		t.Fatalf("expected an entitled app to be licensed and reachable: %#v", access.Apps[0])
 	}
 
+	// The app set is still bounded by the caller: the system path cannot add an
+	// app nobody entitled them to.
 	noApps := Resolve(Snapshot{BusinessID: 11, DashRole: "admin", MembershipActive: true})
 	if len(noApps.Apps) != 0 {
 		t.Fatalf("expected no app access without an entitled app set: %#v", noApps.Apps)
+	}
+
+	// The waiver is owner/admin only. A plain member with no license row is not
+	// reported as licensed just because they hold an assignment.
+	member := Resolve(Snapshot{
+		BusinessID:       11,
+		DashRole:         "member",
+		MembershipActive: true,
+		SubscribedApps:   []AppID{flow},
+		Assignments:      []RoleAssignment{{AppID: flow, RoleIDs: []int64{7}, Source: SourceExplicit, Active: true}},
+		Roles:            []Role{{ID: 7, AppID: &flow, Permissions: []string{"flow:tasks:view"}}},
+	})
+	if member.Apps[0].Licensed {
+		t.Fatalf("a member without a license row must not be reported licensed: %#v", member.Apps[0])
 	}
 }
 
