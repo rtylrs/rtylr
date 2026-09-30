@@ -48,7 +48,7 @@ INSERT INTO users (email, username, password_hash, full_name) VALUES (?, ?, ?, ?
 
 -- name: ListStaffUsers :many
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
-       p.apps, p.role, p.is_active
+       COALESCE(p.apps, JSON_ARRAY()) AS apps, p.role, p.is_active
 FROM user_app_permissions p
 JOIN users u ON u.id = p.user_id
 WHERE p.owner_id = ?
@@ -91,7 +91,7 @@ WHERE permissions.user_id IS NOT NULL OR member.user_id IS NOT NULL;
 
 -- name: GetStaffUserByID :one
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
-       p.apps, p.role, p.is_active
+       COALESCE(p.apps, JSON_ARRAY()) AS apps, p.role, p.is_active
 FROM user_app_permissions p
 JOIN users u ON u.id = p.user_id
 WHERE p.owner_id = ?
