@@ -5,7 +5,14 @@ import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import Logo from '../../shared/components/Logo';
 import { Button } from '@voxire/components';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useEmailVerification, useResendVerificationEmail } from './useEmailVerification';
+import {
+  isLegacyVerificationCode,
+  isVerificationToken,
+  normalizeVerificationToken,
+  VERIFICATION_TOKEN_MAX_LENGTH,
+} from './verificationToken';
 import notify from '../../shared/lib/notify/notify';
 
 type Status = 'loading' | 'success' | 'error' | 'awaitingCode';
@@ -19,15 +26,21 @@ const VerifyEmail: React.FC = () => {
   const resendMutation = useResendVerificationEmail();
   const [status, setStatus] = useState<Status>('loading');
   const [verificationCode, setVerificationCode] = useState('');
+  // Whatever the server said about the last attempt, so its "request a new one"
+  // outcome is not overwritten by the generic "invalid" copy.
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const hasLinkToken = Boolean(params.get('token'));
 
   useEffect(() => {
-    const token = params.get('token');
+    // A link token is forwarded as it arrived rather than shape-checked: the
+    // value came from our own email, and the server already answers every
+    // unusable shape distinctly.
+    const token = params.get('token')?.trim();
     if (!token) {
-      // Not an error: onion emails a six-digit code, never a link, so arriving
-      // here without a token is the normal path. Showing a red alert reading
-      // "the verification code is invalid" before the user has typed anything
-      // told them their code had failed when they had not used it yet.
+      // Not an error: arriving here without a token is the normal typed-entry
+      // path. Showing a red alert reading "the verification code is invalid"
+      // before the user has typed anything told them their code had failed when
+      // they had not used it yet.
       setStatus('awaitingCode');
       return;
     }
@@ -46,7 +59,10 @@ const VerifyEmail: React.FC = () => {
             }
           }
         },
-        onError: () => setStatus('error'),
+        onError: (error) => {
+          setErrorMessage(getOneKitErrorMessage(error, t('auth.verify.failed')));
+          setStatus('error');
+        },
       }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,17 +86,26 @@ const VerifyEmail: React.FC = () => {
   };
 
   const handleVerifyCode = (): void => {
-    const code = verificationCode.trim();
-    if (!/^\d{6}$/.test(code)) {
+    // The field holds the whole token, id half included: that is what onion
+    // needs to recompute the account-bound digest, and a code stripped of it
+    // verifies nothing. A legacy six-digit code is sent rather than refused so
+    // the server can say it is too old instead of the user retrying forever.
+    const token = normalizeVerificationToken(verificationCode);
+    if (!isVerificationToken(token) && !isLegacyVerificationCode(token)) {
+      setErrorMessage(t('auth.verify.codeInvalid'));
       setStatus('error');
       return;
     }
+    setErrorMessage(null);
     setStatus('loading');
     verifyMutation.mutate(
-      { token: code },
+      { token },
       {
         onSuccess: (data) => setStatus(data?.verified === false ? 'error' : 'success'),
-        onError: () => setStatus('error'),
+        onError: (error) => {
+          setErrorMessage(getOneKitErrorMessage(error, t('auth.verify.codeInvalid')));
+          setStatus('error');
+        },
       }
     );
   };
@@ -135,11 +160,15 @@ const VerifyEmail: React.FC = () => {
                   <AlertCircle className="h-8 w-8 text-red-500" />
                 </div>
                 <p className="mt-4 text-sm text-red-600">
-                  {hasLinkToken ? t('auth.verify.failed') : t('auth.verify.codeInvalid')}
+                  {errorMessage ??
+                    (hasLinkToken ? t('auth.verify.failed') : t('auth.verify.codeInvalid'))}
                 </p>
               </>
             )}
-            {!hasLinkToken && (
+            {/* A link token that has already failed leaves the form behind:
+                hiding it there stranded the user with no way to try a code
+                they had just been asked to request a new one for. */}
+            {(!hasLinkToken || status === 'error') && (
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
@@ -153,13 +182,17 @@ const VerifyEmail: React.FC = () => {
                 <input
                   id="verification-code"
                   type="text"
-                  inputMode="numeric"
+                  // Not "numeric": the token carries a "." separator, and the
+                  // numeric keypad on iOS has no key for one.
+                  inputMode="text"
                   autoComplete="one-time-code"
-                  maxLength={6}
+                  maxLength={VERIFICATION_TOKEN_MAX_LENGTH}
                   placeholder={t('auth.verify.codePlaceholder')}
                   value={verificationCode}
-                  onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, ''))}
-                  className="w-full h-11 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base text-[#111] text-center tracking-[0.35em] outline-none focus:border-[#4583C4]"
+                  onChange={(event) =>
+                    setVerificationCode(normalizeVerificationToken(event.target.value))
+                  }
+                  className="w-full h-11 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base text-[#111] text-center tracking-[0.15em] outline-none focus:border-[#4583C4]"
                 />
                 <Button type="submit" variant="primary" fullWidth height={44}>
                   {t('auth.verify.verifyCode')}

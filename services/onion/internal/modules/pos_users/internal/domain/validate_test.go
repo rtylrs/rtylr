@@ -34,8 +34,10 @@ func TestValidateCreatePOSUserInput_RejectsInvalidRole(t *testing.T) {
 	}
 }
 
+// Was PIN "4321" before the brute-force fix. A 4-digit PIN is a 10,000-candidate
+// space that a cost-12 bcrypt endpoint can walk, so the floor moved to 6 digits.
 func TestValidateCreatePOSUserInput_AcceptsValid(t *testing.T) {
-	if err := ValidateCreatePOSUserInput(CreatePOSUserInput{Name: "Alex", PIN: "4321", Role: RoleCashier}); err != nil {
+	if err := ValidateCreatePOSUserInput(CreatePOSUserInput{Name: "Alex", PIN: "432165", Role: RoleCashier}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

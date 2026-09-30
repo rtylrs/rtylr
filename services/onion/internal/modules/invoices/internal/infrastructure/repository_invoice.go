@@ -165,6 +165,12 @@ func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv do
 }
 
 func (r *Repository) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error {
+	// The UPDATE below refuses the same values, but a status-only write must
+	// not be able to fabricate a money-bearing state even if a caller bypasses
+	// the application guard.
+	if err := domain.ValidateSettableInvoiceStatus(status); err != nil {
+		return err
+	}
 	_, err := r.queries.UpdateInvoiceStatus(ctx, sqlc.UpdateInvoiceStatusParams{
 		Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
 		ID:         invoiceID,

@@ -160,11 +160,10 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 	api.RegisterRoutes(ctx, router, m.service)
 }
 
+// GetAnonymousRoutes returns nothing: both invite routes read the accepting
+// account from the auth context, and an anonymous request never carries one.
 func (m *Module) GetAnonymousRoutes() []string {
-	return []string{
-		"/hr/employees/invite/verify",
-		"/hr/employees/invite/accept",
-	}
+	return []string{}
 }
 
 func (m *Module) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error) {

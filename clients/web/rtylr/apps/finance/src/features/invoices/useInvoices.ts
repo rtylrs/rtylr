@@ -14,7 +14,12 @@ import type {
 import { InvoicePaymentServiceClient } from '@voxire/voxie/finance/invoices/payments/v1/client';
 import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
-import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
+import {
+  useListInvoices,
+  withIdempotencyKey,
+  type Keyed,
+} from '../../shared/hooks/queries/useInvoices';
+import type { RecordPaymentResponse } from '@voxire/voxie/finance/invoices/payments/v1/types';
 
 const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');
 const paymentsClient = createOneKitClient(InvoicePaymentServiceClient, 'finance');
@@ -195,38 +200,41 @@ export function useUpdateInvoiceStatus() {
   });
 }
 
+interface RecordPaymentVariables {
+  id: string;
+  amount: number;
+  currency: string;
+  paymentDate: string;
+  method?: string;
+  reference: string;
+}
+
 export function useRecordPayment() {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation({
-    mutationFn: ({
-      id,
-      amount,
-      currency,
-      paymentDate,
-      method,
-      reference,
-    }: {
-      id: string;
-      amount: number;
-      currency: string;
-      paymentDate: string;
-      method?: string;
-      reference: string;
-    }) =>
-      paymentsClient.recordPayment({
-        invoiceId: id,
-        amount,
-        currency,
-        paymentDate,
-        method: method ?? 'cash',
-        reference,
-        notes: '',
-      }),
+  const mutation = useMutation<RecordPaymentResponse, Error, Keyed<RecordPaymentVariables>>({
+    mutationFn: ({ idempotencyKey, id, amount, currency, paymentDate, method, reference }) =>
+      // The generated client already accepts per-call RequestOptions, so the
+      // key reaches the wire without a contract change. Without it the server
+      // answers this POST with 428 and the payment is never recorded.
+      paymentsClient.recordPayment(
+        {
+          invoiceId: id,
+          amount,
+          currency,
+          paymentDate,
+          method: method ?? 'cash',
+          reference,
+          notes: '',
+        },
+        { headers: { 'Idempotency-Key': idempotencyKey } }
+      ),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['invoices'] });
       qc.invalidateQueries({ queryKey: ['invoice', variables.id] });
     },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
+
+  return withIdempotencyKey(mutation);
 }

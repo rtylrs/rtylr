@@ -109,7 +109,13 @@ describe('createApiClient', () => {
     const interceptors = (client.interceptors.response as any).handlers;
     expect(interceptors.length).toBeGreaterThan(0);
 
-    const error = { response: { status: 401 } };
+    // Run the request interceptor first so the config carries the credential
+    // this 401 is a response to. A hand-built error with no config describes a
+    // request that never sent a token, which is no longer a sign-out signal.
+    const reqInterceptors = (client.interceptors.request as any).handlers;
+    const config = reqInterceptors[0].fulfilled({ headers: {} });
+
+    const error = { config, response: { status: 401 } };
     try {
       await interceptors[0].rejected(error);
     } catch {
@@ -118,7 +124,7 @@ describe('createApiClient', () => {
 
     // After 401, the token cookie should be expired (Max-Age=0 removes it)
     // and window.location.href should point to auth
-    expect(window.location.href).toContain('localhost:5176');
+    await vi.waitFor(() => expect(window.location.href).toContain('localhost:5176'));
   });
 
   it('response interceptor passes through non-401 errors', async () => {

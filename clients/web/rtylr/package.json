@@ -10,7 +10,7 @@
     "test:coverage": "./scripts/vitest.sh run --coverage",
     "test:e2e": "playwright test",
     "test:screenshots": "playwright test --grep @screenshots",
-    "typecheck": "./scripts/ensure-contracts.sh && pnpm -C ../.. -r --filter '@rtylr/*' --filter dash --filter '!@rtylr/landing' --filter '!@rtylr/mcp' typecheck && pnpm -C ../.. -r --filter '@voxire/**' typecheck",
+    "typecheck": "./scripts/ensure-contracts.sh && pnpm -C ../.. -r --filter '@rtylr/*' --filter dash --filter '!@rtylr/landing' typecheck && pnpm -C ../.. -r --filter '@voxire/**' typecheck",
     "lint": "pnpm -C ../.. lint",
     "lint:fix": "pnpm -C ../.. lint:fix",
     "format": "prettier --write .",
@@ -21,7 +21,8 @@
     "test:rbac-evidence": "node scripts/validate-role-access-control-v2-evidence.mjs",
     "contracts:sync": "./scripts/ensure-contracts.sh && pnpm -C ../.. --filter @voxire/voxie typecheck",
     "docs:verify-citations": "node scripts/cross-app/verify-citations.mjs",
-    "init": "make -C ../../../voxie generate"
+    "init": "make -C ../../../voxie generate",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json"
   },
   "private": true,
   "packageManager": "pnpm@10.33.0",

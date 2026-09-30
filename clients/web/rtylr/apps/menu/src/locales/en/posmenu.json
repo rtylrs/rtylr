@@ -1,0 +1,10 @@
+{
+  "pageTitle": "Menu · rtylr",
+  "allItems": "Menu",
+  "invalidUrlTitle": "This menu link isn't valid",
+  "invalidUrlDescription": "Check the link in your QR code and try again.",
+  "loadFailedTitle": "Couldn't load the menu",
+  "loadFailedDescription": "Please refresh the page or try again in a few minutes.",
+  "noItemsTitle": "No menu items available",
+  "noItemsDescription": "This menu is currently empty. Please check back later."
+}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/go-sql-driver/mysql"
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure/persistence/sqlc"
@@ -76,9 +77,57 @@ func (r *Repository) CreatePayrollRecord(ctx context.Context, businessID, staffI
 	return result.LastInsertId()
 }
 
+// mysqlErrDuplicateEntry is the server error for a unique-key collision, which
+// the unique key on (business_id, staff_id, period_label) raises when two runs
+// of one period write at the same time.
+const mysqlErrDuplicateEntry = 1062
+
+// CreatePayrollRecords replaces one period's pay records inside a single
+// transaction, so a second run of the same period lands on the same rows
+// instead of adding a second, individually payable copy of them.
+//
+// A run is refused outright once the period holds a paid record. Recomputing a
+// partially paid period would restate figures for money that has already left
+// the business and would leave a period whose rows disagree with each other.
 func (r *Repository) CreatePayrollRecords(ctx context.Context, businessID int64, records []domain.PayrollRecordInput) (int, error) {
 	if len(records) == 0 {
 		return 0, nil
+	}
+
+	period := records[0]
+	for _, record := range records[1:] {
+		if !record.PeriodStart.Equal(period.PeriodStart) || !record.PeriodEnd.Equal(period.PeriodEnd) || record.PeriodLabel != period.PeriodLabel {
+			return 0, errors.New("payroll records must all cover the same period")
+		}
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+
+	// Lock the period before reading it, so a re-run cannot replace a row that
+	// a concurrent settlement is about to mark paid.
+	existing, err := qtx.ListPayrollPeriodRowsForUpdate(ctx, sqlc.ListPayrollPeriodRowsForUpdateParams{
+		BusinessID:  businessID,
+		PeriodStart: period.PeriodStart,
+		PeriodEnd:   period.PeriodEnd,
+	})
+	if err != nil {
+		return 0, err
+	}
+	if domain.PeriodHasPaidRecord(periodRows(existing)) {
+		return 0, domain.ErrPayrollPeriodAlreadyPaid
+	}
+
+	if err := qtx.DeleteUnpaidPayrollRecords(ctx, sqlc.DeleteUnpaidPayrollRecordsParams{
+		BusinessID:  businessID,
+		PeriodLabel: period.PeriodLabel,
+	}); err != nil {
+		return 0, err
 	}
 
 	insert := sq.Insert("hr_payroll_records").Columns(
@@ -104,20 +153,79 @@ func (r *Repository) CreatePayrollRecords(ctx context.Context, businessID int64,
 	if err != nil {
 		return 0, err
 	}
-	result, err := r.pool.ExecContext(ctx, query, args...)
-	if err != nil {
+	if _, err := tx.ExecContext(ctx, query, args...); err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == mysqlErrDuplicateEntry {
+			return 0, domain.ErrPayrollPeriodConflict
+		}
 		logger.Ctx(ctx).Error("Failed to create payroll records", logger.Error(err))
 		return 0, err
 	}
-	affected, err := result.RowsAffected()
-	if err != nil {
+
+	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return int(affected), nil
+	return len(records), nil
 }
 
+// MarkPayrollPaid settles one payroll record. It refuses when the same staff
+// member already has a paid record for the same period: that is the state a
+// duplicated run leaves behind, and settling the second row would pay the
+// employee twice for one period. A paid record belonging to a different staff
+// member is the normal case of paying a period out employee by employee, so it
+// is not a conflict.
 func (r *Repository) MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error {
-	result, err := r.queries.MarkPayrollPaid(ctx, sqlc.MarkPayrollPaidParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+
+	recordPeriod, err := qtx.GetPayrollRecordPeriod(ctx, sqlc.GetPayrollRecordPeriodParams{
+		ID:         payrollID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrPayrollRecordNotFound
+		}
+		return err
+	}
+	periodStart, periodEnd := recordPeriod.PeriodStart, recordPeriod.PeriodEnd
+
+	rows, err := qtx.ListPayrollPeriodRowsForUpdate(ctx, sqlc.ListPayrollPeriodRowsForUpdateParams{
+		BusinessID:  businessID,
+		PeriodStart: periodStart,
+		PeriodEnd:   periodEnd,
+	})
+	if err != nil {
+		return err
+	}
+
+	period := periodRows(rows)
+
+	var staffID int64
+	found := false
+	for _, row := range period {
+		if row.ID != payrollID {
+			continue
+		}
+		found = true
+		staffID = row.StaffID
+		if row.Status == domain.StatusPaid {
+			return domain.ErrPayrollRecordAlreadyPaid
+		}
+	}
+	if !found {
+		return domain.ErrPayrollRecordNotFound
+	}
+	if domain.StaffHasPaidRecordInPeriod(period, staffID, payrollID) {
+		return domain.ErrPayrollRecordHasPaidSibling
+	}
+
+	result, err := qtx.MarkPayrollPaid(ctx, sqlc.MarkPayrollPaidParams{
 		ID:         payrollID,
 		BusinessID: businessID,
 	})
@@ -130,12 +238,11 @@ func (r *Repository) MarkPayrollPaid(ctx context.Context, businessID, payrollID 
 	if err != nil {
 		return err
 	}
-
 	if affected == 0 {
-		return errors.New("payroll record not found or already paid")
+		return domain.ErrPayrollRecordAlreadyPaid
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 // GetCompletedShiftsForPeriod retrieves completed shifts for payroll calculation.
@@ -274,6 +381,25 @@ func (r *Repository) GetDefaultOvertimeMultiplier(ctx context.Context, businessI
 		return 0, false, parseErr
 	}
 	return multiplier, true, nil
+}
+
+// periodRows narrows a locked period read to what the paid-record decisions in
+// this file need, so those decisions stay in the domain where they can be
+// tested without a database.
+func periodRows(rows []sqlc.ListPayrollPeriodRowsForUpdateRow) []domain.PeriodRow {
+	out := make([]domain.PeriodRow, 0, len(rows))
+	for _, row := range rows {
+		status := ""
+		if row.Status.Valid {
+			status = string(row.Status.HrPayrollRecordsStatus)
+		}
+		out = append(out, domain.PeriodRow{
+			ID:      row.ID,
+			StaffID: row.StaffID,
+			Status:  status,
+		})
+	}
+	return out
 }
 
 func payrollRecordFromRow(row sqlc.HrPayrollRecord) domain.PayrollRecord {

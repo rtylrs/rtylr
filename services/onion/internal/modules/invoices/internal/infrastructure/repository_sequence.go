@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
@@ -132,13 +133,7 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 	if newDueCents < 0 {
 		newDueCents = 0
 	}
-	newStatus := "partial"
-	var paidDate *time.Time
-	if newDueCents <= 0 {
-		newStatus = "paid"
-		paidDateValue := p.PaymentDate
-		paidDate = &paidDateValue
-	}
+	newStatus, paidDate := paymentTotalsStatus(newDueCents, p.PaymentDate)
 	if paidDate != nil {
 		err = qtx.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
 			AmountPaid: sqlNullString(newPaidCents.String()), AmountDue: sqlNullString(newDueCents.String()),
@@ -163,6 +158,20 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 func mustParsePaymentDate(value string) time.Time {
 	parsed, _ := time.Parse("2006-01-02", value)
 	return parsed
+}
+
+// paymentTotalsStatus is the only place that decides the money-derived invoice
+// statuses, and it is reached only by a recorded payment: "partial" while a
+// balance is still outstanding, "paid" (with the paid date that revenue
+// reporting is bucketed by) once nothing is. Compare in whole cents, so float
+// residue can neither keep a settled invoice in "partial" nor flip an unpaid
+// one early.
+func paymentTotalsStatus(dueCents money.Amount, paymentDate time.Time) (string, *time.Time) {
+	if dueCents > 0 {
+		return domain.StatusPartial, nil
+	}
+	paidDate := paymentDate
+	return domain.StatusPaid, &paidDate
 }
 
 func paymentFromSqlc(row sqlc.FinancePayment) domain.Payment {

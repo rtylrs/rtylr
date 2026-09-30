@@ -1,10 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
   buildCashTender,
   buildCheckoutOrder,
   buildCreateOrderPayload,
+  buildOfflineTender,
   processCheckout,
+  type ChargeOrderRequest,
 } from "./checkoutWorkflow";
+import { useOfflineQueueStore } from "../../shared/stores/offlineQueueStore";
 import type { CartItem } from "../../shared/stores/cartStore";
 
 const items: CartItem[] = [
@@ -25,6 +28,21 @@ const items: CartItem[] = [
 ];
 
 const basePayload = buildCreateOrderPayload({ items, method: "cash" });
+
+beforeEach(() => {
+  useOfflineQueueStore.setState({ queue: [], online: true });
+});
+
+const onlineOrder = (id = "local-1") =>
+  buildCheckoutOrder({
+    id,
+    items,
+    subtotal: 20,
+    tax: 1.6,
+    total: 21.6,
+    customerId: 7,
+    createdAt: "2026-05-06T00:00:00.000Z",
+  });
 
 describe("buildCheckoutOrder", () => {
   it("builds a paid local order from the cart snapshot", () => {
@@ -85,6 +103,7 @@ describe("processCheckout", () => {
       orderId: "555",
       paymentMethod: "card",
       amountPaid: 21.6,
+      idempotencyKey: expect.any(String),
     });
   });
 
@@ -120,6 +139,7 @@ describe("processCheckout", () => {
       orderId: "55",
       paymentMethod: "card",
       amountPaid: 21.6,
+      idempotencyKey: expect.any(String),
     });
   });
 
@@ -152,21 +172,46 @@ describe("processCheckout", () => {
       orderId: "123",
       paymentMethod: "cash",
       amountPaid: 21.6,
+      idempotencyKey: expect.any(String),
     });
     expect(enqueueOffline).not.toHaveBeenCalled();
     expect(recordCashSale).toHaveBeenCalledWith(21.6, "local-1");
   });
 
-  it("queues a cash order when order creation fails before reaching the server", async () => {
-    const order = buildCheckoutOrder({
-      id: "local-1",
-      items,
-      subtotal: 20,
-      tax: 1.6,
-      total: 21.6,
-      customerId: 7,
-      createdAt: "2026-05-06T00:00:00.000Z",
+  it("builds the tender a queued cash sale must be charged on reconnect", async () => {
+    const order = onlineOrder();
+    const recordCashSale = vi.fn();
+
+    await processCheckout({
+      order,
+      payload: basePayload,
+      method: "cash",
+      createOrder: vi.fn(() => Promise.reject(new Error("Network Error"))),
+      chargeOrder: vi.fn(),
+      // The same call features/payment/index.tsx makes.
+      enqueueOffline: (payload) => {
+        useOfflineQueueStore
+          .getState()
+          .enqueue(payload, { tender: buildOfflineTender("cash", order) });
+      },
+      recordCashSale,
     });
+
+    // One entry, one write: the tender and the key land together, so the drain
+    // can never find a queued sale it cannot charge.
+    const [entry] = useOfflineQueueStore.getState().queue;
+    const tender = entry.tender;
+    expect(tender).toBeDefined();
+    expect(tender?.paymentMethod).toBe("cash");
+    // Same amount the drawer was credited with: a different figure here would
+    // settle the sale for a number the customer never handed over.
+    expect(tender?.amountPaid).toBe(recordCashSale.mock.calls[0][0]);
+    expect(tender?.localOrderId).toBe("local-1");
+    expect(entry.idempotencyKey).toEqual(expect.any(String));
+  });
+
+  it("queues a cash order when order creation fails before reaching the server", async () => {
+    const order = onlineOrder();
     const enqueueOffline = vi.fn();
     const recordCashSale = vi.fn();
 
@@ -326,6 +371,77 @@ describe("processCheckout", () => {
 
     expect(chargeOrder).not.toHaveBeenCalled();
     expect(recordCashSale).not.toHaveBeenCalled();
+  });
+});
+
+describe("idempotency key scope", () => {
+  it("gives two separate sales two different keys", async () => {
+    const keys: string[] = [];
+    const chargeOrder = vi.fn((request: { idempotencyKey: string }) => {
+      keys.push(request.idempotencyKey);
+      return Promise.resolve();
+    });
+
+    for (const id of ["local-1", "local-2"]) {
+      await processCheckout({
+        order: onlineOrder(id),
+        payload: basePayload,
+        method: "card",
+        createOrder: vi.fn(() => Promise.resolve({ orderId: "1" })),
+        chargeOrder,
+        enqueueOffline: vi.fn(),
+        recordCashSale: vi.fn(),
+      });
+    }
+
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).not.toBe(keys[1]);
+  });
+
+  it("mints one UUID key per action, on the charge itself", async () => {
+    const chargeOrder = vi.fn((_request: ChargeOrderRequest) => Promise.resolve());
+    await processCheckout({
+      order: onlineOrder(),
+      payload: basePayload,
+      method: "cash",
+      createOrder: vi.fn(() => Promise.resolve({ orderId: "9" })),
+      chargeOrder,
+      enqueueOffline: vi.fn(),
+      recordCashSale: vi.fn(),
+    });
+
+    expect(chargeOrder).toHaveBeenCalledTimes(1);
+    const [request] = chargeOrder.mock.calls[0];
+    expect(request.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
+  });
+
+  it("does not leak one sale's key into the next queued sale", async () => {
+    // Two offline sales queued in one session must not be collapsed into one
+    // server-side action by a shared key.
+    const keys: string[] = [];
+    for (const id of ["local-a", "local-b"]) {
+      const order = onlineOrder(id);
+      await processCheckout({
+        order,
+        payload: basePayload,
+        method: "cash",
+        createOrder: vi.fn(() => Promise.reject(new Error("Network Error"))),
+        chargeOrder: vi.fn(),
+        enqueueOffline: (payload) => {
+          useOfflineQueueStore
+            .getState()
+            .enqueue(payload, { tender: buildOfflineTender("cash", order) });
+          keys.push(useOfflineQueueStore.getState().queue[0].idempotencyKey ?? "");
+        },
+        recordCashSale: vi.fn(),
+      });
+    }
+
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).not.toBe("");
+    expect(keys[0]).not.toBe(keys[1]);
   });
 });
 

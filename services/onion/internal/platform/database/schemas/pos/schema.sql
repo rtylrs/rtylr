@@ -228,12 +228,15 @@ CREATE TABLE IF NOT EXISTS `pos_gift_card_transactions` (
   KEY `idx_pos_gift_card_transactions_order_ref` (`business_id`,`order_ref`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- A manager override PIN is a bcrypt hash, never plaintext. `pin_hash` mirrors
+-- the pos_users POS PIN credential; the legacy plaintext `pin` column is dropped
+-- by zz_pos_manager_pins_hash.sql for deployments that predate it.
 CREATE TABLE IF NOT EXISTS `pos_manager_pins` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `owner_id` bigint NOT NULL,
   `business_id` bigint NOT NULL DEFAULT '0',
   `staff_id` bigint NOT NULL,
-  `pin` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `pin_hash` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_pos_manager_pins_owner_staff` (`owner_id`,`staff_id`)

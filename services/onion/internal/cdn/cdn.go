@@ -4,10 +4,12 @@
 // (internal/platform/storage) and the cdn_files / cdn_transformations tables.
 //
 // It is deliberately a self-contained subsystem rather than a tenant API
-// module: it serves cross-product asset traffic on its own binary/port and
-// authenticates writes with a service API key, not per-user JWTs. SQL is
-// isolated in store.go; handlers call service methods, service methods call
-// the store — the same inward dependency direction the rest of onion follows.
+// module: it serves cross-product asset traffic on its own binary/port.
+// Writes are authenticated with a service API key or a per-user credential,
+// and every stored asset is owned by the business resolved for the caller
+// (tenant.ResolveBusinessID). SQL is isolated in store.go; handlers call
+// service methods, service methods call the store — the same inward dependency
+// direction the rest of onion follows.
 package cdn
 
 import (
@@ -116,29 +118,36 @@ func registerPurgeMethod() struct{} {
 
 var _ = registerPurgeMethod()
 
-// RegisterRoutes mounts the CDN endpoints. Read endpoints are public; the
-// upload endpoint is wrapped in the API-key middleware. /health, /metrics and
-// CORS are provided by the shared web server, so they are not registered here.
+// RegisterRoutes mounts the CDN endpoints. Read endpoints are mounted behind
+// deliveryAuth, which resolves the caller's tenant when a bearer token is
+// present and leaves the request anonymous otherwise; anonymous callers only
+// see assets flagged public, and a validated delivery signature is the
+// credential for the rest. /health, /metrics and CORS are provided by the
+// shared web server, so they are not registered here.
 func (c *CDN) RegisterRoutes(r chi.Router) {
-	r.Get("/upload", c.serveUploadURL)
-	r.Get("/upload/plan", c.uploadPlan)
-	r.Get("/upload/responsive", c.uploadResponsive)
-	r.Get("/upload/variants", c.uploadVariants)
 	r.Get("/capabilities", c.capabilities)
-	r.Get("/files/{id}", c.serveFile)
-	r.Get("/images/{id}/analyze", c.imageAnalyze)
-	r.Get("/images/{id}/info", c.imageInfo)
-	r.Get("/images/{id}/plan", c.imagePlan)
-	r.Get("/images/{id}/responsive", c.imageResponsive)
-	r.Get("/images/{id}/variants", c.imageVariants)
-	r.Get("/images/{id}", c.serveTransformed)
-	r.Get("/videos/info", c.videoInfo)
 
-	// HEAD reuses the GET handlers — net/http discards the body for HEAD, so
-	// callers get Content-Type/ETag/Cache-Control without transferring bytes.
-	r.Head("/upload", c.serveUploadURL)
-	r.Head("/files/{id}", c.serveFile)
-	r.Head("/images/{id}", c.serveTransformed)
+	r.Group(func(dr chi.Router) {
+		dr.Use(c.deliveryAuth)
+		dr.Get("/upload", c.serveUploadURL)
+		dr.Get("/upload/plan", c.uploadPlan)
+		dr.Get("/upload/responsive", c.uploadResponsive)
+		dr.Get("/upload/variants", c.uploadVariants)
+		dr.Get("/files/{id}", c.serveFile)
+		dr.Get("/images/{id}/analyze", c.imageAnalyze)
+		dr.Get("/images/{id}/info", c.imageInfo)
+		dr.Get("/images/{id}/plan", c.imagePlan)
+		dr.Get("/images/{id}/responsive", c.imageResponsive)
+		dr.Get("/images/{id}/variants", c.imageVariants)
+		dr.Get("/images/{id}", c.serveTransformed)
+		dr.Get("/videos/info", c.videoInfo)
+
+		// HEAD reuses the GET handlers — net/http discards the body for HEAD, so
+		// callers get Content-Type/ETag/Cache-Control without transferring bytes.
+		dr.Head("/upload", c.serveUploadURL)
+		dr.Head("/files/{id}", c.serveFile)
+		dr.Head("/images/{id}", c.serveTransformed)
+	})
 
 	r.Group(func(gr chi.Router) {
 		gr.Use(c.apiKeyAuth)

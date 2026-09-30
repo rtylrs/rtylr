@@ -17,11 +17,29 @@ import (
 	posuserv1 "github.com/voxire/voxie/gen/go/pos/user/v1"
 )
 
-type UserAPI struct {
-	Service *application.Service
+// weakPINMessage is the single operator-facing text for a rejected PIN, shared
+// by the create, update and set-pin paths so the policy reads the same wherever
+// a PIN is set.
+const weakPINMessage = "PIN must be 6 to 12 digits"
+
+// posUserService is the application surface this handler needs. Declaring it
+// here keeps the handler testable without a database, which is what lets the
+// refusal-response tests assert status and body directly.
+type posUserService interface {
+	ListByOwner(ctx context.Context, businessID int64) ([]domain.POSUser, error)
+	ListByLocation(ctx context.Context, businessID, locationID int64) ([]domain.POSUser, error)
+	Create(ctx context.Context, businessID, createdBy int64, input domain.CreatePOSUserInput) (int64, error)
+	Update(ctx context.Context, businessID, id int64, input domain.UpdatePOSUserInput) error
+	Deactivate(ctx context.Context, businessID, id int64) error
+	SetPIN(ctx context.Context, businessID int64, actor application.SetPINActor, input domain.SetPINInput) error
+	VerifyPIN(ctx context.Context, businessID, locationID, userID int64, pin string) (*domain.VerifiedPOSUser, error)
 }
 
-func NewUserAPI(service *application.Service) *UserAPI {
+type UserAPI struct {
+	Service posUserService
+}
+
+func NewUserAPI(service posUserService) *UserAPI {
 	return &UserAPI{Service: service}
 }
 
@@ -82,6 +100,9 @@ func (a *UserAPI) CreatePOSUser(ctx context.Context, req *posuserv1.CreatePOSUse
 		if errors.Is(createErr, application.ErrInvalidInput) {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid input")
 		}
+		if refusal := weakPINRefusal(createErr); refusal != nil {
+			return nil, refusal
+		}
 		logger.Ctx(ctx).Error("failed to create pos_user",
 			logger.Any("business_id", businessID),
 			logger.Error(createErr),
@@ -110,6 +131,9 @@ func (a *UserAPI) UpdatePOSUser(ctx context.Context, req *posuserv1.UpdatePOSUse
 		HourlyRate: req.GetHourlyRate(),
 	})
 	if updateErr != nil {
+		if refusal := weakPINRefusal(updateErr); refusal != nil {
+			return nil, refusal
+		}
 		logger.Ctx(ctx).Error("failed to update pos_user",
 			logger.Any("business_id", businessID),
 			logger.Any("pos_user_id", req.GetId()),
@@ -170,6 +194,9 @@ func (a *UserAPI) SetPIN(ctx context.Context, req *posuserv1.SetPINRequest) (*po
 		if errors.Is(setErr, application.ErrPINAlreadySet) {
 			return nil, onekiterrors.New(http.StatusConflict, "A PIN is already set. Ask a manager to reset it.")
 		}
+		if refusal := weakPINRefusal(setErr); refusal != nil {
+			return nil, refusal
+		}
 		logger.Ctx(ctx).Error("pos_users set-pin failed",
 			logger.Any("business_id", businessID),
 			logger.Any("target_user", req.GetUserId()),
@@ -191,8 +218,8 @@ func (a *UserAPI) VerifyPOSUserPIN(ctx context.Context, req *posuserv1.VerifyPOS
 
 	result, verifyErr := a.Service.VerifyPIN(ctx, businessID, req.GetLocationId(), req.GetUserId(), req.GetPin())
 	if verifyErr != nil {
-		if errors.Is(verifyErr, domain.ErrInvalidPIN) {
-			return nil, onekiterrors.New(http.StatusUnauthorized, "Invalid credentials")
+		if refusal := verifyPINRefusal(verifyErr); refusal != nil {
+			return nil, refusal
 		}
 		logger.Ctx(ctx).Error("pos_users verify-pin failed",
 			logger.Any("business_id", businessID),
@@ -216,6 +243,31 @@ func (a *UserAPI) VerifyPOSUserPIN(ctx context.Context, req *posuserv1.VerifyPOS
 		AuthorizationVersion: result.AuthorizationVersion,
 		RoleManagement:       roleManagementManagedInDash(),
 	}, nil
+}
+
+// verifyPINRefusal maps every credential-shaped failure onto one response.
+//
+// VerifyPIN resolves unknown operator, wrong PIN, no PIN set, active lockout and
+// an unreadable counter store to the single domain.ErrInvalidPIN sentinel. They
+// must leave the client as one indistinguishable response: naming the cause
+// would let a caller enumerate which user ids hold a PIN at a location, and a
+// lockout-specific status would let it poll a victim's lockout state. Returns nil
+// for errors that are not credential failures, so the caller can surface them as
+// server errors instead of pretending the PIN was wrong.
+func verifyPINRefusal(verifyErr error) error {
+	if errors.Is(verifyErr, domain.ErrInvalidPIN) {
+		return onekiterrors.New(http.StatusUnauthorized, "Invalid credentials")
+	}
+	return nil
+}
+
+// weakPINRefusal is the only PIN error allowed to be specific: the caller
+// supplied the PIN, so the message cannot reveal anything about another operator.
+func weakPINRefusal(setErr error) error {
+	if errors.Is(setErr, domain.ErrWeakPIN) {
+		return onekiterrors.New(http.StatusBadRequest, weakPINMessage)
+	}
+	return nil
 }
 
 func roleManagementManagedInDash() *posuserv1.RoleManagementManagedInDash {

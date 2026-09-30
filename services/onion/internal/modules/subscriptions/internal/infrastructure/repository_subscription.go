@@ -71,28 +71,171 @@ func (r *Repository) ExpireTrialSubscriptions(ctx context.Context) error {
 	return r.queries.ExpireTrialSubscriptions(ctx)
 }
 
-func (r *Repository) UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error {
-	return r.queries.UpdateSeatCount(ctx, sqlc.UpdateSeatCountParams{
-		SeatCount: int32(seatCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		OwnerID:   ownerID,
-	})
-}
-
 // ── Seat Periods ──────────────────────────────────────────────────────────────
 
-func (r *Repository) GetActivePeriod(ctx context.Context, subscriptionID int64) (*domain.SeatPeriod, error) {
-	row, err := r.queries.GetActiveSeatPeriod(ctx, subscriptionID)
+// ReconcileSeatBilling brings the seat ledger in line with the current seat
+// count and the plan's current per-seat price, as of asOf. See
+// domain.PlanSeatLedger for the policy; this method only applies it.
+//
+// This is the module's only writer of seat_periods and subscriptions.seat_count.
+// The whole thing runs in one transaction that first ensures the subscription
+// row exists and then locks it, so two concurrent callers serialise instead of
+// both opening a period — the read path that used to do this work had no lock
+// and could leave two open periods that are then both billed.
+func (r *Repository) ReconcileSeatBilling(ctx context.Context, ownerID, defaultPlanID int64, defaultTrialDays, seatCount int, asOf time.Time) error {
+	if seatCount < 1 {
+		seatCount = 1
+	}
+	today := domain.UTCDay(asOf)
+	nextBilling := domain.FirstOfUTCMonth(domain.FirstOfUTCMonth(today).AddDate(0, 1, 0))
+
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	// ON DUPLICATE KEY UPDATE with a self-assignment only creates: an existing
+	// subscription keeps its plan, status and seat count. It also takes the row
+	// lock, so a concurrent creator waits instead of racing.
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, trial_ends_at, next_billing_date)
+		VALUES (?, ?, ?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE owner_id = owner_id`,
+		ownerID, defaultPlanID, newSubscriptionStatus(defaultTrialDays), seatCount,
+		newTrialEnd(defaultTrialDays, asOf), nextBilling,
+	); err != nil {
+		return err
+	}
+
+	var subID int64
+	var pricePerSeatCents int
+	if err := tx.QueryRowContext(ctx, `
+		SELECT s.id, p.price_per_seat_cents
+		FROM subscriptions s
+		JOIN plans p ON p.id = s.plan_id
+		WHERE s.owner_id = ?
+		FOR UPDATE`, ownerID).Scan(&subID, &pricePerSeatCents); err != nil {
+		return err
+	}
+
+	open, err := loadOpenSeatPeriods(ctx, tx, subID)
+	if err != nil {
+		return err
+	}
+
+	plan := domain.PlanSeatLedger(open, today, seatCount, pricePerSeatCents)
+	for _, c := range plan.CloseNoDay {
+		if err := closeSeatPeriod(ctx, tx, c.ID, c.End); err != nil {
+			return err
 		}
+	}
+	if plan.CloseActive {
+		if err := closeSeatPeriod(ctx, tx, plan.RunningID, plan.CloseRunning); err != nil {
+			return err
+		}
+	}
+	if plan.OpenNew {
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
+			VALUES (?, ?, ?, ?, ?, ?)`,
+			subID, ownerID, seatCount, pricePerSeatCents, plan.NewStart, plan.NewBillingM,
+		); err != nil {
+			return err
+		}
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE subscriptions SET seat_count = ?, next_billing_date = ? WHERE id = ?`,
+		seatCount, nextBilling, subID,
+	); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func newSubscriptionStatus(trialDays int) string {
+	if trialDays > 0 {
+		return "trial"
+	}
+	return "active"
+}
+
+func newTrialEnd(trialDays int, asOf time.Time) sql.NullTime {
+	if trialDays <= 0 {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: asOf.UTC().AddDate(0, 0, trialDays), Valid: true}
+}
+
+func loadOpenSeatPeriods(ctx context.Context, tx *sql.Tx, subscriptionID int64) ([]domain.SeatPeriod, error) {
+	rows, err := tx.QueryContext(ctx, `
+		SELECT id, seat_count, price_per_seat_cents, period_start, billing_month
+		FROM seat_periods
+		WHERE subscription_id = ? AND period_end IS NULL
+		ORDER BY period_start ASC, id ASC`, subscriptionID)
+	if err != nil {
 		return nil, err
 	}
-	return seatPeriodFromRow(
-		row.ID, row.SubscriptionID, row.OwnerID,
-		int(row.SeatCount), int(row.PricePerSeatCents),
-		row.PeriodStart, row.PeriodEnd, row.BillingMonth,
-	), nil
+	defer rows.Close()
+
+	var out []domain.SeatPeriod
+	for rows.Next() {
+		var p domain.SeatPeriod
+		p.SubscriptionID = subscriptionID
+		if err := rows.Scan(&p.ID, &p.SeatCount, &p.PricePerSeatCents, &p.PeriodStart, &p.BillingMonth); err != nil {
+			return nil, err
+		}
+		out = append(out, p)
+	}
+	return out, rows.Err()
+}
+
+func closeSeatPeriod(ctx context.Context, tx *sql.Tx, periodID int64, periodEnd time.Time) error {
+	_, err := tx.ExecContext(ctx,
+		`UPDATE seat_periods SET period_end = ? WHERE id = ?`, domain.UTCDay(periodEnd), periodID)
+	return err
+}
+
+// ListOwnerIDsForReconciliation pages the owners whose ledger may be stale:
+// every owner with an active business, an active permission grant, or an
+// existing subscription row (an owner whose team was deactivated still has to
+// be invoiced for the days they were active).
+func (r *Repository) ListOwnerIDsForReconciliation(ctx context.Context, afterOwnerID int64, limit int) ([]int64, error) {
+	if limit < 1 {
+		limit = 1
+	}
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT owner_id FROM (
+		    SELECT b.owner_id AS owner_id
+		    FROM businesses b
+		    WHERE COALESCE(b.is_active, TRUE) = TRUE
+		    UNION
+		    SELECT p.owner_id
+		    FROM user_app_permissions p
+		    WHERE COALESCE(p.is_active, TRUE) = TRUE
+		    UNION
+		    SELECT s.owner_id
+		    FROM subscriptions s
+		) candidates
+		WHERE owner_id > ?
+		ORDER BY owner_id ASC
+		LIMIT ?`, afterOwnerID, limit) // #nosec G115 -- Reviewed width conversion is a validated application batch size.
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ids := make([]int64, 0, limit)
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
 }
 
 func seatPeriodFromRow(
@@ -118,26 +261,8 @@ func seatPeriodFromRow(
 	return sp
 }
 
-func (r *Repository) CloseActivePeriod(ctx context.Context, subscriptionID int64, periodEnd time.Time) error {
-	return r.queries.CloseActiveSeatPeriod(ctx, sqlc.CloseActiveSeatPeriodParams{
-		PeriodEnd:      sql.NullTime{Time: periodEnd, Valid: true},
-		SubscriptionID: subscriptionID,
-	})
-}
-
-func (r *Repository) OpenPeriod(ctx context.Context, subscriptionID, ownerID int64, seatCount, pricePerSeatCents int, periodStart, billingMonth time.Time) error {
-	return r.queries.OpenSeatPeriod(ctx, sqlc.OpenSeatPeriodParams{
-		SubscriptionID:    subscriptionID,
-		OwnerID:           ownerID,
-		SeatCount:         int32(seatCount),         // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		PricePerSeatCents: int32(pricePerSeatCents), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		PeriodStart:       periodStart,
-		BillingMonth:      billingMonth,
-	})
-}
-
 func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]domain.SeatPeriod, error) {
-	billingMonth := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
+	billingMonth := domain.FirstOfUTCMonth(month)
 	rows, err := r.queries.GetSeatPeriodsForMonth(ctx, sqlc.GetSeatPeriodsForMonthParams{
 		OwnerID:      ownerID,
 		BillingMonth: billingMonth,

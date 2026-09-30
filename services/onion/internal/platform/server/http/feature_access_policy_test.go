@@ -3,6 +3,9 @@ package http
 import (
 	"net/http"
 	"testing"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 )
 
 func TestCustomerExportUsesCanonicalPermission(t *testing.T) {
@@ -65,5 +68,95 @@ func TestAttendanceClockOutRoutesAreSelfServiceExempt(t *testing.T) {
 				t.Fatalf("self-service attendance route %q mapped to %q:%q", path, appID, permission)
 			}
 		})
+	}
+}
+
+func TestAISurfaceRoutesUseTheHubDashboardPermission(t *testing.T) {
+	for _, route := range []struct{ method, path string }{
+		{http.MethodGet, "/caret/tools"},
+		{http.MethodPost, "/caret/tools/decision"},
+		{http.MethodGet, "/ai/status"},
+		{http.MethodPost, "/ai/generate-text-stream"},
+		{http.MethodPost, "/hub/caret/v1/tools"},
+		{http.MethodGet, "/hub/ai/v1/usage"},
+		{http.MethodPut, "/hub/ai/v1/quota-settings"},
+	} {
+		t.Run(route.method+" "+route.path, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(route.method, route.path)
+			if !ok || appID != authorization.AppHub || permission != "hub:dashboard:view" {
+				t.Fatalf("mapping = %s:%s,%t, want hub:hub:dashboard:view,true", appID, permission, ok)
+			}
+		})
+	}
+}
+
+// An AI sub-path with no matrix row must still reach the middleware's
+// permission check. Falling through to the unmapped catch-all is what let any
+// authenticated tenant member invoke the tool-decision write path.
+func TestUnmappedAISurfaceSubPathsStillRequireAuthorization(t *testing.T) {
+	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
+
+	member := &authPkg.AuthUser{
+		UserID:     7,
+		BusinessID: 9,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			BusinessID: 9,
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:     authorization.AppPOS,
+				Licensed:  true,
+				HasAccess: true,
+			}},
+		},
+	}
+
+	for _, route := range []struct{ method, path string }{
+		{http.MethodGet, "/caret"},
+		{http.MethodPost, "/caret/tools/decision"},
+		{http.MethodPost, "/caret/tools/decision/approve-all"},
+		{http.MethodDelete, "/caret/internal/exec"},
+		{http.MethodGet, "/ai"},
+		{http.MethodPost, "/ai/anything"},
+		{http.MethodPost, "/hub/caret/v1/unknown"},
+		{http.MethodGet, "/hub/ai/v1/unknown"},
+	} {
+		t.Run(route.method+" "+route.path, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(route.method, route.path)
+			if !ok {
+				t.Fatalf("%q reached the unmapped catch-all, so the middleware skips authorization", route.path)
+			}
+			if hasFeaturePermission(member, appID, permission) {
+				t.Fatalf("%q authorized a tenant member holding no hub permission", route.path)
+			}
+		})
+	}
+}
+
+func TestAISurfaceRoutesAllowAMemberWithTheHubDashboardPermission(t *testing.T) {
+	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
+
+	member := &authPkg.AuthUser{
+		UserID:     7,
+		BusinessID: 9,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			BusinessID:      9,
+			DashPermissions: []string{"hub:dashboard:view"},
+		},
+	}
+
+	for _, path := range []string{"/caret/tools/decision", "/ai/generate-text-stream", "/hub/ai/v1/usage"} {
+		t.Run(path, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(http.MethodPost, path)
+			if !ok || !hasFeaturePermission(member, appID, permission) {
+				t.Fatalf("%q denied a member holding hub:dashboard:view", path)
+			}
+		})
+	}
+}
+
+func TestAISurfaceMatcherDoesNotClaimNeighbouringPrefixes(t *testing.T) {
+	for _, path := range []string{"/aircraft/v1/parts", "/cares/v1/intake", "/hub/air/v1/usage", "/a"} {
+		if appID, permission, ok := featurePermissionForRequest(http.MethodGet, path); ok {
+			t.Fatalf("%q was claimed by the AI namespace as %s:%s", path, appID, permission)
+		}
 	}
 }

@@ -150,10 +150,7 @@ func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.
 		Items:         toInvoiceItemInputs(req.GetItems()),
 	})
 	if err != nil {
-		if errors.Is(err, application.ErrCustomerNotFound) {
-			return nil, onekiterrors.New(http.StatusNotFound, "Customer not found")
-		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create invoice")
+		return nil, invoiceServiceError(err, "Failed to create invoice")
 	}
 	if inv.CreatedAt.IsZero() || inv.UpdatedAt.IsZero() {
 		inv, err = a.Service.GetInvoice(ctx, businessID, inv.ID)
@@ -231,13 +228,7 @@ func (a *InvoicesAPI) UpdateInvoice(ctx context.Context, req *financeinvoicesv1.
 		Items:         toInvoiceItemInputs(body.GetItems()),
 	})
 	if err != nil {
-		if errors.Is(err, domain.ErrInvoiceNotFound) {
-			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
-		}
-		if errors.Is(err, domain.ErrInvoiceNotDraft) {
-			return nil, onekiterrors.New(http.StatusConflict, "Only draft invoices can be edited")
-		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update invoice")
+		return nil, invoiceServiceError(err, "Failed to update invoice")
 	}
 
 	return &financeinvoicesv1.UpdateInvoiceResponse{Invoice: newInvoiceDetailPayload(inv)}, nil
@@ -256,18 +247,11 @@ func (a *InvoicesAPI) UpdateInvoiceStatus(ctx context.Context, req *financeinvoi
 	if body == nil || body.GetStatus() == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Status is required")
 	}
-	if _, ok := validInvoiceStatuses[body.GetStatus()]; !ok {
-		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid invoice status")
-	}
-
+	// The valid-status set and the transition rules live in the domain and are
+	// applied by the service, so this endpoint and every other caller of it
+	// reject the same statuses.
 	if err := a.Service.UpdateInvoiceStatus(ctx, businessID, req.GetId(), body.GetStatus()); err != nil {
-		if errors.Is(err, domain.ErrInvoiceNotFound) {
-			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
-		}
-		if errors.Is(err, domain.ErrInvoiceNotDraft) {
-			return nil, onekiterrors.New(http.StatusConflict, "Invoice lifecycle does not allow this status change")
-		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update invoice status")
+		return nil, invoiceServiceError(err, "Failed to update invoice status")
 	}
 
 	return &financeinvoicesv1.UpdateInvoiceStatusResponse{Message: "Invoice status updated successfully"}, nil

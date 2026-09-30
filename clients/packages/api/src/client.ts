@@ -6,6 +6,7 @@ import {
   resolveCookieDomain,
 } from '@voxire/config';
 import { safeFetch } from './result';
+import { markCredential, sentCredential, shouldEndSharedSession } from './session';
 
 const getBaseUrl = (): string => {
   // Runtime config (self-host) overrides the build-time/hosted default; hosted
@@ -94,6 +95,73 @@ const isOnAuthApp = (): boolean => {
     return false;
   }
 };
+
+// ── 401 classification ────────────────────────────────────────────
+
+/**
+ * 401 bodies that do not mean "your token is no longer valid".
+ *
+ * The bearer gate answers a bad token with a bare "Unauthorized"
+ * (auth_middleware.go). These are 401s the backend raises for other reasons
+ * while the token is still good: unverified email, an account awaiting
+ * activation, outstanding MFA, a failed authorization lookup, or a credential
+ * the caller itself submitted and got wrong (a wrong password on the login
+ * form, a wrong current password, an expired Google code). Signing the user
+ * out of all ten apps for any of them is the bug this list exists to prevent.
+ */
+const NON_SESSION_401_MESSAGES = new Set([
+  'authorization unavailable',
+  'email verification required',
+  'account activation required',
+  'mfa enrollment required',
+  'mfa verification required',
+  'mfa verification unavailable',
+  'invalid email or password',
+  'google code is invalid or expired',
+  'current password is incorrect',
+  'internal authority token required',
+]);
+
+/** Pull a message out of a JSON or plain-text error body. */
+function unauthorizedMessage(data: unknown): string | null {
+  if (typeof data === 'string') {
+    const trimmed = data.trim();
+    return trimmed || null;
+  }
+  if (!data || typeof data !== 'object') return null;
+  const record = data as Record<string, unknown>;
+  for (const key of ['message', 'error', 'detail']) {
+    const value = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+/**
+ * True only for a 401 that actually rejects the bearer token.
+ *
+ * An unrecognised body is treated as a session rejection on purpose: the only
+ * safe default for a status the client does not understand is the behaviour it
+ * had before, and a genuinely dead session has to keep signing the user out.
+ */
+function isSessionRejection(data: unknown): boolean {
+  const message = unauthorizedMessage(data);
+  if (message === null) return true;
+  return !NON_SESSION_401_MESSAGES.has(message.toLowerCase());
+}
+
+/** Run the shared sign-out without ever throwing into a response interceptor. */
+function endSharedSession(appId: string): void {
+  try {
+    clearTokenCookie();
+    if (!isOnAuthApp()) {
+      window.location.href = getAuthUrl(appId);
+    }
+  } catch {
+    // Sign-out is best effort. A cookie or navigation failure here must not
+    // replace the real 401 the caller is about to handle.
+  }
+}
 
 // ── snake_case → camelCase converter ──────────────────────────────
 
@@ -203,6 +271,11 @@ export function createApiClient(appId: string): AxiosInstance {
       // resolves to the same value `getBaseUrl()` returned at creation time.
       config.baseURL = getBaseUrl();
       const token = getToken();
+      // Recorded so the response interceptor can tell a 401 against a real
+      // credential from one against a request that never sent one. Set even
+      // when there is no token, so "absent" and "not credentialed" are the
+      // same answer rather than a stale leftover.
+      markCredential(config, token);
       if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
       }
@@ -231,13 +304,19 @@ export function createApiClient(appId: string): AxiosInstance {
         error.response.data = convertKeys(error.response.data);
       }
       if (error.response?.status === 401) {
+        // An MFA-required 401 is a step-up prompt, not a dead session: signing
+        // out would discard a valid token and strand the user mid-sign-in.
         if (isMFARequiredResponse(error.response.data)) {
           redirectToSecuritySettings();
         } else {
-          clearTokenCookie();
-          if (!isOnAuthApp()) {
-            window.location.href = getAuthUrl(appId);
-          }
+          // Never awaited: the caller's rejection must not wait on the sign-out
+          // decision, and the decision handles its own failures.
+          void shouldEndSharedSession(
+            sentCredential(error.config),
+            isSessionRejection(error.response.data),
+            getToken,
+            () => endSharedSession(appId)
+          );
         }
       }
       return Promise.reject(error);
@@ -269,6 +348,19 @@ export type OneKitClientConstructor<TClient, TOptions extends OneKitClientOption
 
 export const getOneKitApiBaseUrl = (): string => getBaseUrl();
 
+/**
+ * Read a 401 body without disturbing the response the caller still has to
+ * parse. A clone that fails yields null, which classifies as a session
+ * rejection - the same answer a bodiless 401 gets.
+ */
+async function readUnauthorizedBody(response: Response): Promise<unknown> {
+  try {
+    return await response.clone().json();
+  } catch {
+    return null;
+  }
+}
+
 export function createOneKitFetch(appId: string): typeof fetch {
   return async (input, init) => {
     const headers = new Headers(init?.headers);
@@ -283,14 +375,18 @@ export function createOneKitFetch(appId: string): typeof fetch {
     });
 
     if (response.status === 401) {
-      const errorData = await response.clone().json().catch(() => null);
-      if (isMFARequiredResponse(errorData)) {
+      // An MFA-required 401 is a step-up prompt, not a dead session: sending the
+      // user to the sign-in page would discard a perfectly valid token.
+      const unauthorizedBody = await readUnauthorizedBody(response);
+      if (isMFARequiredResponse(unauthorizedBody)) {
         redirectToSecuritySettings();
       } else {
-        clearTokenCookie();
-        if (!isOnAuthApp()) {
-          window.location.href = getAuthUrl(appId);
-        }
+        await shouldEndSharedSession(
+          token,
+          isSessionRejection(unauthorizedBody),
+          getToken,
+          () => endSharedSession(appId)
+        );
       }
     }
 

@@ -22,7 +22,7 @@ type repository interface {
 	GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error)
 	GetPublicBusiness(ctx context.Context, businessID int64) (domain.PublicBusiness, error)
 	LookupBySlug(ctx context.Context, slug string) (domain.SlugLookupResult, error)
-	UpdateSlug(ctx context.Context, businessID int64, slug string) error
+	UpdateSlug(ctx context.Context, businessID, ownerUserID int64, slug string) (bool, error)
 	ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error)
 	CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error)
 	CheckSubBusinessOwnership(ctx context.Context, ownerUserID, parentBusinessID int64) (bool, error)
@@ -61,9 +61,16 @@ func (s *Service) LookupBySlug(ctx context.Context, slug string) (domain.SlugLoo
 	return s.repo.LookupBySlug(ctx, slug)
 }
 
-func (s *Service) UpdateSlug(ctx context.Context, businessID int64, slug string) error {
-	if err := s.repo.UpdateSlug(ctx, businessID, slug); err != nil {
+// UpdateSlug renames the storefront slug of businessID on behalf of ownerUserID.
+// The owner comes from the authenticated caller, so a business the caller does
+// not own is reported as not owned instead of being renamed.
+func (s *Service) UpdateSlug(ctx context.Context, businessID, ownerUserID int64, slug string) error {
+	updated, err := s.repo.UpdateSlug(ctx, businessID, ownerUserID, slug)
+	if err != nil {
 		return err
+	}
+	if !updated {
+		return ErrBusinessNotOwned
 	}
 	cacher.Of[domain.BusinessProfile]().Delete(ctx, []string{cacheKeys.BusinessProfile(businessID)})
 	return nil

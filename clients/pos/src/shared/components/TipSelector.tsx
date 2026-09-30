@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '../utils/format';
+import { parseLocalizedAmount, sanitiseAmountInput } from '../utils/amount';
 import { useSettingsStore } from '../stores/settingsStore';
 
 interface TipSelectorProps {
@@ -9,6 +11,8 @@ interface TipSelectorProps {
 
 const TipSelector: React.FC<TipSelectorProps> = ({ subtotal, onTipChange }) => {
   const presets = useSettingsStore((s) => s.tipPresets);
+  const { i18n } = useTranslation();
+  const locale = i18n?.resolvedLanguage || i18n?.language || 'en';
   const [selected, setSelected] = useState<number | null>(null);
   const [custom, setCustom] = useState<string>('');
 
@@ -18,11 +22,14 @@ const TipSelector: React.FC<TipSelectorProps> = ({ subtotal, onTipChange }) => {
     onTipChange(subtotal * pct);
   };
 
+  // parseFloat stops at the locale's decimal separator, so a French "12,50" tip
+  // reached the order as 12 and the customer kept almost all of the change.
   const pickCustom = (v: string) => {
-    setCustom(v);
+    const text = sanitiseAmountInput(v, locale);
+    setCustom(text);
     setSelected(null);
-    const n = parseFloat(v);
-    onTipChange(!isNaN(n) && n >= 0 ? n : 0);
+    const n = parseLocalizedAmount(text, locale);
+    onTipChange(n >= 0 ? n : 0);
   };
 
   return (

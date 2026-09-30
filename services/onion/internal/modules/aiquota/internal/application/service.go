@@ -12,7 +12,7 @@ import (
 )
 
 type repository interface {
-	ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64
+	ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error)
 	GetEntitlement(ctx context.Context, ownerID int64) (domain.Entitlement, error)
 	GetMode(ctx context.Context, ownerID int64) (domain.Mode, error)
 	SetMode(ctx context.Context, ownerID int64, mode domain.Mode) error
@@ -143,7 +143,14 @@ func (s *Service) status(ctx context.Context, ownerID, userID int64) (domain.Quo
 // hard-capped plans. When only the usage bucket cannot be read, plans that
 // bill for overage keep serving; capped plans are blocked.
 func (s *Service) Reserve(ctx context.Context, businessID, userID int64) (bool, domain.QuotaStatus, error) {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		// Failing closed: the owner id scopes the reservation write below, so an
+		// unresolved tenant must never be replaced by the caller's user id.
+		logger.Ctx(ctx).Error("AI QUOTA BLOCKING: tenant owner could not be resolved",
+			logger.Any("business_id", businessID), logger.Error(err))
+		return false, domain.QuotaStatus{Blocked: true}, err
+	}
 	ent, entErr := s.repo.GetEntitlement(ctx, owner)
 	mode, modeErr := s.repo.GetMode(ctx, owner)
 
@@ -245,7 +252,18 @@ func (s *Service) Reconcile(ctx context.Context, businessID, userID, actualToken
 	if delta == 0 {
 		return
 	}
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		// Adjust below is a write. Reconciling against a substituted owner would
+		// debit another tenant's usage bucket, so the delta is dropped instead:
+		// an un-reconciled reservation only over-serves this tenant.
+		logger.Ctx(ctx).Error("AI QUOTA UNDER-COUNT: tenant owner could not be resolved; skipping reconcile",
+			logger.Any("business_id", businessID),
+			logger.Any("delta", delta),
+			logger.Error(err),
+		)
+		return
+	}
 	mode, err := s.repo.GetMode(ctx, owner)
 	if err != nil {
 		mode = domain.ModePool
@@ -272,18 +290,27 @@ func (s *Service) Reconcile(ctx context.Context, businessID, userID, actualToken
 
 // Status returns the caller's current quota view.
 func (s *Service) Status(ctx context.Context, businessID, userID int64) (domain.QuotaStatus, error) {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		return domain.QuotaStatus{}, err
+	}
 	return s.status(ctx, owner, userID)
 }
 
 // GetMode returns the tenant's allocation mode.
 func (s *Service) GetMode(ctx context.Context, businessID, userID int64) (domain.Mode, error) {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		return "", err
+	}
 	return s.repo.GetMode(ctx, owner)
 }
 
 // SetMode updates the tenant's allocation mode (admin action).
 func (s *Service) SetMode(ctx context.Context, businessID, userID int64, mode domain.Mode) error {
-	owner := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	owner, err := s.repo.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		return err
+	}
 	return s.repo.SetMode(ctx, owner, mode.Normalize())
 }

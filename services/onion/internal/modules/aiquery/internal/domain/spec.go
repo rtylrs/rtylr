@@ -1,7 +1,7 @@
 // Package domain defines the safe, structured query layer the AI uses to read
 // business data. The LLM never emits raw SQL — it emits a QuerySpec, which we
 // validate against an allowlist of read-only views/columns and compile to a
-// parameterized statement that ALWAYS binds owner_id. This makes a missing
+// parameterized statement that ALWAYS binds business_id. This makes a missing
 // tenant filter (a cross-tenant data leak) impossible by construction.
 package domain
 
@@ -20,6 +20,11 @@ var (
 	ErrBadAggregate  = errors.New("unsupported aggregate function")
 	ErrBadOperator   = errors.New("unsupported filter operator")
 	ErrEmptySelect   = errors.New("query selects nothing")
+	// ErrNoBusinessScope is returned when the query carries no resolvable
+	// business. It must be a denial: a zero scope would match the legacy
+	// business_id = 0 bucket or nothing at all, and a missing predicate would
+	// return every business of the owner.
+	ErrNoBusinessScope = errors.New("query has no business scope")
 )
 
 const (
@@ -30,9 +35,11 @@ const (
 )
 
 // allowedViews is the entire surface the AI may query: read-only ai_* views,
-// each mapped to the columns it may select/filter/group by. owner_id is
-// intentionally absent — it is never selectable and is always injected as the
-// tenant filter. Keep this in lockstep with shared/ai_views.sql.
+// each mapped to the columns it may select/filter/group by. owner_id and
+// business_id are intentionally absent — neither is ever selectable, and
+// business_id is always injected as the tenant filter, so a spec cannot narrow
+// or widen its own scope. Keep this in lockstep with
+// schemas/ai/ai_views.sql and schemas/ai/zz_ai_views_business_scope.sql.
 var allowedViews = map[string]map[string]struct{}{
 	"ai_products":   set("id", "name", "sku", "category_id", "brand_id", "supplier_id", "cost_price", "sale_price", "compare_at_price", "currency", "stock_quantity", "low_stock_threshold", "reorder_quantity", "is_active", "track_inventory", "lead_time_days", "created_at", "updated_at"),
 	"ai_customers":  set("id", "first_name", "last_name", "email", "phone", "city", "country", "loyalty_points", "total_spent", "visit_count", "last_visit_at", "loyalty_tier", "is_active", "created_at", "updated_at"),
@@ -96,9 +103,16 @@ func Schema() map[string][]string {
 }
 
 // BuildSQL validates the spec against the allowlist and compiles it to a
-// parameterized SELECT that is always constrained to ownerID. Returns the SQL
-// and its bound args. Any reference outside the allowlist is rejected.
-func BuildSQL(spec QuerySpec, ownerID int64) (string, []any, error) {
+// parameterized SELECT that is always constrained to businessID.
+//
+// businessID must be the id resolved by tenant.ResolveBusinessID. owner_id is
+// deliberately not a substitute: it is shared by every business of an account,
+// so scoping by it returns rows from businesses the caller has no membership in.
+func BuildSQL(spec QuerySpec, businessID int64) (string, []any, error) {
+	if businessID <= 0 {
+		return "", nil, ErrNoBusinessScope
+	}
+
 	cols, ok := allowedViews[spec.View]
 	if !ok {
 		return "", nil, fmt.Errorf("%w: %q", ErrUnknownView, spec.View)
@@ -109,8 +123,8 @@ func BuildSQL(spec QuerySpec, ownerID int64) (string, []any, error) {
 		return "", nil, err
 	}
 
-	// owner_id is always bound — the core isolation guarantee.
-	b := sq.Select(selects...).From(spec.View).Where(sq.Eq{"owner_id": ownerID})
+	// business_id is always bound — the core isolation guarantee.
+	b := sq.Select(selects...).From(spec.View).Where(sq.Eq{"business_id": businessID})
 
 	for _, f := range spec.Where {
 		pred, perr := filterPredicate(f, cols)

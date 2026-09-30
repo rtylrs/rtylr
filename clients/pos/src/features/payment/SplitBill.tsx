@@ -1,10 +1,12 @@
 import { createOneKitClient } from '@voxire/api';
 import { OrderSplitServiceClient } from '@voxire/voxie/pos/orders/splits/v1/client';
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { formatCurrency } from '../../shared/utils/format';
+import { parseLocalizedAmount, sanitiseAmountInput } from '../../shared/utils/amount';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { buildSplitBillRequest } from './splitBillWorkflow';
 
@@ -15,6 +17,8 @@ type SplitMode = 'seat' | 'amount' | 'items';
 const SplitBillScreen: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
+  const locale = i18n?.resolvedLanguage || i18n?.language || 'en';
   const items = useCartStore((s) => s.items);
   const total = useCartStore((s) => s.total());
   const serverOrderId = useCartStore((s) => s.serverOrderId);
@@ -37,8 +41,8 @@ const SplitBillScreen: React.FC = () => {
   );
 
   const amountSum = useMemo(
-    () => amountSplits.reduce((sum, raw) => sum + (Number.parseFloat(raw) || 0), 0),
-    [amountSplits]
+    () => amountSplits.reduce((sum, raw) => sum + parseLocalizedAmount(raw, locale), 0),
+    [amountSplits, locale]
   );
   const amountMatchesTotal = total > 0 && Math.abs(amountSum - total) < 0.005;
 
@@ -57,7 +61,8 @@ const SplitBillScreen: React.FC = () => {
   };
 
   const updateAmount = (idx: number, raw: string) => {
-    setAmountInputs(amountSplits.map((v, i) => (i === idx ? raw : v)));
+    const text = sanitiseAmountInput(raw, locale);
+    setAmountInputs(amountSplits.map((v, i) => (i === idx ? text : v)));
   };
 
   const confirm = async (): Promise<void> => {
@@ -188,6 +193,7 @@ const SplitBillScreen: React.FC = () => {
                   <span className="text-sm text-pos-muted w-20">Split {idx + 1}</span>
                   <input
                     type="number"
+                    inputMode="decimal"
                     value={raw}
                     onChange={(e) => updateAmount(idx, e.target.value)}
                     className="flex-1 h-11 px-3 rounded-lg bg-white/10 text-pos-text"

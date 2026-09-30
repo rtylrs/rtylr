@@ -13,6 +13,16 @@ describe('i18n package', () => {
     expect(isRTL('fr')).toBe(false);
   });
 
+  it('resolves direction for a regional tag, which an exact match missed', () => {
+    expect(isRTL('ar-EG')).toBe(true);
+    expect(isRTL('ar-SA')).toBe(true);
+    expect(isRTL('he-IL')).toBe(true);
+    expect(isRTL('ur-PK')).toBe(true);
+    expect(isRTL('en-GB')).toBe(false);
+    expect(isRTL('fr-CA')).toBe(false);
+    expect(isRTL('zh-CN')).toBe(false);
+  });
+
   it('returns native language names', () => {
     expect(getLanguage('ar')?.nativeName).toBe('العربية');
     expect(getLanguage('en')?.nativeName).toBe('English');

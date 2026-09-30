@@ -8,28 +8,58 @@ import (
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
 // VerifyInviteToken checks if the token is valid and returns the user info along with their app access list.
 func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, string, string, []string, error) {
-	userID, ownerID, _, err := s.repo.GetInviteToken(ctx, token)
+	invite, err := s.repo.GetInviteToken(ctx, token)
 	if err != nil {
 		return 0, "", "", nil, err
 	}
 
-	email, fullName, _, err := s.repo.GetUserByID(ctx, userID)
+	email, fullName, _, err := s.repo.GetUserByID(ctx, invite.UserID)
 	if err != nil {
 		return 0, "", "", nil, err
 	}
 
 	// Fetch the user's app permissions so the frontend can redirect to the right app after accept.
 	apps := []string{}
-	if perm, permErr := s.repo.GetPermission(ctx, ownerID, userID); permErr == nil && perm != nil {
+	if perm, permErr := s.repo.GetPermission(ctx, invite.OwnerID, invite.UserID); permErr == nil && perm != nil {
 		apps = perm.Apps
 	}
 
-	return userID, email, fullName, apps, nil
+	return invite.UserID, email, fullName, apps, nil
+}
+
+// resolveInviteBusinessID returns the business an accepted invitation belongs
+// to, verified as the invitee's.
+//
+// The invite row is the authoritative binding: InviteUser records the business
+// it granted access in, so that is what the accept activates. users.business_id
+// is deliberately not consulted. It is the member's *own* default business, not
+// the invitation's, so it names a different tenant whenever somebody who
+// already belongs to one is invited to another — the previous code substituted
+// it whenever the owner lookup failed and then activated the member and granted
+// its authorization in that unrelated business.
+//
+// Invitations issued before the business was recorded on the row fall back to
+// the inviter's business and are verified the same way, so no write ever lands
+// under an id that has not been positively checked for this member.
+func (s *Service) resolveInviteBusinessID(ctx context.Context, invite domain.InviteToken) (int64, error) {
+	candidate := invite.BusinessID
+	if candidate <= 0 {
+		ownerBusinessID, err := s.repo.GetBusinessIDByOwnerID(ctx, invite.OwnerID)
+		if err != nil {
+			return 0, err
+		}
+		candidate = ownerBusinessID
+	}
+	if candidate <= 0 {
+		return 0, tenant.ErrNoBusinessScope
+	}
+	return tenant.ResolveBusinessID(ctx, candidate, invite.UserID)
 }
 
 // AcceptInvite sets the user's password and marks the token as used.
@@ -38,9 +68,20 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 		return 0, err
 	}
 
-	userID, ownerID, _, err := s.repo.GetInviteToken(ctx, token)
+	invite, err := s.repo.GetInviteToken(ctx, token)
 	if err != nil {
 		return 0, err
+	}
+	userID, ownerID := invite.UserID, invite.OwnerID
+
+	// Resolve and verify the business before the token is claimed: an
+	// invitation whose tenant cannot be verified must not write anything at
+	// all, so this runs ahead of every write below.
+	businessID, err := s.resolveInviteBusinessID(ctx, invite)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to resolve business for accepted invitation",
+			logger.Int("user_id", int(userID)), logger.Int("owner_id", int(ownerID)), logger.Error(err))
+		return 0, fmt.Errorf("resolve business for accepted invitation: %w", err)
 	}
 
 	hash, err := passwordutils.HashPassword(password)
@@ -71,21 +112,6 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 		return failAccept(err)
 	}
 
-	// Resolve the business to activate the member in. The owner lookup is the
-	// primary source; the member's own users.business_id is the fallback,
-	// because it carries the same tenant and is set at invite time. Skipping
-	// activation when the lookup fails used to surface as a successful accept
-	// with the invitee stuck in pending_invitation.
-	businessID, businessErr := s.repo.GetBusinessIDByOwnerID(ctx, ownerID)
-	if businessErr != nil {
-		if fallbackID, fallbackErr := s.repo.GetUserBusinessID(ctx, userID); fallbackErr == nil && fallbackID != 0 {
-			businessID = fallbackID
-		} else {
-			logger.Ctx(ctx).Error("failed to resolve business for accepted invitation",
-				logger.Int("user_id", int(userID)), logger.Int("owner_id", int(ownerID)), logger.Error(businessErr))
-			return failAccept(fmt.Errorf("resolve business for accepted invitation: %w", businessErr))
-		}
-	}
 	if stateErr := s.repo.UpsertProvisioningState(ctx, userID, businessID, "invitation", "active", true, false); stateErr != nil {
 		return failAccept(stateErr)
 	}

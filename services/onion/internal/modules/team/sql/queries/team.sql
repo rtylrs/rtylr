@@ -100,10 +100,10 @@ WHERE p.owner_id = ?
 LIMIT 1;
 
 -- name: CreateInviteToken :exec
-INSERT INTO invite_tokens (user_id, owner_id, token, expires_at) VALUES (?, ?, ?, ?);
+INSERT INTO invite_tokens (user_id, owner_id, business_id, token, expires_at) VALUES (?, ?, ?, ?, ?);
 
 -- name: GetInviteToken :one
-SELECT user_id, owner_id, expires_at, used_at FROM invite_tokens WHERE token = ?;
+SELECT user_id, owner_id, business_id, expires_at, used_at FROM invite_tokens WHERE token = ?;
 
 -- name: MarkInviteTokenUsed :exec
 UPDATE invite_tokens SET used_at = NOW() WHERE token = ?;

@@ -2,7 +2,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 
 const root = process.cwd();
 const changedOnly = process.argv.includes('--changed-only');
@@ -49,8 +49,72 @@ const rules = [
   },
 ];
 
+function toPosix(value) {
+  return value.split(sep).join('/');
+}
+
+function fatal(message) {
+  console.error(`OneKit boundary: ${message}`);
+  process.exit(2);
+}
+
+function git(args) {
+  try {
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+    });
+  } catch (error) {
+    const detail = String(error.stderr || error.message).trim();
+    fatal(`git ${args.join(' ')} failed: ${detail}`);
+  }
+}
+
+// A ref that does not exist yet is a normal answer to "what is the base?", so
+// resolution failures are collected rather than fatal.
+function gitOrNull(args) {
+  try {
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 64 * 1024 * 1024,
+    });
+  } catch {
+    return null;
+  }
+}
+
+const repoRoot = git(['rev-parse', '--show-toplevel']).trim();
+const appsDirectory = join(root, 'apps');
+if (!appsDirectory.startsWith(`${repoRoot}${sep}`)) {
+  fatal(
+    `${root} is not inside ${repoRoot}. Run this from the client workspace root (clients/web/rtylr).`
+  );
+}
+
+// git reports every path relative to the repository root, never to this
+// package. Filtering on a bare `apps/` prefix therefore matched nothing once
+// the workspace moved under clients/.
+const appsPrefix = toPosix(relative(repoRoot, appsDirectory));
+// `:(top)` keeps the pathspec anchored at the repository root instead of the
+// process cwd, which is this package rather than the repository.
+const appsPathspec = `:(top)${appsPrefix}/`;
+
+function toPackagePath(gitPath) {
+  return toPosix(relative(root, resolve(repoRoot, gitPath)));
+}
+
+function isAppSource(gitPath) {
+  return (
+    gitPath.startsWith(`${appsPrefix}/`) &&
+    sourceExtensions.has(gitPath.slice(gitPath.lastIndexOf('.')))
+  );
+}
+
 function relativePath(file) {
-  return relative(root, file).split(sep).join('/');
+  return toPosix(relative(root, file));
 }
 
 function walk(directory) {
@@ -68,33 +132,92 @@ function walk(directory) {
   return files;
 }
 
-function gitOutput(args) {
-  try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8' });
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    throw new Error(`Unable to inspect git changes: ${detail}`);
-  }
-}
-
-function diffBase() {
+function explicitBaseRef() {
   if (process.env.GITHUB_BASE_REF) return `origin/${process.env.GITHUB_BASE_REF}`;
   if (process.env.GITHUB_EVENT_BEFORE && !/^0+$/.test(process.env.GITHUB_EVENT_BEFORE)) {
     return process.env.GITHUB_EVENT_BEFORE;
   }
   if (process.env.GITHUB_SHA) return `${process.env.GITHUB_SHA}^`;
-  return 'HEAD';
+  return null;
 }
 
-function changedLines() {
-  const diff = gitOutput(['diff', '--unified=0', diffBase(), 'HEAD']);
-  const findings = [];
+// Ordered best-first. Only refs that actually resolve are used, and the result
+// is always a merge base, so a wrong guess here widens the diff at worst and
+// never narrows it.
+function candidateBaseRefs() {
+  const refs = [];
+  const upstream = gitOrNull(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{upstream}']);
+  if (upstream) refs.push(upstream.trim());
+
+  for (const remote of (gitOrNull(['remote']) ?? '').split('\n').filter(Boolean)) {
+    const head = gitOrNull(['symbolic-ref', '--quiet', `refs/remotes/${remote}/HEAD`]);
+    if (head) refs.push(head.trim());
+    for (const branch of ['main', 'master']) {
+      if (refs.includes(`${remote}/${branch}`)) continue;
+      const ref = gitOrNull([
+        'rev-parse',
+        '--verify',
+        '--quiet',
+        `refs/remotes/${remote}/${branch}^{commit}`,
+      ]);
+      if (ref) refs.push(`${remote}/${branch}`);
+    }
+  }
+  return refs;
+}
+
+function isShallow() {
+  return (gitOrNull(['rev-parse', '--is-shallow-repository']) ?? '').trim() === 'true';
+}
+
+// The commit the branch is compared against, or null plus the reason it could
+// not be found. `--changed-only` promises that nothing new crossed the
+// boundary, and reporting success after inspecting an empty `HEAD..HEAD` diff
+// is the defect this replaced, so an unresolved base is never a pass.
+function resolveBase() {
+  const explicit = explicitBaseRef();
+  for (const ref of explicit ? [explicit] : candidateBaseRefs()) {
+    const commit = gitOrNull(['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]);
+    if (!commit) continue;
+    const mergeBase = gitOrNull(['merge-base', 'HEAD', commit.trim()]);
+    return { ref, sha: (mergeBase ?? commit).trim() };
+  }
+
+  if (isShallow()) {
+    return {
+      error:
+        'this is a shallow clone and no diff base could be resolved, so the branch cannot be checked. Run `git fetch --unshallow` and commit again.',
+    };
+  }
+  if (explicit) {
+    return {
+      error: `the requested diff base "${explicit}" does not exist locally. Fetch it (git fetch origin "${explicit}") or unset the CI base variables, and commit again.`,
+    };
+  }
+  return {
+    error:
+      'no diff base could be resolved (no upstream branch and no remote HEAD), so the branch cannot be checked. Run `git fetch origin` and `git branch --set-upstream-to=origin/<branch>`, then commit again.',
+  };
+}
+
+function addedLines(args) {
+  const diff = git([
+    'diff',
+    '--unified=0',
+    '--no-color',
+    '--no-ext-diff',
+    ...args,
+    '--',
+    appsPathspec,
+  ]);
+  const added = [];
   let file = null;
   let lineNumber = 0;
 
   for (const line of diff.split('\n')) {
-    if (line.startsWith('+++ b/')) {
-      file = line.slice('+++ b/'.length);
+    if (line.startsWith('+++ ')) {
+      const target = line.slice(4).replace(/\t.*$/, '').trim();
+      file = target === '/dev/null' ? null : target.replace(/^b\//, '');
       continue;
     }
     const hunk = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
@@ -102,33 +225,59 @@ function changedLines() {
       lineNumber = Number(hunk[1]);
       continue;
     }
-    if (
-      !file ||
-      !file.startsWith('apps/') ||
-      !sourceExtensions.has(file.slice(file.lastIndexOf('.')))
-    ) {
-      continue;
-    }
-    if (line.startsWith('+') && !line.startsWith('+++')) {
-      findings.push({ file, line: lineNumber, text: line.slice(1) });
+    if (file === null) continue;
+    if (line.startsWith('+')) {
+      added.push({ file, line: lineNumber, text: line.slice(1) });
       lineNumber += 1;
     } else if (!line.startsWith('-')) {
       lineNumber += 1;
     }
   }
+  return added;
+}
+
+function wholeFile(fileName) {
+  return readFileSync(join(repoRoot, fileName), 'utf8')
+    .split('\n')
+    .map((text, index) => ({ file: fileName, line: index + 1, text }));
+}
+
+// The pre-commit hook runs after `git add`, so the staged index is the one that
+// decides the commit. The branch diff covers what is already committed and the
+// worktree diff covers edits made after staging.
+function reviewedLines(base) {
+  const hasHead = gitOrNull(['rev-parse', '--verify', '--quiet', 'HEAD^{commit}']) !== null;
+  const head = hasHead ? 'HEAD' : '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+  const lines = [];
+
+  // Skipped when there is no base to diff against; the caller fails loudly
+  // rather than treating the missing branch diff as a clean result.
+  if (base && base.sha !== head) lines.push(...addedLines([base.sha, head]));
+  lines.push(...addedLines(['--cached', head]));
+  lines.push(...addedLines([]));
 
   // git diff does not include untracked files. Treat new app source files as
   // entirely new so the guard is useful before the first commit as well.
-  const untracked = gitOutput(['ls-files', '--others', '--exclude-standard', '--', 'apps'])
+  const untracked = git([
+    'ls-files',
+    '--others',
+    '--exclude-standard',
+    '--full-name',
+    '--',
+    appsPathspec,
+  ])
     .split('\n')
     .filter(Boolean)
     .filter((fileName) => sourceExtensions.has(fileName.slice(fileName.lastIndexOf('.'))));
-  for (const fileName of untracked) {
-    const contents = readFileSync(join(root, fileName), 'utf8').split('\n');
-    contents.forEach((text, index) => findings.push({ file: fileName, line: index + 1, text }));
-  }
+  for (const fileName of untracked) lines.push(...wholeFile(fileName));
 
-  return findings;
+  return lines
+    .filter((entry) => isAppSource(entry.file))
+    .map((entry) => ({
+      file: toPackagePath(entry.file),
+      line: entry.line,
+      text: entry.text,
+    }));
 }
 
 function findingsForLine(file, line, text) {
@@ -140,7 +289,6 @@ function findingsForLine(file, line, text) {
 
 function appDependencyFindings() {
   const findings = [];
-  const appsDirectory = join(root, 'apps');
   if (!existsSync(appsDirectory)) return findings;
 
   for (const entry of readdirSync(appsDirectory, { withFileTypes: true })) {
@@ -163,27 +311,59 @@ function appDependencyFindings() {
 }
 
 const findings = [];
+const seen = new Set();
+const record = (finding) => {
+  const key = `${finding.file}:${finding.line}:${finding.code}`;
+  if (seen.has(key)) return;
+  seen.add(key);
+  findings.push(finding);
+};
+
 findings.push(...appDependencyFindings());
+let baseError = null;
 if (changedOnly) {
-  for (const entry of changedLines())
-    findings.push(...findingsForLine(entry.file, entry.line, entry.text));
+  const base = resolveBase();
+  if (base.error) {
+    baseError = base.error;
+  } else if (isShallow()) {
+    console.error(
+      `OneKit boundary: warning: shallow clone; the diff against ${base.ref} may be incomplete.`
+    );
+  }
+  // Staged, unstaged and untracked lines need no base, so they are still judged
+  // when the base is unresolvable: the author sees every real violation in one
+  // run instead of fixing them one commit attempt at a time.
+  for (const entry of reviewedLines(base.error ? null : base)) {
+    for (const finding of findingsForLine(entry.file, entry.line, entry.text)) record(finding);
+  }
 } else if (scanAll) {
-  for (const file of walk(join(root, 'apps'))) {
+  for (const file of walk(appsDirectory)) {
     const fileName = relativePath(file);
     const contents = readFileSync(file, 'utf8').split('\n');
-    contents.forEach((text, index) => findings.push(...findingsForLine(fileName, index + 1, text)));
+    contents.forEach((text, index) => {
+      for (const finding of findingsForLine(fileName, index + 1, text)) record(finding);
+    });
   }
 }
 
 if (findings.length > 0) {
   console.error(
-    `OneKit boundary: ${findings.length} violation(s)${changedOnly ? ' in added lines' : ''}.`
+    `OneKit boundary: ${findings.length} violation(s)${changedOnly ? ' in added lines' : ''} under ${appsPrefix}/.`
   );
   for (const finding of findings.slice(0, 100)) {
     console.error(`- ${finding.file}:${finding.line} [${finding.code}] ${finding.message}`);
   }
   if (findings.length > 100) console.error(`- ... ${findings.length - 100} more`);
+  console.error(
+    'Apps must reach the backend through a generated OneKit service client. Revert these lines, or allowlist a deliberate exception in scripts/enforce-onekit-boundary.mjs.'
+  );
   process.exitCode = 1;
-} else {
+} else if (!baseError) {
   console.log(`OneKit boundary: no ${changedOnly ? 'new ' : ''}app transport violations found.`);
+}
+
+if (baseError) {
+  // Exit 2 keeps this distinguishable from an actual boundary violation (1).
+  console.error(`OneKit boundary: ${baseError}`);
+  process.exit(2);
 }

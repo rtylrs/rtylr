@@ -18,6 +18,7 @@ import (
 const (
 	subscriptionCacheTTL = 10 * time.Minute
 	defaultPlanSlug      = "free"
+	reconcileBatchSize   = 200
 )
 
 // invalidateSubscriptionScope clears every subscription + user-scoped cache
@@ -39,33 +40,54 @@ func (s *Service) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 	return s.repo.ListPlans(ctx)
 }
 
+// GetMySubscription is a pure read. Everything that changes subscription or
+// seat state lives behind ReconcileOwnerBilling, which the background job calls;
+// a GET used to do it inline, so every cached read (and every prefetch or
+// crawler hit that missed the cache) mutated rows without a lock.
 func (s *Service) GetMySubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
 	return cacher.Of[*domain.Subscription]().GetOrComputeSingle(
 		ctx,
 		cacheKeys.Subscription(ownerID),
 		func(ctx context.Context) (*domain.Subscription, error) {
-			return s.getSubscriptionOrCreateDefault(ctx, ownerID)
+			return s.readSubscription(ctx, ownerID)
 		},
 		cacher.WithExpiry(ctx, subscriptionCacheTTL),
 	)
 }
 
-func (s *Service) getSubscriptionOrCreateDefault(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
+func (s *Service) readSubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
 	sub, err := s.repo.GetSubscription(ctx, ownerID)
-	if err == nil {
-		return s.syncSubscriptionBillingState(ctx, sub)
+	if errors.Is(err, domain.ErrSubscriptionNotFound) {
+		return s.defaultSubscription(ctx, ownerID)
 	}
-	if !errors.Is(err, domain.ErrSubscriptionNotFound) {
-		return nil, err
-	}
-	if upsertErr := s.UpsertSubscription(ctx, ownerID, defaultPlanSlug); upsertErr != nil {
-		return nil, upsertErr
-	}
-	sub, err = s.repo.GetSubscription(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
 	return s.withSeatAllowance(sub), nil
+}
+
+// defaultSubscription projects the default plan for an owner that has no
+// subscription row yet. The background job persists the row; a read only
+// reports what it would have contained, so the response is unchanged without
+// the write.
+func (s *Service) defaultSubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
+	plan, err := s.repo.GetPlanBySlug(ctx, defaultPlanSlug)
+	if err != nil {
+		return nil, err
+	}
+	seatCount, err := s.currentActiveSeatCount(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	return s.withSeatAllowance(&domain.Subscription{
+		OwnerID:           ownerID,
+		PlanName:          plan.Name,
+		PlanSlug:          plan.Slug,
+		Apps:              plan.Apps,
+		PricePerSeatCents: plan.PricePerSeatCents,
+		Status:            "active",
+		SeatCount:         seatCount,
+	}), nil
 }
 
 func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlug string) error {
@@ -83,13 +105,9 @@ func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlu
 		return upsertErr
 	}
 	defer invalidateSubscriptionScope(ctx, ownerID)
-
-	sub, err := s.repo.GetSubscription(ctx, ownerID)
-	if err != nil {
-		return err
-	}
-	_, err = s.syncSubscriptionBillingState(ctx, sub)
-	return err
+	// A plan change moves the per-seat price, so the running seat period has to
+	// be split rather than left at the old price for the rest of the month.
+	return s.ReconcileOwnerBilling(ctx, ownerID)
 }
 
 func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
@@ -100,10 +118,11 @@ func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, er
 	if !errors.Is(err, domain.ErrSubscriptionNotFound) {
 		return nil, err
 	}
-	if _, createErr := s.getSubscriptionOrCreateDefault(ctx, ownerID); createErr != nil {
-		return nil, createErr
+	plan, planErr := s.repo.GetPlanBySlug(ctx, defaultPlanSlug)
+	if planErr != nil {
+		return nil, planErr
 	}
-	return s.repo.GetOwnerApps(ctx, ownerID)
+	return plan.Apps, nil
 }
 
 // ExpireTrialSubscriptions transitions trials whose promised end date has
@@ -115,13 +134,12 @@ func (s *Service) ExpireTrialSubscriptions(ctx context.Context) error {
 
 // GetBillingDetail returns the current month's usage line items and totals.
 func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int64) (*domain.BillingDetail, error) {
-	sub, err := s.getSubscriptionOrCreateDefault(ctx, ownerID)
+	sub, err := s.readSubscription(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
 
-	now := time.Now().UTC()
-	currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+	currentMonth := domain.FirstOfUTCMonth(time.Now().UTC())
 	periods, err := s.repo.GetPeriodsForMonth(ctx, ownerID, currentMonth)
 	if err != nil {
 		return nil, err
@@ -191,54 +209,69 @@ func (s *Service) GetBillingHistory(ctx context.Context, ownerID, businessID int
 	return months, nil
 }
 
-// RecordSeatChange is called when a team member is added or removed.
-// It closes the current seat period and opens a new one reflecting the new count.
-func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64, newSeatCount int) error {
-	if newSeatCount < 1 {
-		newSeatCount = 1
-	}
-	sub, err := s.repo.GetSubscription(ctx, ownerID)
+// ReconcileOwnerBilling re-derives one owner's seat ledger from current state:
+// the subscription row (created on the default plan if absent) and the seat
+// period for the current billing month, plus subscriptions.seat_count.
+//
+// This is the only path that writes billing state. It is driven by the
+// subscriptions.reconcile job and by plan changes, never by a GET. The
+// repository call is transactional and takes a row lock, so calling it
+// concurrently for the same owner converges on a single open period instead of
+// two that are both billed.
+func (s *Service) ReconcileOwnerBilling(ctx context.Context, ownerID int64) error {
+	// The default plan is only materialised when the owner has no row; passing
+	// it unconditionally lets the repository keep the existing plan on the
+	// create-if-absent insert.
+	plan, err := s.repo.GetPlanBySlug(ctx, defaultPlanSlug)
 	if err != nil {
 		return err
 	}
-
-	now := time.Now().UTC()
-	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-
-	activePeriod, err := s.repo.GetActivePeriod(ctx, sub.ID)
+	seatCount, err := s.currentActiveSeatCount(ctx, ownerID)
 	if err != nil {
 		return err
 	}
-	if activePeriod != nil &&
-		activePeriod.SeatCount == newSeatCount &&
-		activePeriod.PricePerSeatCents == sub.PricePerSeatCents {
-		if sub.SeatCount != newSeatCount {
-			if err := s.repo.UpdateSeatCount(ctx, ownerID, newSeatCount); err != nil {
-				return err
-			}
-			invalidateSubscriptionScope(ctx, ownerID)
-		}
-		return nil
-	}
-
-	if activePeriod != nil {
-		// Close the active period as of yesterday (the last full day at old count).
-		yesterday := now.AddDate(0, 0, -1)
-		if closeErr := s.repo.CloseActivePeriod(ctx, sub.ID, yesterday); closeErr != nil {
-			return closeErr
-		}
-	}
-
-	// Open a new period starting today with the new seat count.
-	if openErr := s.repo.OpenPeriod(ctx, sub.ID, ownerID, newSeatCount, sub.PricePerSeatCents, now, billingMonth); openErr != nil {
-		return openErr
-	}
-
-	// Update seat_count on the subscription.
-	if err := s.repo.UpdateSeatCount(ctx, ownerID, newSeatCount); err != nil {
+	if err := s.repo.ReconcileSeatBilling(ctx, ownerID, plan.ID, plan.TrialDays, seatCount, time.Now().UTC()); err != nil {
 		return err
 	}
 	invalidateSubscriptionScope(ctx, ownerID)
+	return nil
+}
+
+// ReconcileAllSubscriptions is the subscriptions.reconcile job: it walks every
+// owner that could owe for the current billing month and rolls their ledger
+// forward. Without it nothing advances a seat period past the month it was
+// opened in, so every later month bills zero.
+func (s *Service) ReconcileAllSubscriptions(ctx context.Context) error {
+	after := int64(0)
+	reconciled, failed := 0, 0
+	for {
+		owners, err := s.repo.ListOwnerIDsForReconciliation(ctx, after, reconcileBatchSize)
+		if err != nil {
+			return err
+		}
+		if len(owners) == 0 {
+			break
+		}
+		for _, ownerID := range owners {
+			after = ownerID
+			if err := s.ReconcileOwnerBilling(ctx, ownerID); err != nil {
+				failed++
+				logger.Ctx(ctx).Error("seat billing reconciliation failed",
+					logger.Any("owner_id", ownerID),
+					logger.Error(err),
+				)
+				continue
+			}
+			reconciled++
+		}
+		if len(owners) < reconcileBatchSize {
+			break
+		}
+	}
+	logger.Ctx(ctx).Info("seat billing reconciliation finished",
+		logger.Int("reconciled", reconciled),
+		logger.Int("failed", failed),
+	)
 	return nil
 }
 
@@ -251,33 +284,6 @@ func (s *Service) currentActiveSeatCount(ctx context.Context, ownerID int64) (in
 		return 1, nil
 	}
 	return seatCount, nil
-}
-
-func (s *Service) syncSubscriptionBillingState(ctx context.Context, sub *domain.Subscription) (*domain.Subscription, error) {
-	seatCount, err := s.currentActiveSeatCount(ctx, sub.OwnerID)
-	if err != nil {
-		return nil, err
-	}
-
-	activePeriod, err := s.repo.GetActivePeriod(ctx, sub.ID)
-	if err != nil {
-		return nil, err
-	}
-	needsPeriodSync := activePeriod == nil ||
-		activePeriod.SeatCount != seatCount ||
-		activePeriod.PricePerSeatCents != sub.PricePerSeatCents
-
-	if sub.SeatCount != seatCount || needsPeriodSync {
-		if err := s.RecordSeatChange(ctx, sub.OwnerID, seatCount); err != nil {
-			return nil, err
-		}
-		sub, err = s.repo.GetSubscription(ctx, sub.OwnerID)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return s.withSeatAllowance(sub), nil
 }
 
 func (s *Service) withSeatAllowance(sub *domain.Subscription) *domain.Subscription {
@@ -319,12 +325,15 @@ func computeLineItemWithAllowance(seatCount, pricePerSeatCents int, start time.T
 		effectiveEnd = *end
 	}
 
-	firstOfNextMonth := time.Date(billingMonth.Year(), billingMonth.Month()+1, 1, 0, 0, 0, 0, time.UTC)
-	daysInMonth := int(firstOfNextMonth.Sub(billingMonth).Hours() / 24)
+	daysInMonth := domain.DaysInUTCMonth(billingMonth)
 
-	daysUsed := int(effectiveEnd.Sub(start).Hours()/24) + 1
-	if daysUsed < 1 {
-		daysUsed = 1
+	// A period closed before it started never covered a day, so it bills
+	// nothing. The reconciler produces that shape when it collapses a
+	// duplicate open period, and charging it a day would double-bill the
+	// day the replacement period already covers.
+	daysUsed := 0
+	if !effectiveEnd.Before(start) {
+		daysUsed = int(effectiveEnd.Sub(start).Hours()/24) + 1
 	}
 	if daysUsed > daysInMonth {
 		daysUsed = daysInMonth

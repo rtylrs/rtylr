@@ -4,6 +4,7 @@ import { cdnImageUrl } from '@voxire/config';
 import type { Customization } from '../../shared/lib/types';
 
 import { cleanMojibake } from '../../shared/lib/sanitize';
+import { sanitizeHtml } from '../../shared/lib/html';
 
 interface HeaderProps {
   customization: Customization;
@@ -18,6 +19,11 @@ const Header: React.FC<HeaderProps> = ({ customization, compact = false }) => {
   const logoUrl = cdnImageUrl(customization.logoUrl);
   const brandName = cleanMojibake(customization.brandName);
   const tagline = cleanMojibake(customization.tagline);
+  // The header HTML is business-supplied and lands on anonymous public pages,
+  // so it is allowlist-sanitised before it reaches innerHTML. Businesses keep
+  // their formatting and links; script, handlers and unsafe URLs do not
+  // survive.
+  const headerHtml = sanitizeHtml(customization.headerHtml);
 
   return (
     <header
@@ -27,16 +33,11 @@ const Header: React.FC<HeaderProps> = ({ customization, compact = false }) => {
         background: 'var(--recruit-surface)',
       }}
     >
-      {customization.headerHtml && (
+      {headerHtml && (
         <div
           className="px-6 py-2 text-xs"
           style={{ color: 'var(--recruit-muted)' }}
-          // Businesses supply the header HTML themselves; rendering raw
-          // lets them link back to their main site and drop a light
-          // navbar without us shipping a full editor. Sanitisation is
-          // their responsibility since only authenticated admins can
-          // set this field.
-          dangerouslySetInnerHTML={{ __html: customization.headerHtml }}
+          dangerouslySetInnerHTML={{ __html: headerHtml }}
         />
       )}
       <div

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"testing"
 	"time"
@@ -10,6 +11,20 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+// createAcceptingAccount inserts the account an acceptance links to. An invite
+// is addressed to an hr_employees email and only that account may claim it, so
+// the account has to exist under the same address.
+func createAcceptingAccount(t *testing.T, db *sql.DB, userID int64, email string) {
+	t.Helper()
+	if _, err := db.ExecContext(context.Background(),
+		"INSERT INTO users (id, email, password_hash) VALUES (?, ?, 'not-a-real-hash')", userID, email); err != nil {
+		t.Fatalf("create accepting account %d: %v", userID, err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE id = ?", userID)
+	})
+}
 
 // Regression: AcceptInvite consumed the invite token before attempting to link
 // the employee. When the link failed - the user_id already belonged to another
@@ -22,13 +37,15 @@ func TestAcceptInvite_FailedLinkLeavesTokenUsable(t *testing.T) {
 	ctx := context.Background()
 
 	const (
-		alreadyLinkedUserID int64 = 981001
-		freshUserID         int64 = 981002
+		recipientUserID int64 = 981002
+		blockingUserID  int64 = 981003
 	)
 
-	linked, err := repo.CreateEmployee(ctx, testutil.OwnerID, domain.EmployeeRecord{
-		UserID: alreadyLinkedUserID, FirstName: "Already", LastName: "Linked",
-		Email: "already.linked.981001@example.invalid", Status: "invited",
+	// The recipient's account is already on another employee row, so the link
+	// must fail with ErrUserAlreadyLinked.
+	blocking, err := repo.CreateEmployee(ctx, testutil.OwnerID, domain.EmployeeRecord{
+		UserID: recipientUserID, FirstName: "Already", LastName: "Linked",
+		Email: "already.linked.981002@example.invalid", Status: "invited",
 	})
 	if err != nil {
 		t.Fatalf("CreateEmployee (linked): %v", err)
@@ -42,19 +59,20 @@ func TestAcceptInvite_FailedLinkLeavesTokenUsable(t *testing.T) {
 		t.Fatalf("CreateEmployee (target): %v", err)
 	}
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employee_invites WHERE employee_id IN (?, ?)", linked.ID, target.ID)
-		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employees WHERE id IN (?, ?)", linked.ID, target.ID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employee_invites WHERE employee_id IN (?, ?)", blocking.ID, target.ID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employees WHERE id IN (?, ?)", blocking.ID, target.ID)
 	})
+
+	createAcceptingAccount(t, db, recipientUserID, "invite.target.981002@example.invalid")
+	createAcceptingAccount(t, db, blockingUserID, "blocking.981003@example.invalid")
 
 	token, err := repo.CreateInviteToken(ctx, testutil.OwnerID, target.ID, time.Now().Add(time.Hour))
 	if err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
 
-	// alreadyLinkedUserID is on another hr_employees row, so the link must fail
-	// with ErrUserAlreadyLinked.
-	if err := svc.AcceptInvite(ctx, token, alreadyLinkedUserID); !errors.Is(err, domain.ErrUserAlreadyLinked) {
-		t.Fatalf("AcceptInvite with an already-linked user = %v, want ErrUserAlreadyLinked", err)
+	if err := svc.AcceptInviteForCaller(ctx, token, recipientUserID); !errors.Is(err, domain.ErrUserAlreadyLinked) {
+		t.Fatalf("AcceptInvite with an already-linked account = %v, want ErrUserAlreadyLinked", err)
 	}
 
 	// The failed accept must not burn the invite.
@@ -66,20 +84,23 @@ func TestAcceptInvite_FailedLinkLeavesTokenUsable(t *testing.T) {
 		t.Fatalf("invite employee id = %d, want %d", invite.EmployeeID, target.ID)
 	}
 
-	// The same token is still usable by a non-conflicting user.
-	if err := svc.AcceptInvite(ctx, token, freshUserID); err != nil {
+	// The same token is still usable once the conflicting link is gone.
+	if _, err := db.ExecContext(ctx, "UPDATE hr_employees SET user_id = NULL WHERE id = ?", blocking.ID); err != nil {
+		t.Fatalf("release the blocking account: %v", err)
+	}
+	if err := svc.AcceptInviteForCaller(ctx, token, recipientUserID); err != nil {
 		t.Fatalf("AcceptInvite retry with the preserved token: %v", err)
 	}
 	accepted, err := repo.GetEmployee(ctx, testutil.OwnerID, target.ID)
 	if err != nil {
 		t.Fatalf("GetEmployee after accept: %v", err)
 	}
-	if accepted.UserID != freshUserID || accepted.Status != "active" {
-		t.Fatalf("accepted employee user_id=%d status=%q, want user_id=%d status=active", accepted.UserID, accepted.Status, freshUserID)
+	if accepted.UserID != recipientUserID || accepted.Status != "active" {
+		t.Fatalf("accepted employee user_id=%d status=%q, want user_id=%d status=active", accepted.UserID, accepted.Status, recipientUserID)
 	}
 
 	// A successful accept still consumes the token exactly once.
-	if err := svc.AcceptInvite(ctx, token, freshUserID); !errors.Is(err, domain.ErrInviteTokenInvalid) {
+	if err := svc.AcceptInviteForCaller(ctx, token, recipientUserID); !errors.Is(err, domain.ErrInviteTokenInvalid) {
 		t.Fatalf("second accept error = %v, want ErrInviteTokenInvalid", err)
 	}
 }
@@ -106,6 +127,8 @@ func TestAcceptInvite_MissingEmployeeLeavesTokenUsable(t *testing.T) {
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employees WHERE id = ?", emp.ID)
 	})
 
+	createAcceptingAccount(t, db, userID, "vanished.employee.981011@example.invalid")
+
 	token, err := repo.CreateInviteToken(ctx, testutil.OwnerID, emp.ID, time.Now().Add(time.Hour))
 	if err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
@@ -115,7 +138,7 @@ func TestAcceptInvite_MissingEmployeeLeavesTokenUsable(t *testing.T) {
 		t.Fatalf("delete employee row: %v", err)
 	}
 
-	if err := svc.AcceptInvite(ctx, token, userID); !errors.Is(err, domain.ErrEmployeeNotFound) {
+	if err := svc.AcceptInviteForCaller(ctx, token, userID); !errors.Is(err, domain.ErrEmployeeNotFound) {
 		t.Fatalf("AcceptInvite for a deleted employee = %v, want ErrEmployeeNotFound", err)
 	}
 

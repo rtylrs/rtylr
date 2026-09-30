@@ -178,7 +178,7 @@ func (h *CreateInvoiceHandler) Serve(ctx context.Context, req *CreateInvoiceRequ
 
 	inv, err := h.FinanceService.CreateInvoice(ctx, businessID, input)
 	if err != nil {
-		return CreateInvoiceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create invoice")
+		return CreateInvoiceResponse{}, invoiceServiceError(err, "Failed to create invoice")
 	}
 	if inv.CreatedAt.IsZero() || inv.UpdatedAt.IsZero() {
 		inv, err = h.FinanceService.GetInvoice(ctx, businessID, inv.ID)

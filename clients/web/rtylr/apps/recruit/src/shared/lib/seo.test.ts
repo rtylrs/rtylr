@@ -126,6 +126,15 @@ describe('applySEO', () => {
 });
 
 describe('loadAnalytics', () => {
+  // Analytics is gated on consent, so these cases grant it up front. The
+  // gating itself is pinned in seo.analytics.test.ts.
+  beforeEach(() => {
+    document.cookie = 'rtylr-consent=granted; Path=/';
+  });
+  afterEach(() => {
+    document.cookie = 'rtylr-consent=; Path=/; Max-Age=0';
+  });
+
   it('injects GA4 scripts only when gaMeasurementId is set', () => {
     loadAnalytics(baseCustomization({ gaMeasurementId: 'G-ABC123' }));
     expect(document.getElementById('recruit-ga-G-ABC123')).not.toBeNull();

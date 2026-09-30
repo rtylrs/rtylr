@@ -183,13 +183,31 @@ func (s *Service) VerifyInviteToken(ctx context.Context, token string) (*domain.
 	return invite, nil
 }
 
-func (s *Service) AcceptInvite(ctx context.Context, token string, userID int64) error {
+// AcceptInviteForCaller links the accepting account to the invited employee
+// row. callerUserID is the caller's own id, read from the auth context by the
+// handler, and the invite names the email it was sent to - so a token that
+// leaked to the inviter or a log cannot bind an account of the holder's
+// choosing. The recipient is checked before the token is consumed, so a wrong
+// account cannot burn the invite for the person it was sent to.
+func (s *Service) AcceptInviteForCaller(ctx context.Context, token string, callerUserID int64) error {
 	invite, err := s.VerifyInviteToken(ctx, token)
 	if err != nil {
 		return err
 	}
 
-	if err := s.repo.AcceptInvite(ctx, invite.OwnerID, invite.EmployeeID, userID, token); err != nil {
+	invited, err := s.repo.GetEmployee(ctx, invite.OwnerID, invite.EmployeeID)
+	if err != nil {
+		return err
+	}
+	callerEmail, err := s.repo.GetAccountEmail(ctx, callerUserID)
+	if err != nil {
+		return err
+	}
+	if !domain.SameEmailAddress(invited.Email, callerEmail) {
+		return domain.ErrInviteRecipientMismatch
+	}
+
+	if err := s.repo.AcceptInvite(ctx, invite.OwnerID, invite.EmployeeID, callerUserID, token); err != nil {
 		return err
 	}
 	invalidateHRCoreScope(ctx, invite.OwnerID)

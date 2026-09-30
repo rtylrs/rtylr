@@ -1,6 +1,7 @@
 // Pure helpers for the POS sign-in roster. Kept separate from the component so
 // the normalization (which tolerates both snake_case and camelCase, since the
-// API layer camelCases responses) is unit-testable.
+// API layer camelCases responses) is unit-testable. The PIN length and format
+// policy lives in ./pinPolicy, which the staff screen shares.
 
 export interface RosterMember {
   userId: number;
@@ -46,9 +47,3 @@ export function mapRoster(data: unknown): RosterMember[] {
   });
 }
 
-export const PIN_LENGTH = 4;
-
-/** Validates a PIN is exactly PIN_LENGTH digits. */
-export function isCompletePin(pin: string): boolean {
-  return new RegExp(`^\\d{${PIN_LENGTH}}$`).test(pin);
-}

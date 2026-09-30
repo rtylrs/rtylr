@@ -3576,12 +3576,12 @@ type PosLocation struct {
 }
 
 type PosManagerPin struct {
-	ID         int64        `db:"id" json:"id"`
-	OwnerID    int64        `db:"owner_id" json:"owner_id"`
-	BusinessID int64        `db:"business_id" json:"business_id"`
-	StaffID    int64        `db:"staff_id" json:"staff_id"`
-	Pin        string       `db:"pin" json:"pin"`
-	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
+	ID         int64          `db:"id" json:"id"`
+	OwnerID    int64          `db:"owner_id" json:"owner_id"`
+	BusinessID int64          `db:"business_id" json:"business_id"`
+	StaffID    int64          `db:"staff_id" json:"staff_id"`
+	PinHash    sql.NullString `db:"pin_hash" json:"pin_hash"`
+	CreatedAt  sql.NullTime   `db:"created_at" json:"created_at"`
 }
 
 type PosMemberLocation struct {

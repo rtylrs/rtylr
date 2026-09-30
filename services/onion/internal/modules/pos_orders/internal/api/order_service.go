@@ -272,10 +272,7 @@ func (a *OrderAPI) VoidOrder(ctx context.Context, req *posordersv1.VoidOrderRequ
 	}
 
 	if err := a.Service.VoidOrder(ctx, businessID, req.GetOrderId(), req.GetReason()); err != nil {
-		if errors.Is(err, domain.ErrOrderNotFound) {
-			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")
-		}
-		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to void order")
+		return nil, voidOrderError(err)
 	}
 
 	return &posordersv1.VoidOrderResponse{Message: "Order voided successfully"}, nil

@@ -37,6 +37,14 @@ var (
 	ErrBusinessNameRequired = errors.New("business name is required")
 	ErrBusinessNameTaken    = errors.New("business name already taken")
 	ErrInvalidEmailCode     = errors.New("invalid or expired email verification code")
+	// ErrEmailCodeSuperseded is a code minted before codes were bound to an
+	// account. Retrying it can never succeed, so the caller is told to request
+	// a new one instead of being told the code was wrong.
+	ErrEmailCodeSuperseded = errors.New("email verification code is no longer valid; request a new one")
+	// ErrTooManyEmailCodeAttempts is the per-user attempt cap. Answering with
+	// the generic invalid-code error would leave a legitimate user with a
+	// correct code and no way forward.
+	ErrTooManyEmailCodeAttempts = errors.New("too many email verification attempts; request a new code")
 )
 
 type Service struct {

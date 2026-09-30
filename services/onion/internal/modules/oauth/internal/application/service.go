@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
@@ -302,7 +303,11 @@ func verifyPKCE(verifier, challenge, method string) bool {
 	}
 	h := sha256.Sum256([]byte(verifier))
 	computed := base64.RawURLEncoding.EncodeToString(h[:])
-	return computed == challenge
+	// The code challenge is the only secret in this flow: `==` leaks how many
+	// leading bytes matched, which turns code_verifier guessing into a byte at
+	// a time. hmac.Equal keeps the comparison constant-time, matching the
+	// internal token, CDN signature and webhook signature checks.
+	return hmac.Equal([]byte(computed), []byte(challenge))
 }
 
 func (s *Service) validateTokenClient(ctx context.Context, clientID string) error {

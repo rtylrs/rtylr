@@ -34,6 +34,13 @@ type listSuppliersToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	required, dispatched := supplierToolPermissions[name]
+	if !dispatched {
+		return nil, false, nil
+	}
+	if err := requireSupplierToolPermission(ctx, required); err != nil {
+		return nil, true, err
+	}
 	switch name {
 	case getSupplierToolName:
 		output, err := m.executeGetSupplierTool(ctx, input)
@@ -45,7 +52,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		output, err := m.executeCreateSupplierTool(ctx, input)
 		return output, true, err
 	default:
-		return nil, false, nil
+		return nil, true, fmt.Errorf("supplier tool %q has no executor", name)
 	}
 }
 

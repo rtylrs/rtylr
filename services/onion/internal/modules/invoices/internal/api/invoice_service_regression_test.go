@@ -166,6 +166,168 @@ func TestNormalizeInvoicePaymentMethod(t *testing.T) {
 	}
 }
 
+// An authenticated finance caller must not be able to turn an unpaid invoice
+// into revenue with a status write: "paid" adds total to revenue and removes
+// the invoice from receivables, so the books would net to zero with both sides
+// wrong. Only a recorded payment may set it.
+func TestUpdateInvoiceStatusRejectsPaidAndKeepsRevenueAndReceivables(t *testing.T) {
+	api, ctx, db := newInvoiceRegressionAPI(t, 995916)
+	const businessID int64 = 995916
+
+	invoiceID := createInvoiceRegressionFixture(t, api, db, ctx)
+	if _, err := db.ExecContext(ctx, `
+		UPDATE finance_invoices
+		SET status = 'sent', total = 1085.00, amount_paid = 0, amount_due = 1085.00
+		WHERE id = ?`, invoiceID); err != nil {
+		t.Fatalf("stage sent invoice: %v", err)
+	}
+
+	receivableBefore, revenueBefore := invoiceStatusAggregates(t, db, ctx, businessID)
+
+	for _, status := range []string{"paid", "partial"} {
+		_, err := api.UpdateInvoiceStatus(ctx, &financeinvoicesv1.UpdateInvoiceStatusRequest{
+			Id:   invoiceID,
+			Body: &financeinvoicesv1.UpdateInvoiceStatusBody{Status: status},
+		})
+		if got := financePermissionStatus(err); got != http.StatusBadRequest {
+			t.Fatalf("status %q = %d, want %d (err = %v)", status, got, http.StatusBadRequest, err)
+		}
+	}
+
+	_, err := api.UpdateInvoiceStatus(ctx, &financeinvoicesv1.UpdateInvoiceStatusRequest{
+		Id:   invoiceID,
+		Body: &financeinvoicesv1.UpdateInvoiceStatusBody{Status: "settled"},
+	})
+	if got := financePermissionStatus(err); got != http.StatusBadRequest {
+		t.Fatalf("unknown status = %d, want %d (err = %v)", got, http.StatusBadRequest, err)
+	}
+
+	var (
+		storedStatus string
+		amountPaid   float64
+		paidDate     sql.NullTime
+	)
+	if err := db.QueryRowContext(ctx,
+		"SELECT status, amount_paid, paid_date FROM finance_invoices WHERE id = ?", invoiceID,
+	).Scan(&storedStatus, &amountPaid, &paidDate); err != nil {
+		t.Fatalf("read invoice after rejected writes: %v", err)
+	}
+	if storedStatus != "sent" {
+		t.Errorf("stored status = %q after rejected writes, want sent", storedStatus)
+	}
+	if amountPaid != 0 {
+		t.Errorf("amount_paid = %v, want 0", amountPaid)
+	}
+	if paidDate.Valid {
+		t.Errorf("paid_date = %v, want NULL", paidDate.Time)
+	}
+
+	receivableAfter, revenueAfter := invoiceStatusAggregates(t, db, ctx, businessID)
+	if receivableAfter != receivableBefore || revenueAfter != revenueBefore {
+		t.Errorf("receivables/revenue = %v/%v after rejected writes, want %v/%v",
+			receivableAfter, revenueAfter, receivableBefore, revenueBefore)
+	}
+}
+
+// invoiceStatusAggregates reads the two figures a status write corrupts: the
+// receivable it would leave and the revenue it would invent. Same predicates as
+// SumTotalReceivable and SumPaidInvoices.
+func invoiceStatusAggregates(t *testing.T, db *sql.DB, ctx context.Context, businessID int64) (receivable, revenue float64) {
+	t.Helper()
+	if err := db.QueryRowContext(ctx, `
+		SELECT
+			COALESCE((SELECT SUM(amount_due) FROM finance_invoices
+				WHERE business_id = ? AND status IN ('sent','viewed','partial','overdue')), 0),
+			COALESCE((SELECT SUM(total) FROM finance_invoices
+				WHERE business_id = ? AND status = 'paid'), 0)`, businessID, businessID,
+	).Scan(&receivable, &revenue); err != nil {
+		t.Fatalf("read invoice aggregates: %v", err)
+	}
+	return receivable, revenue
+}
+
+// "overdue" is a delivery/ageing label an invoice can reach without money, so
+// the status endpoint must still accept it.
+func TestUpdateInvoiceStatusAllowsOverdueFromSent(t *testing.T) {
+	api, ctx, db := newInvoiceRegressionAPI(t, 995917)
+
+	invoiceID := createInvoiceRegressionFixture(t, api, db, ctx)
+	if _, err := db.ExecContext(ctx, "UPDATE finance_invoices SET status = 'sent' WHERE id = ?", invoiceID); err != nil {
+		t.Fatalf("stage sent invoice: %v", err)
+	}
+
+	if _, err := api.UpdateInvoiceStatus(ctx, &financeinvoicesv1.UpdateInvoiceStatusRequest{
+		Id:   invoiceID,
+		Body: &financeinvoicesv1.UpdateInvoiceStatusBody{Status: "overdue"},
+	}); err != nil {
+		t.Fatalf("sent -> overdue: %v", err)
+	}
+
+	var status string
+	if err := db.QueryRowContext(ctx, "SELECT status FROM finance_invoices WHERE id = ?", invoiceID).Scan(&status); err != nil {
+		t.Fatalf("read invoice status: %v", err)
+	}
+	if status != "overdue" {
+		t.Errorf("stored status = %q, want overdue", status)
+	}
+}
+
+// Recording the money is what flips the status, and it stays correct after the
+// status endpoint starts refusing "paid" and "partial".
+func TestRecordPaymentStillSetsPaidAndPartial(t *testing.T) {
+	api, ctx, db := newInvoiceRegressionAPI(t, 995918)
+	payments := NewInvoicePaymentAPI(api.Service)
+
+	invoiceID := createInvoiceRegressionFixture(t, api, db, ctx)
+	if _, err := db.ExecContext(ctx, "UPDATE finance_invoices SET total = 100, amount_due = 100 WHERE id = ?", invoiceID); err != nil {
+		t.Fatalf("stage invoice total: %v", err)
+	}
+
+	if _, err := payments.RecordPayment(ctx, &financeinvoicespaymentsv1.RecordPaymentRequest{
+		InvoiceId:   invoiceID,
+		Amount:      25,
+		Currency:    "USD",
+		PaymentDate: "2026-06-20",
+		Method:      "card",
+		Reference:   "partial-payment-995918",
+	}); err != nil {
+		t.Fatalf("RecordPayment(partial): %v", err)
+	}
+	assertInvoiceMoney(t, db, invoiceID, "partial", 25, 75)
+
+	if _, err := payments.RecordPayment(ctx, &financeinvoicespaymentsv1.RecordPaymentRequest{
+		InvoiceId:   invoiceID,
+		Amount:      75,
+		Currency:    "USD",
+		PaymentDate: "2026-06-21",
+		Method:      "card",
+		Reference:   "final-payment-995918",
+	}); err != nil {
+		t.Fatalf("RecordPayment(final): %v", err)
+	}
+	assertInvoiceMoney(t, db, invoiceID, "paid", 100, 0)
+}
+
+func assertInvoiceMoney(t *testing.T, db *sql.DB, invoiceID int64, wantStatus string, wantPaid, wantDue float64) {
+	t.Helper()
+	var (
+		status     string
+		amountPaid float64
+		amountDue  float64
+	)
+	if err := db.QueryRowContext(context.Background(),
+		"SELECT status, amount_paid, amount_due FROM finance_invoices WHERE id = ?", invoiceID,
+	).Scan(&status, &amountPaid, &amountDue); err != nil {
+		t.Fatalf("read invoice money: %v", err)
+	}
+	if status != wantStatus {
+		t.Errorf("status = %q, want %q", status, wantStatus)
+	}
+	if amountPaid != wantPaid || amountDue != wantDue {
+		t.Errorf("amount_paid/amount_due = %v/%v, want %v/%v", amountPaid, amountDue, wantPaid, wantDue)
+	}
+}
+
 func newInvoiceRegressionAPI(t *testing.T, businessID int64) (*InvoicesAPI, context.Context, *sql.DB) {
 	t.Helper()
 	db := testutil.OpenDB(t)

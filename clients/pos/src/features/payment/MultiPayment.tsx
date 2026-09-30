@@ -1,5 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -41,6 +41,9 @@ const MultiPaymentScreen: React.FC = () => {
   const [method, setMethod] = useState<PaymentMethod>('cash');
   const [amount, setAmount] = useState('');
   const [busy, setBusy] = useState(false);
+  // Same reason as the checkout screen: `busy` disables the button on the next
+  // render only, so a second tap in the same tick would charge twice.
+  const finalizing = useRef(false);
   const tipsEnabled = useSettingsStore((s) => s.features.tips);
 
   const loadOrder = useCallback(async (canApply: () => boolean = () => true): Promise<void> => {
@@ -124,13 +127,18 @@ const MultiPaymentScreen: React.FC = () => {
       toast.error('Collected payments exceed the amount due');
       return;
     }
+    if (finalizing.current) return;
+    finalizing.current = true;
     setBusy(true);
     try {
       await finalizeMultiPayment({
         orderId,
         payments,
-        chargeOrder: async (payload) => {
-          await orderPaymentClient.processPayment(payload);
+        chargeOrder: async ({ idempotencyKey, ...payload }) => {
+          // Required on this route: the server answers 428 without it.
+          await orderPaymentClient.processPayment(payload, {
+            headers: { 'Idempotency-Key': idempotencyKey },
+          });
         },
       });
       toast.success('Payment complete');
@@ -139,6 +147,7 @@ const MultiPaymentScreen: React.FC = () => {
       toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
     } finally {
       setBusy(false);
+      finalizing.current = false;
     }
   };
 

@@ -56,24 +56,33 @@ func tenantQueries(db *sql.DB) *tenantsqlc.Queries {
 // business. Prefer ResolveBusinessID for tenant data scoping — owner id is only
 // needed for billing aggregation and legacy owner_id columns.
 //
-// Returns fallbackUserID when businessID is unset, the DB is unavailable, or the
-// business row is missing. Returns an error only when the lookup fails for
-// reasons other than a missing row.
+// Fails closed on every path. A caller that cannot get a verified owner must
+// receive a non-nil error, never the fallback user and never a zero id: the
+// fallback is an unrelated user's id, and 0 is the shared "business_id = 0"
+// bucket. Both would let a failed lookup write or read another tenant's data.
+//
+// Returns ErrNoBusinessScope when no business is in scope, and
+// ErrOwnerLookupFailed when the pool is unavailable, the business row is
+// missing, or the row carries no usable owner. The success path is unchanged:
+// a verified, active business with a positive owner returns that owner.
 func ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error) {
+	return resolveOwnerID(ctx, dbclient.Pool(), businessID, fallbackUserID)
+}
+
+func resolveOwnerID(ctx context.Context, db *sql.DB, businessID, _ int64) (int64, error) {
 	if businessID <= 0 {
-		return fallbackUserID, nil
+		return 0, ErrNoBusinessScope
 	}
 
-	db := dbclient.Pool()
 	if db == nil {
-		return fallbackUserID, nil
+		logger.Ctx(ctx).Error("cannot resolve owner: database pool unavailable",
+			logger.Any("business_id", businessID),
+		)
+		return 0, ErrOwnerLookupFailed
 	}
 
 	ownerID, err := tenantQueries(db).GetActiveBusinessOwnerID(ctx, businessID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return fallbackUserID, nil
-		}
 		logger.Ctx(ctx).Error("failed to resolve owner for business",
 			logger.Any("business_id", businessID),
 			logger.Error(err),
@@ -81,7 +90,11 @@ func ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int6
 		return 0, ErrOwnerLookupFailed
 	}
 	if ownerID <= 0 {
-		return fallbackUserID, nil
+		logger.Ctx(ctx).Error("business resolved to a non-positive owner",
+			logger.Any("business_id", businessID),
+			logger.Any("owner_id", ownerID),
+		)
+		return 0, ErrOwnerLookupFailed
 	}
 	return ownerID, nil
 }

@@ -38,7 +38,9 @@ func (m *Module) GetAnonymousRoutes() []string { return []string{} }
 func (m *Module) ReserveQuota(ctx context.Context, businessID, userID int64) (allowed bool, planSlug string, allowanceTokens, usedTokens, remainingTokens, reservedTokens int64) {
 	ok, st, err := m.service.Reserve(ctx, businessID, userID)
 	if err != nil {
-		return ok, "", 0, 0, 0, 0
+		// Deny rather than trust ok: a tenant scope that could not be resolved
+		// must never read as an available allowance.
+		return false, "", 0, 0, 0, 0
 	}
 	return ok, st.PlanSlug, st.AllowanceTokens, st.UsedTokens, st.RemainingTokens, application.ReservationEstimateTokens
 }

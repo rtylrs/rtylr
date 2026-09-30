@@ -7,6 +7,8 @@ interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   danger?: boolean;
+  /** Set while the confirmed action's request is in flight. */
+  pending?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   children?: React.ReactNode;
@@ -19,6 +21,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   danger,
+  pending = false,
   onConfirm,
   onCancel,
   children,
@@ -38,18 +41,21 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         {children}
         <div className="grid grid-cols-2 gap-2">
           <button
-            className="h-12 rounded-lg bg-white/10 text-pos-text font-semibold hover:bg-white/20 transition"
+            className="h-12 rounded-lg bg-white/10 text-pos-text font-semibold hover:bg-white/20 transition disabled:opacity-50"
             onClick={onCancel}
+            disabled={pending}
           >
             {cancelText}
           </button>
           <button
-            className={`h-12 rounded-lg font-semibold transition ${
+            className={`h-12 rounded-lg font-semibold transition disabled:opacity-50 ${
               danger
                 ? 'bg-destructive text-white hover:opacity-90'
                 : 'bg-pos-text text-pos-bg hover:opacity-90'
             }`}
             onClick={onConfirm}
+            disabled={pending}
+            aria-busy={pending || undefined}
           >
             {confirmText}
           </button>

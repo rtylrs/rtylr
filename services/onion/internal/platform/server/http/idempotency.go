@@ -2,12 +2,19 @@ package http
 
 import (
 	"bytes"
+	"compress/gzip"
+	"compress/zlib"
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -19,18 +26,53 @@ import (
 )
 
 const (
-	idempotencyHeader             = "Idempotency-Key"
-	idempotencyTTL                = 30 * time.Minute
+	idempotencyHeader = "Idempotency-Key"
+
+	// idempotencyTTL is the retention window for a COMPLETED response. It must
+	// comfortably exceed a client's retry window; 30 minutes is the contract
+	// already documented on the middleware and is unchanged.
+	idempotencyTTL = 30 * time.Minute
+
+	// idempotencyClaimTTL is the lease on an IN-FLIGHT claim and is deliberately
+	// much shorter than idempotencyTTL. A holder that crashes mid-handler never
+	// runs its release, so the lease is what stops a crashed claim from wedging
+	// the key for the full retention window.
+	//
+	// Takeover policy: once the lease expires the next requester's SET NX
+	// succeeds and it executes the handler. That is at-least-once, chosen over
+	// wedging, and it is safe here because the lease is strictly longer than
+	// RequestTimeout — the first attempt is cancelled by the request deadline
+	// before any takeover can occur, so an expired lease always means "crashed",
+	// never "still running". Keep this invariant if either value changes.
+	idempotencyClaimTTL = 2 * RequestTimeout
+
+	// idempotencyRetryAfterSeconds is the Retry-After advertised to a client that
+	// arrives while a claim is held. It matches the claim lease scale so a
+	// client that polls lands after a crashed holder's lease expires.
+	idempotencyRetryAfterSeconds = 2
+
 	idempotencyMaxLen             = 128
 	idempotencyMaxStoredBodyBytes = 256 << 10
+	// Tied to the upstream body limit: a body that is too large to buffer here
+	// is one RequestBodyLimitMiddleware has already rejected.
+	idempotencyMaxFingerprintBody = DefaultMaxRequestBodyBytes
 	idempotencyCacheWriteTimeout  = 2 * time.Second
 )
 
-// idempotencyRecord is what we store in the cache for a completed request.
+// idempotencyRecord is what we store in the cache. Status 0 means "claimed, no
+// result yet" — a distinct state from a completed response so a reader never
+// mistakes an in-flight claim for a replayable answer.
 type idempotencyRecord struct {
 	Status  int         `json:"status"`
 	Headers http.Header `json:"headers"`
 	Body    []byte      `json:"body"`
+	// Claim identifies the attempt that owns an in-flight claim. Release is
+	// conditional on still seeing our own token, so a holder that comes back
+	// after its lease was taken over cannot delete the successor's claim.
+	Claim string `json:"claim,omitempty"`
+	// Fingerprint binds the record to one specific request. A record without
+	// one (written before this field existed) replays unconditionally.
+	Fingerprint string `json:"fingerprint,omitempty"`
 }
 
 type idempotencyRedisStore interface {
@@ -43,18 +85,21 @@ type idempotencyRedisStore interface {
 // IdempotencyMiddleware deduplicates mutating requests that carry an
 // Idempotency-Key header. On the first call the handler runs normally and
 // the response is stored for 30 minutes; any subsequent request with the same
-// key from the same principal within that window gets the stored response
-// without touching the DB.
+// key, from the same principal in the same tenant, carrying the same
+// fingerprint, gets the stored response without touching the DB.
 //
 // When Redis is enabled the store is Redis (shared across all replicas), with a
-// SetNx reservation so exactly one request executes even under a horizontally
-// scaled deployment — a retry that lands on a different replica replays the
-// stored response instead of re-executing the handler. Without Redis it falls
-// back to the in-process cache (correct for a single replica).
+// SET NX claim so exactly one request executes even under a horizontally scaled
+// deployment. Without Redis it falls back to the in-process cache (correct for
+// a single replica).
+//
+// In-flight duplicates get 409 with Retry-After — never a second execution and
+// never a silent success. A key reused with a *different* request also gets 409
+// rather than the first response.
 //
 // Scope: POST, PUT, PATCH only. GET/DELETE are idempotent by nature.
-// Key scoping: authenticated user ID when available, otherwise remote IP.
-// Header absent: passthrough — callers that don't need dedup pay nothing.
+// Key scoping: tenant + authenticated user ID when available, otherwise remote
+// IP. Header absent: passthrough — callers that don't need dedup pay nothing.
 func IdempotencyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost && r.Method != http.MethodPut && r.Method != http.MethodPatch {
@@ -125,66 +170,78 @@ func persistIdempotencyRecord(ctx context.Context, store idempotencyRedisStore, 
 	return true
 }
 
-// serveIdempotentRedis gives correct cross-replica idempotency. SetNx atomically
-// reserves the key so exactly one request runs; concurrent or retried duplicates
-// (on any replica) either replay the completed response or get 409 while it is
-// still in flight. The reservation is released if the handler fails or panics so
-// the client can retry with a fresh attempt.
+// serveIdempotentRedis gives correct cross-replica idempotency. SET NX
+// atomically claims the key so exactly one request runs; concurrent or retried
+// duplicates (on any replica) either replay the completed response or get 409
+// with Retry-After while the claim is still in flight. Only the attempt that
+// owns the claim releases it, so a handler that fails, panics, or returns after
+// its lease was taken over cannot delete the successor's claim.
 func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string) {
 	serveIdempotentRedisWithStore(w, r, next, cacheKey, cacher.GetRedisCache())
 }
 
 func serveIdempotentRedisWithStore(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string, rc idempotencyRedisStore) {
-	pending := []byte(`{"status":0}`)
+	fingerprint := idempotencyRequestFingerprint(r)
+	claimPayload, claim, err := newIdempotencyClaim(fingerprint)
+	if err != nil {
+		// Without a claim token the release path cannot prove ownership, and
+		// running an unclaimed mutation risks a double charge.
+		logger.Ctx(r.Context()).Error("refusing to execute an unclaimed idempotent mutation",
+			logger.Error(err),
+		)
+		writeIdempotencyUnavailable(w, r)
 
-	reserved, cached := reserveIdempotencyKey(r.Context(), rc, cacheKey, pending)
+		return
+	}
+
+	reserved, cached := reserveIdempotencyKey(r.Context(), rc, cacheKey, claimPayload)
 	if !reserved {
 		if cached != nil {
 			var rec idempotencyRecord
 			if err := json.Unmarshal(cached, &rec); err == nil {
 				if rec.Status >= 200 {
+					if idempotencyFingerprintConflict(rec.Fingerprint, fingerprint) {
+						writeIdempotencyKeyReuse(w, r)
+
+						return
+					}
 					writeIdempotentReplay(w, rec)
+
 					return
 				}
 				// Owned by another in-flight request (possibly on another
 				// replica) — tell the client to retry shortly.
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusConflict)
-				if _, writeErr := w.Write([]byte(`{"error":"a request with this Idempotency-Key is still being processed"}`)); writeErr != nil {
-					logger.Ctx(r.Context()).Warn("failed to write idempotency conflict response", logger.Error(writeErr))
-				}
+				writeIdempotencyInFlight(w, r)
+
 				return
 			}
 		}
 		// Do not execute a mutating handler without a reservation. A failed
 		// reservation is either another in-flight request or a brief cache race;
 		// both are safe to retry, while running now could duplicate the mutation.
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusConflict)
-		if _, writeErr := w.Write([]byte(`{"error":"a request with this Idempotency-Key is still being processed"}`)); writeErr != nil {
-			logger.Ctx(r.Context()).Warn("failed to write idempotency conflict response", logger.Error(writeErr))
-		}
+		writeIdempotencyInFlight(w, r)
+
 		return
 	}
 
 	stored := false
-	if reserved {
-		// Release the reservation unless we store a success, so an error or a
-		// panic doesn't leave the key wedged for the full TTL.
-		defer func() {
-			if !stored {
-				cacheCtx, cancel := idempotencyCacheContext(r.Context())
-				defer cancel()
-				rc.Delete(cacheCtx, []string{cacheKey})
-			}
-		}()
-	}
+	// Release the claim unless we store a success, so an error or a panic
+	// doesn't leave the key wedged. The token check is what keeps a holder that
+	// returns after its lease expired from evicting the takeover attempt.
+	defer func() {
+		if stored {
+			return
+		}
+		cacheCtx, cancel := idempotencyCacheContext(r.Context())
+		defer cancel()
+		releaseIdempotencyClaim(cacheCtx, rc, cacheKey, claim)
+	}()
 
 	rec := &responseRecorder{ResponseWriter: w, status: http.StatusOK}
 	next.ServeHTTP(rec, r)
 
 	if rec.status >= 200 && rec.status < 300 {
-		storeIdempotencyRecord(r.Context(), cacheKey, rec, func(cacheCtx context.Context, key string, payload []byte) {
+		storeIdempotencyRecord(r.Context(), cacheKey, rec, fingerprint, func(cacheCtx context.Context, key string, payload []byte) {
 			// Put cannot report failure, so confirm the write instead of
 			// assuming it landed: an unconfirmed write leaves the pending
 			// sentinel in place and every retry would be answered with 409
@@ -194,9 +251,40 @@ func serveIdempotentRedisWithStore(w http.ResponseWriter, r *http.Request, next 
 	}
 }
 
+// newIdempotencyClaim builds the in-flight sentinel. It marshals with a zero
+// Status, which is how a later reader tells a live claim from a completed
+// response.
+func newIdempotencyClaim(fingerprint string) ([]byte, string, error) {
+	var token [16]byte
+	if _, err := rand.Read(token[:]); err != nil {
+		return nil, "", err
+	}
+	claim := hex.EncodeToString(token[:])
+
+	payload, err := json.Marshal(idempotencyRecord{Claim: claim, Fingerprint: fingerprint})
+	if err != nil {
+		return nil, "", err
+	}
+
+	return payload, claim, nil
+}
+
+// releaseIdempotencyClaim drops an in-flight claim this attempt still owns. A
+// successor can only win SET NX once the key is gone, so if the stored value is
+// still our own claim no successor has started and the delete is safe.
+func releaseIdempotencyClaim(ctx context.Context, store idempotencyRedisStore, key, claim string) {
+	if current := store.Get(ctx, key); current != nil {
+		var rec idempotencyRecord
+		if err := json.Unmarshal(current, &rec); err != nil || rec.Claim != claim {
+			return
+		}
+	}
+	store.Delete(ctx, []string{key})
+}
+
 func reserveIdempotencyKey(ctx context.Context, store idempotencyRedisStore, key string, pending []byte) (bool, []byte) {
 	for attempt := 0; attempt < 2; attempt++ {
-		if store.SetNx(ctx, key, pending, idempotencyTTL) {
+		if store.SetNx(ctx, key, pending, idempotencyClaimTTL) {
 			return true, nil
 		}
 		if cached := store.Get(ctx, key); cached != nil {
@@ -208,17 +296,26 @@ func reserveIdempotencyKey(ctx context.Context, store idempotencyRedisStore, key
 
 // serveIdempotentLocal is the single-replica fallback used when Redis is off:
 // dedup against the in-process cache. The keyed reservation closes the
-// get-then-run race so concurrent retries cannot execute the handler twice.
+// get-then-run race so concurrent retries cannot execute the handler twice. A
+// duplicate waits for the holder and then replays its stored response, so
+// there is no in-flight window to answer 409 with.
 func serveIdempotentLocal(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string) {
 	reservation := acquireLocalIdempotencyReservation(cacheKey)
 	defer reservation.release()
 
+	fingerprint := idempotencyRequestFingerprint(r)
 	lc := cacher.GetLocalCache(r.Context())
 
 	if cached := lc.Get(r.Context(), cacheKey); cached != nil {
 		var rec idempotencyRecord
 		if err := json.Unmarshal(cached, &rec); err == nil {
+			if idempotencyFingerprintConflict(rec.Fingerprint, fingerprint) {
+				writeIdempotencyKeyReuse(w, r)
+
+				return
+			}
 			writeIdempotentReplay(w, rec)
+
 			return
 		}
 		logger.Ctx(r.Context()).Warn("failed to unmarshal idempotency record, reprocessing",
@@ -232,7 +329,7 @@ func serveIdempotentLocal(w http.ResponseWriter, r *http.Request, next http.Hand
 	// Only cache successful responses — errors may be transient and the
 	// client should be able to retry and get a fresh attempt.
 	if rec.status >= 200 && rec.status < 300 {
-		storeIdempotencyRecord(r.Context(), cacheKey, rec, func(cacheCtx context.Context, key string, payload []byte) {
+		storeIdempotencyRecord(r.Context(), cacheKey, rec, fingerprint, func(cacheCtx context.Context, key string, payload []byte) {
 			lc.Put(cacheCtx, key, payload, idempotencyTTL)
 		})
 	}
@@ -298,11 +395,26 @@ func writeIdempotentReplay(w http.ResponseWriter, rec idempotencyRecord) {
 }
 
 func buildIdempotencyKey(r *http.Request, key string) string {
-	principal := anonymousIdempotencyPrincipal(r.RemoteAddr)
+	return fmt.Sprintf("idem:%s:%s", idempotencyPrincipal(r), key)
+}
+
+// idempotencyPrincipal scopes a key to one principal in one tenant. The business
+// ID is part of the scope because a user can belong to several businesses
+// (user_business_access); keying on the user alone would let one tenant's client
+// key read another tenant's stored response.
+func idempotencyPrincipal(r *http.Request) string {
 	if authUser, ok := authPkg.GetAuthUser(r.Context()); ok {
-		principal = fmt.Sprintf("u%d", authUser.UserID)
+		return fmt.Sprintf("b%d:u%d", authUser.BusinessID, authUser.UserID)
 	}
-	return fmt.Sprintf("idem:%s:%s", principal, key)
+	return "anon:" + anonymousIdempotencyPrincipal(r.RemoteAddr)
+}
+
+// idempotencyFingerprintConflict reports that a stored record belongs to a
+// different request. An empty fingerprint on either side means it could not be
+// computed (legacy record, or a body that could not be buffered); those replay
+// as before rather than rejecting a request that cannot be proven to be a reuse.
+func idempotencyFingerprintConflict(stored, incoming string) bool {
+	return stored != "" && incoming != "" && stored != incoming
 }
 
 func anonymousIdempotencyPrincipal(remoteAddr string) string {
@@ -331,12 +443,140 @@ func requiresIdempotencyKey(r *http.Request) bool {
 		(strings.HasPrefix(path, "/pos/orders/") && strings.HasSuffix(path, "/pay"))
 }
 
-func storeIdempotencyRecord(ctx context.Context, cacheKey string, rec *responseRecorder, persist func(context.Context, string, []byte)) {
+// idempotencyRequestFingerprint binds a key to one specific request, so a key
+// reused with a different payload is rejected instead of answered with the first
+// request's response.
+//
+// The body is fingerprinted after content-decoding, so a client that gzips and
+// one that does not produce the same fingerprint for the same logical request,
+// while a genuine body change still produces a different one. Method, path and
+// query are included; the tenant and principal are already part of the store
+// key. r.Body is left readable by the handler.
+func idempotencyRequestFingerprint(r *http.Request) string {
+	digest := sha256.New()
+	writeFingerprintPart(digest, r.Method)
+	writeFingerprintPart(digest, r.URL.Path)
+	writeFingerprintPart(digest, r.URL.RawQuery)
+
+	raw, ok := readIdempotencyRequestBody(r)
+	if !ok {
+		// The body could not be buffered, so no fingerprint can be trusted.
+		// Returning "" disables the reuse check rather than comparing a value
+		// that could collide.
+		return ""
+	}
+
+	decoded, err := decodeIdempotencyRequestBody(r.Header.Get("Content-Encoding"), raw)
+	if err != nil {
+		decoded = raw
+	}
+	if _, err := digest.Write(decoded); err != nil {
+		return ""
+	}
+
+	return hex.EncodeToString(digest.Sum(nil))
+}
+
+func writeFingerprintPart(digest io.Writer, part string) {
+	// Length-prefixed so two different (method, path, query) triples cannot
+	// produce the same concatenated input.
+	_, _ = fmt.Fprintf(digest, "%d:%s\x00", len(part), part)
+}
+
+// readIdempotencyRequestBody buffers the body and puts it back, so the handler
+// still reads the original wire bytes. Bounded by
+// idempotencyMaxFingerprintBody; RequestBodyLimitMiddleware runs ahead of this
+// middleware and caps the body lower.
+func readIdempotencyRequestBody(r *http.Request) ([]byte, bool) {
+	if r.Body == nil {
+		return nil, true
+	}
+
+	raw, err := io.ReadAll(io.LimitReader(r.Body, idempotencyMaxFingerprintBody+1))
+	_ = r.Body.Close()
+	if err != nil {
+		return nil, false
+	}
+
+	if len(raw) > idempotencyMaxFingerprintBody {
+		// Too large to fingerprint. Drain the remainder so the handler is not
+		// handed a silently truncated body, then report it as unfingerprintable.
+		if rest, restErr := io.ReadAll(io.LimitReader(r.Body, idempotencyMaxFingerprintBody+1)); restErr == nil {
+			raw = append(raw, rest...)
+		}
+		r.Body = io.NopCloser(bytes.NewReader(raw))
+
+		return nil, false
+	}
+
+	r.Body = io.NopCloser(bytes.NewReader(raw))
+
+	return raw, true
+}
+
+func decodeIdempotencyRequestBody(contentEncoding string, raw []byte) ([]byte, error) {
+	if len(raw) == 0 {
+		return raw, nil
+	}
+
+	var decoder io.ReadCloser
+	var err error
+	switch strings.ToLower(strings.TrimSpace(contentEncoding)) {
+	case "gzip", "x-gzip":
+		decoder, err = gzip.NewReader(bytes.NewReader(raw))
+	case "deflate":
+		decoder, err = zlib.NewReader(bytes.NewReader(raw))
+	default:
+		// No stdlib decoder (br, zstd) or an identity request. Fingerprint the
+		// raw bytes, which is still content-sensitive and stable per client.
+		return nil, errUnsupportedContentEncoding
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = decoder.Close() }()
+
+	return io.ReadAll(io.LimitReader(decoder, idempotencyMaxFingerprintBody))
+}
+
+var errUnsupportedContentEncoding = errors.New("unsupported content encoding")
+
+func writeIdempotencyInFlight(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Retry-After", strconv.Itoa(idempotencyRetryAfterSeconds))
+	w.WriteHeader(http.StatusConflict)
+	if _, writeErr := w.Write([]byte(`{"error":"a request with this Idempotency-Key is still being processed"}`)); writeErr != nil {
+		logger.Ctx(r.Context()).Warn("failed to write idempotency conflict response", logger.Error(writeErr))
+	}
+}
+
+// writeIdempotencyKeyReuse answers a client that reused a key for a different
+// request. Replaying the stored response would report a success for a mutation
+// the client never asked for.
+func writeIdempotencyKeyReuse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusConflict)
+	if _, writeErr := w.Write([]byte(`{"error":"this Idempotency-Key was already used with a different request"}`)); writeErr != nil {
+		logger.Ctx(r.Context()).Warn("failed to write idempotency key reuse response", logger.Error(writeErr))
+	}
+}
+
+func writeIdempotencyUnavailable(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Retry-After", strconv.Itoa(idempotencyRetryAfterSeconds))
+	w.WriteHeader(http.StatusServiceUnavailable)
+	if _, writeErr := w.Write([]byte(`{"error":"idempotency is temporarily unavailable, retry shortly"}`)); writeErr != nil {
+		logger.Ctx(r.Context()).Warn("failed to write idempotency unavailable response", logger.Error(writeErr))
+	}
+}
+
+func storeIdempotencyRecord(ctx context.Context, cacheKey string, rec *responseRecorder, fingerprint string, persist func(context.Context, string, []byte)) {
 	body := rec.buf.Bytes()
 	entry := idempotencyRecord{
-		Status:  rec.status,
-		Headers: idempotencyHeadersForReplay(rec.Header()),
-		Body:    body,
+		Status:      rec.status,
+		Headers:     idempotencyHeadersForReplay(rec.Header()),
+		Body:        body,
+		Fingerprint: fingerprint,
 	}
 	if len(body) > idempotencyMaxStoredBodyBytes {
 		logger.Ctx(ctx).Warn("storing idempotency tombstone for oversized response body",
@@ -357,12 +597,18 @@ func storeIdempotencyRecord(ctx context.Context, cacheKey string, rec *responseR
 	persist(cacheCtx, cacheKey, payload)
 }
 
+// idempotencyHeadersForReplay keeps only headers the stored body is
+// self-describing by. Content-Encoding is deliberately dropped:
+// responseCompressMiddleware wraps this middleware, so it has already set
+// Content-Encoding: gzip on the shared header map by the time the recorder runs,
+// while the bytes the recorder buffers are the UNCOMPRESSED ones. Persisting
+// that header would replay a plain body labelled gzip — and the outer
+// compressor skips re-encoding precisely because the header is already set.
+// Encoding is re-derived from the replaying client's own Accept-Encoding.
 func idempotencyHeadersForReplay(h http.Header) http.Header {
 	out := make(http.Header)
-	for _, key := range []string{"Content-Type", "Content-Encoding"} {
-		if values := h.Values(key); len(values) > 0 {
-			out[key] = values
-		}
+	if values := h.Values("Content-Type"); len(values) > 0 {
+		out["Content-Type"] = values
 	}
 	return out
 }

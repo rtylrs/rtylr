@@ -11,11 +11,16 @@ import (
 // permission that protects it. App access remains a separate check in the
 // authentication middleware. A route is left unmapped when the matrix does
 // not define a feature permission for that surface, rather than guessing a
-// broader permission.
+// broader permission. The AI namespaces are the one exception: they claim
+// every sub-path so an unmapped one cannot skip the check, see
+// aiFeaturePermission.
 func featurePermissionForRequest(method, path string) (authorization.AppID, string, bool) {
 	path = strings.ToLower(strings.TrimRight(path, "/"))
 	method = strings.ToUpper(method)
 
+	if permission, ok := aiFeaturePermission(path); ok {
+		return authorization.AppHub, permission, true
+	}
 	if permission, ok := hubFeaturePermission(method, path); ok {
 		return authorization.AppHub, permission, true
 	}
@@ -47,6 +52,38 @@ func featurePermissionForRequest(method, path string) (authorization.AppID, stri
 		return authorization.AppRecruit, permission, true
 	}
 	return "", "", false
+}
+
+// The AI subsystem (the echo module: /caret, /ai, and the hub.caret.v1 and
+// hub.ai.v1 contract routes) is mounted outside every application prefix, so
+// appForPath and the per-app matchers below used to claim none of it and a
+// request reached a handler carrying nothing but a valid token. Caret is a Hub
+// surface, so it takes the same minimum Hub permission that /hub/dashboard
+// already requires.
+//
+// No per-tool permission belongs here. POST /caret/tools/decision fans out to a
+// registry whose tools each own the permission of the app they touch, and a
+// permission outside the catalog could not be granted to anyone, which would
+// deny the whole product.
+func aiFeaturePermission(path string) (string, bool) {
+	if isAISurfacePath(path) {
+		return "hub:dashboard:view", true
+	}
+	return "", false
+}
+
+// isAISurfacePath claims the whole AI namespace rather than only the routes
+// that exist today, so a sub-path with no matrix entry is still gated by the
+// middleware instead of falling through to the unmapped catch-all. Comparing a
+// whole segment keeps a neighbouring route such as /aircraft from being
+// classified as AI.
+func isAISurfacePath(path string) bool {
+	for _, namespace := range []string{"/caret", "/ai", "/hub/caret", "/hub/ai"} {
+		if path == namespace || strings.HasPrefix(path, namespace+"/") {
+			return true
+		}
+	}
+	return false
 }
 
 func hubFeaturePermission(method, path string) (string, bool) {
@@ -258,8 +295,24 @@ func isHRPolicyExemptPath(method, path string) bool {
 		path == "/hr/shift/v1/availability" || strings.HasPrefix(path, "/hr/shift/v1/availability/") {
 		return true
 	}
-	return method == http.MethodGet &&
-		(path == "/hr/payroll/my-runs" || strings.HasPrefix(path, "/hr/payroll/my-runs/"))
+	if method == http.MethodGet &&
+		(path == "/hr/payroll/my-runs" || strings.HasPrefix(path, "/hr/payroll/my-runs/")) {
+		return true
+	}
+	// Invite acceptance and verification are self-scoped: both handlers take the
+	// account from the auth context, refuse an anonymous caller, and acceptance
+	// additionally requires the caller's account email to equal the address the
+	// invite was sent to, so nothing in the request selects another tenant or
+	// another employee. Gating them on hr:employees:manage refused the invitee
+	// before those checks could run.
+	//
+	// Exact paths on the registered method only, so issuing an invite
+	// (POST /hr/employees/invite) stays behind hr:employees:manage.
+	if method == http.MethodPost && path == "/hr/employees/invite/accept" {
+		return true
+	}
+
+	return method == http.MethodGet && path == "/hr/employees/invite/verify"
 }
 
 func isPayrollExecutePath(path string) bool {

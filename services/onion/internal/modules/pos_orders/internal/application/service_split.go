@@ -254,11 +254,6 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		return 0, "", "", errors.New("online ordering is not enabled")
 	}
 
-	orderNumber, err := s.repo.GenerateOrderNumber(ctx, ownerID)
-	if err != nil {
-		return 0, "", "", fmt.Errorf("generate order number: %w", err)
-	}
-
 	items := make([]domain.OrderItemInput, 0, len(input.Items))
 	for i, it := range input.Items {
 		item, err := s.repo.GetPublicMenuItem(ctx, ownerID, it.MenuItemID)
@@ -273,7 +268,10 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		items = append(items, item)
 	}
 
-	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerPhone, input.Notes, items)
+	// The order number is generated inside the insert transaction, not here:
+	// counting on a separate connection let two simultaneous checkouts pick
+	// the same number and the loser of uq_pos_orders_number lost the order.
+	orderID, orderNumber, err := s.repo.CreatePublicOrder(ctx, ownerID, "", input.CustomerName, input.CustomerPhone, input.Notes, items)
 	if err != nil {
 		return 0, "", "", fmt.Errorf("create public order: %w", err)
 	}

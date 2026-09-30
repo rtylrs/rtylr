@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Banknote, CreditCard, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ import {
   buildCashTender,
   buildCheckoutOrder,
   buildCreateOrderPayload,
+  buildOfflineTender,
   processCheckout,
   type CheckoutPaymentMethod,
 } from "./checkoutWorkflow";
@@ -25,7 +26,6 @@ import { useCashDrawerStore } from "../../shared/stores/cashDrawerStore";
 import { printReceiptAndOpenDrawer, openDrawer } from "./paymentHardware";
 import { resetAfterCheckout } from "./checkoutState";
 import QrPayPanel from "./QrPayPanel";
-import TipSelector from "../../shared/components/TipSelector";
 import { earnPointsAfterPayment } from "../loyalty/loyaltyWorkflow";
 import { resolveOpenSessionId } from "../close-session/closeSessionWorkflow";
 import {
@@ -68,7 +68,6 @@ const Payment: React.FC = () => {
   const [localOrderRef] = useState(() => `local-${Date.now().toString(36)}`);
   const printer = useSettingsStore((s) => s.printer);
   const business = useSettingsStore((s) => s.business);
-  const tipsEnabled = useSettingsStore((s) => s.features.tips);
   const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const cashDrawerEnabled = useSettingsStore((s) => s.features.cashDrawer);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
@@ -78,18 +77,58 @@ const Payment: React.FC = () => {
   const [method, setMethod] = useState<CheckoutPaymentMethod>("card");
   const [processing, setProcessing] = useState(false);
   const [cashAmount, setCashAmount] = useState("");
-  const [qrConfirmed, setQrConfirmed] = useState(false);
-  const [tip, setTip] = useState(0);
+  const [cardAttested, setCardAttested] = useState(false);
+  const [qrAttested, setQrAttested] = useState(false);
+  // `processing` only reaches the DOM on the next render, so a second tap in
+  // the same tick still reaches handleCharge. Without this synchronous claim a
+  // double-tap starts two checkouts, and two checkouts are two sales.
+  const chargeInFlight = useRef(false);
 
   const subtotal = subtotalFn();
   const tax = taxTotalFn();
   const discount = discountTotalFn();
-  const appliedTip = tipsEnabled ? tip : 0;
+  // Tips are not collectible here. The payment contract carries no tip field, so
+  // the only way to charge one is to inflate `amount_paid`, which the server
+  // stores as `change_due` (amount_paid - total). That books tip money as
+  // change, overstates cash_sales against the drawer at close, and caps refunds
+  // at the tip-free order total. Do not re-enable a tip control without an
+  // end-to-end contract, column and reconciliation change.
+  const appliedTip = 0;
+  // `total()` includes the cart's stored tip (e.g. a resumed held order);
+  // subtracting it keeps the charge equal to the tip-free total the server
+  // computes from the order lines.
   const grandTotal = Math.max(0, totalFn() - storedTip + appliedTip);
   const cashTender = buildCashTender(cashAmount, grandTotal);
   const serverOrderId = useCartStore((s) => s.serverOrderId);
 
+  // There is no card terminal or payment provider wired into this app, so
+  // "card" and "qr" are recorded on the operator's word alone. An attestation
+  // is bound to one method at one amount: changing either voids it, so a stale
+  // confirmation can never carry over to a different sale.
+  useEffect(() => {
+    setCardAttested(false);
+    setQrAttested(false);
+  }, [method, grandTotal]);
+
+  const attested =
+    method === "card" ? cardAttested : method === "qr" ? qrAttested : false;
+  const tenderSatisfied =
+    method === "cash" ? cashTender.canCharge : attested;
+
   const handleCharge = async (): Promise<void> => {
+    // The disabled button is only one way in; never let an unattested card/QR
+    // tender reach the API, which would mark the order paid with no evidence
+    // that money moved.
+    if (!tenderSatisfied) {
+      toast.error(
+        method === "cash"
+          ? "Enter the cash received before charging."
+          : "Confirm the payment before charging.",
+      );
+      return;
+    }
+    if (chargeInFlight.current) return;
+    chargeInFlight.current = true;
     setProcessing(true);
     try {
       const order = buildCheckoutOrder({
@@ -159,14 +198,23 @@ const Payment: React.FC = () => {
           }
           return orderClient.createOrder(generatedPayload);
         },
-        chargeOrder: async (chargePayload) => {
-          await orderPaymentClient.processPayment(chargePayload);
+        chargeOrder: async ({ idempotencyKey, ...chargePayload }) => {
+          // The generated client already accepts per-call RequestOptions, so the
+          // key reaches the wire without a contract change. Without it the
+          // server answers this POST with 428 and the sale never happens.
+          await orderPaymentClient.processPayment(chargePayload, {
+            headers: { "Idempotency-Key": idempotencyKey },
+          });
         },
         enqueueOffline: (offlinePayload) => {
           if (requiresCompatOrder(items)) {
             throw new Error("Combo orders require an online connection.");
           }
-          enqueueOffline(offlinePayload);
+          // Tender and key go in with the entry, in one write, so the drain
+          // can never find a queued sale it cannot charge or cannot key.
+          enqueueOffline(offlinePayload, {
+            tender: buildOfflineTender(method, order),
+          });
         },
         recordCashSale,
         onOrderCreated: setServerOrderId,
@@ -246,6 +294,7 @@ const Payment: React.FC = () => {
       );
     } finally {
       setProcessing(false);
+      chargeInFlight.current = false;
     }
   };
 
@@ -343,10 +392,6 @@ const Payment: React.FC = () => {
             </div>
           </div>
 
-          {tipsEnabled && (
-            <TipSelector subtotal={subtotal} onTipChange={setTip} />
-          )}
-
           {/* Method selector */}
           <div className="flex gap-2">
             {methods.map((m) => {
@@ -369,9 +414,30 @@ const Payment: React.FC = () => {
           </div>
 
           {method === "card" && (
-            <p className="text-sm text-pos-muted text-center">
-              Present card to terminal or tap to pay.
-            </p>
+            <div className="space-y-2">
+              <p className="text-sm text-pos-muted text-center">
+                No card terminal or payment provider is connected to this app.
+                It does not read the card and cannot verify an authorisation.
+              </p>
+              <button
+                type="button"
+                onClick={() => setCardAttested((v) => !v)}
+                aria-pressed={cardAttested}
+                className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors ${
+                  cardAttested
+                    ? "border-pos-text bg-pos-text text-pos-bg"
+                    : "border-pos-border text-pos-muted hover:border-white/20"
+                }`}
+              >
+                {cardAttested
+                  ? `Attested: I took ${fmt(grandTotal)} on the register's own device`
+                  : "Tap to attest that you took this card payment yourself"}
+              </button>
+              <p className="text-xs text-pos-muted text-center">
+                This records an operator-attested sale. Nothing confirms it with
+                a provider, and the order will show as paid.
+              </p>
+            </div>
           )}
 
           {method === "cash" && (
@@ -404,28 +470,15 @@ const Payment: React.FC = () => {
             <QrPayPanel
               orderId={localOrderRef}
               amount={grandTotal}
-              onConfirmed={() => setQrConfirmed(true)}
+              onAttested={() => setQrAttested(true)}
+              onReset={() => setQrAttested(false)}
             />
-          )}
-
-          {method === "qr" && qrConfirmed && (
-            <motion.div
-              className="text-center text-sm text-emerald-400 font-medium"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              Payment confirmed - tap Charge to complete
-            </motion.div>
           )}
 
           <button
             className="w-full py-3.5 rounded-xl bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 disabled:opacity-40 transition-opacity"
             onClick={handleCharge}
-            disabled={
-              processing ||
-              (method === "cash" && !cashTender.canCharge) ||
-              (method === "qr" && !qrConfirmed)
-            }
+            disabled={processing || !tenderSatisfied}
           >
             {processing ? (
               <span className="inline-flex items-center gap-2">
@@ -436,6 +489,12 @@ const Payment: React.FC = () => {
               `Confirm Payment · ${fmt(grandTotal)}`
             )}
           </button>
+          {method !== "cash" && (
+            <p className="text-xs text-pos-muted text-center">
+              Operator-attested. No terminal or provider confirms this payment;
+              the order is recorded as paid on the attestation above.
+            </p>
+          )}
         </div>
       </div>
     </POSLayout>

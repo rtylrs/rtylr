@@ -19,6 +19,7 @@ type Repository interface {
 	// Invite
 	CreateInviteToken(ctx context.Context, ownerID, employeeID int64, expiresAt time.Time) (string, error)
 	GetInviteByToken(ctx context.Context, token string) (*InviteRecord, error)
+	GetAccountEmail(ctx context.Context, userID int64) (string, error)
 	AcceptInvite(ctx context.Context, ownerID, employeeID, userID int64, token string) error
 
 	// Locations

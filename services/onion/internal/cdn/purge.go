@@ -32,6 +32,11 @@ type purgeResponse struct {
 }
 
 func (c *CDN) purgeFileVariants(w http.ResponseWriter, r *http.Request) {
+	scope, ok := callerScope(r)
+	if !ok {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		id = strings.TrimSpace(r.URL.Query().Get("id"))
@@ -41,9 +46,11 @@ func (c *CDN) purgeFileVariants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deletedObjects, deletedRows, err := c.purgeFileVariantFamily(r, id)
+	deletedObjects, deletedRows, err := c.purgeFileVariantFamily(r, scope, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			// A file owned by another tenant is reported exactly like one that
+			// does not exist, so purge cannot be used to probe for ids.
 			http.Error(w, "file not found", http.StatusNotFound)
 			return
 		}
@@ -61,9 +68,14 @@ func (c *CDN) purgeFileVariants(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CDN) purgeUploadURL(w http.ResponseWriter, r *http.Request) {
+	scope, ok := callerScope(r)
+	if !ok {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
 	raw := strings.TrimSpace(r.URL.Query().Get("url"))
 	if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
-		deletedObjects, deletedRows, err := c.purgeFileVariantFamily(r, id)
+		deletedObjects, deletedRows, err := c.purgeFileVariantFamily(r, scope, id)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				http.Error(w, "file not found", http.StatusNotFound)
@@ -85,7 +97,7 @@ func (c *CDN) purgeUploadURL(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing url", http.StatusBadRequest)
 		return
 	}
-	deleted, err := c.purgeUploadURLFamily(r, raw)
+	deleted, err := c.purgeUploadURLFamily(r, scope, raw)
 	if err != nil {
 		writePurgeUploadURLError(w, r, raw, err)
 		return
@@ -98,6 +110,11 @@ func (c *CDN) purgeUploadURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CDN) purgeControl(w http.ResponseWriter, r *http.Request) {
+	scope, ok := callerScope(r)
+	if !ok {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
 	var req purgeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid purge request", http.StatusBadRequest)
@@ -107,7 +124,7 @@ func (c *CDN) purgeControl(w http.ResponseWriter, r *http.Request) {
 	req.URL = strings.TrimSpace(req.URL)
 	switch {
 	case req.ID != "":
-		deletedObjects, deletedRows, err := c.purgeFileVariantFamily(r, req.ID)
+		deletedObjects, deletedRows, err := c.purgeFileVariantFamily(r, scope, req.ID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				http.Error(w, "file not found", http.StatusNotFound)
@@ -124,7 +141,7 @@ func (c *CDN) purgeControl(w http.ResponseWriter, r *http.Request) {
 			DeletedRows:    deletedRows,
 		})
 	case req.URL != "":
-		deleted, err := c.purgeUploadURLFamily(r, req.URL)
+		deleted, err := c.purgeUploadURLFamily(r, scope, req.URL)
 		if err != nil {
 			writePurgeUploadURLError(w, r, req.URL, err)
 			return
@@ -139,12 +156,23 @@ func (c *CDN) purgeControl(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *CDN) purgeFileVariantFamily(r *http.Request, id string) (int, int64, error) {
-	meta, err := c.fileByUUID(r.Context(), id)
+func (c *CDN) purgeFileVariantFamily(r *http.Request, scope mutationScope, id string) (int, int64, error) {
+	// The file is resolved through the caller's own scope first, so a purge
+	// aimed at another tenant's uuid stops here — before a single storage
+	// object or row is touched.
+	meta, err := c.fileForRead(r.Context(), scope.read(), id)
 	if err != nil {
 		return 0, 0, err
 	}
-	keys, err := c.transformationStorageKeysByFileUUID(r.Context(), meta.FileUUID)
+	// The read above also admits the caller's own public assets, and evicting a
+	// public asset's derivative cache is still another tenant's storage write
+	// when the file belongs to someone else, so ownership is checked on its own.
+	if !scope.owns(meta) {
+		return 0, 0, sql.ErrNoRows
+	}
+	businessID := meta.BusinessID
+
+	keys, err := c.transformationStorageKeysByFileUUID(r.Context(), businessID, meta.FileUUID)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -158,14 +186,14 @@ func (c *CDN) purgeFileVariantFamily(r *http.Request, id string) (int, int64, er
 			deletedObjects++
 		}
 	}
-	deletedRows, err := c.deleteTransformationsByFileUUID(r.Context(), meta.FileUUID)
+	deletedRows, err := c.deleteTransformationsByFileUUID(r.Context(), businessID, meta.FileUUID)
 	if err != nil {
 		return deletedObjects, 0, err
 	}
 	return deletedObjects, deletedRows, nil
 }
 
-func (c *CDN) purgeUploadURLFamily(r *http.Request, raw string) (int, error) {
+func (c *CDN) purgeUploadURLFamily(r *http.Request, scope mutationScope, raw string) (int, error) {
 	source, err := c.resolveUploadURLSource(raw, r.Host)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %v", errBadPurgeInput, err)
@@ -173,12 +201,26 @@ func (c *CDN) purgeUploadURLFamily(r *http.Request, raw string) (int, error) {
 	seed := ""
 	switch {
 	case source.storageKey != "":
+		// A storage key that names a stored asset is checked for ownership, so
+		// originals/<uuid> and transformed/<uuid>/ cannot be reached through
+		// the ?url= form of the endpoint either.
+		if id, ok := storageKeyFileUUID(source.storageKey); ok && !scope.platform {
+			owned, err := c.fileOwnsUUID(r.Context(), scope.tenant, id)
+			if err != nil {
+				return 0, err
+			}
+			if !owned {
+				return 0, sql.ErrNoRows
+			}
+		}
 		seed = "storage:" + source.storageKey
 	case source.remoteURL != nil:
+		// A remote target's derivatives are a per-URL proxy cache keyed by the
+		// remote address, not tenant data, so no stored row scopes them.
 		seed = "remote:" + source.remoteURL.String()
 	case source.redirectURL != "":
 		if id, ok := fileUUIDFromCanonicalURL(source.redirectURL); ok {
-			deletedObjects, _, err := c.purgeFileVariantFamily(r, id)
+			deletedObjects, _, err := c.purgeFileVariantFamily(r, scope, id)
 			return deletedObjects, err
 		}
 	}

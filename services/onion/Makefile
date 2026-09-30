@@ -30,7 +30,7 @@ build-all: generate contracts
 	     -X 'github.com/voxire/onion/internal/platform/server/http.Version=$$VERSION' \
 	     -X 'github.com/voxire/onion/internal/platform/server/http.Commit=$$COMMIT' \
 	     -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=$$BUILD_TIME'" \
-	   -o ./bin/api ./cmd/api/main.go
+	   -o ./bin/api ./cmd/api
 	@echo "All binaries built successfully!"
 
 # Build the C++ media-engine binary the upload runmode shells out to.
@@ -83,11 +83,11 @@ mutation-validation-check:
 
 # Default run (backwards compatibility)
 run:
-	go run ./cmd/api/main.go
+	go run ./cmd/api
 
 # Run specific services
 run-api:
-	go run ./cmd/api/main.go
+	go run ./cmd/api
 
 # Development with live reloading (air)
 dev:

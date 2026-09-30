@@ -32,6 +32,13 @@ type listTasksToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	required, dispatched := flowToolPermissions[name]
+	if !dispatched {
+		return nil, false, nil
+	}
+	if err := requireFlowToolPermission(ctx, required); err != nil {
+		return nil, true, err
+	}
 	switch name {
 	case listTasksToolName:
 		output, err := m.executeListTasksTool(ctx, input)
@@ -43,7 +50,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		output, err := m.executeCreateTaskTool(ctx, input)
 		return output, true, err
 	default:
-		return nil, false, nil
+		return nil, true, fmt.Errorf("flow tool %q has no executor", name)
 	}
 }
 

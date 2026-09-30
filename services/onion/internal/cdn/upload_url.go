@@ -27,12 +27,13 @@ type uploadURLSource struct {
 // serveUploadURL handles GET /upload?url=... as a compatibility read path for
 // image URLs that predate /files/{uuid}. New uploads still use POST /upload.
 func (c *CDN) serveUploadURL(w http.ResponseWriter, r *http.Request) {
-	if !c.validateSignedDelivery(w, r) {
+	scope, ok := c.validateSignedDelivery(w, r)
+	if !ok {
 		return
 	}
 
 	if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
-		c.serveUploadID(w, r, id)
+		c.serveUploadID(w, r, scope, id)
 		return
 	}
 
@@ -58,7 +59,7 @@ func (c *CDN) serveUploadURL(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "invalid image url", http.StatusBadRequest)
 }
 
-func (c *CDN) serveUploadID(w http.ResponseWriter, r *http.Request, id string) {
+func (c *CDN) serveUploadID(w http.ResponseWriter, r *http.Request, scope readScope, id string) {
 	if _, err := uuid.Parse(id); err != nil {
 		http.Error(w, "invalid file id", http.StatusBadRequest)
 		return
@@ -76,7 +77,7 @@ func (c *CDN) serveUploadID(w http.ResponseWriter, r *http.Request, id string) {
 		return
 	}
 
-	meta, err := c.fileByUUID(r.Context(), id)
+	meta, err := c.fileForRead(r.Context(), scope, id)
 	if err != nil {
 		c.redirectToCanonical(w, c.fileURL(id))
 		return

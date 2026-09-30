@@ -3,6 +3,7 @@ package invoices
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -30,6 +31,13 @@ type listInvoicesToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	required, dispatched := invoiceToolPermissions[name]
+	if !dispatched {
+		return nil, false, nil
+	}
+	if err := requireInvoiceToolPermission(ctx, required); err != nil {
+		return nil, true, err
+	}
 	switch name {
 	case listInvoicesToolName:
 		output, err := m.executeListInvoicesTool(ctx, input)
@@ -47,7 +55,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		output, err := m.executeSendInvoiceTool(ctx, input)
 		return output, true, err
 	default:
-		return nil, false, nil
+		return nil, true, fmt.Errorf("invoice tool %q has no executor", name)
 	}
 }
 

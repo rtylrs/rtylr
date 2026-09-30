@@ -112,23 +112,73 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID, staffID int6
 	return tx.Commit()
 }
 
+// VoidOrder voids an order that has neither taken nor returned money. The row
+// is locked and both of its state columns are checked before the write, the way
+// ResumeOrder does: an unconditional status write relabels a paid sale as
+// voided, erasing the sale from the record while the cash stays in the drawer
+// and the stock movement stays deducted, and it leaves the order refundable so
+// the same amount can be paid back out a second time.
 func (r *Repository) VoidOrder(ctx context.Context, businessID, orderID int64, reason string) error {
-	result, err := r.queries.VoidOrder(ctx, sqlc.VoidOrderParams{
-		CONCAT:     fmt.Sprintf(" [Voided: %s]", reason),
-		ID:         orderID,
-		BusinessID: businessID,
-	})
+	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin void order transaction", logger.Error(err))
+		return err
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var status string
+	var paymentStatus sql.NullString
+	if err = tx.QueryRowContext(ctx, `
+		SELECT status, payment_status
+		FROM pos_orders
+		WHERE business_id = ? AND id = ?
+		FOR UPDATE`, businessID, orderID).Scan(&status, &paymentStatus); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrOrderNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to lock order for void", logger.Error(err))
+		return err
+	}
+
+	guardErr := checkVoidable(domain.OrderStatus(status), domain.PaymentStatus(paymentStatus.String))
+	if errors.Is(guardErr, errOrderAlreadyVoided) {
+		// Already voided: answer success without a second write so a re-sent
+		// void cannot append a second reason to the audit trail.
+		if err := tx.Commit(); err != nil {
+			logger.Ctx(ctx).Error("Failed to commit no-op void order transaction", logger.Error(err))
+			return err
+		}
+		committed = true
+		return nil
+	}
+	if guardErr != nil {
+		logger.Ctx(ctx).Warn("VoidOrder rejected: order is not in a voidable state",
+			logger.Any("order_id", orderID),
+			logger.Any("status", status),
+			logger.Any("payment_status", paymentStatus.String),
+		)
+		return guardErr
+	}
+
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE pos_orders
+		SET status = 'voided', notes = CONCAT(COALESCE(notes,''), ?)
+		WHERE business_id = ? AND id = ? AND status <> 'voided'`,
+		fmt.Sprintf(" [Voided: %s]", reason), businessID, orderID); err != nil {
 		logger.Ctx(ctx).Error("Failed to void order", logger.Error(err))
 		return err
 	}
-	rows, err := result.RowsAffected()
-	if err != nil {
+
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit void order transaction", logger.Error(err))
 		return err
 	}
-	if rows == 0 {
-		return domain.ErrOrderNotFound
-	}
+	committed = true
 	return nil
 }
 
@@ -157,15 +207,13 @@ func (r *Repository) ListHeldOrders(ctx context.Context, businessID int64) ([]do
 	return orders, err
 }
 
-func (r *Repository) GenerateOrderNumber(ctx context.Context, businessID int64) (string, error) {
-	return generateOrderNumber(ctx, r.queries, businessID)
-}
-
 // generateOrderNumber builds the next order number from the rows the given
-// queries can see. Callers that insert several orders in one transaction must
-// pass the transaction-scoped queries: rows the transaction has already
-// inserted are then counted, keeping sibling order numbers distinct. Counting
-// through the pool cannot see them and returns the same number every time.
+// queries can see. It is only ever called with the transaction-scoped queries:
+// a pooled count cannot see rows the transaction has already inserted, so two
+// orders in one transaction would be offered the same number and the second
+// would fail on uq_pos_orders_number. Counting through the transaction does
+// not by itself prevent two *concurrent* transactions from picking the same
+// number, so the create paths also retry a duplicate.
 func generateOrderNumber(ctx context.Context, q *sqlc.Queries, businessID int64) (string, error) {
 	today := time.Now().Format("20060102")
 
@@ -376,11 +424,34 @@ func (r *Repository) GetPublicMenuItem(ctx context.Context, businessID, menuItem
 	return item, nil
 }
 
-func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
+// CreatePublicOrder inserts an online order, generating its order number
+// inside the insert transaction and retrying a lost race on
+// uq_pos_orders_number. Same reasoning as CreateOrder: counting on a separate
+// connection let two customers checking out at the same moment pick the same
+// number, and the loser of the unique key lost the whole order.
+func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error) {
+	// Only a generated number is worth retrying; see CreateOrder.
+	if orderNumber != "" {
+		return r.createPublicOrderOnce(ctx, businessID, orderNumber, customerName, customerPhone, notes, items)
+	}
+	for attempt := 1; ; attempt++ {
+		orderID, generated, err := r.createPublicOrderOnce(ctx, businessID, "", customerName, customerPhone, notes, items)
+		if err == nil {
+			return orderID, generated, nil
+		}
+		if attempt >= createOrderNumberAttempts || !isDuplicateEntry(err) {
+			return 0, "", err
+		}
+		logger.Ctx(ctx).Warn("Public order number collided, retrying create",
+			logger.Any("business_id", businessID), logger.Any("attempt", attempt))
+	}
+}
+
+func (r *Repository) createPublicOrderOnce(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin public order transaction", logger.Error(err))
-		return 0, err
+		return 0, "", err
 	}
 
 	defer func() {
@@ -396,6 +467,17 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 	totals := domain.ComputeTotals(items)
 
 	qtx := r.queries.WithTx(tx)
+
+	// Counted through the transaction so the number reflects every order this
+	// business has, not just the ones a pooled connection can see.
+	if orderNumber == "" {
+		orderNumber, err = generateOrderNumber(ctx, qtx, businessID)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to generate public order number", logger.Error(err))
+			return 0, "", err
+		}
+	}
+
 	res, err := qtx.CreatePublicOrder(ctx, sqlc.CreatePublicOrderParams{
 		OwnerID:       businessID,
 		BusinessID:    businessID,
@@ -410,12 +492,12 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
-		return 0, err
+		return 0, "", err
 	}
 
 	orderID, err := res.LastInsertId()
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 
 	for _, item := range items {
@@ -430,14 +512,14 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 			Notes:      sqlutil.NullString(item.Notes),
 		}); err != nil {
 			logger.Ctx(ctx).Error("Failed to insert public order item", logger.Error(err))
-			return 0, err
+			return 0, "", err
 		}
 	}
 
 	if err = tx.Commit(); err != nil {
-		return 0, err
+		return 0, "", err
 	}
-	return orderID, nil
+	return orderID, orderNumber, nil
 }
 
 func (r *Repository) GetPublicOrderStatus(ctx context.Context, businessID, orderID int64) (orderNumber, status string, err error) {

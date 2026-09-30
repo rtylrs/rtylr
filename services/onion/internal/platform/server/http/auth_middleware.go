@@ -167,11 +167,11 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 							return
 						}
 						if status.MFARequired {
-							if !status.MFAEnrolled && !isMFAPath(path) {
+							if !status.MFAEnrolled && !isMFAPath(r, false) {
 								writeUnauthorizedResponse(ctx, w, "MFA enrollment required")
 								return
 							}
-							if status.MFAEnrolled && !isMFAPath(path) {
+							if status.MFAEnrolled && !isMFAPath(r, true) {
 								mfaResolver, ok := accessResolver.(authPkg.MFAVerifiedResolver)
 								if !ok {
 									writeUnauthorizedResponse(ctx, w, "MFA verification unavailable")
@@ -236,15 +236,26 @@ func appForPath(path string) (authorization.AppID, bool) {
 	return "", false
 }
 
-func isMFAPath(path string) bool {
-	switch strings.ToLower(strings.TrimRight(path, "/")) {
+// isMFAPath reports whether a request may bypass the MFA gate.
+//
+// Reads and proof endpoints (state, verify, recovery) always bypass: they are
+// how a user satisfies the gate in the first place.
+//
+// Enrollment bypasses only the "enrollment required" branch, because it is the
+// only way out of that state. Once a factor exists the same endpoints are a
+// factor rotation, so they must clear the verification gate like any other
+// mutation. Everything else — PATCH /2fa, POST /invalidate-sessions — is a
+// security-setting mutation and gets no exemption at all: exempting them let a
+// stolen bearer token disable or replace the second factor outright.
+func isMFAPath(r *http.Request, mfaEnrolled bool) bool {
+	switch strings.ToLower(strings.TrimRight(r.URL.Path, "/")) {
 	case "/hub/security/v1/state",
-		"/hub/security/v1/2fa",
-		"/hub/security/v1/mfa/enroll",
-		"/hub/security/v1/mfa/enroll/confirm",
 		"/hub/security/v1/mfa/verify",
 		"/hub/security/v1/mfa/recovery":
 		return true
+	case "/hub/security/v1/mfa/enroll",
+		"/hub/security/v1/mfa/enroll/confirm":
+		return !mfaEnrolled
 	default:
 		return false
 	}

@@ -140,6 +140,22 @@ export interface DaySummary {
   closingCash: number;
 }
 
+/**
+ * The money a queued offline sale already took from the customer.
+ *
+ * CreateOrderRequest carries no amount, so the tender is captured at checkout -
+ * while the cash is still in the drawer - and stored with the queue entry. It
+ * has to live on the entry itself: a separate store left a window in which the
+ * entry existed with no tender, which is what the old payload-fingerprint
+ * matching heuristic existed to paper over.
+ */
+export interface OfflineTender {
+  paymentMethod: string;
+  amountPaid: number;
+  /** Local order id the tender was taken against; shown on the queue screen. */
+  localOrderId: string;
+}
+
 export interface OfflineQueuedOrder {
   id: string;
   /** Generated Voxie CreateOrderRequest, replayed verbatim on reconnect. */
@@ -148,4 +164,25 @@ export interface OfflineQueuedOrder {
   retries: number;
   lastError?: string;
   status: 'pending' | 'syncing' | 'failed';
+  /**
+   * Optional only because an entry persisted by an older build has none: this
+   * is a persisted shape read back across versions, not a value `enqueue` is
+   * allowed to omit. The drain backfills both fields below before its first
+   * send, so an entry read here is never replayed without them.
+   */
+  tender?: OfflineTender;
+  /**
+   * Idempotency-Key minted once for the user action that queued this sale, and
+   * replayed verbatim by every drain and every manual Retry. The server answers
+   * 428 without it and dedups on it, so a crash between sending the charge and
+   * reading the response re-issues the same key instead of minting a second one
+   * for what is the same sale.
+   */
+  idempotencyKey?: string;
+  /**
+   * Order id returned by createOrder, written here BEFORE the charge. A crash
+   * from then on replays this charge - which the server makes a no-op on an
+   * already-paid order - instead of creating a second sale.
+   */
+  serverOrderId?: string;
 }

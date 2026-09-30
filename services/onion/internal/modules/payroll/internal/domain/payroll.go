@@ -25,6 +25,46 @@ type PayrollRecord struct {
 	Notes         string    `json:"notes"`
 	CreatedAt     time.Time `json:"created_at"`
 }
+
+// StatusPaid is the only status that means money has left the business.
+const StatusPaid = "paid"
+
+// PeriodRow is the part of a payroll record a period-wide decision needs. Both
+// re-running a period and settling one record read the whole period under a
+// lock, and both decisions are about paid rows.
+type PeriodRow struct {
+	ID      int64
+	StaffID int64
+	Status  string
+}
+
+// PeriodHasPaidRecord reports whether any row in the period has been settled.
+// Re-running such a period is refused: recomputing it would restate figures for
+// money that has already been paid out.
+func PeriodHasPaidRecord(rows []PeriodRow) bool {
+	for _, row := range rows {
+		if row.Status == StatusPaid {
+			return true
+		}
+	}
+	return false
+}
+
+// StaffHasPaidRecordInPeriod reports whether the given employee already has a
+// settled record for this period, ignoring one record id. That is the state a
+// duplicated payroll run leaves behind, and settling the second row would pay
+// the employee twice for one period. Records for other employees are the
+// normal case of paying a period out employee by employee, so they do not
+// block anyone.
+func StaffHasPaidRecordInPeriod(rows []PeriodRow, staffID, exceptID int64) bool {
+	for _, row := range rows {
+		if row.ID != exceptID && row.StaffID == staffID && row.Status == StatusPaid {
+			return true
+		}
+	}
+	return false
+}
+
 type PayrollRunInput struct {
 	OwnerID     int64  `json:"owner_id"`
 	BusinessID  int64  `json:"business_id"`

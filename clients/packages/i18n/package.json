@@ -19,5 +19,8 @@
     "@types/react": "19.2.14",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json"
   }
 }

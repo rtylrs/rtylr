@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -62,6 +63,12 @@ func (a *PayrollAPI) RunPayroll(ctx context.Context, req *hrpayrollv1.RunPayroll
 		PeriodLabel: req.GetPeriodLabel(),
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrPayrollPeriodAlreadyPaid) {
+			return nil, onekiterrors.New(http.StatusConflict, "Payroll for this period has already been paid and cannot be recalculated")
+		}
+		if errors.Is(err, domain.ErrPayrollPeriodConflict) {
+			return nil, onekiterrors.New(http.StatusConflict, "Payroll for this period changed while it was being written. Retry the run.")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to run payroll: "+err.Error())
 	}
 
@@ -79,6 +86,12 @@ func (a *PayrollAPI) MarkPayrollPaid(ctx context.Context, req *hrpayrollv1.MarkP
 	}
 
 	if err := a.service.MarkPayrollPaid(ctx, businessID, req.GetId()); err != nil {
+		if errors.Is(err, domain.ErrPayrollRecordHasPaidSibling) {
+			return nil, onekiterrors.New(http.StatusConflict, "This employee already has a paid record for this period")
+		}
+		if errors.Is(err, domain.ErrPayrollRecordAlreadyPaid) || errors.Is(err, domain.ErrPayrollRecordNotFound) {
+			return nil, onekiterrors.New(http.StatusConflict, "Payroll record not found or already paid")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to mark payroll as paid: "+err.Error())
 	}
 

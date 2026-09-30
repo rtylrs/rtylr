@@ -29,6 +29,6 @@ go build \
     -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
     -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
     -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
-  -o ./bin/api ./cmd/api/main.go
+  -o ./bin/api ./cmd/api
 
 golangci-lint run

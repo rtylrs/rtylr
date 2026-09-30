@@ -30,7 +30,15 @@ var (
 
 const mfaSecretPrefix = "enc:v1:"
 
+// BeginMFAEnrollment issues a TOTP secret for the authenticator app. It is
+// self-proving: enroll/confirm only succeeds with a code derived from the
+// secret returned here, so possessing the response is not enough to activate a
+// factor. When the user already holds one, the rotation is gated behind
+// requireStepUp so a stolen bearer token cannot swap the factor out.
 func (s *Service) BeginMFAEnrollment(ctx context.Context, userID int64) (string, string, error) {
+	if err := s.requireStepUp(ctx, userID); err != nil {
+		return "", "", err
+	}
 	secretBytes := make([]byte, 20)
 	if _, err := rand.Read(secretBytes); err != nil {
 		return "", "", err
@@ -49,6 +57,9 @@ func (s *Service) BeginMFAEnrollment(ctx context.Context, userID int64) (string,
 }
 
 func (s *Service) CompleteMFAEnrollment(ctx context.Context, userID int64, code string) ([]string, error) {
+	if err := s.requireStepUp(ctx, userID); err != nil {
+		return nil, err
+	}
 	stored, err := s.repo.GetMFASecret(ctx, userID, false)
 	if err != nil {
 		return nil, ErrMFAEnrollmentMissing
@@ -79,6 +90,22 @@ func (s *Service) CompleteMFAEnrollment(ctx context.Context, userID int64, code 
 }
 
 func (s *Service) VerifyMFA(ctx context.Context, userID int64, code string) error {
+	now := time.Now()
+	if err := mfaAttempts.check(userID, now); err != nil {
+		return err
+	}
+	err := s.verifyMFAOnce(ctx, userID, code)
+	if err == nil {
+		mfaAttempts.reset(userID)
+		return nil
+	}
+	if errors.Is(err, ErrMFAInvalidCode) {
+		mfaAttempts.recordFailure(userID, time.Now())
+	}
+	return err
+}
+
+func (s *Service) verifyMFAOnce(ctx context.Context, userID int64, code string) error {
 	stored, err := s.repo.GetMFASecret(ctx, userID, true)
 	if err != nil {
 		return ErrMFAInvalidCode
@@ -91,6 +118,22 @@ func (s *Service) VerifyMFA(ctx context.Context, userID int64, code string) erro
 }
 
 func (s *Service) UseMFARecoveryCode(ctx context.Context, userID int64, code string) error {
+	now := time.Now()
+	if err := mfaAttempts.check(userID, now); err != nil {
+		return err
+	}
+	err := s.consumeMFARecoveryCode(ctx, userID, code)
+	if err == nil {
+		mfaAttempts.reset(userID)
+		return nil
+	}
+	if errors.Is(err, ErrMFAInvalidCode) {
+		mfaAttempts.recordFailure(userID, time.Now())
+	}
+	return err
+}
+
+func (s *Service) consumeMFARecoveryCode(ctx context.Context, userID int64, code string) error {
 	normalized := strings.ToUpper(strings.TrimSpace(code))
 	if normalized == "" {
 		return ErrMFAInvalidCode
@@ -151,7 +194,7 @@ func validTOTP(secret, code string, now time.Time) bool {
 
 func mfaEncryptionKey() ([]byte, error) {
 	secret := strings.TrimSpace(os.Getenv("MFA_ENCRYPTION_KEY"))
-	if secret == "" {
+	if secret == "" && config.GlobalConfig != nil {
 		secret = strings.TrimSpace(config.GlobalConfig.JWTSecret)
 	}
 	if secret == "" {

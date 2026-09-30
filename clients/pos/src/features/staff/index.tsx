@@ -7,6 +7,8 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import ManagerRequired from '../../shared/components/ManagerRequired';
 import { useCapabilities } from '../../shared/hooks/useCapabilities';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
+import { digitsOnly } from '../../shared/utils/digits';
+import { PIN_MAX_LENGTH, PIN_MIN_LENGTH } from '../login/pinPolicy';
 import {
   mapPOSUsers,
   buildStaffUpdate,
@@ -219,14 +221,20 @@ const StaffScreen: React.FC = () => {
               <input
                 type="password"
                 inputMode="numeric"
-                maxLength={4}
+                // A saved password manager can fill a long secret past maxLength,
+                // so the field is marked as a new credential as well.
+                autoComplete="new-password"
+                maxLength={PIN_MAX_LENGTH}
                 value={edits.newPin ?? ''}
                 onChange={(e) =>
-                  setEdits({ ...edits, newPin: e.target.value.replace(/\D/g, '').slice(0, 4) })
+                  setEdits({ ...edits, newPin: digitsOnly(e.target.value, PIN_MAX_LENGTH) })
                 }
                 placeholder="Leave blank to keep current"
                 className="w-full h-11 px-3 rounded-lg bg-pos-bg border border-pos-border text-pos-text text-sm outline-none"
               />
+              <p className="text-[11px] text-pos-muted">
+                {PIN_MIN_LENGTH}-{PIN_MAX_LENGTH} digits
+              </p>
             </div>
 
             <div className="flex items-center justify-between gap-2 pt-1">

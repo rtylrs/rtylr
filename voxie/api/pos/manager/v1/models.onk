@@ -9,3 +9,17 @@ message VerifyPINResponse {
   staff_id: int64
   message: string
 }
+
+message SetPINRequest {
+  /// staff_id is the manager the override is attributed to.
+  staff_id: int64 @required @gt(0)
+  /// pin is the new manager override PIN, 6-12 digits. Sensitive: do not log this field.
+  pin: string @required
+  /// current_password re-authenticates the business owner, so a stolen or
+  /// left-open session cannot mint a manager PIN. Sensitive: do not log this field.
+  current_password: string @required
+}
+
+message SetPINResponse {
+  success: bool
+}
