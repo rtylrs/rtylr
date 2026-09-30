@@ -59,7 +59,12 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 // normalized member row exists, allowing the caller to use the legacy profile.
 // SQL stays in this repository so the application layer receives a persistence
 // independent snapshot for the pure resolver.
-func (r *Repository) GetAuthorizationSnapshot(ctx context.Context, businessID, userID int64, subscribedApps []string) (authorization.Snapshot, bool, error) {
+//
+// businessApps is the business's plan entitlement. Owners and admins inherit it
+// wholesale; every other member is bounded by their own active role
+// assignments. The legacy user_app_permissions.apps column never reaches here,
+// so a stale row in it cannot grant an app that no assignment backs.
+func (r *Repository) GetAuthorizationSnapshot(ctx context.Context, businessID, userID int64, businessApps []string) (authorization.Snapshot, bool, error) {
 	if businessID <= 0 || userID <= 0 {
 		return authorization.Snapshot{}, false, nil
 	}
@@ -127,30 +132,35 @@ func (r *Repository) GetAuthorizationSnapshot(ctx context.Context, businessID, u
 		return authorization.Snapshot{}, false, err
 	}
 
-	// The app set is the union of the caller's plan-derived apps (owners, whose
-	// access is the system path) and the apps this member actually holds a role
-	// assignment for. Members and admins are bounded by their assignments
-	// alone, so a stale legacy user_app_permissions.apps row can no longer add
-	// an app nobody assigned them.
-	apps := make([]authorization.AppID, 0, len(subscribedApps))
-	seenApps := make(map[authorization.AppID]struct{}, len(subscribedApps)+len(assignments))
-	appendApp := func(appID authorization.AppID) {
+	// Owners and admins are tenant administrators and inherit the business's
+	// plan entitlement in full, which is why an admin does not need a per-app
+	// assignment to reach the whole product. Every other member is bounded by
+	// their own active role assignments. dashRoleKey is already normalized to
+	// the "dash." form above.
+	inheritsPlan := dashRoleKey == "dash.owner" || dashRoleKey == "dash.admin"
+	source := make([]string, 0, len(businessApps))
+	if inheritsPlan {
+		source = businessApps
+	} else {
+		for _, assignment := range assignments {
+			if assignment.Active {
+				source = append(source, string(assignment.AppID))
+			}
+		}
+	}
+
+	apps := make([]authorization.AppID, 0, len(source))
+	seenApps := make(map[authorization.AppID]struct{}, len(source))
+	for _, rawApp := range source {
+		appID := authorization.AppID(rawApp)
 		if appID == "" || appID == "dash" {
-			return
+			continue
 		}
 		if _, seen := seenApps[appID]; seen {
-			return
+			continue
 		}
 		seenApps[appID] = struct{}{}
 		apps = append(apps, appID)
-	}
-	for _, app := range subscribedApps {
-		appendApp(authorization.AppID(app))
-	}
-	for _, assignment := range assignments {
-		if assignment.Active {
-			appendApp(assignment.AppID)
-		}
 	}
 
 	return authorization.Snapshot{
