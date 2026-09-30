@@ -68,7 +68,7 @@ LIMIT ? OFFSET ?;
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
        COALESCE(member.dash_role_key, '') AS dash_role_key,
        permissions.role AS legacy_role,
-       permissions.apps AS legacy_apps,
+       COALESCE(permissions.apps, JSON_ARRAY()) AS legacy_apps,
        member.status AS member_status,
        permissions.is_active AS legacy_is_active
 FROM users AS u
