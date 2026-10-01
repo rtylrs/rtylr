@@ -55,7 +55,13 @@ func TestUpsertHRConfigPartialCorePayloadKeepsOmittedFields(t *testing.T) {
 		t.Fatalf("Validate: %v", err)
 	}
 
-	apiCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: testutil.OwnerID, BusinessID: testutil.BusinessID, EffectiveAccess: &authorization.EffectiveAccess{IsOwner: true}})
+	apiCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{
+		UserID: testutil.OwnerID, BusinessID: testutil.BusinessID,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			IsOwner: true,
+			Apps:    []authorization.EffectiveAppAccess{{AppID: authorization.AppHR, Licensed: true, HasAccess: true}},
+		},
+	})
 	resp, err := handler.Serve(apiCtx, &req)
 	if err != nil {
 		t.Fatalf("Serve: %v", err)

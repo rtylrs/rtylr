@@ -42,7 +42,6 @@ vi.mock('@voxire/auth', () => {
     ),
   };
 });
-vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
 vi.mock('@voxire/config', () => ({ getAvatarUrl: () => '' }));
 vi.mock('@voxire/caret', () => ({
   buildCaretRouteContext: () => ({}),
@@ -61,7 +60,6 @@ vi.mock('@voxire/utils', () => ({ useForesightLinks: () => undefined }));
 vi.mock('../shared/components/GlobalSearch', () => ({ default: () => null }));
 vi.mock('../shared/components/TrialBanner', () => ({ default: () => null }));
 vi.mock('../shared/lib/clients', () => ({
-  licenseClient: { getLicenseState: () => Promise.resolve({ status: 'hosted', valid: true }) },
   userClient: { getMe: () => Promise.resolve({}) },
 }));
 vi.mock('motion/react', () => {

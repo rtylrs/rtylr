@@ -25,7 +25,6 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: 'API reference', href: '/api/overview', detail: 'Explore the API surface.' },
       { label: 'MCP', href: '/api/overview', detail: 'Connect agents and developer tools.' },
-      { label: 'Backend environment', href: '/self-hosting/backend-env', detail: 'Configure backend services.' },
     ],
   },
   {
@@ -37,19 +36,10 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'Host',
-    items: [
-      { label: 'Self Host rtylr', href: '/self-hosting', detail: 'Run rtylr on infrastructure you control.' },
-      { label: 'Docker Compose', href: '/self-hosting/compose', detail: 'Launch an evaluation or production stack.' },
-      { label: 'Helm', href: '/self-hosting/helm', detail: 'Deploy rtylr to Kubernetes.' },
-    ],
-  },
-  {
     label: 'Resources',
     items: [
       { label: 'Documentation map', href: '/', detail: 'Find the right rtylr guide.' },
       { label: 'FAQ', href: '/faq', detail: 'Find answers to common questions.' },
-      { label: 'Architecture', href: '/self-hosting/architecture', detail: 'See how the self-hosted stack fits together.' },
     ],
   },
 ];
@@ -85,19 +75,6 @@ export const sidebarGroups = [
   {
     label: 'API',
     items: [['API Overview', '/api/overview']],
-  },
-  {
-    label: 'Self-Hosting',
-    items: [
-      ['Overview', '/self-hosting'],
-      ['Architecture', '/self-hosting/architecture'],
-      ['Image Contract', '/self-hosting/images'],
-      ['Helm Install', '/self-hosting/helm'],
-      ['Docker Compose', '/self-hosting/compose'],
-      ['DNS Setup', '/self-hosting/dns'],
-      ['Backend Environment', '/self-hosting/backend-env'],
-      ['Upgrade Flow', '/self-hosting/upgrade'],
-    ],
   },
   {
     label: 'Help',

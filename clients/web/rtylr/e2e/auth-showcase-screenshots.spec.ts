@@ -24,7 +24,7 @@ const TAGLINE = {
 
 test.describe('auth-showcase responsive matrix @screenshots', () => {
   test.beforeEach(async ({ page }) => {
-    // The sign-in route reads runtime config and hub features on load. Answer
+    // The sign-in route reads hub features on load. Answer
     // them so no request is in flight while the capture settles.
     await page.route(/localhost:9999\//, (route: Route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })

@@ -57,11 +57,6 @@ const Footer: React.FC = () => {
           label: t('footer.link.documentation'),
           external: true,
         },
-        {
-          to: 'https://docs.rtylr.com/self-hosting',
-          label: t('footer.link.selfHost'),
-          external: true,
-        },
         { to: '/integrations', label: t('footer.link.integrations') },
         { to: '/support', label: t('footer.link.helpCenter') },
       ],

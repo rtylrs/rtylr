@@ -1,5 +1,4 @@
 import { createOneKitClient, createRestRouteClient } from '@voxire/api';
-import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { BusinessServiceClient } from '@voxire/voxie/hub/business/v1/client';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { NotificationServiceClient } from '@voxire/voxie/flow/notification/v1/client';
@@ -32,7 +31,6 @@ export const insightsV2 = createOneKitClient(InsightsServiceV2, 'flow');
 export const timeV2 = createOneKitClient(TimeServiceV2, 'flow');
 export const profileClient = createOneKitClient(ProfileClient, 'flow');
 export const statusClient = createOneKitClient(StatusServiceClient, 'flow');
-export const licenseClient = createOneKitClient(LicenseServiceClient, 'flow');
 export const rest = createRestRouteClient('flow');
 
 // License, Flow presence, and HR self-lookup remain explicit REST fallbacks

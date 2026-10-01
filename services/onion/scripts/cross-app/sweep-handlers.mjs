@@ -336,7 +336,7 @@ for (const f of walk(paths.platform, ['.go'])) {
         rpc_or_route: `${mm[1].replace('Register', '').toUpperCase()} /${pm[1]}`,
         request_type: '',
         response_type: '',
-        auth_required: t.includes('license_routes') ? 'mixed' : 'yes',
+        auth_required: 'yes',
         tenant_predicate: tenantPredicate(t),
         file: relRepo(f),
         line: t.slice(0, mm.index).split('\n').length,

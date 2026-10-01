@@ -33,5 +33,5 @@ type ProviderCapabilities struct {
 	SupportsEmbeddings bool // For vector embeddings
 	SupportsDatabase   bool // For MindsDB-style database queries
 	SupportsFineTuning bool // For custom model training
-	IsCustomModel      bool // For self-hosted/custom models
+	IsCustomModel      bool // For endpoints outside the built-in provider catalog
 }

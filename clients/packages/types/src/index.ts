@@ -1,5 +1,4 @@
 export * from './user';
-export * from './runtime';
 export * from './business';
 export * from './pos';
 export * from './erp';

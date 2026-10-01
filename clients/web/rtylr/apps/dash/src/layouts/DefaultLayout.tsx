@@ -31,7 +31,6 @@ import {
 import { SUPPORTED_LANGUAGES } from '@voxire/i18n';
 import { selectLanguage } from '../shared/services/i18next';
 import { CaretPanel, CaretButton, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
-import { LicenseBanner } from '@voxire/components';
 import { useUserStore } from '../shared/stores/userStore';
 import { useBusinessStore } from '../shared/stores/businessStore';
 import { useConfigStore } from '../shared/stores/configStore';
@@ -56,7 +55,6 @@ import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/dashCaretContext';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { licenseClient } from '../shared/lib/clients';
 
 interface NavItem {
   /** Stable id, also the tour anchor. Never the label: that is a translation. */
@@ -685,7 +683,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         {/* Main content + Caret AI inline column */}
         <div className="flex flex-1 min-w-0 overflow-hidden">
           <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-            <LicenseBanner client={licenseClient} />
             {/* Topbar */}
             <header
               className="dash-topbar h-11 flex items-center justify-between px-4 sm:px-6 shrink-0"

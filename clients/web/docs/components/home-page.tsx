@@ -2,8 +2,7 @@ import Link from 'next/link';
 
 const quickStartCards = [
   ['01', 'Set up rtylr', 'Understand the platform, create your organization, and get your first team moving.', '/getting-started/introduction'],
-  ['02', 'Self-host rtylr', 'Run rtylr on infrastructure you control with Docker Compose or Kubernetes.', '/self-hosting'],
-  ['03', 'Build with the API', 'Connect your own tools and workflows to the rtylr data model.', '/api/overview'],
+  ['02', 'Build with the API', 'Connect your own tools and workflows to the rtylr data model.', '/api/overview'],
 ];
 
 const appCards = [
@@ -24,10 +23,9 @@ export function HomePage() {
         <div className="home-hero__copy">
           <p className="eyebrow"><span className="eyebrow__mark" /> RTYLR DOCUMENTATION</p>
           <h1>Everything you need to run rtylr.</h1>
-          <p className="hero-description">One place to learn the platform, launch every app, connect your data, and run rtylr on your own infrastructure.</p>
+          <p className="hero-description">One place to learn the platform, launch every app, and connect your data.</p>
           <div className="hero-actions">
             <Link className="primary-button" href="/getting-started/introduction">Start with rtylr <span aria-hidden="true">↗</span></Link>
-            <Link className="secondary-button" href="/self-hosting">Self-hosting <span aria-hidden="true">↗</span></Link>
           </div>
         </div>
         <div className="hero-visual" aria-label="The rtylr platform and its apps">

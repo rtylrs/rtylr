@@ -3,14 +3,11 @@ import {
   resolveApiBase,
   resolveAppUrl,
   resolveAuthUrl,
-  resolveCookieDomain,
 } from '@voxire/config';
 import { safeFetch } from './result';
 import { markCredential, sentCredential, shouldEndSharedSession } from './session';
 
 const getBaseUrl = (): string => {
-  // Runtime config (self-host) overrides the build-time/hosted default; hosted
-  // returns the same VITE_API_URL/rtylr default it always did.
   return resolveApiBase();
 };
 
@@ -37,9 +34,6 @@ const isLocalDevHost = (hostname: string): boolean => {
 const getCookieDomain = (): string | undefined => {
   const hostname = window.location.hostname.toLowerCase();
   if (isLocalDevHost(hostname)) return undefined;
-  // Self-host: scope to the deployment's own shared parent domain (if any).
-  const runtimeDomain = resolveCookieDomain();
-  if (runtimeDomain) return runtimeDomain;
   if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) return '.rtylr.com';
   return undefined;
 };
@@ -53,7 +47,6 @@ const clearTokenCookie = (): void => {
 };
 
 const getAuthBaseUrl = (): string => {
-  // Self-host uses the runtime auth URL; hosted uses sso.rtylr.com.
   return isLocalDevHost(window.location.hostname) ? 'http://localhost:5176' : resolveAuthUrl();
 };
 
@@ -267,8 +260,6 @@ export function createApiClient(appId: string): AxiosInstance {
   client.interceptors.request.use(
     (config) => {
       // Resolve the base per-request: the singleton `api` is created at module
-      // load, which can be before runtime config (self-host) has fetched. Hosted
-      // resolves to the same value `getBaseUrl()` returned at creation time.
       config.baseURL = getBaseUrl();
       const token = getToken();
       // Recorded so the response interceptor can tell a 401 against a real

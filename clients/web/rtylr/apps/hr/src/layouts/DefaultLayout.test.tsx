@@ -50,7 +50,6 @@ vi.mock('@voxire/auth', () => {
   );
   return { useUserStore };
 });
-vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
 vi.mock('@voxire/config', () => ({ getAvatarUrl: () => '' }));
 vi.mock('@voxire/caret', () => ({
   buildCaretRouteContext: () => ({}),
@@ -63,7 +62,6 @@ vi.mock('@voxire/ui', () => ({
 }));
 vi.mock('@voxire/utils', () => ({ useForesightLinks: () => undefined }));
 vi.mock('../shared/lib/clients', () => ({
-  licenseClient: {},
   userClient: { getMe: () => Promise.resolve({}) },
 }));
 // `config: null` is production's real state, since nothing populates

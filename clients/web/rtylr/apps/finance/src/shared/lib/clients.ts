@@ -1,6 +1,5 @@
 import { createOneKitClient, createRestRouteClient, oneKitResult, unwrap } from '@voxire/api';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
-import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/client';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
 import { FinancialServiceClient } from '@voxire/voxie/insights/financial/v1/client';
@@ -20,7 +19,6 @@ import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
 import { StatementServiceClient } from '@voxire/voxie/finance/statement/v1/client';
 import { TaxServiceClient } from '@voxire/voxie/finance/tax/v1/client';
 
-export const licenseClient = createOneKitClient(LicenseServiceClient, 'finance');
 export const userClient = createOneKitClient(UserServiceClient, 'finance');
 export const financeDashboardClient = createOneKitClient(FinanceDashboardServiceClient, 'finance');
 export const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');

@@ -3,7 +3,6 @@ import {
   createOneKitFetch,
   type RealtimeEvent,
 } from "@voxire/api";
-import { useServerStore } from "../../stores/serverStore";
 import { resolveApiBaseUrl, resolveWsBaseUrl } from "../server/serverConfig";
 
 let oneKitFetch: ReturnType<typeof createOneKitFetch> | null = null;
@@ -44,9 +43,8 @@ const activeTopics = new Map<string, ActiveTopic>();
 let realtimeClient: RealtimeClient | null = null;
 let realtimeUrl: string | null = null;
 
-function attachTopic(topic: string, active: ActiveTopic): void {
+function attachTopic(client: RealtimeClient, topic: string, active: ActiveTopic): void {
   if (active.unsubscribeClient) return;
-  const client = ensureRealtimeClient();
   active.unsubscribeClient = client.subscribe(topic, (event) => {
     for (const handler of Array.from(active.handlers)) handler(event);
   });
@@ -57,43 +55,31 @@ function ensureRealtimeClient(): RealtimeClient {
   if (realtimeClient && realtimeUrl === nextUrl) return realtimeClient;
 
   realtimeClient?.close();
-  realtimeClient = new RealtimeClient({
+  const client = new RealtimeClient({
     url: nextUrl,
     getTicket: getRealtimeTicket,
   });
+  realtimeClient = client;
   realtimeUrl = nextUrl;
 
   for (const active of activeTopics.values())
     active.unsubscribeClient = undefined;
   for (const [topic, active] of activeTopics) {
-    if (active.handlers.size > 0) attachTopic(topic, active);
+    if (active.handlers.size > 0) attachTopic(client, topic, active);
   }
-  return realtimeClient;
+  return client;
 }
-
-useServerStore.subscribe((state, previousState) => {
-  if (
-    !realtimeClient ||
-    (state.mode === previousState.mode &&
-      state.customApiUrl === previousState.customApiUrl)
-  ) {
-    return;
-  }
-  // The persist middleware notifies subscribers before writing localStorage.
-  queueMicrotask(() => {
-    if (realtimeClient) ensureRealtimeClient();
-  });
-});
 
 export const posRealtime = {
   subscribe(topic: string, handler: RealtimeEventHandler): () => void {
+    const client = ensureRealtimeClient();
     let active = activeTopics.get(topic);
     if (!active) {
       active = { handlers: new Set() };
       activeTopics.set(topic, active);
     }
     active.handlers.add(handler);
-    attachTopic(topic, active);
+    attachTopic(client, topic, active);
 
     let subscribed = true;
     return (): void => {

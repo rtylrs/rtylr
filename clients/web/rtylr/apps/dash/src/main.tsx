@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { injectTheme, loadRuntimeConfig } from '@voxire/config';
+import { injectTheme } from '@voxire/config';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
 import { router } from './router';
@@ -30,29 +30,22 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  // Show the loader immediately while runtime config (self-host URLs / feature
-  // posture) is fetched. Render the app only once it resolves — or fails, in
-  // which case we fall back to static (hosted) defaults so boot is never
-  // hard-blocked. Hosted resolves in one quick request and is unchanged.
-  root.render(<FullScreenLoader />);
-  void loadRuntimeConfig().finally(() => {
-    root.render(
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <CookiesProvider>
-            <Suspense fallback={<FullScreenLoader />}>
-              <I18nextProvider i18n={i18next}>
-                <HelmetContainer title="Dashboard - Rtylr" favicon="/favicon.ico" />
-                <CookieBanner />
-                <RouterProvider router={router} />
-                <Toaster expand={false} richColors />
-              </I18nextProvider>
-            </Suspense>
-          </CookiesProvider>
-        </QueryClientProvider>
-      </HelmetProvider>
-    );
-  });
+  root.render(
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <CookiesProvider>
+          <Suspense fallback={<FullScreenLoader />}>
+            <I18nextProvider i18n={i18next}>
+              <HelmetContainer title="Dashboard - Rtylr" favicon="/favicon.ico" />
+              <CookieBanner />
+              <RouterProvider router={router} />
+              <Toaster expand={false} richColors />
+            </I18nextProvider>
+          </Suspense>
+        </CookiesProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  );
 } else {
   const msg = document.createElement('div');
   msg.textContent = 'The app failed to load. Please refresh the page.';

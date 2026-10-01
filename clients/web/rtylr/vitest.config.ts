@@ -26,16 +26,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    // The suite reached the live internet on every run. Two paths did it:
-    // @voxire/config's loadRuntimeConfig fetched `${VITE_API_URL}/runtime-config`,
-    // which defaults to https://api.voxire.com, and recruit's font pairing
-    // injected a <link> pointing at fonts.googleapis.com that happy-dom then
-    // fetched. Both left a request in flight when the window was torn down, and
-    // happy-dom's abortAll threw an unhandled DOMException out of teardown
-    // (#988).
-    //
-    // A port-9 base refuses immediately, so nothing is ever in flight, and no
-    // test run can touch production.
+    // Keep tests away from production: a port-9 API base refuses immediately,
+    // so no request can remain in flight when happy-dom tears down a window.
     env: {
       VITE_API_URL: TEST_API_BASE,
     },

@@ -2,10 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@voxire/ui';
 import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
-import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
-import { licenseClient, userClient } from '../shared/lib/clients';
+import { userClient } from '../shared/lib/clients';
 import { useForesightLinks } from '@voxire/utils';
 import { useNavigate, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
@@ -682,7 +681,6 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
-            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

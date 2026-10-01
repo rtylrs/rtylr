@@ -9,8 +9,6 @@ import (
 	"net/netip"
 	"strings"
 
-	"github.com/workos/workos-go/v4/pkg/workos_errors"
-
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
@@ -33,7 +31,7 @@ var (
 	ErrGoogleEmailUnverified    = errors.New("google email unverified")
 )
 
-// GoogleAuth exchanges a WorkOS auth code for user info, then either logs
+// GoogleAuth exchanges a Google auth code for user info, then either logs
 // in the matching user (by verified email) or provisions a new account.
 //
 // Account linking rule (locked in the plan):
@@ -52,14 +50,17 @@ func (s *Service) GoogleAuth(
 	signupIP netip.Addr,
 	deviceInfo string,
 ) (*GoogleAuthResult, error) {
-	if s.workOSProvider == nil || s.workOSProvider.clientID == "" {
+	if s.googleOAuthProvider == nil || s.googleClientID == "" {
 		return nil, ErrGoogleOAuthNotConfigured
 	}
 
-	googleUser, err := s.workOSProvider.AuthenticateWithCode(ctx, code)
+	googleUser, err := s.googleOAuthProvider.AuthenticateWithCode(ctx, code)
 	if err != nil {
-		logger.Ctx(ctx).Warn("workos code exchange failed", logger.Error(err))
-		if isWorkOSUnavailable(err) {
+		if errors.Is(err, ErrGoogleOAuthNotConfigured) {
+			return nil, ErrGoogleOAuthNotConfigured
+		}
+		logger.Ctx(ctx).Warn("google code exchange failed", logger.Error(err))
+		if googleOAuthUnavailable(err) {
 			return nil, ErrGoogleOAuthUnavailable
 		}
 		return nil, ErrGoogleTokenInvalid
@@ -67,53 +68,8 @@ func (s *Service) GoogleAuth(
 	return s.linkGoogleUser(ctx, googleUser, businessName, signupIP, deviceInfo)
 }
 
-func isWorkOSUnavailable(err error) bool {
-	status, isHTTPError := workOSHTTPStatus(err)
-	if isHTTPError {
-		return status == 429 || status >= 500
-	}
-	return true
-}
-
-func workOSHTTPStatus(err error) (int, bool) {
-	var httpErr workos_errors.HTTPError
-	if errors.As(err, &httpErr) {
-		return httpErr.Code, true
-	}
-
-	// WorkOS uses structured authentication errors for some 4xx responses;
-	// each embeds the HTTP status but has its own Error implementation.
-	var emailVerification *workos_errors.EmailVerificationRequiredError
-	if errors.As(err, &emailVerification) {
-		return emailVerification.HTTPError.Code, true
-	}
-	var mfaEnrollment *workos_errors.MFAEnrollmentError
-	if errors.As(err, &mfaEnrollment) {
-		return mfaEnrollment.HTTPError.Code, true
-	}
-	var mfaChallenge *workos_errors.MFAChallengeError
-	if errors.As(err, &mfaChallenge) {
-		return mfaChallenge.HTTPError.Code, true
-	}
-	var organizationSelection *workos_errors.OrganizationSelectionRequiredError
-	if errors.As(err, &organizationSelection) {
-		return organizationSelection.HTTPError.Code, true
-	}
-	var ssoRequired *workos_errors.SSORequiredError
-	if errors.As(err, &ssoRequired) {
-		return ssoRequired.Code, true
-	}
-	var organizationMethods *workos_errors.OrganizationAuthenticationMethodsRequiredError
-	if errors.As(err, &organizationMethods) {
-		return organizationMethods.Code, true
-	}
-
-	return 0, false
-}
-
 // linkGoogleUser verifies the provider identity and links or provisions the
-// local account. Split from GoogleAuth so the verification gate is unit-
-// testable without the WorkOS SDK (#815).
+// local account. Split from GoogleAuth so the verification gate is unit-testable.
 func (s *Service) linkGoogleUser(
 	ctx context.Context,
 	googleUser *GoogleUser,
@@ -220,13 +176,10 @@ func (s *Service) linkGoogleUser(
 	return &GoogleAuthResult{UserID: userID, Token: token, IsNew: true}, nil
 }
 
-// SocialAuthorizationURL returns the WorkOS-hosted consent URL for a social
-// provider (google, github, microsoft, apple). The frontend redirects the user
-// there; the provider returns to the callback with a code that GoogleAuth
-// exchanges (the exchange is provider-agnostic).
-func (s *Service) SocialAuthorizationURL(provider string) (string, error) {
-	if s.workOSProvider == nil || s.workOSProvider.clientID == "" {
+// GoogleAuthorizationURL returns the Google-hosted consent URL.
+func (s *Service) GoogleAuthorizationURL() (string, error) {
+	if s.googleOAuthProvider == nil || s.googleClientID == "" {
 		return "", ErrGoogleOAuthNotConfigured
 	}
-	return s.workOSProvider.GetAuthorizationURL(provider)
+	return s.googleOAuthProvider.GetAuthorizationURL()
 }

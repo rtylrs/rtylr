@@ -9,8 +9,8 @@ import (
 //
 // Cross-origin choices are deliberate: this server is an API + CDN consumed
 // cross-site by *.rtylr.com / *.voxire.com, so Cross-Origin-Resource-Policy is
-// "cross-origin" (assets must stay embeddable) and COOP allows popups (so the
-// WorkOS OAuth flow is never broken). COEP and a same-site CORP are
+// "cross-origin" (assets must stay embeddable) and COOP allows popups for the
+// Google sign-in flow. COEP and a same-site CORP are
 // intentionally omitted — they would break legitimate cross-origin embedding.
 var securityResponseHeaders = map[string]string{
 	"X-Content-Type-Options": "nosniff",

@@ -130,12 +130,10 @@ message CheckEmailExistsResponse {
   exists: bool
 }
 
-message SocialAuthorizeRequest {
-  /// provider is the social login provider (google, github, microsoft, apple).
-  provider: string @in("google", "github", "microsoft", "apple", "") @query("provider")
+message GoogleAuthorizeRequest {
 }
 
-message SocialAuthorizeResponse {
-  /// url is the provider-hosted consent URL to redirect the browser to.
+message GoogleAuthorizeResponse {
+  /// url is the Google consent URL to redirect the browser to.
   url: string
 }

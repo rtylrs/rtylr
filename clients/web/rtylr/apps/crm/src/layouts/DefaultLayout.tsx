@@ -33,11 +33,9 @@ import { useForesightLinks } from '@voxire/utils';
 import { pageTitleKey, routeLabels } from '../shared/lib/routeLabels';
 import { useTranslation } from 'react-i18next';
 import { createOneKitClient } from '@voxire/api';
-import { LicenseBanner } from '@voxire/components';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
-import { licenseClient } from '../shared/lib/clients';
 import { toast } from 'sonner';
 import { readLocalStorage, writeLocalStorage } from '../shared/lib/storage';
 
@@ -661,7 +659,6 @@ const DefaultLayout: React.FC = () => {
             </header>
 
             {/* Content */}
-            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

@@ -1,24 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
 const realtimeMocks = vi.hoisted(() => {
   type Event = { topic: string; type: string };
   type EventHandler = (event: Event) => void;
-  type ServerState = {
-    mode: "hosted" | "self_host";
-    customApiUrl: string | null;
-  };
-  type ServerListener = (
-    state: ServerState,
-    previousState: ServerState,
-  ) => void;
 
   class MockRealtimeClient {
     readonly subscriptions = new Map<string, Set<EventHandler>>();
-    closed = false;
 
-    constructor(readonly options: { url: string }) {
-      clients.push(this);
-    }
+    constructor(readonly options: { url: string }) {}
 
     subscribe(topic: string, handler: EventHandler): () => void {
       const handlers = this.subscriptions.get(topic) ?? new Set<EventHandler>();
@@ -31,85 +20,53 @@ const realtimeMocks = vi.hoisted(() => {
     }
 
     close(): void {
-      this.closed = true;
       this.subscriptions.clear();
     }
   }
 
   const clients: MockRealtimeClient[] = [];
-  const listeners = new Set<ServerListener>();
-  let serverState: ServerState = { mode: "hosted", customApiUrl: null };
-  let wsBaseUrl = "wss://server-a.example";
 
-  return {
-    MockRealtimeClient,
-    clients,
-    getWsBaseUrl: (): string => wsBaseUrl,
-    serverStore: {
-      subscribe: (listener: ServerListener): (() => void) => {
-        listeners.add(listener);
-        return (): void => {
-          listeners.delete(listener);
-        };
-      },
-    },
-    setServer: (next: ServerState): void => {
-      const previous = serverState;
-      serverState = next;
-      for (const listener of listeners) listener(serverState, previous);
-      if (next.mode === "self_host" && next.customApiUrl) {
-        wsBaseUrl = next.customApiUrl.replace(/^http/, "ws").replace(/\/$/, "");
-      }
-    },
-  };
+  return { MockRealtimeClient, clients };
 });
 
-vi.mock("@voxire/api", () => ({
-  RealtimeClient: realtimeMocks.MockRealtimeClient,
+vi.mock('@voxire/api', () => ({
+  RealtimeClient: class extends realtimeMocks.MockRealtimeClient {
+    constructor(options: { url: string }) {
+      super(options);
+      realtimeMocks.clients.push(this);
+    }
+  },
   createOneKitFetch: () => vi.fn(),
 }));
 
-vi.mock("../../stores/serverStore", () => ({
-  useServerStore: realtimeMocks.serverStore,
+vi.mock('../server/serverConfig', () => ({
+  resolveApiBaseUrl: () => 'https://api.rtylr.example/',
+  resolveWsBaseUrl: () => 'wss://api.rtylr.example',
 }));
 
-vi.mock("../server/serverConfig", () => ({
-  resolveApiBaseUrl: () => "https://server-a.example/",
-  resolveWsBaseUrl: realtimeMocks.getWsBaseUrl,
-}));
+import { posRealtime } from './realtime';
 
-import { posRealtime } from "./realtime";
-
-describe("posRealtime", () => {
-  it("reconnects active subscriptions to the newly selected server", async () => {
+describe('posRealtime', () => {
+  it('delivers events and closes a topic after its final listener leaves', () => {
     const handler = vi.fn();
-    posRealtime.subscribe("owner:1", handler);
+    const unsubscribe = posRealtime.subscribe('owner:1', handler);
 
     expect(realtimeMocks.clients).toHaveLength(1);
     expect(realtimeMocks.clients[0]?.options.url).toBe(
-      "wss://server-a.example/pos/ws",
+      'wss://api.rtylr.example/pos/ws'
     );
-
-    realtimeMocks.setServer({
-      mode: "self_host",
-      customApiUrl: "https://server-b.example/",
-    });
-    await Promise.resolve();
-
-    expect(realtimeMocks.clients).toHaveLength(2);
-    expect(realtimeMocks.clients[0]?.closed).toBe(true);
-    expect(realtimeMocks.clients[1]?.options.url).toBe(
-      "wss://server-b.example/pos/ws",
-    );
-    expect(realtimeMocks.clients[1]?.subscriptions.has("owner:1")).toBe(true);
+    expect(realtimeMocks.clients[0]?.subscriptions.get('owner:1')?.size).toBe(1);
 
     const activeHandler = Array.from(
-      realtimeMocks.clients[1]?.subscriptions.get("owner:1") ?? [],
+      realtimeMocks.clients[0]?.subscriptions.get('owner:1') ?? []
     )[0];
-    activeHandler?.({ topic: "owner:1", type: "pos:order:voided" });
+    activeHandler?.({ topic: 'owner:1', type: 'pos:order:voided' });
     expect(handler).toHaveBeenCalledWith({
-      topic: "owner:1",
-      type: "pos:order:voided",
+      topic: 'owner:1',
+      type: 'pos:order:voided',
     });
+
+    unsubscribe();
+    expect(realtimeMocks.clients[0]?.subscriptions.has('owner:1')).toBe(false);
   });
 });

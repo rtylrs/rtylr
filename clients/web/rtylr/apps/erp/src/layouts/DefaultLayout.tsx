@@ -6,8 +6,7 @@ import { Link, useNavigate, useRouterState, Outlet } from '@tanstack/react-route
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
-import { LicenseBanner } from '@voxire/components';
-import { licenseClient, userClient } from '../shared/lib/clients';
+import { userClient } from '../shared/lib/clients';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -602,7 +601,6 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
-            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

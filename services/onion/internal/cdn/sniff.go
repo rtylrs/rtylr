@@ -17,8 +17,7 @@ import (
 // io.MultiReader silently downgraded an io.ReadSeeker to a plain io.Reader, and
 // the handler's body is a multipart.File, which is seekable. s3.PutObject needs
 // to seek back to the start to compute the payload hash whenever the endpoint
-// is not TLS, so every upload failed with 500 against a plaintext object store:
-// the shape onion ships for self-host and documents for local development.
+// is not TLS, so every upload failed with 500 against a plaintext object store.
 // Production was unaffected because the SDK signs a streaming body as
 // UNSIGNED-PAYLOAD over TLS, which is why this stayed invisible.
 func sniffMIME(r io.Reader) (string, io.Reader, error) {

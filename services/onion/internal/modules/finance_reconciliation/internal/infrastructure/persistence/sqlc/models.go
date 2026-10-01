@@ -980,48 +980,6 @@ func (ns NullFinanceTaxConfigType) Value() (driver.Value, error) {
 	return string(ns.FinanceTaxConfigType), nil
 }
 
-type SelfHostLicensesStatus string
-
-const (
-	SelfHostLicensesStatusActive  SelfHostLicensesStatus = "active"
-	SelfHostLicensesStatusRevoked SelfHostLicensesStatus = "revoked"
-)
-
-func (e *SelfHostLicensesStatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = SelfHostLicensesStatus(s)
-	case string:
-		*e = SelfHostLicensesStatus(s)
-	default:
-		return fmt.Errorf("unsupported scan type for SelfHostLicensesStatus: %T", src)
-	}
-	return nil
-}
-
-type NullSelfHostLicensesStatus struct {
-	SelfHostLicensesStatus SelfHostLicensesStatus `json:"self_host_licenses_status"`
-	Valid                  bool                   `json:"valid"` // Valid is true if SelfHostLicensesStatus is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullSelfHostLicensesStatus) Scan(value interface{}) error {
-	if value == nil {
-		ns.SelfHostLicensesStatus, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.SelfHostLicensesStatus.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullSelfHostLicensesStatus) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.SelfHostLicensesStatus), nil
-}
-
 type SubscriptionsStatus string
 
 const (
@@ -1950,26 +1908,6 @@ type SeatPeriod struct {
 	// First day of the month this period belongs to
 	BillingMonth time.Time    `db:"billing_month" json:"billing_month"`
 	CreatedAt    sql.NullTime `db:"created_at" json:"created_at"`
-}
-
-type SelfHostLicense struct {
-	ID            int64                  `db:"id" json:"id"`
-	OwnerEmail    string                 `db:"owner_email" json:"owner_email"`
-	CustomerName  sql.NullString         `db:"customer_name" json:"customer_name"`
-	Plan          string                 `db:"plan" json:"plan"`
-	Features      json.RawMessage        `db:"features" json:"features"`
-	SeatLimit     sql.NullInt32          `db:"seat_limit" json:"seat_limit"`
-	ExpiresAt     sql.NullTime           `db:"expires_at" json:"expires_at"`
-	GraceUntil    sql.NullTime           `db:"grace_until" json:"grace_until"`
-	Status        SelfHostLicensesStatus `db:"status" json:"status"`
-	LicenseKey    string                 `db:"license_key" json:"license_key"`
-	KeyHash       string                 `db:"key_hash" json:"key_hash"`
-	CreatedBy     sql.NullInt64          `db:"created_by" json:"created_by"`
-	UpdatedBy     sql.NullInt64          `db:"updated_by" json:"updated_by"`
-	CreatedAt     sql.NullTime           `db:"created_at" json:"created_at"`
-	UpdatedAt     sql.NullTime           `db:"updated_at" json:"updated_at"`
-	RegeneratedAt sql.NullTime           `db:"regenerated_at" json:"regenerated_at"`
-	RevokedAt     sql.NullTime           `db:"revoked_at" json:"revoked_at"`
 }
 
 type Subscription struct {

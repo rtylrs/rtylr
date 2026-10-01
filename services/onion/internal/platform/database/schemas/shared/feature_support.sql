@@ -61,25 +61,6 @@ INSERT INTO feature_flags (
   variant_off
 )
 VALUES (
-  'auth.social_login_enabled',
-  'Show social-login buttons on the auth login screen.',
-  TRUE,
-  100,
-  'on',
-  'off'
-)
-ON DUPLICATE KEY UPDATE
-  feature_key = feature_key;
-
-INSERT INTO feature_flags (
-  feature_key,
-  description,
-  enabled,
-  rollout_percentage,
-  variant_on,
-  variant_off
-)
-VALUES (
   'is_desktop_mode_default',
   'Default the rtylr landing page to the desktop OS experience when enabled.',
   FALSE,

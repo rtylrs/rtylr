@@ -99,6 +99,13 @@ func grantMemberAccess(t *testing.T, db *sql.DB, businessID int64) {
 	t.Helper()
 	ctx := context.Background()
 	if _, err := db.ExecContext(ctx,
+		`INSERT INTO users (id, business_id, email, password_hash)
+		 VALUES (?, ?, ?, 'test')`,
+		memberUserID, businessID, fmt.Sprintf("aiquery-member-%d@example.invalid", businessID),
+	); err != nil {
+		t.Fatalf("create member test user: %v", err)
+	}
+	if _, err := db.ExecContext(ctx,
 		`INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
 		 VALUES (?, ?, 'member', 'active')`,
 		businessID, memberUserID,
@@ -108,6 +115,7 @@ func grantMemberAccess(t *testing.T, db *sql.DB, businessID int64) {
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(context.Background(),
 			`DELETE FROM authorization_business_members WHERE user_id = ? AND business_id = ?`, memberUserID, businessID)
+		_, _ = db.ExecContext(context.Background(), `DELETE FROM users WHERE id = ?`, memberUserID)
 	})
 }
 
@@ -117,8 +125,8 @@ func seedInvoice(t *testing.T, db *sql.DB, invoiceNumber string, businessID int6
 	if _, err := db.ExecContext(ctx,
 		`INSERT INTO finance_invoices
 		   (owner_id, business_id, invoice_number, client_name, issue_date, due_date, total, amount_paid, amount_due)
-		 VALUES (?, ?, ?, 'aiq-probe', CURRENT_DATE, CURRENT_DATE, 10, 0, 10)`,
-		testutil.OwnerID, businessID, invoiceNumber,
+		 VALUES (?, ?, ?, ?, CURRENT_DATE, CURRENT_DATE, 10, 0, 10)`,
+		testutil.OwnerID, businessID, invoiceNumber, invoiceNumber,
 	); err != nil {
 		t.Fatalf("seed finance_invoices (%d, %s): %v", businessID, invoiceNumber, err)
 	}

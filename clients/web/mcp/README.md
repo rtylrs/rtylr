@@ -102,7 +102,7 @@ To sign out and re-authorize, delete `~/.rtylr-mcp/config.json`.
 
 | Environment variable | Default | Description |
 |---------------------|---------|-------------|
-| `RTYLR_API_URL` | `https://api.voxire.com` | Override the API base URL (for self-hosted or dev) |
+| `RTYLR_API_URL` | `https://api.voxire.com` | Override the API base URL for local development or a test environment |
 
 ## Development
 

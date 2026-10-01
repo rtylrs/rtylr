@@ -2,14 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
-import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import { APP_CONFIG, APP_URLS } from '@voxire/config';
 
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useRegisterRestaurant, checkEmailExists } from '../../shared/hooks/useAuth';
-import { useFeatureGate } from '../../shared/hooks/useFeatureGate';
-import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
+import { startGoogleLogin } from '../../shared/lib/social';
 import { Button, HelmetContainer } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 import PasswordStrengthMeter, {
@@ -19,7 +18,6 @@ import { getCookie } from '@voxire/auth';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
 const DEFAULT_SIGNUP_PLAN_SLUG = 'free';
-const AUTH_SOCIAL_LOGIN_FLAG = 'auth.social_login_enabled';
 
 type RedirectableAppId = keyof typeof APP_CONFIG;
 
@@ -47,7 +45,6 @@ const Register: React.FC = (): React.JSX.Element => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
-  const showSocialLogin = useFeatureGate(AUTH_SOCIAL_LOGIN_FLAG, false);
   const emailError = getEmailError(email);
   const matchError = getPasswordMatchError(password, confirmPassword);
 
@@ -100,13 +97,13 @@ const Register: React.FC = (): React.JSX.Element => {
     );
   };
 
-  const handleSocial = async (provider: SocialProvider): Promise<void> => {
+  const handleGoogleLogin = async (): Promise<void> => {
     if (!businessName.trim()) {
       notify.error('Enter your business name first');
       return;
     }
     try {
-      await startSocialLogin(provider, redirectParam, businessName.trim());
+      await startGoogleLogin(redirectParam, businessName.trim());
     } catch {
       notify.error('Social sign-in is currently unavailable');
     }
@@ -327,62 +324,21 @@ const Register: React.FC = (): React.JSX.Element => {
             {t('auth.register.submit')}
           </Button>
 
-          {showSocialLogin && (
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="auth-provider-button"
-                fullWidth
-                height={40}
-                onClick={() => handleSocial('google')}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <FaGoogle className="text-[#444]" />
-                  {t('auth.common.google')}
-                </span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="auth-provider-button"
-                fullWidth
-                height={40}
-                onClick={() => handleSocial('github')}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <FaGithub className="text-[#444]" />
-                  {t('auth.common.github')}
-                </span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="auth-provider-button"
-                fullWidth
-                height={40}
-                onClick={() => handleSocial('microsoft')}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <FaMicrosoft className="text-[#444]" />
-                  {t('auth.common.microsoft')}
-                </span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="auth-provider-button"
-                fullWidth
-                height={40}
-                onClick={() => handleSocial('apple')}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <FaApple className="text-[#444]" />
-                  {t('auth.common.apple')}
-                </span>
-              </Button>
-            </div>
-          )}
+          <div className="grid grid-cols-1 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => void handleGoogleLogin()}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaGoogle className="text-[#444]" />
+                {t('auth.common.google')}
+              </span>
+            </Button>
+          </div>
         </form>
       </AuthShell>
     </>

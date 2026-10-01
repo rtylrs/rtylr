@@ -83,20 +83,6 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&deleteAddonGrantHandler{Service: service},
 	)
 
-	// Self-host licenses
-	router.Get("/console/self-host-licenses", rawListSelfHostLicenses(ctx, service))
-	serverHttp.RegisterPOSTWithValidation[createSelfHostLicenseRequest, application.SelfHostLicenseKeyResult](
-		ctx, router, []string{"/console/self-host-licenses"},
-		&createSelfHostLicenseHandler{Service: service},
-	)
-	serverHttp.RegisterPOSTWithValidation[licenseIDRequest, application.SelfHostLicenseKeyResult](
-		ctx, router, []string{"/console/self-host-licenses/{id}/regenerate"},
-		&regenerateSelfHostLicenseHandler{Service: service},
-	)
-	serverHttp.RegisterPOSTWithValidation[licenseIDRequest, application.SelfHostLicenseDTO](
-		ctx, router, []string{"/console/self-host-licenses/{id}/revoke"},
-		&revokeSelfHostLicenseHandler{Service: service},
-	)
 }
 
 // ── helper ────────────────────────────────────────────────────────────────────

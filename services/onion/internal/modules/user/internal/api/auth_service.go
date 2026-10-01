@@ -263,16 +263,17 @@ func (a *AuthAPI) CheckEmailExists(ctx context.Context, req *commonauthv1.CheckE
 	return &commonauthv1.CheckEmailExistsResponse{Exists: exists}, nil
 }
 
-func (a *AuthAPI) SocialAuthorize(_ context.Context, req *commonauthv1.SocialAuthorizeRequest) (*commonauthv1.SocialAuthorizeResponse, error) {
-	url, err := a.UserService.SocialAuthorizationURL(req.GetProvider())
+func (a *AuthAPI) GoogleAuthorize(ctx context.Context, _ *commonauthv1.GoogleAuthorizeRequest) (*commonauthv1.GoogleAuthorizeResponse, error) {
+	url, err := a.UserService.GoogleAuthorizationURL()
 	if err != nil {
 		if errors.Is(err, application.ErrGoogleOAuthNotConfigured) {
-			return nil, onekithttp.NewError(http.StatusServiceUnavailable, "Social login is not configured on this server")
+			return nil, onekithttp.NewError(http.StatusServiceUnavailable, "Google login is not configured on this server")
 		}
-		return nil, onekithttp.NewError(http.StatusBadRequest, "Failed to generate authorization URL: "+err.Error())
+		logger.Ctx(ctx).Warn("failed to create Google authorization URL", logger.Error(err))
+		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to start Google sign-in")
 	}
 
-	return &commonauthv1.SocialAuthorizeResponse{Url: url}, nil
+	return &commonauthv1.GoogleAuthorizeResponse{Url: url}, nil
 }
 
 func authErrorFromError(err error, fallbackMessage string) error {

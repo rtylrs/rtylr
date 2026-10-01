@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -24,6 +25,13 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+func nullableString(raw string) any {
+	if strings.TrimSpace(raw) == "" {
+		return nil
+	}
+	return raw
 }
 
 // dynamic-query: squirrel

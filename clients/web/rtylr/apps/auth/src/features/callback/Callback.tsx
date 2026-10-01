@@ -4,7 +4,11 @@ import { APP_URLS } from '@voxire/config';
 import type { GoogleAuthRequest } from '@voxire/voxie/common/auth/v1/types';
 import { useGoogleAuth } from '../../shared/hooks/useAuth';
 import { sessionStorageGet, sessionStorageRemove } from '../../shared/lib/storage';
-import { SOCIAL_AUTH_BUSINESS_NAME_KEY, SOCIAL_AUTH_REDIRECT_KEY } from '../../shared/lib/social';
+import {
+  GOOGLE_AUTH_STATE_KEY,
+  SOCIAL_AUTH_BUSINESS_NAME_KEY,
+  SOCIAL_AUTH_REDIRECT_KEY,
+} from '../../shared/lib/social';
 
 type KnownAppId = keyof typeof APP_URLS;
 
@@ -26,8 +30,13 @@ const Callback: React.FC = (): React.JSX.Element => {
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
+    const state = params.get('state');
+    const expectedState = sessionStorageGet(GOOGLE_AUTH_STATE_KEY);
 
-    if (!code) {
+    sessionStorageRemove(GOOGLE_AUTH_STATE_KEY);
+    if (!code || !state || !expectedState || state !== expectedState || params.has('error')) {
+      sessionStorageRemove(SOCIAL_AUTH_REDIRECT_KEY);
+      sessionStorageRemove(SOCIAL_AUTH_BUSINESS_NAME_KEY);
       window.location.replace('/?error=oauth_failed');
       return;
     }

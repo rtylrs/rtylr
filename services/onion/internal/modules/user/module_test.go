@@ -14,7 +14,7 @@ func TestAnonymousRoutesMatchGeneratedAuthRoutes(t *testing.T) {
 		"/common/auth/v1/resend-verification":    true,
 		"/common/auth/v1/invite/accept":          true,
 		"/common/auth/v1/email-exists":           true,
-		"/common/auth/v1/social/authorize":       true,
+		"/common/auth/v1/google/authorize":       true,
 	}
 
 	if len(routes) != len(want) {

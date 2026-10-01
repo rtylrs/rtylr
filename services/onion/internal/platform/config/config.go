@@ -47,9 +47,9 @@ const (
 )
 
 const (
-	// NVIDIA NIM is an OpenAI-compatible provider (hosted catalog or self-hosted).
+	// NVIDIA NIM is an OpenAI-compatible inference provider.
 	// Only the API key is an env secret (NVIDIA_NIM_API_KEY); base URL + model are
-	// fixed here. Point NvidiaNIMBaseURL at a self-hosted NIM if/when we run one.
+	// fixed here. Point NvidiaNIMBaseURL at the configured NIM endpoint.
 	// #nosec G101 -- This is an environment variable name, not a secret value.
 	NvidiaNIMAPIKeyEnvVar = "NVIDIA_NIM_API_KEY"
 	NvidiaNIMBaseURL      = "https://integrate.api.nvidia.com/v1"
@@ -75,30 +75,26 @@ const (
 )
 
 type AppConfig struct {
-	RunMode                string
-	DatabaseURL            string
-	DBHost                 string
-	DBPort                 string
-	DBUser                 string
-	DBPass                 string
-	DBName                 string
-	JWTSecret              string
-	JWTDuration            time.Duration
-	ResendKey              string
-	LeadNotifyEmails       []string
-	NewsletterNotifyEmails []string
-	AppEnv                 string
-	AppRelease             string
-	DeploymentMode         string
-	Port                   string
-	Hostname               string
-	AuthAppURL             string
-	GoogleOAuthClientID    string
-
-	// WorkOS
-	WorkOSAPIKey      string
-	WorkOSClientID    string
-	WorkOSRedirectURI string
+	RunMode                 string
+	DatabaseURL             string
+	DBHost                  string
+	DBPort                  string
+	DBUser                  string
+	DBPass                  string
+	DBName                  string
+	JWTSecret               string
+	JWTDuration             time.Duration
+	ResendKey               string
+	LeadNotifyEmails        []string
+	NewsletterNotifyEmails  []string
+	AppEnv                  string
+	AppRelease              string
+	Port                    string
+	Hostname                string
+	AuthAppURL              string
+	GoogleOAuthClientID     string
+	GoogleOAuthClientSecret string
+	GoogleOAuthRedirectURI  string
 
 	// DB Connection Pool configuration
 	DBMaxOpenConns    int
@@ -197,20 +193,6 @@ type AppConfig struct {
 	CDNModerationEnabled    bool
 	CDNModerationProvider   string // "openai" | "local"
 	CDNModerationFailClosed bool   // reject uploads when the moderation check errors
-
-	// License runmode / self-hosting controls.
-	LicenseKey               string
-	LicenseFile              string
-	LicensePublicKey         string
-	LicenseSigningPrivateKey string
-	LicenseIssuer            string
-	LicenseGracePeriod       time.Duration
-	LicenseClockStateFile    string
-	// LicenseAuthorityURL is the hosted license authority a self-host backend
-	// validates RTYLR_LICENSE_KEY against. Defaults to the Voxire authority and
-	// is intentionally NOT a documented customer knob (override only for our own
-	// testing via LICENSE_AUTHORITY_URL).
-	LicenseAuthorityURL string
 
 	// Internal Auth
 	InternalToken string

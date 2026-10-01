@@ -144,8 +144,6 @@ vi.mock('@voxire/auth', () => ({
   ) => select({ user: mocks.authUser, effectiveAccess: mocks.authUser.effectiveAccess }),
 }));
 
-vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
-
 // Sidebar preferences use React Query in production. The account-menu and
 // appearance tests do not exercise that persistence path, so keep the shell
 // isolated from its provider and network requirements here.

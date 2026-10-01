@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -163,98 +162,6 @@ func (h *deleteAddonGrantHandler) Serve(ctx context.Context, _ *grantIDRequest) 
 	return resourceMutationResponse{Message: "Addon grant deleted"}, nil
 }
 
-type createSelfHostLicenseRequest struct {
-	OwnerEmail   string   `json:"owner_email" validate:"required"`
-	CustomerName string   `json:"customer_name"`
-	Plan         string   `json:"plan"`
-	Features     []string `json:"features"`
-	SeatLimit    int      `json:"seat_limit"`
-	ExpiresAt    string   `json:"expires_at"`
-	GraceUntil   string   `json:"grace_until"`
-}
-
-func (r createSelfHostLicenseRequest) input() application.CreateSelfHostLicenseInput {
-	return application.CreateSelfHostLicenseInput{
-		OwnerEmail:   r.OwnerEmail,
-		CustomerName: r.CustomerName,
-		Plan:         r.Plan,
-		Features:     r.Features,
-		SeatLimit:    r.SeatLimit,
-		ExpiresAt:    r.ExpiresAt,
-		GraceUntil:   r.GraceUntil,
-	}
-}
-
-type createSelfHostLicenseHandler struct {
-	Service *application.Service
-}
-
-func (h *createSelfHostLicenseHandler) Serve(ctx context.Context, req *createSelfHostLicenseRequest) (application.SelfHostLicenseKeyResult, error) {
-	admin, err := consoleAdmin(ctx)
-	if err != nil {
-		return application.SelfHostLicenseKeyResult{}, err
-	}
-	result, err := h.Service.CreateSelfHostLicense(ctx, req.input(), admin.UserID)
-	if err != nil {
-		return application.SelfHostLicenseKeyResult{}, selfHostLicenseError(err)
-	}
-	return *result, nil
-}
-
-type licenseIDRequest struct{}
-
-func (h *createSelfHostLicenseHandler) Validate(_ context.Context, _ *createSelfHostLicenseRequest) error {
-	return nil
-}
-
-type regenerateSelfHostLicenseHandler struct {
-	Service *application.Service
-}
-
-func (h *regenerateSelfHostLicenseHandler) Validate(ctx context.Context, _ *licenseIDRequest) error {
-	return validateIDPath(ctx, "id", "Invalid self-host license ID")
-}
-
-func (h *regenerateSelfHostLicenseHandler) Serve(ctx context.Context, _ *licenseIDRequest) (application.SelfHostLicenseKeyResult, error) {
-	admin, err := consoleAdmin(ctx)
-	if err != nil {
-		return application.SelfHostLicenseKeyResult{}, err
-	}
-	id, err := parseIDPath(ctx, "id")
-	if err != nil {
-		return application.SelfHostLicenseKeyResult{}, err
-	}
-	result, err := h.Service.RegenerateSelfHostLicenseKey(ctx, id, admin.UserID)
-	if err != nil {
-		return application.SelfHostLicenseKeyResult{}, selfHostLicenseError(err)
-	}
-	return *result, nil
-}
-
-type revokeSelfHostLicenseHandler struct {
-	Service *application.Service
-}
-
-func (h *revokeSelfHostLicenseHandler) Validate(ctx context.Context, _ *licenseIDRequest) error {
-	return validateIDPath(ctx, "id", "Invalid self-host license ID")
-}
-
-func (h *revokeSelfHostLicenseHandler) Serve(ctx context.Context, _ *licenseIDRequest) (application.SelfHostLicenseDTO, error) {
-	admin, err := consoleAdmin(ctx)
-	if err != nil {
-		return application.SelfHostLicenseDTO{}, err
-	}
-	id, err := parseIDPath(ctx, "id")
-	if err != nil {
-		return application.SelfHostLicenseDTO{}, err
-	}
-	result, err := h.Service.RevokeSelfHostLicense(ctx, id, admin.UserID)
-	if err != nil {
-		return application.SelfHostLicenseDTO{}, selfHostLicenseError(err)
-	}
-	return *result, nil
-}
-
 func consoleAdmin(ctx context.Context) (*authPkg.AuthUser, error) {
 	admin, ok := authPkg.GetAuthUser(ctx)
 	if !ok || admin == nil {
@@ -286,17 +193,4 @@ func parseIDPath(ctx context.Context, param string) (int64, error) {
 		return 0, errors.New("invalid path id")
 	}
 	return id, nil
-}
-
-func selfHostLicenseError(err error) error {
-	switch {
-	case errors.Is(err, application.ErrSelfHostLicenseNotFound):
-		return onekiterrors.New(http.StatusNotFound, "Self-host license not found")
-	case errors.Is(err, application.ErrInvalidSelfHostLicenseInput):
-		return onekiterrors.New(http.StatusBadRequest, strings.TrimSpace(err.Error()))
-	case errors.Is(err, application.ErrSelfHostLicenseSigningKeyMissing):
-		return onekiterrors.New(http.StatusInternalServerError, "License signing key is not configured")
-	default:
-		return onekiterrors.New(http.StatusInternalServerError, "Self-host license request failed")
-	}
 }

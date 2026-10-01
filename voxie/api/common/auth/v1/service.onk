@@ -29,6 +29,6 @@ service AuthService {
   /// CheckEmailExists probes whether an email is already registered.
   checkEmailExists(CheckEmailExistsRequest) -> CheckEmailExistsResponse @get("/email-exists")
 
-  /// SocialAuthorize returns the WorkOS-hosted consent URL for a provider.
-  socialAuthorize(SocialAuthorizeRequest) -> SocialAuthorizeResponse @get("/social/authorize")
+  /// GoogleAuthorize returns the Google consent URL for sign-in.
+  googleAuthorize(GoogleAuthorizeRequest) -> GoogleAuthorizeResponse @get("/google/authorize")
 }

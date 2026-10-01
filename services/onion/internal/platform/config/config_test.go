@@ -5,16 +5,21 @@ import (
 	"time"
 )
 
-func setLicenseConfigEnv(t *testing.T) {
+func setConfigEnv(t *testing.T) {
 	t.Helper()
-	t.Setenv("RUN_MODE", "license")
+	t.Setenv("RUN_MODE", "api")
+	t.Setenv("DB_HOST", "127.0.0.1")
+	t.Setenv("DB_PORT", "3306")
+	t.Setenv("DB_USER", "test")
+	t.Setenv("DB_PASSWORD", "test")
+	t.Setenv("DB_NAME", "onion_test")
 	t.Setenv("JWT_SECRET", "test-secret")
 	t.Setenv("JWT_DURATION", "")
 	t.Cleanup(func() { GlobalConfig = nil })
 }
 
 func TestOpenCodeConfiguration(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 	GlobalConfig = nil
 	for _, key := range []string{DeepSeekAPIKeyEnvVar, NvidiaNIMAPIKeyEnvVar, GeminiAPIKeyEnvVar, OpenAIAPIKeyEnvVar, OpenCodeAPIKeyEnvVar} {
 		t.Setenv(key, "")
@@ -48,7 +53,7 @@ func TestOpenCodeConfiguration(t *testing.T) {
 }
 
 func TestLoadAndValidate_TrimsAndFiltersRedisHosts(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 	t.Setenv("REDIS_HOSTS", " redis-a:6379, , redis-b:6380, ")
 
 	cfg, err := LoadAndValidate()
@@ -97,7 +102,7 @@ func TestTrustedProxyCIDRsRequirePeerNetwork(t *testing.T) {
 }
 
 func TestLoadAndValidate_DefaultsJWTDuration(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 
 	cfg, err := LoadAndValidate()
 	if err != nil {
@@ -109,7 +114,7 @@ func TestLoadAndValidate_DefaultsJWTDuration(t *testing.T) {
 }
 
 func TestLoadAndValidate_RejectsMalformedJWTDuration(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 	t.Setenv("JWT_DURATION", "not-a-duration")
 
 	if _, err := LoadAndValidate(); err == nil {
@@ -118,7 +123,7 @@ func TestLoadAndValidate_RejectsMalformedJWTDuration(t *testing.T) {
 }
 
 func TestLoadAndValidate_RejectsNonPositiveJWTDuration(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 	t.Setenv("JWT_DURATION", "0s")
 
 	if _, err := LoadAndValidate(); err == nil {
@@ -127,7 +132,7 @@ func TestLoadAndValidate_RejectsNonPositiveJWTDuration(t *testing.T) {
 }
 
 func TestLoadAndValidate_AcceptsShortJWTSecret(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 	t.Setenv("JWT_SECRET", "short")
 	t.Setenv("JWT_DURATION", (24 * time.Hour).String())
 

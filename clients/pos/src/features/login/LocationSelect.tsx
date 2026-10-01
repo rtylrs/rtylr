@@ -28,10 +28,10 @@ interface Props {
 type Step = 'location' | 'create' | 'terminal';
 
 const LocationSelect: React.FC<Props> = ({ onComplete }) => {
-  // Only the business owner/admin may create POS locations; store managers and
-  // staff work at locations they're assigned to.
-  const role = useUserStore((s) => s.role);
-  const canCreateLocation = role === 'owner' || role === 'admin';
+  // Location creation is available to business owners and admins. The server
+  // remains authoritative for the corresponding permission.
+  const effectiveAccess = useUserStore((s) => s.effectiveAccess);
+  const canCreateLocation = Boolean(effectiveAccess?.isOwner || effectiveAccess?.isAdmin);
   const [step, setStep] = useState<Step>('location');
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [terminals, setTerminals] = useState<TerminalOption[]>([]);

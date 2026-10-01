@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { parseEffectiveAccess, useUserStore } from '@voxire/auth';
-import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -51,7 +50,7 @@ import {
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
 import { useForesightLinks } from '@voxire/utils';
-import { licenseClient, userClient } from '../shared/lib/clients';
+import { userClient } from '../shared/lib/clients';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import { signOutFromHR } from '../shared/lib/hrSignOut';
 import CommandPalette from '../shared/components/CommandPalette';
@@ -1032,7 +1031,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <LicenseBanner client={licenseClient} />
         <AnimatePresence mode="wait">
           <motion.main
             key={pathname}

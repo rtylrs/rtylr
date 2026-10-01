@@ -5,9 +5,8 @@ import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
-import { LicenseBanner } from '@voxire/components';
 import { CaretPanel, buildCaretRouteContext, useCaretStore } from '@voxire/caret';
-import { licenseClient, userClient } from '../shared/lib/clients';
+import { userClient } from '../shared/lib/clients';
 import { getPageTitle, routeLabels } from '../shared/lib/nav';
 import {
   TrendingUp,
@@ -447,7 +446,6 @@ const DefaultLayout: React.FC = () => {
         </div>
       </header>
 
-      <LicenseBanner client={licenseClient} />
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}

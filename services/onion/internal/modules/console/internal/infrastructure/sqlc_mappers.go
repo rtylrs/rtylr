@@ -143,36 +143,6 @@ func planFromListRow(row sqlc.ListPlansRow) PlanRow {
 	return p
 }
 
-func selfHostLicenseFromModel(row sqlc.SelfHostLicense) *SelfHostLicenseRow {
-	var features sql.NullString
-	if len(row.Features) > 0 && string(row.Features) != "null" {
-		features = sql.NullString{String: string(row.Features), Valid: true}
-	}
-	var seatLimit sql.NullInt64
-	if row.SeatLimit.Valid {
-		seatLimit = sql.NullInt64{Int64: int64(row.SeatLimit.Int32), Valid: true}
-	}
-	return &SelfHostLicenseRow{
-		ID:            row.ID,
-		OwnerEmail:    row.OwnerEmail,
-		CustomerName:  row.CustomerName,
-		Plan:          row.Plan,
-		Features:      features,
-		SeatLimit:     seatLimit,
-		ExpiresAt:     row.ExpiresAt,
-		GraceUntil:    row.GraceUntil,
-		Status:        string(row.Status),
-		LicenseKey:    row.LicenseKey,
-		KeyHash:       row.KeyHash,
-		CreatedBy:     row.CreatedBy,
-		UpdatedBy:     row.UpdatedBy,
-		CreatedAt:     row.CreatedAt,
-		UpdatedAt:     row.UpdatedAt,
-		RegeneratedAt: row.RegeneratedAt,
-		RevokedAt:     row.RevokedAt,
-	}
-}
-
 func featuresJSONFromString(raw string) json.RawMessage {
 	if raw == "" {
 		return nil

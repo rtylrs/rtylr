@@ -70,7 +70,7 @@ logical database tag.
 
 ## Probes And Profiling
 
-`cmd/api`, `cmd/upload`, `cmd/license`, and `cmd/worker` start a probe server
+`cmd/api`, `cmd/upload`, and `cmd/worker` start a probe server
 when `PROBE_PORT` is set or when running in Kubernetes. pprof starts only when
 `PPROF_ENABLED=true` or `PPROF_PORT` is set. The destructive probe `POST
 /stop` requires the `PROBE_STOP_TOKEN` value in the `X-Probe-Token` header;

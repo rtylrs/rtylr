@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { bootObservability } from '@voxire/observability';
-import { loadRuntimeConfig } from '@voxire/config';
 import { initAppearance } from '@voxire/ui';
 import { APPEARANCE_DEFAULTS, LEGACY_THEME_STORAGE_KEY } from '@voxire/utils';
 import { router } from './router';
@@ -70,14 +69,12 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  // Await runtime config (self-host) before rendering; loader meanwhile, static
-  // hosted defaults on failure. Hosted is unchanged.
   root.render(
     <I18nextProvider i18n={i18n}>
       <BootLoader />
     </I18nextProvider>
   );
-  void Promise.all([loadRuntimeConfig(), i18nReady]).finally(() => {
+  void i18nReady.finally(() => {
     root.render(
       <I18nextProvider i18n={i18n}>
         <QueryClientProvider client={queryClient}>

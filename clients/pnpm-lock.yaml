@@ -471,6 +471,9 @@ importers:
       '@voxire/api':
         specifier: workspace:*
         version: link:../packages/api
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../packages/auth
       '@voxire/caret':
         specifier: workspace:*
         version: link:../packages/caret

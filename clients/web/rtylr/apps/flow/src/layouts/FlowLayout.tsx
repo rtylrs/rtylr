@@ -44,8 +44,6 @@ import { useLifePreferences } from '../shared/lib/lifePreferences';
 import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
 import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject } from '../shared/lib/projectMapper';
-import { LicenseBanner } from '@voxire/components';
-import { licenseClient } from '../shared/lib/clients';
 import { useFlowBusinessName, useFlowBusinessId } from '../shared/hooks/useFlowBusinessName';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
@@ -960,7 +958,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 })}
               </div>
             )}
-            <LicenseBanner client={licenseClient} />
             {/* mode="wait" (the default AnimatePresence sequencing) would unmount
                 the outgoing <main> before mounting the incoming one - since this
                 is keyed on the full pathname, that gap opens on every navigation

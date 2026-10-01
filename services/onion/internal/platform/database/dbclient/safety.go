@@ -12,7 +12,7 @@ import (
 // knownProductionHosts are this application's production database endpoints.
 //
 // Matched exactly, not by an "*.rds.amazonaws.com" suffix: that suffix covers
-// every standard AWS RDS endpoint in existence, so a staging, dev or self-host
+// every standard AWS RDS endpoint in existence, so a staging or dev
 // deployment running its own RDS instance would trip a guard that claims to be
 // protecting *this* production database. Keep the regional endpoint alongside
 // the legacy alias while both are supported.
@@ -57,8 +57,8 @@ func productionDBAllowed() bool {
 // connection is being checked ("database", "logging database", "read replica")
 // so the refusal points at the right environment variable.
 //
-// APP_ENV alone isn't a safe signal in either direction. Self-host deploys set
-// APP_ENV=production while pointing at a local Docker database, so it can't be
+// APP_ENV alone isn't a safe signal in either direction. Local Docker setups
+// set APP_ENV=production while pointing at a local database, so it can't be
 // required; and tiers that aren't named "production" may still legitimately
 // target the real database, so it can't be the only way in. The guard fires
 // only on the combination that actually indicates a mistake: the production
@@ -100,8 +100,8 @@ func checkProductionSafety(role, dsn string) error {
 //
 // Local means one of: the name "localhost"; a loopback or unspecified IP; or a
 // single-label hostname. That last case is load-bearing rather than lenient.
-// self-host/docker-compose.yml sets DB_HOST: db for api, upload and worker, so
-// a Docker service name has to count as local or every containerised deployment
+// Local Compose files set DB_HOST: db for api, upload and worker, so a Docker
+// service name has to count as local or every containerised deployment
 // would be refused. A single label cannot be a public DNS name.
 //
 // Remote therefore means a dotted name or a routable IP, which is exactly the
@@ -153,7 +153,7 @@ func remoteDBAllowed() bool {
 // dsn resolves to a host that is not on this machine.
 //
 // checkProductionSafety only fires on one exact known endpoint, so that a
-// staging or self-host tier on its own RDS instance is not blocked by a guard
+// staging tier on its own RDS instance is not blocked by a guard
 // claiming to protect *this* production database. The consequence is that a
 // development-labelled config pointing at any other managed database connects
 // without comment. This closes that gap from the other direction: rather than

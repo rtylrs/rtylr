@@ -23,13 +23,8 @@ vi.mock('../../shared/hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('../../shared/hooks/useFeatureGate', () => ({
-  useFeatureGate: () => false,
-}));
-
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
-  LicenseBanner: () => null,
   Button: ({ children, ...rest }: { children: React.ReactNode }) => (
     <button type="button" {...rest}>
       {children}
@@ -47,11 +42,8 @@ vi.mock('../../shared/components/AuthShell', () => ({
 // that vitest hoists above a plain `const`.
 const { mockGetMe } = vi.hoisted(() => ({ mockGetMe: vi.fn() }));
 vi.mock('@voxire/api', () => ({
-  createOneKitClient: () => ({ getMe: mockGetMe }),
+  createOneKitClient: () => ({ getMe: mockGetMe, googleAuthorize: vi.fn() }),
 }));
-
-// Only reaches the mocked LicenseBanner, so a bare object is enough.
-vi.mock('../../shared/lib/clients', () => ({ licenseClient: {} }));
 
 import Login from './Login';
 

@@ -1,5 +1,3 @@
-import { resolveCookieDomain } from "@voxire/config";
-
 export type CookieSameSite = "lax" | "strict" | "none";
 
 export interface SetCookieOptions {
@@ -81,12 +79,6 @@ export function getDefaultCookieDomain(): string | undefined {
   const isLocalhost =
     hostname === "localhost" || /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
   if (isLocalhost) return undefined;
-
-  // Self-host: scope the SSO cookie to the deployment's own shared parent domain
-  // (derived from the runtime-config app URLs). Returns undefined for hosted, so
-  // the existing `.rtylr.com` behavior below is preserved.
-  const runtimeDomain = resolveCookieDomain();
-  if (runtimeDomain) return runtimeDomain;
 
   if (hostname === "rtylr.com" || hostname.endsWith(".rtylr.com")) {
     return ".rtylr.com";

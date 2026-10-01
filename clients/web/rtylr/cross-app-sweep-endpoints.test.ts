@@ -32,7 +32,7 @@ function makeFixture(packages: 'root' | 'local' | 'none') {
   cpSync(SCRIPT, script);
   writeFileSync(join(workspace, 'docs/cross-app/inventory/contracts.csv'), 'domain,capability\n');
   mkdirSync(join(workspace, 'apps/dash/src'), { recursive: true });
-  writeFileSync(join(workspace, 'apps/dash/src/client.ts'), 'safe.get("/license/state");\n');
+  writeFileSync(join(workspace, 'apps/dash/src/client.ts'), 'safe.get("/health");\n');
 
   const writePackage = (base: string, file: string) => {
     mkdirSync(join(base, 'api/src'), { recursive: true });
