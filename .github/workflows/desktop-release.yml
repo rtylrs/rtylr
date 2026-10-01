@@ -47,7 +47,7 @@ jobs:
 
       - name: Install onek
         shell: bash
-        run: go install github.com/1homsi/onekit/cmd/onek@v0.19.3
+        run: go install github.com/1homsi/onekit/cmd/onek@v0.21.1
 
       - name: Generate contracts
         shell: bash

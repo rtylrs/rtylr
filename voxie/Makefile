@@ -1,7 +1,7 @@
 .PHONY: clean generate install-onek typecheck
 
 # Onekit CLI version. Generated output is gitignored; see `make generate`.
-ONK_VERSION := v0.19.3
+ONK_VERSION := v0.21.1
 
 # `go install` writes to GOPATH/bin, which is not guaranteed to be on PATH here.
 GOBIN_DIR := $(shell go env GOPATH)/bin
