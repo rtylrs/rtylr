@@ -146,10 +146,6 @@
     "download": "Download PDF",
     "comingSoon": "PDF download coming in a future update"
   },
-  "team": {
-    "invited": "Invitation sent",
-    "removed": "Member removed"
-  },
   "kpi": {
     "receivable": "Receivable",
     "expensesMtd": "Expenses MTD",

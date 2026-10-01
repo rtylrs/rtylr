@@ -274,20 +274,10 @@
     "consentDefaults": "Consent defaults",
     "optInByDefault": "Opt in new customers by default",
     "optInByDefaultHint": "New customers will be opted into marketing unless they say otherwise",
-    "emailAndNameRequired": "Email and full name are required",
-    "teamTitle": "Team",
-    "teamSubtitle": "People who have access to CRM.",
-    "inviteSomeone": "Invite someone to CRM",
-    "invitePlaceholder": "Jane Smith",
+    "teamManagementTitle": "Team access",
+    "teamManagementDescription": "Manage members, groups, app licenses, and permissions together in Dash.",
+    "teamManagementAction": "Open team management",
     "subtitle": "Configure your CRM defaults"
-  },
-  "team": {
-    "inviteSent": "Invitation sent",
-    "inviteFailed": "Failed to send invitation",
-    "memberRemoved": "Member removed",
-    "removeFailed": "Failed to remove member",
-    "emptyTitle": "No team members yet",
-    "inviteMember": "Invite member"
   },
   "customerProfile": {
     "noTagsTitle": "No tags yet",

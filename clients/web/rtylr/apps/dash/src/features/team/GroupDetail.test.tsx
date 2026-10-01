@@ -30,7 +30,8 @@ type Group = {
   color: string;
   memberCount: number;
   members: GroupMember[];
-  resourcePermissions: { resourceKey: string; permissionLevel: string }[];
+  licensedAppIds: string[];
+  permissionProfileAssignments: { appId: string; permissionProfileIds: string[] }[];
 };
 type TeamMember = { id: string; name: string; email: string; role: string };
 
@@ -69,6 +70,10 @@ vi.mock('../../shared/hooks/queries/useGroups', () => ({
   useRemoveGroupMember: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+vi.mock('../../shared/hooks/queries/usePermissions', () => ({
+  usePermissionProfiles: () => ({ data: [] }),
+}));
+
 vi.mock('../../shared/hooks/queries/useTeam', () => ({
   useTeam: (params: { page?: number; pageSize?: number }) => {
     teamRequest.page = params.page ?? 1;
@@ -86,7 +91,8 @@ const makeGroup = (overrides: Partial<Group>): Group => ({
   color: '#4583C4',
   memberCount: 0,
   members: [],
-  resourcePermissions: [],
+  licensedAppIds: [],
+  permissionProfileAssignments: [],
   ...overrides,
 });
 

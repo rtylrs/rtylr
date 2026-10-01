@@ -47,9 +47,6 @@ func (a *FeatureAPI) ResolveMyFeatures(ctx context.Context, req *hubfeaturev1.Re
 	attrs["user_id"] = strconv.FormatInt(u.UserID, 10)
 	attrs["business_id"] = strconv.FormatInt(u.BusinessID, 10)
 	attrs["plan_id"] = strconv.FormatInt(u.PlanID, 10)
-	if u.Role != "" {
-		attrs["role"] = u.Role
-	}
 	if u.Platform != "" {
 		attrs["platform"] = u.Platform
 	}
@@ -263,8 +260,7 @@ func requireAdmin(ctx context.Context) error {
 	if !ok || user == nil {
 		return onekiterrors.PermissionDenied()
 	}
-	role := strings.ToLower(user.Role)
-	if role != "owner" && role != "admin" && role != "console_admin" {
+	if !authPkg.IsBusinessAdmin(user) && !authPkg.IsConsoleAdmin(user) {
 		return onekiterrors.PermissionDenied()
 	}
 	return nil
@@ -280,7 +276,7 @@ func requireTargetScope(ctx context.Context, requestedOwner int64) error {
 	if !ok || user == nil {
 		return onekiterrors.PermissionDenied()
 	}
-	if strings.EqualFold(user.Role, "console_admin") {
+	if authPkg.IsConsoleAdmin(user) {
 		return nil
 	}
 	callerBusinessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)

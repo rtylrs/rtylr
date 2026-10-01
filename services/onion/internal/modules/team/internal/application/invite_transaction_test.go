@@ -34,8 +34,8 @@ func TestInviteUserRemovesNewUserWhenAuthorizationFails(t *testing.T) {
 	})
 
 	_, _, err := service.InviteUser(ctx, testutil.OwnerID, testutil.BusinessID, domain.InviteUserInput{
-		Email: email,
-		Apps:  []string{"not-an-app"},
+		Email:          email,
+		LicensedAppIDs: []string{"not-an-app"},
 	})
 	if err == nil {
 		t.Fatal("InviteUser succeeded with an invalid app")

@@ -21,7 +21,6 @@ func campaignWriteContext(businessID, userID, id int64) context.Context {
 	user := &authPkg.AuthUser{
 		UserID:     userID,
 		BusinessID: businessID,
-		Role:       "owner",
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID: businessID,
 			IsOwner:    true,

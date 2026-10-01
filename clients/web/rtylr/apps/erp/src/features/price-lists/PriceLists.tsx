@@ -31,8 +31,7 @@ const PriceLists: React.FC = () => {
   const { t } = useTranslation('erp');
   const { data: lists = [], isLoading, refetch } = usePriceLists();
   const createMut = useCreatePriceList();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManagePriceLists = canErpPermission(role, 'erp:purchase_orders');
+  const canManagePriceLists = canErpPermission('erp:price_lists:manage');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newCurrency, setNewCurrency] = useState('USD');

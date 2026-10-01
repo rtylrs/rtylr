@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -161,7 +162,7 @@ func authenticatedGiftCardBusinessID(ctx context.Context) (int64, error) {
 
 func requireGiftCardManager(ctx context.Context) error {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "pos_manager") {
+	if !ok || !authPkg.HasAppPermission(authUser, authorization.AppPOS, "pos:gift_cards:manage") {
 		return onekiterrors.PermissionDenied()
 	}
 	return nil

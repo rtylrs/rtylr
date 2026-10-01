@@ -232,84 +232,6 @@ func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token str
 	return nil
 }
 
-// EnsureOwnerAuthorizationMembership writes the business owner's row in
-// authorization_business_members.
-//
-// Creating a business did not write one, so GetAuthorizationSnapshot found no
-// row for the owner and left EffectiveAccess.IsOwner false, and every check
-// through requireHubPermission answered 403 to the person who had just created
-// the business. Meanwhile GET /hub/user/v1/users/me reads businesses.owner_id
-// directly and correctly reported is_owner true, so the two sources of truth
-// disagreed. Several call sites work around this by short-circuiting on
-// userID == ownerID; this writes the row those workarounds were standing in for.
-//
-// Idempotent, and it never demotes: an owner who somehow already has a row keeps
-// their role and is only reactivated.
-func (r *Repository) EnsureOwnerAuthorizationMembership(ctx context.Context, businessID, userID int64) error {
-	if businessID <= 0 || userID <= 0 {
-		return nil
-	}
-
-	const ownerRoleKey = "dash.owner"
-
-	var dashRoleID int64
-	err := r.db.QueryRowContext(ctx, `
-		SELECT id
-		FROM authorization_roles
-		WHERE business_id = 0 AND app_id = 'dash' AND role_key = ?
-		  AND lifecycle = 'active' AND is_archived = FALSE
-		LIMIT 1`, ownerRoleKey).Scan(&dashRoleID)
-	if err != nil {
-		// A deployment without the v2 authorization tables, or without the
-		// catalogue seeded, behaves exactly as it did before this existed
-		// rather than failing business creation over it.
-		if authorizationCatalogueUnavailable(err) {
-			logger.Ctx(ctx).Warn("skipping owner authorization membership: dash owner role unavailable",
-				logger.Int("business_id", int(businessID)), logger.Error(err))
-			return nil
-		}
-		logger.Ctx(ctx).Error("failed to look up the dash owner role",
-			logger.Int("business_id", int(businessID)), logger.Error(err))
-		return err
-	}
-
-	if _, err = r.db.ExecContext(ctx, `
-		INSERT INTO authorization_business_members
-			(business_id, user_id, dash_role_id, dash_role_key, status, authorization_version)
-		VALUES (?, ?, ?, ?, 'active', 1)
-		ON DUPLICATE KEY UPDATE
-			status = 'active',
-			authorization_version = authorization_version + 1,
-			updated_at = NOW()`,
-		businessID, userID, dashRoleID, strings.TrimPrefix(ownerRoleKey, "dash."),
-	); err != nil {
-		if authorizationCatalogueUnavailable(err) {
-			logger.Ctx(ctx).Warn("skipping owner authorization membership: table unavailable",
-				logger.Int("business_id", int(businessID)), logger.Error(err))
-			return nil
-		}
-		logger.Ctx(ctx).Error("failed to write the owner authorization membership",
-			logger.Int("business_id", int(businessID)), logger.Int("user_id", int(userID)), logger.Error(err))
-		return err
-	}
-	return nil
-}
-
-// authorizationCatalogueUnavailable reports a deployment where the v2
-// authorization tables are absent or unseeded, which is a supported state
-// rather than a fault. Mirrors the team module's helper of the same shape.
-func authorizationCatalogueUnavailable(err error) bool {
-	if err == nil {
-		return false
-	}
-	if errors.Is(err, sql.ErrNoRows) {
-		return true
-	}
-	message := strings.ToLower(err.Error())
-	return strings.Contains(message, "authorization_") &&
-		(strings.Contains(message, "doesn't exist") || strings.Contains(message, "no such table"))
-}
-
 // EmailExists reports whether a user row with the given email exists. The
 // email is matched as stored (callers normalize case before calling).
 func (r *Repository) EmailExists(ctx context.Context, email string) (bool, error) {
@@ -428,28 +350,6 @@ func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64
 	return 0, nil
 }
 
-// GetUserRole returns the role for a user within their business.
-func (r *Repository) GetUserRole(ctx context.Context, businessID, userID int64) (string, error) {
-	// Check if user is the business owner
-	ownerID, err := r.queries.GetBusinessOwnerID(ctx, businessID)
-	if err == nil && ownerID == userID {
-		return "owner", nil
-	}
-
-	// Otherwise check permissions table
-	role, err := r.queries.GetUserAppRole(ctx, sqlc.GetUserAppRoleParams{
-		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
-		UserID:     userID,
-	})
-	if errors.Is(err, sql.ErrNoRows) {
-		return "staff", nil
-	}
-	if err != nil {
-		return "", err
-	}
-	return string(role.UserAppPermissionsRole), nil
-}
-
 // CreateBusiness creates a new business and returns its ID.
 func (r *Repository) CreateBusiness(ctx context.Context, name string, ownerID int64) (int64, error) {
 	res, err := r.queries.CreateBusiness(ctx, sqlc.CreateBusinessParams{
@@ -497,9 +397,9 @@ func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, metho
 
 // CheckBusinessAccess reports whether userID may switch into businessID.
 // Access is granted if the user directly owns the business (businesses.owner_id = userID)
-// or has been explicitly granted access via user_business_access.
+// or has an active authorization_business_members row.
 func (r *Repository) CheckBusinessAccess(ctx context.Context, userID, businessID int64) (bool, error) {
-	// cross-schema read from user_business_access — multi-business switch validation
+	// cross-schema read from normalized tenant memberships — business switch validation
 	cnt, err := r.queries.CheckBusinessAccess(ctx, sqlc.CheckBusinessAccessParams{
 		ID:         businessID,
 		OwnerID:    userID,

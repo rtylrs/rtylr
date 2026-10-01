@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { injectTheme, loadRuntimeConfig } from '@voxire/config';
+import { injectTheme } from '@voxire/config';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
 import { FullScreenLoader } from '@voxire/components';
@@ -20,18 +20,13 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  // Await runtime config (self-host) before rendering; loader meanwhile, static
-  // hosted defaults on failure. Hosted is unchanged.
-  root.render(<FullScreenLoader />);
-  void loadRuntimeConfig().finally(() => {
-    root.render(
-      <Suspense fallback={<FullScreenLoader />}>
-        <QueryClientProvider client={queryClient}>
-          <I18nextProvider i18n={i18next}>
-            <RouterProvider router={router} />
-          </I18nextProvider>
-        </QueryClientProvider>
-      </Suspense>
-    );
-  });
+  root.render(
+    <Suspense fallback={<FullScreenLoader />}>
+      <QueryClientProvider client={queryClient}>
+        <I18nextProvider i18n={i18next}>
+          <RouterProvider router={router} />
+        </I18nextProvider>
+      </QueryClientProvider>
+    </Suspense>
+  );
 }

@@ -3,10 +3,7 @@
 // and every app imports the role type from here rather than from @voxire/types
 // (see the *Permissions.ts bridges in erp, crm, hr, finance and insights). So
 // the copy that mattered to consumers was the one that was wrong (#795).
-import type { EffectiveAccess, ProvisioningStatus, UserRole } from '@voxire/types';
-
-export type { UserRole };
-export { USER_ROLES, parseUserRole } from '@voxire/types';
+import type { EffectiveAccess, ProvisioningStatus } from '@voxire/types';
 export type AppId =
   | 'dash'
   | 'auth'
@@ -29,23 +26,21 @@ export interface User {
   lastName?: string;
   email?: string;
   emailAddress?: string;
-  role?: UserRole;
+  businessId?: string;
   businessName?: string;
   storeName?: string;
   planType?: string;
-  apps?: AppId[];
   effectiveAccess?: EffectiveAccess;
   provisioningStatus?: ProvisioningStatus;
+  isConsoleAdmin?: boolean;
   addons?: Record<string, boolean>;
   theme?: string;
-  [key: string]: unknown;
 }
 
 export interface UserState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  role: UserRole | null;
   userId: string | null;
   addons: Record<string, boolean>;
   effectiveAccess: EffectiveAccess | null;
@@ -57,7 +52,6 @@ export interface UserActions {
   logout: () => void;
   setToken: (token: string) => void;
   setUser: (user: User) => void;
-  setRole: (role: UserRole) => void;
   setUserId: (userId: string) => void;
   setAddons: (addons: Record<string, boolean>) => void;
   setEffectiveAccess: (access: EffectiveAccess | null) => void;

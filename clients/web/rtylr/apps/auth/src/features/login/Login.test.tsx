@@ -23,13 +23,8 @@ vi.mock('../../shared/hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('../../shared/hooks/useFeatureGate', () => ({
-  useFeatureGate: () => false,
-}));
-
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
-  LicenseBanner: () => null,
   Button: ({ children, ...rest }: { children: React.ReactNode }) => (
     <button type="button" {...rest}>
       {children}
@@ -47,11 +42,8 @@ vi.mock('../../shared/components/AuthShell', () => ({
 // that vitest hoists above a plain `const`.
 const { mockGetMe } = vi.hoisted(() => ({ mockGetMe: vi.fn() }));
 vi.mock('@voxire/api', () => ({
-  createOneKitClient: () => ({ getMe: mockGetMe }),
+  createOneKitClient: () => ({ getMe: mockGetMe, googleAuthorize: vi.fn() }),
 }));
-
-// Only reaches the mocked LicenseBanner, so a bare object is enough.
-vi.mock('../../shared/lib/clients', () => ({ licenseClient: {} }));
 
 import Login from './Login';
 
@@ -87,6 +79,26 @@ describe('Login Feature Component', () => {
 });
 
 describe('Login redirect target and the MFA gate', () => {
+  const effectiveAccessFor = (appId: string) => ({
+    businessId: '1',
+    dashPermissions: [],
+    subscribedApps: [appId],
+    licenses: [],
+    apps: [
+      {
+        appId,
+        licensed: true,
+        hasAccess: true,
+        permissions: [],
+        permissionScopes: [],
+        sources: ['explicit'],
+      },
+    ],
+    isOwner: false,
+    isAdmin: false,
+    authorizationVersion: 1,
+  });
+
   // window.location.href is assigned directly by the component. Replace the
   // whole object so the assignment is observable and happy-dom does not try to
   // navigate, and set `search` before render because redirectParam is read once
@@ -125,8 +137,7 @@ describe('Login redirect target and the MFA gate', () => {
 
   const OWES_MFA = {
     provisioningStatus: { mfaRequired: true, mfaEnrolled: false, mfaVerified: false },
-    role: 'staff',
-    apps: ['crm'],
+    effectiveAccess: effectiveAccessFor('crm'),
   };
 
   beforeEach(() => {
@@ -162,8 +173,7 @@ describe('Login redirect target and the MFA gate', () => {
     const assigned = setLocation('?redirect=crm');
     mockGetMe.mockResolvedValue({
       provisioningStatus: { mfaRequired: true, mfaEnrolled: true, mfaVerified: true },
-      role: 'staff',
-      apps: ['crm'],
+      effectiveAccess: effectiveAccessFor('crm'),
     });
 
     render(<Login />);
@@ -175,7 +185,10 @@ describe('Login redirect target and the MFA gate', () => {
 
   it('honours the redirect when MFA is not required at all', async () => {
     const assigned = setLocation('?redirect=flow');
-    mockGetMe.mockResolvedValue({ provisioningStatus: { mfaRequired: false }, apps: ['flow'] });
+    mockGetMe.mockResolvedValue({
+      provisioningStatus: { mfaRequired: false },
+      effectiveAccess: effectiveAccessFor('flow'),
+    });
 
     render(<Login />);
     await signIn();
@@ -195,15 +208,18 @@ describe('Login redirect target and the MFA gate', () => {
     expect(assigned[0]).toBe('http://localhost:5175');
   });
 
-  it('ignores a redirect naming something that is not a known app', async () => {
+  it('sends a user with an invalid redirect to Dash', async () => {
     const assigned = setLocation('?redirect=https://evil.example.com');
-    mockGetMe.mockResolvedValue({ provisioningStatus: { mfaRequired: false }, apps: ['crm'] });
+    mockGetMe.mockResolvedValue({
+      provisioningStatus: { mfaRequired: false },
+      effectiveAccess: effectiveAccessFor('crm'),
+    });
 
     render(<Login />);
     await signIn();
 
     await waitFor(() => expect(assigned.length).toBeGreaterThan(0));
-    expect(assigned[0]).toBe('http://localhost:5181');
+    expect(assigned[0]).toBe('http://localhost:5175');
     expect(assigned[0]).not.toContain('evil.example.com');
   });
 });

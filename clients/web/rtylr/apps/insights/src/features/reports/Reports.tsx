@@ -29,8 +29,7 @@ const Reports: React.FC = (): React.JSX.Element => {
   const { data, isLoading, isError, refetch } = useReportTemplates();
   const generateRevenue = useGenerateRevenueReport();
   const exportRevenue = useExportRevenueReport();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canExportReports = canInsightsPermission(role, 'insights:reports:export');
+  const canExportReports = canInsightsPermission('insights:reports:export');
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;

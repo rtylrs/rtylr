@@ -7,11 +7,10 @@ export interface UserState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  role: string | null;
 }
 
 interface UserActions {
-  login: (role: string) => void;
+  login: () => void;
   logout: () => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
@@ -29,13 +28,11 @@ export const useUserStore = create<UserStore>()(
       isAuthenticated: false,
       loading: false,
       error: null,
-      role: null,
 
       // Actions
-      login: (role: string) =>
+      login: () =>
         set({
           token: null, // Token is stored in cookie only
-          role,
           isAuthenticated: true,
           loading: false,
           error: null,
@@ -47,7 +44,6 @@ export const useUserStore = create<UserStore>()(
           isAuthenticated: false,
           loading: false,
           error: null,
-          role: null,
           token: null,
         });
       },
@@ -64,7 +60,6 @@ export const useUserStore = create<UserStore>()(
       name: 'rtylr:auth:app:user',
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
-        role: state.role,
         // Don't persist token, loading, or error
       }),
     }

@@ -8,17 +8,9 @@ import { EmptyState } from '@voxire/ui';
 import { Button, Input } from '../../shared/components/ui';
 import { ConfirmDialog, SkeletonList } from '../../shared/components/dash';
 import { useGroups, useDeleteGroup, type Group } from '../../shared/hooks/queries/useGroups';
-import { APP_RESOURCES } from '../../shared/config/appResources';
+import { APP_NAMES } from '../../shared/config/appNames';
 
-/** Returns the unique app-level ids that have at least one active resourcePermission. */
-const getActiveAppIds = (group: Group): string[] => {
-  const appIds = new Set<string>();
-  for (const p of group.resourcePermissions) {
-    const appId = p.resourceKey.split('.')[0];
-    if (appId) appIds.add(appId);
-  }
-  return Array.from(appIds);
-};
+const getActiveAppIds = (group: Group): string[] => group.licensedAppIds;
 
 /**
  * The i18n key naming an app id, falling back to the id uppercased.
@@ -27,7 +19,7 @@ const getActiveAppIds = (group: Group): string[] => {
  * given when it matches nothing, so an unknown app still reads as its id.
  */
 const appLabelKey = (appId: string): string =>
-  APP_RESOURCES.find((a) => a.id === appId)?.labelKey ?? appId.toUpperCase();
+  APP_NAMES[appId as keyof typeof APP_NAMES]?.short ?? appId.toUpperCase();
 
 const Groups = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -108,14 +100,17 @@ const Groups = (): React.JSX.Element => {
                 }}
               >
                 <div className="col-span-5">{t('team.groups.columnName')}</div>
-                <div className="col-span-4">{t('team.groups.columnSections')}</div>
+                <div className="col-span-4">{t('team.groups.columnProfiles')}</div>
                 <div className="col-span-2">{t('team.groups.columnMembers')}</div>
                 <div className="col-span-1"></div>
               </div>
 
               {filtered.map((g) => {
                 const activeAppIds = getActiveAppIds(g);
-                const sectionCount = g.resourcePermissions.length;
+                const profileCount = g.permissionProfileAssignments.reduce(
+                  (count, assignment) => count + assignment.permissionProfileIds.length,
+                  0
+                );
                 return (
                   <div
                     key={g.id}
@@ -152,7 +147,7 @@ const Groups = (): React.JSX.Element => {
                       </div>
                     </div>
 
-                    {/* Sections summary */}
+                    {/* Licensed apps and permission profile count */}
                     <div className="col-span-4 flex items-center gap-1 flex-wrap">
                       {activeAppIds.length === 0 ? (
                         <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
@@ -176,7 +171,7 @@ const Groups = (): React.JSX.Element => {
                             className="text-[11px] ml-1"
                             style={{ color: 'var(--dash-text-dim)' }}
                           >
-                            {t('team.groups.sectionsCount', { count: sectionCount })}
+                            {t('team.groups.profilesCount', { count: profileCount })}
                           </span>
                         </>
                       )}

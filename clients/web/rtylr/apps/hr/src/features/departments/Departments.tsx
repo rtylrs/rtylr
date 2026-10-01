@@ -60,8 +60,7 @@ const cardAnim: Variants = {
 const Departments: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const showCompensation = canViewCompensation(role);
+  const showCompensation = canViewCompensation();
   const { data: fetchedDepartments, isLoading: loading } = useDepartments(showCompensation);
   const departments: Department[] = fetchedDepartments || [];
   const [createOpen, setCreateOpen] = useState(false);

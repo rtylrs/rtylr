@@ -21,7 +21,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "finance invoices send", App: authorization.AppFinance, Permission: "finance:invoices:send", Call: func(ctx context.Context) (any, error) {
-			response, err := NewInvoicesAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).SendInvoice(ctx, &financeinvoicesv1.SendInvoiceRequest{Id: 1})
+			response, err := NewInvoicesAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).SendInvoice(ctx, &financeinvoicesv1.SendInvoiceRequest{Id: 7401})
 			return response, err
 		}},
 		{Name: "finance tax configure", App: authorization.AppFinance, Permission: "finance:tax:configure", Call: func(ctx context.Context) (any, error) {

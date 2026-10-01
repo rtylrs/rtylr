@@ -1,16 +1,23 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   useUserStore: vi.fn(),
+  effectiveAccess: undefined as unknown,
   useTimeOff: vi.fn(),
   approveMutate: vi.fn(),
   navigate: vi.fn(),
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: mocks.useUserStore,
+  useUserStore: Object.assign(mocks.useUserStore, {
+    getState: () => ({
+      user: { effectiveAccess: mocks.effectiveAccess },
+      effectiveAccess: mocks.effectiveAccess,
+    }),
+  }),
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -45,10 +52,19 @@ describe('TimeOff empty state', () => {
     mocks.useTimeOff.mockReset();
     mocks.approveMutate.mockReset();
     mocks.navigate.mockReset();
+    mocks.effectiveAccess = createEffectiveAccess('hr', { permissions: ['hr:time_off:request'] });
 
     mocks.useUserStore.mockImplementation(
-      (selector: (state: { user: { role: string } }) => unknown) =>
-        selector({ user: { role: 'staff' } })
+      (
+        selector: (state: {
+          user: { effectiveAccess: unknown };
+          effectiveAccess: unknown;
+        }) => unknown
+      ) =>
+        selector({
+          user: { effectiveAccess: mocks.effectiveAccess },
+          effectiveAccess: mocks.effectiveAccess,
+        })
     );
   });
 

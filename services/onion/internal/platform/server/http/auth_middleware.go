@@ -50,7 +50,7 @@ func processTokenAuthentication(ctx context.Context, token, path, remoteAddr str
 	authUser := &authPkg.AuthUser{
 		UserID:         claims.UserID,
 		BusinessID:     claims.BusinessID,
-		Role:           claims.Role,
+		IsConsoleAdmin: claims.IsConsoleAdmin,
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,
@@ -202,11 +202,8 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 
 func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, permission string) bool {
 	if appID == authorization.AppHub {
-		// Owners and admins are granted every dashboard permission by the
-		// resolver, but a legacy account with no normalized membership row yet
-		// resolves to no effective access. Fall back to the same owner/admin
-		// boundary the concrete handlers enforce so those accounts are not
-		// denied at the edge before their handler can apply that rule.
+		// Owners and admins have full dashboard access, including permissions
+		// added to handlers before the catalog is updated.
 		return authPkg.HasDashboardPermission(user, permission) || authPkg.IsBusinessAdmin(user)
 	}
 	return authPkg.HasAppPermission(user, appID, permission)

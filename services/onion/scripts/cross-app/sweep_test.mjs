@@ -165,7 +165,6 @@ try {
     'GET /console/resources/{table}',
     'GET /console/resources/{table}/rows',
     'GET /console/resources/{table}/rows/{id}',
-    'GET /console/self-host-licenses',
   ];
   for (const rpc of [...anonymous, ...authenticated]) {
     const row = route(rpc);

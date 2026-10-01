@@ -1,34 +1,40 @@
-import { describe, it, expect } from 'vitest';
-import { legacyRoleToDashRole, dashRoleToLegacyRole } from './authorizationDraft';
+import { describe, expect, it } from 'vitest';
+import { buildPermissionProfileAssignments } from './authorizationDraft';
 
-describe('legacyRoleToDashRole', () => {
-  it('preserves owners instead of demoting them to members', () => {
-    expect(legacyRoleToDashRole('owner')).toBe('owner');
+describe('buildPermissionProfileAssignments', () => {
+  it('creates one assignment per licensed app and removes duplicate profiles', () => {
+    expect(
+      buildPermissionProfileAssignments(['crm', 'flow'], {
+        crm: ['profile-read', 'profile-read', 'profile-write'],
+        flow: ['flow-read'],
+      })
+    ).toEqual([
+      {
+        appId: 'crm',
+        permissionProfileIds: ['profile-read', 'profile-write'],
+        assignmentSource: 'explicit',
+        status: 'active',
+        scopes: [],
+      },
+      {
+        appId: 'flow',
+        permissionProfileIds: ['flow-read'],
+        assignmentSource: 'explicit',
+        status: 'active',
+        scopes: [],
+      },
+    ]);
   });
 
-  it('matches case-insensitively', () => {
-    expect(legacyRoleToDashRole('Admin')).toBe('admin');
-    expect(legacyRoleToDashRole('OWNER')).toBe('owner');
-    expect(legacyRoleToDashRole('Viewer')).toBe('viewer');
-  });
-
-  it('maps known legacy roles', () => {
-    expect(legacyRoleToDashRole('admin')).toBe('admin');
-    expect(legacyRoleToDashRole('operator')).toBe('manager');
-    expect(legacyRoleToDashRole('billing')).toBe('manager');
-    expect(legacyRoleToDashRole('menu_manager')).toBe('manager');
-    expect(legacyRoleToDashRole('store_manager')).toBe('manager');
-    expect(legacyRoleToDashRole('viewer')).toBe('viewer');
-    expect(legacyRoleToDashRole('staff')).toBe('member');
-    expect(legacyRoleToDashRole('something-else')).toBe('member');
-  });
-});
-
-describe('dashRoleToLegacyRole', () => {
-  it('round-trips the editable roles without touching owner display', () => {
-    expect(dashRoleToLegacyRole('admin')).toBe('admin');
-    expect(dashRoleToLegacyRole('manager')).toBe('operator');
-    expect(dashRoleToLegacyRole('viewer')).toBe('viewer');
-    expect(dashRoleToLegacyRole('member')).toBe('staff');
+  it('omits licensed apps without a selected profile and accepts group assignments', () => {
+    expect(buildPermissionProfileAssignments(['hr', 'erp'], { hr: ['hr-view'] }, 'group')).toEqual([
+      {
+        appId: 'hr',
+        permissionProfileIds: ['hr-view'],
+        assignmentSource: 'group',
+        status: 'active',
+        scopes: [],
+      },
+    ]);
   });
 });

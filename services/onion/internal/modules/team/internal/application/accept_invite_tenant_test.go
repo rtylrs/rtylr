@@ -14,11 +14,10 @@ import (
 // the refusal path can be asserted to have written nothing at all.
 
 const (
-	inviteOwnerID     int64 = 7001
-	inviteeID         int64 = 7002
-	inviteBusinessID  int64 = 7003
-	otherBusinessID   int64 = 7004
-	unownedBusinessID int64 = 7005
+	inviteOwnerID    int64 = 7001
+	inviteeID        int64 = 7002
+	inviteBusinessID int64 = 7003
+	otherBusinessID  int64 = 7004
 )
 
 func inviteRowScript(inviteBusiness any) scriptedQuery {
@@ -38,17 +37,11 @@ var noBusinessForOwner = scriptedQuery{
 	err:     sql.ErrNoRows,
 }
 
-// The established membership check used by tenant.ResolveBusinessID.
-func accessQueryScript(allowedBusinessID int64) scriptedQuery {
+func businessInfoScript(ownerID int64) scriptedQuery {
 	return scriptedQuery{
-		match:   containsAny("user_app_permissions uap"),
-		columns: []string{"1"},
-		rows: func() [][]driver.Value {
-			if allowedBusinessID == inviteBusinessID {
-				return [][]driver.Value{{int64(1)}}
-			}
-			return nil
-		}(),
+		match:   containsAny("SELECT name, owner_id FROM businesses WHERE id = ?"),
+		columns: []string{"name", "owner_id"},
+		rows:    [][]driver.Value{{"Invited Business", ownerID}},
 	}
 }
 
@@ -77,13 +70,11 @@ var businessForOwner = scriptedQuery{
 }
 
 // A member who already belongs to one business is invited to another. The
-// accept must resolve the invitation's business and never fall back to the
-// member's own users.business_id, which names an unrelated tenant.
+// accept uses the invitation's business and verifies it belongs to its issuer.
 func TestAcceptInviteWritesUnderTheInviteBusiness(t *testing.T) {
 	db, fake := newFakeDB(t, []scriptedQuery{
 		inviteRowScript(inviteBusinessID),
-		businessForOwner,
-		accessQueryScript(inviteBusinessID),
+		businessInfoScript(inviteOwnerID),
 	})
 	service := NewService(context.Background(), db)
 
@@ -130,7 +121,6 @@ func TestAcceptInviteRefusesWhenOwnerLookupFails(t *testing.T) {
 		// business_id is NULL: the row predates the column being populated.
 		inviteRowScript(nil),
 		noBusinessForOwner,
-		accessQueryScript(unownedBusinessID),
 	})
 	service := NewService(context.Background(), db)
 
@@ -143,14 +133,12 @@ func TestAcceptInviteRefusesWhenOwnerLookupFails(t *testing.T) {
 	}
 }
 
-// The invitation names a business the invitee has no membership in — a stale
-// or tampered binding. The accept must refuse rather than activate them there.
-func TestAcceptInviteRefusesUnverifiedInviteBusiness(t *testing.T) {
+// The invitation names a business its issuer does not own. The accept must
+// refuse rather than activate a member under an unrelated tenant.
+func TestAcceptInviteRefusesBusinessOutsideInviterOwnership(t *testing.T) {
 	db, fake := newFakeDB(t, []scriptedQuery{
 		inviteRowScript(inviteBusinessID),
-		// The membership check finds no source that grants this user access to
-		// the business the invitation names.
-		accessQueryScript(otherBusinessID),
+		businessInfoScript(otherBusinessID),
 	})
 	service := NewService(context.Background(), db)
 
@@ -169,7 +157,7 @@ func TestAcceptInviteRefusesUnverifiedInviteBusiness(t *testing.T) {
 func TestAcceptInviteDoesNotTouchTheAccountOnRefusal(t *testing.T) {
 	db, fake := newFakeDB(t, []scriptedQuery{
 		inviteRowScript(inviteBusinessID),
-		accessQueryScript(otherBusinessID),
+		businessInfoScript(otherBusinessID),
 	})
 	service := NewService(context.Background(), db)
 

@@ -87,13 +87,13 @@ func TestAuthenticationRejectsInactiveMemberAndBannedUser(t *testing.T) {
 	}
 	const businessID = int64(1)
 	_, err = db.ExecContext(ctx, `
-INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
-VALUES (?, ?, ?, '[]', 'admin', TRUE)`, businessID, testutil.OwnerID, userID)
+INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+VALUES (?, ?, 'member', 'active')`, businessID, userID)
 	if err != nil {
 		t.Fatalf("insert permission: %v", err)
 	}
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_app_permissions WHERE user_id = ?", userID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM authorization_business_members WHERE user_id = ?", userID)
 		_ = service.repo.DeleteUser(context.Background(), userID)
 	})
 
@@ -108,8 +108,8 @@ VALUES (?, ?, ?, '[]', 'admin', TRUE)`, businessID, testutil.OwnerID, userID)
 		t.Fatalf("active member token should validate: %v", err)
 	}
 
-	if _, err := db.ExecContext(ctx, "UPDATE user_app_permissions SET is_active = FALSE WHERE user_id = ?", userID); err != nil {
-		t.Fatalf("deactivate permission: %v", err)
+	if _, err := db.ExecContext(ctx, "UPDATE authorization_business_members SET status = 'revoked' WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("revoke membership: %v", err)
 	}
 	if _, err := service.Authenticate(ctx, email, password); !errors.Is(err, ErrInvalidCredentials) {
 		t.Fatalf("inactive member login error = %v, want ErrInvalidCredentials", err)
@@ -154,10 +154,10 @@ func TestHydrateAccessTokenClaims_ClearsStaleConsoleAdmin(t *testing.T) {
 		_ = service.repo.DeleteUser(context.Background(), userID)
 	})
 
-	claims := &AccessTokenClaims{UserID: userID, Role: "console_admin"}
+	claims := &AccessTokenClaims{UserID: userID, IsConsoleAdmin: true}
 	service.hydrateAccessTokenClaims(ctx, claims)
-	if claims.Role == "console_admin" {
-		t.Fatal("stale console_admin role must be cleared for non-admin users")
+	if claims.IsConsoleAdmin {
+		t.Fatal("stale console administrator status must be cleared for non-admin users")
 	}
 	if claims.TokenEpoch != 0 {
 		t.Errorf("TokenEpoch = %d, want 0 for untouched user", claims.TokenEpoch)

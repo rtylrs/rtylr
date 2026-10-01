@@ -18,8 +18,7 @@ const EmployeeDetail = (): React.JSX.Element => {
   const employeeId = id ? Number(id) : undefined;
   const { data: employee, isLoading } = useGetEmployee(employeeId);
   const [activeTab, setActiveTab] = useState<Tab>('personal');
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const showCompensation = canViewCompensation(role);
+  const showCompensation = canViewCompensation();
 
   if (isLoading) {
     return (

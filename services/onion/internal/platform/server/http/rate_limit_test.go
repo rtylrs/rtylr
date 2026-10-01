@@ -107,7 +107,7 @@ func TestGetClientKey_TrustsOnlyCloudflare(t *testing.T) {
 		t.Errorf("CF-Connecting-IP should win, got %q", got)
 	}
 
-	// A directly reachable self-host listener must ignore a rotated header even
+	// A directly reachable listener must ignore a rotated header even
 	// when the value looks like a valid public IP.
 	t.Setenv("TRUSTED_PROXY_CIDRS", "203.0.113.0/24")
 	r.RemoteAddr = "198.51.100.10:4321"

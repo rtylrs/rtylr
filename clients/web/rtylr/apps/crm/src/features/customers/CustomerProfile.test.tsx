@@ -1,9 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
-  role: 'operator' as string,
+  effectiveAccess: null as unknown,
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -16,10 +17,18 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (state: { user: { role: string } }) => unknown) =>
-    selector({ user: { role: mocks.role } }),
-}));
+vi.mock('@voxire/auth', () => {
+  const state = () => ({
+    user: { effectiveAccess: mocks.effectiveAccess },
+    effectiveAccess: mocks.effectiveAccess,
+  });
+  return {
+    useUserStore: Object.assign(
+      (selector: (value: ReturnType<typeof state>) => unknown) => selector(state()),
+      { getState: state }
+    ),
+  };
+});
 
 const customer = {
   id: 1,
@@ -70,27 +79,31 @@ function renderProfile(): void {
   render(<CustomerProfile />);
 }
 
+beforeEach(() => {
+  mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: ['crm:customers:delete'] });
+});
+
 describe('CustomerProfile delete gating', () => {
   it('shows the delete button for an operator (crm:customers:manage is granted directly)', () => {
-    mocks.role = 'operator';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: ['crm:customers:delete'] });
     renderProfile();
     expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
   });
 
   it('shows the delete button for admin (inherits crm:customers:manage)', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
     renderProfile();
     expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
   });
 
   it('hides the delete button for staff, who has no CRM access', () => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: [] });
     renderProfile();
     expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
   });
 
   it('hides the delete button for viewer', () => {
-    mocks.role = 'viewer';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: ['crm:customers:view'] });
     renderProfile();
     expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
   });
@@ -98,7 +111,7 @@ describe('CustomerProfile delete gating', () => {
 
 describe('CustomerProfile tags empty state', () => {
   it('shows the empty state and focuses the tag input when the call-to-action is clicked', () => {
-    mocks.role = 'operator';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: ['crm:customers:edit'] });
     renderProfile();
 
     expect(screen.getByText('crm.customerProfile.noTagsTitle')).toBeInTheDocument();

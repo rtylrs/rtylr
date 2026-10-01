@@ -40,7 +40,6 @@ func (r *Repository) CountActiveSeats(ctx context.Context, ownerID int64) (int, 
 	count, err := r.queries.CountActiveSeats(ctx, sqlc.CountActiveSeatsParams{
 		OwnerID:   ownerID,
 		OwnerID_2: ownerID,
-		OwnerID_3: ownerID,
 	})
 	if err != nil {
 		return 0, err
@@ -212,9 +211,10 @@ func (r *Repository) ListOwnerIDsForReconciliation(ctx context.Context, afterOwn
 		    FROM businesses b
 		    WHERE COALESCE(b.is_active, TRUE) = TRUE
 		    UNION
-		    SELECT p.owner_id
-		    FROM user_app_permissions p
-		    WHERE COALESCE(p.is_active, TRUE) = TRUE
+		    SELECT business.owner_id
+		    FROM authorization_business_members member
+		    JOIN businesses business ON business.id = member.business_id
+		    WHERE member.status = 'active' AND COALESCE(business.is_active, TRUE) = TRUE
 		    UNION
 		    SELECT s.owner_id
 		    FROM subscriptions s

@@ -13,9 +13,7 @@ import {
   useTerminalContextStore,
   useSettingsStore,
   useThemeStore,
-  useServerStore,
 } from './shared/stores';
-import ServerSetup from './features/server-setup';
 import { resolveAuthUrl } from './shared/services/server/serverConfig';
 import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
@@ -92,7 +90,6 @@ const AppShell = (): React.JSX.Element => {
   const setReceiptFooter = useSettingsStore((s) => s.setReceiptFooter);
   const setTheme = useThemeStore((s) => s.setTheme);
   const { locationId, terminalId, setTerminalContext } = useTerminalContextStore();
-  const serverConfigured = useServerStore((s) => s.configured);
   const hasRestoredSession = useRef(false);
   const hasLoadedPOSSettings = useRef(false);
 
@@ -100,10 +97,7 @@ const AppShell = (): React.JSX.Element => {
     runDesktopAutoUpdater();
   }, []);
 
-  // Check auth — only after the backend has been chosen, so the very first
-  // redirect targets the correct (hosted or self-host) auth host.
   useEffect(() => {
-    if (!serverConfigured) return;
     if (hasRestoredSession.current) return;
     hasRestoredSession.current = true;
 
@@ -117,7 +111,7 @@ const AppShell = (): React.JSX.Element => {
         window.location.href = `${resolveAuthUrl()}?redirect=pos`;
       },
     });
-  }, [getUserInfo, serverConfigured, setToken, token]);
+  }, [getUserInfo, setToken, token]);
 
   useEffect(() => {
     const name = businessDisplayName(userBusinessProfile);
@@ -167,12 +161,7 @@ const AppShell = (): React.JSX.Element => {
     setContext(context.branchId, context.terminalId, context.employeeId);
   }, [employee, endSession, isActive, locationId, setContext, terminalId]);
 
-  // Step 0: No backend chosen yet → first-run server chooser.
-  if (!serverConfigured) {
-    return <ServerSetup variant="first-run" />;
-  }
-
-  // Step 1: No location/terminal selected → show LocationSelect
+  // No location/terminal selected → show LocationSelect.
   if (!locationId || !terminalId) {
     return (
       <LocationSelect

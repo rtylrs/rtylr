@@ -163,7 +163,7 @@ func RateLimitMiddleware(limit int, window time.Duration) func(http.Handler) htt
 // unlimited buckets and bypass every limiter (global + per-route brute-force).
 //
 // CF-Connecting-IP is honored only when the socket peer is in the configured
-// Cloudflare/proxy CIDR set. Self-hosted API listeners are directly reachable,
+// Cloudflare/proxy CIDR set. Directly reachable API listeners,
 // so a client can otherwise rotate this header and receive a fresh bucket on
 // every request. X-Forwarded-For / X-Real-IP are deliberately not honored.
 func getClientKey(r *http.Request) string {
@@ -269,7 +269,7 @@ func perRouteRateLimitWithKeyFn(limit int, window time.Duration, keyFn func(*htt
 //     the real ceiling is limit x N for a client that spreads requests across
 //     them. Nothing here is shared state; there is no Redis bucket.
 //   - getClientKey only honours CF-Connecting-IP from a trusted proxy CIDR, so
-//     a directly-reachable self-host listener cannot be given fresh buckets by
+//     a directly-reachable listener cannot be given fresh buckets by
 //     rotating a header — but it also means every client behind one corporate
 //     NAT or CGNAT egress shares a single bucket.
 var authRouteLimiters = map[string]func(http.Handler) http.Handler{

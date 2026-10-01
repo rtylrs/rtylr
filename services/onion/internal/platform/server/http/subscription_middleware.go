@@ -42,7 +42,7 @@ func SubscriptionEnforcementMiddleware(db *sql.DB, accessPolicy *RouteAccessPoli
 				next.ServeHTTP(w, r)
 				return
 			}
-			if strings.HasPrefix(r.URL.Path, "/hub/subscription/") || strings.EqualFold(authUser.Role, "console_admin") {
+			if strings.HasPrefix(r.URL.Path, "/hub/subscription/") || authPkg.IsConsoleAdmin(authUser) {
 				next.ServeHTTP(w, r)
 				return
 			}

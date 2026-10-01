@@ -13,19 +13,13 @@ import {
   useUpdateGroup,
   useAddGroupMembers,
   useRemoveGroupMember,
-  type ResourcePermission,
-  type ResourcePermissionLevel,
 } from '../../shared/hooks/queries/useGroups';
 import { useTeam } from '../../shared/hooks/queries/useTeam';
-import { APP_RESOURCES, type PermissionLevel } from '../../shared/config/appResources';
+import { usePermissionProfiles } from '../../shared/hooks/queries/usePermissions';
+import { APP_NAMES } from '../../shared/config/appNames';
+import { buildPermissionProfileAssignments } from './authorizationDraft';
 
-type LocalPermissionLevel = PermissionLevel; // 'none' | 'viewer' | 'editor'
-
-const LEVELS: { value: LocalPermissionLevel; tKey: string }[] = [
-  { value: 'none', tKey: 'groupDetail.levelNone' },
-  { value: 'viewer', tKey: 'groupDetail.levelViewer' },
-  { value: 'editor', tKey: 'groupDetail.levelEditor' },
-];
+const APP_IDS = ['pos', 'erp', 'hr', 'crm', 'finance', 'flow', 'insights', 'menu', 'recruit'];
 
 const PRESET_COLORS = [
   '#6366f1',
@@ -52,6 +46,7 @@ const GroupDetail = (): React.JSX.Element => {
   const updateGroup = useUpdateGroup(id);
   const addMembers = useAddGroupMembers(id);
   const removeMember = useRemoveGroupMember(id);
+  const { data: permissionProfiles = [] } = usePermissionProfiles();
   const [teamPage, setTeamPage] = useState(1);
   const {
     data: teamData,
@@ -65,7 +60,8 @@ const GroupDetail = (): React.JSX.Element => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#6366f1');
-  const [resourcePerms, setResourcePerms] = useState<Map<string, LocalPermissionLevel>>(new Map());
+  const [licensedAppIds, setLicensedAppIds] = useState<string[]>([]);
+  const [profileIdsByApp, setProfileIdsByApp] = useState<Record<string, string[]>>({});
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [selectedToAdd, setSelectedToAdd] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -79,54 +75,56 @@ const GroupDetail = (): React.JSX.Element => {
       setName(group.name);
       setDescription(group.description ?? '');
       setColor(group.color ?? '#6366f1');
-      const perms = new Map<string, LocalPermissionLevel>();
-      for (const p of group.resourcePermissions) {
-        perms.set(p.resourceKey, p.permissionLevel);
-      }
-      setResourcePerms(perms);
+      setLicensedAppIds(group.licensedAppIds);
+      setProfileIdsByApp(
+        Object.fromEntries(
+          group.permissionProfileAssignments.map((assignment) => [
+            assignment.appId,
+            assignment.permissionProfileIds,
+          ])
+        )
+      );
       setDirty(false);
     } else if (isNew && initializedGroupId.current !== 'new') {
       initializedGroupId.current = 'new';
-      setResourcePerms(new Map());
+      setLicensedAppIds([]);
+      setProfileIdsByApp({});
     }
   }, [group, isNew]);
 
-  const setLevel = (resourceKey: string, level: LocalPermissionLevel): void => {
-    setResourcePerms((prev) => {
-      const next = new Map(prev);
-      if (level === 'none') {
-        next.delete(resourceKey);
-      } else {
-        next.set(resourceKey, level);
-      }
-      return next;
-    });
+  const toggleLicensedApp = (appId: string): void => {
+    setLicensedAppIds((prev) =>
+      prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId]
+    );
     setDirty(true);
   };
 
-  const buildPermissions = (): ResourcePermission[] => {
-    const result: ResourcePermission[] = [];
-    resourcePerms.forEach((level, resourceKey) => {
-      result.push({ resourceKey, permissionLevel: level as ResourcePermissionLevel });
-    });
-    return result;
-  };
-
-  const activeSectionCount = resourcePerms.size;
+  const activeAppCount = licensedAppIds.length;
 
   const handleSave = async (): Promise<void> => {
-    const resourcePermissions = buildPermissions();
+    const permissionProfileAssignments = buildPermissionProfileAssignments(
+      licensedAppIds,
+      profileIdsByApp,
+      'group'
+    );
     try {
       if (isNew) {
         const created = await createGroup.mutateAsync({
           name,
           description,
           color,
-          resourcePermissions,
+          licensedAppIds,
+          permissionProfileAssignments,
         });
         navigate({ to: `/team/groups/${created.id}`, replace: true });
       } else {
-        await updateGroup.mutateAsync({ name, description, color, resourcePermissions });
+        await updateGroup.mutateAsync({
+          name,
+          description,
+          color,
+          licensedAppIds,
+          permissionProfileAssignments,
+        });
       }
       setDirty(false);
     } catch {
@@ -304,7 +302,7 @@ const GroupDetail = (): React.JSX.Element => {
                 }}
               >
                 {tabKey === 'apps'
-                  ? t('team.groupDetail.tabApps', { count: activeSectionCount })
+                  ? t('team.groupDetail.tabApps', { count: activeAppCount })
                   : t('team.groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
               </button>
             ))}
@@ -319,7 +317,7 @@ const GroupDetail = (): React.JSX.Element => {
             className="rounded-xl overflow-hidden"
             style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
           >
-            {/* Column headers */}
+            {/* Application licenses and permission profiles */}
             <div
               className="grid grid-cols-12 gap-2 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
               style={{
@@ -327,72 +325,69 @@ const GroupDetail = (): React.JSX.Element => {
                 borderBottom: '1px solid var(--dash-border)',
               }}
             >
-              <div className="col-span-6">{t('team.groupDetail.columnSection')}</div>
-              {LEVELS.map((l) => (
-                <div key={l.value} className="col-span-2 text-center">
-                  {t(l.tKey)}
-                </div>
-              ))}
+              <div className="col-span-4">{t('team.groupDetail.columnApp')}</div>
+              <div className="col-span-2 text-center">{t('team.groupDetail.columnLicense')}</div>
+              <div className="col-span-6">{t('team.groupDetail.columnPermissionProfile')}</div>
             </div>
 
-            {APP_RESOURCES.map((app) => (
-              <React.Fragment key={app.id}>
-                {/* App header row */}
+            {APP_IDS.map((appId) => {
+              const appName = APP_NAMES[appId as keyof typeof APP_NAMES];
+              const appProfiles = permissionProfiles.filter((profile) => profile.appId === appId);
+              const licensed = licensedAppIds.includes(appId);
+              return (
                 <div
-                  className="px-5 py-2.5"
-                  style={{
-                    background: 'var(--dash-hover)',
-                    borderBottom: '1px solid var(--dash-border)',
-                  }}
+                  key={appId}
+                  className="grid grid-cols-12 gap-2 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
+                  style={{ borderBottom: '1px solid var(--dash-border)' }}
                 >
-                  <span
-                    className="text-xs font-semibold uppercase tracking-wider"
-                    style={{ color: 'var(--dash-text-muted)' }}
-                  >
-                    {t(app.labelKey)}
-                  </span>
-                </div>
-
-                {/* Section rows */}
-                {app.sections.map((section) => {
-                  const current: LocalPermissionLevel = resourcePerms.get(section.key) ?? 'none';
-                  return (
-                    <div
-                      key={section.key}
-                      className="grid grid-cols-12 gap-2 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
-                      style={{ borderBottom: '1px solid var(--dash-border)' }}
+                  <div className="col-span-4">
+                    <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                      {t(appName.short)}
+                    </span>
+                  </div>
+                  <div className="col-span-2 flex justify-center">
+                    <input
+                      type="checkbox"
+                      aria-label={t('team.groupDetail.licenseAppAriaLabel', {
+                        app: t(appName.short),
+                      })}
+                      checked={licensed}
+                      onChange={() => toggleLicensedApp(appId)}
+                      style={{ accentColor: color }}
+                    />
+                  </div>
+                  <div className="col-span-6">
+                    <select
+                      aria-label={t('team.groupDetail.permissionProfileForApp', {
+                        app: t(appName.short),
+                      })}
+                      value={profileIdsByApp[appId]?.[0] ?? ''}
+                      disabled={!licensed}
+                      onChange={(event) => {
+                        setProfileIdsByApp((current) => ({
+                          ...current,
+                          [appId]: event.target.value ? [event.target.value] : [],
+                        }));
+                        setDirty(true);
+                      }}
+                      className="w-full rounded-lg px-3 py-2 text-xs disabled:opacity-50"
+                      style={{
+                        background: 'var(--dash-bg)',
+                        border: '1px solid var(--dash-border)',
+                        color: 'var(--dash-text)',
+                      }}
                     >
-                      <div className="col-span-6 pl-3">
-                        <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                          {t(section.labelKey)}
-                        </span>
-                      </div>
-                      {LEVELS.map((l) => (
-                        <div key={l.value} className="col-span-2 flex justify-center">
-                          <button
-                            type="button"
-                            aria-label={t('team.groupDetail.radioAriaLabel', {
-                              section: t(section.labelKey),
-                              level: t(l.tKey),
-                            })}
-                            onClick={() => setLevel(section.key, l.value)}
-                            className="h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all"
-                            style={{
-                              borderColor: current === l.value ? color : 'var(--dash-border)',
-                              background: current === l.value ? color : 'transparent',
-                            }}
-                          >
-                            {current === l.value && (
-                              <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                            )}
-                          </button>
-                        </div>
+                      <option value="">{t('team.groupDetail.noPermissionProfile')}</option>
+                      {appProfiles.map((profile) => (
+                        <option key={profile.id} value={profile.id}>
+                          {profile.name}
+                        </option>
                       ))}
-                    </div>
-                  );
-                })}
-              </React.Fragment>
-            ))}
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
           </motion.div>
         )}
 

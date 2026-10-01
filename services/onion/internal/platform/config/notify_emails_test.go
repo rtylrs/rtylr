@@ -55,7 +55,7 @@ func TestDefaultNotifyLists(t *testing.T) {
 }
 
 func TestLoadAndValidateReadsNotifyLists(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 	t.Setenv("LEAD_NOTIFY_EMAILS", "x@voxire.com, y@voxire.com")
 	t.Setenv("NEWSLETTER_NOTIFY_EMAILS", "")
 	cfg, err := LoadAndValidate()

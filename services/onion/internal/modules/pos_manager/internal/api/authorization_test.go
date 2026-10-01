@@ -57,20 +57,12 @@ func posCtx(permissions ...string) context.Context {
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
+				PermissionScopes: map[string][]authorization.Scope{
+					"pos:orders:view": {{Type: "location", ID: "92"}},
+				},
 			}},
 		},
 	})
-}
-
-// skipInLegacyAuthorizationMode documents that AUTHORIZATION_V2_MODE=legacy
-// makes HasAppPermission accept any licensed POS app regardless of the
-// permission list, so the "denied without the permission" cases cannot be
-// asserted in that mode. The same caveat applies to the sibling pos_users gate.
-func skipInLegacyAuthorizationMode(t *testing.T) {
-	t.Helper()
-	if authPkg.LegacyAuthorizationMode() {
-		t.Skip("AUTHORIZATION_V2_MODE=legacy grants POS app access without checking permissions")
-	}
 }
 
 // A caller who is logged in but cannot take the POS action the override would
@@ -78,8 +70,6 @@ func skipInLegacyAuthorizationMode(t *testing.T) {
 // guards were "is logged in" and a tenant-membership lookup, so any
 // authenticated user of the business could brute-force manager PINs.
 func TestVerifyPIN_RequiresPOSOrderViewPermission(t *testing.T) {
-	skipInLegacyAuthorizationMode(t)
-
 	cases := map[string][]string{
 		"no permissions at all":      {},
 		"unrelated permission":       {"pos:employees:manage"},
@@ -105,14 +95,12 @@ func TestVerifyPIN_RequiresPOSOrderViewPermission(t *testing.T) {
 // caller gets past it and then fails at tenant resolution, which needs a
 // database and so is not observable in a unit test.
 func TestHasPOSManagerOverride_PermittedCallerPassesTheGate(t *testing.T) {
-	skipInLegacyAuthorizationMode(t)
 	if !hasPOSManagerOverride(posCtx("pos:orders:view")) {
 		t.Error("a caller holding pos:orders:view was refused by the gate")
 	}
 }
 
 func TestHasPOSManagerOverride_DeniesWithoutThePermission(t *testing.T) {
-	skipInLegacyAuthorizationMode(t)
 	if hasPOSManagerOverride(posCtx()) {
 		t.Error("a caller with no POS permissions passed the gate")
 	}
@@ -131,7 +119,6 @@ func TestHasPOSManagerOverride_DeniesAnonymous(t *testing.T) {
 // gets 403 with no database reachable at all, which only holds if the
 // permission check short-circuits first.
 func TestVerifyPIN_PermissionGateRunsBeforeTenantResolution(t *testing.T) {
-	skipInLegacyAuthorizationMode(t)
 
 	svc := &recordingService{result: &domain.VerifyResult{Valid: true, StaffID: 1}}
 	api := &ManagerAPI{Service: svc}

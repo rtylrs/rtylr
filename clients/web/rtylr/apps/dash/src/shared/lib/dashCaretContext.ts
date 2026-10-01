@@ -5,7 +5,6 @@ export interface DashSystemContextInput {
   pathname: string;
   search?: string;
   businessName?: string;
-  role?: string;
   apps?: string[];
 }
 
@@ -165,10 +164,9 @@ export function buildDashSystemContext({
   pathname,
   search,
   businessName,
-  role,
   apps,
 }: DashSystemContextInput): string {
-  const ctx = buildDashPageContext({ pathname, search, businessName, role, apps });
+  const ctx = buildDashPageContext({ pathname, search, businessName, apps });
   const lines = [
     'App: Dash business command center.',
     businessName ? `Business: ${businessName}.` : '',
@@ -184,7 +182,6 @@ export function buildDashPageContext({
   pathname,
   search,
   businessName,
-  role,
   apps,
 }: DashSystemContextInput): CaretPageContext {
   const info = pageInfo(pathname);
@@ -198,7 +195,6 @@ export function buildDashPageContext({
     routeLabels: ROUTE_LABELS,
     routeModules: ROUTE_MODULES,
     businessName,
-    role,
     selected,
     businessMemory: buildBusinessMemory(),
     cacheContext,

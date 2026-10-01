@@ -1,9 +1,11 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   useUserStore: vi.fn(),
+  effectiveAccess: undefined as unknown,
   useSwaps: vi.fn(),
   createSwapMutate: vi.fn(),
   resolveSwapMutate: vi.fn(),
@@ -21,7 +23,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: mocks.useUserStore,
+  useUserStore: Object.assign(mocks.useUserStore, {
+    getState: () => ({
+      user: { effectiveAccess: mocks.effectiveAccess },
+      effectiveAccess: mocks.effectiveAccess,
+    }),
+  }),
 }));
 
 vi.mock('sonner', () => ({
@@ -62,9 +69,12 @@ vi.mock('../staff/useStaff', () => ({
 import Operations from './Operations';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 
-function role(r: string): void {
+function setAccess(effectiveAccess: ReturnType<typeof createEffectiveAccess>): void {
+  mocks.effectiveAccess = effectiveAccess;
   mocks.useUserStore.mockImplementation(
-    (selector: (state: { user: { role: string } }) => unknown) => selector({ user: { role: r } })
+    (
+      selector: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) => selector({ user: { effectiveAccess }, effectiveAccess })
   );
 }
 
@@ -74,7 +84,7 @@ describe('Operations empty states', () => {
       if (typeof m === 'function' && 'mockReset' in m) m.mockReset();
     });
 
-    role('owner');
+    setAccess(createEffectiveAccess('hr', { isOwner: true }));
     mocks.useStaff.mockReturnValue({ data: [] });
     mocks.usePayroll.mockReturnValue({ data: [] });
     mocks.useSwaps.mockReturnValue({ data: [], refetch: mocks.refetchSwaps });
@@ -143,7 +153,7 @@ describe('Operations department labor cost', () => {
       if (typeof m === 'function' && 'mockReset' in m) m.mockReset();
     });
 
-    role('owner');
+    setAccess(createEffectiveAccess('hr', { isOwner: true }));
     mocks.useStaff.mockReturnValue({
       data: [
         { id: 101, name: 'Ada', department: 'Sales' },

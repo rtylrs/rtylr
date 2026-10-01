@@ -77,11 +77,11 @@ ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), template_id = VALUES(
 INSERT INTO pos_orders
     (id, owner_id, business_id, session_id, table_id, location_id, order_number, type, status, payment_status, customer_name, staff_id, subtotal, total, amount_paid)
 VALUES
-    (7211, 1001, 1001, 3201, 3101, 3001, 'AUTH-VOID', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 20.00, 20.00, 20.00),
-    (7212, 1001, 1001, 3201, 3101, 3001, 'AUTH-VOID-APPROVE', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 21.00, 21.00, 21.00),
+    (7211, 1001, 1001, 3201, 3101, 3001, 'AUTH-VOID', 'dine_in', 'pending', 'unpaid', 'Direct Authorization', 1002, 20.00, 20.00, 0.00),
+    (7212, 1001, 1001, 3201, 3101, 3001, 'AUTH-VOID-APPROVE', 'dine_in', 'pending', 'unpaid', 'Direct Authorization', 1002, 21.00, 21.00, 0.00),
     (7213, 1001, 1001, 3201, 3101, 3001, 'AUTH-REFUND', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 22.00, 22.00, 22.00),
     (7214, 1001, 1001, 3201, 3101, 3001, 'AUTH-REFUND-APPROVE', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 23.00, 23.00, 23.00),
-    (7215, 1001, 1001, 3201, 3101, 3001, 'AUTH-VOID-OVERRIDE', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 24.00, 24.00, 24.00),
+    (7215, 1001, 1001, 3201, 3101, 3001, 'AUTH-VOID-OVERRIDE', 'dine_in', 'pending', 'unpaid', 'Direct Authorization', 1002, 24.00, 24.00, 0.00),
     (7216, 1001, 1001, 3201, 3101, 3001, 'AUTH-REFUND-OVERRIDE', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 25.00, 25.00, 25.00),
     (7217, 1001, 1001, 3201, 3101, 3001, 'AUTH-DISCOUNT', 'dine_in', 'paid', 'paid', 'Direct Authorization', 1002, 26.00, 26.00, 26.00),
     (7218, 1001, 1001, 3201, 3101, 3001, 'AUTH-DISCOUNT-STAFF', 'dine_in', 'pending', 'unpaid', 'Direct Authorization', 1001, 26.00, 26.00, 0.00)
@@ -96,7 +96,7 @@ ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), staff_id = VALUES(sta
 INSERT INTO erp_purchase_orders
     (id, owner_id, business_id, supplier_id, po_number, status, subtotal, total, created_by)
 VALUES
-    (7301, 1001, 1001, 5101, 'AUTH-APPROVE', 'sent', 5.00, 5.00, 1002)
+    (7301, 1001, 1001, 5101, 'AUTH-APPROVE', 'draft', 5.00, 5.00, 1002)
 ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), status = VALUES(status), created_by = VALUES(created_by);
 
 INSERT INTO erp_purchase_order_items
@@ -114,7 +114,7 @@ ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), warehouse_id = VALUES
 INSERT INTO erp_stock_take_items
     (id, stock_take_id, product_id, expected_qty, counted_qty, variance)
 VALUES
-    (7304, 7303, 5201, 50.000, 50.000, 0.000)
+    (7304, 7303, 5201, 50.000, NULL, NULL)
 ON DUPLICATE KEY UPDATE product_id = VALUES(product_id), expected_qty = VALUES(expected_qty), counted_qty = VALUES(counted_qty), variance = VALUES(variance);
 
 INSERT INTO pos_terminals
@@ -132,12 +132,38 @@ ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), user_id = VALUES(user
 INSERT INTO authorization_roles
     (id, business_id, app_id, role_key, display_name, description, level, assignment_mode, is_system, is_archived, lifecycle, version, created_by)
 VALUES
-    (7305, 1001, 'dash', 'direct-authorization-role', 'Direct Authorization Role', 'Direct authorization fixture role.', 10, 'many', FALSE, FALSE, 'active', 1, 1001)
+    (7305, 1001, 'dash', 'direct-authorization-role', 'Direct Authorization Role', 'Direct authorization fixture role.', 10, 'many', FALSE, FALSE, 'active', 1, 1001),
+    (7308, 1001, 'dash', 'direct-team-authorization-role', 'Direct Team Authorization Role', 'Isolated profile for team authorization evidence.', 10, 'many', FALSE, FALSE, 'active', 1, 1001)
+ON DUPLICATE KEY UPDATE
+    business_id = VALUES(business_id), display_name = VALUES(display_name),
+    is_archived = VALUES(is_archived), lifecycle = VALUES(lifecycle);
+
+INSERT INTO authorization_roles
+    (id, business_id, app_id, role_key, display_name, description, level, assignment_mode, is_system, is_archived, lifecycle, version, created_by)
+VALUES
+    (7306, 1001, 'pos', 'direct-authorization-pos-role', 'Direct Authorization POS Role', 'POS profile used by invalid-scope tests.', 10, 'many', FALSE, FALSE, 'active', 1, 1001)
 ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), display_name = VALUES(display_name), is_archived = VALUES(is_archived), lifecycle = VALUES(lifecycle);
 
-INSERT INTO user_app_permissions
-    (business_id, owner_id, user_id, apps, role, is_active)
+INSERT INTO finance_invoices
+    (id, owner_id, business_id, invoice_number, client_name, status, issue_date, due_date, currency, subtotal, total, amount_due)
 VALUES
-    (1001, 1001, 1002, JSON_ARRAY(), 'staff', TRUE),
-    (1001, 1001, 1003, JSON_ARRAY(), 'staff', TRUE)
-ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), apps = VALUES(apps), role = VALUES(role), is_active = TRUE;
+    (7401, 1001, 1001, 'AUTH-SEND', 'Direct Authorization', 'draft', '2026-08-27', '2026-09-27', 'USD', 1.00, 1.00, 1.00)
+ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), status = VALUES(status), total = VALUES(total), amount_due = VALUES(amount_due);
+
+INSERT INTO authorization_business_members
+    (business_id, user_id, member_type, status)
+VALUES
+    (1001, 1002, 'member', 'active'),
+    (1001, 1003, 'member', 'active')
+ON DUPLICATE KEY UPDATE member_type = VALUES(member_type), status = VALUES(status);
+
+INSERT INTO user_provisioning_states
+    (user_id, business_id, mode, state, email_verified, password_change_required, mfa_required, mfa_enrolled)
+VALUES
+    (1001, 1001, 'invitation', 'active', TRUE, FALSE, FALSE, FALSE),
+    (1002, 1001, 'invitation', 'active', TRUE, FALSE, FALSE, FALSE),
+    (1003, 1001, 'invitation', 'active', TRUE, FALSE, FALSE, FALSE)
+ON DUPLICATE KEY UPDATE
+    business_id = VALUES(business_id), state = VALUES(state), email_verified = VALUES(email_verified),
+    password_change_required = VALUES(password_change_required), mfa_required = VALUES(mfa_required),
+    mfa_enrolled = VALUES(mfa_enrolled);

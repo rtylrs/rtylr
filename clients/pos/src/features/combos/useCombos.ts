@@ -5,10 +5,7 @@ import {
 } from "@voxire/voxie/pos/combo/v1/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Combo } from "../../shared/types/pos";
-import {
-  resolveApiBaseUrl,
-  useServerStore,
-} from "../../shared/stores/serverStore";
+import { resolveApiBaseUrl } from "../../shared/services/server/serverConfig";
 
 class ServerScopedComboServiceClient extends ComboServiceClient {
   constructor(_configuredBaseUrl: string, options?: ComboServiceClientOptions) {
@@ -55,13 +52,8 @@ function comboItems(value: string): Combo["items"] {
 }
 
 export function useCombos() {
-  const serverMode = useServerStore((state) => state.mode);
-  const customApiUrl = useServerStore((state) => state.customApiUrl);
-  const serverIdentity =
-    serverMode === "self_host" ? (customApiUrl ?? "self-host") : "hosted";
-
   const query = useQuery({
-    queryKey: ["pos-combos", serverIdentity],
+    queryKey: ["pos-combos"],
     queryFn: async (): Promise<Combo[]> => {
       const comboClient = createOneKitClient(
         ServerScopedComboServiceClient,

@@ -73,10 +73,8 @@ func securityManagerContext() context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     42,
 		BusinessID: 7,
-		Role:       "owner",
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID:      7,
-			DashRole:        "owner",
 			DashPermissions: []string{"hub:security:manage"},
 			IsOwner:         true,
 		},

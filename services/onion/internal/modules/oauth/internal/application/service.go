@@ -150,7 +150,7 @@ func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier
 		return "", "", 0, err
 	}
 
-	businessID, role, err := s.repo.GetUserBusinessIDAndRole(ctx, authCode.UserID)
+	businessID, err := s.repo.GetUserBusinessID(ctx, authCode.UserID)
 	if err != nil {
 		return "", "", 0, err
 	}
@@ -158,7 +158,6 @@ func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier
 	claims := &OAuthTokenClaims{
 		UserID:     authCode.UserID,
 		BusinessID: businessID,
-		Role:       role,
 		Scope:      authCode.Scope,
 	}
 
@@ -214,7 +213,7 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 		return "", "", 0, err
 	}
 
-	businessID, role, err := s.repo.GetUserBusinessIDAndRole(ctx, token.UserID)
+	businessID, err := s.repo.GetUserBusinessID(ctx, token.UserID)
 	if err != nil {
 		return "", "", 0, err
 	}
@@ -222,7 +221,6 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 	claims := &OAuthTokenClaims{
 		UserID:     token.UserID,
 		BusinessID: businessID,
-		Role:       role,
 		Scope:      token.Scope,
 	}
 

@@ -11,7 +11,6 @@ import (
 type OAuthTokenClaims struct {
 	UserID     int64  `json:"user_id"`
 	BusinessID int64  `json:"business_id,omitempty"`
-	Role       string `json:"role,omitempty"`
 	Scope      string `json:"scope,omitempty"`
 	jwt.RegisteredClaims
 }

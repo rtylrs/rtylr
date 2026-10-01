@@ -21,12 +21,13 @@ const DEFAULT_SMS_BODY = 'Flash sale today! {{first_name}}, enjoy 20% off. Reply
 
 const SMSCampaign: React.FC = () => {
   const navigate = useNavigate();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
-  const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
   const search = useSearch({ from: '/layout/campaigns/sms' });
   const campaignId = search.id;
   const isEditing = !!campaignId;
+  const canCreateCampaign = canCrmPermission('crm:campaigns:create');
+  const canManageCampaign = canCrmPermission('crm:campaigns:manage');
+  const canWriteCampaign = isEditing ? canManageCampaign : canCreateCampaign;
+  const canSendCampaigns = canCrmPermission('crm:campaigns:send');
   // Set after a create that could not be activated, so clicking "Save & activate"
   // again updates that campaign instead of creating a duplicate.
   const [createdId, setCreatedId] = useState<number | undefined>(undefined);
@@ -135,7 +136,7 @@ const SMSCampaign: React.FC = () => {
           }
           actions={
             <>
-              {canManageCampaigns && (
+              {canWriteCampaign && (
                 <Button
                   variant="outline"
                   onClick={() => handleSave(false)}
@@ -145,7 +146,7 @@ const SMSCampaign: React.FC = () => {
                   {pending ? 'Saving…' : 'Save draft'}
                 </Button>
               )}
-              {canSendCampaigns && (
+              {canWriteCampaign && canSendCampaigns && (
                 <Button
                   variant="primary"
                   onClick={() => handleSave(true)}

@@ -9,20 +9,22 @@ import type {
   StaffUserPayload,
   StaffUserWithGroups,
 } from '@voxire/voxie/hub/team/members/v1/types';
-import type { AppRoleAssignment as ApiAppRoleAssignment } from '@voxire/voxie/hub/user/v1/types';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import i18next from 'i18next';
 import { parseEffectiveAccess } from '@voxire/auth';
 import type { EffectiveAccess } from '@voxire/types';
-import { teamMemberSchema } from '../../schemas/team';
+import {
+  permissionProfileAssignmentSchema,
+  teamMemberSchema,
+  type PermissionProfileAssignment,
+} from '../../schemas/team';
 
 export type TeamMember = z.infer<typeof teamMemberSchema> & {
   status: string;
-  dashRole?: string;
-  appAssignments?: ApiAppRoleAssignment[];
   effectiveAccess?: EffectiveAccess;
   groupIds?: number[];
+  isOwner?: boolean;
 };
 
 const membersClient = createOneKitClient(MembersServiceClient, 'dash');
@@ -51,13 +53,15 @@ function fromApiMember(u: StaffUserPayload | StaffUserWithGroups): TeamMember {
     fullName: u.fullName,
     name: u.fullName || email,
     email,
-    role: u.role ?? '',
-    apps: u.apps ?? [],
+    memberType: u.memberType ?? 'member',
+    licensedAppIds: u.licensedAppIds ?? [],
+    permissionProfileAssignments: z
+      .array(permissionProfileAssignmentSchema)
+      .parse(u.permissionProfileAssignments ?? []),
     isActive: u.isActive ?? false,
     status: u.isActive ? 'active' : 'inactive',
-    dashRole: u.dashRole ?? effectiveAccess?.dashRole ?? undefined,
-    appAssignments: u.appAssignments,
     effectiveAccess: effectiveAccess ?? undefined,
+    isOwner: effectiveAccess?.isOwner ?? false,
     createdAt: u.createdAt ?? '',
     groups:
       'groups' in u
@@ -136,13 +140,11 @@ export const useMember = (id: string | undefined) => {
 interface InviteMemberPayload {
   email: string;
   fullName: string;
-  role: TeamMember['role'];
-  apps: string[];
-  groupId?: number;
+  memberType: 'member' | 'admin';
+  licensedAppIds: string[];
+  permissionProfileAssignments: PermissionProfileAssignment[];
   username?: string;
   temporaryPassword?: string;
-  dashRole?: string;
-  appAssignments?: ApiAppRoleAssignment[];
   groupIds?: number[];
   provisioningMode?: 'invitation' | 'direct_credentials';
 }
@@ -154,25 +156,11 @@ export const useInviteMember = () => {
       return invitationsClient.inviteUser({
         email: payload.email,
         fullName: payload.fullName,
-        role: payload.role,
-        apps: payload.apps,
-        ...(payload.dashRole ? { dashRole: payload.dashRole } : {}),
-        ...(payload.appAssignments ? { appAssignments: payload.appAssignments } : {}),
-        // One `groupIds`, merged from both inputs. The singular `groupId` used
-        // to be spread after the plural list, so supplying both sent only the
-        // single id and silently dropped every other group. The contract has
-        // no singular field, which is what #945 originally reported; it is
-        // translated here instead.
-        ...(payload.groupIds?.length || payload.groupId
-          ? {
-              groupIds: [
-                ...new Set(
-                  [...(payload.groupIds ?? []), ...(payload.groupId ? [payload.groupId] : [])].map(
-                    String
-                  )
-                ),
-              ],
-            }
+        memberType: payload.memberType,
+        licensedAppIds: payload.licensedAppIds,
+        permissionProfileAssignments: payload.permissionProfileAssignments,
+        ...(payload.groupIds?.length
+          ? { groupIds: [...new Set(payload.groupIds.map(String))] }
           : {}),
         ...(payload.provisioningMode ? { provisioningMode: payload.provisioningMode } : {}),
         ...(payload.username ? { username: payload.username } : {}),
@@ -200,10 +188,14 @@ export const useUpdateMember = () => {
       return permissionsClient.updatePermissions({
         userId: id,
         ...(patch.fullName || patch.name ? { fullName: patch.fullName ?? patch.name } : {}),
-        apps: patch.apps ?? [],
-        role: patch.role ?? 'staff',
-        ...(patch.dashRole ? { dashRole: patch.dashRole } : {}),
-        ...(patch.appAssignments ? { appAssignments: patch.appAssignments } : {}),
+        ...(patch.memberType ? { memberType: patch.memberType } : {}),
+        replaceLicensedAppIds: patch.licensedAppIds !== undefined,
+        ...(patch.licensedAppIds !== undefined ? { licensedAppIds: patch.licensedAppIds } : {}),
+        replacePermissionProfileAssignments: patch.permissionProfileAssignments !== undefined,
+        ...(patch.permissionProfileAssignments !== undefined
+          ? { permissionProfileAssignments: patch.permissionProfileAssignments }
+          : {}),
+        replaceGroupIds: patch.groupIds !== undefined,
         ...(patch.groupIds ? { groupIds: patch.groupIds.map(String) } : {}),
       });
     },

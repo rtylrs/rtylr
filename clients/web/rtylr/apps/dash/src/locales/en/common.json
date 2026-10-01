@@ -20,6 +20,25 @@
     "application": "Application",
     "permissions": "Permissions"
   },
+  "permissionProfiles": {
+    "title": "Permission profiles",
+    "description": "Create app-specific access profiles and assign them to members or groups.",
+    "new": "New profile",
+    "create": "Create permission profile",
+    "edit": "Edit permission profile",
+    "name": "Profile name",
+    "optionalDescription": "Optional profile description",
+    "assignedMembers": "{{count}} members",
+    "permissionCount": "{{count}} permissions",
+    "highImpact": "High impact",
+    "sensitive": "Sensitive"
+  },
+  "permissionCatalog": {
+    "title": "Permission catalog",
+    "description": "Review the resource actions available when building permission profiles.",
+    "loadErrorTitle": "Couldn't load permissions",
+    "loadError": "The permission catalog could not be loaded."
+  },
   "refresh": "Refresh",
   "clearSearch": "Clear search",
   "clearFilters": "Clear filters",

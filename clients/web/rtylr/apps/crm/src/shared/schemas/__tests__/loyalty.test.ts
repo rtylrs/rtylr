@@ -221,11 +221,13 @@ describe('loyalty schemas accept int64-as-string wire values (rtylr#942)', () =>
       pointsExpiryDays: '365',
     };
     const result = loyaltyConfigSchema.parse(config);
-    expect(result.bronzeMin).toBe(100);
-    expect(result.silverMin).toBe(500);
-    expect(result.goldMin).toBe(1500);
-    expect(result.platinumMin).toBe(5000);
-    expect(result.pointsExpiry).toBe(365);
+    expect(result).toMatchObject({
+      bronzeMin: 100,
+      silverMin: 500,
+      goldMin: 1500,
+      platinumMin: 5000,
+      pointsExpiry: 365,
+    });
   });
 
   it('transaction: parses points/balanceBefore/balanceAfter as wire strings', () => {

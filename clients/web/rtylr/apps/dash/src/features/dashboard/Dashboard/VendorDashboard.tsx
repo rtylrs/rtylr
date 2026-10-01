@@ -19,6 +19,7 @@ import {
 import { HelmetContainer } from '@voxire/components';
 import { resolveAppUrl, type AppId } from '@voxire/config';
 import { useUserStore } from '../../../shared/stores/userStore';
+import { canEffectiveAccess } from '@voxire/permissions';
 import { useCommandPalette } from '../../../shared/stores/commandPaletteStore';
 import { getTenantKey } from '../../../shared/utils/tenantStorage';
 import { useTranslation } from 'react-i18next';
@@ -459,20 +460,7 @@ const isLaunchable = (app: string): app is (typeof LAUNCHABLE_APPS)[number] =>
   (LAUNCHABLE_APPS as readonly string[]).includes(app);
 
 const StaffDashboard: React.FC<{ userApps: string[] }> = ({ userApps }) => {
-  // Memoised because it is a useEffect dependency: a fresh array every render
-  // would re-run the redirect on every render.
-  const launchable = React.useMemo(() => userApps.filter(isLaunchable), [userApps]);
-
-  React.useEffect(() => {
-    // resolveAppUrl, not a hostname built by hand. APP_URLS already answers
-    // this per environment, and resolveAppUrl layers self-host's runtime
-    // config on top; interpolating rtylr.com sent a local session, and every
-    // self-hosted one, to the hosted product. This runs in an effect with no
-    // click involved, so a staff member with one app was redirected off the
-    // moment they landed on Dash.
-    const [firstApp] = launchable;
-    if (firstApp) window.location.href = resolveAppUrl(firstApp);
-  }, [launchable]);
+  const launchable = userApps.filter(isLaunchable);
 
   return (
     <div className="max-w-xl mx-auto py-12 text-center space-y-4">
@@ -512,16 +500,12 @@ const StaffDashboard: React.FC<{ userApps: string[] }> = ({ userApps }) => {
 
 const VendorDashboard: React.FC = () => {
   const { user } = useUserStore();
-  const role = (user?.role ?? '').toLowerCase();
-  const isAdmin = user?.effectiveAccess
-    ? user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin
-    : role === 'admin' || role === 'owner';
-  const userApps: string[] = user?.effectiveAccess
-    ? user.effectiveAccess.apps
-        .filter((app) => app.licensed && app.hasAccess)
-        .map((app) => app.appId)
-    : (user?.apps ?? []);
-  if (!isAdmin) return <StaffDashboard userApps={userApps} />;
+  const access = user?.effectiveAccess;
+  const userApps =
+    access?.apps.filter((app) => app.licensed && app.hasAccess).map((app) => app.appId) ?? [];
+  if (!canEffectiveAccess(access, 'hub:dashboard:view')) {
+    return <StaffDashboard userApps={userApps} />;
+  }
   return (
     <>
       <HelmetContainer title="Dashboard · rtylr" />

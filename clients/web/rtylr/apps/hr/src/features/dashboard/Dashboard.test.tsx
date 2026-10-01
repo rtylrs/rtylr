@@ -2,9 +2,11 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DashboardWidget } from '../../shared/schemas/dashboard';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   useUserStore: vi.fn(),
+  effectiveAccess: undefined as unknown,
   useGetDashboard: vi.fn(),
   useHRDashboard: vi.fn(),
   useUpdateWidgetLayout: vi.fn(),
@@ -19,7 +21,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: mocks.useUserStore,
+  useUserStore: Object.assign(mocks.useUserStore, {
+    getState: () => ({
+      user: { effectiveAccess: mocks.effectiveAccess },
+      effectiveAccess: mocks.effectiveAccess,
+    }),
+  }),
 }));
 
 vi.mock('./useDashboard', () => ({
@@ -118,15 +125,19 @@ vi.mock('./widgets/SetupCompletionWidget', () => ({
 
 import Dashboard from './Dashboard';
 
-function role(r: string): void {
+function setAccess(effectiveAccess: ReturnType<typeof createEffectiveAccess>): void {
+  mocks.effectiveAccess = effectiveAccess;
   mocks.useUserStore.mockImplementation(
-    (selector: (state: { user: { role: string } }) => unknown) => selector({ user: { role: r } })
+    (
+      selector: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) => selector({ user: { effectiveAccess }, effectiveAccess })
   );
 }
 
 describe('Dashboard compensation gating', () => {
   beforeEach(() => {
     mocks.useUserStore.mockReset();
+    setAccess(createEffectiveAccess('hr', { isOwner: true }));
     mocks.useGetDashboard.mockReset();
     mocks.useHRDashboard.mockReset();
     mocks.useUpdateWidgetLayout.mockReset();
@@ -167,7 +178,7 @@ describe('Dashboard compensation gating', () => {
   });
 
   it('hides the payroll stat and payroll widget for a staff-role user (default layout)', () => {
-    role('staff');
+    setAccess(createEffectiveAccess('hr', { permissions: ['hr:employees:view'] }));
 
     render(<Dashboard />);
 
@@ -178,7 +189,7 @@ describe('Dashboard compensation gating', () => {
   });
 
   it('shows the payroll stat and payroll widget for an admin-role user (default layout)', () => {
-    role('admin');
+    setAccess(createEffectiveAccess('hr', { isAdmin: true }));
 
     render(<Dashboard />);
 
@@ -187,7 +198,7 @@ describe('Dashboard compensation gating', () => {
   });
 
   it('shows the payroll stat and payroll widget for an owner-role user (default layout)', () => {
-    role('owner');
+    setAccess(createEffectiveAccess('hr', { isOwner: true }));
 
     render(<Dashboard />);
 
@@ -231,7 +242,7 @@ describe('Dashboard compensation gating', () => {
       data: { widgets: storedWidgets, data: {} },
       isLoading: false,
     });
-    role('staff');
+    setAccess(createEffectiveAccess('hr', { permissions: ['hr:employees:view'] }));
 
     render(<Dashboard />);
 
@@ -240,7 +251,7 @@ describe('Dashboard compensation gating', () => {
   });
 
   it('shows the recent activity empty state and refetches the legacy dashboard on CTA click', () => {
-    role('owner');
+    setAccess(createEffectiveAccess('hr', { isOwner: true }));
 
     render(<Dashboard />);
 
@@ -252,7 +263,7 @@ describe('Dashboard compensation gating', () => {
   });
 
   it('shows the recent hires empty state and navigates to invite staff on CTA click', () => {
-    role('owner');
+    setAccess(createEffectiveAccess('hr', { isOwner: true }));
     mocks.useStaff.mockReturnValue({ data: [] });
 
     render(<Dashboard />);
@@ -265,7 +276,7 @@ describe('Dashboard compensation gating', () => {
   });
 
   it('does not show the recent hires empty state once staff exist', () => {
-    role('owner');
+    setAccess(createEffectiveAccess('hr', { isOwner: true }));
     mocks.useStaff.mockReturnValue({
       data: [{ id: 1, name: 'Alex Chen', role: 'Server', department: 'FOH' }],
     });

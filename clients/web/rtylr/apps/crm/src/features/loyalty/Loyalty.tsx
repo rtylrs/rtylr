@@ -37,8 +37,7 @@ const activityColor: Record<string, string> = {
 
 const Loyalty: React.FC = () => {
   const { t } = useTranslation();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
+  const canConfigureLoyalty = canCrmPermission('crm:loyalty:manage');
   const { data: config, isError: configError } = useLoyaltyConfig();
   const { data: transactions } = useLoyaltyTransactions();
   const { data: tiersData } = useLoyaltyTiers();

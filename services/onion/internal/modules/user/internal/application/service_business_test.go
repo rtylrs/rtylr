@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"testing"
 	"time"
@@ -11,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-func TestCreateBusinessForUserCreatesOwnerAuthorizationMembership(t *testing.T) {
+func TestCreateBusinessForUserResolvesOwnerFromBusiness(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	service := NewService(ctx, db, "")
@@ -51,22 +50,21 @@ func TestCreateBusinessForUserCreatesOwnerAuthorizationMembership(t *testing.T) 
 		t.Fatalf("created business ID = %d, want a positive ID", businessID)
 	}
 
-	var roleKey, status string
-	var roleID sql.NullInt64
-	err = db.QueryRowContext(ctx, `
-		SELECT dash_role_key, status, dash_role_id
-		FROM authorization_business_members
-		WHERE business_id = ? AND user_id = ?`, businessID, userID).Scan(&roleKey, &status, &roleID)
+	var ownerID int64
+	err = db.QueryRowContext(ctx, `SELECT owner_id FROM businesses WHERE id = ?`, businessID).Scan(&ownerID)
 	if err != nil {
-		t.Fatalf("read owner authorization membership: %v", err)
+		t.Fatalf("read business owner: %v", err)
 	}
-	if roleKey != "owner" {
-		t.Fatalf("owner dash role key = %q, want owner", roleKey)
+	if ownerID != userID {
+		t.Fatalf("business owner = %d, want %d", ownerID, userID)
 	}
-	if status != "active" {
-		t.Fatalf("owner membership status = %q, want active", status)
+	var membershipCount int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM authorization_business_members
+		WHERE business_id = ? AND user_id = ?`, businessID, userID).Scan(&membershipCount); err != nil {
+		t.Fatalf("count owner membership rows: %v", err)
 	}
-	if !roleID.Valid || roleID.Int64 <= 0 {
-		t.Fatalf("owner dash role ID = %v, want a positive ID", roleID)
+	if membershipCount != 0 {
+		t.Fatalf("owner has %d separate membership rows, want owner derived from business ownership", membershipCount)
 	}
 }

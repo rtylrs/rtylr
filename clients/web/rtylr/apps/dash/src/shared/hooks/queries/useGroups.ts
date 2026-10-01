@@ -2,24 +2,21 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import i18next from 'i18next';
+import { z } from 'zod';
 import { groupsClient } from '../../lib/clients';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
 import type {
   Group as ApiGroup,
   GroupDetail as ApiGroupDetail,
 } from '@voxire/voxie/hub/team/groups/v1/types';
-import type { AppRoleAssignment } from '@voxire/voxie/hub/user/v1/types';
+import {
+  permissionProfileAssignmentSchema,
+  type PermissionProfileAssignment,
+} from '../../schemas/team';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'dash');
 
 // Types
-export type ResourcePermissionLevel = 'viewer' | 'editor';
-
-export type ResourcePermission = {
-  resourceKey: string;
-  permissionLevel: ResourcePermissionLevel;
-};
-
 export type GroupSummary = {
   id: number;
   name: string;
@@ -32,7 +29,8 @@ export type Group = {
   name: string;
   description: string;
   color: string;
-  resourcePermissions: ResourcePermission[];
+  licensedAppIds: string[];
+  permissionProfileAssignments: PermissionProfileAssignment[];
   memberCount: number;
   createdAt: string;
   updatedAt: string;
@@ -63,13 +61,6 @@ function toIdNumber(value: string | undefined): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function toResourcePermissions(perms: ApiGroup['resourcePermissions']): ResourcePermission[] {
-  return (perms ?? []).map((p) => ({
-    resourceKey: p.resourceKey ?? '',
-    permissionLevel: p.permissionLevel === 'editor' ? 'editor' : 'viewer',
-  }));
-}
-
 function fromApiGroup(g: ApiGroup): Group {
   return {
     id: toIdNumber(g.id),
@@ -77,7 +68,10 @@ function fromApiGroup(g: ApiGroup): Group {
     name: g.name ?? '',
     description: g.description ?? '',
     color: g.color ?? '',
-    resourcePermissions: toResourcePermissions(g.resourcePermissions),
+    licensedAppIds: g.licensedAppIds ?? [],
+    permissionProfileAssignments: z
+      .array(permissionProfileAssignmentSchema)
+      .parse(g.permissionProfileAssignments ?? []),
     memberCount: g.memberCount ?? 0,
     createdAt: g.createdAt ?? '',
     updatedAt: g.updatedAt ?? '',
@@ -128,7 +122,8 @@ export const useCreateGroup = (): ReturnType<
       name: string;
       description?: string;
       color?: string;
-      resourcePermissions: ResourcePermission[];
+      licensedAppIds: string[];
+      permissionProfileAssignments: PermissionProfileAssignment[];
     }
   >
 > => {
@@ -138,7 +133,8 @@ export const useCreateGroup = (): ReturnType<
       name: string;
       description?: string;
       color?: string;
-      resourcePermissions: ResourcePermission[];
+      licensedAppIds: string[];
+      permissionProfileAssignments: PermissionProfileAssignment[];
     }) => {
       const res = await groupsClient.createGroup(payload);
       if (!res.group) throw new Error('Group was not returned by the server');
@@ -163,7 +159,8 @@ export const useUpdateGroup = (
       name: string;
       description?: string;
       color?: string;
-      resourcePermissions: ResourcePermission[];
+      licensedAppIds: string[];
+      permissionProfileAssignments: PermissionProfileAssignment[];
     }
   >
 > => {
@@ -173,7 +170,8 @@ export const useUpdateGroup = (
       name: string;
       description?: string;
       color?: string;
-      resourcePermissions: ResourcePermission[];
+      licensedAppIds: string[];
+      permissionProfileAssignments: PermissionProfileAssignment[];
     }) => {
       if (!id) throw new Error('Group id is required');
       const res = await groupsClient.updateGroup({ id, ...payload });
@@ -254,11 +252,9 @@ export const useBulkInvite = (): ReturnType<
     Error,
     {
       emails: string[];
-      role: string;
-      apps: string[];
-      groupId?: number;
-      dashRole?: string;
-      appAssignments?: AppRoleAssignment[];
+      memberType: 'member' | 'admin';
+      licensedAppIds: string[];
+      permissionProfileAssignments: PermissionProfileAssignment[];
       groupIds?: number[];
     }
   >
@@ -267,21 +263,17 @@ export const useBulkInvite = (): ReturnType<
   return useMutation({
     mutationFn: async (payload: {
       emails: string[];
-      role: string;
-      apps: string[];
-      groupId?: number;
-      dashRole?: string;
-      appAssignments?: AppRoleAssignment[];
+      memberType: 'member' | 'admin';
+      licensedAppIds: string[];
+      permissionProfileAssignments: PermissionProfileAssignment[];
       groupIds?: number[];
     }) => {
       const res = await invitationsClient.bulkInvite({
         emails: payload.emails,
-        role: payload.role,
-        apps: payload.apps,
-        ...(payload.dashRole ? { dashRole: payload.dashRole } : {}),
-        ...(payload.appAssignments ? { appAssignments: payload.appAssignments } : {}),
+        memberType: payload.memberType,
+        licensedAppIds: payload.licensedAppIds,
+        permissionProfileAssignments: payload.permissionProfileAssignments,
         ...(payload.groupIds ? { groupIds: payload.groupIds.map(String) } : {}),
-        ...(payload.groupId ? { groupId: String(payload.groupId) } : {}),
       });
       return {
         results: (res.results ?? []).map((r) => ({

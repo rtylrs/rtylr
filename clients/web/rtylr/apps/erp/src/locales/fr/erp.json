@@ -406,11 +406,9 @@
   },
   "settings": {
     "team": {
-      "empty": {
-        "title": "Pas encore de membres d'équipe."
-      },
-      "invite": "Inviter un membre",
-      "refresh": "Actualiser"
+      "managementTitle": "Accès de l’équipe",
+      "managementDescription": "Gérez les membres, les groupes, les licences des applications et les autorisations dans Dash.",
+      "managementAction": "Ouvrir la gestion de l’équipe"
     }
   },
   "barcodes": {

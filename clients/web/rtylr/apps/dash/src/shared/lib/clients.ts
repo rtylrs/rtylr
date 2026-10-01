@@ -1,5 +1,4 @@
 import { createOneKitClient, createRestRouteClient } from '@voxire/api';
-import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { AiServiceClient } from '@voxire/voxie/hub/ai/v1/client';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import { BusinessServiceClient } from '@voxire/voxie/hub/business/v1/client';
@@ -33,7 +32,6 @@ export const onboardingClient = createOneKitClient(OnboardingServiceClient, 'das
 export const userClient = createOneKitClient(UserServiceClient, 'dash');
 export const orderClient = createOneKitClient(OrderServiceClient, 'dash');
 export const tableClient = createOneKitClient(TableServiceClient, 'dash');
-export const licenseClient = createOneKitClient(LicenseServiceClient, 'dash');
 export const rest = createRestRouteClient('dash');
 
 // pos/orders/compat/v1 and hub/settings/compat/v1 have no contract in voxie

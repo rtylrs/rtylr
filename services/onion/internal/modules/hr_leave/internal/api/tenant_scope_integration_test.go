@@ -38,13 +38,6 @@ func TestLeaveTypeHandlersResolveBusinessIDBeforeReadingOrWriting(t *testing.T) 
 	if callerUserID == ownBusinessID {
 		t.Fatal("test setup must use a user id distinct from the business id")
 	}
-	if _, err := db.ExecContext(ctx, `INSERT INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'admin')`, callerUserID, ownBusinessID); err != nil {
-		t.Fatalf("insert own business membership: %v", err)
-	}
-	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?", callerUserID, ownBusinessID)
-	})
-
 	repo := infrastructure.NewRepository(db)
 	ownType, err := repo.CreateLeaveType(ctx, ownBusinessID, domain.LeaveTypeRecord{
 		Name: fmt.Sprintf("scope own %d", stamp), IsPaid: true, IsActive: true,

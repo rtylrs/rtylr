@@ -507,11 +507,10 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 const Segments: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
   // Segment deletion has no dedicated resource; `crm:segments` is the operator-tier
   // resource that already covers this asset, consistent with customer deletion being
   // gated at operator-tier (`crm:customers:manage`) rather than walled off to admin.
-  const canDeleteSegment = canCrmPermission(role, 'crm:segments');
+  const canDeleteSegment = canCrmPermission('crm:segments:manage');
   const { data: fetchedSegments } = useListSegments();
   const removeSegment = useDeleteSegment();
   const createSegment = useCreateSegment();

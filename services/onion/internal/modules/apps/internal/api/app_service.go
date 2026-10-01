@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/apps/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/hubapp"
@@ -35,12 +36,12 @@ func NewAppAPI(appsService *application.Service, addonsService hubapp.AddonProvi
 
 func (a *AppAPI) ListApps(ctx context.Context, _ *hubappv1.ListAppsRequest) (*hubappv1.ListAppsResponse, error) {
 	var businessID, userID int64
-	var role string
-	if u, ok := authPkg.GetAuthUser(ctx); ok {
-		businessID, userID, role = u.BusinessID, u.UserID, u.Role
+	var effectiveAccess *authorization.EffectiveAccess
+	if user, ok := authPkg.GetAuthUser(ctx); ok {
+		businessID, userID, effectiveAccess = user.BusinessID, user.UserID, user.EffectiveAccess
 	}
 
-	apps, err := a.AppsService.GetVisibleAppsForUser(ctx, businessID, userID, role)
+	apps, err := a.AppsService.GetVisibleAppsForUser(ctx, businessID, userID, effectiveAccess)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load apps")
 	}

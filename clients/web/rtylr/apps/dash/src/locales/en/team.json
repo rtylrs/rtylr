@@ -126,7 +126,7 @@
     "posLocationsManagerHint": "Locations this manager runs within the assigned POS scope",
     "posLocationsMemberHint": "Locations this member can work at",
     "appAccessTitle": "App access",
-    "appAccessDescription": "Apps this member can launch.",
+    "appAccessDescription": "Apps assigned directly to this member. Group access appears under effective access.",
     "groupsTitle": "Groups",
     "manageGroups": "Manage groups",
     "groupsDescription": "Groups this member belongs to.",

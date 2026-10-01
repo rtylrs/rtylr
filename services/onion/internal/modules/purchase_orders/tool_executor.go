@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -59,6 +60,9 @@ func (m *Module) executeGetPurchaseOrderTool(ctx context.Context, input map[stri
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
+	}
+	if !authPkg.HasAppPermission(authUser, authorization.AppERP, "erp:purchasing:approve") {
+		return nil, errors.New("permission denied")
 	}
 
 	poID, err := parsePurchaseOrderIDToolInput(input)
@@ -170,7 +174,7 @@ func (m *Module) executeApprovePurchaseOrderTool(ctx context.Context, input map[
 	if bizErr != nil {
 		return nil, bizErr
 	}
-	if err := m.service.ApprovePurchaseOrder(ctx, businessID, poID, authUser.UserID, authUser.Role); err != nil {
+	if err := m.service.ApprovePurchaseOrder(ctx, businessID, poID, authUser.UserID); err != nil {
 		return nil, err
 	}
 

@@ -35,14 +35,14 @@ func TestDeactivateUser_RequiresUserID(t *testing.T) {
 
 func TestCreateGroup_RequiresName(t *testing.T) {
 	s := &Service{}
-	if _, err := s.CreateGroup(context.Background(), 1, domain.CreateGroupInput{Name: ""}); err == nil {
+	if _, err := s.CreateGroup(context.Background(), 1, 1, 1, domain.CreateGroupInput{Name: ""}); err == nil {
 		t.Fatal("expected error for empty group name")
 	}
 }
 
 func TestCreateGroup_NameRequired_GivesError(t *testing.T) {
 	s := &Service{}
-	_, err := s.CreateGroup(context.Background(), 1, domain.CreateGroupInput{Name: ""})
+	_, err := s.CreateGroup(context.Background(), 1, 1, 1, domain.CreateGroupInput{Name: ""})
 	if err == nil {
 		t.Fatal("expected error for empty group name")
 	}
@@ -50,7 +50,7 @@ func TestCreateGroup_NameRequired_GivesError(t *testing.T) {
 
 func TestUpdateGroup_RequiresName(t *testing.T) {
 	s := &Service{}
-	if err := s.UpdateGroup(context.Background(), 1, 5, domain.UpdateGroupInput{Name: ""}); err == nil {
+	if err := s.UpdateGroup(context.Background(), 1, 1, 1, 5, domain.UpdateGroupInput{Name: ""}); err == nil {
 		t.Fatal("expected error for empty group name")
 	}
 }
@@ -72,9 +72,8 @@ func TestAddGroupMembers_RequiresNonEmptyUserIDs(t *testing.T) {
 func TestBulkInvite_SkipsEmptyEmails(t *testing.T) {
 	s := &Service{}
 	results, _ := s.BulkInvite(context.Background(), 1, 0, domain.BulkInviteInput{
-		Emails: []string{"", "  ", ""},
-		Apps:   []string{"pos"},
-		Role:   domain.RoleStaff,
+		Emails:     []string{"", "  ", ""},
+		MemberType: "member",
 	})
 	// All emails are blank, so all should be skipped and results be nil/empty.
 	if len(results) != 0 {
@@ -91,22 +90,22 @@ func TestInviteUser_EmptyEmailStringFails(t *testing.T) {
 	}
 }
 
-func TestInviteUser_RejectsOwnerRole(t *testing.T) {
+func TestInviteUser_RejectsOwnerMemberType(t *testing.T) {
 	s := &Service{}
 	_, _, err := s.InviteUser(context.Background(), 1, 0, domain.InviteUserInput{
-		Email: "new-owner@example.com",
-		Role:  domain.RoleOwner,
+		Email:      "new-owner@example.com",
+		MemberType: "owner",
 	})
-	if !errors.Is(err, domain.ErrForbidden) {
-		t.Fatalf("expected ErrForbidden for owner invite role, got %v", err)
+	if err == nil || err.Error() != "invalid member type" {
+		t.Fatalf("expected invalid member type for owner invite, got %v", err)
 	}
 }
 
-func TestInviteUser_RejectsInvalidRole(t *testing.T) {
+func TestInviteUser_RejectsInvalidMemberType(t *testing.T) {
 	s := &Service{}
 	_, _, err := s.InviteUser(context.Background(), 1, 0, domain.InviteUserInput{
-		Email: "bad-role@example.com",
-		Role:  "super_admin",
+		Email:      "bad-type@example.com",
+		MemberType: "super_admin",
 	})
 	if err == nil {
 		t.Fatal("expected error for invalid invite role")
@@ -175,7 +174,7 @@ func TestGetBusinessInfo_ZeroBusinessID(t *testing.T) {
 
 func TestCreateGroup_EmptyNameAlwaysErrors(t *testing.T) {
 	s := &Service{}
-	_, err := s.CreateGroup(context.Background(), 0, domain.CreateGroupInput{Name: ""})
+	_, err := s.CreateGroup(context.Background(), 0, 0, 0, domain.CreateGroupInput{Name: ""})
 	if err == nil {
 		t.Fatal("expected error for empty name with zero ownerID")
 	}

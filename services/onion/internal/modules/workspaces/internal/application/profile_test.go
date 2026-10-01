@@ -10,7 +10,7 @@ import (
 func TestGetFlowProfileReturnsOnlyPublicProjects(t *testing.T) {
 	svc, ctx, _ := v2Svc(t)
 	svc.SetHubProfileResolver(fakeHubProfileResolver{profile: hubprofile.Profile{
-		ID: v2UserA, FullName: "Abed Amouneh", Email: "abed@example.com", Role: "owner",
+		ID: v2UserA, FullName: "Abed Amouneh", Email: "abed@example.com",
 	}})
 
 	createV2Project(ctx, t, svc, "public-one", "public", v2UserA)
@@ -36,8 +36,8 @@ func TestGetFlowProfileReturnsOnlyPublicProjects(t *testing.T) {
 	if profile.Name != "Abed Amouneh" || profile.Email != "abed@example.com" {
 		t.Errorf("identity not carried through: %+v", profile)
 	}
-	if profile.RoleTitle != "owner" {
-		t.Errorf("role title = %q, want owner", profile.RoleTitle)
+	if profile.RoleTitle != "" {
+		t.Errorf("role title = %q, want empty until a job title is available", profile.RoleTitle)
 	}
 }
 
@@ -45,7 +45,7 @@ func TestGetFlowProfileReturnsOnlyPublicProjects(t *testing.T) {
 func TestGetFlowProfileExcludesArchivedProjects(t *testing.T) {
 	svc, ctx, _ := v2Svc(t)
 	svc.SetHubProfileResolver(fakeHubProfileResolver{profile: hubprofile.Profile{
-		ID: v2UserA, FullName: "Abed Amouneh", Role: "owner",
+		ID: v2UserA, FullName: "Abed Amouneh",
 	}})
 
 	p := createV2Project(ctx, t, svc, "public-then-binned", "public", v2UserA)

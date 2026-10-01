@@ -52,8 +52,9 @@ function member(over: Partial<FlowTeamMember> = {}): FlowTeamMember {
     id: '7',
     name: 'Maya Krishnan',
     email: 'maya@example.test',
-    role: 'member',
-    apps: ['flow'],
+    memberType: 'member',
+    isOwner: false,
+    hasFlowAccess: true,
     isActive: true,
     ...over,
   };
@@ -97,7 +98,7 @@ describe('TeamView', () => {
   // filter is what keeps someone who has no Flow access off a Flow time sheet.
   it('leaves out a business member who does not have Flow access', () => {
     membersState.value = {
-      data: [member(), member({ id: '9', name: 'Dana Reeves', apps: ['hr'] })],
+      data: [member(), member({ id: '9', name: 'Dana Reeves', hasFlowAccess: false })],
       isLoading: false,
     };
     render(<TeamView />);

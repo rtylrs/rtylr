@@ -19,9 +19,8 @@ const HRPermissionGuard = ({
 }: HRPermissionGuardProps): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
 
-  if (canHrPermission(role, permission)) return <>{children}</>;
+  if (canHrPermission(permission)) return <>{children}</>;
   if (fallback) return <>{fallback}</>;
 
   return (

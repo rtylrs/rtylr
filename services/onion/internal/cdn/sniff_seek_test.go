@@ -12,8 +12,7 @@ import (
 // whenever the endpoint is not TLS. sniffMIME used to wrap its input in an
 // io.MultiReader, which has no Seek, so the handler's multipart.File was
 // silently downgraded and every upload against a plaintext object store failed
-// with 500: the shape onion ships for self-host and documents for local
-// development (#1077).
+// with 500 against a plaintext object store (#1077).
 func TestSniffMIMEKeepsASeekableBodySeekable(t *testing.T) {
 	png := "\x89PNG\r\n\x1a\n" + strings.Repeat("\x00", 64)
 

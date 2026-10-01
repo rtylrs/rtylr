@@ -4,7 +4,6 @@ import { Plus, ClipboardList, CheckCircle2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
-import { canEffectiveAccess } from '@voxire/permissions';
 import { useTranslation } from 'react-i18next';
 import {
   useStockTakes,
@@ -73,14 +72,11 @@ const StockTakes: React.FC = () => {
   } = useInventoryReport();
   const createMut = useCreateStockTake();
   const updateMut = useUpdateStockTake();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
   const effectiveAccess = useUserStore(
     (state) => state.user?.effectiveAccess ?? state.effectiveAccess
   );
-  const canCreateStockTakes = canErpPermission(role, 'erp:inventory:adjust');
-  const canCompleteStockTakes = effectiveAccess
-    ? canEffectiveAccess(effectiveAccess, 'erp:inventory:approve')
-    : role === 'admin' || role === 'owner';
+  const canCreateStockTakes = canErpPermission('erp:inventory:adjust');
+  const canCompleteStockTakes = canErpPermission('erp:inventory:approve', effectiveAccess);
   const [showCreate, setShowCreate] = useState(false);
   const [newWarehouseId, setNewWarehouseId] = useState('');
   const [newNotes, setNewNotes] = useState('');

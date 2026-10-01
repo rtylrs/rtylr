@@ -21,11 +21,13 @@ const mockToast = vi.hoisted(() => ({
   error: vi.fn(),
 }));
 
-const mockUser = vi.hoisted(() => ({ role: 'owner' as string | null }));
+const mockUser = vi.hoisted(() => ({
+  effectiveAccess: { isOwner: true, isAdmin: false } as { isOwner: boolean; isAdmin: boolean } | null,
+}));
 
 vi.mock('../../shared/stores/userStore', () => ({
-  useUserStore: (selector: (s: { role: string | null }) => unknown) =>
-    selector({ role: mockUser.role }),
+  useUserStore: (selector: (s: { effectiveAccess: typeof mockUser.effectiveAccess }) => unknown) =>
+    selector(mockUser),
 }));
 
 vi.mock('@voxire/api', () => ({
@@ -44,7 +46,7 @@ vi.mock('sonner', () => ({
 describe('LocationSelect', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUser.role = 'owner';
+    mockUser.effectiveAccess = { isOwner: true, isAdmin: false };
   });
 
   afterEach(() => {
@@ -170,7 +172,7 @@ describe('LocationSelect', () => {
   });
 
   it('does not offer location creation to a store manager', async () => {
-    mockUser.role = 'store_manager';
+    mockUser.effectiveAccess = { isOwner: false, isAdmin: false };
     accessClient.getMyLocations.mockResolvedValue({
       locations: [
         { id: 1, name: 'Main' },
@@ -186,7 +188,7 @@ describe('LocationSelect', () => {
   });
 
   it('tells an unassigned store manager to ask their owner instead of showing a create form', async () => {
-    mockUser.role = 'store_manager';
+    mockUser.effectiveAccess = { isOwner: false, isAdmin: false };
     accessClient.getMyLocations.mockResolvedValue({ locations: [] });
     locationClient.listLocations.mockResolvedValue({ locations: [] });
 

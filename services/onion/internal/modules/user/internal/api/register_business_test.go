@@ -59,21 +59,15 @@ func TestRegisterCreatesRequestedBusinessBeforeIssuingToken(t *testing.T) {
 				}
 				return
 			}
-			if businessID.Int64 <= 0 || claims.BusinessID != businessID.Int64 || claims.Role != "owner" {
-				t.Fatalf("business=%v, token business=%d role=%q", businessID, claims.BusinessID, claims.Role)
+			if businessID.Int64 <= 0 || claims.BusinessID != businessID.Int64 || claims.IsConsoleAdmin {
+				t.Fatalf("business=%v, token business=%d console_admin=%t", businessID, claims.BusinessID, claims.IsConsoleAdmin)
 			}
-			var storedName, role, status string
+			var storedName string
 			if err := db.QueryRowContext(ctx, "SELECT name FROM businesses WHERE id = ? AND owner_id = ?", businessID.Int64, res.UserId).Scan(&storedName); err != nil {
 				t.Fatal(err)
 			}
 			if storedName != strings.TrimSpace(name) {
 				t.Fatalf("business name = %q", storedName)
-			}
-			if err := db.QueryRowContext(ctx, "SELECT dash_role_key, status FROM authorization_business_members WHERE business_id = ? AND user_id = ?", businessID.Int64, res.UserId).Scan(&role, &status); err != nil {
-				t.Fatal(err)
-			}
-			if role != "owner" || status != "active" {
-				t.Fatalf("membership = %s/%s", role, status)
 			}
 		})
 	}

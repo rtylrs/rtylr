@@ -3,147 +3,132 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
-	sqlnull "github.com/voxire/onion/internal/platform/utils/queries"
 )
 
-// ListStaffUsersByBusinessID lists team members scoped to a single business
-// (via user_app_permissions.business_id), so each business sees only its own
-// team. Group enrichment stays owner-scoped (groups are owner-level), resolved
-// from the business's owner.
+// ListStaffUsersByBusinessID returns members from the current business.
 func (r *Repository) ListStaffUsersByBusinessID(ctx context.Context, businessID int64, limit, offset int32) ([]domain.StaffUser, error) {
 	rows, err := r.queries.ListStaffUsersByBusinessID(ctx, sqlc.ListStaffUsersByBusinessIDParams{
-		BusinessID:   sqlnull.Int64(businessID),
-		BusinessID_2: businessID,
-		Limit:        limit,
-		Offset:       offset,
+		BusinessID: businessID, Limit: limit, Offset: offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to list staff users by business", logger.Error(err))
-
 		return nil, err
 	}
-
 	users := make([]domain.StaffUser, 0, len(rows))
-
 	for _, row := range rows {
-		var su domain.StaffUser
-		su.ID = row.ID
-		su.Email = row.Email
-		su.FullName = row.FullName
-		if row.CreatedAt.Valid {
-			su.CreatedAt = row.CreatedAt.Time
-		}
-		su.Role = staffRole(row)
-		su.IsActive = staffIsActive(row)
-
-		if err := json.Unmarshal(row.LegacyApps, &su.Apps); err != nil {
-			su.Apps = []string{}
-		}
-
-		users = append(users, su)
+		users = append(users, domain.StaffUser{
+			ID: row.ID, Email: row.Email, FullName: row.FullName,
+			CreatedAt: row.CreatedAt.Time, MemberType: string(row.MemberType),
+			IsActive: string(row.MemberStatus) == "active",
+		})
 	}
-
-	userIDs := make([]int64, len(users))
+	userIDs := make([]int64, 0, len(users))
 	for i := range users {
-		userIDs[i] = users[i].ID
+		userIDs = append(userIDs, users[i].ID)
 		users[i].Groups = []domain.GroupSummary{}
 	}
-
-	if _, ownerID, ownerErr := r.GetBusinessByID(ctx, businessID); ownerErr == nil {
-		if groupsByUser, gErr := r.groupsForUsers(ctx, ownerID, userIDs); gErr == nil {
-			for i := range users {
-				if groups := groupsByUser[users[i].ID]; groups != nil {
-					users[i].Groups = groups
-				}
-			}
+	_, ownerID, err := r.GetBusinessByID(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+	groupsByUser, err := r.groupsForUsers(ctx, ownerID, businessID, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	for i := range users {
+		users[i].Groups = groupsByUser[users[i].ID]
+	}
+	businessApps, err := r.GetOwnerApps(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range users {
+		snapshot, found, err := r.GetAuthorizationSnapshot(ctx, businessID, users[i].ID, businessApps)
+		if err != nil {
+			return nil, err
+		}
+		if found {
+			applyStaffAuthorization(&users[i], snapshot)
 		}
 	}
-
 	return users, nil
 }
 
 func (r *Repository) CountStaffUsersByBusinessID(ctx context.Context, businessID int64) (int64, error) {
-	return r.queries.CountStaffUsersByBusinessID(ctx, sqlc.CountStaffUsersByBusinessIDParams{
-		BusinessID:   sqlnull.Int64(businessID),
-		BusinessID_2: businessID,
-	})
+	return r.queries.CountStaffUsersByBusinessID(ctx, businessID)
 }
 
-// groupsForUsers batches group lookups for many users into a single query,
-// mapping the result back per user ID in memory (avoids an N+1 over users).
-func (r *Repository) groupsForUsers(ctx context.Context, ownerID int64, userIDs []int64) (map[int64][]domain.GroupSummary, error) {
+// groupsForUsers batches group lookups for many users into one query.
+func (r *Repository) groupsForUsers(ctx context.Context, ownerID, businessID int64, userIDs []int64) (map[int64][]domain.GroupSummary, error) {
 	result := make(map[int64][]domain.GroupSummary, len(userIDs))
 	if len(userIDs) == 0 {
 		return result, nil
 	}
-
-	rows, err := r.queries.ListUserGroupsForUsers(ctx, sqlc.ListUserGroupsForUsersParams{
-		UserIds: userIDs,
-		OwnerID: ownerID,
-	})
+	rows, err := r.queries.ListUserGroupsForUsers(ctx, sqlc.ListUserGroupsForUsersParams{UserIds: userIDs, OwnerID: ownerID, BusinessID: businessID})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to batch list user groups", logger.Error(err))
 		return nil, err
 	}
-
 	for _, row := range rows {
-		summary := domain.GroupSummary{ID: row.ID, Name: row.Name, Color: row.Color.String}
-		result[row.UserID] = append(result[row.UserID], summary)
+		result[row.UserID] = append(result[row.UserID], domain.GroupSummary{ID: row.ID, Name: row.Name, Color: row.Color.String})
 	}
-
 	return result, nil
 }
 
 func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
-	row, err := r.queries.GetStaffUserByID(ctx, sqlc.GetStaffUserByIDParams{
-		OwnerID:    ownerID,
-		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
-		UserID:     userID,
-	})
+	row, err := r.queries.GetStaffUserByID(ctx, sqlc.GetStaffUserByIDParams{OwnerID: ownerID, BusinessID: businessID, UserID: userID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrUserNotFound
 		}
-
-		logger.Ctx(ctx).Error("Failed to get staff user by id", logger.Error(err))
-
 		return nil, err
 	}
-
-	su := &domain.StaffUser{
-		ID:       row.ID,
-		Email:    row.Email,
-		FullName: row.FullName,
-		Role:     domain.Role(row.Role.UserAppPermissionsRole),
+	member := &domain.StaffUser{
+		ID: row.ID, Email: row.Email, FullName: row.FullName,
+		MemberType: string(row.MemberType), IsActive: string(row.MemberStatus) == "active",
 	}
-
 	if row.CreatedAt.Valid {
-		su.CreatedAt = row.CreatedAt.Time
+		member.CreatedAt = row.CreatedAt.Time
 	}
-
-	if row.IsActive.Valid {
-		su.IsActive = row.IsActive.Bool
+	businessApps, err := r.GetOwnerApps(ctx, ownerID)
+	if err != nil {
+		return nil, err
 	}
-
-	if err := json.Unmarshal(row.Apps, &su.Apps); err != nil {
-		su.Apps = []string{}
+	snapshot, found, err := r.GetAuthorizationSnapshot(ctx, businessID, userID, businessApps)
+	if err != nil {
+		return nil, err
 	}
-
-	groups, err := r.GetUserGroups(ctx, ownerID, su.ID)
-	if err != nil || groups == nil {
-		groups = []domain.GroupSummary{}
+	if !found {
+		return nil, domain.ErrUserNotFound
 	}
-	su.Groups = groups
+	applyStaffAuthorization(member, snapshot)
+	member.Groups, err = r.GetUserGroups(ctx, ownerID, businessID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return member, nil
+}
 
-	return su, nil
+func applyStaffAuthorization(member *domain.StaffUser, snapshot authorization.Snapshot) {
+	resolved := authorization.Resolve(snapshot)
+	member.EffectiveAccess = &resolved
+	member.PermissionProfileAssignments = make([]authorization.RoleAssignment, 0, len(snapshot.Assignments))
+	for _, assignment := range snapshot.Assignments {
+		if assignment.Active && assignment.GroupID == nil && assignment.Source == authorization.SourceExplicit {
+			member.PermissionProfileAssignments = append(member.PermissionProfileAssignments, assignment)
+		}
+	}
+	member.LicensedAppIDs = make([]string, 0, len(snapshot.Licenses))
+	for _, license := range snapshot.Licenses {
+		if license.Active && license.GroupID == nil && license.Source == authorization.SourceExplicit {
+			member.LicensedAppIDs = appendUniqueAuthorizationApp(member.LicensedAppIDs, string(license.AppID))
+		}
+	}
 }
 
 // ─── Invite Tokens ──────────────────────────────────────────────────────────
@@ -273,42 +258,11 @@ func (r *Repository) MarkOnboarded(ctx context.Context, userID int64) error {
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
-func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sqlc.NullUserAppPermissionsRole, isActive sql.NullBool, createdAt, updatedAt sql.NullTime) *domain.UserAppPermission {
-	p := &domain.UserAppPermission{
-		ID:      id,
-		OwnerID: ownerID,
-		UserID:  userID,
-	}
-
-	if role.Valid {
-		p.Role = domain.Role(role.UserAppPermissionsRole)
-	}
-
-	if isActive.Valid {
-		p.IsActive = isActive.Bool
-	}
-
-	if createdAt.Valid {
-		p.CreatedAt = createdAt.Time
-	}
-
-	if updatedAt.Valid {
-		p.UpdatedAt = updatedAt.Time
-	}
-
-	if err := json.Unmarshal(apps, &p.Apps); err != nil {
-		p.Apps = []string{}
-	}
-
-	return p
-}
-
 // CountActiveMembers returns the billable active seat count for an owner.
 func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int, error) {
 	count, err := r.queries.CountActiveMembers(ctx, sqlc.CountActiveMembersParams{
 		OwnerID:   ownerID,
 		OwnerID_2: ownerID,
-		OwnerID_3: ownerID,
 	})
 	if err != nil {
 		return 0, err
@@ -320,26 +274,3 @@ func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────
-
-// staffRole prefers the normalized dash role, falling back to the legacy column
-// for members that have not been backfilled yet. A member with neither is
-// reported as "member", which is what the dash role vocabulary calls them.
-func staffRole(row sqlc.ListStaffUsersByBusinessIDRow) domain.Role {
-	if key := strings.TrimPrefix(row.DashRoleKey, "dash."); key != "" {
-		return domain.Role(key)
-	}
-	if row.LegacyRole.Valid && string(row.LegacyRole.UserAppPermissionsRole) != "" {
-		return domain.Role(row.LegacyRole.UserAppPermissionsRole)
-	}
-	return domain.Role("member")
-}
-
-// staffIsActive prefers the normalized membership status, so a member revoked
-// through the v2 path is not reported active just because a legacy row is still
-// flagged on.
-func staffIsActive(row sqlc.ListStaffUsersByBusinessIDRow) bool {
-	if row.MemberStatus.Valid {
-		return string(row.MemberStatus.AuthorizationBusinessMembersStatus) == "active"
-	}
-	return row.LegacyIsActive.Valid && row.LegacyIsActive.Bool
-}

@@ -154,10 +154,6 @@
     "download": "Télécharger le PDF",
     "comingSoon": "Le téléchargement PDF arrivera dans une prochaine mise à jour"
   },
-  "team": {
-    "invited": "Invitation envoyée",
-    "removed": "Membre retiré"
-  },
   "kpi": {
     "receivable": "Créances",
     "expensesMtd": "Dépenses du mois",

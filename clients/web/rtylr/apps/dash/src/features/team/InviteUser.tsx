@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { Input, Label } from '../../shared/components/ui';
-import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
+import { useInviteMember } from '../../shared/hooks/queries/useTeam';
 import { useGroups, useBulkInvite, type BulkResult } from '../../shared/hooks/queries/useGroups';
 import { usePOSLocations, useAssignPOSLocation } from '../../shared/hooks/queries/usePOSAccess';
 import {
@@ -28,9 +28,8 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
-import { isAddonEnabled, useAddons } from '../../shared/hooks/queries/useAddons';
-import { buildAppRoleAssignments, dashRoleToLegacyRole } from './authorizationDraft';
-import { useCustomRoles } from '../../shared/hooks/queries/usePermissions';
+import { buildPermissionProfileAssignments } from './authorizationDraft';
+import { usePermissionProfiles } from '../../shared/hooks/queries/usePermissions';
 import { APP_NAMES } from '../../shared/config/appNames';
 
 const ALL_APPS = [
@@ -99,7 +98,7 @@ const ALL_APPS = [
   },
 ];
 
-const ROLE_IDS = ['admin', 'manager', 'member', 'viewer'] as const;
+const MEMBER_TYPES = ['admin', 'member'] as const;
 
 const STATUS_COLORS: Record<BulkResult['status'], string> = {
   invited: '#10b981',
@@ -115,14 +114,14 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const assignLocation = useAssignPOSLocation();
   const { data: sub } = useMySubscription();
   const { data: groups = [] } = useGroups();
-  const { data: customRoles = [] } = useCustomRoles();
+  const { data: customRoles = [] } = usePermissionProfiles();
 
   const [tab, setTab] = useState<'single' | 'bulk'>('single');
 
   // Single tab state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('member');
+  const [memberType, setMemberType] = useState<'member' | 'admin'>('member');
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
   const [authMethod, setAuthMethod] = useState<'invite' | 'manual'>('invite');
@@ -131,11 +130,11 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [showPassword, setShowPassword] = useState(false);
   const [singleGroupId, setSingleGroupId] = useState<string>('');
   const [singleStep, setSingleStep] = useState<0 | 1 | 2 | 3>(0);
-  const [roleIdsByApp, setRoleIdsByApp] = useState<Record<string, string[]>>({});
+  const [profileIdsByApp, setProfileIdsByApp] = useState<Record<string, string[]>>({});
 
   // Bulk tab state
   const [bulkEmailsRaw, setBulkEmailsRaw] = useState('');
-  const [bulkRole, setBulkRole] = useState<string>('member');
+  const [bulkMemberType, setBulkMemberType] = useState<'member' | 'admin'>('member');
   const [bulkApps, setBulkApps] = useState<string[]>([]);
   const [bulkLocations, setBulkLocations] = useState<number[]>([]);
   const [bulkGroupId, setBulkGroupId] = useState<string>('');
@@ -145,11 +144,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const posSelectedSingle = selectedApps.includes('pos');
   const posSelectedBulk = bulkApps.includes('pos');
   const { data: locations = [] } = usePOSLocations(posSelectedSingle || posSelectedBulk);
-
-  const { data: addonsData = [] } = useAddons();
-  const menuAddonEnabled = isAddonEnabled(addonsData, 'menu');
-
-  const allRoles: string[] = [...ROLE_IDS, ...(menuAddonEnabled ? ['menu_manager'] : [])];
 
   const parsedEmails = bulkEmailsRaw
     .split('\n')
@@ -178,11 +172,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
 
   // Assigns the member to each chosen POS location. Best-effort per location so
   // one failure doesn't abandon the rest; failures surface as a toast.
-  const assignLocations = async (
-    userId: number,
-    locationIds: number[],
-    _memberRole: string
-  ): Promise<void> => {
+  const assignLocations = async (userId: number, locationIds: number[]): Promise<void> => {
     if (!userId || locationIds.length === 0) return;
     const results = await Promise.allSettled(
       locationIds.map((locationId) =>
@@ -214,23 +204,21 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       const res = await invite.mutateAsync({
         email,
         fullName: name,
-        role: dashRoleToLegacyRole(role) as TeamMember['role'],
-        apps: selectedApps,
-        dashRole: role,
-        appAssignments: buildAppRoleAssignments(
-          selectedApps,
-          singleGroupId ? Number(singleGroupId) : undefined,
-          roleIdsByApp
-        ),
+        memberType,
+        licensedAppIds: memberType === 'admin' ? [] : selectedApps,
+        permissionProfileAssignments:
+          memberType === 'admin'
+            ? []
+            : buildPermissionProfileAssignments(selectedApps, profileIdsByApp),
         ...(singleGroupId ? { groupIds: [Number(singleGroupId)] } : {}),
         provisioningMode: authMethod === 'manual' ? 'direct_credentials' : 'invitation',
         ...(authMethod === 'manual'
           ? { username: username.trim(), temporaryPassword: password }
           : {}),
       });
-      if (posSelectedSingle) {
+      if (memberType === 'member' && posSelectedSingle) {
         const userId = Number(res.userId || 0);
-        await assignLocations(userId, selectedLocations, role);
+        await assignLocations(userId, selectedLocations);
       }
       navigate({ to: '/team' });
     } catch {
@@ -254,10 +242,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     <div className="space-y-3">
       <div>
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          {t('team.inviteUser.appRolesTitle')}
+          {t('team.inviteUser.permissionProfilesTitle')}
         </p>
         <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-          {t('team.inviteUser.appRolesDescription')}
+          {t('team.inviteUser.permissionProfilesDescription')}
         </p>
       </div>
       {selectedApps.map((appKey) => {
@@ -267,9 +255,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
             <Label htmlFor={`invite-app-role-${appKey}`}>{appKey.toUpperCase()}</Label>
             <select
               id={`invite-app-role-${appKey}`}
-              value={roleIdsByApp[appKey]?.[0] ?? ''}
+              value={profileIdsByApp[appKey]?.[0] ?? ''}
               onChange={(event) =>
-                setRoleIdsByApp((current) => ({
+                setProfileIdsByApp((current) => ({
                   ...current,
                   [appKey]: event.target.value ? [event.target.value] : [],
                 }))
@@ -281,7 +269,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 color: 'var(--dash-text)',
               }}
             >
-              <option value="">{t('team.inviteUser.defaultAppRole')}</option>
+              <option value="">{t('team.inviteUser.noPermissionProfile')}</option>
               {options.map((customRole) => (
                 <option key={customRole.id} value={customRole.id}>
                   {customRole.name}
@@ -299,22 +287,18 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     try {
       const res = await bulkInvite.mutateAsync({
         emails: parsedEmails,
-        apps: bulkApps,
-        dashRole: bulkRole,
-        role: dashRoleToLegacyRole(bulkRole) as TeamMember['role'],
-        appAssignments: buildAppRoleAssignments(
-          bulkApps,
-          bulkGroupId ? Number(bulkGroupId) : undefined
-        ),
+        memberType: bulkMemberType,
+        licensedAppIds: bulkMemberType === 'admin' ? [] : bulkApps,
+        permissionProfileAssignments:
+          bulkMemberType === 'admin' ? [] : buildPermissionProfileAssignments(bulkApps, {}),
         ...(bulkGroupId ? { groupIds: [Number(bulkGroupId)] } : {}),
-        ...(bulkGroupId ? { groupId: Number(bulkGroupId) } : {}),
       });
       setBulkResults(res.results);
-      if (posSelectedBulk && bulkLocations.length > 0) {
+      if (bulkMemberType === 'member' && posSelectedBulk && bulkLocations.length > 0) {
         await Promise.allSettled(
           res.results
             .filter((r) => r.userId && (r.status === 'invited' || r.status === 'existing'))
-            .map((r) => assignLocations(Number(r.userId), bulkLocations, bulkRole))
+            .map((r) => assignLocations(Number(r.userId), bulkLocations))
         );
       }
     } catch {
@@ -322,41 +306,43 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     }
   };
 
-  const renderRoleSelector = (
-    currentRole: string,
-    onChange: (r: string) => void
+  const renderMemberTypeSelector = (
+    currentMemberType: 'member' | 'admin',
+    onChange: (memberType: 'member' | 'admin') => void
   ): React.JSX.Element => (
     <div className="space-y-2">
-      {allRoles.map((roleId) => (
+      {MEMBER_TYPES.map((type) => (
         <button
-          key={roleId}
+          key={type}
           type="button"
-          onClick={() => onChange(roleId)}
+          onClick={() => onChange(type)}
           className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-left transition-colors"
           style={{
-            background: currentRole === roleId ? 'rgba(69,131,196,0.06)' : 'transparent',
+            background: currentMemberType === type ? 'rgba(69,131,196,0.06)' : 'transparent',
             border: `1px solid ${
-              currentRole === roleId ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
+              currentMemberType === type ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
             }`,
           }}
         >
           <div
             className="h-4 w-4 rounded-full border-2 shrink-0 flex items-center justify-center"
-            style={{ borderColor: currentRole === roleId ? '#4583C4' : 'var(--dash-border)' }}
+            style={{ borderColor: currentMemberType === type ? '#4583C4' : 'var(--dash-border)' }}
           >
-            {currentRole === roleId && (
+            {currentMemberType === type && (
               <div className="h-2 w-2 rounded-full" style={{ background: '#4583C4' }} />
             )}
           </div>
           <div className="flex-1 min-w-0">
             <p
               className="text-sm font-medium"
-              style={{ color: currentRole === roleId ? '#4583C4' : 'var(--dash-text)' }}
+              style={{ color: currentMemberType === type ? '#4583C4' : 'var(--dash-text)' }}
             >
-              {t(`common.roleLabels.${roleId}`)}
+              {t(`common.roleLabels.${type}`)}
             </p>
             <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-              {t(`common.roleDescriptions.${roleId}`)}
+              {type === 'admin'
+                ? t('team.inviteUser.adminAccessDescription')
+                : t('team.inviteUser.memberAccessDescription')}
             </p>
           </div>
         </button>
@@ -407,7 +393,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const renderLocationSelector = (
     currentLocations: number[],
     toggle: (id: number) => void,
-    currentRole: string,
     onRemovePos: () => void
   ): React.JSX.Element => (
     <div className="space-y-2 pt-1">
@@ -416,9 +401,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           {t('team.inviteUser.posLocationsTitle')}
         </p>
         <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-          {currentRole === 'manager'
-            ? t('team.inviteUser.posLocationsManagerHint')
-            : 'Locations this member can work at'}
+          {t('team.inviteUser.posLocationsMemberHint')}
         </p>
       </div>
       {locations.length === 0 ? (
@@ -731,7 +714,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                       {t('team.inviteUser.roleHint')}
                     </p>
                   </div>
-                  {renderRoleSelector(role, setRole)}
+                  {renderMemberTypeSelector(memberType, setMemberType)}
                 </div>
 
                 {/* Licenses */}
@@ -747,14 +730,21 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                       {t('team.inviteUser.licensesHint')}
                     </p>
                   </div>
-                  {renderAppSelector(selectedApps, toggleApp)}
+                  {memberType === 'admin' ? (
+                    <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                      {t('team.inviteUser.adminReceivesFullAccess')}
+                    </p>
+                  ) : (
+                    renderAppSelector(selectedApps, toggleApp)
+                  )}
 
-                  {posSelectedSingle &&
-                    renderLocationSelector(selectedLocations, toggleLocation, role, () =>
+                  {memberType === 'member' &&
+                    posSelectedSingle &&
+                    renderLocationSelector(selectedLocations, toggleLocation, () =>
                       toggleApp('pos')
                     )}
 
-                  {selectedApps.length > 0 && renderAppRoleSelectors()}
+                  {memberType === 'member' && selectedApps.length > 0 && renderAppRoleSelectors()}
 
                   {/* Seat cost preview */}
                   {sub &&
@@ -817,15 +807,19 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                     </p>
                   </div>
                   <div>
-                    <strong>{t('team.inviteUser.reviewDashRole')}</strong>
+                    <strong>{t('team.inviteUser.reviewMemberType')}</strong>
                     <p className="capitalize" style={{ color: 'var(--dash-text-muted)' }}>
-                      {role}
+                      {memberType}
                     </p>
                   </div>
                   <div>
                     <strong>{t('team.inviteUser.reviewApps')}</strong>
                     <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {selectedApps.length ? selectedApps.join(', ') : t('team.inviteUser.noApps')}
+                      {memberType === 'admin'
+                        ? t('team.inviteUser.adminReceivesFullAccess')
+                        : selectedApps.length
+                          ? selectedApps.join(', ')
+                          : t('team.inviteUser.noApps')}
                     </p>
                   </div>
                   <div>
@@ -879,7 +873,11 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                   <div>
                     <strong>{t('team.inviteUser.activationApps')}</strong>
                     <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {selectedApps.length ? selectedApps.join(', ') : t('team.inviteUser.noApps')}
+                      {memberType === 'admin'
+                        ? t('team.inviteUser.adminReceivesFullAccess')
+                        : selectedApps.length
+                          ? selectedApps.join(', ')
+                          : t('team.inviteUser.noApps')}
                     </p>
                   </div>
                   <div>
@@ -1005,7 +1003,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                   {t('team.inviteUser.appliedToAllInvited')}
                 </p>
               </div>
-              {renderRoleSelector(bulkRole, setBulkRole)}
+              {renderMemberTypeSelector(bulkMemberType, setBulkMemberType)}
             </div>
 
             {/* Licenses */}
@@ -1021,10 +1019,17 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                   {t('team.inviteUser.appliedToAllInvited')}
                 </p>
               </div>
-              {renderAppSelector(bulkApps, toggleBulkApp)}
+              {bulkMemberType === 'admin' ? (
+                <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                  {t('team.inviteUser.adminReceivesFullAccess')}
+                </p>
+              ) : (
+                renderAppSelector(bulkApps, toggleBulkApp)
+              )}
 
-              {posSelectedBulk &&
-                renderLocationSelector(bulkLocations, toggleBulkLocation, bulkRole, () =>
+              {bulkMemberType === 'member' &&
+                posSelectedBulk &&
+                renderLocationSelector(bulkLocations, toggleBulkLocation, () =>
                   toggleBulkApp('pos')
                 )}
             </div>

@@ -22,8 +22,8 @@ func fix03ConsoleErrorStatus(err error) int {
 
 func fix03ConsoleAdminContext() context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
-		UserID: 7,
-		Role:   "console_admin",
+		UserID:         7,
+		IsConsoleAdmin: true,
 	})
 }
 

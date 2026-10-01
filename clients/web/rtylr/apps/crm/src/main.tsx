@@ -4,8 +4,6 @@ import { Toaster } from 'sonner';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { bootObservability } from '@voxire/observability';
-import { loadRuntimeConfig } from '@voxire/config';
-import { FullScreenLoader } from '@voxire/components';
 import { router } from './router';
 import { readLocalStorage } from './shared/lib/storage';
 
@@ -39,17 +37,12 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  // Await runtime config (self-host) before rendering; loader meanwhile, static
-  // hosted defaults on failure. Hosted is unchanged.
-  root.render(<FullScreenLoader />);
-  void loadRuntimeConfig().finally(() => {
-    root.render(
-      <QueryClientProvider client={queryClient}>
-        <CookiesProvider>
-          <RouterProvider router={router} />
-          <Toaster expand={false} richColors />
-        </CookiesProvider>
-      </QueryClientProvider>
-    );
-  });
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <CookiesProvider>
+        <RouterProvider router={router} />
+        <Toaster expand={false} richColors />
+      </CookiesProvider>
+    </QueryClientProvider>
+  );
 }

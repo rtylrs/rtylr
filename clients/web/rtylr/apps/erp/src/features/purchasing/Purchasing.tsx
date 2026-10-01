@@ -187,8 +187,7 @@ const Purchasing: React.FC = () => {
   const suppliers = supplierResult?.suppliers ?? [];
   const { data: productResult } = useProducts();
   const products = productResult?.products ?? [];
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canApprovePO = canErpPermission(role, 'erp:purchase_orders:approve');
+  const canApprovePO = canErpPermission('erp:purchasing:approve');
   const [showCreate, setShowCreate] = useState(false);
   const [newSupplierId, setNewSupplierId] = useState('');
   const [newPoNumber, setNewPoNumber] = useState('');

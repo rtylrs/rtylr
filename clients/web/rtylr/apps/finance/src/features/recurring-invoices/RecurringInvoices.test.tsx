@@ -3,17 +3,30 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import RecurringInvoices from './RecurringInvoices';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
-  role: 'admin' as string | null,
+  effectiveAccess: undefined as unknown,
   useRecurringInvoices: vi.fn(),
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (
-    selector: (state: { user: { role: string | null }; role: string | null }) => unknown
-  ) => selector({ user: { role: mocks.role }, role: mocks.role }),
+  useUserStore: Object.assign(
+    (
+      selector: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      selector({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('./useRecurringInvoices', () => ({
@@ -46,7 +59,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.role = 'admin';
+  mocks.effectiveAccess = createEffectiveAccess('finance', { isOwner: true });
   mocks.useRecurringInvoices.mockReturnValue({
     data: {
       invoices: [
@@ -78,7 +91,9 @@ describe('RecurringInvoices', () => {
   });
 
   it('hides create and pause controls from a viewer', () => {
-    mocks.role = 'viewer';
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:recurring_invoices:view'],
+    });
 
     render(<RecurringInvoices />);
 

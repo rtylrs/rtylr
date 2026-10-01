@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
@@ -94,14 +95,16 @@ func (a *MembersAPI) GetMember(ctx context.Context, req *hubteammembersv1.GetMem
 	staff := newProtoStaffUser(*member)
 	return &hubteammembersv1.GetMemberResponse{
 		User: &hubteammembersv1.StaffUserWithGroups{
-			Id:        staff.GetId(),
-			Email:     staff.GetEmail(),
-			FullName:  staff.GetFullName(),
-			CreatedAt: staff.GetCreatedAt(),
-			Apps:      staff.GetApps(),
-			Role:      staff.GetRole(),
-			IsActive:  staff.GetIsActive(),
-			Groups:    groups,
+			Id:                           staff.GetId(),
+			Email:                        staff.GetEmail(),
+			FullName:                     staff.GetFullName(),
+			CreatedAt:                    staff.GetCreatedAt(),
+			IsActive:                     staff.GetIsActive(),
+			MemberType:                   staff.GetMemberType(),
+			LicensedAppIds:               staff.GetLicensedAppIds(),
+			PermissionProfileAssignments: staff.GetPermissionProfileAssignments(),
+			EffectiveAccess:              staff.GetEffectiveAccess(),
+			Groups:                       groups,
 		},
 	}, nil
 }
@@ -119,6 +122,7 @@ func (a *MembersAPI) RemoveMember(ctx context.Context, req *hubteammembersv1.Rem
 
 	actorID := device.UserID
 	if err := a.Service.DeactivateUser(ctx, actorID, device.BusinessID, memberID); err != nil {
+		logger.Ctx(ctx).Error("Failed to deactivate team member", logger.Error(err))
 		switch {
 		case errors.Is(err, domain.ErrForbidden):
 			return nil, onekiterrors.PermissionDenied()

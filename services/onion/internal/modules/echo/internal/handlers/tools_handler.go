@@ -253,7 +253,9 @@ func (h *ToolDecisionHandler) logDecision(ctx context.Context, req *ToolDecision
 		fields = append(fields,
 			logger.Any("user_id", user.UserID),
 			logger.Any("business_id", user.BusinessID),
-			logger.String("role", user.Role),
+			logger.Bool("is_console_admin", user.IsConsoleAdmin),
+			logger.Bool("is_business_owner", user.EffectiveAccess != nil && user.EffectiveAccess.IsOwner),
+			logger.Bool("is_business_admin", user.EffectiveAccess != nil && user.EffectiveAccess.IsAdmin),
 		)
 	}
 

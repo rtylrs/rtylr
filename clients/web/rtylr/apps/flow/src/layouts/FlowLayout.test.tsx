@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import FlowLayout from './FlowLayout';
 import { useFlowStore } from '../shared/stores/flowStore';
+import { createEffectiveAccess } from '../../../../test/effectiveAccess';
 
 // FlowLayout mounts the whole app shell (sidebar, header, realtime wiring,
 // caret panel, command bar, etc.). This test only exercises the account menu
@@ -20,16 +21,13 @@ const mocks = vi.hoisted(() => ({
   // userStore via a `useEffect` keyed on `[authUser, setUser]`. If the mock
   // returned a fresh object on every render, that effect would think the
   // dependency changed every time and call setUser in a loop.
-  // `role` is part of the shape because the project-creation gate reads it:
-  // with no effectiveAccess in the payload, canFlowPermission falls back to
-  // the legacy business role, and undefined correctly denies. Tests that need
-  // to create a project set it, and reset it afterwards, so the object
-  // identity stays stable for the effect described above.
+  // Effective access is updated in place so the auth-user object identity stays
+  // stable for the effect described above.
   authUser: {
     id: '1',
     name: 'Test User',
     email: 'test@example.com',
-    role: undefined as string | undefined,
+    effectiveAccess: null as ReturnType<typeof createEffectiveAccess> | null,
   },
 }));
 
@@ -138,11 +136,13 @@ vi.mock('@voxire/utils', async (importOriginal) => ({
 
 vi.mock('@voxire/auth', () => ({
   signOut: mocks.signOut,
-  useUserStore: (select: (state: { user: typeof mocks.authUser }) => unknown) =>
-    select({ user: mocks.authUser }),
+  useUserStore: (
+    select: (state: {
+      user: typeof mocks.authUser;
+      effectiveAccess: typeof mocks.authUser.effectiveAccess;
+    }) => unknown
+  ) => select({ user: mocks.authUser, effectiveAccess: mocks.authUser.effectiveAccess }),
 }));
-
-vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
 
 // Sidebar preferences use React Query in production. The account-menu and
 // appearance tests do not exercise that persistence path, so keep the shell
@@ -425,11 +425,11 @@ describe('FlowLayout New project modal (#1060)', () => {
 
   beforeEach(() => {
     createProjectMutate.mockClear();
-    mocks.authUser.role = 'owner';
+    mocks.authUser.effectiveAccess = createEffectiveAccess('flow', { isOwner: true });
   });
 
   afterEach(() => {
-    mocks.authUser.role = undefined;
+    mocks.authUser.effectiveAccess = null;
   });
 
   it('sends the description and the chosen visibility', () => {

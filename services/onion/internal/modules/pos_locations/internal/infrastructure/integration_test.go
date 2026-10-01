@@ -147,12 +147,13 @@ func TestLocations_List_AtLeastOneLocation(t *testing.T) {
 
 func TestLocations_Create_ThenListContainsNew(t *testing.T) {
 	db := testutil.OpenDB(t)
+	testutil.GrantBusinessAccess(t, db, testutil.OtherBusinessID, testutil.OtherOwnerID)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
 	newID, err := repo.Create(ctx, domain.LocationInput{
-		OwnerID:    testutil.OwnerID,
-		BusinessID: testutil.BusinessID,
+		OwnerID:    testutil.OtherOwnerID,
+		BusinessID: testutil.OtherBusinessID,
 		Name:       "Integration Test Location",
 		IsActive:   true,
 	})
@@ -163,7 +164,7 @@ func TestLocations_Create_ThenListContainsNew(t *testing.T) {
 		t.Fatal("Create returned ID=0")
 	}
 
-	locs, err := repo.List(ctx, testutil.OwnerID)
+	locs, err := repo.List(ctx, testutil.OtherBusinessID)
 	if err != nil {
 		t.Fatalf("List after create: %v", err)
 	}
@@ -181,13 +182,14 @@ func TestLocations_Create_ThenListContainsNew(t *testing.T) {
 
 func TestLocations_Update_ChangesName(t *testing.T) {
 	db := testutil.OpenDB(t)
+	testutil.GrantBusinessAccess(t, db, testutil.OtherBusinessID, testutil.OtherOwnerID)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 	active := true
 
 	newID, err := repo.Create(ctx, domain.LocationInput{
-		OwnerID:    testutil.OwnerID,
-		BusinessID: testutil.BusinessID,
+		OwnerID:    testutil.OtherOwnerID,
+		BusinessID: testutil.OtherBusinessID,
 		Name:       "Before Update",
 		IsActive:   true,
 	})
@@ -197,8 +199,8 @@ func TestLocations_Update_ChangesName(t *testing.T) {
 
 	err = repo.Update(ctx, domain.LocationUpdateInput{
 		ID:         newID,
-		OwnerID:    testutil.OwnerID,
-		BusinessID: testutil.BusinessID,
+		OwnerID:    testutil.OtherOwnerID,
+		BusinessID: testutil.OtherBusinessID,
 		Name:       "After Update",
 		IsActive:   &active,
 	})
@@ -206,7 +208,7 @@ func TestLocations_Update_ChangesName(t *testing.T) {
 		t.Fatalf("Update: %v", err)
 	}
 
-	locs, err := repo.List(ctx, testutil.OwnerID)
+	locs, err := repo.List(ctx, testutil.OtherBusinessID)
 	if err != nil {
 		t.Fatalf("List after update: %v", err)
 	}

@@ -39,14 +39,12 @@ func deleteEmployeeContext(businessID, userID, employeeID int64) context.Context
 	user := &authPkg.AuthUser{
 		UserID:     userID,
 		BusinessID: businessID,
-		Role:       "owner",
 		ProvisioningStatus: &authorization.ProvisioningStatus{
 			State:         authorization.ProvisioningActive,
 			EmailVerified: true,
 		},
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID:           businessID,
-			DashRole:             "owner",
 			IsOwner:              true,
 			AuthorizationVersion: 1,
 			Apps: []authorization.EffectiveAppAccess{{
@@ -54,7 +52,6 @@ func deleteEmployeeContext(businessID, userID, employeeID int64) context.Context
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: []string{"hr:employees:manage"},
-				Scopes:      nil,
 			}},
 		},
 	}

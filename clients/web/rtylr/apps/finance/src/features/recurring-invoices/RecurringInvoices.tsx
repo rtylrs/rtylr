@@ -205,11 +205,7 @@ const RecurringInvoices: React.FC = () => {
   const activeCount = rows.reduce((count, recurring) => count + Number(recurring.isActive), 0);
   const setStatus = useSetRecurringStatus();
   const [showCreate, setShowCreate] = useState(false);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageRecurringInvoices = canFinancePermission(
-    role,
-    'finance:recurring_invoices:manage'
-  );
+  const canManageRecurringInvoices = canFinancePermission('finance:recurring_invoices:manage');
 
   const togglePause = (id: string, isActive: boolean): void => {
     if (!canManageRecurringInvoices) return;

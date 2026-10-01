@@ -37,8 +37,8 @@ func LoadDotEnv() {
 }
 
 // ListenPort returns the HTTP listen port for this process. PORT from the
-// environment wins when set; otherwise fallback is used (9999 for API, 8080 for
-// CDN upload, 8082 for license, etc.).
+// environment wins when set; otherwise fallback is used (9999 for API and 8080
+// for CDN upload, for example).
 func ListenPort(fallback string) string {
 	if v := strings.TrimSpace(os.Getenv("PORT")); v != "" {
 		return v

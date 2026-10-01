@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
@@ -74,15 +73,10 @@ func (s *Service) CreatePurchaseOrder(ctx context.Context, businessID int64, inp
 	return id, nil
 }
 
-// ApprovePurchaseOrder transitions a purchase order to the `approved` status.
-// Approval requires an owner, admin, or operator role and cannot be performed
-// by the user who created the order. The actor is passed explicitly so every
-// entry point (API and tools) applies the same segregation-of-duties policy.
-func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID, actorID int64, actorRole string) error {
-	if !canApprovePurchaseOrder(actorRole) {
-		return domain.ErrPurchaseOrderApprovalForbidden
-	}
-
+// ApprovePurchaseOrder transitions a purchase order when the caller has the
+// app permission enforced at the API or tool boundary. It also enforces
+// segregation of duties for every entry point.
+func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID, actorID int64) error {
 	po, err := s.repo.GetByID(ctx, businessID, poID)
 	if err != nil {
 		return err
@@ -110,15 +104,6 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID, ac
 	s.invalidateCache(ctx, businessID)
 
 	return nil
-}
-
-func canApprovePurchaseOrder(role string) bool {
-	switch strings.ToLower(strings.TrimSpace(role)) {
-	case "owner", "admin", "operator":
-		return true
-	default:
-		return false
-	}
 }
 
 func (s *Service) ReceivePurchaseOrder(ctx context.Context, businessID, poID, receivedBy int64, submitted []domain.PurchaseOrderItem) error {

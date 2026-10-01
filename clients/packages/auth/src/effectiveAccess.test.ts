@@ -3,8 +3,6 @@ import { hasEffectiveAppAccess, parseEffectiveAccess } from "./effectiveAccess";
 
 const validAccess = {
   businessId: "business-1",
-  dashRole: "member",
-  dashRoleId: null,
   dashPermissions: [],
   subscribedApps: ["flow"],
   licenses: [],
@@ -13,13 +11,9 @@ const validAccess = {
       appId: "flow",
       licensed: true,
       hasAccess: true,
-      roleIds: ["flow-contributor"],
-      primaryRoleId: "flow-contributor",
-      displayRole: "Contributor",
       permissions: ["flow:tasks:view"],
-      scopes: [{ scopeType: "business", scopeId: "*" }],
+      permissionScopes: [{ permissionKey: "flow:tasks:view", scopes: [] }],
       sources: ["explicit"],
-      permissionSources: { "flow:tasks:view": ["flow-contributor"] },
     },
   ],
   isOwner: false,
@@ -36,6 +30,32 @@ describe("parseEffectiveAccess", () => {
     expect(hasEffectiveAppAccess(access, "finance")).toBe(false);
   });
 
+  it("recognizes the baseline Dash launcher permission for an active member", () => {
+    const access = parseEffectiveAccess({
+      ...validAccess,
+      dashPermissions: ["hub:dashboard:view"],
+    });
+    expect(hasEffectiveAppAccess(access, "dash")).toBe(true);
+  });
+
+  it("parses the resource scopes emitted by normalized authorization", () => {
+    const access = parseEffectiveAccess({
+      ...validAccess,
+      apps: [
+        {
+          ...validAccess.apps[0],
+          permissionScopes: [
+            { permissionKey: "flow:tasks:view", scopes: [{ scopeType: "flow_project", scopeId: "41" }] },
+          ],
+        },
+      ],
+    });
+
+    expect(access?.apps[0]?.permissionScopes["flow:tasks:view"]).toEqual([
+      { scopeType: "flow_project", scopeId: "41" },
+    ]);
+  });
+
   it("fails closed when a required field is malformed", () => {
     const malformed = {
       ...validAccess,
@@ -44,28 +64,24 @@ describe("parseEffectiveAccess", () => {
     expect(parseEffectiveAccess(malformed)).toBeNull();
   });
 
-  it("treats omitted per-app collections as empty without rejecting other apps", () => {
+  it("accepts omitted zero-value fields emitted by the server without granting access", () => {
     const access = parseEffectiveAccess({
-      ...validAccess,
-      apps: [
-        validAccess.apps[0],
-        {
-          appId: "hr",
-          licensed: false,
-          hasAccess: false,
-          roleIds: [],
-          primaryRoleId: null,
-          displayRole: null,
-          scopes: [],
-          permissionSources: {},
-        },
-      ],
+      business_id: "business-1",
+      authorization_version: "3",
+      apps: [{ app_id: "hr" }],
     });
 
     expect(access).not.toBeNull();
-    expect(hasEffectiveAppAccess(access, "flow")).toBe(true);
-    expect(access?.apps[1]?.permissions).toEqual([]);
-    expect(access?.apps[1]?.sources).toEqual([]);
+    expect(access?.isOwner).toBe(false);
+    expect(access?.isAdmin).toBe(false);
+    expect(access?.dashPermissions).toEqual([]);
+    expect(access?.subscribedApps).toEqual([]);
+    expect(access?.apps[0]?.licensed).toBe(false);
+    expect(access?.apps[0]?.hasAccess).toBe(false);
+    expect(access?.apps[0]?.permissions).toEqual([]);
+    expect(access?.apps[0]?.permissionScopes).toEqual({});
+    expect(access?.apps[0]?.sources).toEqual([]);
+    expect(hasEffectiveAppAccess(access, "hr")).toBe(false);
   });
 
   it("does not accept unknown applications", () => {

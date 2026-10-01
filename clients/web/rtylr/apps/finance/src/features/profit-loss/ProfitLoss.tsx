@@ -6,7 +6,7 @@ import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
-import { canEffectiveAccess } from '@voxire/permissions';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 import { usePLByPeriod } from '../../shared/hooks/useTax';
 import PaymentReminderPanel from '../../shared/components/PaymentReminderPanel';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
@@ -144,10 +144,7 @@ const ProfitLoss: React.FC = () => {
   const effectiveAccess = useUserStore(
     (state) => state.user?.effectiveAccess ?? state.effectiveAccess
   );
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canExport = effectiveAccess
-    ? canEffectiveAccess(effectiveAccess, 'finance:reports:export')
-    : role === 'owner' || role === 'admin';
+  const canExport = canFinancePermission('finance:reports:export', effectiveAccess);
   const loading = Boolean(isPending || isLoading);
   const reportUnavailable = !plData && !isError && !loading;
 

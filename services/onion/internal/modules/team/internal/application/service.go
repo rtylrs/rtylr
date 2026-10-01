@@ -10,7 +10,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
@@ -102,19 +101,6 @@ func (s *Service) EnqueueAccessRequestEmail(ctx context.Context, businessID int6
 	})
 }
 
-func (s *Service) ListStaffUsers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.StaffUser, bool, error) {
-	limit, offset := paginateTeam(page, pageSize)
-	rows, err := s.repo.ListStaffUsers(ctx, ownerID, int32(limit+1), int32(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-	if err != nil {
-		return nil, false, err
-	}
-	hasMore := len(rows) > limit
-	if hasMore {
-		rows = rows[:limit]
-	}
-	return rows, hasMore, nil
-}
-
 // ListStaffUsersByBusiness resolves the business owner and lists all staff
 // under that owner. Lets non-owner members see the full team, not just the
 // rows they personally own (which would be empty). Result is cached per
@@ -176,18 +162,8 @@ func (s *Service) GetMyProfile(ctx context.Context, userID, businessID int64) (d
 	)
 }
 
-// GetEffectiveAccess is the middleware-facing authorization boundary. A nil
-// result means the normalized member row is not available yet, so callers may
-// remain on the legacy read path during the additive migration.
+// GetEffectiveAccess is the middleware-facing normalized authorization boundary.
 func (s *Service) GetEffectiveAccess(ctx context.Context, businessID, userID int64) (*authorization.EffectiveAccess, error) {
-	if authPkg.LegacyAuthorizationMode() {
-		_, _, _, apps, role, err := s.GetMeByBusiness(ctx, businessID, userID)
-		if err != nil {
-			return nil, err
-		}
-		legacy := authorization.LegacyAccess(businessID, apps, string(role))
-		return &legacy, nil
-	}
 	profile, err := s.GetMyProfile(ctx, userID, businessID)
 	if err != nil {
 		return nil, err

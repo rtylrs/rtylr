@@ -1,19 +1,28 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
-  role: 'operator' as string,
+  effectiveAccess: null as unknown,
 }));
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (state: { user: { role: string } }) => unknown) =>
-    selector({ user: { role: mocks.role } }),
-}));
+vi.mock('@voxire/auth', () => {
+  const state = () => ({
+    user: { effectiveAccess: mocks.effectiveAccess },
+    effectiveAccess: mocks.effectiveAccess,
+  });
+  return {
+    useUserStore: Object.assign(
+      (selector: (value: ReturnType<typeof state>) => unknown) => selector(state()),
+      { getState: state }
+    ),
+  };
+});
 
 const refetchRewards = vi.fn();
 const rewardsList: unknown[] = [];
@@ -35,11 +44,12 @@ function renderRewards(): void {
 
 beforeEach(() => {
   refetchRewards.mockClear();
+  mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: [] });
 });
 
 describe('LoyaltyRewards empty state', () => {
   it('shows an "add reward" call-to-action for a role that can configure loyalty', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
     renderRewards();
 
     expect(screen.getByText('crm.rewards.empty')).toBeInTheDocument();
@@ -56,7 +66,7 @@ describe('LoyaltyRewards empty state', () => {
   });
 
   it('falls back to a "refresh" call-to-action for a role that cannot configure loyalty', () => {
-    mocks.role = 'operator';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: [] });
     renderRewards();
 
     expect(screen.getByText('crm.rewards.empty')).toBeInTheDocument();

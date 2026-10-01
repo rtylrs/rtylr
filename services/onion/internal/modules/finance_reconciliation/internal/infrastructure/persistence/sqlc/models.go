@@ -142,6 +142,48 @@ func (ns NullAuthorizationAuditEventsSourceClient) Value() (driver.Value, error)
 	return string(ns.AuthorizationAuditEventsSourceClient), nil
 }
 
+type AuthorizationBusinessMembersMemberType string
+
+const (
+	AuthorizationBusinessMembersMemberTypeMember AuthorizationBusinessMembersMemberType = "member"
+	AuthorizationBusinessMembersMemberTypeAdmin  AuthorizationBusinessMembersMemberType = "admin"
+)
+
+func (e *AuthorizationBusinessMembersMemberType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationBusinessMembersMemberType(s)
+	case string:
+		*e = AuthorizationBusinessMembersMemberType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationBusinessMembersMemberType: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationBusinessMembersMemberType struct {
+	AuthorizationBusinessMembersMemberType AuthorizationBusinessMembersMemberType `json:"authorization_business_members_member_type"`
+	Valid                                  bool                                   `json:"valid"` // Valid is true if AuthorizationBusinessMembersMemberType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationBusinessMembersMemberType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationBusinessMembersMemberType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationBusinessMembersMemberType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationBusinessMembersMemberType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationBusinessMembersMemberType), nil
+}
+
 type AuthorizationBusinessMembersStatus string
 
 const (
@@ -189,10 +231,9 @@ func (ns NullAuthorizationBusinessMembersStatus) Value() (driver.Value, error) {
 type AuthorizationLicenseAssignmentsSource string
 
 const (
-	AuthorizationLicenseAssignmentsSourceExplicit    AuthorizationLicenseAssignmentsSource = "explicit"
-	AuthorizationLicenseAssignmentsSourceDashDefault AuthorizationLicenseAssignmentsSource = "dash_default"
-	AuthorizationLicenseAssignmentsSourceGroup       AuthorizationLicenseAssignmentsSource = "group"
-	AuthorizationLicenseAssignmentsSourceSystem      AuthorizationLicenseAssignmentsSource = "system"
+	AuthorizationLicenseAssignmentsSourceExplicit AuthorizationLicenseAssignmentsSource = "explicit"
+	AuthorizationLicenseAssignmentsSourceGroup    AuthorizationLicenseAssignmentsSource = "group"
+	AuthorizationLicenseAssignmentsSourceSystem   AuthorizationLicenseAssignmentsSource = "system"
 )
 
 func (e *AuthorizationLicenseAssignmentsSource) Scan(src interface{}) error {
@@ -277,10 +318,9 @@ func (ns NullAuthorizationLicenseAssignmentsStatus) Value() (driver.Value, error
 type AuthorizationRoleAssignmentsSource string
 
 const (
-	AuthorizationRoleAssignmentsSourceExplicit    AuthorizationRoleAssignmentsSource = "explicit"
-	AuthorizationRoleAssignmentsSourceDashDefault AuthorizationRoleAssignmentsSource = "dash_default"
-	AuthorizationRoleAssignmentsSourceGroup       AuthorizationRoleAssignmentsSource = "group"
-	AuthorizationRoleAssignmentsSourceSystem      AuthorizationRoleAssignmentsSource = "system"
+	AuthorizationRoleAssignmentsSourceExplicit AuthorizationRoleAssignmentsSource = "explicit"
+	AuthorizationRoleAssignmentsSourceGroup    AuthorizationRoleAssignmentsSource = "group"
+	AuthorizationRoleAssignmentsSourceSystem   AuthorizationRoleAssignmentsSource = "system"
 )
 
 func (e *AuthorizationRoleAssignmentsSource) Scan(src interface{}) error {
@@ -940,48 +980,6 @@ func (ns NullFinanceTaxConfigType) Value() (driver.Value, error) {
 	return string(ns.FinanceTaxConfigType), nil
 }
 
-type SelfHostLicensesStatus string
-
-const (
-	SelfHostLicensesStatusActive  SelfHostLicensesStatus = "active"
-	SelfHostLicensesStatusRevoked SelfHostLicensesStatus = "revoked"
-)
-
-func (e *SelfHostLicensesStatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = SelfHostLicensesStatus(s)
-	case string:
-		*e = SelfHostLicensesStatus(s)
-	default:
-		return fmt.Errorf("unsupported scan type for SelfHostLicensesStatus: %T", src)
-	}
-	return nil
-}
-
-type NullSelfHostLicensesStatus struct {
-	SelfHostLicensesStatus SelfHostLicensesStatus `json:"self_host_licenses_status"`
-	Valid                  bool                   `json:"valid"` // Valid is true if SelfHostLicensesStatus is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullSelfHostLicensesStatus) Scan(value interface{}) error {
-	if value == nil {
-		ns.SelfHostLicensesStatus, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.SelfHostLicensesStatus.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullSelfHostLicensesStatus) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.SelfHostLicensesStatus), nil
-}
-
 type SubscriptionsStatus string
 
 const (
@@ -1025,182 +1023,6 @@ func (ns NullSubscriptionsStatus) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.SubscriptionsStatus), nil
-}
-
-type UserAppPermissionsRole string
-
-const (
-	UserAppPermissionsRoleOwner        UserAppPermissionsRole = "owner"
-	UserAppPermissionsRoleAdmin        UserAppPermissionsRole = "admin"
-	UserAppPermissionsRoleOperator     UserAppPermissionsRole = "operator"
-	UserAppPermissionsRoleBilling      UserAppPermissionsRole = "billing"
-	UserAppPermissionsRoleMenuManager  UserAppPermissionsRole = "menu_manager"
-	UserAppPermissionsRoleStoreManager UserAppPermissionsRole = "store_manager"
-	UserAppPermissionsRoleStaff        UserAppPermissionsRole = "staff"
-	UserAppPermissionsRoleViewer       UserAppPermissionsRole = "viewer"
-)
-
-func (e *UserAppPermissionsRole) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = UserAppPermissionsRole(s)
-	case string:
-		*e = UserAppPermissionsRole(s)
-	default:
-		return fmt.Errorf("unsupported scan type for UserAppPermissionsRole: %T", src)
-	}
-	return nil
-}
-
-type NullUserAppPermissionsRole struct {
-	UserAppPermissionsRole UserAppPermissionsRole `json:"user_app_permissions_role"`
-	Valid                  bool                   `json:"valid"` // Valid is true if UserAppPermissionsRole is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullUserAppPermissionsRole) Scan(value interface{}) error {
-	if value == nil {
-		ns.UserAppPermissionsRole, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.UserAppPermissionsRole.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullUserAppPermissionsRole) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.UserAppPermissionsRole), nil
-}
-
-type UserBusinessAccessRole string
-
-const (
-	UserBusinessAccessRoleOwner  UserBusinessAccessRole = "owner"
-	UserBusinessAccessRoleAdmin  UserBusinessAccessRole = "admin"
-	UserBusinessAccessRoleViewer UserBusinessAccessRole = "viewer"
-)
-
-func (e *UserBusinessAccessRole) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = UserBusinessAccessRole(s)
-	case string:
-		*e = UserBusinessAccessRole(s)
-	default:
-		return fmt.Errorf("unsupported scan type for UserBusinessAccessRole: %T", src)
-	}
-	return nil
-}
-
-type NullUserBusinessAccessRole struct {
-	UserBusinessAccessRole UserBusinessAccessRole `json:"user_business_access_role"`
-	Valid                  bool                   `json:"valid"` // Valid is true if UserBusinessAccessRole is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullUserBusinessAccessRole) Scan(value interface{}) error {
-	if value == nil {
-		ns.UserBusinessAccessRole, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.UserBusinessAccessRole.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullUserBusinessAccessRole) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.UserBusinessAccessRole), nil
-}
-
-type UserGroupAppPermissionsPermissionLevel string
-
-const (
-	UserGroupAppPermissionsPermissionLevelUse  UserGroupAppPermissionsPermissionLevel = "use"
-	UserGroupAppPermissionsPermissionLevelEdit UserGroupAppPermissionsPermissionLevel = "edit"
-	UserGroupAppPermissionsPermissionLevelOwn  UserGroupAppPermissionsPermissionLevel = "own"
-)
-
-func (e *UserGroupAppPermissionsPermissionLevel) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = UserGroupAppPermissionsPermissionLevel(s)
-	case string:
-		*e = UserGroupAppPermissionsPermissionLevel(s)
-	default:
-		return fmt.Errorf("unsupported scan type for UserGroupAppPermissionsPermissionLevel: %T", src)
-	}
-	return nil
-}
-
-type NullUserGroupAppPermissionsPermissionLevel struct {
-	UserGroupAppPermissionsPermissionLevel UserGroupAppPermissionsPermissionLevel `json:"user_group_app_permissions_permission_level"`
-	Valid                                  bool                                   `json:"valid"` // Valid is true if UserGroupAppPermissionsPermissionLevel is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullUserGroupAppPermissionsPermissionLevel) Scan(value interface{}) error {
-	if value == nil {
-		ns.UserGroupAppPermissionsPermissionLevel, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.UserGroupAppPermissionsPermissionLevel.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullUserGroupAppPermissionsPermissionLevel) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.UserGroupAppPermissionsPermissionLevel), nil
-}
-
-type UserGroupResourcePermissionsPermissionLevel string
-
-const (
-	UserGroupResourcePermissionsPermissionLevelViewer UserGroupResourcePermissionsPermissionLevel = "viewer"
-	UserGroupResourcePermissionsPermissionLevelEditor UserGroupResourcePermissionsPermissionLevel = "editor"
-)
-
-func (e *UserGroupResourcePermissionsPermissionLevel) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = UserGroupResourcePermissionsPermissionLevel(s)
-	case string:
-		*e = UserGroupResourcePermissionsPermissionLevel(s)
-	default:
-		return fmt.Errorf("unsupported scan type for UserGroupResourcePermissionsPermissionLevel: %T", src)
-	}
-	return nil
-}
-
-type NullUserGroupResourcePermissionsPermissionLevel struct {
-	UserGroupResourcePermissionsPermissionLevel UserGroupResourcePermissionsPermissionLevel `json:"user_group_resource_permissions_permission_level"`
-	Valid                                       bool                                        `json:"valid"` // Valid is true if UserGroupResourcePermissionsPermissionLevel is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullUserGroupResourcePermissionsPermissionLevel) Scan(value interface{}) error {
-	if value == nil {
-		ns.UserGroupResourcePermissionsPermissionLevel, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.UserGroupResourcePermissionsPermissionLevel.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullUserGroupResourcePermissionsPermissionLevel) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.UserGroupResourcePermissionsPermissionLevel), nil
 }
 
 type UserMfaEnrollmentsMethod string
@@ -1477,23 +1299,14 @@ type AuthorizationAuditEvent struct {
 }
 
 type AuthorizationBusinessMember struct {
-	ID                   int64                              `db:"id" json:"id"`
-	BusinessID           int64                              `db:"business_id" json:"business_id"`
-	UserID               int64                              `db:"user_id" json:"user_id"`
-	DashRoleID           sql.NullInt64                      `db:"dash_role_id" json:"dash_role_id"`
-	DashRoleKey          string                             `db:"dash_role_key" json:"dash_role_key"`
-	Status               AuthorizationBusinessMembersStatus `db:"status" json:"status"`
-	AuthorizationVersion int64                              `db:"authorization_version" json:"authorization_version"`
-	CreatedAt            sql.NullTime                       `db:"created_at" json:"created_at"`
-	UpdatedAt            sql.NullTime                       `db:"updated_at" json:"updated_at"`
-}
-
-type AuthorizationDashAppDefault struct {
-	DashRoleID     int64         `db:"dash_role_id" json:"dash_role_id"`
-	AppID          string        `db:"app_id" json:"app_id"`
-	DefaultRoleID  sql.NullInt64 `db:"default_role_id" json:"default_role_id"`
-	DefaultEnabled bool          `db:"default_enabled" json:"default_enabled"`
-	CreatedAt      sql.NullTime  `db:"created_at" json:"created_at"`
+	ID                   int64                                  `db:"id" json:"id"`
+	BusinessID           int64                                  `db:"business_id" json:"business_id"`
+	UserID               int64                                  `db:"user_id" json:"user_id"`
+	MemberType           AuthorizationBusinessMembersMemberType `db:"member_type" json:"member_type"`
+	Status               AuthorizationBusinessMembersStatus     `db:"status" json:"status"`
+	AuthorizationVersion int64                                  `db:"authorization_version" json:"authorization_version"`
+	CreatedAt            sql.NullTime                           `db:"created_at" json:"created_at"`
+	UpdatedAt            sql.NullTime                           `db:"updated_at" json:"updated_at"`
 }
 
 type AuthorizationLicenseAssignment struct {
@@ -1502,12 +1315,12 @@ type AuthorizationLicenseAssignment struct {
 	UserID     sql.NullInt64                         `db:"user_id" json:"user_id"`
 	GroupID    sql.NullInt64                         `db:"group_id" json:"group_id"`
 	AppID      string                                `db:"app_id" json:"app_id"`
-	Source     AuthorizationLicenseAssignmentsSource `db:"source" json:"source"`
 	Status     AuthorizationLicenseAssignmentsStatus `db:"status" json:"status"`
 	GrantedBy  sql.NullInt64                         `db:"granted_by" json:"granted_by"`
 	GrantedAt  sql.NullTime                          `db:"granted_at" json:"granted_at"`
 	RevokedBy  sql.NullInt64                         `db:"revoked_by" json:"revoked_by"`
 	RevokedAt  sql.NullTime                          `db:"revoked_at" json:"revoked_at"`
+	Source     AuthorizationLicenseAssignmentsSource `db:"source" json:"source"`
 }
 
 type AuthorizationPermissionCatalog struct {
@@ -1541,19 +1354,21 @@ type AuthorizationRole struct {
 }
 
 type AuthorizationRoleAssignment struct {
-	ID         int64                              `db:"id" json:"id"`
-	BusinessID int64                              `db:"business_id" json:"business_id"`
-	UserID     sql.NullInt64                      `db:"user_id" json:"user_id"`
-	GroupID    sql.NullInt64                      `db:"group_id" json:"group_id"`
-	AppID      string                             `db:"app_id" json:"app_id"`
-	RoleID     int64                              `db:"role_id" json:"role_id"`
-	Source     AuthorizationRoleAssignmentsSource `db:"source" json:"source"`
-	Status     AuthorizationRoleAssignmentsStatus `db:"status" json:"status"`
-	IsPrimary  bool                               `db:"is_primary" json:"is_primary"`
-	GrantedBy  sql.NullInt64                      `db:"granted_by" json:"granted_by"`
-	GrantedAt  sql.NullTime                       `db:"granted_at" json:"granted_at"`
-	RevokedBy  sql.NullInt64                      `db:"revoked_by" json:"revoked_by"`
-	RevokedAt  sql.NullTime                       `db:"revoked_at" json:"revoked_at"`
+	ID            int64                              `db:"id" json:"id"`
+	BusinessID    int64                              `db:"business_id" json:"business_id"`
+	UserID        sql.NullInt64                      `db:"user_id" json:"user_id"`
+	GroupID       sql.NullInt64                      `db:"group_id" json:"group_id"`
+	AppID         string                             `db:"app_id" json:"app_id"`
+	RoleID        int64                              `db:"role_id" json:"role_id"`
+	Status        AuthorizationRoleAssignmentsStatus `db:"status" json:"status"`
+	ActiveUserID  sql.NullInt64                      `db:"active_user_id" json:"active_user_id"`
+	ActiveGroupID sql.NullInt64                      `db:"active_group_id" json:"active_group_id"`
+	IsPrimary     bool                               `db:"is_primary" json:"is_primary"`
+	GrantedBy     sql.NullInt64                      `db:"granted_by" json:"granted_by"`
+	GrantedAt     sql.NullTime                       `db:"granted_at" json:"granted_at"`
+	RevokedBy     sql.NullInt64                      `db:"revoked_by" json:"revoked_by"`
+	RevokedAt     sql.NullTime                       `db:"revoked_at" json:"revoked_at"`
+	Source        AuthorizationRoleAssignmentsSource `db:"source" json:"source"`
 }
 
 type AuthorizationRoleAssignmentScope struct {
@@ -1596,9 +1411,9 @@ type Business struct {
 	LogoUrl     sql.NullString `db:"logo_url" json:"logo_url"`
 	Slug        sql.NullString `db:"slug" json:"slug"`
 	IsActive    sql.NullBool   `db:"is_active" json:"is_active"`
+	MfaEnforced bool           `db:"mfa_enforced" json:"mfa_enforced"`
 	CreatedAt   sql.NullTime   `db:"created_at" json:"created_at"`
 	UpdatedAt   sql.NullTime   `db:"updated_at" json:"updated_at"`
-	MfaEnforced bool           `db:"mfa_enforced" json:"mfa_enforced"`
 }
 
 type BusinessAddon struct {
@@ -2095,26 +1910,6 @@ type SeatPeriod struct {
 	CreatedAt    sql.NullTime `db:"created_at" json:"created_at"`
 }
 
-type SelfHostLicense struct {
-	ID            int64                  `db:"id" json:"id"`
-	OwnerEmail    string                 `db:"owner_email" json:"owner_email"`
-	CustomerName  sql.NullString         `db:"customer_name" json:"customer_name"`
-	Plan          string                 `db:"plan" json:"plan"`
-	Features      json.RawMessage        `db:"features" json:"features"`
-	SeatLimit     sql.NullInt32          `db:"seat_limit" json:"seat_limit"`
-	ExpiresAt     sql.NullTime           `db:"expires_at" json:"expires_at"`
-	GraceUntil    sql.NullTime           `db:"grace_until" json:"grace_until"`
-	Status        SelfHostLicensesStatus `db:"status" json:"status"`
-	LicenseKey    string                 `db:"license_key" json:"license_key"`
-	KeyHash       string                 `db:"key_hash" json:"key_hash"`
-	CreatedBy     sql.NullInt64          `db:"created_by" json:"created_by"`
-	UpdatedBy     sql.NullInt64          `db:"updated_by" json:"updated_by"`
-	CreatedAt     sql.NullTime           `db:"created_at" json:"created_at"`
-	UpdatedAt     sql.NullTime           `db:"updated_at" json:"updated_at"`
-	RegeneratedAt sql.NullTime           `db:"regenerated_at" json:"regenerated_at"`
-	RevokedAt     sql.NullTime           `db:"revoked_at" json:"revoked_at"`
-}
-
 type Subscription struct {
 	ID                      int64                   `db:"id" json:"id"`
 	OwnerID                 int64                   `db:"owner_id" json:"owner_id"`
@@ -2189,27 +1984,6 @@ type User struct {
 	TwoFactorEnabled bool           `db:"two_factor_enabled" json:"two_factor_enabled"`
 }
 
-type UserAppPermission struct {
-	ID         int64         `db:"id" json:"id"`
-	BusinessID sql.NullInt64 `db:"business_id" json:"business_id"`
-	OwnerID    int64         `db:"owner_id" json:"owner_id"`
-	UserID     int64         `db:"user_id" json:"user_id"`
-	// Array of app IDs: pos, erp, hr, crm, finance, flow
-	Apps      json.RawMessage            `db:"apps" json:"apps"`
-	Role      NullUserAppPermissionsRole `db:"role" json:"role"`
-	IsActive  sql.NullBool               `db:"is_active" json:"is_active"`
-	CreatedAt sql.NullTime               `db:"created_at" json:"created_at"`
-	UpdatedAt sql.NullTime               `db:"updated_at" json:"updated_at"`
-}
-
-type UserBusinessAccess struct {
-	ID         int64                  `db:"id" json:"id"`
-	UserID     int64                  `db:"user_id" json:"user_id"`
-	BusinessID int64                  `db:"business_id" json:"business_id"`
-	Role       UserBusinessAccessRole `db:"role" json:"role"`
-	CreatedAt  sql.NullTime           `db:"created_at" json:"created_at"`
-}
-
 type UserEmailVerificationToken struct {
 	ID         int64        `db:"id" json:"id"`
 	UserID     int64        `db:"user_id" json:"user_id"`
@@ -2222,33 +1996,21 @@ type UserEmailVerificationToken struct {
 type UserGroup struct {
 	ID          int64          `db:"id" json:"id"`
 	OwnerID     int64          `db:"owner_id" json:"owner_id"`
-	BusinessID  int64          `db:"business_id" json:"business_id"`
 	Name        string         `db:"name" json:"name"`
 	Description sql.NullString `db:"description" json:"description"`
 	Color       sql.NullString `db:"color" json:"color"`
 	CreatedAt   sql.NullTime   `db:"created_at" json:"created_at"`
 	UpdatedAt   sql.NullTime   `db:"updated_at" json:"updated_at"`
-}
-
-type UserGroupAppPermission struct {
-	GroupID         int64                                  `db:"group_id" json:"group_id"`
-	AppID           string                                 `db:"app_id" json:"app_id"`
-	PermissionLevel UserGroupAppPermissionsPermissionLevel `db:"permission_level" json:"permission_level"`
+	BusinessID  int64          `db:"business_id" json:"business_id"`
 }
 
 type UserGroupMember struct {
 	GroupID    int64         `db:"group_id" json:"group_id"`
 	UserID     int64         `db:"user_id" json:"user_id"`
 	OwnerID    int64         `db:"owner_id" json:"owner_id"`
-	BusinessID int64         `db:"business_id" json:"business_id"`
 	AddedAt    sql.NullTime  `db:"added_at" json:"added_at"`
 	AddedBy    sql.NullInt64 `db:"added_by" json:"added_by"`
-}
-
-type UserGroupResourcePermission struct {
-	GroupID         int64                                       `db:"group_id" json:"group_id"`
-	ResourceKey     string                                      `db:"resource_key" json:"resource_key"`
-	PermissionLevel UserGroupResourcePermissionsPermissionLevel `db:"permission_level" json:"permission_level"`
+	BusinessID int64         `db:"business_id" json:"business_id"`
 }
 
 type UserMfaEnrollment struct {

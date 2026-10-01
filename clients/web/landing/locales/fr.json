@@ -91,7 +91,6 @@
       "hardware": "Matériel",
       "blog": "Blog",
       "documentation": "Documentation",
-      "selfHost": "Auto-héberger rtylr",
       "integrations": "Intégrations",
       "helpCenter": "Centre d’aide",
       "status": "État des services",
@@ -250,10 +249,6 @@
         {
           "number": "Un identifiant",
           "label": "POS, ERP, CRM, RH et Finance"
-        },
-        {
-          "number": "Auto-hébergé",
-          "label": "Sur vos propres serveurs"
         },
         {
           "number": "Liban",
@@ -955,10 +950,6 @@
         {
           "question": "La démo est-elle un rendez-vous commercial ?",
           "answer": "C’est une présentation produit de 30 minutes, menée par quelqu’un qui a construit rtylr. Vous n’en avez pas besoin pour commencer : l’offre gratuite couvre 10 membres sur un établissement et ne demande aucune carte, vous pouvez donc vous inscrire et explorer seul d’abord. La présentation sert aux questions qu’une page d’inscription ne traite pas."
-        },
-        {
-          "question": "La démo peut-elle couvrir l’auto-hébergement ?",
-          "answer": "Oui. rtylr peut être auto-hébergé, et l’installation est documentée publiquement sur docs.rtylr.com/self-hosting. Signalez-le à la réservation, sous Explore a Rtylr Use Case, et la présentation prendra cette direction. La documentation est ouverte, vous pouvez donc la lire d’abord et venir avec des questions précises sur votre infrastructure."
         }
       ]
     }

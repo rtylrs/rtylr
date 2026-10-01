@@ -3,8 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-	"fmt"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -26,6 +25,13 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+func nullableString(raw string) any {
+	if strings.TrimSpace(raw) == "" {
+		return nil
+	}
+	return raw
 }
 
 // dynamic-query: squirrel
@@ -87,44 +93,6 @@ SET business_id = ?, onboarded = TRUE, updated_at = NOW()
 WHERE id = ?`,
 		businessID,
 		ownerID,
-	); err != nil {
-		_ = tx.Rollback()
-		return nil, err
-	}
-
-	appsJSON := `["dash","pos","erp","hr","crm","finance","flow","insights"]`
-	if params.PlanID > 0 {
-		// cross-schema read from plans (subscriptions module) — plan app entitlements for provisioning
-		if err = tx.QueryRowContext(ctx, `
-SELECT apps
-FROM plans
-WHERE id = ? AND is_active = TRUE
-LIMIT 1`,
-			params.PlanID,
-		).Scan(&appsJSON); err != nil {
-			_ = tx.Rollback()
-			return nil, err
-		}
-		if !json.Valid([]byte(appsJSON)) {
-			_ = tx.Rollback()
-			return nil, fmt.Errorf("plan %d has invalid apps JSON", params.PlanID)
-		}
-	}
-
-	// cross-schema write to user_app_permissions (team/hub module) — grant owner role on the new business
-	if _, err = tx.ExecContext(ctx, `
-INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
-VALUES (?, ?, ?, ?, 'owner', TRUE)
-ON DUPLICATE KEY UPDATE
-  business_id = VALUES(business_id),
-  apps = VALUES(apps),
-  role = VALUES(role),
-  is_active = TRUE,
-  updated_at = NOW()`,
-		businessID,
-		ownerID,
-		ownerID,
-		appsJSON,
 	); err != nil {
 		_ = tx.Rollback()
 		return nil, err

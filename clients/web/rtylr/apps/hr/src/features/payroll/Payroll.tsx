@@ -42,8 +42,7 @@ type StatusFilter = (typeof FILTER_STATUSES)[number];
 const Payroll = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: settings } = useHrSettings();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
+  const canRunPayroll = canHrPermission('hr:payroll:execute');
   const payrollConfigured = usePayrollConfigured();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [params] = useState<ListPayrollRunsParams>({ limit: 50, offset: 0 });

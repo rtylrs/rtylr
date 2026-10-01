@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
+	authorizationtransport "github.com/voxire/onion/internal/platform/authorization/transport"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
@@ -25,12 +26,16 @@ func (a *GroupsAPI) ListGroups(ctx context.Context, _ *hubteamgroupsv1.ListGroup
 	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
 		return nil, permissionErr
 	}
+	businessID, ok := teamBusinessIDFromCtx(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	groups, err := a.Service.ListGroups(ctx, ownerID)
+	groups, err := a.Service.ListGroups(ctx, ownerID, businessID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list groups")
 	}
@@ -44,10 +49,15 @@ func (a *GroupsAPI) ListGroups(ctx context.Context, _ *hubteamgroupsv1.ListGroup
 }
 
 func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.CreateGroupRequest) (*hubteamgroupsv1.CreateGroupResponse, error) {
-	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+	_, permissionErr := requireHubPermission(ctx, "hub:groups:manage")
+	if permissionErr != nil {
 		return nil, permissionErr
 	}
-	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	businessID, businessOK := teamBusinessIDFromCtx(ctx)
+	if !businessOK {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -57,26 +67,28 @@ func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.Create
 		return nil, onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 
-	perms := protoResourcePermissionsToDomain(req.GetResourcePermissions())
+	assignments, assignmentErr := permissionProfileAssignmentsFromProto(req.GetPermissionProfileAssignments())
+	if assignmentErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, assignmentErr.Error())
+	}
 	color := req.GetColor()
 	if color == "" {
 		color = "#6366f1"
 	}
 
-	id, err := a.Service.CreateGroup(ctx, ownerID, domain.CreateGroupInput{
-		Name:                name,
-		Description:         req.GetDescription(),
-		Color:               color,
-		ResourcePermissions: perms,
+	id, err := a.Service.CreateGroup(ctx, actorID, ownerID, businessID, domain.CreateGroupInput{
+		BusinessID:                   businessID,
+		Name:                         name,
+		Description:                  req.GetDescription(),
+		Color:                        color,
+		LicensedAppIDs:               req.GetLicensedAppIds(),
+		PermissionProfileAssignments: assignments,
 	})
 	if err != nil {
-		if errors.Is(err, domain.ErrInvalidPermissionLevel) {
-			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid resource permission level")
-		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create group")
 	}
 
-	g, err := a.Service.GetGroup(ctx, ownerID, id)
+	g, err := a.Service.GetGroup(ctx, ownerID, businessID, id)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to fetch group")
 	}
@@ -88,6 +100,10 @@ func (a *GroupsAPI) GetGroupDetail(ctx context.Context, req *hubteamgroupsv1.Get
 	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
 		return nil, permissionErr
 	}
+	businessID, ok := teamBusinessIDFromCtx(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -98,7 +114,7 @@ func (a *GroupsAPI) GetGroupDetail(ctx context.Context, req *hubteamgroupsv1.Get
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group id")
 	}
 
-	detail, err := a.Service.GetGroupDetail(ctx, ownerID, groupID)
+	detail, err := a.Service.GetGroupDetail(ctx, ownerID, businessID, groupID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) ||
 			errors.Is(err, domain.ErrGroupNotFound) ||
@@ -115,7 +131,11 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
 		return nil, permissionErr
 	}
-	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	businessID, businessOK := teamBusinessIDFromCtx(ctx)
+	if !businessOK {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -130,23 +150,25 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 		return nil, onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 
-	perms := protoResourcePermissionsToDomain(req.GetResourcePermissions())
-	if err := a.Service.UpdateGroup(ctx, ownerID, groupID, domain.UpdateGroupInput{
-		Name:                name,
-		Description:         req.GetDescription(),
-		Color:               req.GetColor(),
-		ResourcePermissions: perms,
+	assignments, assignmentErr := permissionProfileAssignmentsFromProto(req.GetPermissionProfileAssignments())
+	if assignmentErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, assignmentErr.Error())
+	}
+	if err := a.Service.UpdateGroup(ctx, actorID, ownerID, businessID, groupID, domain.UpdateGroupInput{
+		BusinessID:                   businessID,
+		Name:                         name,
+		Description:                  req.GetDescription(),
+		Color:                        req.GetColor(),
+		LicensedAppIDs:               req.GetLicensedAppIds(),
+		PermissionProfileAssignments: assignments,
 	}); err != nil {
 		if errors.Is(err, domain.ErrGroupNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
 		}
-		if errors.Is(err, domain.ErrInvalidPermissionLevel) {
-			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid resource permission level")
-		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update group")
 	}
 
-	g, err := a.Service.GetGroup(ctx, ownerID, groupID)
+	g, err := a.Service.GetGroup(ctx, ownerID, businessID, groupID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to fetch group")
 	}
@@ -158,6 +180,10 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
 		return nil, permissionErr
 	}
+	businessID, businessOK := teamBusinessIDFromCtx(ctx)
+	if !businessOK {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -168,7 +194,7 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group id")
 	}
 
-	if err := a.Service.DeleteGroup(ctx, ownerID, groupID); err != nil {
+	if err := a.Service.DeleteGroup(ctx, ownerID, businessID, groupID); err != nil {
 		if errors.Is(err, domain.ErrGroupNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
 		}
@@ -227,6 +253,10 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
 		return nil, permissionErr
 	}
+	businessID, businessOK := teamBusinessIDFromCtx(ctx)
+	if !businessOK {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -238,7 +268,7 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group or user id")
 	}
 
-	if err := a.Service.RemoveGroupMember(ctx, ownerID, groupID, userID); err != nil {
+	if err := a.Service.RemoveGroupMember(ctx, ownerID, businessID, groupID, userID); err != nil {
 		if errors.Is(err, domain.ErrPermissionNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
 		}
@@ -252,6 +282,10 @@ func (a *GroupsAPI) GetUserGroups(ctx context.Context, req *hubteamgroupsv1.GetU
 	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
 		return nil, permissionErr
 	}
+	businessID, ok := teamBusinessIDFromCtx(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -262,7 +296,7 @@ func (a *GroupsAPI) GetUserGroups(ctx context.Context, req *hubteamgroupsv1.GetU
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid user id")
 	}
 
-	groups, err := a.Service.GetUserGroups(ctx, ownerID, userID)
+	groups, err := a.Service.GetUserGroups(ctx, ownerID, businessID, userID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get user groups")
 	}
@@ -275,35 +309,18 @@ func (a *GroupsAPI) GetUserGroups(ctx context.Context, req *hubteamgroupsv1.GetU
 	return &hubteamgroupsv1.GetUserGroupsResponse{Groups: payloads}, nil
 }
 
-func protoResourcePermissionsToDomain(perms []*hubteamgroupsv1.ResourcePermission) []domain.ResourcePermission {
-	out := make([]domain.ResourcePermission, 0, len(perms))
-	for _, p := range perms {
-		out = append(out, domain.ResourcePermission{
-			ResourceKey:     p.GetResourceKey(),
-			PermissionLevel: domain.PermissionLevel(p.GetPermissionLevel()),
-		})
-	}
-	return out
-}
-
 func toProtoGroup(g domain.Group) *hubteamgroupsv1.Group {
-	perms := make([]*hubteamgroupsv1.ResourcePermission, 0, len(g.ResourcePermissions))
-	for _, p := range g.ResourcePermissions {
-		perms = append(perms, &hubteamgroupsv1.ResourcePermission{
-			ResourceKey:     p.ResourceKey,
-			PermissionLevel: string(p.PermissionLevel),
-		})
-	}
 	return &hubteamgroupsv1.Group{
-		Id:                  g.ID,
-		OwnerId:             g.OwnerID,
-		Name:                g.Name,
-		Description:         g.Description,
-		Color:               g.Color,
-		ResourcePermissions: perms,
-		MemberCount:         int32(g.MemberCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		CreatedAt:           g.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:           g.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		Id:                           g.ID,
+		OwnerId:                      g.OwnerID,
+		Name:                         g.Name,
+		Description:                  g.Description,
+		Color:                        g.Color,
+		LicensedAppIds:               append([]string{}, g.LicensedAppIDs...),
+		PermissionProfileAssignments: authorizationtransport.PermissionProfileAssignmentsToProto(g.PermissionProfileAssignments),
+		MemberCount:                  int32(g.MemberCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		CreatedAt:                    g.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:                    g.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
 
@@ -319,15 +336,16 @@ func toProtoGroupDetail(detail domain.GroupDetail) *hubteamgroupsv1.GroupDetail 
 	}
 	g := toProtoGroup(detail.Group)
 	return &hubteamgroupsv1.GroupDetail{
-		Id:                  g.GetId(),
-		OwnerId:             g.GetOwnerId(),
-		Name:                g.GetName(),
-		Description:         g.GetDescription(),
-		Color:               g.GetColor(),
-		ResourcePermissions: g.GetResourcePermissions(),
-		MemberCount:         int32(len(members)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		CreatedAt:           g.GetCreatedAt(),
-		UpdatedAt:           g.GetUpdatedAt(),
-		Members:             members,
+		Id:                           g.GetId(),
+		OwnerId:                      g.GetOwnerId(),
+		Name:                         g.GetName(),
+		Description:                  g.GetDescription(),
+		Color:                        g.GetColor(),
+		LicensedAppIds:               g.GetLicensedAppIds(),
+		PermissionProfileAssignments: g.GetPermissionProfileAssignments(),
+		MemberCount:                  int32(len(members)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		CreatedAt:                    g.GetCreatedAt(),
+		UpdatedAt:                    g.GetUpdatedAt(),
+		Members:                      members,
 	}
 }

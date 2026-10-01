@@ -418,11 +418,9 @@
   },
   "settings": {
     "team": {
-      "empty": {
-        "title": "لا يوجد أعضاء فريق بعد."
-      },
-      "invite": "دعوة عضو",
-      "refresh": "تحديث"
+      "managementTitle": "صلاحيات الفريق",
+      "managementDescription": "أدِر الأعضاء والمجموعات وتراخيص التطبيقات والصلاحيات معًا في Dash.",
+      "managementAction": "فتح إدارة الفريق"
     }
   },
   "barcodes": {

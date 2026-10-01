@@ -175,8 +175,7 @@ func (a *UserAPI) SetPIN(ctx context.Context, req *posuserv1.SetPINRequest) (*po
 
 	setErr := a.Service.SetPIN(ctx, businessID, application.SetPINActor{
 		UserID:          device.User.UserID,
-		IsOwner:         device.User.UserID == businessID,
-		TeamRole:        device.User.Role,
+		IsOwner:         device.User.EffectiveAccess != nil && device.User.EffectiveAccess.IsOwner,
 		EffectiveAccess: device.User.EffectiveAccess,
 	}, domain.SetPINInput{
 		UserID:     req.GetUserId(),

@@ -191,7 +191,7 @@ func TestAssertAppEnvIsUnderstoodReportsUnexpectedEnvironments(t *testing.T) {
 // recognise. The default is already the safe one, so an unknown label is a
 // warning to read, not an outage to create.
 func TestLoadAndValidateAcceptsUnrecognisedAppEnv(t *testing.T) {
-	setLicenseConfigEnv(t)
+	setConfigEnv(t)
 	t.Setenv(AppEnvEnvVar, "production-eu")
 
 	if _, err := LoadAndValidate(); err != nil {

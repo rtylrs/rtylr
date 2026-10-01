@@ -207,6 +207,13 @@ func (r *Repository) CompleteMFAEnrollment(ctx context.Context, userID int64, re
 		_ = tx.Rollback()
 		return cause
 	}
+	var pendingID int64
+	if err := tx.QueryRowContext(ctx, `
+		SELECT id FROM user_mfa_enrollments
+		WHERE user_id = ? AND method = 'totp' AND is_active = FALSE AND revoked_at IS NULL
+		ORDER BY id DESC LIMIT 1 FOR UPDATE`, userID).Scan(&pendingID); err != nil {
+		return rollback(err)
+	}
 	// Retire the outgoing factor before the new one goes live. Activating the
 	// pending row alone left the previous TOTP secret active as well, so a
 	// rotation produced two valid secrets and only the newest was ever checked.
@@ -219,7 +226,7 @@ func (r *Repository) CompleteMFAEnrollment(ctx context.Context, userID int64, re
 	result, err := tx.ExecContext(ctx, `
 		UPDATE user_mfa_enrollments
 		SET is_active = TRUE, enrolled_at = NOW()
-		WHERE user_id = ? AND method = 'totp' AND is_active = FALSE`, userID)
+		WHERE id = ? AND user_id = ? AND method = 'totp' AND is_active = FALSE AND revoked_at IS NULL`, pendingID, userID)
 	if err != nil {
 		return rollback(err)
 	}

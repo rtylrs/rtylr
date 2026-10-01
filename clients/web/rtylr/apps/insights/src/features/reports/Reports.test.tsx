@@ -1,18 +1,20 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { EffectiveAccess } from '@voxire/types';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 import { initTestI18n } from '../../shared/testUtils/i18nTestSetup';
 import Reports from './Reports';
 
 initTestI18n();
 
 interface MockUserState {
-  user: { role: string | null } | null;
-  role: string | null;
+  user: { effectiveAccess: EffectiveAccess } | null;
+  effectiveAccess: EffectiveAccess | null;
 }
 
 const mocks = vi.hoisted(() => ({
-  role: null as string | null,
+  effectiveAccess: null as EffectiveAccess | null,
   useReportTemplates: vi.fn(),
   useGenerateRevenueReport: vi.fn(),
   useExportRevenueReport: vi.fn(),
@@ -31,8 +33,19 @@ vi.mock('motion/react', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (state: MockUserState) => unknown) =>
-    selector({ user: { role: mocks.role }, role: mocks.role }),
+  useUserStore: Object.assign(
+    (selector: (state: MockUserState) => unknown) =>
+      selector({
+        user: mocks.effectiveAccess ? { effectiveAccess: mocks.effectiveAccess } : null,
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: mocks.effectiveAccess ? { effectiveAccess: mocks.effectiveAccess } : null,
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('../../shared/hooks/queries/useInsightsReports', () => ({
@@ -43,7 +56,9 @@ vi.mock('../../shared/hooks/queries/useInsightsReports', () => ({
 
 describe('Reports export gating', () => {
   beforeEach(() => {
-    mocks.role = null;
+    mocks.effectiveAccess = createEffectiveAccess('insights', {
+      permissions: ['insights:reports:create'],
+    });
     mocks.useReportTemplates.mockReturnValue({
       data: { templates: [] },
       isLoading: false,
@@ -54,8 +69,10 @@ describe('Reports export gating', () => {
     mocks.useExportRevenueReport.mockReturnValue({ mutate: vi.fn(), isPending: false });
   });
 
-  it('hides the export button for a non-admin-tier role', () => {
-    mocks.role = 'operator';
+  it('hides the export button when a member has create but not export permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('insights', {
+      permissions: ['insights:reports:create'],
+    });
     render(<Reports />);
 
     expect(screen.queryByRole('button', { name: 'Export Revenue CSV' })).not.toBeInTheDocument();
@@ -63,22 +80,22 @@ describe('Reports export gating', () => {
     expect(screen.getByRole('button', { name: 'Generate Revenue Report' })).toBeInTheDocument();
   });
 
-  it('hides the export button when there is no role at all', () => {
-    mocks.role = null;
+  it('hides the export button when authorization data is missing', () => {
+    mocks.effectiveAccess = null;
     render(<Reports />);
 
     expect(screen.queryByRole('button', { name: 'Export Revenue CSV' })).not.toBeInTheDocument();
   });
 
   it('shows the export button for admin', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('insights', { isAdmin: true });
     render(<Reports />);
 
     expect(screen.getByRole('button', { name: 'Export Revenue CSV' })).toBeInTheDocument();
   });
 
   it('shows the export button for owner', () => {
-    mocks.role = 'owner';
+    mocks.effectiveAccess = createEffectiveAccess('insights', { isOwner: true });
     render(<Reports />);
 
     expect(screen.getByRole('button', { name: 'Export Revenue CSV' })).toBeInTheDocument();
@@ -87,7 +104,9 @@ describe('Reports export gating', () => {
 
 describe('Reports empty state', () => {
   beforeEach(() => {
-    mocks.role = null;
+    mocks.effectiveAccess = createEffectiveAccess('insights', {
+      permissions: ['insights:reports:create'],
+    });
     mocks.useGenerateRevenueReport.mockReturnValue({ mutate: vi.fn(), isPending: false });
     mocks.useExportRevenueReport.mockReturnValue({ mutate: vi.fn(), isPending: false });
   });

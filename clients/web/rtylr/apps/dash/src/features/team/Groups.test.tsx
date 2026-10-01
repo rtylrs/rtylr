@@ -26,7 +26,8 @@ type Group = {
   name: string;
   color: string;
   memberCount: number;
-  resourcePermissions: { resourceKey: string }[];
+  licensedAppIds: string[];
+  permissionProfileAssignments: { appId: string; permissionProfileIds: string[] }[];
 };
 
 const groupsData = vi.hoisted(() => ({
@@ -72,7 +73,8 @@ describe('Groups list empty state', () => {
         name: 'Managers',
         color: '#4583C4',
         memberCount: 2,
-        resourcePermissions: [],
+        licensedAppIds: [],
+        permissionProfileAssignments: [],
       },
     ];
     render(<Groups />);
@@ -92,7 +94,8 @@ describe('Groups list empty state', () => {
         name: 'Managers',
         color: '#4583C4',
         memberCount: 2,
-        resourcePermissions: [],
+        licensedAppIds: [],
+        permissionProfileAssignments: [],
       },
     ];
     render(<Groups />);

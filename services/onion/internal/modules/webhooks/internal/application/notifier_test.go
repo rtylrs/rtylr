@@ -11,6 +11,7 @@ import (
 const (
 	notifyTenant  int64 = 885001
 	notifyCreator int64 = 885010
+	notifyOwner   int64 = 885011
 	notifyHook    int64 = 885020
 )
 
@@ -37,12 +38,14 @@ func seedFailing(t *testing.T, db *sql.DB, membershipStatus string, deadAgeHours
 	      VALUES (?, ?, 'fixture-auth-disabled', 'Hook Owner', ?)`, notifyCreator, notifyEmail, notifyTenant)
 	// authorization_business_members has a foreign key to businesses, so the
 	// tenant has to exist as a row rather than just as an id.
+	exec(`INSERT INTO users (id, email, password_hash, full_name, business_id)
+	      VALUES (?, 'tenant-owner@test.local', 'fixture-auth-disabled', 'Tenant Owner', ?)`, notifyOwner, notifyTenant)
 	exec(`INSERT INTO businesses (id, name, owner_id) VALUES (?, 'Notify Test Co', ?)`,
-		notifyTenant, notifyCreator)
+		notifyTenant, notifyOwner)
 	if membershipStatus != "" {
 		exec(`INSERT INTO authorization_business_members
-		        (business_id, user_id, dash_role_key, status, authorization_version)
-		      VALUES (?, ?, 'owner', ?, 1)`, notifyTenant, notifyCreator, membershipStatus)
+		        (business_id, user_id, member_type, status, authorization_version)
+		      VALUES (?, ?, 'member', ?, 1)`, notifyTenant, notifyCreator, membershipStatus)
 	}
 	exec(`INSERT INTO hub_webhooks (id, owner_id, business_id, url, events, secret, is_active)
 	      VALUES (?, ?, ?, 'https://example.test/hook', JSON_ARRAY('order_created'), 's', TRUE)`,
@@ -72,6 +75,7 @@ func clearFailing(t *testing.T, db *sql.DB) {
 	}
 	_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id = ?", notifyTenant)
 	_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", notifyCreator)
+	_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", notifyOwner)
 	_, _ = db.ExecContext(ctx, "DELETE FROM email_jobs WHERE to_email = ?", notifyEmail)
 }
 

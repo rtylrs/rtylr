@@ -1,8 +1,4 @@
 {
-  "teamEmptyTitle": "No team members yet",
-  "teamEmptyDescription": "Invite people to give them access to Finance.",
-  "teamEmptyCta": "Invite member",
-  "teamLoadFailed": "Couldn't load team members",
   "title": "Settings",
   "reset": "Settings reset",
   "saved": "Settings saved",
@@ -35,15 +31,9 @@
     "focusSearch": "Focus search"
   },
   "team": {
-    "heading": "Team",
-    "description": "People who have access to Finance.",
-    "inviteTitle": "Invite someone to Finance",
-    "fullName": "Full name",
-    "namePlaceholder": "Jane Smith",
-    "email": "Email",
-    "invite": "Invite member",
-    "required": "Email and full name are required",
-    "invited": "Invitation sent"
+    "accessTitle": "Team access",
+    "accessDescription": "Manage members, groups, app licenses, and permissions together in Dash.",
+    "accessAction": "Open team management"
   },
   "tabs": {
     "general": "General",

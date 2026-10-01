@@ -28,14 +28,12 @@ func hrRouteContext(businessID, userID int64, param, value string) context.Conte
 	user := &authPkg.AuthUser{
 		UserID:     userID,
 		BusinessID: businessID,
-		Role:       "owner",
 		ProvisioningStatus: &authorization.ProvisioningStatus{
 			State:         authorization.ProvisioningActive,
 			EmailVerified: true,
 		},
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID:           businessID,
-			DashRole:             "owner",
 			IsOwner:              true,
 			AuthorizationVersion: 1,
 			Apps: []authorization.EffectiveAppAccess{{
@@ -43,7 +41,6 @@ func hrRouteContext(businessID, userID int64, param, value string) context.Conte
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: []string{"hr:roles:manage"},
-				Scopes:      nil,
 			}},
 		},
 	}

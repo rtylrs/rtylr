@@ -13,9 +13,7 @@ func roleAuthorizationUser(permissions ...string) *authPkg.AuthUser {
 	return &authPkg.AuthUser{
 		UserID:     7,
 		BusinessID: 9,
-		Role:       "member",
 		EffectiveAccess: &authorization.EffectiveAccess{
-			DashRole:        "member",
 			DashPermissions: permissions,
 		},
 	}
@@ -27,8 +25,8 @@ func TestPermissionAPIsRejectMissingCanonicalPermissionBeforeServiceAccess(t *te
 		permission string
 		call       func(context.Context) error
 	}{
-		{name: "get permissions", permission: "hub:roles:view", call: func(ctx context.Context) error {
-			_, err := (&PermissionAPI{}).GetPermissions(ctx, &hubpermissionv1.GetPermissionsRequest{})
+		{name: "list permission catalog", permission: "hub:roles:view", call: func(ctx context.Context) error {
+			_, err := (&PermissionAPI{}).ListPermissionCatalog(ctx, &hubpermissionv1.ListPermissionCatalogRequest{})
 			return err
 		}},
 		{name: "list roles", permission: "hub:roles:view", call: func(ctx context.Context) error {
@@ -37,10 +35,6 @@ func TestPermissionAPIsRejectMissingCanonicalPermissionBeforeServiceAccess(t *te
 		}},
 		{name: "create role", permission: "hub:roles:create", call: func(ctx context.Context) error {
 			_, err := (&PermissionAPI{}).CreateRole(ctx, &hubpermissionv1.CreateRoleRequest{})
-			return err
-		}},
-		{name: "update permission matrix", permission: "hub:roles:edit", call: func(ctx context.Context) error {
-			_, err := (&PermissionAPI{}).UpdatePermissionMatrix(ctx, &hubpermissionv1.UpdatePermissionMatrixRequest{})
 			return err
 		}},
 		{name: "update role", permission: "hub:roles:edit", call: func(ctx context.Context) error {

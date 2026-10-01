@@ -75,26 +75,21 @@ WHERE owner_id = ? AND is_active = TRUE;
 
 -- name: ListUserBusinesses :many
 SELECT b.id, b.name, COALESCE(b.logo_url, '') AS logo_url, COALESCE(b.parent_id, 0) AS parent_id,
-       b.is_active, (b.owner_id = ?) AS is_owned
+       b.is_active, (b.owner_id = sqlc.arg(user_id)) AS is_owned
 FROM businesses b
 WHERE b.is_active = TRUE
-  AND (b.owner_id = ? OR EXISTS (
-    SELECT 1 FROM user_business_access uba WHERE uba.user_id = ? AND uba.business_id = b.id
-  ) OR EXISTS (
+  AND (b.owner_id = sqlc.arg(user_id) OR EXISTS (
     SELECT 1
-    FROM user_app_permissions uap
-    WHERE uap.user_id = ?
-      AND uap.business_id = b.id
-      AND uap.is_active = TRUE
+    FROM authorization_business_members member
+    WHERE member.user_id = sqlc.arg(user_id)
+      AND member.business_id = b.id
+      AND member.status = 'active'
   ))
 ORDER BY b.id ASC
 LIMIT 100;
 
 -- name: InsertSubBusiness :execresult
 INSERT INTO businesses (name, owner_id, parent_id) VALUES (?, ?, ?);
-
--- name: GrantUserBusinessAccess :exec
-INSERT INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'owner');
 
 -- name: CheckSubBusinessOwnership :one
 SELECT COUNT(*) AS cnt FROM businesses WHERE id = ? AND owner_id = ? AND is_active = TRUE;

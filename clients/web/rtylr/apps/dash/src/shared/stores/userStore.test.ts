@@ -33,7 +33,7 @@ describe('userStore (dash)', () => {
   });
 
   it('login sets user and isAuthenticated', () => {
-    const user = { name: 'John', email: 'john@test.com' };
+    const user = { fullName: 'John', email: 'john@test.com' };
     getState().login(user);
 
     expect(getState().user).toEqual(user);
@@ -41,7 +41,7 @@ describe('userStore (dash)', () => {
   });
 
   it('logout clears user state', () => {
-    getState().login({ name: 'John' });
+    getState().login({ fullName: 'John' });
     getState().setToken('abc');
     getState().setUserId('u1');
 
@@ -68,7 +68,7 @@ describe('userStore (dash)', () => {
   });
 
   it('setUser updates user', () => {
-    const user = { id: 1, name: 'Test' };
+    const user = { id: 1, fullName: 'Test' };
     getState().setUser(user);
     expect(getState().user).toEqual(user);
   });

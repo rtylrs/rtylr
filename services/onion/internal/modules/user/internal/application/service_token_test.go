@@ -64,9 +64,6 @@ func TestValidateToken_HydratesMissingBusinessScope(t *testing.T) {
 	if claims.BusinessID != businessID {
 		t.Fatalf("expected hydrated business %d, got %d", businessID, claims.BusinessID)
 	}
-	if claims.Role != "owner" {
-		t.Fatalf("expected hydrated owner role, got %q", claims.Role)
-	}
 	if claims.Platform != "rtylr" || claims.PlatformUserID != 42 || claims.PlanID != 9 {
 		t.Fatalf("platform claims were not preserved: %+v", claims)
 	}
@@ -82,7 +79,7 @@ func TestValidateToken_HydratesMissingBusinessScope(t *testing.T) {
 	if refreshedClaims.BusinessID != businessID {
 		t.Fatalf("expected refreshed token business %d, got %d", businessID, refreshedClaims.BusinessID)
 	}
-	if refreshedClaims.Role != "owner" {
-		t.Fatalf("expected refreshed token owner role, got %q", refreshedClaims.Role)
+	if refreshedClaims.UserID != userID || refreshedClaims.BusinessID != businessID {
+		t.Fatalf("expected refreshed token identity, got user=%d business=%d", refreshedClaims.UserID, refreshedClaims.BusinessID)
 	}
 }

@@ -75,8 +75,6 @@ Other workflows:
 - `desktop-release.yml` — Tauri desktop builds and the public downloads site;
   installer releases are still tagged `pos-v*` and are separate from source
   releases.
-- `publish-images.yml` / `publish-images-pos.yml` — the public self-host images,
-  dispatched by the Release workflow when app sources change (or run manually).
 
 ## Development notes
 

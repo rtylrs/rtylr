@@ -13,16 +13,16 @@ import (
 func TestDirectAuthorizationMatrix(t *testing.T) {
 	cases := []testutil.DirectAuthorizationCase{
 		{Name: "hub roles view", App: authorization.AppHub, Permission: "hub:roles:view", Call: func(ctx context.Context) (any, error) {
-			response, err := NewPermissionAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).GetPermissions(ctx, nil)
+			response, err := NewPermissionAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).ListPermissionCatalog(ctx, nil)
 			return response, err
 		}},
-		{Name: "hub roles create", App: authorization.AppHub, Permission: "hub:roles:create", Role: "owner", DelegationUserID: 1002, Call: func(ctx context.Context) (any, error) {
+		{Name: "hub roles create", App: authorization.AppHub, Permission: "hub:roles:create", Call: func(ctx context.Context) (any, error) {
 			appID := "dash"
-			response, err := NewPermissionAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CreateRole(ctx, &hubpermissionv1.CreateRoleRequest{Name: "Authorization Probe", AppId: &appID, Permissions: []string{"hub:team:view"}})
+			response, err := NewPermissionAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CreateRole(ctx, &hubpermissionv1.CreateRoleRequest{Name: "Authorization Probe", AppId: &appID, Permissions: []string{}})
 			return response, err
 		}},
-		{Name: "hub roles edit", App: authorization.AppHub, Permission: "hub:roles:edit", Role: "owner", DelegationUserID: 1002, Call: func(ctx context.Context) (any, error) {
-			response, err := NewPermissionAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).UpdateRole(ctx, &hubpermissionv1.UpdateRoleRequest{Id: 7305, Body: &hubpermissionv1.UpdateRoleBody{Name: "Authorization Probe", Permissions: []string{"hub:team:view"}}})
+		{Name: "hub roles edit", App: authorization.AppHub, Permission: "hub:roles:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewPermissionAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).UpdateRole(ctx, &hubpermissionv1.UpdateRoleRequest{Id: 7305, Body: &hubpermissionv1.UpdateRoleBody{Name: "Authorization Probe", Permissions: []string{}}})
 			return response, err
 		}},
 		{Name: "hub roles archive", App: authorization.AppHub, Permission: "hub:roles:archive", Call: func(ctx context.Context) (any, error) {

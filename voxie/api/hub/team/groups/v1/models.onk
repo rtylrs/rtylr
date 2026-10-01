@@ -1,10 +1,5 @@
 package hub.team.groups.v1
 
-message ResourcePermission {
-  resource_key: string
-  permission_level: string
-}
-
 message GroupSummary {
   id: int64
   name: string
@@ -18,7 +13,8 @@ message Group {
   name: string
   description: string
   color: string
-  resource_permissions: ResourcePermission[]
+  licensed_app_ids: string[]
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
   member_count: int32
   /// When the record was created.
   created_at: string
@@ -45,7 +41,8 @@ message GroupDetail {
   name: string
   description: string
   color: string
-  resource_permissions: ResourcePermission[]
+  licensed_app_ids: string[]
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
   member_count: int32
   /// When the record was created.
   created_at: string
@@ -64,7 +61,8 @@ message CreateGroupRequest {
   name: string @required
   description: string
   color: string
-  resource_permissions: ResourcePermission[]
+  licensed_app_ids: string[]
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
 }
 
 message CreateGroupResponse {
@@ -84,7 +82,8 @@ message UpdateGroupRequest {
   name: string @required
   description: string
   color: string
-  resource_permissions: ResourcePermission[]
+  licensed_app_ids: string[]
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
 }
 
 message UpdateGroupResponse {

@@ -2,8 +2,6 @@ package auth
 
 import (
 	"context"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -19,7 +17,7 @@ const (
 type AuthUser struct {
 	UserID             int64                             `json:"user_id"`
 	BusinessID         int64                             `json:"business_id"`
-	Role               string                            `json:"role"`
+	IsConsoleAdmin     bool                              `json:"is_console_admin,omitempty"`
 	Platform           string                            `json:"platform,omitempty"`
 	PlatformUserID     int64                             `json:"platform_user_id,omitempty"`
 	PlanID             int64                             `json:"plan_id,omitempty"`
@@ -33,14 +31,6 @@ type AuthUser struct {
 // a request. Implementations must fail closed when normalized data is invalid.
 type EffectiveAccessResolver interface {
 	GetEffectiveAccess(ctx context.Context, businessID, userID int64) (*authorization.EffectiveAccess, error)
-}
-
-// LegacyAuthorizationMode is an operational rollback switch for the additive
-// authorization rollout. In legacy mode the team service reconstructs the
-// former app-level access boundary from user_app_permissions, while the
-// normalized tables and their history remain untouched.
-func LegacyAuthorizationMode() bool {
-	return strings.EqualFold(strings.TrimSpace(os.Getenv("AUTHORIZATION_V2_MODE")), "legacy")
 }
 
 type ProvisioningStatusResolver interface {
@@ -67,7 +57,7 @@ type ProvisioningStateStore interface {
 type TokenClaims struct {
 	UserID         int64
 	BusinessID     int64
-	Role           string
+	IsConsoleAdmin bool
 	Platform       string
 	PlatformUserID int64
 	PlanID         int64

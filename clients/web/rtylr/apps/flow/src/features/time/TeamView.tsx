@@ -30,11 +30,11 @@ const TeamView = (): React.JSX.Element => {
   // on was stale.
   //
   // It returns the whole business team; the people who can appear on a Flow
-  // time sheet are the ones with Flow access, which is the same split
+  // time sheet are the ones with resolved Flow access, which is the same split
   // FlowSettings makes. A member's `id` is their user id, which is what
   // workDays is keyed on.
   const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
-  const members = useMemo(() => allMembers.filter((m) => m.apps?.includes('flow')), [allMembers]);
+  const members = useMemo(() => allMembers.filter((m) => m.hasFlowAccess), [allMembers]);
   const { data, isLoading, isError } = useTeamWorkDays(date, date);
 
   const dayByUserId = useMemo(() => {

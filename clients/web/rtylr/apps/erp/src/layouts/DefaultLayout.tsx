@@ -5,9 +5,8 @@ import { useForesightLinks } from '@voxire/utils';
 import { Link, useNavigate, useRouterState, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
-import { signOut, useUserStore } from '@voxire/auth';
-import { LicenseBanner } from '@voxire/components';
-import { licenseClient, userClient } from '../shared/lib/clients';
+import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
+import { userClient } from '../shared/lib/clients';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -179,7 +178,15 @@ const DefaultLayout: React.FC = () => {
       .getMe({})
       .then((res) => {
         if (res?.id) {
-          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
+          setAuthUser({
+            id: String(res.id),
+            businessId: String(res.businessId),
+            name: res.fullName ?? '',
+            email: res.email ?? '',
+            businessName: res.businessName ?? '',
+            isConsoleAdmin: res.isConsoleAdmin,
+            effectiveAccess: parseEffectiveAccess(res.effectiveAccess) ?? undefined,
+          });
         }
       })
       .catch(() => undefined);
@@ -594,7 +601,6 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
-            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

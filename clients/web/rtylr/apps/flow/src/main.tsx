@@ -3,15 +3,14 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { I18nextProvider } from 'react-i18next';
 import { bootObservability } from '@voxire/observability';
-import { loadRuntimeConfig } from '@voxire/config';
 import { initAppearance } from '@voxire/ui';
 import { APPEARANCE_DEFAULTS, LEGACY_THEME_STORAGE_KEY } from '@voxire/utils';
 import { router } from './router';
 import { FLOW_APPEARANCE_STORAGE_KEY } from './shared/stores/appearanceStore';
 import { ACCENT_DEFAULT } from './shared/lib/colorUtils';
-import { useTranslation } from 'react-i18next';
-import './shared/services/i18next';
+import i18n from './shared/services/i18next';
 import './globals.css';
 
 // Apply the persisted appearance before the first render so the first paint is
@@ -32,7 +31,6 @@ initAppearance({
 bootObservability({ app: 'flow' });
 
 const BootLoader = (): React.JSX.Element => {
-  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -46,10 +44,16 @@ const BootLoader = (): React.JSX.Element => {
         fontSize: 'var(--text-section)',
       }}
     >
-      {t('flow.shell.loadingApp')}
+      {i18n.isInitialized ? i18n.t('flow.shell.loadingApp') : 'Loading…'}
     </div>
   );
 };
+
+const i18nReady = i18n.isInitialized
+  ? Promise.resolve()
+  : new Promise<void>((resolve) => {
+      i18n.on('initialized', () => resolve());
+    });
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,17 +69,21 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  // Await runtime config (self-host) before rendering; loader meanwhile, static
-  // hosted defaults on failure. Hosted is unchanged.
-  root.render(<BootLoader />);
-  void loadRuntimeConfig().finally(() => {
+  root.render(
+    <I18nextProvider i18n={i18n}>
+      <BootLoader />
+    </I18nextProvider>
+  );
+  void i18nReady.finally(() => {
     root.render(
-      <QueryClientProvider client={queryClient}>
-        <Suspense fallback={<BootLoader />}>
-          <RouterProvider router={router} />
-          <Toaster expand={false} richColors />
-        </Suspense>
-      </QueryClientProvider>
+      <I18nextProvider i18n={i18n}>
+        <QueryClientProvider client={queryClient}>
+          <Suspense fallback={<BootLoader />}>
+            <RouterProvider router={router} />
+            <Toaster expand={false} richColors />
+          </Suspense>
+        </QueryClientProvider>
+      </I18nextProvider>
     );
   });
 }

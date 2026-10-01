@@ -1,39 +1,3 @@
--- name: GetPermission :one
-SELECT id, owner_id, user_id, apps, role, is_active, created_at, updated_at
-FROM user_app_permissions
-WHERE owner_id = ? AND user_id = ?;
-
--- name: GetPermissionByBusiness :one
-SELECT id, owner_id, user_id, apps, role, is_active, created_at, updated_at
-FROM user_app_permissions
-WHERE business_id = ? AND user_id = ?;
-
--- name: GetPermissionByUserID :one
-SELECT id, owner_id, user_id, apps, role, is_active, created_at, updated_at
-FROM user_app_permissions
-WHERE user_id = ?
-LIMIT 1;
-
--- name: ListPermissions :many
-SELECT id, owner_id, user_id, apps, role, is_active, created_at, updated_at
-FROM user_app_permissions
-WHERE owner_id = ?
-ORDER BY created_at DESC LIMIT 100;
-
--- name: UpsertPermission :exec
-INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role)
-VALUES (?, ?, ?, ?, ?)
-ON DUPLICATE KEY UPDATE
-    business_id = VALUES(business_id),
-    apps = VALUES(apps),
-    role = VALUES(role),
-    updated_at = NOW();
-
--- name: DeactivateUser :exec
-UPDATE user_app_permissions
-SET is_active = FALSE, updated_at = NOW()
-WHERE owner_id = ? AND user_id = ?;
-
 -- name: GetUserByEmail :one
 SELECT id, email, COALESCE(full_name,'') AS full_name FROM users WHERE email = ? LIMIT 1;
 
@@ -46,57 +10,28 @@ SELECT business_id FROM users WHERE id = ?;
 -- name: CreateUser :execresult
 INSERT INTO users (email, username, password_hash, full_name) VALUES (?, ?, ?, ?);
 
--- name: ListStaffUsers :many
-SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
-       COALESCE(p.apps, JSON_ARRAY()) AS apps, p.role, p.is_active
-FROM user_app_permissions p
-JOIN users u ON u.id = p.user_id
-WHERE p.owner_id = ?
-ORDER BY u.created_at DESC, u.id DESC
-LIMIT ? OFFSET ?;
-
--- The team list is a list of business *members*, so it is sourced from both the
--- normalized membership table and the legacy permission table. Sourcing it from
--- user_app_permissions alone silently hid every member without a legacy row,
--- including the owner (who never gets one), so the owner could not see
--- themselves in their own team.
---
--- Both sources are selected separately and reconciled in Go: the normalized
--- dash_role_key and status win, with the legacy columns as the fallback for
--- members that have not been backfilled yet.
+-- Team access is sourced only from active business membership.
 -- name: ListStaffUsersByBusinessID :many
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
-       COALESCE(member.dash_role_key, '') AS dash_role_key,
-       permissions.role AS legacy_role,
-       COALESCE(permissions.apps, JSON_ARRAY()) AS legacy_apps,
-       member.status AS member_status,
-       permissions.is_active AS legacy_is_active
-FROM users AS u
-LEFT JOIN user_app_permissions AS permissions
-       ON permissions.user_id = u.id AND permissions.business_id = ?
-LEFT JOIN authorization_business_members AS member
-       ON member.user_id = u.id AND member.business_id = ?
-WHERE permissions.user_id IS NOT NULL OR member.user_id IS NOT NULL
+       member.member_type, member.status AS member_status
+FROM authorization_business_members AS member
+JOIN users AS u ON u.id = member.user_id
+WHERE member.business_id = ?
 ORDER BY u.created_at DESC, u.id DESC
 LIMIT ? OFFSET ?;
 
 -- name: CountStaffUsersByBusinessID :one
 SELECT COUNT(*)
-FROM users AS u
-LEFT JOIN user_app_permissions AS permissions
-       ON permissions.user_id = u.id AND permissions.business_id = ?
-LEFT JOIN authorization_business_members AS member
-       ON member.user_id = u.id AND member.business_id = ?
-WHERE permissions.user_id IS NOT NULL OR member.user_id IS NOT NULL;
+FROM authorization_business_members
+WHERE business_id = ?;
 
 -- name: GetStaffUserByID :one
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
-       COALESCE(p.apps, JSON_ARRAY()) AS apps, p.role, p.is_active
-FROM user_app_permissions p
-JOIN users u ON u.id = p.user_id
-WHERE p.owner_id = ?
-  AND p.business_id = ?
-  AND p.user_id = ?
+       member.member_type, member.status AS member_status
+FROM authorization_business_members AS member
+JOIN businesses AS business ON business.id = member.business_id
+JOIN users AS u ON u.id = member.user_id
+WHERE business.owner_id = ? AND member.business_id = ? AND member.user_id = ?
 LIMIT 1;
 
 -- name: CreateInviteToken :exec
@@ -143,26 +78,19 @@ UPDATE users SET full_name = ?, updated_at = NOW() WHERE id = ?;
 SELECT id FROM businesses WHERE owner_id = ? LIMIT 1;
 
 -- name: CountActiveMembers :one
-SELECT COUNT(DISTINCT user_id)
+SELECT COUNT(*)
 FROM (
     SELECT b.owner_id AS user_id
     FROM businesses b
     JOIN users u ON u.id = b.owner_id
     WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
     UNION
-    SELECT p.user_id AS user_id
-    FROM user_app_permissions p
-    JOIN users u ON u.id = p.user_id
-    WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-    UNION
-    SELECT u.id AS user_id
-    FROM users u
-    JOIN businesses b ON b.id = u.business_id
-    LEFT JOIN user_app_permissions p ON p.owner_id = b.owner_id AND p.user_id = u.id
-    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-      -- Deactivated members keep users.business_id, so the permission row decides
-      -- whether they still occupy a seat. A missing row still counts (legacy data).
-      AND COALESCE(p.is_active, TRUE) = TRUE
+    SELECT member.user_id
+    FROM authorization_business_members member
+    JOIN businesses b ON b.id = member.business_id
+    JOIN users u ON u.id = member.user_id
+    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE
+      AND member.status = 'active' AND COALESCE(u.is_banned, FALSE) = FALSE
 ) active_users;
 
 -- cross-schema read from subscriptions + plans — approved for owner app resolution
@@ -201,17 +129,15 @@ VALUES (?, ?, ?, ?, ?, ?);
 -- name: UpdateSubscriptionSeatCount :exec
 UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?;
 
--- cross-schema read from hub — approved for business-wide admin notification fan-out
+-- cross-schema read from hub — business administrator notification fan-out
 -- name: ListAdminsAndOwnerUserIDs :many
 SELECT b.owner_id AS user_id
 FROM businesses b
 WHERE b.id = ?
 UNION
-SELECT p.user_id
-FROM user_app_permissions p
-WHERE p.business_id = ?
-  AND p.role IN ('admin', 'owner')
-  AND p.is_active = TRUE;
+SELECT member.user_id
+FROM authorization_business_members member
+WHERE member.business_id = ? AND member.member_type = 'admin' AND member.status = 'active';
 
 -- name: ResolveAccessRequest :exec
 UPDATE access_requests SET status = ? WHERE id = ? AND business_id = ?;
@@ -300,46 +226,3 @@ WHERE e.owner_id = ?
         AND s.business_id = e.business_id
         AND s.user_id = e.user_id
   );
-
--- cross-schema read from hr_core — revoke access when the employee is terminated.
--- name: RevokeBusinessUserPermissions :execrows
--- Employment-driven revocation (#834): one business, one user. The join to
--- hr_employees keeps the decision inside this module's SQL while the
--- employment fact stays authoritative in hr_core's table.
---
--- Both business-id comparisons live in the WHERE clause. sqlc rewrites
--- sqlc.arg in a WHERE expression into a placeholder but left it untouched
--- inside the JOIN ON, so the statement reached MySQL with the literal text
--- sqlc.arg('business_id') in it and every call failed with
--- "Error 1305: FUNCTION sqlc.arg does not exist". The join is an inner join,
--- so moving the condition out of ON and into WHERE selects exactly the same
--- rows.
---
--- The two comparisons are separately named because the columns have different
--- nullability: user_app_permissions.business_id is nullable and types as
--- sql.NullInt64, hr_employees.business_id is NOT NULL and types as int64.
--- Sharing one name makes sqlc refuse the query outright. Both are filled from
--- the same caller argument.
-UPDATE user_app_permissions p
-JOIN hr_employees e
-  ON e.user_id = p.user_id
-SET p.is_active = FALSE, p.updated_at = NOW()
-WHERE p.business_id = sqlc.arg('business_id')
-  AND e.business_id = sqlc.arg('employee_business_id')
-  AND p.user_id = sqlc.arg('user_id')
-  AND p.is_active = TRUE
-  AND e.status = 'terminated';
-
--- cross-schema read from hr_core — sweep permissions for terminated employees.
--- name: ReconcileTerminatedEmployeeAccess :execrows
--- Daily sweep: every still-active permission row whose user is a terminated
--- employee of that same business is deactivated. Catches anything the
--- synchronous hook missed (crash between status write and revoke, direct SQL,
--- or the hook being unwired).
-UPDATE user_app_permissions p
-JOIN hr_employees e
-  ON e.user_id = p.user_id
- AND e.business_id = p.business_id
-SET p.is_active = FALSE, p.updated_at = NOW()
-WHERE e.status = 'terminated'
-  AND p.is_active = TRUE;

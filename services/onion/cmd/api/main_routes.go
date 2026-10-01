@@ -16,7 +16,6 @@ import (
 	"github.com/voxire/onion/internal/platform/cache"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
-	"github.com/voxire/onion/internal/platform/license"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/storage"
@@ -87,9 +86,6 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	accessPolicy := http.NewRouteAccessPolicy()
 	accessPolicy.RegisterAnonymousRoutes("/health")
 	accessPolicy.RegisterAnonymousRoutes("/version")
-	accessPolicy.RegisterAnonymousRoutes("/license/state")
-	accessPolicy.RegisterAnonymousRoutes("/runtime-config")
-	accessPolicy.RegisterAnonymousRoutes("/.well-known/rtylr.json")
 	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
 	accessPolicy.RegisterAnonymousRoutes("/invalidate-cache")
 
@@ -110,14 +106,6 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		"/videos/info",
 		"/purge",
 		"/sign",
-	)
-
-	// Self-host license authority routes
-	accessPolicy.RegisterAnonymousRoutes(
-		"/license/status",
-		"/license/verify",
-		"/license/activate",
-		"/license/refresh",
 	)
 
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
@@ -171,12 +159,6 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		},
 	)
 
-	// Self-host license validator. A no-op in hosted mode (always valid, no
-	// network); in self-host mode it validates the key against the license
-	// authority with a grace window. Built once and shared by /license/state,
-	// /runtime-config, and the enforcement middleware below.
-	licenseValidator := license.NewCachedValidator(platformConfig.GlobalConfig)
-
 	middlewares := []http.MiddlewareFunc{
 		http.SecurityMiddleware(),
 		jwtutils.JWTMiddleware(),
@@ -188,31 +170,11 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		http.SubscriptionEnforcementMiddleware(dbclient.Pool(), accessPolicy),
 		// After auth so idempotency keys are scoped per authenticated user.
 		http.IdempotencyMiddleware,
-		// AFTER auth: gate protected API routes when a self-host license is
-		// invalid. Strict no-op in hosted mode (never consults the validator).
-		http.LicenseEnforcementMiddleware(licenseValidator, accessPolicy),
 	}
 
 	http.RegisterCacheRoutes(ctx, r)
 	http.RegisterStatusRoutes(ctx, r)
 	http.RegisterVersionRoutes(r)
-
-	// /license/state lets frontends render an admin-only notice. Prime the
-	// cache in the background so the first protected request isn't blocked on
-	// the authority round-trip.
-	http.RegisterLicenseStateRoutes(r, licenseValidator)
-	http.RegisterRuntimeConfigRoutes(r, licenseValidator)
-	if license.IsSelfHosted(platformConfig.GlobalConfig) {
-		go licenseValidator.Refresh(ctx)
-	}
-
-	// License authority routes (/license/status, /license/verify, /license/activate, /license/refresh)
-	if pool := dbclient.Pool(); pool != nil {
-		if err := license.EnsureActivationTable(ctx, pool); err != nil {
-			logger.Ctx(ctx).Warn("license activation ledger unavailable", logger.Error(err))
-		}
-	}
-	http.RegisterLicenseAuthorityRoutes(r, platformConfig.GlobalConfig, dbclient.Pool())
 
 	// Consolidated CDN / Upload routes
 	cfg := platformConfig.GlobalConfig

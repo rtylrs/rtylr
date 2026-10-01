@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/store_themes/internal/application"
 	"github.com/voxire/onion/internal/modules/store_themes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -92,7 +93,7 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 
 func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "store_manager") {
+	if !ok || !authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:branding:edit") {
 		return CreateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
@@ -132,7 +133,7 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 
 func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "store_manager") {
+	if !ok || !authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:branding:edit") {
 		return UpdateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)

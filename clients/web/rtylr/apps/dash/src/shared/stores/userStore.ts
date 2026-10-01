@@ -14,20 +14,15 @@ export interface StoredUser {
   id?: number;
   email?: string;
   fullName?: string;
-  role?: string;
   businessId?: number;
   businessName?: string;
   businessSlug?: string;
   business_slug?: string;
   logo?: string;
-  isOwner?: boolean;
   isConsoleAdmin?: boolean;
-  apps?: string[];
   onboarded?: boolean;
   planSlug?: string;
   subscriptionStatus?: string;
-  effectiveResources?: Record<string, string>;
-  dashRole?: string;
   effectiveAccess?: EffectiveAccess;
   provisioningStatus?: ProvisioningStatus;
 }

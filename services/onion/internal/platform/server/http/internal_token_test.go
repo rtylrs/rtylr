@@ -11,7 +11,7 @@ import (
 // newInternalTokenRequest builds a request carrying the given Internal-Token
 // header. An empty name omits the header entirely, as a real client would.
 func newInternalTokenRequest(name, token string) *http.Request {
-	req := httptest.NewRequest(http.MethodPost, "/license/activate", nil)
+	req := httptest.NewRequest(http.MethodPost, "/internal/operations", nil)
 	if name != "" {
 		req.Header.Set(internalTokenHeader, token)
 	}

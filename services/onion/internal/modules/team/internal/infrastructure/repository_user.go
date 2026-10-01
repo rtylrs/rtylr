@@ -7,12 +7,10 @@ import (
 	"fmt"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
-	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/authorization"
-	"github.com/voxire/onion/internal/platform/logger"
 )
 
-func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx, businessID, ownerID, userID int64, groupIDs []int64) error {
+func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx, businessID, ownerID, actorID, userID int64, groupIDs []int64) error {
 	if _, err := tx.ExecContext(ctx, `
 		DELETE FROM user_group_members
 		WHERE user_id = ? AND owner_id = ? AND (business_id = ? OR business_id = 0)`, userID, ownerID, businessID); err != nil {
@@ -34,7 +32,7 @@ func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx
 			INSERT INTO user_group_members (group_id, user_id, owner_id, business_id, added_by)
 			VALUES (?, ?, ?, ?, ?)
 			ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), added_by = VALUES(added_by)`,
-			groupID, userID, ownerID, businessID, ownerID); err != nil {
+			groupID, userID, ownerID, businessID, actorID); err != nil {
 			return err
 		}
 	}
@@ -161,92 +159,47 @@ func isTenantAppID(appID string) bool {
 	}
 }
 
-func isDashRole(role string) bool {
-	switch role {
-	case "owner", "admin", "manager", "member", "viewer":
-		return true
-	default:
-		return false
+func (r *Repository) DeactivateUser(ctx context.Context, businessID, ownerID, actorID, userID int64) error {
+	if businessID <= 0 || ownerID <= 0 || actorID <= 0 || userID <= 0 {
+		return domain.ErrUserNotFound
 	}
-}
-
-func legacyDashRole(role domain.Role) string {
-	switch role {
-	case domain.RoleOwner:
-		return "owner"
-	case domain.RoleAdmin:
-		return "admin"
-	case domain.RoleOperator, domain.RoleBilling, domain.RoleMenuManager, domain.RoleStoreManager:
-		return "manager"
-	case domain.RoleViewer:
-		return "viewer"
-	default:
-		return "member"
-	}
-}
-
-func appRoleKey(appID string, role domain.Role) string {
-	suffix := "viewer"
-	switch role {
-	case domain.RoleOwner, domain.RoleAdmin:
-		suffix = "admin"
-	case domain.RoleOperator, domain.RoleStoreManager, domain.RoleMenuManager:
-		// Insights has no manager role in the catalog (viewer/analyst/admin
-		// only) and the legacy backfill maps these roles to viewer, so follow
-		// it instead of looking up a key that does not exist.
-		if appID == "insights" {
-			suffix = "viewer"
-		} else {
-			suffix = "manager"
-		}
-	case domain.RoleStaff:
-		switch appID {
-		case "pos":
-			suffix = "cashier"
-		case "flow":
-			suffix = "contributor"
-		case "hr":
-			suffix = "employee"
-		}
-	}
-	if appID == "pos" && (role == domain.RoleOperator || role == domain.RoleStoreManager || role == domain.RoleMenuManager) {
-		suffix = "location_manager"
-	}
-	return appID + "." + suffix
-}
-
-func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to deactivate user", logger.Error(err))
 		return err
 	}
-	if err := sqlc.New(tx).DeactivateUser(ctx, sqlc.DeactivateUserParams{OwnerID: ownerID, UserID: userID}); err != nil {
-		_ = tx.Rollback()
-		return err
+	rollback := func(cause error) error { _ = tx.Rollback(); return cause }
+	result, err := tx.ExecContext(ctx, `
+		UPDATE authorization_business_members member
+		JOIN businesses business ON business.id = member.business_id
+		SET member.status = 'revoked', member.authorization_version = member.authorization_version + 1, member.updated_at = NOW()
+		WHERE business.id = ? AND business.owner_id = ? AND member.user_id = ? AND member.status <> 'revoked'`, businessID, ownerID, userID)
+	if err != nil {
+		return rollback(err)
 	}
-	if _, err := tx.ExecContext(ctx, `
-		UPDATE authorization_business_members
-		SET status = 'revoked', authorization_version = authorization_version + 1, updated_at = NOW()
-		WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?) AND user_id = ? AND status <> 'revoked'`, ownerID, userID); err != nil && !authorizationSchemaUnavailable(err) {
-		_ = tx.Rollback()
-		return err
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return rollback(err)
 	}
-	if _, err := tx.ExecContext(ctx, `
-		UPDATE authorization_license_assignments l
-		JOIN businesses b ON b.id = l.business_id
-		SET l.status = 'revoked', l.revoked_at = NOW()
-		WHERE b.owner_id = ? AND l.user_id = ? AND l.status = 'active'`, ownerID, userID); err != nil && !authorizationSchemaUnavailable(err) {
-		_ = tx.Rollback()
-		return err
+	if rows == 0 {
+		return rollback(domain.ErrUserNotFound)
 	}
-	if _, err := tx.ExecContext(ctx, `
-		UPDATE authorization_role_assignments a
-		JOIN businesses b ON b.id = a.business_id
-		SET a.status = 'revoked', a.revoked_at = NOW()
-		WHERE b.owner_id = ? AND a.user_id = ? AND a.status = 'active'`, ownerID, userID); err != nil && !authorizationSchemaUnavailable(err) {
-		_ = tx.Rollback()
-		return err
+	for _, query := range []string{
+		`UPDATE authorization_license_assignments SET status = 'revoked', revoked_at = NOW(), revoked_by = ? WHERE business_id = ? AND user_id = ? AND status = 'active'`,
+		`UPDATE authorization_role_assignments SET status = 'revoked', revoked_at = NOW(), revoked_by = ? WHERE business_id = ? AND user_id = ? AND status = 'active'`,
+		`DELETE FROM user_group_members WHERE business_id = ? AND user_id = ?`,
+	} {
+		var execErr error
+		if query == `DELETE FROM user_group_members WHERE business_id = ? AND user_id = ?` {
+			_, execErr = tx.ExecContext(ctx, query, businessID, userID)
+		} else {
+			_, execErr = tx.ExecContext(ctx, query, actorID, businessID, userID)
+		}
+		if execErr != nil {
+			return rollback(execErr)
+		}
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_audit_events (business_id, actor_user_id, target_user_id, action, source_client) VALUES (?, ?, ?, 'member.deactivated', 'dash')`, businessID, actorID, userID); err != nil {
+		return rollback(err)
 	}
 	return tx.Commit()
 }
@@ -257,64 +210,32 @@ func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) 
 func (r *Repository) RevokeBusinessUserPermissions(ctx context.Context, businessID, userID int64) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to revoke permissions for terminated employee",
-			logger.Any("business_id", businessID), logger.Any("user_id", userID), logger.Error(err))
 		return 0, err
 	}
-	rollback := func(cause error) (int64, error) {
-		_ = tx.Rollback()
-		if authorizationSchemaUnavailable(cause) {
-			rows, legacyErr := r.queries.RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
-				BusinessID:         nullBusinessID(businessID),
-				EmployeeBusinessID: businessID,
-				UserID:             userID,
-			})
-			return rows, legacyErr
+	rollback := func(cause error) (int64, error) { _ = tx.Rollback(); return 0, cause }
+	var changed int64
+	for _, query := range []string{
+		`UPDATE authorization_business_members SET status = 'revoked', authorization_version = authorization_version + 1, updated_at = NOW() WHERE business_id = ? AND user_id = ? AND status <> 'revoked'`,
+		`UPDATE authorization_license_assignments SET status = 'revoked', revoked_at = NOW() WHERE business_id = ? AND user_id = ? AND status = 'active'`,
+		`UPDATE authorization_role_assignments SET status = 'revoked', revoked_at = NOW() WHERE business_id = ? AND user_id = ? AND status = 'active'`,
+	} {
+		result, execErr := tx.ExecContext(ctx, query, businessID, userID)
+		if execErr != nil {
+			return rollback(execErr)
 		}
-		return 0, cause
+		count, countErr := result.RowsAffected()
+		if countErr != nil {
+			return rollback(countErr)
+		}
+		changed += count
 	}
-	// The two business-id parameters are the same business. They are separate
-	// because the two columns differ in nullability; see the note on the query.
-	rows, err := sqlc.New(tx).RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
-		BusinessID:         nullBusinessID(businessID),
-		EmployeeBusinessID: businessID,
-		UserID:             userID,
-	})
-	if err != nil {
-		return rollback(err)
-	}
-	if result, normalizedErr := tx.ExecContext(ctx, `
-		UPDATE authorization_business_members
-		SET status = 'revoked', authorization_version = authorization_version + 1, updated_at = NOW()
-		WHERE business_id = ? AND user_id = ? AND status <> 'revoked'`, businessID, userID); normalizedErr != nil {
-		return rollback(normalizedErr)
-	} else if affected, countErr := result.RowsAffected(); countErr == nil {
-		rows += affected
-	}
-	if result, normalizedErr := tx.ExecContext(ctx, `
-		UPDATE authorization_license_assignments
-		SET status = 'revoked', revoked_at = NOW()
-		WHERE business_id = ? AND user_id = ? AND status = 'active'`, businessID, userID); normalizedErr != nil {
-		return rollback(normalizedErr)
-	} else if affected, countErr := result.RowsAffected(); countErr == nil {
-		rows += affected
-	}
-	if result, normalizedErr := tx.ExecContext(ctx, `
-		UPDATE authorization_role_assignments
-		SET status = 'revoked', revoked_at = NOW()
-		WHERE business_id = ? AND user_id = ? AND status = 'active'`, businessID, userID); normalizedErr != nil {
-		return rollback(normalizedErr)
-	} else if affected, countErr := result.RowsAffected(); countErr == nil {
-		rows += affected
-	}
-	if _, err := tx.ExecContext(ctx, `
-		INSERT INTO authorization_audit_events
-			(business_id, target_user_id, action, reason, source_client)
-		VALUES (?, ?, 'member.authorization.revoked.termination', 'HR employee terminated', 'app')`, businessID, userID); err != nil {
-		return rollback(err)
+	if changed > 0 {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO authorization_audit_events (business_id, target_user_id, action, reason, source_client) VALUES (?, ?, 'member.authorization.revoked.termination', 'HR employee terminated', 'app')`, businessID, userID); err != nil {
+			return rollback(err)
+		}
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return rows, nil
+	return changed, nil
 }

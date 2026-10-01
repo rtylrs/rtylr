@@ -104,11 +104,11 @@ func TestRecruitPermissionHelperRejectsWrongAppAndMembersWithoutAccess(t *testin
 	if _, err := requireRecruitPermission(authPkg.WithAuthUser(context.Background(), noAccess), "recruit:jobs:view"); recruitStatus(err) != http.StatusForbidden {
 		t.Fatalf("app without access returned %v, want 403", err)
 	}
-	// A license row is plan metadata and must not change the decision.
+	// A permission assignment cannot replace the app's active license.
 	unlicensed := &authPkg.AuthUser{BusinessID: 9, UserID: 7, EffectiveAccess: &authorization.EffectiveAccess{
 		Apps: []authorization.EffectiveAppAccess{{AppID: authorization.AppRecruit, Licensed: false, HasAccess: true, Permissions: []string{"recruit:jobs:view"}}},
 	}}
-	if _, err := requireRecruitPermission(authPkg.WithAuthUser(context.Background(), unlicensed), "recruit:jobs:view"); err != nil {
-		t.Fatalf("a license row must not gate recruit:jobs:view: %v", err)
+	if _, err := requireRecruitPermission(authPkg.WithAuthUser(context.Background(), unlicensed), "recruit:jobs:view"); recruitStatus(err) != http.StatusForbidden {
+		t.Fatalf("an unlicensed app returned %v, want 403", err)
 	}
 }

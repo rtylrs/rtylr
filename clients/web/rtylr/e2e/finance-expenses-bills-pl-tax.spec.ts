@@ -24,14 +24,6 @@ async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
     })
   );
 
-  await page.route(`${API_URL}/runtime-config`, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ deployment_mode: 'hosted' }),
-    })
-  );
-
   // AppGuard reads /hub/user/v1/users/me on mount.
   await page.route(`${API_URL}/hub/user/v1/users/me`, (route) =>
     route.fulfill({
@@ -54,16 +46,6 @@ async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ subscription: null }),
-    })
-  );
-
-  // LicenseBanner is mounted for the owner fixture; return the hosted state so
-  // it remains a no-op without making a real API request.
-  await page.route(`${API_URL}/license/state`, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ mode: 'hosted', valid: true, status: 'hosted' }),
     })
   );
 

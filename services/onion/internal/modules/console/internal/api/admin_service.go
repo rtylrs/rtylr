@@ -27,7 +27,7 @@ func requireConsoleAdmin(ctx context.Context) error {
 	if !ok {
 		return onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
-	if user.Role != "console_admin" {
+	if !authPkg.IsConsoleAdmin(user) {
 		return onekiterrors.PermissionDenied()
 	}
 	return nil

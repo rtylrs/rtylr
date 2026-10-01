@@ -71,7 +71,7 @@ FROM users
 WHERE email = ?
 LIMIT 1;
 
--- cross-schema read from users and user_business_access: resolve a mention
+-- cross-schema read from users and tenant membership: resolve a mention
 -- inside the task's business without exposing same-named users from another
 -- tenant
 -- name: LookupUserByUsername :one
@@ -82,8 +82,8 @@ WHERE u.username = ?
       u.business_id = ?
       OR EXISTS (
           SELECT 1
-          FROM user_business_access uba
-          WHERE uba.user_id = u.id AND uba.business_id = ?
+          FROM authorization_business_members member
+          WHERE member.user_id = u.id AND member.business_id = ? AND member.status = 'active'
       )
   )
 LIMIT 1;

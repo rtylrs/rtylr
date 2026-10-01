@@ -20,7 +20,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewPurchaseOrderAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CreatePurchaseOrder(ctx, &erppurchaseorderv1.CreatePurchaseOrderRequest{SupplierId: testutil.Int64Ptr(5101), PoNumber: "AUTH-PROBE", Items: []*erppurchaseorderv1.CreatePurchaseOrderItemRequest{{ProductId: testutil.Int64Ptr(5201), QuantityOrdered: 1, UnitCost: 5}}})
 			return response, err
 		}},
-		{Name: "erp purchasing approve", App: authorization.AppERP, Permission: "erp:purchasing:approve", Role: "admin", Call: func(ctx context.Context) (any, error) {
+		{Name: "erp purchasing approve", App: authorization.AppERP, Permission: "erp:purchasing:approve", Call: func(ctx context.Context) (any, error) {
 			response, err := NewPurchaseOrderAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).ApprovePurchaseOrder(ctx, &erppurchaseorderv1.ApprovePurchaseOrderRequest{Id: 7301})
 			return response, err
 		}},

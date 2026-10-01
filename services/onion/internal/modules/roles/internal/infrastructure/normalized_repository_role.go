@@ -11,6 +11,34 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 )
 
+func (r *Repository) ListPermissionCatalog(ctx context.Context) ([]domain.PermissionEntry, error) {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT permission_key, app_id, action, is_sensitive, is_high_risk
+		FROM authorization_permission_catalog
+		ORDER BY app_id, permission_key`)
+	if err != nil {
+		return nil, normalizedSchemaError(err)
+	}
+	defer rows.Close()
+
+	permissions := make([]domain.PermissionEntry, 0)
+	for rows.Next() {
+		var permission domain.PermissionEntry
+		if err := rows.Scan(&permission.Key, &permission.AppID, &permission.Action, &permission.IsSensitive, &permission.IsHighRisk); err != nil {
+			return nil, err
+		}
+		parts := strings.Split(permission.Key, ":")
+		if len(parts) > 2 {
+			permission.Resource = strings.Join(parts[1:len(parts)-1], ":")
+		}
+		permissions = append(permissions, permission)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return permissions, nil
+}
+
 func validateRolePermissions(ctx context.Context, executor interface {
 	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
 }, appID string, permissions []string,

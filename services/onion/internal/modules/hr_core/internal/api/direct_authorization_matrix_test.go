@@ -12,9 +12,9 @@ import (
 )
 
 func TestDirectAuthorizationMatrix(t *testing.T) {
-	withID := func(ctx context.Context) context.Context {
+	withID := func(ctx context.Context, id string) context.Context {
 		rctx := chi.NewRouteContext()
-		rctx.URLParams.Add("id", "1")
+		rctx.URLParams.Add("id", id)
 		return context.WithValue(ctx, chi.RouteCtxKey, rctx)
 	}
 
@@ -32,11 +32,11 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "hr employee update", App: authorization.AppHR, Permission: "hr:employees:manage", Call: func(ctx context.Context) (any, error) {
-			response, err := (&UpdateEmployeeHandler{Service: application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))}).Serve(withID(ctx), &UpdateEmployeeRequest{})
+			response, err := (&UpdateEmployeeHandler{Service: application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))}).Serve(withID(ctx, "4110"), &UpdateEmployeeRequest{})
 			return response, err
 		}},
 		{Name: "hr employee terminate", App: authorization.AppHR, Permission: "hr:employees:manage", Call: func(ctx context.Context) (any, error) {
-			response, err := (&DeleteEmployeeHandler{Service: application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))}).Serve(withID(ctx), &DeleteEmployeeRequest{})
+			response, err := (&DeleteEmployeeHandler{Service: application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))}).Serve(withID(ctx, "4111"), &DeleteEmployeeRequest{})
 			return response, err
 		}},
 	})

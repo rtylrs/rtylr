@@ -4,10 +4,9 @@ import { useLocation, useRouterState, Link, Outlet } from '@tanstack/react-route
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
-import { signOut, useUserStore } from '@voxire/auth';
-import { LicenseBanner } from '@voxire/components';
+import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, buildCaretRouteContext, useCaretStore } from '@voxire/caret';
-import { licenseClient, userClient } from '../shared/lib/clients';
+import { userClient } from '../shared/lib/clients';
 import { getPageTitle, routeLabels } from '../shared/lib/nav';
 import {
   TrendingUp,
@@ -79,7 +78,15 @@ const DefaultLayout: React.FC = () => {
       .getMe({})
       .then((res) => {
         if (res?.id) {
-          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
+          setAuthUser({
+            id: String(res.id),
+            businessId: String(res.businessId),
+            name: res.fullName ?? '',
+            email: res.email ?? '',
+            businessName: res.businessName ?? '',
+            isConsoleAdmin: res.isConsoleAdmin,
+            effectiveAccess: parseEffectiveAccess(res.effectiveAccess) ?? undefined,
+          });
         }
       })
       .catch(() => undefined);
@@ -439,7 +446,6 @@ const DefaultLayout: React.FC = () => {
         </div>
       </header>
 
-      <LicenseBanner client={licenseClient} />
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}

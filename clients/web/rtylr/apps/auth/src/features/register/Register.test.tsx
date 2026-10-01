@@ -22,13 +22,8 @@ vi.mock('../../shared/hooks/useAuth', () => ({
   checkEmailExists: vi.fn().mockResolvedValue({ exists: false }),
 }));
 
-vi.mock('../../shared/hooks/useFeatureGate', () => ({
-  useFeatureGate: () => false,
-}));
-
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
-  LicenseBanner: () => null,
   Button: ({ children, ...rest }: { children: React.ReactNode }) => (
     <button type="button" {...rest}>
       {children}

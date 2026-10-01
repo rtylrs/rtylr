@@ -46,17 +46,6 @@ func TestAuthSuccessLogsCanBeEnabled(t *testing.T) {
 	}
 }
 
-func TestLegacyAuthorizationModeIsExplicit(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "legacy")
-	if !authPkg.LegacyAuthorizationMode() {
-		t.Fatal("expected legacy authorization mode to be enabled")
-	}
-	t.Setenv("AUTHORIZATION_V2_MODE", "")
-	if authPkg.LegacyAuthorizationMode() {
-		t.Fatal("expected normalized authorization mode by default")
-	}
-}
-
 func TestAppForPathCoversLicensedApplicationPrefixes(t *testing.T) {
 	cases := []struct {
 		path string
@@ -130,37 +119,32 @@ func TestFeaturePermissionForRequestDoesNotGuessUnmappedRoutes(t *testing.T) {
 	}
 }
 
-func TestHubFeaturePermissionFallsBackToOwnerAdminWithoutEffectiveAccess(t *testing.T) {
+func TestHubFeaturePermissionHonorsResolvedOwnerAndAdminAccess(t *testing.T) {
 	cases := []struct {
 		name string
 		user *authPkg.AuthUser
 		want bool
 	}{
 		{
-			name: "owner without normalized membership row",
-			user: &authPkg.AuthUser{UserID: 1, BusinessID: 1, Role: "owner"},
+			name: "business owner",
+			user: &authPkg.AuthUser{UserID: 1, BusinessID: 1, EffectiveAccess: &authorization.EffectiveAccess{IsOwner: true}},
 			want: true,
 		},
 		{
-			name: "console admin without normalized membership row",
-			user: &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "console_admin"},
+			name: "business admin",
+			user: &authPkg.AuthUser{UserID: 2, BusinessID: 1, EffectiveAccess: &authorization.EffectiveAccess{IsAdmin: true}},
 			want: true,
 		},
 		{
-			name: "admin without normalized membership row",
-			user: &authPkg.AuthUser{UserID: 3, BusinessID: 1, Role: "admin"},
-			want: true,
-		},
-		{
-			name: "member without normalized membership row",
-			user: &authPkg.AuthUser{UserID: 4, BusinessID: 1, Role: "member"},
+			name: "member without permission",
+			user: &authPkg.AuthUser{UserID: 3, BusinessID: 1, EffectiveAccess: &authorization.EffectiveAccess{}},
 			want: false,
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			if got := hasFeaturePermission(tc.user, authorization.AppHub, "hub:team:invite"); got != tc.want {
-				t.Fatalf("hasFeaturePermission(role=%q) = %v, want %v", tc.user.Role, got, tc.want)
+				t.Fatalf("hasFeaturePermission() = %v, want %v", got, tc.want)
 			}
 		})
 	}

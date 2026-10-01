@@ -38,8 +38,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
   const { data, isLoading, refetch } = useListTimesheets({ status: 'submitted' });
   const approveMutation = useApproveTimesheet();
   const rejectMutation = useRejectTimesheet();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canApprove = canHrPermission(role, 'hr:time_off:approve');
+  const canApprove = canHrPermission('hr:time_off:approve');
 
   const [rejectTarget, setRejectTarget] = useState<TimesheetPayload | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');

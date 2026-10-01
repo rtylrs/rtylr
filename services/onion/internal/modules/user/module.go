@@ -51,7 +51,7 @@ func (v *userTokenValidator) ValidateTokenFull(ctx context.Context, token string
 	return &authPkg.TokenClaims{
 		UserID:         claims.UserID,
 		BusinessID:     claims.BusinessID,
-		Role:           claims.Role,
+		IsConsoleAdmin: claims.IsConsoleAdmin,
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,
@@ -82,11 +82,10 @@ func NewModule(ctx context.Context, db *sql.DB, googleClientID string) *Module {
 	return module
 }
 
-// WithWorkOS configures the module to use WorkOS for Google OAuth.
-// apiKey, clientID, and redirectURI come from the WorkOS dashboard.
-func (m *Module) WithWorkOS(apiKey, clientID, redirectURI string) *Module {
-	p := application.NewWorkOSProvider(apiKey, clientID, redirectURI)
-	m.UserService.WithWorkOSProvider(p)
+// WithGoogleOAuth configures direct Google OAuth for the auth application.
+func (m *Module) WithGoogleOAuth(clientID, clientSecret, redirectURI string) *Module {
+	p := application.NewGoogleOAuthProvider(clientID, clientSecret, redirectURI)
+	m.UserService.WithGoogleOAuthProvider(p)
 	return m
 }
 
@@ -149,7 +148,7 @@ func (m *Module) GetAnonymousRoutes() []string {
 			"/common/auth/v1/resend-verification",
 			"/common/auth/v1/invite/accept",
 			"/common/auth/v1/email-exists",
-			"/common/auth/v1/social/authorize",
+			"/common/auth/v1/google/authorize",
 		},
 	)
 }

@@ -174,7 +174,7 @@ func TestArchiveRestorePurgeLifecycle(t *testing.T) {
 	if binned.PurgeAt == nil {
 		t.Fatalf("purge_at not stamped")
 	}
-	wantDeadline := time.Now().AddDate(0, 0, DefaultBinRetentionDays)
+	wantDeadline := time.Now().UTC().AddDate(0, 0, DefaultBinRetentionDays)
 	if diff := binned.PurgeAt.Sub(wantDeadline); diff > 2*time.Minute || diff < -2*time.Minute {
 		t.Errorf("purge_at off the retention window by %v", diff)
 	}

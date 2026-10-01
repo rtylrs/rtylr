@@ -83,14 +83,6 @@ async function stubFinanceAPI(
     })
   );
 
-  await page.route(`${API_URL}/runtime-config`, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ deployment_mode: 'hosted' }),
-    })
-  );
-
   // AppGuard fetches /hub/user/v1/users/me on mount. Return a minimal owner user so the
   // guard admits us without bouncing to the auth app.
   await page.route(`${API_URL}/hub/user/v1/users/me`, (route) =>
@@ -113,14 +105,6 @@ async function stubFinanceAPI(
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ subscription: null }),
-    })
-  );
-
-  await page.route(`${API_URL}/license/state`, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ mode: 'hosted', valid: true, status: 'hosted' }),
     })
   );
 

@@ -4,6 +4,8 @@ sql:
     queries: "queries"
     schema:
       - "schema.sql"
+      - "../../../../internal/platform/database/schemas/shared/user_groups.sql"
+      - "../../../../internal/platform/database/schemas/shared/zz_authorization.sql"
     gen:
       go:
         package: "sqlc"

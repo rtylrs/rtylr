@@ -23,6 +23,7 @@
     "@tauri-apps/plugin-updater": "^2.10.1",
     "@types/qrcode": "^1.5.6",
     "@voxire/api": "workspace:*",
+    "@voxire/auth": "workspace:*",
     "@voxire/caret": "workspace:*",
     "@voxire/config": "workspace:*",
     "@voxire/i18n": "workspace:*",

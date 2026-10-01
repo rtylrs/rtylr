@@ -1,9 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { createOneKitClient } from '@voxire/api';
+import { parseEffectiveAccess } from '@voxire/auth';
 import { OauthServiceClient } from '@voxire/voxie/common/oauth/v1/client';
 import { ConfigServiceClient } from '@voxire/voxie/hub/config/v1/client';
 import { SettingsServiceClient } from '@voxire/voxie/pos/settings/v1/client';
+
+type EffectiveAccess = NonNullable<ReturnType<typeof parseEffectiveAccess>>;
 
 interface Addons {
   feedback: boolean;
@@ -21,7 +24,7 @@ const configClient = createOneKitClient(ConfigServiceClient, 'pos');
 const settingsClient = createOneKitClient(SettingsServiceClient, 'pos');
 
 export interface StoredUser {
-  role?: string;
+  effectiveAccess?: EffectiveAccess | null;
   addons?: Addons;
   name?: string;
   email?: string;
@@ -51,7 +54,7 @@ interface UserState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  role: string | null;
+  effectiveAccess: EffectiveAccess | null;
   userId: string | null;
   addons: Addons;
   visits: unknown[];
@@ -73,7 +76,7 @@ const initialState: UserState = {
   isAuthenticated: false,
   loading: false,
   error: null,
-  role: null,
+  effectiveAccess: null,
   userId: null,
   addons: {
     feedback: false,
@@ -149,7 +152,7 @@ export const useUserStore = create<UserState & UserActions>()(
           isAuthenticated: false,
           loading: false,
           error: null,
-          role: null,
+          effectiveAccess: null,
           userId: null,
           token: null,
         });
@@ -170,13 +173,14 @@ export const useUserStore = create<UserState & UserActions>()(
           ]);
           const state = get();
           const profile = normalizeBusinessProfile(config.business);
+          const effectiveAccess = parseEffectiveAccess(me.effectiveAccess);
           const user: StoredUser = {
             ...(state.user ?? {}),
             id: me.userId,
-            role: me.role,
+            effectiveAccess,
           };
           set({
-            role: me.role || state.role,
+            effectiveAccess,
             userId: idText(me.userId) ?? state.userId,
             token: state.token,
             user,
@@ -229,6 +233,7 @@ export const useUserStore = create<UserState & UserActions>()(
     }),
     {
       name: 'user-store',
+      version: 1,
       partialize: (state) => ({
         user: state.user,
         businessProfile: state.businessProfile,
@@ -236,7 +241,7 @@ export const useUserStore = create<UserState & UserActions>()(
         // token cookie is the single persistent credential, and duplicating
         // it into localStorage exposes it to any XSS.
         isAuthenticated: state.isAuthenticated,
-        role: state.role,
+        effectiveAccess: state.effectiveAccess,
         userId: state.userId,
         addons: state.addons,
         visits: state.visits,

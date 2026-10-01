@@ -7,8 +7,7 @@ import type { AppId } from './types';
  * Clears the SSO token cookie (host + parent domain), resets the shared user store,
  * and redirects to auth with ?redirect= so the user can sign in again for this app.
  *
- * `resolveAuthUrl()` returns the runtime auth URL in self-host deployments and
- * the static `sso.rtylr.com` default everywhere else.
+ * `resolveAuthUrl()` returns the hosted sign-in application URL.
  */
 export function signOut(appId: AppId): void {
   removeCookie('token', { domain: getDefaultCookieDomain() });

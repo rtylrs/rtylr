@@ -328,7 +328,7 @@ describe('flowStore', () => {
   // -- Collection setters --------------------------------------------------
   it('setMembers replaces members array', () => {
     getState().setMembers([
-      { id: 'm1', name: 'Alice', email: 'a@b.com', initials: 'AL', role: 'admin', capacity: 40 },
+      { id: 'm1', name: 'Alice', email: 'a@b.com', initials: 'AL', capacity: 40 },
     ]);
     expect(getState().members).toHaveLength(1);
   });

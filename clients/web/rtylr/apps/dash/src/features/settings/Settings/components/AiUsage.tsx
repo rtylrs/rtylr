@@ -9,7 +9,7 @@ import {
   type AiQuotaMode,
 } from '../../../../shared/hooks/queries/useAiQuota';
 import { useUserStore } from '../../../../shared/stores/userStore';
-import { isAdminOrOwner } from '../../../../shared/utils/requireAdminOrOwner';
+import { canManageDash } from '../../../../shared/utils/canManageDash';
 
 const fmt = (n: number): string => (n ?? 0).toLocaleString();
 
@@ -30,7 +30,7 @@ const MODES: { id: AiQuotaMode; label: string; description: string; icon: typeof
 
 const AiUsage: React.FC = () => {
   const { user } = useUserStore();
-  const isOwner = isAdminOrOwner(user);
+  const isOwner = canManageDash(user);
   const {
     data: usage,
     isLoading: usageLoading,

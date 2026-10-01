@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { posthog } from '@voxire/observability';
 import { FLAG_KEYS, FLAG_PROD_DEFAULTS, FLAG_ENV_OVERRIDES, type FlagKey } from './flags';
-import { allFeaturesEnabled } from './runtimeConfig';
 
 /**
  * Client-side feature-flag resolver.
@@ -43,11 +42,6 @@ function readPostHog(flag: FlagKey): boolean | null {
 }
 
 export function resolveFlag(flag: FlagKey): boolean {
-  // Self-host installs run without the hosted licensing/upsell gating: every
-  // app and feature is treated as enabled. This is centralized here so every
-  // `useFeatureFlag` / `<AppFlagGuard>` consumer inherits it. Hosted (and any
-  // deployment where runtime config didn't flip this on) is unaffected.
-  if (allFeaturesEnabled()) return true;
   const ph = readPostHog(flag);
   if (ph !== null) return ph;
   const env = readEnvOverride(flag);

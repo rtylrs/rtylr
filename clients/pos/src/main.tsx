@@ -11,7 +11,7 @@ import { bootObservability } from '@voxire/observability';
 import './globals.css';
 
 const I18nGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isReady = () => i18next.isInitialized && i18next.hasLoadedNamespace('server');
+  const isReady = () => i18next.isInitialized && i18next.hasLoadedNamespace('translation');
   const [ready, setReady] = useState(isReady);
 
   useEffect(() => {

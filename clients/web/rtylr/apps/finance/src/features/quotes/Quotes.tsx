@@ -167,8 +167,7 @@ const Quotes: React.FC = () => {
   const total = data.reduce((s: number, q) => s + (q.amount ?? 0), 0);
   const [showCreate, setShowCreate] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<(typeof data)[number] | null>(null);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageQuotes = canFinancePermission(role, 'finance:quotes:manage');
+  const canManageQuotes = canFinancePermission('finance:quotes:manage');
 
   const handleConvert = (id: string): void => {
     if (!canManageQuotes) return;

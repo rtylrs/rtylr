@@ -9,6 +9,7 @@ import (
 	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
@@ -213,7 +214,7 @@ func TestAssignAssetHandler_Validate_ValidRequest(t *testing.T) {
 // --- EquipmentAPI.ApproveEquipment ---
 
 func authenticatedCtx() context.Context {
-	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: 7, BusinessID: 5, Role: "owner"})
+	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: 7, BusinessID: 5, EffectiveAccess: &authorization.EffectiveAccess{IsOwner: true}})
 }
 
 func TestEquipmentAPIApproveEquipmentRejectsMissingBody(t *testing.T) {

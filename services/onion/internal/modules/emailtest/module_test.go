@@ -130,7 +130,7 @@ func TestEmailTestAnonymousRoutesStayEmpty(t *testing.T) {
 }
 
 func authenticatedContext() context.Context {
-	device := authPkg.Device{IsAnonymous: false, User: &authPkg.AuthUser{UserID: 1, Role: "admin"}}
+	device := authPkg.Device{IsAnonymous: false, User: &authPkg.AuthUser{UserID: 1}}
 	return device.Ctx(context.Background())
 }
 

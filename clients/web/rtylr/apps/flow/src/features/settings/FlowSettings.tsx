@@ -70,38 +70,24 @@ interface SettingsSection {
 
 function buildSections(
   t: (key: string) => string,
-  canManageWorkspaces: boolean,
-  canManageTeam: boolean,
-  canManageBin: boolean
+  canManageProjects: boolean,
+  canManageTeam: boolean
 ): SettingsSection[] {
   const sections: SettingsSection[] = [
     // Owner/admin only: grants and revokes Flow access for other business
     // members, gated the same way canInviteMembers gates it everywhere else.
     ...(canManageTeam ? [{ id: 'team', label: t('common.settings.team'), icon: Users }] : []),
     { id: 'notifications', label: t('common.settings.notifications'), icon: Bell },
-    // Admin/owner only: rates and the approval lock change what the whole
-    // business can edit. The flag is still called canManageWorkspaces because
-    // it is the same role check the removed Workspaces tab used; it is the
-    // only thing gating this one now.
-    ...(canManageWorkspaces
-      ? [{ id: 'time', label: t('flow.settings.time.section'), icon: Clock }]
-      : []),
+    { id: 'time', label: t('flow.settings.time.section'), icon: Clock },
     { id: 'appearance', label: t('common.settings.appearance'), icon: Palette },
     { id: 'sidebar', label: t('flow.sidebar.settingsSection'), icon: PanelLeft },
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
     { id: 'life', label: t('common.settings.life'), icon: Sparkles },
     { id: 'shortcuts', label: t('common.settings.shortcuts'), icon: Keyboard },
-    // Business-wide recycle bin. Gated on the central Flow settings
-    // permission, which is also enforced by the server.
-    ...(canManageBin ? [{ id: 'bin', label: t('flow.settings.bin.section'), icon: Trash2 }] : []),
+    ...(canManageProjects
+      ? [{ id: 'bin', label: t('flow.settings.bin.section'), icon: Trash2 }]
+      : []),
   ];
-  // No Workspaces tab. Workspaces were removed from the product, and
-  // SECTION_CONTENT never had an entry for one, so the tab fell through to
-  // PlaceholderSection and read "This section is not yet available."
-  //
-  // It was also unshifted to position 0, which made it the default section,
-  // so the first thing an admin saw in Settings was a dead tab carrying the
-  // selected-tab dot. See vault/rtylr/apps/flow/workspace-removal.md.
   return sections;
 }
 
@@ -1045,9 +1031,9 @@ export const TeamSection: React.FC = () => {
   const { data: allMembers = [], isLoading, refetch: refetchMembers } = flowTeamQuery;
 
   // The /team/members endpoint returns the entire business team. Flow only
-  // displays the licensed members here. Role and license changes are owned by
+  // displays the members with resolved Flow access here. Access changes are owned by
   // Dash and are not mutated from this surface.
-  const flowMembers = allMembers.filter((m) => m.apps?.includes('flow'));
+  const flowMembers = allMembers.filter((m) => m.hasFlowAccess);
 
   return (
     <div className="space-y-6">
@@ -1112,7 +1098,13 @@ export const TeamSection: React.FC = () => {
                   color: 'var(--flow-text-muted)',
                 }}
               >
-                {m.role}
+                {t(
+                  m.isOwner
+                    ? 'common.roles.owner'
+                    : m.memberType === 'admin'
+                      ? 'common.roles.admin'
+                      : 'common.roles.member'
+                )}
               </span>
             </div>
           ))}
@@ -1138,7 +1130,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
   const { t } = useTranslation();
-  const sections = buildSections(t, false, false, false);
+  const sections = buildSections(t, false, false);
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <p className="text-section font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
@@ -1157,17 +1149,11 @@ const settingsRouteApi = getRouteApi('/settings');
 const FlowSettings: React.FC = () => {
   const { t } = useTranslation();
   const effectiveAccess = useAuthUserStore((s) => s.effectiveAccess);
-  const legacyRole = useAuthUserStore((s) => s.user?.role);
-  const canManageWorkspaces = canFlowPermission(
-    legacyRole,
-    'flow:settings:manage',
-    effectiveAccess
-  );
-  const canManageTeam = canFlowPermission(legacyRole, 'flow:team:manage', effectiveAccess);
-  const canManageBin = canManageWorkspaces;
+  const canManageProjects = canFlowPermission('flow:projects:edit', effectiveAccess);
+  const canManageTeam = canFlowPermission('flow:team:manage', effectiveAccess);
   const sections = useMemo(
-    () => buildSections(t, canManageWorkspaces, canManageTeam, canManageBin),
-    [t, canManageWorkspaces, canManageTeam, canManageBin]
+    () => buildSections(t, canManageProjects, canManageTeam),
+    [t, canManageProjects, canManageTeam]
   );
   const isAccessibleSection = (id: string): boolean => sections.some((s) => s.id === id);
   // ?section=time makes a section linkable, so the sidebar can point at one -

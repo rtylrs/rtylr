@@ -3,14 +3,12 @@ package hub.team.invitations.v1
 message InviteUserRequest {
   email: string @required @email
   full_name: string @required
-  /// Legacy global role accepted during the migration window.
-  role: string?
-  /// Legacy flat application list accepted during the migration window.
-  apps: string[]
-  /// Independent Dash role assignment.
-  dash_role: string?
-  /// Independent application role assignments.
-  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Use admin for a full-access business administrator, otherwise member.
+  member_type: string
+  /// App licenses assigned directly to the invited member.
+  licensed_app_ids: string[]
+  /// Direct permission profiles assigned to the invited member.
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
   /// Groups that provide inherited access.
   group_ids: int64[]
   /// Optional user-provided secret; omit it to send an invitation link.
@@ -30,16 +28,14 @@ message InviteUserResponse {
 
 message BulkInviteRequest {
   emails: string[] @min_items(1)
-  role: string?
-  apps: string[]
-  /// Independent Dash role assignment shared by all invitees.
-  dash_role: string?
-  /// Independent application role assignments shared by all invitees.
-  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Use admin for full-access business administrators, otherwise member.
+  member_type: string
+  /// App licenses shared by all invitees.
+  licensed_app_ids: string[]
+  /// Permission profiles shared by all invitees.
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
   /// Groups that provide inherited access to all invitees.
   group_ids: int64[]
-  /// Identifies an optional group to add invitees to.
-  group_id: int64
 }
 
 message BulkInviteResult {
@@ -64,13 +60,10 @@ message VerifyInviteResponse {
   email: string
   full_name: string
   valid: bool
-  /// Lists the app IDs the invited user will have access to, so the
-  /// frontend can redirect to the right app after the invite is accepted.
-  apps: string[]
-  /// Dash role that will become active after acceptance.
-  dash_role: string?
-  /// Application roles that will become active after acceptance.
-  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// App IDs for which the invitation reserves a license.
+  licensed_app_ids: string[]
+  /// Permission profiles that will become active after acceptance.
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
 }
 
 message AcceptInviteRequest {

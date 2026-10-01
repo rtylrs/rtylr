@@ -72,8 +72,7 @@ const InvoiceDetail: React.FC = () => {
   const [showSend, setShowSend] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canSendInvoice = canFinancePermission(role, 'finance:invoices:send');
+  const canSendInvoice = canFinancePermission('finance:invoices:send');
 
   if (isError && !invoice) {
     return (

@@ -427,9 +427,9 @@ function CampaignCard({
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
-  const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
+  const canCreateCampaigns = canCrmPermission('crm:campaigns:create');
+  const canManageCampaigns = canCrmPermission('crm:campaigns:manage');
+  const canSendCampaigns = canCrmPermission('crm:campaigns:send');
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   // Set once a "Load more" page comes back empty.
@@ -541,7 +541,7 @@ const Campaigns: React.FC = () => {
               })}
             </p>
           </div>
-          {canManageCampaigns && (
+          {canCreateCampaigns && (
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 type="button"
@@ -712,7 +712,7 @@ const Campaigns: React.FC = () => {
                         label: t('crm.campaigns.viewAllCampaigns'),
                         onClick: () => setStatusFilter('All'),
                       }
-                    : canManageCampaigns
+                    : canCreateCampaigns
                       ? {
                           label: t('crm.campaigns.newEmailCampaign'),
                           onClick: () => navigate({ to: '/campaigns/email' }),

@@ -31,7 +31,6 @@ import {
 import { SUPPORTED_LANGUAGES } from '@voxire/i18n';
 import { selectLanguage } from '../shared/services/i18next';
 import { CaretPanel, CaretButton, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
-import { LicenseBanner } from '@voxire/components';
 import { useUserStore } from '../shared/stores/userStore';
 import { useBusinessStore } from '../shared/stores/businessStore';
 import { useConfigStore } from '../shared/stores/configStore';
@@ -56,7 +55,6 @@ import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/dashCaretContext';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { licenseClient } from '../shared/lib/clients';
 
 interface NavItem {
   /** Stable id, also the tour anchor. Never the label: that is a translation. */
@@ -256,20 +254,14 @@ const AppsSection: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useUserStore();
   const { data: apps = [] } = useApps();
-  const userApps = (user?.apps as string[] | undefined) ?? [];
   const effectiveAccess = user?.effectiveAccess;
-  const isOwner = effectiveAccess?.isOwner ?? (user?.role === 'owner' || user?.role === 'admin');
 
   const visible = apps.filter((a) => {
     if (!(a.key in APP_URLS)) return false;
     if (a.status !== 'active') return false;
-    if (effectiveAccess) {
-      return effectiveAccess.apps.some(
-        (app) => app.appId === a.key && app.licensed && app.hasAccess
-      );
-    }
-    if (isOwner) return userApps.length === 0 || userApps.includes(a.key);
-    return userApps.includes(a.key);
+    return Boolean(
+      effectiveAccess?.apps.some((app) => app.appId === a.key && app.licensed && app.hasAccess)
+    );
   });
 
   if (visible.length === 0) return null;
@@ -463,10 +455,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         pathname,
         search,
         businessName: user?.businessName,
-        role: user?.role,
-        apps: user?.apps,
+        apps: user?.effectiveAccess?.apps
+          .filter((app) => app.licensed && app.hasAccess)
+          .map((app) => app.appId),
       }),
-    [pathname, search, user?.apps, user?.businessName, user?.role]
+    [pathname, search, user?.businessName, user?.effectiveAccess]
   );
   const caretPageContext = React.useMemo(
     () =>
@@ -474,10 +467,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         pathname,
         search,
         businessName: user?.businessName,
-        role: user?.role,
-        apps: user?.apps,
+        apps: user?.effectiveAccess?.apps
+          .filter((app) => app.licensed && app.hasAccess)
+          .map((app) => app.appId),
       }),
-    [pathname, search, user?.apps, user?.businessName, user?.role]
+    [pathname, search, user?.businessName, user?.effectiveAccess]
   );
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
@@ -689,7 +683,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         {/* Main content + Caret AI inline column */}
         <div className="flex flex-1 min-w-0 overflow-hidden">
           <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-            <LicenseBanner client={licenseClient} />
             {/* Topbar */}
             <header
               className="dash-topbar h-11 flex items-center justify-between px-4 sm:px-6 shrink-0"

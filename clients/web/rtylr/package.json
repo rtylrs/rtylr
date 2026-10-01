@@ -18,7 +18,7 @@
     "contracts:audit-requests": "./scripts/ensure-contracts.sh && node scripts/audit-request-contracts.mjs --fail-on-errors",
     "contracts:enforce": "node scripts/enforce-onekit-boundary.mjs --changed-only",
     "contracts:enforce:all": "node scripts/enforce-onekit-boundary.mjs --all",
-    "test:rbac-evidence": "node scripts/validate-role-access-control-v2-evidence.mjs",
+    "test:authorization-evidence": "node scripts/validate-authorization-evidence.mjs",
     "contracts:sync": "./scripts/ensure-contracts.sh && pnpm -C ../.. --filter @voxire/voxie typecheck",
     "docs:verify-citations": "node scripts/cross-app/verify-citations.mjs",
     "init": "make -C ../../../voxie generate",

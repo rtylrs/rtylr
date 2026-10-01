@@ -4,7 +4,7 @@ import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useRouterState, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
-import { signOut, useUserStore } from '@voxire/auth';
+import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -33,11 +33,9 @@ import { useForesightLinks } from '@voxire/utils';
 import { pageTitleKey, routeLabels } from '../shared/lib/routeLabels';
 import { useTranslation } from 'react-i18next';
 import { createOneKitClient } from '@voxire/api';
-import { LicenseBanner } from '@voxire/components';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
-import { licenseClient } from '../shared/lib/clients';
 import { toast } from 'sonner';
 import { readLocalStorage, writeLocalStorage } from '../shared/lib/storage';
 
@@ -171,7 +169,15 @@ const DefaultLayout: React.FC = () => {
     userClient
       .getMe({})
       .then((res) => {
-        setAuthUser({ id: String(res.id), name: res.fullName, email: res.email });
+        setAuthUser({
+          id: String(res.id),
+          businessId: String(res.businessId),
+          name: res.fullName ?? '',
+          email: res.email ?? '',
+          businessName: res.businessName ?? '',
+          isConsoleAdmin: res.isConsoleAdmin,
+          effectiveAccess: parseEffectiveAccess(res.effectiveAccess) ?? undefined,
+        });
       })
       .catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -653,7 +659,6 @@ const DefaultLayout: React.FC = () => {
             </header>
 
             {/* Content */}
-            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

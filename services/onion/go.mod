@@ -32,7 +32,6 @@ require (
 	github.com/samber/slog-betterstack v1.4.4
 	github.com/trinodb/trino-go-client v0.333.0
 	github.com/voxire/voxie v0.0.0-00010101000000-000000000000
-	github.com/workos/workos-go/v4 v4.46.1
 	golang.org/x/image v0.45.0
 )
 
@@ -60,7 +59,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/cel-go v0.30.0 // indirect
-	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect

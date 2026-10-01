@@ -14,7 +14,7 @@ func TestIsProductionHost(t *testing.T) {
 		"VOXIRE-DB.RDS.AMAZONAWS.COM:3306":                        true,
 
 		// other RDS endpoints are NOT this app's production database: a staging
-		// or self-host deployment on its own RDS instance must not be blocked
+		// or isolated deployment on its own RDS instance must not be blocked
 		"staging-db.rds.amazonaws.com:3306":        false,
 		"voxire-db-replica.rds.amazonaws.com:3306": false,
 		"some-other-app.rds.amazonaws.com":         false,
@@ -73,10 +73,10 @@ func TestCheckProductionSafety(t *testing.T) {
 		}
 	})
 
-	t.Run("allows self-host docker host with APP_ENV=production", func(t *testing.T) {
+	t.Run("allows local docker host with APP_ENV=production", func(t *testing.T) {
 		t.Setenv("APP_ENV", "production")
 		t.Setenv(envAllowProductionDB, "")
-		dsn := "user:pw@tcp(db:3306)/onion_self_host"
+		dsn := "user:pw@tcp(db:3306)/onion_local"
 		if err := checkProductionSafety("database", dsn); err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -246,9 +246,9 @@ func TestReplicaDSNIsChecked(t *testing.T) {
 }
 
 // isLocalDBHost decides whether checkDevelopmentSafety fires at all, so the
-// single-label case matters as much as the loopback ones: self-host's compose
-// files set DB_HOST: db for api, upload and worker, and a guard that called a
-// Docker service name "remote" would refuse every containerised deployment.
+// single-label case matters as much as the loopback ones: local compose files
+// set DB_HOST: db for api, upload and worker, and a guard that called a Docker
+// service name "remote" would refuse every containerised deployment.
 func TestIsLocalDBHost(t *testing.T) {
 	local := []string{
 		"localhost",
@@ -260,7 +260,7 @@ func TestIsLocalDBHost(t *testing.T) {
 		"::1",
 		"[::1]:3306",
 		"0.0.0.0",
-		"db",          // self-host compose service name
+		"db",          // local compose service name
 		"db:3306",     //
 		"mysql",       // the same shape under another name
 		"onion_mysql", // the local-env volume/container naming
@@ -320,7 +320,7 @@ func TestCheckDevelopmentSafety(t *testing.T) {
 	})
 
 	// Regression guard: a containerised development run reaches its database by
-	// service name. Refusing that would break self-host and any compose setup.
+	// service name. Refusing that would break local compose setups.
 	t.Run("allows a docker service name in development", func(t *testing.T) {
 		t.Setenv("APP_ENV", "development")
 		t.Setenv(envAllowRemoteDB, "")

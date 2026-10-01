@@ -14,10 +14,10 @@ import (
 )
 
 // TestAuthenticateRejectsBannedUserWithActiveAccess covers B18-R01: console
-// BanUser only flips users.is_banned and leaves user_app_permissions active, so
+// BanUser only flips users.is_banned and leaves the membership active, so
 // the ban has to be carried by GetUserByIdentifier itself. When it was not, the
-// identifier lookup returned IsBanned=false, hasActiveAccountAccess saw the
-// still-active permission row, and login issued a token for a banned account.
+// identifier lookup returned IsBanned=false, the active membership passed the
+// access check, and login issued a token for a banned account.
 func TestAuthenticateRejectsBannedUserWithActiveAccess(t *testing.T) {
 	db := testutil.OpenDB(t)
 
@@ -47,12 +47,12 @@ func TestAuthenticateRejectsBannedUserWithActiveAccess(t *testing.T) {
 	}
 	const businessID = int64(1)
 	if _, err := db.ExecContext(ctx, `
-INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
-VALUES (?, ?, ?, '[]', 'admin', TRUE)`, businessID, testutil.OwnerID, userID); err != nil {
-		t.Fatalf("insert permission: %v", err)
+INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+VALUES (?, ?, 'member', 'active')`, businessID, userID); err != nil {
+		t.Fatalf("insert membership: %v", err)
 	}
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_app_permissions WHERE user_id = ?", userID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM authorization_business_members WHERE user_id = ?", userID)
 		_ = service.repo.DeleteUser(context.Background(), userID)
 	})
 
@@ -61,17 +61,17 @@ VALUES (?, ?, ?, '[]', 'admin', TRUE)`, businessID, testutil.OwnerID, userID); e
 		t.Fatalf("active account should authenticate, id=%d err=%v", got, err)
 	}
 
-	// BanUser flips only is_banned; the permission row stays active.
+	// BanUser flips only is_banned; the membership stays active.
 	if _, err := db.ExecContext(ctx, "UPDATE users SET is_banned = TRUE WHERE id = ?", userID); err != nil {
 		t.Fatalf("ban user: %v", err)
 	}
 	var active bool
 	if err := db.QueryRowContext(ctx,
-		"SELECT COALESCE(is_active, TRUE) FROM user_app_permissions WHERE user_id = ?", userID).Scan(&active); err != nil {
-		t.Fatalf("read permission state: %v", err)
+		"SELECT status = 'active' FROM authorization_business_members WHERE user_id = ?", userID).Scan(&active); err != nil {
+		t.Fatalf("read membership state: %v", err)
 	}
 	if !active {
-		t.Fatal("permission row must stay active so the ban is the only rejection")
+		t.Fatal("membership must stay active so the ban is the only rejection")
 	}
 
 	// The identifier lookup used by Authenticate must surface the ban.

@@ -3,7 +3,6 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -18,19 +17,31 @@ import (
 // same business. Idempotent; the daily job runs it so a missed synchronous
 // revoke is corrected within a day.
 func (r *Repository) ReconcileTerminatedEmployeeAccess(ctx context.Context) (int64, error) {
-	rows, err := r.queries.ReconcileTerminatedEmployeeAccess(ctx)
+	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
-		logger.Ctx(ctx).Error("terminated-employee access reconciliation failed", logger.Error(err))
 		return 0, err
 	}
-	if _, err := r.pool.ExecContext(ctx, `
-		UPDATE authorization_business_members m
-		JOIN hr_employees e ON e.user_id = m.user_id AND e.business_id = m.business_id
-		SET m.status = 'revoked', m.authorization_version = m.authorization_version + 1, m.updated_at = NOW()
-		WHERE e.status = 'terminated' AND m.status <> 'revoked'`); err != nil && !authorizationSchemaUnavailable(err) {
+	rollback := func(cause error) (int64, error) { _ = tx.Rollback(); return 0, cause }
+	var changed int64
+	for _, query := range []string{
+		`UPDATE authorization_business_members member JOIN hr_employees employee ON employee.user_id = member.user_id AND employee.business_id = member.business_id SET member.status = 'revoked', member.authorization_version = member.authorization_version + 1, member.updated_at = NOW() WHERE employee.status = 'terminated' AND member.status <> 'revoked'`,
+		`UPDATE authorization_license_assignments license JOIN hr_employees employee ON employee.user_id = license.user_id AND employee.business_id = license.business_id SET license.status = 'revoked', license.revoked_at = NOW() WHERE employee.status = 'terminated' AND license.status = 'active'`,
+		`UPDATE authorization_role_assignments assignment JOIN hr_employees employee ON employee.user_id = assignment.user_id AND employee.business_id = assignment.business_id SET assignment.status = 'revoked', assignment.revoked_at = NOW() WHERE employee.status = 'terminated' AND assignment.status = 'active'`,
+	} {
+		result, execErr := tx.ExecContext(ctx, query)
+		if execErr != nil {
+			return rollback(execErr)
+		}
+		count, countErr := result.RowsAffected()
+		if countErr != nil {
+			return rollback(countErr)
+		}
+		changed += count
+	}
+	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return rows, nil
+	return changed, nil
 }
 
 // ─── Users ────────────────────────────────────────────────────────────────────
@@ -189,12 +200,6 @@ func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, ownerID,
 			args: []any{ownerID, businessID, userID},
 		},
 		{
-			name: "legacy permission",
-			query: `DELETE FROM user_app_permissions
-				WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-			args: []any{ownerID, businessID, userID},
-		},
-		{
 			name:  "user",
 			query: `DELETE FROM users WHERE id = ?`,
 			args:  []any{userID},
@@ -203,9 +208,6 @@ func (r *Repository) DeleteInvitedUser(ctx context.Context, businessID, ownerID,
 
 	for _, statement := range statements {
 		if _, err := tx.ExecContext(ctx, statement.query, statement.args...); err != nil {
-			if authorizationSchemaUnavailable(err) {
-				continue
-			}
 			return rollback(fmt.Errorf("delete invited user %s: %w", statement.name, err))
 		}
 	}
@@ -273,58 +275,4 @@ func (r *Repository) UpdateUserProfile(ctx context.Context, userID int64, fullNa
 		return err
 	}
 	return nil
-}
-
-// ─── Staff listing (join users + permissions) ─────────────────────────────────
-
-func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.StaffUser, error) {
-	rows, err := r.queries.ListStaffUsers(ctx, sqlc.ListStaffUsersParams{
-		OwnerID: ownerID,
-		Limit:   limit,
-		Offset:  offset,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to list staff users", logger.Error(err))
-
-		return nil, err
-	}
-
-	users := make([]domain.StaffUser, 0, len(rows))
-
-	for _, row := range rows {
-		var su domain.StaffUser
-		su.ID = row.ID
-		su.Email = row.Email
-		su.FullName = row.FullName
-		if row.CreatedAt.Valid {
-			su.CreatedAt = row.CreatedAt.Time
-		}
-		su.Role = domain.Role(row.Role.UserAppPermissionsRole)
-		if row.IsActive.Valid {
-			su.IsActive = row.IsActive.Bool
-		}
-
-		if err := json.Unmarshal(row.Apps, &su.Apps); err != nil {
-			su.Apps = []string{}
-		}
-
-		users = append(users, su)
-	}
-
-	userIDs := make([]int64, len(users))
-	for i := range users {
-		userIDs[i] = users[i].ID
-		users[i].Groups = []domain.GroupSummary{}
-	}
-
-	groupsByUser, err := r.groupsForUsers(ctx, ownerID, userIDs)
-	if err == nil {
-		for i := range users {
-			if groups := groupsByUser[users[i].ID]; groups != nil {
-				users[i].Groups = groups
-			}
-		}
-	}
-
-	return users, nil
 }

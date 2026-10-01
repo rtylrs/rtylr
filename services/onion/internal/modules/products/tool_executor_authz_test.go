@@ -21,7 +21,6 @@ func productToolUser(permissions ...string) *authPkg.AuthUser {
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "erp", ID: "9201"}},
 			}},
 		},
 	}
@@ -46,7 +45,6 @@ func assertProductToolDenied(t *testing.T, toolName string, output map[string]an
 // Each ERP product write must require the same permission its HTTP twin does,
 // so a caller holding only the read permission cannot mutate the catalog.
 func TestProductWriteToolsDenyCallerWithoutTheMatchingPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	for _, tc := range []struct {
 		tool       string
@@ -71,7 +69,6 @@ func TestProductWriteToolsDenyCallerWithoutTheMatchingPermission(t *testing.T) {
 }
 
 func TestProductWriteToolsAllowCallerHoldingThePermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	for _, tc := range []struct {
 		tool       string
@@ -94,18 +91,13 @@ func TestProductWriteToolsAllowCallerHoldingThePermission(t *testing.T) {
 	}
 }
 
-func TestProductToolsDenyCallerWithOnlyTheLegacyRole(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
-
-	user := productToolUser()
-	user.Role = "owner"
-	ctx := authPkg.WithAuthUser(context.Background(), user)
+func TestProductToolsDenyCallerWithoutPermission(t *testing.T) {
+	ctx := authPkg.WithAuthUser(context.Background(), productToolUser())
 	output, handled, err := (&Module{}).ExecuteCaretTool(ctx, deleteProductToolName, map[string]any{"product_id": 7})
 	assertProductToolDenied(t, deleteProductToolName, output, handled, err)
 }
 
 func TestProductToolsIgnoreTenantFromToolInput(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	spoofed := map[string]any{"product_id": 7, "business_id": 9201, "owner_id": 9101}
 	readOnly := authPkg.WithAuthUser(context.Background(), productToolUser("erp:products:view"))
@@ -126,7 +118,6 @@ func TestProductToolsIgnoreTenantFromToolInput(t *testing.T) {
 // declared permission without an executor is a hard error rather than a silent
 // pass-through to the next executor in the chain.
 func TestProductToolPermissionsCoverEveryDispatchedTool(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	dispatched := []string{
 		getProductToolName,

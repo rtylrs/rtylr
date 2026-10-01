@@ -15,48 +15,27 @@ func canViewRoles(user *authPkg.AuthUser) bool {
 	if user == nil {
 		return false
 	}
-	if authPkg.LegacyAuthorizationMode() {
-		return authPkg.IsBusinessAdmin(user)
-	}
-	if user.EffectiveAccess != nil {
-		return authPkg.HasDashboardPermission(user, "hub:roles:view")
-	}
-	return authPkg.IsBusinessAdmin(user)
+	return authPkg.HasDashboardPermission(user, "hub:roles:view")
 }
 
 func canEditRoles(user *authPkg.AuthUser) bool {
 	if user == nil {
 		return false
 	}
-	if authPkg.LegacyAuthorizationMode() {
-		return authPkg.IsBusinessAdmin(user)
-	}
-	if user.EffectiveAccess != nil {
-		return authPkg.HasDashboardPermission(user, "hub:roles:create") ||
-			authPkg.HasDashboardPermission(user, "hub:roles:edit")
-	}
-	return authPkg.IsBusinessAdmin(user)
+	return authPkg.HasDashboardPermission(user, "hub:roles:create") ||
+		authPkg.HasDashboardPermission(user, "hub:roles:edit")
 }
 
 func canArchiveRoles(user *authPkg.AuthUser) bool {
 	if user == nil {
 		return false
 	}
-	if authPkg.LegacyAuthorizationMode() {
-		return authPkg.IsBusinessAdmin(user)
-	}
-	if user.EffectiveAccess != nil {
-		return authPkg.HasDashboardPermission(user, "hub:roles:archive")
-	}
-	return authPkg.IsBusinessAdmin(user)
+	return authPkg.HasDashboardPermission(user, "hub:roles:archive")
 }
 
 func canDelegateRoleMutation(user *authPkg.AuthUser, appID string, permissions []string) bool {
 	if user == nil {
 		return false
-	}
-	if user.EffectiveAccess == nil {
-		return authPkg.IsBusinessAdmin(user)
 	}
 	return authorization.CanDelegatePermissions(user.EffectiveAccess, authorization.AppID(appID), permissions)
 }
@@ -84,39 +63,6 @@ func nextPage(page, pageSize, total int64) *int32 {
 	}
 	next := int32(page + 1) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	return &next
-}
-
-func buildPermissionMatrix(entries []domain.PermissionEntry, roles []domain.Role) *hubpermissionv1.PermissionMatrix {
-	roleNames := make([]string, 0, len(roles))
-	rolePermSets := make(map[string]map[string]struct{}, len(roles))
-	for _, role := range roles {
-		roleNames = append(roleNames, role.Name)
-		perms := make(map[string]struct{}, len(role.Permissions))
-		for _, p := range role.Permissions {
-			perms[p] = struct{}{}
-		}
-		rolePermSets[role.Name] = perms
-	}
-
-	rows := make([]*hubpermissionv1.PermissionRow, 0, len(entries))
-	for _, entry := range entries {
-		roleValues := make(map[string]bool, len(roleNames))
-		for _, roleName := range roleNames {
-			_, enabled := rolePermSets[roleName][entry.Key]
-			roleValues[roleName] = enabled
-		}
-		rows = append(rows, &hubpermissionv1.PermissionRow{
-			Key:        entry.Key,
-			Category:   entry.Category,
-			Label:      entry.Label,
-			RoleValues: roleValues,
-		})
-	}
-
-	return &hubpermissionv1.PermissionMatrix{
-		Rows:  rows,
-		Roles: roleNames,
-	}
 }
 
 func toProtoRole(role domain.Role) *hubpermissionv1.CustomRole {

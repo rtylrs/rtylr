@@ -22,7 +22,7 @@ func oneKitStatus(err error) int {
 func TestResolveConfigBusinessIDFailsClosedWithoutTenantMapping(t *testing.T) {
 	_, sErr := resolveConfigBusinessID(
 		context.Background(),
-		&authPkg.AuthUser{UserID: 5, BusinessID: 42, Role: "owner"},
+		&authPkg.AuthUser{UserID: 5, BusinessID: 42},
 		&GetConfigByOwnerRequest{Owner: "not-a-number"},
 	)
 	if oneKitStatus(sErr) != http.StatusForbidden {
@@ -33,7 +33,7 @@ func TestResolveConfigBusinessIDFailsClosedWithoutTenantMapping(t *testing.T) {
 func TestResolveConfigBusinessID_AllowsConsoleAdminRequestedBusiness(t *testing.T) {
 	got, sErr := resolveConfigBusinessID(
 		context.Background(),
-		&authPkg.AuthUser{UserID: 1, Role: "console_admin"},
+		&authPkg.AuthUser{UserID: 1, IsConsoleAdmin: true},
 		&GetConfigByOwnerRequest{Owner: "7"},
 	)
 	if sErr != nil {
@@ -47,7 +47,7 @@ func TestResolveConfigBusinessID_AllowsConsoleAdminRequestedBusiness(t *testing.
 func TestResolveConfigBusinessID_DeniesInvalidRequestedBusiness(t *testing.T) {
 	_, sErr := resolveConfigBusinessID(
 		context.Background(),
-		&authPkg.AuthUser{UserID: 1, Role: "console_admin"},
+		&authPkg.AuthUser{UserID: 1, IsConsoleAdmin: true},
 		&GetConfigByOwnerRequest{Owner: "nope"},
 	)
 	if sErr == nil {

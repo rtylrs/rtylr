@@ -8,4 +8,4 @@ export * from './timezones';
 export * from './industries';
 export * from './flags';
 export * from './appGuards';
-export * from './runtimeConfig';
+export * from './serviceUrls';

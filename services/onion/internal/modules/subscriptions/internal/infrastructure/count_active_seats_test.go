@@ -37,19 +37,20 @@ func seedSeatOwner(t *testing.T, db *sql.DB) (ownerID, businessID int64) {
 	}
 
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_app_permissions WHERE owner_id = ?", ownerID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_license_assignments WHERE business_id = ?", businessID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE business_id = ?", businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id = ?", businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", ownerID)
 	})
 	return ownerID, businessID
 }
 
-func insertTenantMember(t *testing.T, db *sql.DB, businessID int64, permission string) int64 {
+func insertTenantMember(t *testing.T, db *sql.DB, businessID int64, status string, grantLicense bool) int64 {
 	t.Helper()
 	ctx := context.Background()
 
 	suffix := time.Now().UnixNano()
-	email := fmt.Sprintf("seat-count-%d-%s@test.local", suffix, permission)
+	email := fmt.Sprintf("seat-count-%d-%s@test.local", suffix, status)
 	res, err := db.ExecContext(ctx,
 		`INSERT INTO users (email, username, password_hash, business_id) VALUES (?, ?, '', ?)`,
 		email, fmt.Sprintf("seat-count-%d", suffix), businessID)
@@ -62,24 +63,22 @@ func insertTenantMember(t *testing.T, db *sql.DB, businessID int64, permission s
 	}
 
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_app_permissions WHERE user_id = ?", userID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_license_assignments WHERE business_id = ? AND user_id = ?", businessID, userID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE business_id = ? AND user_id = ?", businessID, userID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", userID)
 	})
 
-	if permission == "none" {
-		return userID
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+		VALUES (?, ?, 'member', ?)`, businessID, userID, status); err != nil {
+		t.Fatalf("insert membership: %v", err)
 	}
-
-	var ownerID int64
-	if err := db.QueryRowContext(ctx, `SELECT owner_id FROM businesses WHERE id = ?`, businessID).Scan(&ownerID); err != nil {
-		t.Fatalf("read business owner: %v", err)
-	}
-	active := permission == "active"
-	if _, err := db.ExecContext(ctx,
-		`INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
-		 VALUES (?, ?, ?, JSON_ARRAY(), 'staff', ?)`,
-		businessID, ownerID, userID, active); err != nil {
-		t.Fatalf("insert permission: %v", err)
+	if grantLicense {
+		if _, err := db.ExecContext(ctx, `
+			INSERT INTO authorization_license_assignments (business_id, user_id, app_id, source, status)
+			VALUES (?, ?, 'hr', 'explicit', 'active')`, businessID, userID); err != nil {
+			t.Fatalf("insert app license: %v", err)
+		}
 	}
 	return userID
 }
@@ -101,7 +100,7 @@ func TestSubscriptions_CountActiveSeats_DeactivatedMemberFreesSeat(t *testing.T)
 		t.Fatalf("baseline seat count = %d, want 1 (the owner)", before)
 	}
 
-	userID := insertTenantMember(t, db, businessID, "active")
+	userID := insertTenantMember(t, db, businessID, "active", true)
 
 	active, err := repo.CountActiveSeats(ctx, ownerID)
 	if err != nil {
@@ -112,9 +111,9 @@ func TestSubscriptions_CountActiveSeats_DeactivatedMemberFreesSeat(t *testing.T)
 	}
 
 	if _, err := db.ExecContext(ctx,
-		`UPDATE user_app_permissions SET is_active = FALSE WHERE owner_id = ? AND user_id = ?`,
-		ownerID, userID); err != nil {
-		t.Fatalf("deactivate permission: %v", err)
+		`UPDATE authorization_business_members SET status = 'revoked' WHERE business_id = ? AND user_id = ?`,
+		businessID, userID); err != nil {
+		t.Fatalf("revoke membership: %v", err)
 	}
 
 	after, err := repo.CountActiveSeats(ctx, ownerID)
@@ -126,9 +125,8 @@ func TestSubscriptions_CountActiveSeats_DeactivatedMemberFreesSeat(t *testing.T)
 	}
 }
 
-// Attached users without a permission row must keep counting: only an
-// explicitly inactive row removes a seat.
-func TestSubscriptions_CountActiveSeats_AttachedUserWithoutPermissionRowStillCounts(t *testing.T) {
+// Seat count follows business membership independently of app licensing.
+func TestSubscriptions_CountActiveSeats_UnlicensedMemberStillCounts(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -139,13 +137,13 @@ func TestSubscriptions_CountActiveSeats_AttachedUserWithoutPermissionRowStillCou
 		t.Fatalf("CountActiveSeats before: %v", err)
 	}
 
-	insertTenantMember(t, db, businessID, "none")
+	insertTenantMember(t, db, businessID, "active", false)
 
 	after, err := repo.CountActiveSeats(ctx, ownerID)
 	if err != nil {
 		t.Fatalf("CountActiveSeats after: %v", err)
 	}
 	if after != before+1 {
-		t.Fatalf("count with attached permission-less member = %d, want %d", after, before+1)
+		t.Fatalf("count with unlicensed member = %d, want %d", after, before+1)
 	}
 }

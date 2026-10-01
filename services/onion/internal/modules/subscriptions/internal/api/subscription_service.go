@@ -133,13 +133,13 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 	return &hubsubscriptionv1.CreateCheckoutResponse{CheckoutUrl: checkoutURL}, nil
 }
 
-// billingUser gates subscription mutations using the role carried by the
-// authenticated tenant token. Keep this check at the API boundary so both
-// mutation endpoints reject unauthorized requests before touching billing or
-// Paddle state.
+// billingUser gates subscription mutations using resolved tenant permissions.
+// Keep this check at the API boundary so unauthorized requests are rejected
+// before touching billing or Paddle state.
 func billingUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil || authUser.UserID <= 0 || !isBillingCapableRole(authUser.Role) {
+	if !ok || authUser == nil || authUser.UserID <= 0 ||
+		(!authPkg.IsBusinessAdmin(authUser) && !authPkg.HasDashboardPermission(authUser, "hub:billing:manage")) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return authUser, nil
@@ -150,23 +150,10 @@ func billingUser(ctx context.Context) (*authPkg.AuthUser, error) {
 // must come from Paddle checkout/webhook processing or a console grant.
 func consoleAdminUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil || authUser.UserID <= 0 || !isConsoleAdminRole(authUser.Role) {
+	if !ok || authUser == nil || authUser.UserID <= 0 || !authPkg.IsConsoleAdmin(authUser) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return authUser, nil
-}
-
-func isBillingCapableRole(role string) bool {
-	switch strings.ToLower(strings.TrimSpace(role)) {
-	case "owner", "admin", "billing", "console_admin":
-		return true
-	default:
-		return false
-	}
-}
-
-func isConsoleAdminRole(role string) bool {
-	return strings.EqualFold(strings.TrimSpace(role), "console_admin")
 }
 
 func toProtoSubscription(sub *domain.Subscription) *hubsubscriptionv1.Subscription {

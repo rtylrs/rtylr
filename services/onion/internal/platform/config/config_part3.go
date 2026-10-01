@@ -15,20 +15,7 @@ func envOrDefault(key, fallback string) string {
 	return fallback
 }
 
-// envTrimmedOrDefault is envOrDefault for values where surrounding whitespace is
-// never meaningful, such as a URL. A variable set to spaces by a shell export or
-// a compose file means the same as unset, and passing those spaces through
-// produces an address nothing can reach.
-func envTrimmedOrDefault(key, fallback string) string {
-	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
-		return v
-	}
-	return fallback
-}
-
 // envFirst returns the value of the first set/non-empty env var in keys, or "".
-// Used to accept a customer-facing name and an internal alias (e.g. the
-// documented RTYLR_LICENSE_KEY plus the legacy LICENSE_KEY).
 func envFirst(keys ...string) string {
 	for _, k := range keys {
 		if v := strings.TrimSpace(os.Getenv(k)); v != "" {
@@ -172,34 +159,4 @@ func GetAIPrimaryProvider() string {
 
 func IsAnyAIConfigured() bool {
 	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
-}
-
-// GetLicenseSigningPrivateKey returns the private key used to sign self-host
-// license keys (license authority runmode).
-func GetLicenseSigningPrivateKey() string {
-	if GlobalConfig != nil {
-		return GlobalConfig.LicenseSigningPrivateKey
-	}
-	return os.Getenv("LICENSE_SIGNING_PRIVATE_KEY")
-}
-
-// GetLicensePublicKey returns the public key used to verify license keys on
-// self-host deployments.
-func GetLicensePublicKey() string {
-	if GlobalConfig != nil {
-		return GlobalConfig.LicensePublicKey
-	}
-	return os.Getenv("LICENSE_PUBLIC_KEY")
-}
-
-// GetLicenseIssuer returns the issuer name embedded in generated license keys,
-// defaulting to "voxire" when unset.
-func GetLicenseIssuer() string {
-	if GlobalConfig != nil && GlobalConfig.LicenseIssuer != "" {
-		return GlobalConfig.LicenseIssuer
-	}
-	if v := strings.TrimSpace(os.Getenv("LICENSE_ISSUER")); v != "" {
-		return v
-	}
-	return "voxire"
 }

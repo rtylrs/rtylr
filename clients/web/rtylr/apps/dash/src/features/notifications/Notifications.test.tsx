@@ -71,12 +71,12 @@ beforeEach(() => {
 });
 
 describe('notification link safety', () => {
-  it('accepts an absolute self-host Dash URL and keeps its internal path', () => {
+  it('accepts an absolute Dash URL and keeps its internal path', () => {
     expect(
       resolveNotificationTarget(
-        'https://dash.self-host.test/team?from=notification#pending',
-        'https://app.self-host.test',
-        'https://dash.self-host.test'
+        'https://dash.example.test/team?from=notification#pending',
+        'https://app.example.test',
+        'https://dash.example.test'
       )
     ).toMatchObject({
       path: '/team?from=notification#pending',

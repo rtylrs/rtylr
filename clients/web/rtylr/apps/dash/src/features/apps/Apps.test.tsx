@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Grid3x3 } from 'lucide-react';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -45,13 +46,14 @@ const appsData = vi.hoisted(() => ({
   data: [] as App[],
   isLoading: false,
 }));
+const userState = vi.hoisted(() => ({ effectiveAccess: undefined as unknown }));
 
 vi.mock('../../shared/hooks/queries/useApps', () => ({
   useApps: () => appsData,
 }));
 
 vi.mock('../../shared/stores/userStore', () => ({
-  useUserStore: () => ({ user: { role: 'owner', apps: [] } }),
+  useUserStore: () => ({ user: { effectiveAccess: userState.effectiveAccess } }),
 }));
 
 import Apps from './Apps';
@@ -60,6 +62,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   appsData.data = [];
   appsData.isLoading = false;
+  userState.effectiveAccess = createEffectiveAccess(undefined, {
+    appIds: ['erp'],
+    isOwner: true,
+  });
 });
 
 describe('Apps grid empty state', () => {

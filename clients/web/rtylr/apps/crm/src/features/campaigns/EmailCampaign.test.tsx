@@ -1,12 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   createCampaign: vi.fn(),
   updateCampaign: vi.fn(),
   updateCampaignStatus: vi.fn(),
+  effectiveAccess: null as unknown,
 }));
 
 const segments = vi.hoisted(() => [
@@ -23,10 +25,18 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (state: { user: { role: string } }) => unknown) =>
-    selector({ user: { role: 'admin' } }),
-}));
+vi.mock('@voxire/auth', () => {
+  const state = () => ({
+    user: { effectiveAccess: mocks.effectiveAccess },
+    effectiveAccess: mocks.effectiveAccess,
+  });
+  return {
+    useUserStore: Object.assign(
+      (selector: (value: ReturnType<typeof state>) => unknown) => selector(state()),
+      { getState: state }
+    ),
+  };
+});
 
 vi.mock('../../shared/hooks/queries/useCampaigns', () => ({
   useCreateCampaign: () => ({ mutate: mocks.createCampaign, isPending: false }),
@@ -77,6 +87,7 @@ function clickSaveAndActivate(): void {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
 });
 
 describe('EmailCampaign activation retry (B56-R05)', () => {

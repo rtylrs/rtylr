@@ -12,7 +12,6 @@ func bankFeedAuthUser(permissions ...string) *authPkg.AuthUser {
 	return &authPkg.AuthUser{
 		UserID:     7001,
 		BusinessID: 8001,
-		Role:       "member",
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID:           8001,
 			AuthorizationVersion: 1,
@@ -21,15 +20,12 @@ func bankFeedAuthUser(permissions ...string) *authPkg.AuthUser {
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "finance", ID: "8001"}},
 			}},
 		},
 	}
 }
 
 func TestSyncAuthorizationDoesNotAcceptViewOnlyPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
-
 	if canSyncBankFeeds(bankFeedAuthUser("finance:bank_feeds:view")) {
 		t.Fatal("view-only bank-feed permission unexpectedly authorizes sync")
 	}
@@ -44,8 +40,6 @@ func TestSyncAuthorizationDoesNotAcceptViewOnlyPermission(t *testing.T) {
 }
 
 func TestSyncAuthorizationAcceptsMutationGrants(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
-
 	for _, permission := range []string{bankFeedSyncPermission, bankFeedReconciliationPermission} {
 		if !canSyncBankFeeds(bankFeedAuthUser(permission)) {
 			t.Errorf("mutation permission %q was rejected", permission)
@@ -53,12 +47,9 @@ func TestSyncAuthorizationAcceptsMutationGrants(t *testing.T) {
 	}
 }
 
-func TestSyncAuthorizationDoesNotUseLegacyAppMembershipFallback(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "legacy")
-
+func TestSyncAuthorizationRequiresMutationPermission(t *testing.T) {
 	user := bankFeedAuthUser("finance:bank_feeds:view")
-	user.Role = "finance.viewer"
 	if canSyncBankFeeds(user) {
-		t.Fatal("legacy view-only membership unexpectedly authorizes sync")
+		t.Fatal("view-only permission unexpectedly authorizes sync")
 	}
 }

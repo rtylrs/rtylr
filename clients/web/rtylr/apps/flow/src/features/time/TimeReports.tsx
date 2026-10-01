@@ -44,7 +44,7 @@ const TimeReports = (): React.JSX.Element => {
   // unreachable. useFlowTeam had already shipped. A member's `id` is their user
   // id, which is what the work-day totals are keyed on.
   const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
-  const members = useMemo(() => allMembers.filter((m) => m.apps?.includes('flow')), [allMembers]);
+  const members = useMemo(() => allMembers.filter((m) => m.hasFlowAccess), [allMembers]);
   const { data, isLoading, isError } = useTeamWorkDays(from, to);
 
   const totalsByUserId = useMemo(() => {

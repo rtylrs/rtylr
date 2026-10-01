@@ -84,12 +84,6 @@ jobs:
           echo "components=$(printf '%s' "$changed" | tr '\n' ' ' | sed 's/ *$//')" >> "$GITHUB_OUTPUT"
           echo "files_changed=$count" >> "$GITHUB_OUTPUT"
 
-          if printf '%s\n' $changed | grep -qE '^(rtylr|packages|pos|landing|onion|contracts)$'; then
-            echo "publish_images=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish_images=false" >> "$GITHUB_OUTPUT"
-          fi
-
           echo "Changed components: $(printf '%s' "$changed" | tr '\n' ' ')"
           echo "$changed" | sed '/^$/d' > components.txt
 
@@ -168,13 +162,3 @@ jobs:
               --notes "$notes" \
               release-assets/*
           fi
-
-      - name: Trigger self-host image publishing
-        if: steps.components.outputs.publish_images == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          jq -n --arg version "$VERSION" \
-            '{event_type: "rtylr-release", client_payload: {version: $version}}' \
-            | gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" --input -

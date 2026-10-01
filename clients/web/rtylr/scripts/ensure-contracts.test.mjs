@@ -34,6 +34,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const script = join(dirname(fileURLToPath(import.meta.url)), 'ensure-contracts.sh');
+const bash = execFileSync('sh', ['-c', 'command -v bash'], { encoding: 'utf8' }).trim();
 
 const git = (repo, args) =>
   execFileSync('git', args, { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
@@ -194,7 +195,7 @@ test('a tree with no generated output fails instead of passing as a no-op', () =
 test('a missing generator tool is a distinguishable exit 3, not a silent pass', () => {
   withRepo({ extra: `${ORPHAN_ROUTE}\n` }, (repo) => {
     // A PATH carrying everything the parity check needs (git, find, sort, comm,
-    // mktemp, grep, sed) but not the generator toolchain (make, go, python3).
+    // mktemp, grep, sed, dirname) but not the generator toolchain (make, go, python3).
     // Regeneration is impossible, so the check must say so rather than quietly
     // reporting success.
     const bin = mkdtempSync(join(tmpdir(), 'ensure-contracts-bin-'));
@@ -209,6 +210,7 @@ test('a missing generator tool is a distinguishable exit 3, not a silent pass', 
         'sed',
         'tr',
         'cat',
+        'dirname',
         'rm',
       ]) {
         const resolved = execFileSync('sh', ['-c', `command -v ${tool}`], {
@@ -216,12 +218,16 @@ test('a missing generator tool is a distinguishable exit 3, not a silent pass', 
         }).trim();
         symlinkSync(resolved, join(bin, tool));
       }
-      const result = spawnSync('/usr/bin/bash', [script], {
+      const result = spawnSync(bash, [script], {
         cwd: repo,
         encoding: 'utf8',
         env: { ...process.env, PATH: bin },
       });
-      assert.equal(result.status, 3, `absent tooling must exit 3, got ${result.status}`);
+      assert.equal(
+        result.status,
+        3,
+        `absent tooling must exit 3, got ${result.status}; signal=${result.signal}; error=${result.error}; stderr=${result.stderr}`
+      );
       assert.match(result.stderr, /not on PATH/);
       assert.match(result.stderr, /not silently skipped/);
     } finally {

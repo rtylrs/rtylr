@@ -124,7 +124,6 @@ func (r *Repository) CountActiveSeatsForOwner(ctx context.Context, ownerID int64
 	count, err := r.queries.CountActiveSeatsForOwner(ctx, sqlc.CountActiveSeatsForOwnerParams{
 		OwnerID:   ownerID,
 		OwnerID_2: ownerID,
-		OwnerID_3: ownerID,
 	})
 	if err != nil {
 		return 0, err

@@ -25,7 +25,6 @@ func TestIssueRealtimeTicketReturnsNoStoreOpaqueTicket(t *testing.T) {
 	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     42,
 		BusinessID: 9,
-		Role:       "staff",
 		Token:      "the-bearer-jwt-must-not-be-copied",
 	})
 	req := httptest.NewRequest(http.MethodPost, "/flow/ws-ticket", http.NoBody).WithContext(ctx)

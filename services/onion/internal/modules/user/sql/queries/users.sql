@@ -53,21 +53,17 @@ UPDATE users SET business_id = ? WHERE id = ?;
 -- name: GetBusinessOwnerID :one
 SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1;
 
--- name: GetUserAppRole :one
-SELECT role FROM user_app_permissions
-WHERE business_id = ? AND user_id = ? AND COALESCE(is_active, TRUE) = TRUE;
-
 -- Read authentication state without the application cache so deactivation and
 -- bans take effect across processes without waiting for a profile-cache TTL.
 -- name: GetUserAccessState :one
 SELECT
     EXISTS(
-        SELECT 1 FROM user_app_permissions p
-        WHERE p.user_id = u.id
+        SELECT 1 FROM authorization_business_members member
+        WHERE member.user_id = u.id
     ) AS has_permissions,
     EXISTS(
-        SELECT 1 FROM user_app_permissions p
-        WHERE p.user_id = u.id AND COALESCE(p.is_active, TRUE) = TRUE
+        SELECT 1 FROM authorization_business_members member
+        WHERE member.user_id = u.id AND member.status = 'active'
     ) OR EXISTS(
         SELECT 1 FROM businesses b
         WHERE b.owner_id = u.id AND COALESCE(b.is_active, TRUE) = TRUE
@@ -109,10 +105,12 @@ WHERE u.id = ?
 -- name: BusinessNameExists :one
 SELECT EXISTS(SELECT 1 FROM businesses WHERE name = ? LIMIT 1) AS exists_flag;
 
--- cross-schema read from user_business_access — multi-business switch validation
+-- cross-schema read from tenant membership — multi-business switch validation
 -- name: CheckBusinessAccess :one
 SELECT COUNT(*) AS cnt FROM (
     SELECT 1 FROM businesses b WHERE b.id = ? AND b.owner_id = ? AND b.is_active = TRUE
     UNION ALL
-    SELECT 1 FROM user_business_access uba WHERE uba.user_id = ? AND uba.business_id = ?
+    SELECT 1 FROM authorization_business_members member
+    JOIN businesses b ON b.id = member.business_id AND b.is_active = TRUE
+    WHERE member.user_id = ? AND member.business_id = ? AND member.status = 'active'
 ) x;

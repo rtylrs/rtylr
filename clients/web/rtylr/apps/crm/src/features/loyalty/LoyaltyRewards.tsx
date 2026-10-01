@@ -176,8 +176,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
 const LoyaltyRewards: React.FC = () => {
   const { t } = useTranslation();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
+  const canConfigureLoyalty = canCrmPermission('crm:loyalty:manage');
   const { data: fetched, isLoading, refetch } = useLoyaltyRewards();
   const rewards = fetched ?? [];
   const [showAdd, setShowAdd] = useState(false);

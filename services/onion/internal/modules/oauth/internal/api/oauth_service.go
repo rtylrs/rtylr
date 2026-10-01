@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/voxire/onion/internal/modules/oauth/internal/application"
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
@@ -134,7 +134,6 @@ func (a *OauthAPI) Me(ctx context.Context, _ *commonoauthv1.MeRequest) (*commono
 	return &commonoauthv1.MeResponse{
 		UserId:          device.User.UserID,
 		BusinessId:      device.User.BusinessID,
-		Role:            device.User.Role,
 		EffectiveAccess: effectiveAccessToProto(device.User.EffectiveAccess),
 	}, nil
 }
@@ -152,12 +151,6 @@ func effectiveAccessToProto(access *authorization.EffectiveAccess) *hubuserv1.Ef
 		IsOwner:              access.IsOwner,
 		IsAdmin:              access.IsAdmin,
 		AuthorizationVersion: access.AuthorizationVersion,
-	}
-	if access.DashRole != "" {
-		result.DashRole = stringValue(access.DashRole)
-	}
-	if access.DashRoleID != nil {
-		result.DashRoleId = stringValue(strconv.FormatInt(*access.DashRoleID, 10))
 	}
 	for _, appID := range access.SubscribedApps {
 		result.SubscribedApps = append(result.SubscribedApps, string(appID))
@@ -181,26 +174,23 @@ func effectiveAccessToProto(access *authorization.EffectiveAccess) *hubuserv1.Ef
 	}
 	for _, app := range access.Apps {
 		item := &hubuserv1.EffectiveAppAccess{
-			AppId:             string(app.AppID),
-			Licensed:          app.Licensed,
-			HasAccess:         app.HasAccess,
-			Permissions:       append([]string{}, app.Permissions...),
-			PermissionSources: make(map[string]string, len(app.PermissionSources)),
+			AppId:            string(app.AppID),
+			Licensed:         app.Licensed,
+			HasAccess:        app.HasAccess,
+			Permissions:      append([]string{}, app.Permissions...),
+			PermissionScopes: make([]*hubuserv1.PermissionScopeGrant, 0, len(app.PermissionScopes)),
 		}
-		for permission, sources := range app.PermissionSources {
-			item.PermissionSources[permission] = strings.Join(sources, ",")
+		permissionKeys := make([]string, 0, len(app.PermissionScopes))
+		for permission := range app.PermissionScopes {
+			permissionKeys = append(permissionKeys, permission)
 		}
-		for _, roleID := range app.RoleIDs {
-			item.RoleIds = append(item.RoleIds, strconv.FormatInt(roleID, 10))
-		}
-		if app.PrimaryRoleID != nil {
-			item.PrimaryRoleId = stringValue(strconv.FormatInt(*app.PrimaryRoleID, 10))
-		}
-		if app.DisplayRole != "" {
-			item.DisplayRole = stringValue(app.DisplayRole)
-		}
-		for _, scope := range app.Scopes {
-			item.Scopes = append(item.Scopes, &hubuserv1.RoleScope{ScopeType: scope.Type, ScopeId: scope.ID})
+		sort.Strings(permissionKeys)
+		for _, permission := range permissionKeys {
+			grant := &hubuserv1.PermissionScopeGrant{PermissionKey: permission}
+			for _, scope := range app.PermissionScopes[permission] {
+				grant.Scopes = append(grant.Scopes, &hubuserv1.PermissionScope{ScopeType: scope.Type, ScopeId: scope.ID})
+			}
+			item.PermissionScopes = append(item.PermissionScopes, grant)
 		}
 		for _, source := range app.Sources {
 			item.Sources = append(item.Sources, string(source))

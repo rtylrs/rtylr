@@ -21,6 +21,8 @@ import { normalizeConfigData, useConfigStore } from '../stores/configStore';
 import { accessClient, configClient, userClient } from '../lib/clients';
 import { useBusinessFavicon } from '../hooks/useBusinessFavicon';
 import { APP_NAMES } from '../config/appNames';
+import { canEffectiveAccess } from '@voxire/permissions';
+import { canManageDash } from './canManageDash';
 
 const getCookieToken = (): string | null => {
   const raw = document.cookie
@@ -95,27 +97,41 @@ const ALL_APPS = [
   },
 ];
 
-// Route path prefixes that billing/menu_manager may reach in addition to
-// staffAllowedPaths, derived from their canonical resource grants in
-// packages/permissions/src/matrix.ts (billing: 'hub:billing'; menu_manager:
-// 'app:menu' + 'hub:design') and their invite descriptions in InviteUser.tsx.
-// This is a route-level approximation of that matrix - Dash's router does not
-// yet check resources per-route - so keep it narrow: it must not grow to
-// include Team management, business deletion, or any other settings surface,
-// which stay admin/owner (and operator, see hasManagementRole below) only.
-const ROLE_SCOPED_PATHS: Record<string, string[]> = {
-  billing: ['/settings/billing'],
-  menu_manager: ['/menu', '/create-item', '/create-banner', '/qr-codes', '/design'],
-};
+const DASH_ROUTE_PERMISSIONS: Array<[string, string]> = [
+  ['/team/groups', 'hub:groups:manage'],
+  ['/team', 'hub:team:view'],
+  ['/roles', 'hub:roles:view'],
+  ['/permissions', 'hub:roles:view'],
+  ['/settings/billing', 'hub:billing:view'],
+  ['/settings', 'hub:business:settings:view'],
+  ['/menus', 'menu:menus:view'],
+  ['/menu', 'menu:menus:view'],
+  ['/orders', 'menu:orders:view'],
+  ['/qr-codes', 'menu:menus:view'],
+  ['/design', 'menu:branding:edit'],
+  ['/customers', 'crm:customers:view'],
+  ['/products', 'erp:products:view'],
+];
+
+function canAccessDashPath(user: StoredUser | null, pathname: string): boolean {
+  if (!user?.effectiveAccess) return false;
+  if (user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin) return true;
+  if (pathname === '/apps' || pathname === '/settings/account' || pathname === '/security') {
+    return true;
+  }
+  if (pathname === '/') {
+    return canEffectiveAccess(user.effectiveAccess, 'hub:dashboard:view') || canManageDash(user);
+  }
+  const match = DASH_ROUTE_PERMISSIONS.find(([prefix]) => pathname.startsWith(prefix));
+  return match ? canEffectiveAccess(user.effectiveAccess, match[1]) : false;
+}
 
 function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const { t } = useTranslation();
   const userApps: string[] =
     user.effectiveAccess?.apps
       .filter((app) => app.licensed && app.hasAccess)
-      .map((app) => app.appId) ??
-    user.apps ??
-    [];
+      .map((app) => app.appId) ?? [];
   const businessName = user?.businessName || '';
   const fullName = user?.fullName || user?.email || '';
   const [requested, setRequested] = useState<Set<string>>(new Set());
@@ -466,7 +482,6 @@ function BusinessRoute(): React.JSX.Element | null {
         const effectiveAccess = parseEffectiveAccess(res.effectiveAccess);
         setUser({
           ...res,
-          dashRole: res.dashRole ?? effectiveAccess?.dashRole ?? undefined,
           effectiveAccess: effectiveAccess ?? undefined,
           provisioningStatus: res.provisioningStatus
             ? {
@@ -562,43 +577,10 @@ function BusinessRoute(): React.JSX.Element | null {
     return <MFAAccessGate enrollmentRequired={!provisioningStatus.mfaEnrolled} />;
   }
 
-  // The normalized access document is authoritative when present. Legacy role
-  // routing remains only for the migration window when the server did not send
-  // that document.
-  const role = (user?.role ?? '').toLowerCase();
-  const dashRole = (user?.dashRole ?? '').toLowerCase();
-  const hasManagementRole = user?.effectiveAccess
-    ? user.effectiveAccess.dashPermissions.some(
-        (permission) =>
-          permission === 'hub:team:edit' ||
-          permission === 'hub:roles:view' ||
-          permission === 'hub:licenses:manage'
-      )
-    : // `owner` and `dashRole` belong here, matching isAdminOrOwner's legacy
-      // arm. Without them, treating an omitted isOwner as "not an owner"
-      // below would restrict a legacy owner whose marker was never set.
-      role === 'admin' || role === 'owner' || dashRole === 'admin' || dashRole === 'owner';
-  const staffAllowedPaths = user?.effectiveAccess
-    ? ['/settings/account', '/security']
-    : ['/settings/account', '/security', ...(ROLE_SCOPED_PATHS[role] ?? [])];
-
-  // `!== true`, not `=== false`. StoredUser.isOwner is optional, so a hydrated
-  // user like { role: 'staff', isOwner: undefined, effectiveAccess: undefined }
-  // matched neither branch of `=== false` and fell through to the full app.
-  // Deny by default: ownership has to be asserted, not merely un-denied. This
-  // is the render-layer half of the same rule isAdminOrOwner applies in the
-  // route loader, whose own comment noted this guard was the lenient one.
-  if (
-    user &&
-    user.isOwner !== true &&
-    !hasManagementRole &&
-    !staffAllowedPaths.some((p) => pathname.startsWith(p))
-  ) {
+  if (user && !canAccessDashPath(user, pathname)) {
     return <StaffView user={user} />;
   }
 
-  // Owners, admins/operators, and role-scoped members (on their allowed
-  // paths above) reach here.
   return <Outlet />;
 }
 

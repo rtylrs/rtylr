@@ -112,16 +112,3 @@ func TestCreatePurchaseOrder_ValidatesNestedItemsBeforeRepository(t *testing.T) 
 		t.Fatalf("expected ErrInvalidPurchaseOrder, got %v", err)
 	}
 }
-
-func TestCanApprovePurchaseOrder(t *testing.T) {
-	for _, role := range []string{"owner", "admin", "operator", " ADMIN "} {
-		if !canApprovePurchaseOrder(role) {
-			t.Errorf("canApprovePurchaseOrder(%q) = false, want true", role)
-		}
-	}
-	for _, role := range []string{"billing", "staff", "viewer", ""} {
-		if canApprovePurchaseOrder(role) {
-			t.Errorf("canApprovePurchaseOrder(%q) = true, want false", role)
-		}
-	}
-}

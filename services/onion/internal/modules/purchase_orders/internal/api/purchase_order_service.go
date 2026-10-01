@@ -173,7 +173,7 @@ func (a *PurchaseOrderAPI) ApprovePurchaseOrder(ctx context.Context, req *erppur
 	if err != nil {
 		return nil, err
 	}
-	if approveErr := a.Service.ApprovePurchaseOrder(ctx, ownerID, req.GetId(), authUser.UserID, authUser.Role); approveErr != nil {
+	if approveErr := a.Service.ApprovePurchaseOrder(ctx, ownerID, req.GetId(), authUser.UserID); approveErr != nil {
 		if errors.Is(approveErr, domain.ErrPurchaseOrderNotFound) {
 			return nil, purchaseOrderStatusError(http.StatusNotFound, "Purchase order not found")
 		}
@@ -185,9 +185,6 @@ func (a *PurchaseOrderAPI) ApprovePurchaseOrder(ctx context.Context, req *erppur
 		}
 		if errors.Is(approveErr, domain.ErrPurchaseOrderSelfApproval) {
 			return nil, purchaseOrderStatusError(http.StatusForbidden, "Purchase order creators cannot approve their own orders")
-		}
-		if errors.Is(approveErr, domain.ErrPurchaseOrderApprovalForbidden) {
-			return nil, onekiterrors.PermissionDenied()
 		}
 		if errors.Is(approveErr, domain.ErrPurchaseOrderInvalidTransition) {
 			return nil, purchaseOrderStatusError(http.StatusConflict, "Purchase order cannot be approved from its current status")

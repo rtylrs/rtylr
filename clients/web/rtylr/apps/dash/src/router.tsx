@@ -11,7 +11,7 @@ import {
 import { ErrorBoundary } from '@voxire/ui';
 import { Spinner } from '@voxire/components';
 import { BusinessRoute } from './shared/utils/BusinessRoute';
-import { isAdminOrOwner } from './shared/utils/requireAdminOrOwner';
+import { canManageDash } from './shared/utils/canManageDash';
 import { useUserStore } from './shared/stores/userStore';
 import AppLayout from './layouts/AppLayout';
 import SettingsLayout from './features/settings/Settings/components/SettingsLayout';
@@ -68,11 +68,10 @@ const wrap = (children: React.ReactNode) => (
   </AppLayout>
 );
 
-const requireAdminOrOwner = () => {
+const requireDashManagement = () => {
   const user = useUserStore.getState().user;
-  // Deny by default (including unhydrated users) and let BusinessRoute drive
-  // the auth/onboarding redirect. Previously a null user passed the guard.
-  if (!isAdminOrOwner(user)) {
+  // Deny until Dash access has been hydrated; BusinessRoute handles the session.
+  if (!canManageDash(user)) {
     throw redirect({ to: '/' });
   }
 };
@@ -190,7 +189,7 @@ const teamMemberDetailRoute = createRoute({
 const permissionsRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/permissions',
-  beforeLoad: requireAdminOrOwner,
+  beforeLoad: requireDashManagement,
   component: () => wrap(<Permissions />),
 });
 
@@ -200,7 +199,7 @@ const rolesRoute = createRoute({
   validateSearch: z.object({
     create: z.literal(1).optional().catch(undefined),
   }),
-  beforeLoad: requireAdminOrOwner,
+  beforeLoad: requireDashManagement,
   component: () => wrap(<Roles />),
 });
 
@@ -213,7 +212,7 @@ const appsRoute = createRoute({
 const auditRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/audit',
-  beforeLoad: requireAdminOrOwner,
+  beforeLoad: requireDashManagement,
   component: () => wrap(<Audit />),
 });
 
@@ -238,14 +237,14 @@ const billingRedirectRoute = createRoute({
 const apiKeysRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/api-keys',
-  beforeLoad: requireAdminOrOwner,
+  beforeLoad: requireDashManagement,
   component: () => wrap(<ApiKeys />),
 });
 
 const webhooksRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/webhooks',
-  beforeLoad: requireAdminOrOwner,
+  beforeLoad: requireDashManagement,
   component: () => wrap(<Webhooks />),
 });
 

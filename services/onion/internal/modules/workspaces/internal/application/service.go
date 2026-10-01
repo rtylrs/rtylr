@@ -92,9 +92,8 @@ type Service struct {
 	// safe while the API bootstrap wires the HR-owned provider.
 	labourCosts labourcost.Provider
 
-	// hubProfiles resolves the central effective-access payload used by Flow's
-	// business-wide reporting visibility. Project and workspace authorization
-	// remains owned by Flow resource membership.
+	// hubProfiles resolves central access for Flow reporting and business
+	// administrators, while member-level resource access remains Flow-owned.
 	hubProfiles hubprofile.Resolver
 
 	// orgchart resolves who reports to a caller, backing the dept-manager

@@ -4,8 +4,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'sonner';
 import { bootObservability } from '@voxire/observability';
-import { loadRuntimeConfig } from '@voxire/config';
-import { FullScreenLoader } from '@voxire/components';
 import { router } from './router';
 import i18next from './shared/services/i18next';
 import { queryClient } from './shared/lib/react-query';
@@ -22,17 +20,12 @@ const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  // Await runtime config (self-host) before rendering; loader meanwhile, static
-  // hosted defaults on failure. Hosted is unchanged.
-  root.render(<FullScreenLoader />);
-  void loadRuntimeConfig().finally(() => {
-    root.render(
-      <QueryClientProvider client={queryClient}>
-        <I18nextProvider i18n={i18next}>
-          <RouterProvider router={router} />
-          <Toaster expand={false} richColors position="top-right" />
-        </I18nextProvider>
-      </QueryClientProvider>
-    );
-  });
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <I18nextProvider i18n={i18next}>
+        <RouterProvider router={router} />
+        <Toaster expand={false} richColors position="top-right" />
+      </I18nextProvider>
+    </QueryClientProvider>
+  );
 }

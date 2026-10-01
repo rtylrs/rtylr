@@ -55,7 +55,6 @@ func hrMemberRequest(t *testing.T, method, path string, permissions []string, se
 // used to be gated on one, so the middleware refused the person the invite was
 // addressed to before the handler's own identity and email checks could run.
 func TestHRInviteAcceptAndVerifyReachAUserWithoutEmployeePermissions(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	for _, tc := range []struct{ method, path string }{
 		{http.MethodPost, "/hr/employees/invite/accept"},
@@ -76,7 +75,6 @@ func TestHRInviteAcceptAndVerifyReachAUserWithoutEmployeePermissions(t *testing.
 // another person's account and must stay behind hr:employees:manage, as must
 // every other /hr/employees route and any longer path under the exempt ones.
 func TestHRInviteExemptionDoesNotCoverIssuingOrLongerPaths(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	for _, tc := range []struct {
 		name       string

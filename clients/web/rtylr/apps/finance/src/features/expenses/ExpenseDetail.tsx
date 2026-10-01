@@ -47,8 +47,7 @@ const ExpenseDetail: React.FC = () => {
   const rejectMut = useRejectExpense();
   const [receipt, setReceipt] = React.useState<string | null>(null);
   const [savingReceipt, setSavingReceipt] = React.useState(false);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canApproveExpense = canFinancePermission(role, 'finance:expenses:approve');
+  const canApproveExpense = canFinancePermission('finance:expenses:approve');
 
   const categoryName = React.useMemo(() => {
     if (expense?.categoryId == null) return 'Uncategorized';

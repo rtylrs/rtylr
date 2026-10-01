@@ -21,7 +21,6 @@ func inventoryToolUser(permissions ...string) *authPkg.AuthUser {
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "erp", ID: "9201"}},
 			}},
 		},
 	}
@@ -46,7 +45,6 @@ func assertInventoryToolDenied(t *testing.T, toolName string, output map[string]
 // erp.set_stock is a write tool whose HTTP twin requires erp:inventory:adjust.
 // A caller holding only the inventory read permission must not reach it.
 func TestSetStockToolDeniesCallerWithoutAdjustPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	readOnly := authPkg.WithAuthUser(context.Background(), inventoryToolUser("erp:inventory:view"))
 	output, handled, err := (&Module{}).ExecuteCaretTool(readOnly, setStockToolName, map[string]any{"product_id": 7, "quantity": 5})
@@ -58,7 +56,6 @@ func TestSetStockToolDeniesCallerWithoutAdjustPermission(t *testing.T) {
 }
 
 func TestSetStockToolAllowsCallerWithAdjustPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	ctx := authPkg.WithAuthUser(context.Background(), inventoryToolUser("erp:inventory:view", "erp:inventory:adjust"))
 	_, handled, err := (&Module{}).ExecuteCaretTool(ctx, setStockToolName, map[string]any{"product_id": 7, "quantity": 5})
@@ -73,7 +70,6 @@ func TestSetStockToolAllowsCallerWithAdjustPermission(t *testing.T) {
 }
 
 func TestSetStockToolDenyPrecedesTenantAndServiceWork(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	// A caller with no inventory grant must be rejected by the gate, not by
 	// input parsing or tenant resolution, so the rejection cannot be used to
@@ -84,7 +80,6 @@ func TestSetStockToolDenyPrecedesTenantAndServiceWork(t *testing.T) {
 }
 
 func TestInventoryToolAuthorizationIgnoresTenantFromToolInput(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	spoofed := map[string]any{"product_id": 7, "quantity": 5, "business_id": 9201, "owner_id": 9101}
 	readOnly := authPkg.WithAuthUser(context.Background(), inventoryToolUser("erp:inventory:view"))
@@ -105,7 +100,6 @@ func TestInventoryToolAuthorizationIgnoresTenantFromToolInput(t *testing.T) {
 // declared permission without an executor is a hard error rather than a silent
 // pass-through to the next executor in the chain.
 func TestInventoryToolPermissionsCoverEveryDispatchedTool(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	dispatched := []string{listProductsToolName, setStockToolName}
 	for _, toolName := range dispatched {

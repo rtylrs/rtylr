@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Quotes from './Quotes';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const quote = {
   id: 'Q-100',
@@ -14,12 +15,24 @@ const quote = {
   expiresAt: '2026-07-24',
 };
 
-const mocks = vi.hoisted(() => ({ useQuotesMock: vi.fn(), role: 'admin' as string | null }));
+const mocks = vi.hoisted(() => ({ useQuotesMock: vi.fn(), effectiveAccess: undefined as unknown }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (
-    selector: (state: { user: { role: string | null }; role: string | null }) => unknown
-  ) => selector({ user: { role: mocks.role }, role: mocks.role }),
+  useUserStore: Object.assign(
+    (
+      selector: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      selector({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -80,11 +93,11 @@ beforeAll(async () => {
 describe('Quotes table', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isOwner: true });
     mocks.useQuotesMock.mockReturnValue({
       data: { quotes: [quote], hasMore: false },
       isLoading: false,
     });
-    mocks.role = 'admin';
   });
 
   it('formats the Issued timestamp as a readable date', () => {
@@ -108,7 +121,9 @@ describe('Quotes table', () => {
   });
 
   it('hides quote mutations from a viewer', () => {
-    mocks.role = 'viewer';
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:quotes:view'],
+    });
 
     render(<Quotes />);
 
@@ -121,11 +136,11 @@ describe('Quotes table', () => {
 describe('Quotes empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isOwner: true });
     mocks.useQuotesMock.mockReturnValue({
       data: { quotes: [], hasMore: false },
       isLoading: false,
     });
-    mocks.role = 'admin';
   });
 
   it('renders the shared EmptyState CTA and opens the new quote modal on click', () => {

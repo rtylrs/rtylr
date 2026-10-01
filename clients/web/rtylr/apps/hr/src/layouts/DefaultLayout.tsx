@@ -4,8 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
-import { useUserStore } from '@voxire/auth';
-import { LicenseBanner } from '@voxire/components';
+import { parseEffectiveAccess, useUserStore } from '@voxire/auth';
 import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -51,7 +50,7 @@ import {
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
 import { useForesightLinks } from '@voxire/utils';
-import { licenseClient, userClient } from '../shared/lib/clients';
+import { userClient } from '../shared/lib/clients';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import { signOutFromHR } from '../shared/lib/hrSignOut';
 import CommandPalette from '../shared/components/CommandPalette';
@@ -584,7 +583,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const [theme, setTheme] = useTheme();
   const hrUser = useUserStore((s) => s.user);
-  const role = useUserStore((s) => s.user?.role ?? s.role);
+  const effectiveAccess = hrUser?.effectiveAccess;
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
     if (hrUser?.name || hrUser?.email) return;
@@ -592,7 +591,15 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
       .getMe({})
       .then((res) => {
         if (res?.id) {
-          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
+          setAuthUser({
+            id: String(res.id),
+            businessId: String(res.businessId),
+            name: res.fullName ?? '',
+            email: res.email ?? '',
+            businessName: res.businessName ?? '',
+            isConsoleAdmin: res.isConsoleAdmin,
+            effectiveAccess: parseEffectiveAccess(res.effectiveAccess) ?? undefined,
+          });
         }
       })
       .catch(() => undefined);
@@ -610,7 +617,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     section.items.filter(
       (item) =>
         (!item.configGuard || item.configGuard(timeTrackingModel, config)) &&
-        (!item.permission || canHrPermission(role, item.permission))
+        (!item.permission || canHrPermission(item.permission))
     )
   );
   const visibleNavPaths = new Set(visibleNavItems.map((item) => item.path));
@@ -1024,7 +1031,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <LicenseBanner client={licenseClient} />
         <AnimatePresence mode="wait">
           <motion.main
             key={pathname}

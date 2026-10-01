@@ -144,11 +144,6 @@ func (s *Service) employeeIDForUser(ctx context.Context, businessID, userID int6
 }
 
 func equipmentUserCanManage(user *authPkg.AuthUser) bool {
-	if authPkg.LegacyAuthorizationMode() {
-		// Legacy HasAppPermission intentionally degrades to app membership.
-		// Do not inherit that broad fallback for this state-changing action.
-		return authPkg.IsBusinessAdmin(user) || authPkg.HasAnyRole(user, "manager", "hr_admin", "admin", "owner", "console_admin")
-	}
 	if authPkg.IsBusinessAdmin(user) {
 		return true
 	}

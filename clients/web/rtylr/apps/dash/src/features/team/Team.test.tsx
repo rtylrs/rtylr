@@ -26,7 +26,16 @@ vi.mock('motion/react', () => ({
   },
 }));
 
-type TeamMember = { id: string; name: string; email: string; role: string };
+type TeamMember = {
+  id: string;
+  name: string;
+  email: string;
+  memberType: string;
+  licensedAppIds: string[];
+  permissionProfileAssignments: unknown[];
+  effectiveAccess: { apps: { appId: string; licensed: boolean }[] };
+  status: string;
+};
 
 const teamData = vi.hoisted(() => ({
   data: { members: [] as TeamMember[], hasMore: false } as
@@ -89,7 +98,18 @@ describe('Team list empty state', () => {
 
   it('shows the search-empty title, description and clear-search action when a search matches nothing', () => {
     teamData.data = {
-      members: [{ id: '1', name: 'Jane Doe', email: 'jane@rtylr.com', role: 'admin' }],
+      members: [
+        {
+          id: '1',
+          name: 'Jane Doe',
+          email: 'jane@rtylr.com',
+          memberType: 'admin',
+          licensedAppIds: [],
+          permissionProfileAssignments: [],
+          effectiveAccess: { apps: [] },
+          status: 'active',
+        },
+      ],
       hasMore: false,
     };
     render(<Team />);
@@ -105,7 +125,18 @@ describe('Team list empty state', () => {
 
   it('clears the search query when the search-empty call-to-action is clicked', () => {
     teamData.data = {
-      members: [{ id: '1', name: 'Jane Doe', email: 'jane@rtylr.com', role: 'admin' }],
+      members: [
+        {
+          id: '1',
+          name: 'Jane Doe',
+          email: 'jane@rtylr.com',
+          memberType: 'admin',
+          licensedAppIds: [],
+          permissionProfileAssignments: [],
+          effectiveAccess: { apps: [] },
+          status: 'active',
+        },
+      ],
       hasMore: false,
     };
     render(<Team />);
@@ -122,7 +153,18 @@ describe('Team list empty state', () => {
 
   it('does not show the empty state when members match', () => {
     teamData.data = {
-      members: [{ id: '1', name: 'Jane Doe', email: 'jane@rtylr.com', role: 'admin' }],
+      members: [
+        {
+          id: '1',
+          name: 'Jane Doe',
+          email: 'jane@rtylr.com',
+          memberType: 'admin',
+          licensedAppIds: [],
+          permissionProfileAssignments: [],
+          effectiveAccess: { apps: [] },
+          status: 'active',
+        },
+      ],
       hasMore: false,
     };
     render(<Team />);

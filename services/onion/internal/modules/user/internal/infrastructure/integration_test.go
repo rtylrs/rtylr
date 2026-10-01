@@ -148,18 +148,6 @@ func TestUser_GetUserBusinessID_NoError(t *testing.T) {
 	}
 }
 
-func TestUser_GetUserRole_Owner(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	role, err := repo.GetUserRole(context.Background(), 1, testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("GetUserRole: %v", err)
-	}
-	if role != "owner" {
-		t.Errorf("expected role owner, got %s", role)
-	}
-}
-
 func TestUser_RecordLogin_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

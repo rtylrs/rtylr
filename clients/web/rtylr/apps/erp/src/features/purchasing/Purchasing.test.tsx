@@ -1,14 +1,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 // i18next is deliberately not mocked. An identity `t` makes an assertion and
 // the component agree on a key, so neither notices the key never resolves
 // (rtylr#1269). The real locale files mean the copy below also proves the lookup.
 
 const mocks = vi.hoisted(() => ({
-  role: 'operator' as string | null,
+  effectiveAccess: undefined as unknown,
   approveMutate: vi.fn(),
 }));
 
@@ -34,8 +35,21 @@ vi.mock('motion/react', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (select: (state: { user: { role: string | null } }) => unknown) =>
-    select({ user: { role: mocks.role } }),
+  useUserStore: Object.assign(
+    (
+      select: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      select({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('./usePurchaseOrders', () => ({
@@ -69,29 +83,32 @@ beforeAll(async () => {
 });
 
 describe('Purchasing approval gating', () => {
+  beforeEach(() => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:purchasing:view'] });
+  });
+
   it('hides the Approve action for an operator', () => {
-    mocks.role = 'operator';
     render(<Purchasing />);
 
     expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
   });
 
   it('hides the Approve action for staff', () => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:purchasing:view'] });
     render(<Purchasing />);
 
     expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
   });
 
   it('shows the Approve action for admin', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isAdmin: true });
     render(<Purchasing />);
 
     expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
   });
 
   it('shows the Approve action for owner', () => {
-    mocks.role = 'owner';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
     render(<Purchasing />);
 
     expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();

@@ -16,12 +16,11 @@ import (
 
 const teamStaffUserID int64 = 1002
 
-func TestTeam_ListPermissions_NoError(t *testing.T) {
+func TestTeam_ListMembers_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.ListPermissions(context.Background(), testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("ListPermissions: %v", err)
+	if _, err := repo.ListStaffUsersByBusinessID(context.Background(), testutil.BusinessID, 20, 0); err != nil {
+		t.Fatalf("ListStaffUsersByBusinessID: %v", err)
 	}
 }
 
@@ -30,14 +29,13 @@ func TestTeam_BulkInvite_ReportsMissingGroup(t *testing.T) {
 	email := fmt.Sprintf("missing-group-invite-%d@test.local", time.Now().UnixNano())
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE user_id IN (SELECT id FROM users WHERE email = ?)", email)
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_app_permissions WHERE user_id IN (SELECT id FROM users WHERE email = ?)", email)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM authorization_business_members WHERE user_id IN (SELECT id FROM users WHERE email = ?)", email)
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE email = ?", email)
 	})
 	service := application.NewService(context.Background(), db)
 	results, err := service.BulkInvite(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.BulkInviteInput{
-		Emails:  []string{email},
-		Role:    domain.RoleStaff,
-		GroupID: 9999999,
+		Emails: []string{email}, MemberType: "member",
+		GroupIDs: []int64{9999999},
 	})
 	if err != nil {
 		t.Fatalf("BulkInvite: %v", err)
@@ -50,30 +48,6 @@ func TestTeam_BulkInvite_ReportsMissingGroup(t *testing.T) {
 	}
 	if !strings.Contains(results[0].Message, "group assignment failed") {
 		t.Fatalf("message = %q, want group assignment failure", results[0].Message)
-	}
-}
-
-func TestTeam_ListPermissions_OwnerScoped(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	perms, err := repo.ListPermissions(context.Background(), testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("ListPermissions: %v", err)
-	}
-	for _, p := range perms {
-		if p.OwnerID != testutil.OwnerID {
-			t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, p.OwnerID)
-		}
-	}
-}
-
-func TestTeam_GetPermissionByUserID_NoError(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	// May be nil if the user has no permissions row
-	_, err := repo.GetPermissionByUserID(context.Background(), teamStaffUserID)
-	if err != nil {
-		t.Fatalf("GetPermissionByUserID: %v", err)
 	}
 }
 
@@ -120,7 +94,7 @@ func TestTeam_IsOnboarded_NoError(t *testing.T) {
 func TestTeam_ListGroups_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.ListGroups(context.Background(), testutil.OwnerID)
+	_, err := repo.ListGroups(context.Background(), testutil.OwnerID, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("ListGroups: %v", err)
 	}
@@ -130,6 +104,7 @@ func TestTeam_CreateGroup_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateGroup(context.Background(), testutil.OwnerID, domain.CreateGroupInput{
+		BusinessID:  testutil.BusinessID,
 		Name:        "Integration Test Group",
 		Description: "Created by integration test",
 		Color:       "#FF5733",
@@ -140,19 +115,19 @@ func TestTeam_CreateGroup_ReturnsPositiveID(t *testing.T) {
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
-	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.OwnerID, testutil.BusinessID, id) })
 }
 
 func TestTeam_CreateGroup_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.CreateGroup(context.Background(), testutil.OwnerID, domain.CreateGroupInput{Name: "ListGroup"})
+	id, err := repo.CreateGroup(context.Background(), testutil.OwnerID, domain.CreateGroupInput{BusinessID: testutil.BusinessID, Name: "ListGroup"})
 	if err != nil {
 		t.Fatalf("CreateGroup: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.DeleteGroup(context.Background(), testutil.OwnerID, testutil.BusinessID, id) })
 
-	groups, err := repo.ListGroups(context.Background(), testutil.OwnerID)
+	groups, err := repo.ListGroups(context.Background(), testutil.OwnerID, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("ListGroups: %v", err)
 	}

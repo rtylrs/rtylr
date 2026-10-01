@@ -36,7 +36,6 @@ import {
 import { useMySubscription } from '../../shared/hooks/queries/useSubscription';
 import { SeatSavingsNote } from '../../shared/components/SeatSavingsNote';
 import { useGroups, useAddGroupMembers } from '../../shared/hooks/queries/useGroups';
-import { legacyRoleToDashRole } from './authorizationDraft';
 import { mailtoFor } from '../../shared/utils/mailto';
 
 const APP_ICONS: Record<
@@ -72,7 +71,7 @@ const Team: React.FC = (): React.JSX.Element => {
   const members = useMemo(() => teamData?.members ?? [], [teamData]);
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [memberTypeFilter, setMemberTypeFilter] = useState<string>('all');
   const [confirm, setConfirm] = useState<TeamMember | null>(null);
   const { data: sub } = useMySubscription();
 
@@ -96,11 +95,11 @@ const Team: React.FC = (): React.JSX.Element => {
         !query.trim() ||
         (m.name || '').toLowerCase().includes(query.toLowerCase()) ||
         (m.email || '').toLowerCase().includes(query.toLowerCase());
-      const matchesRole =
-        roleFilter === 'all' || (m.dashRole ?? legacyRoleToDashRole(m.role)) === roleFilter;
-      return matchesQuery && matchesRole;
+      const memberType = m.isOwner ? 'owner' : m.memberType;
+      const matchesMemberType = memberTypeFilter === 'all' || memberType === memberTypeFilter;
+      return matchesQuery && matchesMemberType;
     });
-  }, [members, query, roleFilter]);
+  }, [members, query, memberTypeFilter]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
@@ -155,7 +154,7 @@ const Team: React.FC = (): React.JSX.Element => {
     try {
       const nonOwnerIds = Array.from(selected).filter((id) => {
         const mem = members.find((m) => m.id === id);
-        return mem && mem.role?.toLowerCase() !== 'owner';
+        return mem && !mem.isOwner;
       });
       if (nonOwnerIds.length === 0) {
         toast.error(t('team.list.ownersCannotBeDeactivated'));
@@ -274,22 +273,21 @@ const Team: React.FC = (): React.JSX.Element => {
           <div className="flex items-center gap-1">
             {[
               { id: 'all', label: t('team.list.filterAll') },
+              { id: 'owner', label: t('common.roleLabels.owner') },
               { id: 'admin', label: t('common.roleLabels.admin') },
-              { id: 'manager', label: t('common.roleLabels.manager') },
               { id: 'member', label: t('common.roleLabels.member') },
-              { id: 'viewer', label: t('common.roleLabels.viewer') },
             ].map((r) => (
               <button
                 type="button"
                 key={r.id}
                 onClick={() => {
-                  setRoleFilter(r.id);
+                  setMemberTypeFilter(r.id);
                   setPage(0);
                 }}
                 className="px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors"
                 style={{
-                  background: roleFilter === r.id ? 'rgba(69,131,196,0.12)' : 'transparent',
-                  color: roleFilter === r.id ? '#4583C4' : 'var(--dash-text-muted)',
+                  background: memberTypeFilter === r.id ? 'rgba(69,131,196,0.12)' : 'transparent',
+                  color: memberTypeFilter === r.id ? '#4583C4' : 'var(--dash-text-muted)',
                 }}
               >
                 {r.label}
@@ -357,7 +355,10 @@ const Team: React.FC = (): React.JSX.Element => {
 
                   {/* Rows */}
                   {paged.map((m) => {
-                    const apps = m.apps ?? [];
+                    const apps =
+                      m.effectiveAccess?.apps
+                        .filter((app) => app.licensed)
+                        .map((app) => app.appId) ?? m.licensedAppIds;
                     const isChecked = selected.has(m.id);
                     const emailHref = mailtoFor(m.email);
                     return (
@@ -407,7 +408,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
                         {/* Role */}
                         <div className="col-span-2">
-                          <RoleBadge role={m.dashRole ?? legacyRoleToDashRole(m.role)} />
+                          <RoleBadge role={m.isOwner ? 'owner' : m.memberType} />
                         </div>
 
                         {/* App licenses */}
@@ -531,7 +532,7 @@ const Team: React.FC = (): React.JSX.Element => {
                                 className="my-1"
                                 style={{ borderTop: '1px solid var(--dash-border)' }}
                               />
-                              {m.role?.toLowerCase() !== 'owner' && (
+                              {!m.isOwner && (
                                 <button
                                   type="button"
                                   className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"

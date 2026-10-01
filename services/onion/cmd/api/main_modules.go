@@ -347,12 +347,10 @@ func initializeModules(ctx context.Context) *apiModules {
 		Timesheets:            timesheets.NewModule(ctx, dbclient.Pool()),
 		Training:              training.NewModule(ctx, dbclient.Pool()),
 		User: func() *user.Module {
-			m := user.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.GoogleOAuthClientID)
-			m.WithBusinessProvisioner(hrCoreModule)
 			cfg := platformConfig.GlobalConfig
-			if cfg.WorkOSClientID != "" {
-				m.WithWorkOS(cfg.WorkOSAPIKey, cfg.WorkOSClientID, cfg.WorkOSRedirectURI)
-			}
+			m := user.NewModule(ctx, dbclient.Pool(), cfg.GoogleOAuthClientID)
+			m.WithBusinessProvisioner(hrCoreModule)
+			m.WithGoogleOAuth(cfg.GoogleOAuthClientID, cfg.GoogleOAuthClientSecret, cfg.GoogleOAuthRedirectURI)
 			return m
 		}(),
 		Variants:   variants.NewModule(ctx, dbclient.Pool()),

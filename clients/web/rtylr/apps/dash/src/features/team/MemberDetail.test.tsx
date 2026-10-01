@@ -24,9 +24,29 @@ type Member = {
   name: string;
   fullName: string;
   email: string;
-  role: string;
-  apps: string[];
+  memberType: string;
+  licensedAppIds: string[];
+  permissionProfileAssignments: {
+    appId: string;
+    permissionProfileIds: string[];
+    assignmentSource: string;
+    status: string;
+    groupId?: string;
+    scopes: { scopeType: string; scopeId: string }[];
+  }[];
   status: string;
+  effectiveAccess?: {
+    apps: {
+      appId: string;
+      licensed: boolean;
+      hasAccess: boolean;
+      permissions: string[];
+      permissionScopes: Record<string, { scopeType: string; scopeId: string }[]>;
+      sources: string[];
+    }[];
+  };
+  isOwner?: boolean;
+  groups?: { id: number; name: string; color: string }[];
 };
 
 const memberState = vi.hoisted(() => ({
@@ -38,10 +58,10 @@ const memberState = vi.hoisted(() => ({
 // Counts MemberDetail renders across the test; the disabled-locations bug
 // re-rendered until React threw "Maximum update depth exceeded".
 const renderState = vi.hoisted(() => ({ memberDetailRenders: 0 }));
+const updateMemberMock = vi.hoisted(() => vi.fn());
 
 const userState = vi.hoisted(() => ({
-  user: { role: '', isOwner: false } as {
-    role: string;
+  user: { isOwner: false } as {
     isOwner: boolean;
     effectiveAccess?: { dashPermissions: string[] };
   },
@@ -61,7 +81,7 @@ vi.mock('../../shared/hooks/queries/useTeam', () => ({
     return memberState;
   },
   useDeactivateMember: () => ({ mutateAsync: vi.fn(), isPending: false }),
-  useUpdateMember: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateMember: () => ({ mutateAsync: updateMemberMock, isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useSubscription', () => ({
@@ -121,9 +141,12 @@ const makeMember = (overrides: Partial<Member>): Member => ({
   name: 'Jane Doe',
   fullName: 'Jane Doe',
   email: 'jane@rtylr.com',
-  role: 'staff',
-  apps: [],
+  memberType: 'member',
+  licensedAppIds: [],
+  permissionProfileAssignments: [],
+  effectiveAccess: { apps: [] },
   status: 'active',
+  groups: [],
   ...overrides,
 });
 
@@ -132,10 +155,11 @@ beforeEach(() => {
   memberState.data = undefined;
   memberState.isLoading = false;
   renderState.memberDetailRenders = 0;
+  updateMemberMock.mockReset();
+  updateMemberMock.mockResolvedValue({});
   posState.locations = [];
   posState.memberLocations = undefined;
   userState.user = {
-    role: 'owner',
     isOwner: true,
     effectiveAccess: { dashPermissions: ['hub:team:edit'] },
   };
@@ -158,11 +182,10 @@ describe('MemberDetail: member-not-found empty state', () => {
 describe('MemberDetail: app-access empty state (permission-gated)', () => {
   it('shows an "assign app" action that opens edit mode when the current user can edit the member', () => {
     userState.user = {
-      role: 'owner',
       isOwner: true,
       effectiveAccess: { dashPermissions: ['hub:team:edit'] },
     };
-    memberState.data = makeMember({ apps: [] });
+    memberState.data = makeMember({ licensedAppIds: [] });
     render(<MemberDetail />);
 
     expect(screen.getByText('team.memberDetail.noAppsAssignedTitle')).toBeInTheDocument();
@@ -176,8 +199,8 @@ describe('MemberDetail: app-access empty state (permission-gated)', () => {
   });
 
   it('shows a refresh fallback instead when the current user cannot edit the member', () => {
-    userState.user = { role: 'staff', isOwner: false, effectiveAccess: { dashPermissions: [] } };
-    memberState.data = makeMember({ apps: [] });
+    userState.user = { isOwner: false, effectiveAccess: { dashPermissions: [] } };
+    memberState.data = makeMember({ licensedAppIds: [] });
     render(<MemberDetail />);
 
     expect(screen.getByText('team.memberDetail.noAppsAssignedTitle')).toBeInTheDocument();
@@ -193,10 +216,69 @@ describe('MemberDetail: app-access empty state (permission-gated)', () => {
   });
 
   it('does not show the empty state when the member has assigned apps', () => {
-    memberState.data = makeMember({ apps: ['erp'] });
+    memberState.data = makeMember({
+      licensedAppIds: ['erp'],
+      effectiveAccess: {
+        apps: [
+          {
+            appId: 'erp',
+            licensed: true,
+            hasAccess: true,
+            permissions: [],
+            permissionScopes: {},
+            sources: ['explicit'],
+          },
+        ],
+      },
+    });
     render(<MemberDetail />);
 
     expect(screen.queryByText('team.memberDetail.noAppsAssignedTitle')).not.toBeInTheDocument();
+  });
+});
+
+describe('MemberDetail: group access stays inherited while editing direct assignments', () => {
+  it('does not convert a group-only app assignment into a direct assignment on save', async () => {
+    groupsState.data = [{ id: 12, name: 'Flow users', color: '#64C5B9' }];
+    memberState.data = makeMember({
+      licensedAppIds: [],
+      permissionProfileAssignments: [
+        {
+          appId: 'flow',
+          permissionProfileIds: ['73'],
+          assignmentSource: 'group',
+          status: 'active',
+          groupId: '12',
+          scopes: [],
+        },
+      ],
+      effectiveAccess: {
+        apps: [
+          {
+            appId: 'flow',
+            licensed: true,
+            hasAccess: true,
+            permissions: ['flow:projects:view'],
+            permissionScopes: {},
+            sources: ['group'],
+          },
+        ],
+      },
+    });
+
+    render(<MemberDetail />);
+    fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.save' }));
+
+    await waitFor(() => expect(updateMemberMock).toHaveBeenCalledTimes(1));
+    expect(updateMemberMock).toHaveBeenCalledWith({
+      id: '1',
+      patch: expect.objectContaining({
+        licensedAppIds: [],
+        permissionProfileAssignments: [],
+        groupIds: [12],
+      }),
+    });
   });
 });
 
@@ -236,7 +318,7 @@ describe('MemberDetail: POS location capabilities (#1028)', () => {
   const saveWithPosLocations = async (): Promise<void> => {
     posState.locations = [{ id: 9001, name: 'Downtown' }];
     posState.memberLocations = [KEPT];
-    memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
+    memberState.data = makeMember({ licensedAppIds: ['pos'] });
 
     render(<MemberDetail />);
     fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
@@ -273,7 +355,7 @@ describe('MemberDetail: POS location capabilities (#1028)', () => {
     posState.memberLocations = [
       { ...KEPT, canManagePosUsers: false, canManageTerminals: true, canViewReports: false },
     ];
-    memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
+    memberState.data = makeMember({ licensedAppIds: ['pos'] });
 
     render(<MemberDetail />);
     fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
@@ -293,7 +375,7 @@ describe('MemberDetail: POS location capabilities (#1028)', () => {
 describe('MemberDetail: member-locations query with no data', () => {
   it('renders a bounded number of times when the query is disabled and empty', () => {
     posState.memberLocations = undefined;
-    memberState.data = makeMember({ apps: ['pos'] });
+    memberState.data = makeMember({ licensedAppIds: ['pos'] });
 
     render(<MemberDetail />);
 
@@ -317,7 +399,7 @@ describe('MemberDetail: member-locations query with no data', () => {
       canViewReports: false,
     };
     posState.memberLocations = [assigned];
-    memberState.data = makeMember({ apps: ['pos'], role: 'manager' });
+    memberState.data = makeMember({ licensedAppIds: ['pos'] });
 
     const { rerender } = render(<MemberDetail />);
     fireEvent.click(screen.getByRole('button', { name: 'common.edit' }));
