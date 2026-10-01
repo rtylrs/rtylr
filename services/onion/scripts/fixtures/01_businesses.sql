@@ -17,5 +17,5 @@ VALUES
 ON DUPLICATE KEY UPDATE member_type = VALUES(member_type), status = VALUES(status);
 
 INSERT INTO subscriptions (owner_id, plan_id, status)
-SELECT 1001, id, 'trial' FROM plans WHERE slug = 'free'
+SELECT 1001, id, 'active' FROM plans WHERE slug = 'free'
 ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status);
