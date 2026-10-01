@@ -12,7 +12,6 @@ func TestDeleteSegmentHandler_RejectsNonManagerBeforeService(t *testing.T) {
 		User: &authPkg.AuthUser{
 			UserID:     7,
 			BusinessID: 42,
-			Role:       "staff",
 		},
 		IsAnonymous: false,
 	}).Ctx(context.Background())

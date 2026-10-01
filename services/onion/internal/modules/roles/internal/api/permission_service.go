@@ -20,25 +20,27 @@ func NewPermissionAPI(service *application.Service) *PermissionAPI {
 	return &PermissionAPI{Service: service}
 }
 
-func (a *PermissionAPI) GetPermissions(ctx context.Context, _ *hubpermissionv1.GetPermissionsRequest) (*hubpermissionv1.GetPermissionsResponse, error) {
+func (a *PermissionAPI) ListPermissionCatalog(ctx context.Context, _ *hubpermissionv1.ListPermissionCatalogRequest) (*hubpermissionv1.ListPermissionCatalogResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil || !canViewRoles(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
-	if bizErr != nil {
+	if _, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-
-	roles, err := a.Service.ListRoles(ctx, businessID)
+	permissions, err := a.Service.ListPermissionCatalog(ctx)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list roles")
+		return nil, roleAPIError(err, "Failed to list permission catalog")
 	}
-
-	return &hubpermissionv1.GetPermissionsResponse{
-		Matrix: buildPermissionMatrix(a.Service.ListPermissions(), roles),
-	}, nil
+	entries := make([]*hubpermissionv1.PermissionDefinition, 0, len(permissions))
+	for _, permission := range permissions {
+		entries = append(entries, &hubpermissionv1.PermissionDefinition{
+			Key: permission.Key, AppId: permission.AppID, Resource: permission.Resource,
+			Action: permission.Action, IsSensitive: permission.IsSensitive, IsHighRisk: permission.IsHighRisk,
+		})
+	}
+	return &hubpermissionv1.ListPermissionCatalogResponse{Permissions: entries}, nil
 }
 
 func (a *PermissionAPI) ListRoles(ctx context.Context, req *hubpermissionv1.ListRolesRequest) (*hubpermissionv1.ListRolesResponse, error) {
@@ -112,79 +114,6 @@ func (a *PermissionAPI) CreateRole(ctx context.Context, req *hubpermissionv1.Cre
 	return &hubpermissionv1.CreateRoleResponse{
 		Role: toProtoRole(role),
 	}, nil
-}
-
-func (a *PermissionAPI) UpdatePermissionMatrix(ctx context.Context, req *hubpermissionv1.UpdatePermissionMatrixRequest) (*hubpermissionv1.UpdatePermissionMatrixResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if !canEditRoles(device.User) {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
-	if bizErr != nil {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
-	rolePage, err := a.Service.ListManagedRoles(ctx, businessID, domain.RoleFilter{})
-	if err != nil {
-		return nil, roleAPIError(err, "Failed to list roles")
-	}
-
-	roleName := req.GetRole()
-	permKey := req.GetPermissionKey()
-	var target *domain.Role
-	for i := range rolePage.Roles {
-		if rolePage.Roles[i].Name == roleName {
-			target = &rolePage.Roles[i]
-			break
-		}
-	}
-	if target == nil {
-		return nil, onekiterrors.New(http.StatusNotFound, "Role not found")
-	}
-
-	perms := target.Permissions
-	if perms == nil {
-		perms = []string{}
-	}
-	if req.GetEnabled() {
-		found := false
-		for _, p := range perms {
-			if p == permKey {
-				found = true
-				break
-			}
-		}
-		if !found {
-			perms = append(perms, permKey)
-		}
-	} else {
-		filtered := make([]string, 0, len(perms))
-		for _, p := range perms {
-			if p != permKey {
-				filtered = append(filtered, p)
-			}
-		}
-		perms = filtered
-	}
-	if !canDelegateRoleMutation(device.User, target.AppID, perms) {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
-	if _, err := a.Service.UpdateManagedRole(ctx, businessID, device.User.UserID, domain.UpdateRoleInput{
-		ID:           target.ID,
-		Name:         target.Name,
-		Description:  target.Description,
-		AppID:        target.AppID,
-		Level:        target.Level,
-		ParentRoleID: target.ParentRoleID,
-		ScopeRules:   target.ScopeRules,
-		Permissions:  perms,
-	}); err != nil {
-		return nil, roleAPIError(err, "Failed to update permission matrix")
-	}
-
-	return &hubpermissionv1.UpdatePermissionMatrixResponse{Success: true}, nil
 }
 
 func (a *PermissionAPI) UpdateRole(ctx context.Context, req *hubpermissionv1.UpdateRoleRequest) (*hubpermissionv1.UpdateRoleResponse, error) {

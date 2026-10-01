@@ -213,8 +213,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile(900);
   const { data: settings } = useHrSettings();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const showCompensation = canViewCompensation(role);
+  const showCompensation = canViewCompensation();
 
   const {
     data: dashboardResponse,

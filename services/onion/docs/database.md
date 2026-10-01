@@ -5,7 +5,7 @@ The rtylr backend uses MySQL. All schema files live in `onion/internal/platform/
 - **Production credentials (host, database, user, password):** stored as deployment environment variables only. Never commit them to this repository or any documentation. Operators retrieve them from the deployment platform's secret store.
 - **Engine:** MySQL (InnoDB)
 - **Primary keys:** `BIGINT NOT NULL AUTO_INCREMENT`
-- **Multi-tenancy:** Every table that is tenant-scoped has an `owner_id BIGINT NOT NULL` column referencing `users.id`
+- **Multi-tenancy:** Tenant data is scoped by `business_id`; business ownership is recorded by `businesses.owner_id`.
 
 ---
 
@@ -50,20 +50,22 @@ Core user accounts. Every person who logs in to any rtylr app has a row here.
 | `created_at` | TIMESTAMP | |
 | `updated_at` | TIMESTAMP | |
 
-### `user_app_permissions`
-Controls which apps each staff user can access and what role they have within a business account.
+### Authorization tables
+Membership, app licenses and permission profiles are stored separately. The
+effective-access resolver combines active assignments for a business member.
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | BIGINT PK | |
-| `owner_id` | BIGINT | The business owner's user ID |
-| `user_id` | BIGINT | The staff member's user ID |
-| `apps` | JSON | Array of AppId strings: `["pos","erp","hr"]` |
-| `role` | ENUM | `admin`, `operator`, `staff`, `viewer` |
-| `is_active` | BOOLEAN | |
-| `created_at` / `updated_at` | TIMESTAMP | |
+| Table | Responsibility |
+|-------|----------------|
+| `authorization_business_members` | One membership and member type (`member` or `admin`) per business and user, with lifecycle status and authorization version. The owner is derived from `businesses.owner_id`. |
+| `authorization_license_assignments` | Direct or group license assignments for a specific app. Owners and admins inherit the business subscription's app set. |
+| `authorization_roles` / `authorization_role_permissions` | Permission profiles and the permission keys each profile grants. |
+| `authorization_role_assignments` / `authorization_role_assignment_scopes` | Direct or group profile assignments, optionally scoped to supported resources. |
+| `user_groups` / `user_group_members` | Business-scoped groups and their member links. |
 
-Unique constraint: `(owner_id, user_id)` — one permission row per user per business.
+An app grant requires an active license and an active permission profile
+assignment. Resource-scoped apps also require the requested resource to match an
+assignment scope. Business owners and admins receive the app's full permission
+set and business-wide resource access.
 
 ### `config`
 Business configuration (branding, contact info, feature flags).
@@ -422,7 +424,9 @@ Simple refund record. Columns: `order_id`, `amount`, `reason`, `refunded_by`, `r
 
 ```
 users
-  └─ user_app_permissions (owner_id, user_id)
+  └─ authorization_business_members (business_id, user_id)
+  └─ authorization_license_assignments (business_id, user_id or group_id)
+  └─ authorization_role_assignments (business_id, user_id or group_id)
   └─ config (owner_id)
   └─ themes (owner_id)
 

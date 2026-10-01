@@ -68,8 +68,9 @@ describe('useTeam', () => {
           id: '1',
           fullName: 'Alice',
           email: 'alice@test.com',
-          role: 'admin',
-          apps: [],
+          memberType: 'admin',
+          licensedAppIds: [],
+          permissionProfileAssignments: [],
           isActive: true,
           createdAt: '',
         },
@@ -90,8 +91,9 @@ describe('useTeam', () => {
           id: '51',
           fullName: 'Fifty-first member',
           email: 'member51@test.com',
-          role: 'staff',
-          apps: [],
+          memberType: 'member',
+          licensedAppIds: [],
+          permissionProfileAssignments: [],
           isActive: true,
           createdAt: '',
         },
@@ -127,8 +129,9 @@ describe('useTeam', () => {
           id: '1',
           fullName: '',
           email: 'fallback@test.com',
-          role: 'viewer',
-          apps: [],
+          memberType: 'member',
+          licensedAppIds: [],
+          permissionProfileAssignments: [],
           isActive: true,
           createdAt: '',
         },
@@ -158,9 +161,10 @@ describe('useMember', () => {
         id: '5',
         fullName: 'Charlie',
         email: 'c@c.com',
-        role: 'staff',
+        memberType: 'member',
         isActive: true,
-        apps: ['pos'],
+        licensedAppIds: ['pos'],
+        permissionProfileAssignments: [],
         createdAt: '',
         groups: [],
       },
@@ -192,24 +196,22 @@ describe('useInviteMember', () => {
       await result.current.mutateAsync({
         email: 'new@test.com',
         fullName: 'New User',
-        role: 'staff',
-        apps: ['pos'],
+        memberType: 'member',
+        licensedAppIds: ['pos'],
+        permissionProfileAssignments: [],
       });
     });
 
     expect(mockInvitationsClient.inviteUser).toHaveBeenCalledWith({
       email: 'new@test.com',
       fullName: 'New User',
-      role: 'staff',
-      apps: ['pos'],
+      memberType: 'member',
+      licensedAppIds: ['pos'],
+      permissionProfileAssignments: [],
     });
   });
 
-  // #945 reported that a single invite's group assignment was silently dropped.
-  // That part is fixed: `groupId` is translated into the contract's `group_ids`.
-  // What remained was an ordering bug, since the singular spread sat after the
-  // plural one and replaced it.
-  it('merges a singular groupId into the group list rather than replacing it', async () => {
+  it('deduplicates group assignments', async () => {
     mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
 
     const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
@@ -218,38 +220,18 @@ describe('useInviteMember', () => {
       await result.current.mutateAsync({
         email: 'both@test.com',
         fullName: 'Both Inputs',
-        role: 'staff',
-        apps: ['pos'],
-        groupIds: [11, 12],
-        groupId: 13,
+        memberType: 'member',
+        licensedAppIds: ['pos'],
+        permissionProfileAssignments: [],
+        groupIds: [11, 12, 12],
       });
     });
 
     const sent = mockInvitationsClient.inviteUser.mock.calls[0][0] as { groupIds: string[] };
-    expect(sent.groupIds).toEqual(['11', '12', '13']);
+    expect(sent.groupIds).toEqual(['11', '12']);
   });
 
-  it('sends a singular groupId as the contract group list', async () => {
-    mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
-
-    const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
-
-    await act(async () => {
-      await result.current.mutateAsync({
-        email: 'single@test.com',
-        fullName: 'Single Group',
-        role: 'staff',
-        apps: ['pos'],
-        groupId: 7,
-      });
-    });
-
-    expect(mockInvitationsClient.inviteUser).toHaveBeenCalledWith(
-      expect.objectContaining({ groupIds: ['7'] })
-    );
-  });
-
-  it('does not duplicate a group named by both inputs', async () => {
+  it('does not send duplicate group IDs', async () => {
     mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
 
     const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
@@ -258,10 +240,10 @@ describe('useInviteMember', () => {
       await result.current.mutateAsync({
         email: 'dupe@test.com',
         fullName: 'Duplicate',
-        role: 'staff',
-        apps: ['pos'],
-        groupIds: [5],
-        groupId: 5,
+        memberType: 'member',
+        licensedAppIds: ['pos'],
+        permissionProfileAssignments: [],
+        groupIds: [5, 5],
       });
     });
 
@@ -278,8 +260,9 @@ describe('useInviteMember', () => {
       await result.current.mutateAsync({
         email: 'nogroup@test.com',
         fullName: 'No Group',
-        role: 'staff',
-        apps: ['pos'],
+        memberType: 'member',
+        licensedAppIds: ['pos'],
+        permissionProfileAssignments: [],
       });
     });
 
@@ -295,8 +278,9 @@ describe('useInviteMember', () => {
       await result.current.mutateAsync({
         email: 'manual@test.com',
         fullName: 'Manual User',
-        role: 'admin',
-        apps: ['dash'],
+        memberType: 'admin',
+        licensedAppIds: [],
+        permissionProfileAssignments: [],
         username: 'manual-user',
         temporaryPassword: 'strong-password',
       });
@@ -305,8 +289,9 @@ describe('useInviteMember', () => {
     expect(mockInvitationsClient.inviteUser).toHaveBeenCalledWith({
       email: 'manual@test.com',
       fullName: 'Manual User',
-      role: 'admin',
-      apps: ['dash'],
+      memberType: 'admin',
+      licensedAppIds: [],
+      permissionProfileAssignments: [],
       username: 'manual-user',
       temporaryPassword: 'strong-password',
     });
@@ -340,15 +325,42 @@ describe('useUpdateMember', () => {
     await act(async () => {
       await result.current.mutateAsync({
         id: '42',
-        patch: { fullName: 'Edited User', role: 'admin', apps: ['pos', 'finance'] },
+        patch: {
+          fullName: 'Edited User',
+          memberType: 'admin',
+          licensedAppIds: ['pos', 'finance'],
+          permissionProfileAssignments: [],
+        },
       });
     });
 
     expect(mockPermissionsClient.updatePermissions).toHaveBeenCalledWith({
       userId: '42',
       fullName: 'Edited User',
-      apps: ['pos', 'finance'],
-      role: 'admin',
+      memberType: 'admin',
+      replaceLicensedAppIds: true,
+      licensedAppIds: ['pos', 'finance'],
+      replacePermissionProfileAssignments: true,
+      permissionProfileAssignments: [],
+      replaceGroupIds: false,
+    });
+  });
+
+  it('does not turn an unrelated profile update into an app and role reset', async () => {
+    mockPermissionsClient.updatePermissions.mockResolvedValue({});
+
+    const { result } = renderHook(() => useUpdateMember(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({ id: '42', patch: { fullName: 'Edited User' } });
+    });
+
+    expect(mockPermissionsClient.updatePermissions).toHaveBeenCalledWith({
+      userId: '42',
+      fullName: 'Edited User',
+      replaceLicensedAppIds: false,
+      replacePermissionProfileAssignments: false,
+      replaceGroupIds: false,
     });
   });
 
@@ -359,8 +371,9 @@ describe('useUpdateMember', () => {
           id: '42',
           fullName: 'Old Name',
           email: 'member@test.com',
-          role: 'staff',
-          apps: ['pos'],
+          memberType: 'member',
+          licensedAppIds: ['pos'],
+          permissionProfileAssignments: [],
           isActive: true,
           createdAt: '',
         },
@@ -371,8 +384,9 @@ describe('useUpdateMember', () => {
         id: '42',
         fullName: 'Old Name',
         email: 'member@test.com',
-        role: 'staff',
-        apps: ['pos'],
+        memberType: 'member',
+        licensedAppIds: ['pos'],
+        permissionProfileAssignments: [],
         isActive: true,
         createdAt: '',
         groups: [],
@@ -391,31 +405,40 @@ describe('useUpdateMember', () => {
     await act(async () => {
       await update.result.current.mutateAsync({
         id: '42',
-        patch: { fullName: 'New Name', role: 'admin', apps: ['erp', 'flow'] },
+        patch: {
+          fullName: 'New Name',
+          memberType: 'admin',
+          licensedAppIds: ['erp', 'flow'],
+          permissionProfileAssignments: [],
+        },
       });
     });
 
     expect(mockPermissionsClient.updatePermissions).toHaveBeenCalledWith({
       userId: '42',
       fullName: 'New Name',
-      apps: ['erp', 'flow'],
-      role: 'admin',
+      memberType: 'admin',
+      replaceLicensedAppIds: true,
+      licensedAppIds: ['erp', 'flow'],
+      replacePermissionProfileAssignments: true,
+      permissionProfileAssignments: [],
+      replaceGroupIds: false,
     });
 
     await waitFor(() =>
       expect(team.result.current.data?.members[0]).toMatchObject({
         fullName: 'New Name',
         name: 'New Name',
-        role: 'admin',
-        apps: ['erp', 'flow'],
+        memberType: 'admin',
+        licensedAppIds: ['erp', 'flow'],
       })
     );
     await waitFor(() =>
       expect(member.result.current.data).toMatchObject({
         fullName: 'New Name',
         name: 'New Name',
-        role: 'admin',
-        apps: ['erp', 'flow'],
+        memberType: 'admin',
+        licensedAppIds: ['erp', 'flow'],
       })
     );
   });

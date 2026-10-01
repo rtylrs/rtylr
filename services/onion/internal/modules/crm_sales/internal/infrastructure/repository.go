@@ -117,8 +117,8 @@ func (r *Repository) ValidateLeadAssignee(ctx context.Context, businessID, userI
 		SELECT EXISTS(
 			SELECT 1 FROM businesses b
 			WHERE b.id = ? AND (b.owner_id = ? OR EXISTS (
-				SELECT 1 FROM user_business_access uba
-				WHERE uba.business_id = b.id AND uba.user_id = ?
+				SELECT 1 FROM authorization_business_members member
+				WHERE member.business_id = b.id AND member.user_id = ? AND member.status = 'active'
 			))
 		)`, businessID, userID, userID).Scan(&exists)
 	if err != nil {

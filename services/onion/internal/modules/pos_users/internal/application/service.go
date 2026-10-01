@@ -168,7 +168,6 @@ func (s *Service) Deactivate(ctx context.Context, businessID, id int64) error {
 type SetPINActor struct {
 	UserID          int64
 	IsOwner         bool
-	TeamRole        string
 	EffectiveAccess *authorization.EffectiveAccess
 }
 

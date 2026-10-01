@@ -99,14 +99,15 @@ func grantMemberAccess(t *testing.T, db *sql.DB, businessID int64) {
 	t.Helper()
 	ctx := context.Background()
 	if _, err := db.ExecContext(ctx,
-		`INSERT IGNORE INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'staff')`,
-		memberUserID, businessID,
+		`INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+		 VALUES (?, ?, 'member', 'active')`,
+		businessID, memberUserID,
 	); err != nil {
 		t.Fatalf("grant member access to business %d: %v", businessID, err)
 	}
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(context.Background(),
-			`DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?`, memberUserID, businessID)
+			`DELETE FROM authorization_business_members WHERE user_id = ? AND business_id = ?`, memberUserID, businessID)
 	})
 }
 

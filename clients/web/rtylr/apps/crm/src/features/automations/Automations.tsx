@@ -17,8 +17,7 @@ import { canCrmPermission } from '../../shared/lib/crmPermissions';
 const Automations: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageAutomations = canCrmPermission(role, 'crm:automations');
+  const canManageAutomations = canCrmPermission('crm:automations:manage');
   const { data: fetched, isLoading, isError, refetch } = useListAutomations();
   const updateAutomation = useUpdateAutomation();
   const removeAutomation = useDeleteAutomation();

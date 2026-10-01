@@ -402,11 +402,9 @@
   },
   "settings": {
     "team": {
-      "empty": {
-        "title": "No team members yet."
-      },
-      "invite": "Invite member",
-      "refresh": "Refresh"
+      "managementTitle": "Team access",
+      "managementDescription": "Manage members, groups, app licenses, and permissions together in Dash.",
+      "managementAction": "Open team management"
     }
   },
   "barcodes": {

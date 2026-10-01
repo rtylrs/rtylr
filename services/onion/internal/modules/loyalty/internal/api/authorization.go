@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"strings"
+	"github.com/voxire/onion/internal/platform/authorization"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -13,10 +13,8 @@ func requireLoyaltyManager(ctx context.Context) error {
 	if device.User == nil {
 		return onekiterrors.PermissionDenied()
 	}
-	switch strings.ToLower(strings.TrimSpace(device.User.Role)) {
-	case "owner", "admin", "console_admin":
+	if authPkg.IsBusinessAdmin(device.User) || authPkg.HasAppPermission(device.User, authorization.AppCRM, "crm:loyalty:manage") {
 		return nil
-	default:
-		return onekiterrors.PermissionDenied()
 	}
+	return onekiterrors.PermissionDenied()
 }

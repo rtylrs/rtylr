@@ -298,20 +298,10 @@
     "consentDefaults": "الموافقات الافتراضية",
     "optInByDefault": "تسجيل العملاء الجدد تلقائيًا",
     "optInByDefaultHint": "سيُسجَّل العملاء الجدد في التسويق ما لم يرفضوا ذلك",
-    "emailAndNameRequired": "البريد الإلكتروني والاسم الكامل مطلوبان",
-    "teamTitle": "الفريق",
-    "teamSubtitle": "الأشخاص الذين لديهم وصول إلى إدارة العملاء.",
-    "inviteSomeone": "ادعُ شخصًا إلى إدارة العملاء",
-    "invitePlaceholder": "سارة أحمد",
+    "teamManagementTitle": "صلاحيات الفريق",
+    "teamManagementDescription": "أدِر الأعضاء والمجموعات وتراخيص التطبيقات والصلاحيات معًا في Dash.",
+    "teamManagementAction": "فتح إدارة الفريق",
     "subtitle": "اضبط الإعدادات الافتراضية لإدارة العملاء"
-  },
-  "team": {
-    "inviteSent": "Invitation sent",
-    "inviteFailed": "Failed to send invitation",
-    "memberRemoved": "Member removed",
-    "removeFailed": "Failed to remove member",
-    "emptyTitle": "لا يوجد أعضاء فريق بعد",
-    "inviteMember": "دعوة عضو"
   },
   "customerProfile": {
     "noTagsTitle": "لا توجد وسوم بعد",

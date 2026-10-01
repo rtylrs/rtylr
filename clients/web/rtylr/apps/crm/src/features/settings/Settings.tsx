@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useUserStore } from '@voxire/auth';
-import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
+import { APP_URLS } from '@voxire/config';
+import { Save, Users, Settings2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { EmptyState } from '@voxire/ui';
 import { useCrmSettings, useUpdateCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
 import {
   PageHeader,
@@ -17,18 +16,6 @@ import {
   ACCENT,
 } from '../../shared/components/ui';
 import type { Settings } from '../../shared/schemas/settings';
-import {
-  useCrmTeam,
-  useCrmInviteMember,
-  useCrmDeactivateMember,
-} from '../../shared/hooks/queries/useCrmTeam';
-import {
-  useCrmSubscription,
-  centsToDisplay,
-  computeSeatProration,
-  type CrmSubscription,
-} from '../../shared/hooks/queries/useCrmSubscription';
-import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 type TabId = 'general' | 'team';
 
@@ -230,313 +217,36 @@ const GeneralTab: React.FC = () => {
   );
 };
 
-function getInviteSeatQuote(subscription: CrmSubscription | undefined) {
-  const pricePerSeatCents = subscription?.pricePerSeatCents;
-  const seatCount = subscription?.seatCount;
-  const includedSeatLimit = subscription?.includedSeatLimit;
-  if (
-    typeof pricePerSeatCents !== 'number' ||
-    pricePerSeatCents <= 0 ||
-    typeof seatCount !== 'number' ||
-    seatCount < 0 ||
-    typeof includedSeatLimit !== 'number' ||
-    includedSeatLimit < 0
-  ) {
-    return null;
-  }
-
-  const incrementalBillableSeats = subscription?.isGranted
-    ? 0
-    : Math.max(0, Math.min(1, seatCount + 1 - includedSeatLimit));
-  const incrementalPriceCents = pricePerSeatCents * incrementalBillableSeats;
-  return {
-    ...computeSeatProration(incrementalPriceCents),
-    monthlyCents: incrementalPriceCents,
-  };
-}
-
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 
 const TeamTab: React.FC = () => {
   const { t } = useTranslation();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canInvite = canCrmPermission(role, 'hub:team:invite');
-  const canRemove = canCrmPermission(role, 'hub:team:remove');
-  const { data: fetchedMembers = [], isLoading, isError, refetch } = useCrmTeam();
-  const members = fetchedMembers.filter((member) => member.isActive !== false);
-  const invite = useCrmInviteMember();
-  const deactivate = useCrmDeactivateMember();
-  const { data: sub } = useCrmSubscription();
-  const seatQuote = getInviteSeatQuote(sub);
-
-  const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [showInvite, setShowInvite] = useState(false);
-
-  const handleInvite = (): void => {
-    if (!email.trim() || !fullName.trim()) {
-      toast.error(t('crm.settings.emailAndNameRequired'));
-      return;
-    }
-    invite.mutate(
-      { email: email.trim(), fullName: fullName.trim(), role: 'staff' },
-      {
-        onSuccess: () => {
-          setEmail('');
-          setFullName('');
-          setShowInvite(false);
-        },
-      }
-    );
-  };
-
-  const inputStyle: React.CSSProperties = {
-    padding: '8px 12px',
-    borderRadius: 8,
-    border: '1px solid var(--hub-border)',
-    background: 'var(--hub-input-bg)',
-    color: 'var(--hub-text)',
-    fontSize: 13,
-    outline: 'none',
-    width: '100%',
-    boxSizing: 'border-box',
-  };
-
   return (
     <div style={{ maxWidth: '680px', display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div>
         <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 4px' }}>
-          {t('crm.settings.teamTitle')}
+          {t('crm.settings.teamManagementTitle')}
         </h2>
         <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', margin: 0 }}>
-          {t('crm.settings.teamSubtitle')}
+          {t('crm.settings.teamManagementDescription')}
         </p>
       </div>
-
-      {canInvite && showInvite ? (
-        <Card>
-          <h3
-            style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px' }}
-          >
-            {t('crm.settings.inviteSomeone')}
-          </h3>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}
-          >
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  marginBottom: 4,
-                  color: 'var(--hub-text-muted)',
-                }}
-              >
-                {t('crm.createCustomer.fullName')}
-              </label>
-              <input
-                type="text"
-                placeholder={t('crm.settings.invitePlaceholder')}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  marginBottom: 4,
-                  color: 'var(--hub-text-muted)',
-                }}
-              >
-                {t('common.email')}
-              </label>
-              <input
-                type="email"
-                placeholder="jane@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleInvite();
-                }}
-                style={inputStyle}
-              />
-            </div>
-          </div>
-          {seatQuote ? (
-            <p style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
-              Adding this member costs{' '}
-              <strong style={{ color: 'var(--hub-text)' }}>
-                {centsToDisplay(seatQuote.proratedCents)}
-              </strong>{' '}
-              this month ({seatQuote.daysRemaining}/{seatQuote.daysInMonth} days), then{' '}
-              <strong style={{ color: 'var(--hub-text)' }}>
-                {centsToDisplay(seatQuote.monthlyCents)}/mo
-              </strong>{' '}
-              from {seatQuote.nextMonthName} 1st.
-            </p>
-          ) : null}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button
-              variant="primary"
-              disabled={!email.trim() || !fullName.trim() || invite.isPending}
-              onClick={handleInvite}
-            >
-              <UserPlus size={13} />
-              {invite.isPending ? 'Sending…' : 'Send invite'}
-            </Button>
-            <Button variant="ghost" onClick={() => setShowInvite(false)}>
-              {t('common.cancel')}
-            </Button>
-          </div>
-        </Card>
-      ) : canInvite ? (
-        <div>
-          <Button variant="primary" onClick={() => setShowInvite(true)}>
-            <UserPlus size={13} />
-            {t('crm.team.inviteMember')}
-          </Button>
-        </div>
-      ) : null}
-
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              style={{
-                height: 56,
-                borderRadius: 12,
-                background: 'var(--hub-hover)',
-              }}
-            />
-          ))}
-        </div>
-      ) : isError ? (
-        <Card>
-          <div role="alert" style={{ display: 'grid', justifyItems: 'start', gap: 12 }}>
-            <p style={{ margin: 0, color: 'var(--hub-text-muted)' }}>{t('errors.generic')}</p>
-            <Button variant="outline" onClick={() => void refetch()}>
-              {t('crm.actions.retry')}
-            </Button>
-          </div>
-        </Card>
-      ) : members.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title={t('crm.team.emptyTitle')}
-          action={
-            canInvite
-              ? { label: t('crm.team.inviteMember'), onClick: () => setShowInvite(true) }
-              : { label: t('crm.actions.refresh'), onClick: () => refetch() }
-          }
-        />
-      ) : (
-        <Card padded={false}>
-          {members.map((m, idx) => (
-            <div
-              key={m.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '12px 16px',
-                borderBottom: idx < members.length - 1 ? '1px solid var(--hub-border)' : 'none',
-              }}
-            >
-              <div
-                style={{
-                  height: 32,
-                  width: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  flexShrink: 0,
-                  background: 'color-mix(in srgb, var(--crm-accent, #3b82f6) 20%, transparent)',
-                  color: 'var(--crm-accent, #3b82f6)',
-                }}
-              >
-                {(m.fullName || m.email || '').charAt(0).toUpperCase()}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: 'var(--hub-text)',
-                    margin: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {m.fullName || m.email}
-                </p>
-                <p
-                  style={{
-                    fontSize: 11,
-                    color: 'var(--hub-text-muted)',
-                    margin: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {m.email}
-                </p>
-              </div>
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: 999,
-                  background: 'var(--hub-hover)',
-                  color: 'var(--hub-text-muted)',
-                  flexShrink: 0,
-                }}
-              >
-                {m.role}
-              </span>
-              {canRemove && (
-                <button
-                  type="button"
-                  aria-label={`Remove ${m.fullName || m.email}`}
-                  onClick={() => {
-                    const name = m.fullName || m.email || 'this member';
-                    // Destructive + irreversible: require confirmation.
-                    if (window.confirm(`Remove ${name} from the CRM team?`)) {
-                      deactivate.mutate(m.id ?? '');
-                    }
-                  }}
-                  style={{
-                    height: 28,
-                    width: 28,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 6,
-                    border: 'none',
-                    background: 'transparent',
-                    color: 'var(--hub-text-muted)',
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                  }}
-                >
-                  <UserMinus size={13} />
-                </button>
-              )}
-            </div>
-          ))}
-        </Card>
-      )}
+      <a
+        href={`${APP_URLS.dash}/team`}
+        style={{
+          display: 'inline-flex',
+          alignSelf: 'flex-start',
+          padding: '8px 12px',
+          borderRadius: 8,
+          background: 'var(--crm-accent, #3b82f6)',
+          color: '#fff',
+          fontSize: 12,
+          fontWeight: 600,
+          textDecoration: 'none',
+        }}
+      >
+        {t('crm.settings.teamManagementAction')}
+      </a>
     </div>
   );
 };

@@ -9,11 +9,13 @@ VALUES
     (5100, 'Benefit API Business', 5201, 'services', 'LB', 'UTC', 'USD', TRUE)
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
-INSERT INTO user_business_access (user_id, business_id, role)
+INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
 VALUES
-    (1001, 1001, 'owner'),
-    (1002, 1001, 'admin'),
-    (1003, 1001, 'viewer'),
-    (5201, 5100, 'owner'),
-    (5202, 5100, 'owner')
-ON DUPLICATE KEY UPDATE role = VALUES(role);
+    (1001, 1002, 'admin', 'active'),
+    (1001, 1003, 'member', 'active'),
+    (5100, 5202, 'member', 'active')
+ON DUPLICATE KEY UPDATE member_type = VALUES(member_type), status = VALUES(status);
+
+INSERT INTO subscriptions (owner_id, plan_id, status)
+SELECT 1001, id, 'trial' FROM plans WHERE slug = 'free'
+ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status);

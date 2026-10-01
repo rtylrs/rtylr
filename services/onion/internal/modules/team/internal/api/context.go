@@ -43,3 +43,12 @@ func teamManagerFromCtx(ctx context.Context, service *application.Service) (acto
 	ownerID, err := service.TeamManagerOwnerID(ctx, device.User.UserID, device.User.BusinessID)
 	return device.User.UserID, ownerID, err == nil && ownerID != 0
 }
+
+func teamBusinessIDFromCtx(ctx context.Context) (int64, bool) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return 0, false
+	}
+	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	return businessID, err == nil && businessID > 0
+}

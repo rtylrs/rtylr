@@ -28,8 +28,7 @@ const TimeOff: React.FC = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError, isFetching, refetch } = useTimeOff();
   const approve = useApproveTimeOff();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canApprove = canHrPermission(role, 'hr:time_off:approve');
+  const canApprove = canHrPermission('hr:time_off:approve');
   const [tab, setTab] = useState<(typeof STATUSES)[number]>('All');
 
   const filtered = (data ?? []).filter((req) =>

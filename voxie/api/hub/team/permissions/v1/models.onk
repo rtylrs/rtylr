@@ -2,15 +2,21 @@ package hub.team.permissions.v1
 
 message UpdatePermissionsRequest {
   user_id: int64 @gt(0)
-  apps: string[]
-  role: string?
+  /// Use admin for a full-access business administrator, otherwise member.
+  member_type: string
+  /// App licenses assigned directly to this member.
+  licensed_app_ids: string[]
+  /// Replace direct app licenses when true.
+  replace_licensed_app_ids: bool
   full_name: string?
-  /// Independent Dash role assignment.
-  dash_role: string?
-  /// Independent application role assignments.
-  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Direct permission profiles assigned to the member.
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
+  /// Replace direct permission profiles when true.
+  replace_permission_profile_assignments: bool
   /// Groups that provide inherited access.
   group_ids: int64[]
+  /// Replace group memberships when true.
+  replace_group_ids: bool
 }
 
 message UpdatePermissionsResponse {

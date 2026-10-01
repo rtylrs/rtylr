@@ -21,7 +21,6 @@ func customerToolUser(permissions ...string) *authPkg.AuthUser {
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "crm", ID: "9201"}},
 			}},
 		},
 	}
@@ -40,7 +39,6 @@ func assertPermissionDenied(t *testing.T, err error) {
 // A user holding only the CRM read permission must not create a customer
 // through Caret, even though crm.create_customer is a registered write tool.
 func TestCreateCustomerToolDeniesCallerWithoutCreatePermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	ctx := authPkg.WithAuthUser(context.Background(), customerToolUser("crm:customers:view"))
 	output, handled, err := (&Module{}).ExecuteCaretTool(ctx, createCustomerToolName, map[string]any{"first_name": "Ada"})
@@ -54,7 +52,6 @@ func TestCreateCustomerToolDeniesCallerWithoutCreatePermission(t *testing.T) {
 }
 
 func TestCreateCustomerToolAllowsCallerWithCreatePermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	// The gate admits the caller; the executor then fails on the nil service,
 	// which proves authorization passed rather than short-circuiting.
@@ -71,12 +68,8 @@ func TestCreateCustomerToolAllowsCallerWithCreatePermission(t *testing.T) {
 	}
 }
 
-func TestCreateCustomerToolDeniesCallerWithOnlyTheLegacyRole(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
-
-	user := customerToolUser()
-	user.Role = "owner"
-	ctx := authPkg.WithAuthUser(context.Background(), user)
+func TestCreateCustomerToolDeniesCallerWithoutPermission(t *testing.T) {
+	ctx := authPkg.WithAuthUser(context.Background(), customerToolUser())
 	_, handled, err := (&Module{}).ExecuteCaretTool(ctx, createCustomerToolName, map[string]any{"first_name": "Ada"})
 	if !handled {
 		t.Fatal("crm.create_customer was not recognized as a customers tool")
@@ -89,7 +82,6 @@ func TestCreateCustomerToolDeniesCallerWithOnlyTheLegacyRole(t *testing.T) {
 // "right" business in its input is still denied, and a privileged caller stays
 // admitted even when the input names another tenant.
 func TestCustomerToolAuthorizationIgnoresTenantFromToolInput(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	spoofed := map[string]any{"first_name": "Ada", "business_id": 9201, "owner_id": 9101}
 	underPrivileged := authPkg.WithAuthUser(context.Background(), customerToolUser("crm:customers:view"))
@@ -110,7 +102,6 @@ func TestCustomerToolAuthorizationIgnoresTenantFromToolInput(t *testing.T) {
 }
 
 func TestCustomerToolsDenyUnknownAndUnauthenticatedCallers(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	module := &Module{}
 	output, handled, err := module.ExecuteCaretTool(context.Background(), "crm.not_a_tool", nil)
@@ -129,7 +120,6 @@ func TestCustomerToolsDenyUnknownAndUnauthenticatedCallers(t *testing.T) {
 // declared permission without an executor is a hard error rather than a silent
 // pass-through to the next executor in the chain.
 func TestCustomerToolPermissionsCoverEveryDispatchedTool(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	dispatched := []string{listCustomersToolName, getCustomerToolName, createCustomerToolName}
 	for _, toolName := range dispatched {

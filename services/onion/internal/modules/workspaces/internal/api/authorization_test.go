@@ -30,6 +30,9 @@ func flowUser(permissions ...string) *authPkg.AuthUser {
 			Licensed:    true,
 			HasAccess:   true,
 			Permissions: permissions,
+			PermissionScopes: map[string][]authorization.Scope{
+				"flow:projects:view": {{Type: "project", ID: "1"}},
+			},
 		}}},
 	}
 }

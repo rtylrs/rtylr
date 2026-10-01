@@ -3,16 +3,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  usePermissions,
-  useCustomRoles,
-  useUpdatePermissions,
-  useCreateCustomRole,
+  usePermissionCatalog,
+  usePermissionProfiles,
+  useCreatePermissionProfile,
 } from './usePermissions';
 
 const mockPermissionClient = vi.hoisted(() => ({
-  getPermissions: vi.fn(),
+  listPermissionCatalog: vi.fn(),
   listRoles: vi.fn(),
-  updatePermissionMatrix: vi.fn(),
   createRole: vi.fn(),
 }));
 
@@ -32,46 +30,22 @@ function createWrapper(client: QueryClient) {
     React.createElement(QueryClientProvider, { client }, children);
 }
 
-describe('usePermissions', () => {
+describe('permission-profile queries', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('fetches permissions matrix successfully', async () => {
-    // The wire shape is {matrix: {rows, roles}} with roleValues per row; the
-    // hook translates it into the list/lookup shape the matrix renders.
-    mockPermissionClient.getPermissions.mockResolvedValue({
-      matrix: {
-        rows: [
-          {
-            key: 'orders.view',
-            label: 'View Orders',
-            category: 'Orders',
-            roleValues: { admin: true, staff: false },
-          },
-        ],
-        roles: ['admin', 'staff'],
-      },
-    });
-
-    const client = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
-    const wrapper = createWrapper(client);
-    const { result } = renderHook(() => usePermissions(), { wrapper });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.permissions).toEqual([
-      { key: 'orders.view', label: 'View Orders', group: 'Orders' },
-    ]);
-    expect(result.current.data?.values.admin['orders.view']).toBe(true);
-    expect(result.current.data?.values.staff['orders.view']).toBe(false);
-  });
-
-  it('fetches custom roles successfully', async () => {
-    mockPermissionClient.listRoles.mockResolvedValue({
-      roles: [
-        { id: 1, name: 'Shift Lead', color: '#123456', permissions: ['orders.view'], members: 1 },
+  it('fetches the normalized permission catalog', async () => {
+    mockPermissionClient.listPermissionCatalog.mockResolvedValue({
+      permissions: [
+        {
+          key: 'flow:projects:read',
+          appId: 'flow',
+          resource: 'projects',
+          action: 'read',
+          isSensitive: false,
+          isHighRisk: false,
+        },
       ],
     });
 
@@ -79,42 +53,45 @@ describe('usePermissions', () => {
       defaultOptions: { queries: { retry: false } },
     });
     const wrapper = createWrapper(client);
-    const { result } = renderHook(() => useCustomRoles(), { wrapper });
+    const { result } = renderHook(() => usePermissionCatalog(), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.permissions).toEqual([
+      {
+        key: 'flow:projects:read',
+        appId: 'flow',
+        resource: 'projects',
+        action: 'read',
+        isSensitive: false,
+        isHighRisk: false,
+      },
+    ]);
+  });
+
+  it('fetches permission profiles successfully', async () => {
+    mockPermissionClient.listRoles.mockResolvedValue({
+      roles: [{ id: 1, name: 'Shift Lead', appId: 'flow', permissions: ['flow:projects:read'] }],
+    });
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = createWrapper(client);
+    const { result } = renderHook(() => usePermissionProfiles(), { wrapper });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toHaveLength(1);
     expect(result.current.data?.[0].name).toBe('Shift Lead');
   });
 
-  it('updates permissions successfully', async () => {
-    mockPermissionClient.updatePermissionMatrix.mockResolvedValue({ success: true });
-
-    const client = new QueryClient({
-      defaultOptions: { mutations: { retry: false } },
-    });
-    const wrapper = createWrapper(client);
-    const { result } = renderHook(() => useUpdatePermissions(), { wrapper });
-
-    act(() => {
-      result.current.mutate({ role: 'staff', key: 'orders.view', enabled: true });
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPermissionClient.updatePermissionMatrix).toHaveBeenCalledWith({
-      role: 'staff',
-      permissionKey: 'orders.view',
-      enabled: true,
-    });
-  });
-
-  it('creates custom role successfully', async () => {
+  it('creates a permission profile successfully', async () => {
     mockPermissionClient.createRole.mockResolvedValue({ id: 1, name: 'Manager' });
 
     const client = new QueryClient({
       defaultOptions: { mutations: { retry: false } },
     });
     const wrapper = createWrapper(client);
-    const { result } = renderHook(() => useCreateCustomRole(), { wrapper });
+    const { result } = renderHook(() => useCreatePermissionProfile(), { wrapper });
 
     act(() => {
       result.current.mutate({ name: 'Manager', description: 'Store manager' });

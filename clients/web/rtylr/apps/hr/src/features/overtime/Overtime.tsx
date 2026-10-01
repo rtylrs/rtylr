@@ -29,8 +29,7 @@ const Overtime = (): React.JSX.Element => {
   const [formOpen, setFormOpen] = useState(false);
   const { data: requests, isLoading } = useListOvertimeRequests();
   const approveOvertime = useApproveOvertime();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canApprove = canHrPermission(role, 'hr:time_off:approve');
+  const canApprove = canHrPermission('hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
     statusFilter === 'All' ? true : isHrRequestStatus(r.status, statusFilter)

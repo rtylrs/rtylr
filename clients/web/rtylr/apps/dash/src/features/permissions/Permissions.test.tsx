@@ -13,9 +13,14 @@ vi.mock('@voxire/components', () => ({
 const permissionsState = vi.hoisted(() => ({
   data: undefined as
     | {
-        permissions: { key: string; label: string; group: string }[];
-        roles: string[];
-        values: Record<string, Record<string, boolean>>;
+        permissions: {
+          key: string;
+          appId: string;
+          resource: string;
+          action: string;
+          isSensitive: boolean;
+          isHighRisk: boolean;
+        }[];
       }
     | undefined,
   isLoading: false,
@@ -24,12 +29,7 @@ const permissionsState = vi.hoisted(() => ({
 }));
 
 vi.mock('../../shared/hooks/queries/usePermissions', () => ({
-  usePermissions: () => permissionsState,
-  useUpdatePermissions: () => ({ mutate: vi.fn(), isPending: false }),
-}));
-
-vi.mock('../../shared/stores/userStore', () => ({
-  useUserStore: () => ({ user: { role: 'owner' } }),
+  usePermissionCatalog: () => permissionsState,
 }));
 
 import Permissions from './Permissions';
@@ -41,30 +41,37 @@ beforeEach(() => {
   permissionsState.isError = false;
 });
 
-describe('Permissions: failed matrix request', () => {
+describe('Permissions: failed catalog request', () => {
   it('shows a retry instead of leaving the skeleton on screen', () => {
     permissionsState.isError = true;
     render(<Permissions />);
 
     // Pre-fix the `isLoading || !data` guard matched a failed query forever,
     // so the skeleton was the only thing that ever rendered.
-    expect(screen.getByText("Couldn't load permissions")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    expect(screen.getByText('common.permissionCatalog.loadErrorTitle')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
     expect(permissionsState.refetch).toHaveBeenCalledTimes(1);
   });
 });
 
-describe('Permissions: matrix render', () => {
-  it('renders the translated matrix rows', () => {
+describe('Permissions: catalog render', () => {
+  it('renders app resources and actions from the permission catalog', () => {
     permissionsState.data = {
-      permissions: [{ key: 'orders.view', label: 'View Orders', group: 'Orders' }],
-      roles: ['admin', 'staff'],
-      values: { admin: { 'orders.view': true }, staff: { 'orders.view': false } },
+      permissions: [
+        {
+          key: 'flow:projects:read',
+          appId: 'flow',
+          resource: 'projects',
+          action: 'read',
+          isSensitive: false,
+          isHighRisk: false,
+        },
+      ],
     };
     render(<Permissions />);
 
-    expect(screen.getByText('View Orders')).toBeInTheDocument();
-    expect(screen.getByText('orders.view')).toBeInTheDocument();
-    expect(screen.getByRole('table', { name: 'Permission Matrix' })).toBeInTheDocument();
+    expect(screen.getByText('flow')).toBeInTheDocument();
+    expect(screen.getByText('projects · read')).toBeInTheDocument();
+    expect(screen.getByText('flow:projects:read')).toBeInTheDocument();
   });
 });

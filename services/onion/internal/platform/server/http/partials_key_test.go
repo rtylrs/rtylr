@@ -121,7 +121,7 @@ func TestPartialsBypassAttachesConsoleAdminActor(t *testing.T) {
 	req.Header.Set(PartialsAPIKeyHeader, "pka_test_key")
 	PartialsBypassHandler(bare, http.NotFoundHandler()).ServeHTTP(httptest.NewRecorder(), req)
 
-	if got == nil || got.Role != "console_admin" || got.UserID != 42 {
-		t.Fatalf("expected console_admin actor 42, got %+v", got)
+	if got == nil || !got.IsConsoleAdmin || got.UserID != 42 {
+		t.Fatalf("expected console admin actor 42, got %+v", got)
 	}
 }

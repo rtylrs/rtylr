@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import InvoiceDetail from './InvoiceDetail';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const invoice = {
   id: 'INV-100',
@@ -17,12 +18,24 @@ const invoice = {
   history: [],
 };
 
-const mocks = vi.hoisted(() => ({ role: 'staff' as string | null }));
+const mocks = vi.hoisted(() => ({ effectiveAccess: undefined as unknown }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (
-    selector: (state: { user: { role: string | null }; role: string | null }) => unknown
-  ) => selector({ user: { role: mocks.role }, role: mocks.role }),
+  useUserStore: Object.assign(
+    (
+      selector: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      selector({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -66,11 +79,15 @@ vi.mock('../../shared/components/Skeleton', () => ({ SkeletonRow: () => null }))
 
 describe('InvoiceDetail send/void actions', () => {
   beforeEach(() => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:invoices:view'],
+    });
   });
 
   it('hides Send/Void for a role without finance:invoices:send', () => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:invoices:view'],
+    });
     render(<InvoiceDetail />);
 
     expect(screen.queryByText('Send')).not.toBeInTheDocument();
@@ -78,7 +95,7 @@ describe('InvoiceDetail send/void actions', () => {
   });
 
   it('shows Send/Void for admin', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isAdmin: true });
     render(<InvoiceDetail />);
 
     expect(screen.getByText('Send')).toBeInTheDocument();
@@ -86,7 +103,7 @@ describe('InvoiceDetail send/void actions', () => {
   });
 
   it('shows Send/Void for owner', () => {
-    mocks.role = 'owner';
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isOwner: true });
     render(<InvoiceDetail />);
 
     expect(screen.getByText('Send')).toBeInTheDocument();

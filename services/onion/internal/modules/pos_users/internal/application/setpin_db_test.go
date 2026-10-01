@@ -32,7 +32,7 @@ func newDBService(t *testing.T) *application.Service {
 func TestSetPIN_CrossUser_NonManager_Forbidden(t *testing.T) {
 	s := newDBService(t)
 	err := s.SetPIN(context.Background(), fixtureOwnerID,
-		application.SetPINActor{UserID: serverBUserID, IsOwner: false, TeamRole: "staff"},
+		application.SetPINActor{UserID: serverBUserID, IsOwner: false},
 		domain.SetPINInput{UserID: cashierAUserID, LocationID: fixtureLocationID, Name: "Cashier A", PIN: "432165"},
 	)
 	if !errors.Is(err, application.ErrForbidden) {
@@ -45,7 +45,7 @@ func TestSetPIN_CrossUser_NonManager_Forbidden(t *testing.T) {
 func TestSetPIN_SelfRotation_Rejected(t *testing.T) {
 	s := newDBService(t)
 	err := s.SetPIN(context.Background(), fixtureOwnerID,
-		application.SetPINActor{UserID: cashierAUserID, IsOwner: false, TeamRole: "staff"},
+		application.SetPINActor{UserID: cashierAUserID, IsOwner: false},
 		domain.SetPINInput{UserID: cashierAUserID, LocationID: fixtureLocationID, Name: "Cashier A", PIN: "000042"},
 	)
 	if !errors.Is(err, application.ErrPINAlreadySet) {
@@ -57,7 +57,7 @@ func TestSetPIN_SelfRotation_Rejected(t *testing.T) {
 func TestSetPIN_Unassigned_Rejected(t *testing.T) {
 	s := newDBService(t)
 	err := s.SetPIN(context.Background(), fixtureOwnerID,
-		application.SetPINActor{UserID: 777001, IsOwner: false, TeamRole: "staff"},
+		application.SetPINActor{UserID: 777001, IsOwner: false},
 		domain.SetPINInput{UserID: 777001, LocationID: fixtureLocationID, Name: "Ghost", PIN: "121242"},
 	)
 	if !errors.Is(err, application.ErrInvalidInput) {

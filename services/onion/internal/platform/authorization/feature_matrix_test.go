@@ -24,6 +24,11 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppHub, "hub:roles:archive"},
 	{authorization.AppHub, "hub:licenses:manage"},
 	{authorization.AppHub, "hub:groups:manage"},
+	{authorization.AppHub, "hub:billing:view"},
+	{authorization.AppHub, "hub:billing:manage"},
+	{authorization.AppHub, "hub:business:settings:view"},
+	{authorization.AppHub, "hub:business:settings:manage"},
+	{authorization.AppHub, "hub:ai:quota:manage"},
 	{authorization.AppHub, "hub:hierarchy:manage"},
 	{authorization.AppHub, "hub:audit:view"},
 	{authorization.AppHub, "hub:security:manage"},
@@ -44,6 +49,7 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppPOS, "pos:employees:manage"},
 	{authorization.AppPOS, "pos:terminals:manage"},
 	{authorization.AppPOS, "pos:reports:view"},
+	{authorization.AppPOS, "pos:gift_cards:manage"},
 	{authorization.AppERP, "erp:products:view"},
 	{authorization.AppERP, "erp:products:create"},
 	{authorization.AppERP, "erp:products:edit"},
@@ -61,6 +67,10 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppERP, "erp:purchasing:view"},
 	{authorization.AppERP, "erp:purchasing:create"},
 	{authorization.AppERP, "erp:purchasing:approve"},
+	{authorization.AppERP, "erp:price_lists:view"},
+	{authorization.AppERP, "erp:price_lists:manage"},
+	{authorization.AppFinance, "finance:accounts:view"},
+	{authorization.AppFinance, "finance:accounts:manage"},
 	{authorization.AppFinance, "finance:invoices:view"},
 	{authorization.AppFinance, "finance:invoices:create"},
 	{authorization.AppFinance, "finance:invoices:send"},
@@ -72,6 +82,7 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppFinance, "finance:expenses:create"},
 	{authorization.AppFinance, "finance:expenses:approve"},
 	{authorization.AppFinance, "finance:bank_feeds:view"},
+	{authorization.AppFinance, "finance:bank_feeds:manage"},
 	{authorization.AppFinance, "finance:bank_feeds:sensitive_view"},
 	{authorization.AppFinance, "finance:reconciliation:manage"},
 	{authorization.AppFinance, "finance:reports:view"},
@@ -84,7 +95,10 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppCRM, "crm:customers:export"},
 	{authorization.AppCRM, "crm:campaigns:view"},
 	{authorization.AppCRM, "crm:campaigns:create"},
+	{authorization.AppCRM, "crm:campaigns:manage"},
 	{authorization.AppCRM, "crm:campaigns:send"},
+	{authorization.AppCRM, "crm:segments:manage"},
+	{authorization.AppCRM, "crm:templates:manage"},
 	{authorization.AppCRM, "crm:loyalty:manage"},
 	{authorization.AppCRM, "crm:automations:manage"},
 	{authorization.AppHR, "hr:employees:view"},
@@ -107,7 +121,6 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppFlow, "flow:tasks:assign"},
 	{authorization.AppFlow, "flow:team:manage"},
 	{authorization.AppFlow, "flow:managers:manage"},
-	{authorization.AppFlow, "flow:settings:manage"},
 	{authorization.AppInsights, "insights:dashboard:view"},
 	{authorization.AppInsights, "insights:financial:view"},
 	{authorization.AppInsights, "insights:customers:view"},
@@ -128,9 +141,9 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppRecruit, "recruit:candidates:export"},
 }
 
-func TestFeatureMatrixContainsExactly113UniquePermissions(t *testing.T) {
-	if len(featureMatrixPermissions) != 113 {
-		t.Fatalf("feature matrix permissions = %d, want 113", len(featureMatrixPermissions))
+func TestFeatureMatrixContainsExactly126UniquePermissions(t *testing.T) {
+	if len(featureMatrixPermissions) != 126 {
+		t.Fatalf("feature matrix permissions = %d, want 126", len(featureMatrixPermissions))
 	}
 	seen := make(map[string]struct{}, len(featureMatrixPermissions))
 	for _, entry := range featureMatrixPermissions {
@@ -142,7 +155,6 @@ func TestFeatureMatrixContainsExactly113UniquePermissions(t *testing.T) {
 }
 
 func TestFeatureMatrixPermissionsEnforceAppLicenseAndExactPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	for _, entry := range featureMatrixPermissions {
 		t.Run(entry.permission, func(t *testing.T) {
@@ -197,17 +209,16 @@ func TestFeatureMatrixPermissionsFailClosedForLifecycleAndGroupStates(t *testing
 	}
 }
 
-// A license row must not be able to add an app the member has no role for, and
-// must not be able to remove one they do. Entitlements come from assignments.
-func TestFeatureMatrixLicenseRowsDoNotGateAppAccess(t *testing.T) {
+// Both an active license and an active permission profile are required for member access.
+func TestFeatureMatrixLicenseAndProfileGateAppAccess(t *testing.T) {
 	entry := featureMatrixPermissions[0]
 	licensed := authorization.Resolve(featureMatrixSnapshot(entry, true, true, true, true, false, false))
 	unlicensed := authorization.Resolve(featureMatrixSnapshot(entry, false, true, true, true, false, false))
-	if !licensed.Apps[0].HasAccess || !unlicensed.Apps[0].HasAccess {
-		t.Fatalf("license state must not change app access: licensed=%#v unlicensed=%#v", licensed.Apps[0], unlicensed.Apps[0])
+	if !licensed.Apps[0].HasAccess {
+		t.Fatalf("licensed member with a profile should have access: %#v", licensed.Apps[0])
 	}
-	if !licensed.Apps[0].Licensed || unlicensed.Apps[0].Licensed {
-		t.Fatalf("license state must still be reported: licensed=%#v unlicensed=%#v", licensed.Apps[0], unlicensed.Apps[0])
+	if unlicensed.Apps[0].HasAccess || len(unlicensed.Apps[0].Permissions) != 0 {
+		t.Fatalf("unlicensed member retained access: %#v", unlicensed.Apps[0])
 	}
 }
 

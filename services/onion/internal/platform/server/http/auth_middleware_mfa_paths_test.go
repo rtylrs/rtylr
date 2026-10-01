@@ -21,7 +21,7 @@ func (s stubMFAValidator) ValidateToken(context.Context, string) (int64, error) 
 }
 
 func (s stubMFAValidator) ValidateTokenFull(context.Context, string) (*authPkg.TokenClaims, error) {
-	return &authPkg.TokenClaims{UserID: s.userID, BusinessID: 7, Role: "owner"}, nil
+	return &authPkg.TokenClaims{UserID: s.userID, BusinessID: 7}, nil
 }
 
 type stubMFAValidatorResolver struct {
@@ -42,7 +42,6 @@ type stubMFAAccessResolver struct {
 func (s *stubMFAAccessResolver) GetEffectiveAccess(context.Context, int64, int64) (*authorization.EffectiveAccess, error) {
 	return &authorization.EffectiveAccess{
 		BusinessID:      7,
-		DashRole:        "owner",
 		DashPermissions: []string{"hub:security:manage"},
 		IsOwner:         true,
 	}, nil

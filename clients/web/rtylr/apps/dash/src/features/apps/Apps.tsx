@@ -31,20 +31,17 @@ const Apps: React.FC = () => {
     () =>
       user?.effectiveAccess?.apps
         .filter((app) => app.licensed && app.hasAccess)
-        .map((app) => app.appId) ??
-      user?.apps ??
-      [],
+        .map((app) => app.appId) ?? [],
     [user]
   );
-  const isOwner = user?.effectiveAccess
-    ? user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin
-    : user?.role === 'owner' || user?.role === 'admin';
+  const isPrivileged =
+    user?.effectiveAccess?.isOwner === true || user?.effectiveAccess?.isAdmin === true;
 
   const filtered = useMemo(() => {
     return apps
       .filter((a) => {
         // Staff/invited users only see apps they have explicit permission for.
-        if (!isOwner && !userApps.includes(a.key)) return false;
+        if (!isPrivileged && !userApps.includes(a.key)) return false;
         const matchesQuery =
           !query.trim() ||
           a.label.toLowerCase().includes(query.toLowerCase()) ||
@@ -55,9 +52,9 @@ const Apps: React.FC = () => {
       .map((a) => ({
         ...a,
         // Owners see all apps but locked ones link to the upgrade page.
-        locked: isOwner && userApps.length > 0 && !userApps.includes(a.key),
+        locked: isPrivileged && userApps.length > 0 && !userApps.includes(a.key),
       }));
-  }, [apps, query, category, isOwner, userApps]);
+  }, [apps, query, category, isPrivileged, userApps]);
 
   return (
     <>

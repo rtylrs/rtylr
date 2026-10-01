@@ -23,7 +23,7 @@ var (
 type webSocketClaims struct {
 	UserID         int64  `json:"user_id"`
 	BusinessID     int64  `json:"business_id"`
-	Role           string `json:"role"`
+	IsConsoleAdmin bool   `json:"is_console_admin,omitempty"`
 	Platform       string `json:"platform,omitempty"`
 	PlatformUserID int64  `json:"platform_user_id,omitempty"`
 	PlanID         int64  `json:"plan_id,omitempty"`
@@ -85,7 +85,7 @@ func AuthUserFromWebSocketRequest(r *http.Request) (*AuthUser, error) {
 	return &AuthUser{
 		UserID:         claims.UserID,
 		BusinessID:     claims.BusinessID,
-		Role:           claims.Role,
+		IsConsoleAdmin: claims.IsConsoleAdmin,
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,

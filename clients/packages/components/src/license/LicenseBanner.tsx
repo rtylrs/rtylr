@@ -62,8 +62,7 @@ function noticeMessage(
 export function LicenseBanner({ client, className }: LicenseBannerProps): React.JSX.Element | null {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
-  const role = useUserStore((s) => s.role);
-  const admin = isLicenseAdmin(user, role);
+  const admin = isLicenseAdmin(user);
 
   // Only admins ever trigger the network request.
   const { data } = useLicenseState(client, admin);

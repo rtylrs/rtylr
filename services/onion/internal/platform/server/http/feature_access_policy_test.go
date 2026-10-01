@@ -94,7 +94,6 @@ func TestAISurfaceRoutesUseTheHubDashboardPermission(t *testing.T) {
 // permission check. Falling through to the unmapped catch-all is what let any
 // authenticated tenant member invoke the tool-decision write path.
 func TestUnmappedAISurfaceSubPathsStillRequireAuthorization(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	member := &authPkg.AuthUser{
 		UserID:     7,
@@ -132,7 +131,6 @@ func TestUnmappedAISurfaceSubPathsStillRequireAuthorization(t *testing.T) {
 }
 
 func TestAISurfaceRoutesAllowAMemberWithTheHubDashboardPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	member := &authPkg.AuthUser{
 		UserID:     7,

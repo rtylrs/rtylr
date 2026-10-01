@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -24,17 +25,11 @@ func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, s
 		return 0, "", "", nil, err
 	}
 
-	// Fetch the user's app permissions so the frontend can redirect to the right app after accept.
-	apps := []string{}
-	if perm, permErr := s.repo.GetPermission(ctx, invite.OwnerID, invite.UserID); permErr == nil && perm != nil {
-		apps = perm.Apps
-	}
-
-	return invite.UserID, email, fullName, apps, nil
+	return invite.UserID, email, fullName, []string{}, nil
 }
 
-// resolveInviteBusinessID returns the business an accepted invitation belongs
-// to, verified as the invitee's.
+// resolveInviteBusinessID returns the business recorded on the invitation and
+// verifies that the inviter owns it.
 //
 // The invite row is the authoritative binding: InviteUser records the business
 // it granted access in, so that is what the accept activates. users.business_id
@@ -44,9 +39,8 @@ func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, s
 // it whenever the owner lookup failed and then activated the member and granted
 // its authorization in that unrelated business.
 //
-// Invitations issued before the business was recorded on the row fall back to
-// the inviter's business and are verified the same way, so no write ever lands
-// under an id that has not been positively checked for this member.
+// The invitation itself grants pending membership. Requiring an active
+// membership before accepting would make new invitations impossible to accept.
 func (s *Service) resolveInviteBusinessID(ctx context.Context, invite domain.InviteToken) (int64, error) {
 	candidate := invite.BusinessID
 	if candidate <= 0 {
@@ -59,7 +53,14 @@ func (s *Service) resolveInviteBusinessID(ctx context.Context, invite domain.Inv
 	if candidate <= 0 {
 		return 0, tenant.ErrNoBusinessScope
 	}
-	return tenant.ResolveBusinessID(ctx, candidate, invite.UserID)
+	_, ownerID, err := s.repo.GetBusinessByID(ctx, candidate)
+	if err != nil {
+		return 0, err
+	}
+	if ownerID != invite.OwnerID {
+		return 0, tenant.ErrNoBusinessScope
+	}
+	return candidate, nil
 }
 
 // AcceptInvite sets the user's password and marks the token as used.
@@ -123,25 +124,6 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 	return userID, nil
 }
 
-// GetMeByBusiness returns user info with permissions looked up by business_id.
-func (s *Service) GetMeByBusiness(ctx context.Context, businessID, userID int64) (string, string, bool, []string, domain.Role, error) {
-	email, fullName, isConsoleAdmin, err := s.repo.GetUserByID(ctx, userID)
-	if err != nil {
-		return "", "", false, nil, "", err
-	}
-
-	perm, err := s.repo.GetPermissionByBusiness(ctx, businessID, userID)
-	if err != nil {
-		return email, fullName, isConsoleAdmin, []string{}, "", nil
-	}
-
-	if perm == nil {
-		return email, fullName, isConsoleAdmin, []string{}, "", nil
-	}
-
-	return email, fullName, isConsoleAdmin, perm.Apps, perm.Role, nil
-}
-
 // RequestAccess stores a pending access request from a staff user.
 func (s *Service) RequestAccess(ctx context.Context, businessID, userID int64, app string) error {
 	return s.repo.CreateAccessRequest(ctx, businessID, userID, app)
@@ -184,19 +166,33 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 	if err != nil {
 		return err
 	}
-	apps := existing.Apps
-	for _, a := range apps {
-		if a == app {
-			// already has access — just resolve the request
+	apps := append([]string{}, existing.LicensedAppIDs...)
+	for _, licensedApp := range apps {
+		if licensedApp == app {
 			return s.repo.ResolveAccessRequest(ctx, requestID, businessID, "approved")
 		}
 	}
 	apps = append(apps, app)
-
-	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, targetUserID, apps, existing.Role); err != nil {
-		return err
+	assignments := make([]domain.AppRoleAssignmentInput, 0, len(existing.PermissionProfileAssignments))
+	for _, assignment := range existing.PermissionProfileAssignments {
+		if assignment.GroupID != nil || assignment.Source != authorization.SourceExplicit {
+			continue
+		}
+		assignments = append(assignments, domain.AppRoleAssignmentInput{
+			AppID: string(assignment.AppID), RoleIDs: append([]int64{}, assignment.RoleIDs...),
+			PrimaryRoleID: assignment.PrimaryRoleID, Source: string(authorization.SourceExplicit),
+			Status: "active", Scopes: append([]authorization.Scope{}, assignment.Scopes...),
+		})
 	}
-	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, targetUserID, apps, existing.Role, "", nil, nil); err != nil {
+	groupIDs := make([]int64, 0, len(existing.Groups))
+	for _, group := range existing.Groups {
+		groupIDs = append(groupIDs, group.ID)
+	}
+	memberType := existing.MemberType
+	if memberType == "" {
+		memberType = "member"
+	}
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, actorID, targetUserID, apps, memberType, "active", assignments, groupIDs); err != nil {
 		return err
 	}
 	invalidateUserScope(ctx, targetUserID)

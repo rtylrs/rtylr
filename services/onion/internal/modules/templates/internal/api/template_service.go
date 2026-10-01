@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/templates/internal/application"
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmtemplatev1 "github.com/voxire/voxie/gen/go/crm/template/v1"
@@ -195,12 +196,10 @@ func requireTemplateManager(ctx context.Context) error {
 	if device.User == nil {
 		return onekiterrors.PermissionDenied()
 	}
-	switch strings.ToLower(strings.TrimSpace(device.User.Role)) {
-	case "owner", "admin", "console_admin":
+	if authPkg.IsBusinessAdmin(device.User) || authPkg.HasAppPermission(device.User, authorization.AppCRM, "crm:templates:manage") {
 		return nil
-	default:
-		return onekiterrors.PermissionDenied()
 	}
+	return onekiterrors.PermissionDenied()
 }
 
 func newTemplate(template domain.Template) *crmtemplatev1.Template {

@@ -142,10 +142,7 @@ func (s *Service) GetFlowProfile(
 		Name:     hub.FullName,
 		Email:    hub.Email,
 		Initials: initialsOf(hub.FullName),
-		// The hub profile carries a business role, not a job title. It is the
-		// only title-shaped value that exists, so it fills the field until
-		// staff records grow a real one (fast-follow F-B).
-		RoleTitle:      hub.Role,
+		RoleTitle:      "",
 		Bio:            "",
 		PublicProjects: projects,
 	}, nil

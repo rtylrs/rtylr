@@ -57,8 +57,7 @@ const Tax: React.FC = () => {
   const [showConfig, setShowConfig] = useState(false);
   const { data: taxConfigData } = useTaxConfig();
   const saveRates = useCreateTaxConfig();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageTax = canFinancePermission(role, 'finance:tax');
+  const canManageTax = canFinancePermission('finance:tax:configure');
 
   // Derive editable rates from real data; fall back to empty list while loading
   const serverRates: TaxConfig[] = (taxConfigData ?? []).map((c) => ({

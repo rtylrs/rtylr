@@ -20,6 +20,25 @@
     "application": "التطبيق",
     "permissions": "الأذونات"
   },
+  "permissionProfiles": {
+    "title": "ملفات صلاحيات الوصول",
+    "description": "أنشئ ملفات وصول خاصة بكل تطبيق وعيّنها للأعضاء أو المجموعات.",
+    "new": "ملف جديد",
+    "create": "إنشاء ملف صلاحيات",
+    "edit": "تعديل ملف الصلاحيات",
+    "name": "اسم الملف",
+    "optionalDescription": "وصف اختياري للملف",
+    "assignedMembers": "{{count}} أعضاء",
+    "permissionCount": "{{count}} صلاحيات",
+    "highImpact": "تأثير مرتفع",
+    "sensitive": "حساسة"
+  },
+  "permissionCatalog": {
+    "title": "دليل الصلاحيات",
+    "description": "راجع إجراءات الموارد المتاحة عند إنشاء ملفات الصلاحيات.",
+    "loadErrorTitle": "تعذر تحميل الصلاحيات",
+    "loadError": "تعذر تحميل دليل الصلاحيات."
+  },
   "refresh": "تحديث",
   "clearSearch": "مسح البحث",
   "clearFilters": "مسح الفلاتر",

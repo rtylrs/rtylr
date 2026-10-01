@@ -1,10 +1,12 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   useGetEmployee: vi.fn(),
   useUserStore: vi.fn(),
+  effectiveAccess: undefined as unknown,
 }));
 
 vi.mock('../../shared/hooks/queries/useEmployees', () => ({
@@ -12,7 +14,12 @@ vi.mock('../../shared/hooks/queries/useEmployees', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: mocks.useUserStore,
+  useUserStore: Object.assign(mocks.useUserStore, {
+    getState: () => ({
+      user: { effectiveAccess: mocks.effectiveAccess },
+      effectiveAccess: mocks.effectiveAccess,
+    }),
+  }),
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -52,13 +59,22 @@ describe('EmployeeDetail compensation gating', () => {
   beforeEach(() => {
     mocks.useGetEmployee.mockReset();
     mocks.useUserStore.mockReset();
+    mocks.effectiveAccess = createEffectiveAccess('hr', { permissions: ['hr:employees:view'] });
     mocks.useGetEmployee.mockReturnValue({ data: baseEmployee, isLoading: false });
   });
 
   it('hides salary for a staff-role user', () => {
     mocks.useUserStore.mockImplementation(
-      (selector: (state: { user: { role: string } }) => unknown) =>
-        selector({ user: { role: 'staff' } })
+      (
+        selector: (state: {
+          user: { effectiveAccess: unknown };
+          effectiveAccess: unknown;
+        }) => unknown
+      ) =>
+        selector({
+          user: { effectiveAccess: mocks.effectiveAccess },
+          effectiveAccess: mocks.effectiveAccess,
+        })
     );
 
     render(<EmployeeDetail />);
@@ -69,9 +85,18 @@ describe('EmployeeDetail compensation gating', () => {
   });
 
   it('shows salary for an admin-role user', () => {
+    mocks.effectiveAccess = createEffectiveAccess('hr', { isAdmin: true });
     mocks.useUserStore.mockImplementation(
-      (selector: (state: { user: { role: string } }) => unknown) =>
-        selector({ user: { role: 'admin' } })
+      (
+        selector: (state: {
+          user: { effectiveAccess: unknown };
+          effectiveAccess: unknown;
+        }) => unknown
+      ) =>
+        selector({
+          user: { effectiveAccess: mocks.effectiveAccess },
+          effectiveAccess: mocks.effectiveAccess,
+        })
     );
 
     render(<EmployeeDetail />);
@@ -82,9 +107,18 @@ describe('EmployeeDetail compensation gating', () => {
   });
 
   it('shows salary for an owner-role user', () => {
+    mocks.effectiveAccess = createEffectiveAccess('hr', { isOwner: true });
     mocks.useUserStore.mockImplementation(
-      (selector: (state: { user: { role: string } }) => unknown) =>
-        selector({ user: { role: 'owner' } })
+      (
+        selector: (state: {
+          user: { effectiveAccess: unknown };
+          effectiveAccess: unknown;
+        }) => unknown
+      ) =>
+        selector({
+          user: { effectiveAccess: mocks.effectiveAccess },
+          effectiveAccess: mocks.effectiveAccess,
+        })
     );
 
     render(<EmployeeDetail />);

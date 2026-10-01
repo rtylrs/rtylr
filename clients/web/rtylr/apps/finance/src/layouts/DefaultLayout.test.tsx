@@ -3,12 +3,13 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import DefaultLayout from './DefaultLayout';
 import { initTestI18n } from '../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   signOut: vi.fn(),
   router: { pathname: '/invoices', searchStr: '' },
-  role: 'admin' as string | null,
+  effectiveAccess: null as unknown,
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -23,16 +24,24 @@ vi.mock('@tanstack/react-router', () => ({
     select({ location: mocks.router }),
 }));
 
-vi.mock('@voxire/auth', () => ({
-  signOut: mocks.signOut,
-  useUserStore: (
-    select: (state: { user: Record<string, string | null>; role: string | null }) => unknown
-  ) =>
-    select({
-      user: { id: '1', name: 'Test User', email: 'test@example.com', role: mocks.role },
-      role: mocks.role,
-    }),
-}));
+vi.mock('@voxire/auth', () => {
+  const state = () => ({
+    user: {
+      id: '1',
+      name: 'Test User',
+      email: 'test@example.com',
+      effectiveAccess: mocks.effectiveAccess,
+    },
+    effectiveAccess: mocks.effectiveAccess,
+  });
+  return {
+    signOut: mocks.signOut,
+    useUserStore: Object.assign(
+      (select: (value: ReturnType<typeof state>) => unknown) => select(state()),
+      { getState: state }
+    ),
+  };
+});
 vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
 vi.mock('@voxire/config', () => ({ getAvatarUrl: () => '' }));
 vi.mock('@voxire/caret', () => ({
@@ -88,7 +97,7 @@ describe('Finance mobile navigation', () => {
     mocks.router.pathname = '/invoices';
     mocks.navigate.mockClear();
     mocks.signOut.mockClear();
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isAdmin: true });
   });
 
   it('provides a mobile menu button and opens the sidebar drawer', () => {
@@ -127,7 +136,7 @@ describe('Finance sidebar permission filtering', () => {
   });
 
   it('hides admin-tier nav items for a role without those permissions', () => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('finance');
     render(<DefaultLayout />);
 
     expect(screen.queryByText('Bank Feeds')).not.toBeInTheDocument();
@@ -139,7 +148,7 @@ describe('Finance sidebar permission filtering', () => {
   });
 
   it('shows every nav item for admin', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isAdmin: true });
     render(<DefaultLayout />);
 
     expect(screen.getByText('Bank Feeds')).toBeInTheDocument();
@@ -149,7 +158,7 @@ describe('Finance sidebar permission filtering', () => {
   });
 
   it('shows every nav item for owner', () => {
-    mocks.role = 'owner';
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isOwner: true });
     render(<DefaultLayout />);
 
     expect(screen.getByText('Bank Feeds')).toBeInTheDocument();

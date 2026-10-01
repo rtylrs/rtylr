@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import ExpenseDetail from './ExpenseDetail';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const expense = {
   id: 'EXP-1',
@@ -22,7 +23,7 @@ const expense = {
 };
 
 const mocks = vi.hoisted(() => ({
-  role: 'staff' as string | null,
+  effectiveAccess: undefined as unknown,
   updateExpense: vi.fn(),
   refetchExpense: vi.fn(),
   expenseQuery: {
@@ -35,9 +36,21 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (
-    selector: (state: { user: { role: string | null }; role: string | null }) => unknown
-  ) => selector({ user: { role: mocks.role }, role: mocks.role }),
+  useUserStore: Object.assign(
+    (
+      selector: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      selector({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('@voxire/api', () => ({
@@ -105,7 +118,9 @@ describe('ExpenseDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:expenses:view'],
+    });
     mocks.updateExpense.mockResolvedValue({});
     mocks.refetchExpense.mockResolvedValue({ data: expense });
     Object.assign(mocks.expenseQuery, {
@@ -118,7 +133,9 @@ describe('ExpenseDetail', () => {
   });
 
   it('hides Approve/Reject for a role without finance:expenses:approve', () => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('finance', {
+      permissions: ['finance:expenses:view'],
+    });
     renderDetail();
 
     expect(screen.queryByText('Approve')).not.toBeInTheDocument();
@@ -126,7 +143,7 @@ describe('ExpenseDetail', () => {
   });
 
   it('shows Approve/Reject for admin', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isAdmin: true });
     renderDetail();
 
     expect(screen.getByText('Approve')).toBeInTheDocument();
@@ -134,7 +151,7 @@ describe('ExpenseDetail', () => {
   });
 
   it('shows Approve/Reject for owner', () => {
-    mocks.role = 'owner';
+    mocks.effectiveAccess = createEffectiveAccess('finance', { isOwner: true });
     renderDetail();
 
     expect(screen.getByText('Approve')).toBeInTheDocument();

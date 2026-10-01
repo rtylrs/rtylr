@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@voxire/ui';
 import { useInviteProjectMember } from '../useProjectMembers';
-import { roleLabel } from '../../../shared/lib/roleUtils';
+import { projectRoleLabel } from '../../../shared/lib/roleUtils';
 
 const PROJECT_MEMBER_ROLES: Array<'admin' | 'member' | 'viewer'> = ['admin', 'member', 'viewer'];
 
@@ -109,7 +109,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
           >
             {PROJECT_MEMBER_ROLES.map((r) => (
               <option key={r} value={r}>
-                {t(roleLabel(r))}
+                {t(projectRoleLabel(r))}
               </option>
             ))}
           </select>

@@ -47,14 +47,7 @@ func seedBulkInviteTenant(t *testing.T, db *sql.DB) (actorID, businessID int64) 
 		t.Fatalf("business id: %v", err)
 	}
 
-	if _, err := db.ExecContext(ctx,
-		`INSERT INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'owner')`,
-		actorID, businessID); err != nil {
-		t.Fatalf("insert business access: %v", err)
-	}
-
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?", actorID, businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id = ?", businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", actorID)
 	})
@@ -73,7 +66,7 @@ func TestBulkInviteEnqueuesInvitationEmailForNewInvitee(t *testing.T) {
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM email_jobs WHERE to_email = ?", invitee)
 		_, _ = db.ExecContext(ctx, "DELETE FROM invite_tokens WHERE user_id IN (SELECT id FROM users WHERE email = ?)", invitee)
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_app_permissions WHERE user_id IN (SELECT id FROM users WHERE email = ?)", invitee)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE user_id IN (SELECT id FROM users WHERE email = ?)", invitee)
 		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_license_assignments WHERE user_id IN (SELECT id FROM users WHERE email = ?)", invitee)
 		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_role_assignments WHERE user_id IN (SELECT id FROM users WHERE email = ?)", invitee)
 		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE user_id IN (SELECT id FROM users WHERE email = ?)", invitee)
@@ -83,22 +76,19 @@ func TestBulkInviteEnqueuesInvitationEmailForNewInvitee(t *testing.T) {
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE email = ?", invitee)
 	})
 
-	staffRole := "staff"
 	api := NewInvitationsAPI(application.NewService(ctx, db))
 	authCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{
 		UserID:     actorID,
 		BusinessID: businessID,
-		Role:       "owner",
 		EffectiveAccess: &authorization.EffectiveAccess{
-			DashRole:        "owner",
+			IsOwner:         true,
 			DashPermissions: []string{"hub:team:invite"},
 		},
 	})
 
 	response, err := api.BulkInvite(authCtx, &hubteaminvitationsv1.BulkInviteRequest{
-		Emails: []string{invitee},
-		Role:   &staffRole,
-		Apps:   []string{"dash"},
+		Emails:     []string{invitee},
+		MemberType: "member",
 	})
 	if err != nil {
 		t.Fatalf("BulkInvite: %v", err)

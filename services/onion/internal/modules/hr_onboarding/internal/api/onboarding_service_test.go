@@ -31,13 +31,12 @@ func oneKitStatus(err error) int {
 // business id (1001), the case the endpoints used to confuse.
 func memberCtx(ctx context.Context) context.Context {
 	return authPkg.WithAuthUser(ctx, &authPkg.AuthUser{
-		UserID: 1002, BusinessID: testutil.BusinessID, Role: "member",
+		UserID: 1002, BusinessID: testutil.BusinessID,
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID: testutil.BusinessID, AuthorizationVersion: 1,
 			Apps: []authorization.EffectiveAppAccess{{
 				AppID: authorization.AppHR, Licensed: true, HasAccess: true,
 				Permissions: []string{"hr:employees:manage"},
-				Scopes:      nil,
 			}},
 		},
 	})
@@ -47,8 +46,10 @@ func ensureMemberBusinessAccess(t *testing.T, db *sql.DB) {
 	t.Helper()
 	testutil.EnsureBusiness(t, db, testutil.BusinessID, testutil.OwnerID)
 	if _, err := db.ExecContext(context.Background(),
-		`INSERT IGNORE INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'member')`,
-		1002, testutil.BusinessID,
+		`INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+		 VALUES (?, ?, 'member', 'active')
+		 ON DUPLICATE KEY UPDATE status = 'active'`,
+		testutil.BusinessID, 1002,
 	); err != nil {
 		t.Fatalf("grant member business access: %v", err)
 	}

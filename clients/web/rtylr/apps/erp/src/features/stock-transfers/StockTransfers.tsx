@@ -134,8 +134,7 @@ const StockTransfers: React.FC = () => {
   const productsHaveMore = productResult?.hasMore ?? false;
   const productsTotal = productResult?.total;
   const createMut = useCreateStockTransfer();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canCreateTransfer = canErpPermission(role, 'erp:inventory:transfer');
+  const canCreateTransfer = canErpPermission('erp:inventory:transfer');
   const [showCreate, setShowCreate] = useState(false);
   const [fromWarehouseId, setFromWarehouseId] = useState('');
   const [toWarehouseId, setToWarehouseId] = useState('');

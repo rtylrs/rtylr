@@ -1,9 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
-  role: 'operator' as string,
+  effectiveAccess: null as unknown,
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -14,10 +15,18 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (state: { user: { role: string } }) => unknown) =>
-    selector({ user: { role: mocks.role } }),
-}));
+vi.mock('@voxire/auth', () => {
+  const state = () => ({
+    user: { effectiveAccess: mocks.effectiveAccess },
+    effectiveAccess: mocks.effectiveAccess,
+  });
+  return {
+    useUserStore: Object.assign(
+      (selector: (value: ReturnType<typeof state>) => unknown) => selector(state()),
+      { getState: state }
+    ),
+  };
+});
 
 const draftCampaign = {
   id: 1,
@@ -77,19 +86,22 @@ function renderCampaigns(): void {
  * are absent and the failure reads as a permissions bug rather than a fixture
  * leak.
  *
- * role is reset too. Every test sets it, so it is not load-bearing today, but a
- * future test that forgets would silently inherit the previous one's role.
+ * effective access is reset too so permission changes do not leak between tests.
  */
 beforeEach(() => {
   refetchCampaigns.mockClear();
-  mocks.role = 'operator';
+  mocks.effectiveAccess = createEffectiveAccess('crm', {
+    permissions: ['crm:campaigns:create', 'crm:campaigns:manage'],
+  });
   campaignsList.length = 0;
   campaignsList.push(draftCampaign);
 });
 
 describe('Campaigns send gating', () => {
   it('hides the Activate (send) control for an operator, who lacks crm:campaigns:send', () => {
-    mocks.role = 'operator';
+    mocks.effectiveAccess = createEffectiveAccess('crm', {
+      permissions: ['crm:campaigns:create', 'crm:campaigns:manage'],
+    });
     renderCampaigns();
     expect(screen.queryByRole('button', { name: /activate/i })).not.toBeInTheDocument();
     // Operator still has crm:campaigns, so edit/delete controls remain visible.
@@ -97,13 +109,13 @@ describe('Campaigns send gating', () => {
   });
 
   it('shows the Activate (send) control for admin, who has crm:campaigns:send directly', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
     renderCampaigns();
     expect(screen.getByRole('button', { name: /activate/i })).toBeInTheDocument();
   });
 
   it('hides all management controls for staff, who has no crm:campaigns access', () => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: [] });
     renderCampaigns();
     expect(screen.queryByRole('button', { name: /activate/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
@@ -113,7 +125,7 @@ describe('Campaigns send gating', () => {
 
 describe('Campaigns empty state', () => {
   it('shows a "view all campaigns" call-to-action when the selected status filter has no matches', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
     renderCampaigns();
 
     fireEvent.click(screen.getByRole('button', { name: /^Paused/ }));
@@ -127,7 +139,7 @@ describe('Campaigns empty state', () => {
   });
 
   it('shows a "new email campaign" call-to-action when there are no campaigns at all and the user can manage campaigns', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
     campaignsList.length = 0;
     renderCampaigns();
 
@@ -138,7 +150,7 @@ describe('Campaigns empty state', () => {
   });
 
   it('falls back to a refresh call-to-action when there are no campaigns and the user cannot manage them', () => {
-    mocks.role = 'staff';
+    mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: [] });
     campaignsList.length = 0;
     renderCampaigns();
 

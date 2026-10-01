@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -32,69 +31,68 @@ func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64)
 }
 
 func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int64, input domain.UpdatePermissionsInput) error {
-	if input.UserID == 0 {
-		return errors.New("user id is required")
+	if input.UserID <= 0 || businessID <= 0 {
+		return errors.New("business and user are required")
 	}
-
 	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
 	if err != nil {
 		return err
+	}
+	existing, err := s.repo.GetStaffUserByID(ctx, ownerID, businessID, input.UserID)
+	if err != nil {
+		return err
+	}
+	if !existing.IsActive || input.UserID == ownerID {
+		return domain.ErrForbidden
 	}
 	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, input); err != nil {
 		return err
 	}
 
-	role := input.Role
-	apps := []string{}
-	if input.Apps != nil {
-		apps = *input.Apps
+	memberType := input.MemberType
+	if memberType == "" {
+		memberType = existing.MemberType
 	}
-	if input.Apps == nil || role == "" {
-		existing, err := s.repo.GetStaffUserByID(ctx, ownerID, businessID, input.UserID)
-		if err != nil {
-			return err
+	if memberType == "" {
+		memberType = "member"
+	}
+	licensedApps := []string{}
+	if input.LicensedAppIDs != nil {
+		licensedApps = *input.LicensedAppIDs
+	} else {
+		licensedApps = existing.LicensedAppIDs
+	}
+	assignments := make([]domain.AppRoleAssignmentInput, 0, len(existing.PermissionProfileAssignments))
+	for _, assignment := range existing.PermissionProfileAssignments {
+		if assignment.GroupID != nil || assignment.Source != authorization.SourceExplicit {
+			continue
 		}
-		if input.Apps == nil {
-			apps = existing.Apps
-		}
-		if role == "" {
-			role = existing.Role
-		}
+		assignments = append(assignments, domain.AppRoleAssignmentInput{
+			AppID: string(assignment.AppID), RoleIDs: append([]int64{}, assignment.RoleIDs...),
+			PrimaryRoleID: assignment.PrimaryRoleID, Source: string(assignment.Source),
+			Status: "active", Scopes: append([]authorization.Scope{}, assignment.Scopes...),
+		})
 	}
-	if len(apps) == 0 && len(input.AppAssignments) > 0 {
-		for _, assignment := range input.AppAssignments {
-			if assignment.AppID != "" {
-				apps = appendUniqueString(apps, assignment.AppID)
-			}
-		}
+	if input.PermissionProfileAssignments != nil {
+		assignments = *input.PermissionProfileAssignments
 	}
-	if role == "" {
-		role = domain.RoleStaff
+	groupIDs := make([]int64, 0, len(existing.Groups))
+	for _, group := range existing.Groups {
+		groupIDs = append(groupIDs, group.ID)
 	}
-	if !isAssignableRole(role) {
-		return fmt.Errorf("invalid role: %s", role)
+	if input.GroupIDs != nil {
+		groupIDs = *input.GroupIDs
 	}
-	if role == domain.RoleOwner && input.UserID != ownerID {
-		return domain.ErrForbidden
-	}
-
 	if input.FullName != nil {
 		if err := s.repo.UpdateUserProfile(ctx, input.UserID, *input.FullName); err != nil {
 			return err
 		}
 	}
-
-	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, input.UserID, apps, role); err != nil {
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, actorID, input.UserID, licensedApps, memberType, "active", assignments, groupIDs); err != nil {
 		return err
 	}
-	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, input.UserID, apps, role, input.DashRole, input.AppAssignments, input.GroupIDs); err != nil {
-		return err
-	}
-
 	invalidateUserScope(ctx, input.UserID)
-	if businessID != 0 {
-		invalidateBusinessTeamScope(ctx, businessID)
-	}
+	invalidateBusinessTeamScope(ctx, businessID)
 	return nil
 }
 
@@ -111,7 +109,7 @@ func (s *Service) DeactivateUser(ctx context.Context, actorID, businessID, userI
 		return domain.ErrForbidden
 	}
 
-	if err := s.repo.DeactivateUser(ctx, ownerID, userID); err != nil {
+	if err := s.repo.DeactivateUser(ctx, businessID, ownerID, actorID, userID); err != nil {
 		return err
 	}
 
@@ -140,23 +138,22 @@ func (s *Service) BusinessOwnerID(ctx context.Context, fallbackOwnerID, business
 }
 
 func (s *Service) CanAccessOwner(ctx context.Context, userID, ownerID int64) bool {
-	if userID == 0 || ownerID == 0 {
+	if userID <= 0 || ownerID <= 0 {
 		return false
 	}
 	if userID == ownerID {
 		return true
 	}
-	if businessID, businessErr := s.repo.GetBusinessIDByOwnerID(ctx, ownerID); businessErr == nil && businessID > 0 {
-		apps, _ := s.GetOwnerApps(ctx, ownerID)
-		if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, apps); snapshotErr == nil && found {
-			return authorization.Resolve(snapshot).Apps != nil && snapshot.MembershipActive
-		}
+	businessID, err := s.repo.GetBusinessIDByOwnerID(ctx, ownerID)
+	if err != nil || businessID <= 0 {
+		return false
 	}
-	perm, err := s.repo.GetPermission(ctx, ownerID, userID)
+	apps, err := s.GetOwnerApps(ctx, ownerID)
 	if err != nil {
 		return false
 	}
-	return perm != nil && perm.IsActive
+	snapshot, found, err := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, apps)
+	return err == nil && found && snapshot.MembershipActive
 }
 
 func (s *Service) TeamManagerOwnerID(ctx context.Context, actorID, businessID int64) (int64, error) {
@@ -164,34 +161,28 @@ func (s *Service) TeamManagerOwnerID(ctx context.Context, actorID, businessID in
 }
 
 func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID int64) (int64, error) {
-	ownerID, err := s.resolveBusinessOwnerID(ctx, actorID, businessID)
-	if err != nil {
-		return 0, err
+	if actorID <= 0 || businessID <= 0 {
+		return 0, domain.ErrForbidden
+	}
+	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	if err != nil || ownerID <= 0 {
+		return 0, domain.ErrForbidden
 	}
 	if actorID == ownerID {
 		return ownerID, nil
 	}
-	if businessID == 0 {
-		return 0, domain.ErrForbidden
-	}
-	if apps, appsErr := s.GetOwnerApps(ctx, ownerID); appsErr == nil {
-		if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, actorID, apps); snapshotErr == nil && found {
-			resolved := authorization.Resolve(snapshot)
-			if resolved.IsOwner || resolved.IsAdmin || containsString(resolved.DashPermissions, "hub:team:edit") {
-				return ownerID, nil
-			}
-			return 0, domain.ErrForbidden
-		}
-	}
-
-	perm, err := s.repo.GetPermissionByBusiness(ctx, businessID, actorID)
+	apps, err := s.GetOwnerApps(ctx, ownerID)
 	if err != nil {
 		return 0, domain.ErrForbidden
 	}
-	if perm != nil && perm.IsActive && (perm.Role == domain.RoleAdmin || perm.Role == domain.RoleOwner) {
+	snapshot, found, err := s.repo.GetAuthorizationSnapshot(ctx, businessID, actorID, apps)
+	if err != nil || !found || !snapshot.MembershipActive {
+		return 0, domain.ErrForbidden
+	}
+	access := authorization.Resolve(snapshot)
+	if access.IsOwner || access.IsAdmin || (containsString(access.DashPermissions, "hub:team:edit") || containsString(access.DashPermissions, "hub:groups:manage")) {
 		return ownerID, nil
 	}
-
 	return 0, domain.ErrForbidden
 }
 
@@ -199,60 +190,39 @@ func (s *Service) enforceAuthorizationDelegation(ctx context.Context, actorID, o
 	if actorID == ownerID {
 		return nil
 	}
-	if businessID <= 0 {
-		return domain.ErrForbidden
-	}
-
 	apps, err := s.GetOwnerApps(ctx, ownerID)
 	if err != nil {
-		return domain.ErrForbidden
+		return domain.ErrDelegationCeiling
 	}
 	snapshot, found, err := s.repo.GetAuthorizationSnapshot(ctx, businessID, actorID, apps)
-	if err != nil || !found {
-		// Do not allow a legacy fallback actor to submit normalized role,
-		// license, group, or Dash-role fields during the migration window.
-		if input.DashRole != "" || input.Apps != nil || input.Role != "" || input.AppAssignments != nil || input.GroupIDs != nil {
-			return domain.ErrDelegationCeiling
-		}
-		return nil
+	if err != nil || !found || !snapshot.MembershipActive {
+		return domain.ErrDelegationCeiling
 	}
 	access := authorization.Resolve(snapshot)
 	if access.IsOwner || access.IsAdmin {
 		return nil
 	}
-
-	hasRoleEdit := containsString(access.DashPermissions, "hub:roles:edit")
-	hasTeamEdit := containsString(access.DashPermissions, "hub:team:edit")
-	hasLicenseManage := containsString(access.DashPermissions, "hub:licenses:manage")
-	if input.DashRole != "" {
-		if !hasRoleEdit || !authorization.CanAssignDashboardRole(&access, input.DashRole) {
-			return domain.ErrDelegationCeiling
-		}
-	}
-	if input.Role != "" && !hasRoleEdit {
+	if input.MemberType == "admin" {
 		return domain.ErrDelegationCeiling
 	}
-	if input.Apps != nil && !hasLicenseManage {
+	if input.LicensedAppIDs != nil && !containsString(access.DashPermissions, "hub:licenses:manage") {
 		return domain.ErrDelegationCeiling
 	}
-	if input.GroupIDs != nil && !hasTeamEdit {
+	if input.GroupIDs != nil && !containsString(access.DashPermissions, "hub:team:edit") {
 		return domain.ErrDelegationCeiling
 	}
-	if len(input.AppAssignments) == 0 {
+	if input.PermissionProfileAssignments == nil || len(*input.PermissionProfileAssignments) == 0 {
 		return nil
 	}
-	if !hasRoleEdit {
+	if !containsString(access.DashPermissions, "hub:roles:edit") {
 		return domain.ErrDelegationCeiling
 	}
-	for _, assignment := range input.AppAssignments {
-		if assignment.Source == string(authorization.SourceDashDefault) || assignment.Source == string(authorization.SourceSystem) {
-			return domain.ErrDelegationCeiling
-		}
+	for _, assignment := range *input.PermissionProfileAssignments {
 		if len(assignment.RoleIDs) == 0 {
 			return domain.ErrDelegationCeiling
 		}
-		for _, roleID := range assignment.RoleIDs {
-			grant, grantErr := s.repo.GetAuthorizationRoleGrant(ctx, businessID, roleID)
+		for _, profileID := range assignment.RoleIDs {
+			grant, grantErr := s.repo.GetAuthorizationRoleGrant(ctx, businessID, profileID)
 			if grantErr != nil || grant.AppID != assignment.AppID || !authorization.CanDelegatePermissions(&access, authorization.AppID(grant.AppID), grant.Permissions) {
 				return domain.ErrDelegationCeiling
 			}

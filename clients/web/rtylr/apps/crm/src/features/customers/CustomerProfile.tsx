@@ -49,8 +49,7 @@ const CustomerProfile: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const newTagInputRef = useRef<HTMLInputElement>(null);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canDeleteCustomer = canCrmPermission(role, 'crm:customers:manage');
+  const canDeleteCustomer = canCrmPermission('crm:customers:delete');
   const customerId = Number(id);
 
   const { data: fetched, isLoading, isError } = useGetCustomerFull(customerId);

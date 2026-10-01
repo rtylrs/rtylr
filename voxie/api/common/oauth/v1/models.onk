@@ -52,7 +52,6 @@ message MeRequest {}
 message MeResponse {
   user_id: int64
   business_id: int64
-  role: string
   /// Server-resolved authorization for the active business.
   effective_access: hub.user.v1.EffectiveAccess?
 }

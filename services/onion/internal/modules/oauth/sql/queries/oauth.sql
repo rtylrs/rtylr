@@ -36,15 +36,5 @@ SELECT password_hash FROM users WHERE id = ?;
 -- name: GetUserIDByEmail :one
 SELECT id FROM users WHERE email = ? ORDER BY id ASC LIMIT 1;
 
--- cross-schema read from shared users + user_app_permissions — for JWT claims population
--- name: GetUserBusinessIDAndRole :one
-SELECT
-    u.business_id,
-    CASE WHEN b.owner_id = u.id THEN 'owner' ELSE COALESCE(uap.role, 'staff') END AS role
-FROM users u
-LEFT JOIN businesses b ON b.id = u.business_id
-LEFT JOIN user_app_permissions uap ON uap.user_id = u.id
-    AND (uap.business_id = u.business_id OR (uap.business_id IS NULL AND uap.owner_id = b.owner_id))
-WHERE u.id = ?
-ORDER BY u.id ASC
-LIMIT 1;
+-- name: GetUserBusinessID :one
+SELECT business_id FROM users WHERE id = ?;

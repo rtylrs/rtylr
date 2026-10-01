@@ -29,94 +29,50 @@ func (s *Service) resolveProfileBusinessID(ctx context.Context, userID, business
 }
 
 func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64) (domain.MyProfile, error) {
-	email, fullName, isConsoleAdmin, apps, role, err := s.GetMeByBusiness(ctx, businessID, userID)
+	email, fullName, isConsoleAdmin, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
 		return domain.MyProfile{}, err
 	}
-	if apps == nil {
-		apps = []string{}
+	businessName, businessOwnerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	if err != nil {
+		return domain.MyProfile{}, err
+	}
+	businessApps, err := s.GetOwnerApps(ctx, businessOwnerID)
+	if err != nil {
+		return domain.MyProfile{}, err
+	}
+	planSlug, subscriptionStatus, err := s.GetOwnerSubscriptionInfo(ctx, businessOwnerID)
+	if err != nil {
+		return domain.MyProfile{}, err
 	}
 
-	businessName, businessOwnerID, isPrimaryOwner := s.GetBusinessInfo(ctx, businessID, userID)
-	// A co-owner has role=owner in user_app_permissions but is not the primary owner.
-	isCoOwner := !isPrimaryOwner && role == domain.RoleOwner
-	isOwner := isPrimaryOwner || isCoOwner
-
-	var planSlug, subscriptionStatus string
-	// Resolve the business's plan entitlement for every member, not just the
-	// owner: a dash admin is a tenant administrator and inherits the whole plan
-	// by default. Which apps a member actually receives is decided in the
-	// repository, where the normalized role is known.
-	billingID := businessOwnerID
-	if isPrimaryOwner {
-		billingID = userID
+	snapshot, found, err := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, businessApps)
+	if err != nil {
+		return domain.MyProfile{}, err
 	}
-	businessApps, appsErr := s.GetOwnerApps(ctx, billingID)
-	if appsErr != nil || len(businessApps) == 0 {
-		businessApps = append([]string(nil), defaultFreePlanApps...)
+	if !found {
+		return domain.MyProfile{}, domain.ErrForbidden
 	}
-	if isOwner {
-		role = domain.RoleOwner
-		apps = businessApps
-		if slug, status, subErr := s.GetOwnerSubscriptionInfo(ctx, billingID); subErr == nil {
-			planSlug = slug
-			subscriptionStatus = status
-		} else {
-			planSlug = "free"
-			subscriptionStatus = "active"
-		}
+	effectiveAccess := authorization.Resolve(snapshot)
+	provisioningStatus, found, err := s.repo.GetProvisioningStatusForBusiness(ctx, businessID, userID)
+	if err != nil {
+		return domain.MyProfile{}, err
 	}
-
-	effectiveResources := map[string]string{}
-	if !isOwner {
-		if resPerms, resErr := s.GetUserEffectiveResources(ctx, businessOwnerID, userID); resErr == nil {
-			for k, v := range resPerms {
-				effectiveResources[k] = string(v)
-			}
-		}
-	}
-
-	var effectiveAccess *authorization.EffectiveAccess
-	// The legacy apps column is deliberately not passed through: it is written
-	// by a separate, partially migrated path, so a stale row there would grant
-	// an app that no assignment backs. Owners and admins inherit the plan in the
-	// repository; everyone else is bounded by their own role assignments.
-	if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, businessApps); snapshotErr == nil && found {
-		resolved := authorization.Resolve(snapshot)
-		effectiveAccess = &resolved
-		if resolved.DashRole != "" {
-			role = domain.Role(resolved.DashRole)
-		}
-		isOwner = isOwner || resolved.IsOwner
-		// Always restate the response from the resolver, so the sidebar lists
-		// exactly the apps the member can open rather than whatever the legacy
-		// column happens to hold.
-		apps = make([]string, 0, len(resolved.SubscribedApps)+1)
-		apps = append(apps, "dash")
-		for _, appID := range resolved.SubscribedApps {
-			apps = append(apps, string(appID))
-		}
-	}
-	var provisioningStatus *authorization.ProvisioningStatus
-	if status, found, statusErr := s.repo.GetProvisioningStatus(ctx, userID); statusErr == nil && found {
-		provisioningStatus = status
+	if !found || provisioningStatus.State != authorization.ProvisioningActive || !provisioningStatus.EmailVerified {
+		return domain.MyProfile{}, domain.ErrForbidden
 	}
 
 	return domain.MyProfile{
 		ID:                 userID,
 		Email:              email,
 		FullName:           fullName,
-		Apps:               apps,
-		Role:               string(role),
 		BusinessID:         businessID,
 		BusinessName:       businessName,
-		IsOwner:            isOwner,
 		IsConsoleAdmin:     isConsoleAdmin,
 		Onboarded:          s.IsOnboarded(ctx, userID),
 		PlanSlug:           planSlug,
 		SubscriptionStatus: subscriptionStatus,
-		EffectiveResources: effectiveResources,
-		EffectiveAccess:    effectiveAccess,
+		EffectiveAccess:    &effectiveAccess,
 		ProvisioningStatus: provisioningStatus,
 	}, nil
 }
@@ -144,15 +100,12 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	if input.Email == "" {
 		return 0, "", errors.New("email is required")
 	}
-	role := input.Role
-	if role == "" {
-		role = domain.RoleStaff
+	memberType := input.MemberType
+	if memberType == "" {
+		memberType = "member"
 	}
-	if !isAssignableRole(role) {
-		return 0, "", fmt.Errorf("invalid role: %s", role)
-	}
-	if role == domain.RoleOwner {
-		return 0, "", domain.ErrForbidden
+	if memberType != "member" && memberType != "admin" {
+		return 0, "", errors.New("invalid member type")
 	}
 	provisioningMode := input.ProvisioningMode
 	if provisioningMode == "" {
@@ -187,8 +140,17 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		}
 	}
 
-	ownerID, err := s.requireTeamManager(ctx, ownerID, businessID)
+	actorID := ownerID
+	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
 	if err != nil {
+		return 0, "", err
+	}
+	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, domain.UpdatePermissionsInput{
+		MemberType:                   memberType,
+		LicensedAppIDs:               &input.LicensedAppIDs,
+		PermissionProfileAssignments: &input.PermissionProfileAssignments,
+		GroupIDs:                     &input.GroupIDs,
+	}); err != nil {
 		return 0, "", err
 	}
 
@@ -254,18 +216,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 			logger.Int("user_id", int(userID)), logger.Int("business_id", int(businessID)))
 	}
 
-	apps := input.Apps
-	if apps == nil {
-		apps = []string{}
-	}
-
-	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, userID, apps, role); err != nil {
-		return cleanupCreatedUser(err)
-	}
-	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, userID, apps, role, input.DashRole, input.AppAssignments, input.GroupIDs); err != nil {
-		return cleanupCreatedUser(err)
-	}
-	if err := s.repo.SetNormalizedAuthorizationPending(ctx, businessID, userID); err != nil {
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, actorID, userID, input.LicensedAppIDs, memberType, "pending", input.PermissionProfileAssignments, input.GroupIDs); err != nil {
 		return cleanupCreatedUser(err)
 	}
 	provisioningState := "pending_invitation"
@@ -284,7 +235,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	if err := s.repo.EnsureEmployeeForUser(ctx, ownerID, businessID, userID); err != nil {
 		logger.Ctx(ctx).Error("failed to create employee record for invited user",
 			logger.Int("owner_id", int(ownerID)), logger.Int("user_id", int(userID)), logger.Error(err))
-	} else if err := s.repo.EnsureStaffForUser(ctx, ownerID, businessID, userID, string(role)); err != nil {
+	} else if err := s.repo.EnsureStaffForUser(ctx, ownerID, businessID, userID, "member"); err != nil {
 		logger.Ctx(ctx).Error("failed to create staff directory record for invited user",
 			logger.Int("owner_id", int(ownerID)), logger.Int("business_id", int(businessID)),
 			logger.Int("user_id", int(userID)), logger.Error(err))

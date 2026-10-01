@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../test/effectiveAccess';
 import DefaultLayout from './DefaultLayout';
 
 /**
@@ -17,7 +18,7 @@ import DefaultLayout from './DefaultLayout';
  */
 
 const mocks = vi.hoisted(() => ({
-  role: 'admin' as string | null,
+  effectiveAccess: null as unknown,
   pathname: '/staff',
 }));
 
@@ -32,14 +33,23 @@ vi.mock('@tanstack/react-router', () => ({
     select({ location: { pathname: mocks.pathname } }),
 }));
 
-vi.mock('@voxire/auth', () => ({
-  useUserStore: (select: (state: Record<string, unknown>) => unknown) =>
-    select({
-      user: { id: '1', name: 'Test User', email: 'test@example.com', role: mocks.role },
-      role: mocks.role,
-      setUser: vi.fn(),
-    }),
-}));
+vi.mock('@voxire/auth', () => {
+  const state = () => ({
+    user: {
+      id: '1',
+      name: 'Test User',
+      email: 'test@example.com',
+      effectiveAccess: mocks.effectiveAccess,
+    },
+    effectiveAccess: mocks.effectiveAccess,
+    setUser: vi.fn(),
+  });
+  const useUserStore = Object.assign(
+    (select: (value: ReturnType<typeof state>) => unknown) => select(state()),
+    { getState: state }
+  );
+  return { useUserStore };
+});
 vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
 vi.mock('@voxire/config', () => ({ getAvatarUrl: () => '' }));
 vi.mock('@voxire/caret', () => ({
@@ -98,7 +108,7 @@ const reportingLink = (): HTMLElement | null =>
 
 describe('DefaultLayout reporting-lines nav entry', () => {
   beforeEach(() => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('hr', { isAdmin: true });
     mocks.pathname = '/staff';
   });
 
@@ -108,7 +118,9 @@ describe('DefaultLayout reporting-lines nav entry', () => {
   });
 
   it('hides it from a role that cannot manage staff', () => {
-    mocks.role = 'viewer';
+    mocks.effectiveAccess = createEffectiveAccess('hr', {
+      permissions: ['hr:employees:view'],
+    });
     render(<DefaultLayout />);
     expect(reportingLink()).toBeNull();
   });
@@ -119,7 +131,7 @@ describe('DefaultLayout time tracking nav entries (#1068)', () => {
     screen.queryAllByRole('link').find((a) => a.getAttribute('href') === href) ?? null;
 
   beforeEach(() => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('hr', { isAdmin: true });
     mocks.pathname = '/staff';
     hrConfig.value = null;
   });
@@ -177,7 +189,7 @@ describe('DefaultLayout sidebar active item', () => {
   const isActive = (href: string): boolean => linkTo(href)?.style.color === 'var(--hr-text)';
 
   beforeEach(() => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('hr', { isAdmin: true });
     hrConfig.value = null;
     mocks.pathname = '/performance/goals';
   });

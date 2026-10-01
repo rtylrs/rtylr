@@ -25,7 +25,7 @@ func TestTeam_AddGroupMembers_WritesBusinessIDResolvableBySnapshot(t *testing.T)
 	ownerID := testutil.OwnerID
 
 	groupName := fmt.Sprintf("snapshot-group-%d", time.Now().UnixNano())
-	groupID, err := repo.CreateGroup(ctx, ownerID, domain.CreateGroupInput{Name: groupName})
+	groupID, err := repo.CreateGroup(ctx, ownerID, domain.CreateGroupInput{BusinessID: businessID, Name: groupName})
 	if err != nil {
 		t.Fatalf("CreateGroup: %v", err)
 	}
@@ -48,7 +48,7 @@ func TestTeam_AddGroupMembers_WritesBusinessIDResolvableBySnapshot(t *testing.T)
 		_, _ = db.ExecContext(ctx, "DELETE FROM user_group_members WHERE group_id = ?", groupID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE business_id = ? AND user_id = ?", businessID, userID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", userID)
-		_ = repo.DeleteGroup(ctx, ownerID, groupID)
+		_ = repo.DeleteGroup(ctx, ownerID, businessID, groupID)
 	})
 
 	if _, err := db.ExecContext(ctx,

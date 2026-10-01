@@ -46,7 +46,7 @@ func newRoleFixture(t *testing.T) *roleFixture {
 	repo := infrastructure.NewRepository(db)
 	svc := application.NewService(ctx, db)
 
-	// v2 handlers resolve the tenant through user_business_access; without a row
+	// handlers resolve the tenant through business ownership or active membership; without either
 	// there they answer 403 regardless of project membership.
 	testutil.GrantBusinessAccess(t, db, testutil.BusinessID,
 		roleOwnerID, roleViewerID, roleMemberID, roleManagerID, roleStrangerID)
@@ -137,10 +137,13 @@ func ctxAsWithTaskAssignment(userID int64, canAssignTasks bool) context.Context 
 		"flow:projects:view", "flow:projects:create", "flow:projects:edit",
 		"flow:projects:assign", "flow:tasks:view", "flow:tasks:create",
 		"flow:tasks:edit", "flow:team:manage", "flow:managers:manage",
-		"flow:settings:manage",
 	}
 	if canAssignTasks {
 		permissions = append(permissions, "flow:tasks:assign")
+	}
+	permissionScopes := make(map[string][]authorization.Scope, len(permissions))
+	for _, permission := range permissions {
+		permissionScopes[permission] = []authorization.Scope{{Type: "flow_project", ID: "1"}}
 	}
 
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
@@ -153,6 +156,7 @@ func ctxAsWithTaskAssignment(userID int64, canAssignTasks bool) context.Context 
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
+				PermissionScopes: permissionScopes,
 			}},
 			IsOwner: userID == roleOwnerID,
 			IsAdmin: userID == roleManagerID,

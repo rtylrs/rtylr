@@ -8,6 +8,7 @@ import (
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -54,7 +55,7 @@ func TestUpsertHRConfigPartialCorePayloadKeepsOmittedFields(t *testing.T) {
 		t.Fatalf("Validate: %v", err)
 	}
 
-	apiCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: testutil.OwnerID, BusinessID: testutil.BusinessID, Role: "owner"})
+	apiCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: testutil.OwnerID, BusinessID: testutil.BusinessID, EffectiveAccess: &authorization.EffectiveAccess{IsOwner: true}})
 	resp, err := handler.Serve(apiCtx, &req)
 	if err != nil {
 		t.Fatalf("Serve: %v", err)

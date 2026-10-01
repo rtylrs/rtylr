@@ -41,8 +41,7 @@ const Leave = (): React.JSX.Element => {
   const [statusFilter, setStatusFilter] = useState<(typeof FILTER_STATUSES)[number]>('All');
   const { data: requests, isLoading, isError, isFetching, refetch } = useListLeaveRequests();
   const approveLeave = useApproveLeave();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canApprove = canHrPermission(role, 'hr:time_off:approve');
+  const canApprove = canHrPermission('hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
     statusFilter === 'All' ? true : isHrRequestStatus(r.status, statusFilter)

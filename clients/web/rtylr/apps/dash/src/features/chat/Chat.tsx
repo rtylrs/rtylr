@@ -60,20 +60,22 @@ const Chat: React.FC = () => {
       buildDashSystemContext({
         pathname: '/chat',
         businessName: user?.businessName,
-        role: user?.role,
-        apps: user?.apps,
+        apps: user?.effectiveAccess?.apps
+          .filter((app) => app.licensed && app.hasAccess)
+          .map((app) => app.appId),
       }),
-    [user?.apps, user?.businessName, user?.role]
+    [user?.businessName, user?.effectiveAccess]
   );
   const pageContext = React.useMemo(
     () =>
       buildDashPageContext({
         pathname: '/chat',
         businessName: user?.businessName,
-        role: user?.role,
-        apps: user?.apps,
+        apps: user?.effectiveAccess?.apps
+          .filter((app) => app.licensed && app.hasAccess)
+          .map((app) => app.appId),
       }),
-    [user?.apps, user?.businessName, user?.role]
+    [user?.businessName, user?.effectiveAccess]
   );
 
   const { messages, isStreaming } = useCaretStore();

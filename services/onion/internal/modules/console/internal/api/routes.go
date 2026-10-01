@@ -151,7 +151,7 @@ type updateResourceRowHandler struct {
 
 func (h *updateResourceRowHandler) Serve(ctx context.Context, req *updateResourceRowRequest) (updateResourceRowResponse, error) {
 	user, ok := authPkg.GetAuthUser(ctx)
-	if !ok || user.Role != "console_admin" {
+	if !ok || !authPkg.IsConsoleAdmin(user) {
 		return updateResourceRowResponse{}, onekiterrors.New(http.StatusForbidden, "Console admin access required")
 	}
 	if err := h.Service.UpdateResourceRow(ctx, chi.URLParamFromCtx(ctx, "table"), chi.URLParamFromCtx(ctx, "id"), req.Values); err != nil {
@@ -176,7 +176,7 @@ func getPositiveQueryInt(r *http.Request, name string, fallback int) int {
 
 func checkAdmin(r *http.Request) (*authPkg.AuthUser, bool) {
 	user, ok := authPkg.GetAuthUser(r.Context())
-	if !ok || user.Role != "console_admin" {
+	if !ok || !authPkg.IsConsoleAdmin(user) {
 		return nil, false
 	}
 	return user, true

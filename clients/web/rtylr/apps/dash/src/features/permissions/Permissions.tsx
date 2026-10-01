@@ -1,32 +1,23 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
-import { canEffectiveAccess } from '@voxire/permissions';
-import { Shield, Lock } from 'lucide-react';
-import { PermissionCheckbox, RoleBadge, SkeletonList } from '../../shared/components/dash';
-import { usePermissions, useUpdatePermissions } from '../../shared/hooks/queries/usePermissions';
-import { useUserStore } from '../../shared/stores/userStore';
+import { AlertTriangle, Shield } from 'lucide-react';
+import { SkeletonList } from '../../shared/components/dash';
+import { usePermissionCatalog } from '../../shared/hooks/queries/usePermissions';
 
 const Permissions: React.FC = () => {
-  const user = useUserStore((s) => s.user);
-  const { data, isLoading, isError, refetch } = usePermissions();
-  const updatePermissions = useUpdatePermissions();
+  const { t } = useTranslation();
+  const { data, isLoading, isError, refetch } = usePermissionCatalog();
 
-  const canEditRoles = user?.effectiveAccess
-    ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:edit') ||
-      canEffectiveAccess(user.effectiveAccess, 'hub:roles:create')
-    : user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
-
-  // A failed request settles with isLoading false and data undefined, which
-  // the guard below reads as loading and leaves the skeleton on screen.
   if (isError) {
     return (
-      <div className="space-y-5 max-w-5xl">
+      <div className="max-w-5xl space-y-5">
         <EmptyState
           icon={Shield}
-          title="Couldn't load permissions"
-          description="The permission matrix could not be loaded."
-          action={{ label: 'Refresh', onClick: () => void refetch() }}
+          title={t('common.permissionCatalog.loadErrorTitle')}
+          description={t('common.permissionCatalog.loadError')}
+          action={{ label: t('common.refresh'), onClick: () => void refetch() }}
         />
       </div>
     );
@@ -34,140 +25,96 @@ const Permissions: React.FC = () => {
 
   if (isLoading || !data) {
     return (
-      <div className="space-y-5 max-w-5xl">
+      <div className="max-w-5xl space-y-5">
         <SkeletonList rows={6} withAvatar={false} />
       </div>
     );
   }
 
-  const groups = data.permissions.reduce<Record<string, typeof data.permissions>>((acc, p) => {
-    (acc[p.group] ??= []).push(p);
-    return acc;
-  }, {});
+  const byApp = data.permissions.reduce<Record<string, typeof data.permissions>>(
+    (groups, entry) => {
+      (groups[entry.appId] ??= []).push(entry);
+      return groups;
+    },
+    {}
+  );
 
   return (
     <>
-      <HelmetContainer title="Permissions · rtylr" />
-      <div className="space-y-5 max-w-5xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-9 w-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'rgba(69,131,196,0.15)' }}
-            >
-              <Shield size={16} style={{ color: '#4583C4' }} />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Permissions
-              </h1>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                Configure what each role can do across the workspace.
-              </p>
-            </div>
-          </div>
-          {!canEditRoles && (
-            <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
-            >
-              <Lock size={13} />
-              Read-only mode
-            </div>
-          )}
-        </div>
-
-        <div
-          role="table"
-          aria-label="Permission Matrix"
-          className="rounded-xl overflow-hidden"
-          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-        >
+      <HelmetContainer title={`${t('common.permissionCatalog.title')} · rtylr`} />
+      <div className="max-w-5xl space-y-5">
+        <header className="flex items-center gap-3">
           <div
-            role="row"
-            className="grid items-center px-5 py-3 font-medium text-xs border-b"
-            style={{
-              gridTemplateColumns: `minmax(0, 1fr) repeat(${data.roles.length}, 88px)`,
-              borderColor: 'var(--dash-border)',
-              background: 'var(--dash-hover)',
-            }}
+            className="flex h-9 w-9 items-center justify-center rounded-xl"
+            style={{ background: 'rgba(69,131,196,0.15)' }}
           >
-            <div role="columnheader" style={{ color: 'var(--dash-text-muted)' }}>
-              Permission
-            </div>
-            {data.roles.map((role) => (
-              <div key={role} role="columnheader" className="flex justify-center">
-                <RoleBadge role={role} />
-              </div>
-            ))}
+            <Shield size={16} style={{ color: '#4583C4' }} />
           </div>
+          <div>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+              {t('common.permissionCatalog.title')}
+            </h1>
+            <p className="mt-0.5 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+              {t('common.permissionCatalog.description')}
+            </p>
+          </div>
+        </header>
 
-          <div role="rowgroup">
-            {Object.entries(groups).map(([group, perms]) => (
-              <div key={group}>
-                <div
-                  className="px-5 py-2 text-[11px] font-semibold uppercase tracking-wider"
-                  style={{
-                    background: 'var(--dash-hover)',
-                    color: 'var(--dash-text-dim)',
-                    borderBottom: '1px solid var(--dash-border)',
-                  }}
+        {Object.entries(byApp).map(([appId, permissions]) => (
+          <section
+            key={appId}
+            aria-labelledby={`permission-app-${appId}`}
+            className="overflow-hidden rounded-xl"
+            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+          >
+            <h2
+              id={`permission-app-${appId}`}
+              className="border-b px-5 py-3 text-xs font-semibold uppercase tracking-wider"
+              style={{
+                borderColor: 'var(--dash-border)',
+                background: 'var(--dash-hover)',
+                color: 'var(--dash-text-muted)',
+              }}
+            >
+              {appId}
+            </h2>
+            <ul className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
+              {permissions.map((permission) => (
+                <li
+                  key={permission.key}
+                  className="flex items-center justify-between gap-4 px-5 py-3"
+                  style={{ borderColor: 'var(--dash-border)' }}
                 >
-                  {group}
-                </div>
-                {perms.map((p) => (
-                  <div
-                    key={p.key}
-                    role="row"
-                    className="grid items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
-                    style={{
-                      gridTemplateColumns: `minmax(0, 1fr) repeat(${data.roles.length}, 88px)`,
-                      borderBottom: '1px solid var(--dash-border)',
-                    }}
-                  >
-                    <div role="cell" className="min-w-0">
-                      <p
-                        className="text-xs font-semibold truncate"
-                        style={{ color: 'var(--dash-text)' }}
-                      >
-                        {p.label}
-                      </p>
-                      <p
-                        className="text-[10px] font-mono truncate"
-                        style={{ color: 'var(--dash-text-dim)' }}
-                      >
-                        {p.key}
-                      </p>
-                    </div>
-                    {data.roles.map((role) => {
-                      const value = data.values[role]?.[p.key] ?? false;
-                      const isOwner = role === 'owner';
-                      const isDisabled = isOwner || !canEditRoles;
-                      return (
-                        <div key={role} role="cell" className="flex justify-center">
-                          <PermissionCheckbox
-                            checked={isOwner ? true : value}
-                            disabled={isDisabled}
-                            ariaLabel={`${p.label} for ${role}`}
-                            onChange={(checked) => {
-                              if (!isDisabled) {
-                                updatePermissions.mutate({
-                                  role,
-                                  key: p.key,
-                                  enabled: checked,
-                                });
-                              }
-                            }}
-                          />
-                        </div>
-                      );
-                    })}
+                  <div className="min-w-0">
+                    <p
+                      className="truncate text-xs font-semibold"
+                      style={{ color: 'var(--dash-text)' }}
+                    >
+                      {permission.resource.replace(/:/g, ' / ')} · {permission.action}
+                    </p>
+                    <p
+                      className="truncate font-mono text-[10px]"
+                      style={{ color: 'var(--dash-text-dim)' }}
+                    >
+                      {permission.key}
+                    </p>
                   </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
+                  {(permission.isSensitive || permission.isHighRisk) && (
+                    <span
+                      className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium"
+                      style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
+                    >
+                      <AlertTriangle size={11} />
+                      {permission.isHighRisk
+                        ? t('common.permissionProfiles.highImpact')
+                        : t('common.permissionProfiles.sensitive')}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
       </div>
     </>
   );

@@ -15,13 +15,13 @@ import {
 } from '../../shared/components/ui';
 import { SkeletonGrid } from '../../shared/components/dash';
 import {
-  useArchiveCustomRole,
-  useCreateCustomRole,
-  useCustomRoles,
-  usePermissions,
-  useUpdateCustomRole,
+  useArchivePermissionProfile,
+  useCreatePermissionProfile,
+  usePermissionCatalog,
+  usePermissionProfiles,
+  useUpdatePermissionProfile,
 } from '../../shared/hooks/queries/usePermissions';
-import type { CustomRole } from '../../shared/schemas/permissions';
+import type { PermissionProfile } from '../../shared/schemas/permissions';
 import { useUserStore } from '../../shared/stores/userStore';
 
 const Roles: React.FC = () => {
@@ -29,21 +29,21 @@ const Roles: React.FC = () => {
   const navigate = useNavigate();
   const search = useSearch({ from: '/business/roles' });
   const user = useUserStore((s) => s.user);
-  const { data = [], isLoading } = useCustomRoles();
-  const { data: permissionMatrix } = usePermissions();
-  const createRole = useCreateCustomRole();
-  const updateRole = useUpdateCustomRole();
-  const archiveRole = useArchiveCustomRole();
+  const { data = [], isLoading } = usePermissionProfiles();
+  const { data: permissionCatalog } = usePermissionCatalog();
+  const createRole = useCreatePermissionProfile();
+  const updateRole = useUpdatePermissionProfile();
+  const archiveRole = useArchivePermissionProfile();
   const [open, setOpen] = useState(false);
   const [roleName, setRoleName] = useState('');
   const [roleDescription, setRoleDescription] = useState('');
   const [roleAppId, setRoleAppId] = useState('dash');
   const [rolePermissions, setRolePermissions] = useState<string[]>([]);
-  const [editingRole, setEditingRole] = useState<CustomRole | null>(null);
+  const [editingRole, setEditingRole] = useState<PermissionProfile | null>(null);
 
   const canCreateRole = user?.effectiveAccess
     ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:create')
-    : user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
+    : false;
   const canEditRole = user?.effectiveAccess
     ? canEffectiveAccess(user.effectiveAccess, 'hub:roles:edit')
     : canCreateRole;
@@ -111,21 +111,21 @@ const Roles: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Roles · rtylr" />
+      <HelmetContainer title={`${t('common.permissionProfiles.title')} · rtylr`} />
       <div className="space-y-5 max-w-5xl">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              Custom roles
+              {t('common.permissionProfiles.title')}
             </h1>
             <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-              Build purpose-built roles for your business. Assign them to members in Team.
+              {t('common.permissionProfiles.description')}
             </p>
           </div>
           {canCreateRole && (
             <Button onClick={openCreateRole}>
               <Plus size={14} />
-              New role
+              {t('common.permissionProfiles.new')}
             </Button>
           )}
         </div>
@@ -155,8 +155,10 @@ const Roles: React.FC = () => {
                   {t('common.roleManagement.managedInDash')}
                 </p>
                 <p className="text-[11px] mb-3" style={{ color: 'var(--dash-text-dim)' }}>
-                  {role.memberCount} {role.memberCount === 1 ? 'member' : 'members'} ·{' '}
-                  {role.permissions.length} permissions
+                  {t('common.permissionProfiles.assignedMembers', { count: role.memberCount })} ·{' '}
+                  {t('common.permissionProfiles.permissionCount', {
+                    count: role.permissions.length,
+                  })}
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {role.permissions.slice(0, 4).map((p) => (
@@ -218,7 +220,7 @@ const Roles: React.FC = () => {
         <DialogContent className="max-w-md">
           <form onSubmit={handleCreateRole} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Create Custom Role</DialogTitle>
+              <DialogTitle>{t('common.permissionProfiles.create')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-2">
               <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
@@ -254,7 +256,7 @@ const Roles: React.FC = () => {
             </div>
             <div className="space-y-2">
               <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-                Role Name
+                {t('common.permissionProfiles.name')}
               </label>
               <Input
                 value={roleName}
@@ -271,8 +273,8 @@ const Roles: React.FC = () => {
                 className="max-h-52 overflow-y-auto space-y-1 rounded-lg p-2"
                 style={{ background: 'var(--dash-bg)', border: '1px solid var(--dash-border)' }}
               >
-                {(permissionMatrix?.permissions ?? [])
-                  .filter((permission) => permission.key.startsWith(`${roleAppId}:`))
+                {(permissionCatalog?.permissions ?? [])
+                  .filter((permission) => permission.appId === roleAppId)
                   .map((permission) => {
                     const checked = rolePermissions.includes(permission.key);
                     return (
@@ -299,7 +301,9 @@ const Roles: React.FC = () => {
                           {checked && <Check size={11} color="white" />}
                         </span>
                         <span className="min-w-0">
-                          <span className="block text-xs">{permission.label}</span>
+                          <span className="block text-xs">
+                            {permission.resource.replace(/:/g, ' / ')} · {permission.action}
+                          </span>
                           <span
                             className="block truncate text-[10px] font-mono"
                             style={{ color: 'var(--dash-text-dim)' }}
@@ -319,7 +323,7 @@ const Roles: React.FC = () => {
               <Input
                 value={roleDescription}
                 onChange={(event) => setRoleDescription(event.target.value)}
-                placeholder={t('common.optionalRoleDescription')}
+                placeholder={t('common.permissionProfiles.optionalDescription')}
               />
             </div>
             <DialogFooter>
@@ -327,7 +331,7 @@ const Roles: React.FC = () => {
                 {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={!roleName.trim() || createRole.isPending}>
-                {t('common.createRole')}
+                {t('common.permissionProfiles.create')}
               </Button>
             </DialogFooter>
           </form>
@@ -343,11 +347,11 @@ const Roles: React.FC = () => {
         <DialogContent className="max-w-md">
           <form onSubmit={handleUpdateRole} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>{t('common.editCustomRole')}</DialogTitle>
+              <DialogTitle>{t('common.permissionProfiles.edit')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-2">
               <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-                {t('common.roleName')}
+                {t('common.permissionProfiles.name')}
               </label>
               <Input
                 value={roleName}
@@ -362,7 +366,7 @@ const Roles: React.FC = () => {
               <Input
                 value={roleDescription}
                 onChange={(event) => setRoleDescription(event.target.value)}
-                placeholder={t('common.optionalRoleDescription')}
+                placeholder={t('common.permissionProfiles.optionalDescription')}
               />
             </div>
             <div className="space-y-2">
@@ -373,8 +377,8 @@ const Roles: React.FC = () => {
                 className="max-h-52 overflow-y-auto space-y-1 rounded-lg p-2"
                 style={{ background: 'var(--dash-bg)', border: '1px solid var(--dash-border)' }}
               >
-                {(permissionMatrix?.permissions ?? [])
-                  .filter((permission) => permission.key.startsWith(`${roleAppId}:`))
+                {(permissionCatalog?.permissions ?? [])
+                  .filter((permission) => permission.appId === roleAppId)
                   .map((permission) => {
                     const checked = rolePermissions.includes(permission.key);
                     return (
@@ -401,7 +405,9 @@ const Roles: React.FC = () => {
                           {checked && <Check size={11} color="white" />}
                         </span>
                         <span className="min-w-0">
-                          <span className="block text-xs">{permission.label}</span>
+                          <span className="block text-xs">
+                            {permission.resource.replace(/:/g, ' / ')} · {permission.action}
+                          </span>
                           <span
                             className="block truncate text-[10px] font-mono"
                             style={{ color: 'var(--dash-text-dim)' }}
@@ -419,7 +425,7 @@ const Roles: React.FC = () => {
                 {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={!roleName.trim() || updateRole.isPending}>
-                {t('common.saveRole')}
+                {t('common.saveChanges')}
               </Button>
             </DialogFooter>
           </form>

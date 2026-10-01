@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
-import { useUserStore } from '@voxire/auth';
+import { parseEffectiveAccess, useUserStore } from '@voxire/auth';
 import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
@@ -584,7 +584,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const [theme, setTheme] = useTheme();
   const hrUser = useUserStore((s) => s.user);
-  const role = useUserStore((s) => s.user?.role ?? s.role);
+  const effectiveAccess = hrUser?.effectiveAccess;
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
     if (hrUser?.name || hrUser?.email) return;
@@ -592,7 +592,15 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
       .getMe({})
       .then((res) => {
         if (res?.id) {
-          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
+          setAuthUser({
+            id: String(res.id),
+            businessId: String(res.businessId),
+            name: res.fullName ?? '',
+            email: res.email ?? '',
+            businessName: res.businessName ?? '',
+            isConsoleAdmin: res.isConsoleAdmin,
+            effectiveAccess: parseEffectiveAccess(res.effectiveAccess) ?? undefined,
+          });
         }
       })
       .catch(() => undefined);
@@ -610,7 +618,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     section.items.filter(
       (item) =>
         (!item.configGuard || item.configGuard(timeTrackingModel, config)) &&
-        (!item.permission || canHrPermission(role, item.permission))
+        (!item.permission || canHrPermission(item.permission))
     )
   );
   const visibleNavPaths = new Set(visibleNavItems.map((item) => item.path));

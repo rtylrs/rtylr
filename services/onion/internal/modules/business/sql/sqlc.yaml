@@ -4,9 +4,10 @@ sql:
     queries: "queries"
     schema:
       - "../../../../internal/platform/database/schemas/shared/config.sql"
-      - "../../../../internal/platform/database/schemas/shared/user_apps.sql"
+      - "../../../../internal/platform/database/schemas/shared/users.sql"
+      - "../../../../internal/platform/database/schemas/shared/user_groups.sql"
       - "schema/businesses.sql"
-      - "schema/user_business_access.sql"
+      - "../../../../internal/platform/database/schemas/shared/zz_authorization.sql"
       - "../../../../internal/platform/database/schemas/hr_core/schema.sql"
     gen:
       go:

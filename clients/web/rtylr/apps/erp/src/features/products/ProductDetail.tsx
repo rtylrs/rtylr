@@ -88,9 +88,8 @@ const ProductDetail: React.FC = () => {
   const deleteProduct = useDeleteProduct();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canDeleteProduct = canErpPermission(role, 'erp:products:delete');
-  const canAdjustInventory = canErpPermission(role, 'erp:inventory:adjust');
+  const canDeleteProduct = canErpPermission('erp:products:delete');
+  const canAdjustInventory = canErpPermission('erp:inventory:adjust');
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((category) => map.set(String(category.id), category.name ?? ''));

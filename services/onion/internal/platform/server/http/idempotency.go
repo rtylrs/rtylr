@@ -399,8 +399,8 @@ func buildIdempotencyKey(r *http.Request, key string) string {
 }
 
 // idempotencyPrincipal scopes a key to one principal in one tenant. The business
-// ID is part of the scope because a user can belong to several businesses
-// (user_business_access); keying on the user alone would let one tenant's client
+// ID is part of the scope because a user can belong to several businesses;
+// keying on the user alone would let one tenant's client
 // key read another tenant's stored response.
 func idempotencyPrincipal(r *http.Request) string {
 	if authUser, ok := authPkg.GetAuthUser(r.Context()); ok {

@@ -1,15 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-const mockGetCookie = vi.fn(() => null);
-const mockRemoveCookie = vi.fn();
-const mockSetCookie = vi.fn();
-const mockGetDefaultCookieDomain = vi.fn(() => undefined);
+const { mockGetCookie, mockRemoveCookie, mockSetCookie, mockGetDefaultCookieDomain } = vi.hoisted(
+  () => ({
+    mockGetCookie: vi.fn<(name: string) => string | null>(() => null),
+    mockRemoveCookie: vi.fn(),
+    mockSetCookie: vi.fn(),
+    mockGetDefaultCookieDomain: vi.fn<() => string | undefined>(() => undefined),
+  })
+);
 
 vi.mock('@voxire/auth', () => ({
-  setCookie: (...args: unknown[]) => mockSetCookie(...args),
-  removeCookie: (...args: unknown[]) => mockRemoveCookie(...args),
-  getCookie: (...args: unknown[]) => mockGetCookie(...args),
-  getDefaultCookieDomain: (...args: unknown[]) => mockGetDefaultCookieDomain(...args),
+  setCookie: mockSetCookie,
+  removeCookie: mockRemoveCookie,
+  getCookie: mockGetCookie,
+  getDefaultCookieDomain: mockGetDefaultCookieDomain,
 }));
 
 import { useUserStore } from './userStore';
@@ -23,7 +27,6 @@ beforeEach(() => {
     isAuthenticated: false,
     loading: false,
     error: null,
-    role: null,
   });
 });
 
@@ -33,34 +36,31 @@ describe('userStore (auth)', () => {
     expect(getState().isAuthenticated).toBe(false);
     expect(getState().loading).toBe(false);
     expect(getState().error).toBeNull();
-    expect(getState().role).toBeNull();
   });
 
-  it('login sets role, isAuthenticated, clears loading and error', () => {
+  it('login sets isAuthenticated and clears loading and error', () => {
     getState().setLoading(true);
     getState().setError('some error');
-    getState().login('admin');
+    getState().login();
 
-    expect(getState().role).toBe('admin');
     expect(getState().isAuthenticated).toBe(true);
     expect(getState().loading).toBe(false);
     expect(getState().error).toBeNull();
   });
 
   it('login sets token to null (cookie only)', () => {
-    getState().login('owner');
+    getState().login();
     expect(getState().token).toBeNull();
   });
 
   it('logout clears all auth state', () => {
-    getState().login('admin');
+    getState().login();
 
     getState().logout();
 
     expect(getState().isAuthenticated).toBe(false);
     expect(getState().loading).toBe(false);
     expect(getState().error).toBeNull();
-    expect(getState().role).toBeNull();
     expect(getState().token).toBeNull();
   });
 
@@ -103,7 +103,7 @@ describe('userStore (auth)', () => {
   });
 
   it('logout calls removeCookie', () => {
-    getState().login('admin');
+    getState().login();
     getState().logout();
 
     expect(mockRemoveCookie).toHaveBeenCalledWith('token', { domain: undefined });

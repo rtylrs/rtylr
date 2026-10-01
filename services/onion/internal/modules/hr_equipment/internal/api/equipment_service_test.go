@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
@@ -39,7 +40,7 @@ func TestEquipmentAPIListAssetsAppliesEmployeeFilterAndReportsTotal(t *testing.T
 		t.Fatalf("AssignAssetToEmployee: %v", err)
 	}
 
-	apiCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: testutil.OwnerID, BusinessID: testutil.BusinessID, Role: "owner"})
+	apiCtx := authPkg.WithAuthUser(ctx, &authPkg.AuthUser{UserID: testutil.OwnerID, BusinessID: testutil.BusinessID, EffectiveAccess: &authorization.EffectiveAccess{IsOwner: true}})
 	resp, err := NewEquipmentAPI(service).ListAssets(apiCtx, &hrequipmentv1.ListAssetsRequest{EmployeeId: &employeeID})
 	if err != nil {
 		t.Fatalf("ListAssets: %v", err)

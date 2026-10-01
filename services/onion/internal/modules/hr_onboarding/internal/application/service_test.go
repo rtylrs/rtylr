@@ -36,13 +36,12 @@ type mockRepo struct {
 
 func serviceContext(userID int64, permissions ...string) context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
-		UserID: userID, BusinessID: 1, Role: "member",
+		UserID: userID, BusinessID: 1,
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID: 1, AuthorizationVersion: 1,
 			Apps: []authorization.EffectiveAppAccess{{
 				AppID: authorization.AppHR, Licensed: true, HasAccess: true,
 				Permissions: permissions,
-				Scopes:      nil,
 			}},
 		},
 	})

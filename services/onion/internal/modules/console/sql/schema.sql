@@ -144,20 +144,6 @@ CREATE TABLE IF NOT EXISTS manual_addon_grants (
     INDEX idx_manual_addon_grants_business (business_id)
 );
 
-CREATE TABLE IF NOT EXISTS user_app_permissions (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NULL,
-    owner_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    apps JSON NOT NULL,
-    role ENUM('owner','admin','operator','billing','menu_manager','store_manager','staff','viewer') DEFAULT 'staff',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_perm (owner_id, user_id),
-    INDEX idx_perms_business (business_id)
-);
-
 CREATE TABLE IF NOT EXISTS self_host_licenses (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_email VARCHAR(255) NOT NULL,

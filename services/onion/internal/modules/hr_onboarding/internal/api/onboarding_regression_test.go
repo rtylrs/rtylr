@@ -25,13 +25,12 @@ import (
 
 func authContext(userID, businessID int64, permissions ...string) context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
-		UserID: userID, BusinessID: businessID, Role: "member",
+		UserID: userID, BusinessID: businessID,
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID: businessID, AuthorizationVersion: 1,
 			Apps: []authorization.EffectiveAppAccess{{
 				AppID: authorization.AppHR, Licensed: true, HasAccess: true,
 				Permissions: permissions,
-				Scopes:      nil,
 			}},
 		},
 	})
@@ -50,13 +49,14 @@ func ensureRegressionBusinessAccess(t *testing.T, db *sql.DB, businessID int64) 
 		t.Fatalf("create regression business: %v", err)
 	}
 	if _, err := db.ExecContext(context.Background(),
-		`INSERT IGNORE INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'member')`,
-		1002, businessID,
+		`INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+		 VALUES (?, ?, 'member', 'active')`,
+		businessID, 1002,
 	); err != nil {
 		t.Fatalf("grant regression business access: %v", err)
 	}
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?", 1002, businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM authorization_business_members WHERE user_id = ? AND business_id = ?", 1002, businessID)
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID)
 	})
 }

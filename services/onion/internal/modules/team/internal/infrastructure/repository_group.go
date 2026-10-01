@@ -3,243 +3,300 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/authorization"
 )
 
-// CreateGroup writes the group row and its resource permissions in one
-// transaction. Without it a failure mid-rewrite leaves the group created with
-// no permissions and blocks a retry under the same name (uk_group_owner_name).
 func (r *Repository) CreateGroup(ctx context.Context, ownerID int64, input domain.CreateGroupInput) (int64, error) {
-	if err := validateResourcePermissions(input.ResourcePermissions); err != nil {
-		return 0, err
+	if ownerID <= 0 || input.BusinessID <= 0 {
+		return 0, errors.New("owner and business are required")
 	}
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return 0, err
 	}
+	rollback := func(cause error) (int64, error) { _ = tx.Rollback(); return 0, cause }
 	qtx := r.queries.WithTx(tx)
-
-	res, err := qtx.CreateGroup(ctx, sqlc.CreateGroupParams{
-		OwnerID:     ownerID,
-		Name:        input.Name,
+	result, err := qtx.CreateGroup(ctx, sqlc.CreateGroupParams{
+		OwnerID: ownerID, BusinessID: input.BusinessID, Name: input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
 	})
 	if err != nil {
-		_ = tx.Rollback()
-		return 0, err
+		return rollback(err)
 	}
-	id, err := res.LastInsertId()
+	groupID, err := result.LastInsertId()
 	if err != nil {
-		_ = tx.Rollback()
-		return 0, err
+		return rollback(err)
 	}
-	if err := r.setGroupResourcePermissions(ctx, qtx, id, input.ResourcePermissions); err != nil {
-		_ = tx.Rollback()
-		return 0, err
+	if err := r.replaceGroupAuthorization(ctx, tx, input.BusinessID, ownerID, groupID, input.LicensedAppIDs, input.PermissionProfileAssignments); err != nil {
+		return rollback(err)
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return id, nil
+	return groupID, nil
 }
 
-// validateResourcePermissions rejects levels outside the
-// user_group_resource_permissions.permission_level ENUM('viewer','editor')
-// before any row is written.
-func validateResourcePermissions(perms []domain.ResourcePermission) error {
-	for _, p := range perms {
-		switch p.PermissionLevel {
-		case domain.PermLevelViewer, domain.PermLevelEditor:
-		default:
-			return domain.ErrInvalidPermissionLevel
-		}
-	}
-	return nil
-}
-
-// setGroupResourcePermissions replaces a group's resource-permission rows. It
-// must run inside the caller's transaction: the delete-then-upsert rewrite
-// would otherwise drop the stored permissions when an upsert fails.
-func (r *Repository) setGroupResourcePermissions(ctx context.Context, qtx *sqlc.Queries, groupID int64, perms []domain.ResourcePermission) error {
-	if err := qtx.DeleteGroupResourcePermissions(ctx, groupID); err != nil {
+func (r *Repository) replaceGroupAuthorization(ctx context.Context, tx *sql.Tx, businessID, actorID, groupID int64, apps []string, assignments []domain.AppRoleAssignmentInput) error {
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_license_assignments
+		SET status = 'revoked', revoked_by = ?, revoked_at = NOW()
+		WHERE business_id = ? AND group_id = ? AND status = 'active'`, actorID, businessID, groupID); err != nil {
 		return err
 	}
-	for _, p := range perms {
-		if err := qtx.UpsertGroupResourcePermission(ctx, sqlc.UpsertGroupResourcePermissionParams{
-			GroupID:         groupID,
-			ResourceKey:     p.ResourceKey,
-			PermissionLevel: sqlc.UserGroupResourcePermissionsPermissionLevel(p.PermissionLevel),
-		}); err != nil {
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_role_assignments
+		SET status = 'revoked', revoked_by = ?, revoked_at = NOW()
+		WHERE business_id = ? AND group_id = ? AND status = 'active'`, actorID, businessID, groupID); err != nil {
+		return err
+	}
+	for _, appID := range uniqueAuthorizationApps(apps) {
+		if !isTenantAppID(appID) {
+			return fmt.Errorf("invalid app id: %s", appID)
+		}
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO authorization_license_assignments
+				(business_id, group_id, app_id, source, status, granted_by)
+			VALUES (?, ?, ?, 'group', 'active', ?)`, businessID, groupID, appID, actorID); err != nil {
 			return err
 		}
 	}
-	return nil
+	for _, assignment := range assignments {
+		if assignment.AppID == "" || (assignment.AppID != "dash" && !isTenantAppID(assignment.AppID)) || len(assignment.RoleIDs) == 0 {
+			return errors.New("permission profile assignment requires an app and at least one profile")
+		}
+		if assignment.GroupID != nil || assignment.Source == string(authorization.SourceSystem) {
+			return errors.New("group assignments cannot set their own source or target")
+		}
+		for _, profileID := range uniqueInt64(assignment.RoleIDs) {
+			if err := r.validateAuthorizationRoleID(ctx, tx, businessID, assignment.AppID, profileID); err != nil {
+				return fmt.Errorf("permission profile %d is invalid for %s: %w", profileID, assignment.AppID, err)
+			}
+			result, err := tx.ExecContext(ctx, `
+				INSERT INTO authorization_role_assignments
+					(business_id, group_id, app_id, role_id, source, status, is_primary, granted_by)
+				VALUES (?, ?, ?, ?, 'group', 'active', FALSE, ?)`,
+				businessID, groupID, assignment.AppID, profileID, actorID)
+			if err != nil {
+				return err
+			}
+			assignmentID, err := result.LastInsertId()
+			if err != nil {
+				return err
+			}
+			for _, scope := range assignment.Scopes {
+				if err := authorization.ValidateAssignmentScope(ctx, tx, businessID, scope.Type, scope.ID); err != nil {
+					return fmt.Errorf("invalid scope %q:%q: %w", scope.Type, scope.ID, err)
+				}
+				if _, err := tx.ExecContext(ctx, `
+					INSERT INTO authorization_role_assignment_scopes (assignment_id, scope_type, scope_id)
+					VALUES (?, ?, ?)`, assignmentID, scope.Type, scope.ID); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	_, err := tx.ExecContext(ctx, `
+		INSERT INTO authorization_audit_events
+			(business_id, actor_user_id, target_group_id, action, source_client)
+		VALUES (?, ?, ?, 'group.authorization.updated', 'dash')`, businessID, actorID, groupID)
+	return err
 }
 
-func (r *Repository) GetGroup(ctx context.Context, ownerID, groupID int64) (*domain.Group, error) {
-	row, err := r.queries.GetGroup(ctx, sqlc.GetGroupParams{ID: groupID, OwnerID: ownerID})
+func (r *Repository) GetGroup(ctx context.Context, ownerID, businessID, groupID int64) (*domain.Group, error) {
+	row, err := r.queries.GetGroup(ctx, sqlc.GetGroupParams{ID: groupID, OwnerID: ownerID, BusinessID: businessID})
 	if err != nil {
 		return nil, err
 	}
-	perms, err := r.queries.ListGroupResourcePermissions(ctx, groupID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to list group resource permissions", logger.Error(err))
-		return nil, err
-	}
-	g := &domain.Group{
-		ID:          row.ID,
-		OwnerID:     row.OwnerID,
-		Name:        row.Name,
-		Description: row.Description,
-		Color:       row.Color.String,
+	group := &domain.Group{
+		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID,
+		Name: row.Name, Description: row.Description, Color: row.Color.String,
 	}
 	if row.CreatedAt.Valid {
-		g.CreatedAt = row.CreatedAt.Time
+		group.CreatedAt = row.CreatedAt.Time
 	}
 	if row.UpdatedAt.Valid {
-		g.UpdatedAt = row.UpdatedAt.Time
+		group.UpdatedAt = row.UpdatedAt.Time
 	}
-	g.ResourcePermissions = make([]domain.ResourcePermission, 0, len(perms))
-	for _, p := range perms {
-		g.ResourcePermissions = append(g.ResourcePermissions, domain.ResourcePermission{
-			ResourceKey:     p.ResourceKey,
-			PermissionLevel: domain.PermissionLevel(p.PermissionLevel),
-		})
-	}
-	return g, nil
-}
-
-func (r *Repository) ListGroups(ctx context.Context, ownerID int64) ([]domain.Group, error) {
-	rows, err := r.queries.ListGroups(ctx, ownerID)
+	group.LicensedAppIDs, group.PermissionProfileAssignments, err = r.groupAuthorization(ctx, businessID, groupID)
 	if err != nil {
 		return nil, err
 	}
-	groupIDs := make([]int64, len(rows))
-	for i, row := range rows {
-		groupIDs[i] = row.ID
-	}
-	permsByGroup := r.resourcePermissionsForGroups(ctx, groupIDs)
+	return group, nil
+}
 
+func (r *Repository) groupAuthorization(ctx context.Context, businessID, groupID int64) ([]string, []authorization.RoleAssignment, error) {
+	licenseRows, err := r.pool.QueryContext(ctx, `
+		SELECT app_id FROM authorization_license_assignments
+		WHERE business_id = ? AND group_id = ? AND status = 'active' ORDER BY app_id`, businessID, groupID)
+	if err != nil {
+		return nil, nil, err
+	}
+	licenses := make([]string, 0)
+	for licenseRows.Next() {
+		var appID string
+		if err := licenseRows.Scan(&appID); err != nil {
+			licenseRows.Close()
+			return nil, nil, err
+		}
+		licenses = append(licenses, appID)
+	}
+	if err := licenseRows.Err(); err != nil {
+		licenseRows.Close()
+		return nil, nil, err
+	}
+	if err := licenseRows.Close(); err != nil {
+		return nil, nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT a.app_id, a.role_id, a.is_primary, s.scope_type, s.scope_id
+		FROM authorization_role_assignments a
+		LEFT JOIN authorization_role_assignment_scopes s ON s.assignment_id = a.id
+		WHERE a.business_id = ? AND a.group_id = ? AND a.status = 'active'
+		ORDER BY a.id, s.scope_type, s.scope_id`, businessID, groupID)
+	if err != nil {
+		return nil, nil, err
+	}
+	assignments := make([]authorization.RoleAssignment, 0)
+	for rows.Next() {
+		var appID string
+		var profileID int64
+		var primary bool
+		var scopeType, scopeID sql.NullString
+		if err := rows.Scan(&appID, &profileID, &primary, &scopeType, &scopeID); err != nil {
+			rows.Close()
+			return nil, nil, err
+		}
+		assignment := authorization.RoleAssignment{
+			AppID: authorization.AppID(appID), RoleIDs: []int64{profileID},
+			Source: authorization.SourceGroup, Active: true,
+		}
+		if primary {
+			id := profileID
+			assignment.PrimaryRoleID = &id
+		}
+		if scopeType.Valid && scopeID.Valid {
+			assignment.Scopes = []authorization.Scope{{Type: scopeType.String, ID: scopeID.String}}
+		}
+		assignments = append(assignments, assignment)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return nil, nil, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, nil, err
+	}
+	return licenses, assignments, nil
+}
+
+func (r *Repository) ListGroups(ctx context.Context, ownerID, businessID int64) ([]domain.Group, error) {
+	rows, err := r.queries.ListGroups(ctx, sqlc.ListGroupsParams{OwnerID: ownerID, BusinessID: businessID})
+	if err != nil {
+		return nil, err
+	}
 	groups := make([]domain.Group, 0, len(rows))
 	for _, row := range rows {
-		g := domain.Group{
-			ID:          row.ID,
-			OwnerID:     row.OwnerID,
-			Name:        row.Name,
-			Description: row.Description,
-			Color:       row.Color.String,
-			MemberCount: int(row.MemberCount),
+		group := domain.Group{
+			ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID,
+			Name: row.Name, Description: row.Description, Color: row.Color.String, MemberCount: int(row.MemberCount),
 		}
 		if row.CreatedAt.Valid {
-			g.CreatedAt = row.CreatedAt.Time
+			group.CreatedAt = row.CreatedAt.Time
 		}
 		if row.UpdatedAt.Valid {
-			g.UpdatedAt = row.UpdatedAt.Time
+			group.UpdatedAt = row.UpdatedAt.Time
 		}
-		g.ResourcePermissions = permsByGroup[row.ID]
-		groups = append(groups, g)
+		group.LicensedAppIDs, group.PermissionProfileAssignments, err = r.groupAuthorization(ctx, businessID, row.ID)
+		if err != nil {
+			return nil, err
+		}
+		groups = append(groups, group)
 	}
 	return groups, nil
 }
 
-// resourcePermissionsForGroups batches resource-permission lookups for many
-// groups into one query, mapping the result per group ID in memory (avoids an
-// N+1 over the group list). On error it returns an empty map so callers degrade
-// to groups without resource permissions, matching the previous best-effort
-// per-group behaviour.
-func (r *Repository) resourcePermissionsForGroups(ctx context.Context, groupIDs []int64) map[int64][]domain.ResourcePermission {
-	result := make(map[int64][]domain.ResourcePermission, len(groupIDs))
-	if len(groupIDs) == 0 {
-		return result
-	}
-
-	rows, err := r.queries.ListGroupResourcePermissionsForGroups(ctx, groupIDs)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to batch list group resource permissions", logger.Error(err))
-		return result
-	}
-
-	for _, row := range rows {
-		p := domain.ResourcePermission{
-			ResourceKey:     row.ResourceKey,
-			PermissionLevel: domain.PermissionLevel(row.PermissionLevel),
-		}
-		result[row.GroupID] = append(result[row.GroupID], p)
-	}
-	return result
-}
-
-// UpdateGroup writes the group row and its rewritten resource permissions in
-// one transaction so a failed permission write cannot leave the row updated
-// with the previous permissions silently deleted.
-func (r *Repository) UpdateGroup(ctx context.Context, ownerID, groupID int64, input domain.UpdateGroupInput) error {
-	if err := validateResourcePermissions(input.ResourcePermissions); err != nil {
-		return err
-	}
+func (r *Repository) UpdateGroup(ctx context.Context, ownerID, businessID, groupID int64, input domain.UpdateGroupInput) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
+	rollback := func(cause error) error { _ = tx.Rollback(); return cause }
 	qtx := r.queries.WithTx(tx)
-
-	res, err := qtx.UpdateGroup(ctx, sqlc.UpdateGroupParams{
+	result, err := qtx.UpdateGroup(ctx, sqlc.UpdateGroupParams{
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
-		ID:          groupID,
-		OwnerID:     ownerID,
+		ID:          groupID, OwnerID: ownerID, BusinessID: businessID,
 	})
 	if err != nil {
-		_ = tx.Rollback()
-		return err
+		return rollback(err)
 	}
-	affected, err := res.RowsAffected()
+	affected, err := result.RowsAffected()
 	if err != nil {
-		_ = tx.Rollback()
-		return err
+		return rollback(err)
 	}
-	// A foreign or stale group id must never fall through to the unscoped
-	// resource-permission rewrite below.
 	if affected == 0 {
-		_ = tx.Rollback()
-		return domain.ErrGroupNotFound
+		var found int
+		if err := tx.QueryRowContext(ctx, `SELECT 1 FROM user_groups WHERE id = ? AND owner_id = ? AND business_id = ?`, groupID, ownerID, businessID).Scan(&found); errors.Is(err, sql.ErrNoRows) {
+			return rollback(domain.ErrGroupNotFound)
+		} else if err != nil {
+			return rollback(err)
+		}
 	}
-	if err := r.setGroupResourcePermissions(ctx, qtx, groupID, input.ResourcePermissions); err != nil {
-		_ = tx.Rollback()
-		return err
+	if err := r.replaceGroupAuthorization(ctx, tx, businessID, ownerID, groupID, input.LicensedAppIDs, input.PermissionProfileAssignments); err != nil {
+		return rollback(err)
 	}
 	return tx.Commit()
 }
 
-func (r *Repository) DeleteGroup(ctx context.Context, ownerID, groupID int64) error {
-	// Scoped delete first: only when the caller actually owns the group may
-	// the (unscoped) resource-permission rows be removed.
-	res, err := r.queries.DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, OwnerID: ownerID})
+func (r *Repository) DeleteGroup(ctx context.Context, ownerID, businessID, groupID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
-	affected, err := res.RowsAffected()
+	rollback := func(cause error) error { _ = tx.Rollback(); return cause }
+	if _, err := tx.ExecContext(ctx, `
+		DELETE scope FROM authorization_role_assignment_scopes scope
+		JOIN authorization_role_assignments assignment ON assignment.id = scope.assignment_id
+		WHERE assignment.business_id = ? AND assignment.group_id = ?`, businessID, groupID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM authorization_role_assignments WHERE business_id = ? AND group_id = ?`, businessID, groupID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM authorization_license_assignments WHERE business_id = ? AND group_id = ?`, businessID, groupID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM user_group_members WHERE business_id = ? AND group_id = ?`, businessID, groupID); err != nil {
+		return rollback(err)
+	}
+	result, err := r.queries.WithTx(tx).DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, OwnerID: ownerID, BusinessID: businessID})
 	if err != nil {
-		return err
+		return rollback(err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return rollback(err)
 	}
 	if affected == 0 {
-		return domain.ErrGroupNotFound
+		return rollback(domain.ErrGroupNotFound)
 	}
-	return r.queries.DeleteGroupResourcePermissions(ctx, groupID)
+	return tx.Commit()
 }
 
 func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, businessID, addedBy int64, userIDs []int64) error {
-	for _, uid := range userIDs {
+	for _, userID := range uniqueInt64(userIDs) {
 		if err := r.queries.AddGroupMember(ctx, sqlc.AddGroupMemberParams{
-			GroupID:    groupID,
-			UserID:     uid,
-			OwnerID:    ownerID,
-			BusinessID: businessID,
-			AddedBy:    sql.NullInt64{Int64: addedBy, Valid: addedBy > 0},
+			GroupID: groupID, UserID: userID, OwnerID: ownerID, BusinessID: businessID,
+			AddedBy:  sql.NullInt64{Int64: addedBy, Valid: addedBy > 0},
+			UserID_2: userID, ID: groupID, OwnerID_2: ownerID, BusinessID_2: businessID,
 		}); err != nil {
 			return err
 		}
@@ -247,46 +304,38 @@ func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, busi
 	return nil
 }
 
-func (r *Repository) RemoveGroupMember(ctx context.Context, groupID, userID int64) error {
-	return r.queries.RemoveGroupMember(ctx, sqlc.RemoveGroupMemberParams{
-		GroupID: groupID,
-		UserID:  userID,
-	})
+func (r *Repository) RemoveGroupMember(ctx context.Context, ownerID, businessID, groupID, userID int64) error {
+	return r.queries.RemoveGroupMember(ctx, sqlc.RemoveGroupMemberParams{GroupID: groupID, UserID: userID, OwnerID: ownerID, BusinessID: businessID})
 }
 
-func (r *Repository) GetGroupDetail(ctx context.Context, ownerID, groupID int64) (*domain.GroupDetail, error) {
-	g, err := r.GetGroup(ctx, ownerID, groupID)
+func (r *Repository) GetGroupDetail(ctx context.Context, ownerID, businessID, groupID int64) (*domain.GroupDetail, error) {
+	group, err := r.GetGroup(ctx, ownerID, businessID, groupID)
 	if err != nil {
 		return nil, err
 	}
-	memberRows, err := r.queries.ListGroupMembers(ctx, groupID)
+	rows, err := r.queries.ListGroupMembers(ctx, sqlc.ListGroupMembersParams{GroupID: groupID, OwnerID: ownerID, BusinessID: businessID})
 	if err != nil {
 		return nil, err
 	}
-	detail := &domain.GroupDetail{Group: *g}
-	detail.Members = make([]domain.GroupMember, 0, len(memberRows))
-	for _, m := range memberRows {
-		gm := domain.GroupMember{
-			UserID:   m.UserID,
-			Email:    m.Email,
-			FullName: m.FullName,
+	detail := &domain.GroupDetail{Group: *group, Members: make([]domain.GroupMember, 0, len(rows))}
+	for _, row := range rows {
+		member := domain.GroupMember{UserID: row.UserID, Email: row.Email, FullName: row.FullName}
+		if row.AddedAt.Valid {
+			member.AddedAt = row.AddedAt.Time
 		}
-		if m.AddedAt.Valid {
-			gm.AddedAt = m.AddedAt.Time
-		}
-		detail.Members = append(detail.Members, gm)
+		detail.Members = append(detail.Members, member)
 	}
 	return detail, nil
 }
 
-func (r *Repository) GetUserGroups(ctx context.Context, ownerID, userID int64) ([]domain.GroupSummary, error) {
-	rows, err := r.queries.ListUserGroups(ctx, sqlc.ListUserGroupsParams{UserID: userID, OwnerID: ownerID})
+func (r *Repository) GetUserGroups(ctx context.Context, ownerID, businessID, userID int64) ([]domain.GroupSummary, error) {
+	rows, err := r.queries.ListUserGroups(ctx, sqlc.ListUserGroupsParams{UserID: userID, OwnerID: ownerID, BusinessID: businessID})
 	if err != nil {
 		return nil, err
 	}
-	summaries := make([]domain.GroupSummary, 0, len(rows))
+	groups := make([]domain.GroupSummary, 0, len(rows))
 	for _, row := range rows {
-		summaries = append(summaries, domain.GroupSummary{ID: row.ID, Name: row.Name, Color: row.Color.String})
+		groups = append(groups, domain.GroupSummary{ID: row.ID, Name: row.Name, Color: row.Color.String})
 	}
-	return summaries, nil
+	return groups, nil
 }

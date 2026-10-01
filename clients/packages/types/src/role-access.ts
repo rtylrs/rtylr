@@ -12,25 +12,16 @@ export type TenantAppId =
 
 export type AuthorizationAppId = "dash" | TenantAppId;
 
-export type DashRole = "owner" | "admin" | "manager" | "member" | "viewer";
-
-export type AssignmentSource = "explicit" | "dash_default" | "group" | "system";
+export type AssignmentSource = "explicit" | "group" | "system";
 
 export type AssignmentStatus = "pending" | "active" | "revoked" | "archived";
 
-export type AssignmentMode = "many" | "one" | "primary_plus_addons";
+export type PermissionScopeType =
+  | "pos_location"
+  | "flow_project";
 
-export type RoleScopeType =
-  | "business"
-  | "location"
-  | "department"
-  | "team"
-  | "project"
-  | "terminal"
-  | "portfolio";
-
-export interface RoleScope {
-  scopeType: RoleScopeType;
+export interface PermissionScope {
+  scopeType: PermissionScopeType;
   scopeId: string;
 }
 
@@ -63,7 +54,12 @@ export const KNOWN_PERMISSION_KEYS = [
   "hub:roles:archive",
   "hub:licenses:manage",
   "hub:groups:manage",
+  "hub:billing:view",
+  "hub:billing:manage",
   "hub:hierarchy:manage",
+  "hub:business:settings:view",
+  "hub:business:settings:manage",
+  "hub:ai:quota:manage",
   "hub:audit:view",
   "hub:security:manage",
   "hub:api_keys:manage",
@@ -83,6 +79,7 @@ export const KNOWN_PERMISSION_KEYS = [
   "pos:employees:manage",
   "pos:terminals:manage",
   "pos:reports:view",
+  "pos:gift_cards:manage",
   "erp:products:view",
   "erp:products:create",
   "erp:products:edit",
@@ -100,6 +97,11 @@ export const KNOWN_PERMISSION_KEYS = [
   "erp:purchasing:view",
   "erp:purchasing:create",
   "erp:purchasing:approve",
+  "erp:price_lists:view",
+  "erp:price_lists:manage",
+  "finance:accounts:view",
+  "finance:accounts:manage",
+  "finance:bank_feeds:manage",
   "finance:invoices:view",
   "finance:invoices:create",
   "finance:invoices:send",
@@ -123,7 +125,10 @@ export const KNOWN_PERMISSION_KEYS = [
   "crm:customers:export",
   "crm:campaigns:view",
   "crm:campaigns:create",
+  "crm:campaigns:manage",
   "crm:campaigns:send",
+  "crm:segments:manage",
+  "crm:templates:manage",
   "crm:loyalty:manage",
   "crm:automations:manage",
   "hr:employees:view",
@@ -146,7 +151,6 @@ export const KNOWN_PERMISSION_KEYS = [
   "flow:tasks:assign",
   "flow:team:manage",
   "flow:managers:manage",
-  "flow:settings:manage",
   "insights:dashboard:view",
   "insights:financial:view",
   "insights:customers:view",
@@ -171,29 +175,23 @@ export const KNOWN_PERMISSION_KEYS = [
 export type PermissionKey =
   (typeof KNOWN_PERMISSION_KEYS)[number] | (string & {});
 
-export interface RoleDefinition {
+export interface PermissionProfile {
   id: string;
   businessId: string | null;
   appId: AuthorizationAppId;
-  key: string;
   name: string;
   description: string;
-  level: number;
-  parentRoleId: string | null;
-  assignmentMode: AssignmentMode;
   permissions: PermissionKey[];
   isSystem: boolean;
   isArchived: boolean;
-  version: number;
 }
 
-export interface AppRoleAssignment {
+export interface AppPermissionProfileAssignment {
   appId: TenantAppId;
-  roleIds: string[];
-  primaryRoleId: string | null;
+  permissionProfileIds: string[];
   source: AssignmentSource;
   status: AssignmentStatus;
-  scopes: RoleScope[];
+  scopes: PermissionScope[];
   groupId: string | null;
 }
 
@@ -210,19 +208,14 @@ export interface EffectiveAppAccess {
   appId: TenantAppId;
   licensed: boolean;
   hasAccess: boolean;
-  roleIds: string[];
-  primaryRoleId: string | null;
-  displayRole: string | null;
   permissions: PermissionKey[];
-  scopes: RoleScope[];
+  /** Empty scopes mean the permission applies across the business. */
+  permissionScopes: Record<string, PermissionScope[]>;
   sources: AssignmentSource[];
-  permissionSources: Record<string, string[]>;
 }
 
 export interface EffectiveAccess {
   businessId: string;
-  dashRole: DashRole | string | null;
-  dashRoleId: string | null;
   dashPermissions: PermissionKey[];
   subscribedApps: TenantAppId[];
   licenses: LicenseAssignment[];
@@ -260,7 +253,7 @@ export interface AuthorizationAuditEvent {
   targetGroupId: string | null;
   action: string;
   appId: AuthorizationAppId | null;
-  roleId: string | null;
+  permissionProfileId: string | null;
   before: Record<string, unknown>;
   after: Record<string, unknown>;
   reason: string | null;

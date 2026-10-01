@@ -14,7 +14,6 @@ export interface Member {
   name: string;
   email: string;
   initials: string;
-  role: 'owner' | 'admin' | 'member' | 'viewer';
   /**
    * Contracted hours per week, from HR's work schedule (#868). Absent when the
    * member has no work schedule assigned, or the schedule records no hours.

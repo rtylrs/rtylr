@@ -178,16 +178,11 @@ func (r *Repository) CountActiveOwnedBusinesses(ctx context.Context, ownerUserID
 	return r.queries.CountActiveOwnedBusinesses(ctx, ownerUserID)
 }
 
-// ListUserBusinesses returns all businesses the user owns or has an active
-// owner/member grant for.
+// ListUserBusinesses returns all businesses the user owns or has active membership in.
 func (r *Repository) ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error) {
-	// Cross-schema reads from user_business_access and user_app_permissions
-	// provide one switcher for owners and invited team members.
+	// The normalized membership table is the shared source for business access.
 	rows, err := r.queries.ListUserBusinesses(ctx, sqlc.ListUserBusinessesParams{
-		OwnerID:   userID,
-		OwnerID_2: userID,
-		UserID:    userID,
-		UserID_2:  userID,
+		UserID: userID,
 	})
 	if err != nil {
 		return nil, err
@@ -233,15 +228,6 @@ func (r *Repository) CreateSubBusiness(ctx context.Context, name string, ownerUs
 	}
 	businessID, err := res.LastInsertId()
 	if err != nil {
-		_ = tx.Rollback()
-		return 0, err
-	}
-
-	// cross-schema write to user_business_access — grant owner access to the new sub-business
-	if err = qtx.GrantUserBusinessAccess(ctx, sqlc.GrantUserBusinessAccessParams{
-		UserID:     ownerUserID,
-		BusinessID: businessID,
-	}); err != nil {
 		_ = tx.Rollback()
 		return 0, err
 	}

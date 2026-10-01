@@ -29,7 +29,7 @@ var (
 type websocketTicketRecord struct {
 	UserID         int64  `json:"user_id"`
 	BusinessID     int64  `json:"business_id"`
-	Role           string `json:"role"`
+	IsConsoleAdmin bool   `json:"is_console_admin,omitempty"`
 	Platform       string `json:"platform,omitempty"`
 	PlatformUserID int64  `json:"platform_user_id,omitempty"`
 	PlanID         int64  `json:"plan_id,omitempty"`
@@ -40,7 +40,7 @@ func (r websocketTicketRecord) authUser() *AuthUser {
 	return &AuthUser{
 		UserID:         r.UserID,
 		BusinessID:     r.BusinessID,
-		Role:           r.Role,
+		IsConsoleAdmin: r.IsConsoleAdmin,
 		Platform:       r.Platform,
 		PlatformUserID: r.PlatformUserID,
 		PlanID:         r.PlanID,
@@ -81,7 +81,7 @@ func issueWebSocketTicketAt(ctx context.Context, user *AuthUser, issuedAt time.T
 	record := websocketTicketRecord{
 		UserID:         user.UserID,
 		BusinessID:     user.BusinessID,
-		Role:           user.Role,
+		IsConsoleAdmin: user.IsConsoleAdmin,
 		Platform:       user.Platform,
 		PlatformUserID: user.PlatformUserID,
 		PlanID:         user.PlanID,

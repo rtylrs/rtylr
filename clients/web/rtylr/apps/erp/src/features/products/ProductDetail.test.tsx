@@ -1,9 +1,10 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
-  role: 'operator' as string | null,
+  effectiveAccess: undefined as unknown,
   deleteMutate: vi.fn(),
   navigate: vi.fn(),
   product: undefined as Record<string, unknown> | undefined,
@@ -32,8 +33,21 @@ vi.mock('motion/react', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (select: (state: { user: { role: string | null } }) => unknown) =>
-    select({ user: { role: mocks.role } }),
+  useUserStore: Object.assign(
+    (
+      select: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      select({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 const FOUND_PRODUCT = {
@@ -84,10 +98,10 @@ beforeAll(async () => {
 describe('ProductDetail permission gating', () => {
   beforeEach(() => {
     mocks.product = FOUND_PRODUCT;
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:products:view'] });
   });
 
   it('hides the delete button and inventory adjust control for an operator', () => {
-    mocks.role = 'operator';
     render(<ProductDetail />);
 
     expect(screen.queryByTestId('product-delete-button')).not.toBeInTheDocument();
@@ -95,7 +109,6 @@ describe('ProductDetail permission gating', () => {
   });
 
   it('hides the delete button and inventory adjust control for staff', () => {
-    mocks.role = 'staff';
     render(<ProductDetail />);
 
     expect(screen.queryByTestId('product-delete-button')).not.toBeInTheDocument();
@@ -103,7 +116,7 @@ describe('ProductDetail permission gating', () => {
   });
 
   it('shows the delete button and inventory adjust control for admin', () => {
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isAdmin: true });
     render(<ProductDetail />);
 
     expect(screen.getByTestId('product-delete-button')).toBeInTheDocument();
@@ -111,7 +124,7 @@ describe('ProductDetail permission gating', () => {
   });
 
   it('shows the delete button and inventory adjust control for owner', () => {
-    mocks.role = 'owner';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
     render(<ProductDetail />);
 
     expect(screen.getByTestId('product-delete-button')).toBeInTheDocument();

@@ -3,10 +3,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import ChartOfAccounts from './ChartOfAccounts';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const { createAccountMock } = vi.hoisted(() => ({
   createAccountMock: vi.fn(),
 }));
+const authState = vi.hoisted(() => ({ effectiveAccess: undefined as unknown }));
 
 vi.mock('../../shared/hooks/useChartOfAccounts', () => ({
   useChartOfAccounts: () => ({ data: [], isLoading: false }),
@@ -14,8 +16,21 @@ vi.mock('../../shared/hooks/useChartOfAccounts', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (state: { user: { role: string } }) => unknown) =>
-    selector({ user: { role: 'owner' } }),
+  useUserStore: Object.assign(
+    (
+      selector: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      selector({
+        user: { effectiveAccess: authState.effectiveAccess },
+        effectiveAccess: authState.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: authState.effectiveAccess },
+        effectiveAccess: authState.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -34,6 +49,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  authState.effectiveAccess = createEffectiveAccess('finance', { isOwner: true });
   createAccountMock.mockResolvedValue({});
 });
 

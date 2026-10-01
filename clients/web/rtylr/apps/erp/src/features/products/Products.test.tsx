@@ -3,9 +3,11 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import Products from './Products';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   useProducts: vi.fn(),
+  effectiveAccess: undefined as unknown,
 }));
 
 // i18next is deliberately not mocked. An identity `t` makes an assertion and
@@ -26,8 +28,21 @@ vi.mock('@voxire/utils', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (select: (state: { user: { role: string } }) => unknown) =>
-    select({ user: { role: 'admin' } }),
+  useUserStore: Object.assign(
+    (
+      select: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      select({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('motion/react', () => ({
@@ -72,6 +87,7 @@ beforeAll(async () => {
 describe('Products empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
     mocks.useProducts.mockReturnValue({
       data: { products: [], total: 0, hasMore: false },
       isLoading: false,

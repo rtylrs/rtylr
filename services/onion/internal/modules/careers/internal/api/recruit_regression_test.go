@@ -43,10 +43,9 @@ const (
 // recruitTestAuthContext builds the server-resolved auth user the recruit
 // handlers expect: tenant scope plus the given recruit permissions.
 func recruitTestAuthContext(businessID, userID int64, permissions ...string) context.Context {
-	user := &authPkg.AuthUser{UserID: userID, BusinessID: businessID, Role: "owner"}
+	user := &authPkg.AuthUser{UserID: userID, BusinessID: businessID}
 	user.EffectiveAccess = &authorization.EffectiveAccess{
 		BusinessID:           businessID,
-		DashRole:             "owner",
 		IsOwner:              true,
 		IsAdmin:              true,
 		AuthorizationVersion: 1,

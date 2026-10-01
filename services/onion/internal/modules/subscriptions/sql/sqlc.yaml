@@ -7,7 +7,8 @@ sql:
       - "../../../../internal/platform/database/schemas/shared/zz_subscriptions_paddle_events.sql"
       - "../../../../internal/platform/database/schemas/shared/users.sql"
       - "../../../../internal/platform/database/schemas/shared/businesses.sql"
-      - "../../../../internal/platform/database/schemas/shared/user_apps.sql"
+      - "../../../../internal/platform/database/schemas/shared/user_groups.sql"
+      - "../../../../internal/platform/database/schemas/shared/zz_authorization.sql"
       - "../../../../internal/platform/database/schemas/shared/addons.sql"
     gen:
       go:

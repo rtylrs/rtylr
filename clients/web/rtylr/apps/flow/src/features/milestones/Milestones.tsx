@@ -60,9 +60,8 @@ const Milestones: React.FC = () => {
   // sidebar's create uses, and hidden rather than disabled - a disabled
   // <option> in a native select has nowhere to explain itself.
   const createProject = useCreateProject();
-  const legacyRole = useAuthUserStore((s) => s.user?.role);
   const effectiveAccess = useAuthUserStore((s) => s.effectiveAccess);
-  const canCreateProject = canFlowPermission(legacyRole, 'flow:projects:create', effectiveAccess);
+  const canCreateProject = canFlowPermission('flow:projects:create', effectiveAccess);
   const [creatingProject, setCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   // The list refetch after a create is asynchronous, so for a moment there is

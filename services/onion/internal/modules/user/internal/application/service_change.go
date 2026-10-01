@@ -134,7 +134,7 @@ func (s *Service) getUserBusinessID(ctx context.Context, userID int64) (int64, e
 type AccessTokenClaims struct {
 	UserID         int64  `json:"user_id"`
 	BusinessID     int64  `json:"business_id,omitempty"`
-	Role           string `json:"role,omitempty"`
+	IsConsoleAdmin bool   `json:"is_console_admin,omitempty"`
 	Platform       string `json:"platform,omitempty"`
 	PlatformUserID int64  `json:"platform_user_id,omitempty"`
 	PlanID         int64  `json:"plan_id,omitempty"`
@@ -142,10 +142,6 @@ type AccessTokenClaims struct {
 	jwt.RegisteredClaims
 }
 
-// UnmarshalJSON accepts both the current numeric claim representation and the
-// string-encoded representation issued by older platform clients. The JWT
-// signature and standard claims are still validated by jwt.ParseWithClaims;
-// this only preserves compatibility for the integer claim wire format.
 func (c *AccessTokenClaims) UnmarshalJSON(data []byte) error {
 	type alias AccessTokenClaims
 	aux := struct {
@@ -155,46 +151,36 @@ func (c *AccessTokenClaims) UnmarshalJSON(data []byte) error {
 		PlatformUserID json.RawMessage `json:"platform_user_id"`
 		PlanID         json.RawMessage `json:"plan_id"`
 	}{alias: (*alias)(c)}
-
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-
-	var err error
-	if len(aux.UserID) > 0 {
-		if c.UserID, err = parseAccessTokenInt64(aux.UserID, "user_id"); err != nil {
+	for _, field := range []struct {
+		name string
+		raw  json.RawMessage
+		dest *int64
+	}{
+		{name: "user_id", raw: aux.UserID, dest: &c.UserID},
+		{name: "business_id", raw: aux.BusinessID, dest: &c.BusinessID},
+		{name: "platform_user_id", raw: aux.PlatformUserID, dest: &c.PlatformUserID},
+		{name: "plan_id", raw: aux.PlanID, dest: &c.PlanID},
+	} {
+		if len(field.raw) == 0 || string(field.raw) == "null" {
+			continue
+		}
+		value, err := parseAccessTokenInt64(field.raw, field.name)
+		if err != nil {
 			return err
 		}
+		*field.dest = value
 	}
-	if len(aux.BusinessID) > 0 {
-		if c.BusinessID, err = parseAccessTokenInt64(aux.BusinessID, "business_id"); err != nil {
-			return err
-		}
-	}
-	if len(aux.PlatformUserID) > 0 {
-		if c.PlatformUserID, err = parseAccessTokenInt64(aux.PlatformUserID, "platform_user_id"); err != nil {
-			return err
-		}
-	}
-	if len(aux.PlanID) > 0 {
-		if c.PlanID, err = parseAccessTokenInt64(aux.PlanID, "plan_id"); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
 func parseAccessTokenInt64(raw json.RawMessage, field string) (int64, error) {
-	if string(raw) == "null" {
-		return 0, nil
-	}
-
 	var numeric int64
 	if err := json.Unmarshal(raw, &numeric); err == nil {
 		return numeric, nil
 	}
-
 	var text string
 	if err := json.Unmarshal(raw, &text); err != nil {
 		return 0, fmt.Errorf("%s must be an integer or numeric string: %w", field, err)

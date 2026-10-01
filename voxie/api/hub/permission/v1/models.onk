@@ -1,16 +1,21 @@
 package hub.permission.v1
 
-message PermissionMatrix {
-  rows: PermissionRow[]
-  roles: string[]
+message PermissionDefinition {
+  key: string
+  /// App whose resources are controlled by this permission.
+  app_id: string
+  /// Resource name within the app, such as `orders` or `team`.
+  resource: string
+  /// Action granted on the resource.
+  action: string
+  is_sensitive: bool
+  is_high_risk: bool
 }
 
-message PermissionRow {
-  key: string
-  category: string
-  label: string
-  /// role -> enabled
-  role_values: map[string, bool]
+message ListPermissionCatalogRequest {}
+
+message ListPermissionCatalogResponse {
+  permissions: PermissionDefinition[]
 }
 
 message CustomRole {
@@ -44,12 +49,6 @@ message CustomRole {
   member_count: int32
   /// When the record was created.
   created_at: string
-}
-
-message GetPermissionsRequest {}
-
-message GetPermissionsResponse {
-  matrix: PermissionMatrix
 }
 
 message ListRolesRequest {
@@ -278,14 +277,4 @@ message ListRoleAuditResponse {
   page_size: int32
   total: int64
   next_page: int32?
-}
-
-message UpdatePermissionMatrixRequest {
-  role: string @required
-  permission_key: string @required
-  enabled: bool
-}
-
-message UpdatePermissionMatrixResponse {
-  success: bool
 }

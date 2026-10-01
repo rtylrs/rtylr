@@ -8,7 +8,7 @@ message AccessRequest {
   /// Requested normalized role identifiers.
   role_ids: string[]
   /// Requested resource scopes.
-  scopes: hub.user.v1.RoleScope[]
+  scopes: hub.user.v1.PermissionScope[]
   /// Optional business reason for the request.
   reason: string?
   /// Current request lifecycle status.
@@ -28,7 +28,7 @@ message RequestAccessRequest {
   /// Requested normalized role identifiers.
   role_ids: string[]
   /// Requested resource scopes.
-  scopes: hub.user.v1.RoleScope[]
+  scopes: hub.user.v1.PermissionScope[]
   /// Optional business reason for the request.
   reason: string?
 }
@@ -51,7 +51,7 @@ message ApproveAccessRequestRequest {
   /// Approved normalized role identifiers.
   role_ids: string[]
   /// Approved resource scopes.
-  scopes: hub.user.v1.RoleScope[]
+  scopes: hub.user.v1.PermissionScope[]
 }
 
 message ApproveAccessRequestResponse {

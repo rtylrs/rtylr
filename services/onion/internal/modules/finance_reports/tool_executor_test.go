@@ -20,15 +20,12 @@ func financeReportToolUser(permissions ...string) *authPkg.AuthUser {
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "finance", ID: "9201"}},
 			}},
 		},
 	}
 }
 
 func TestFinanceReportToolPermissionCheck(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
-
 	if !financeReportsToolCanRead(financeReportToolUser("finance:reports:view")) {
 		t.Fatal("finance:reports:view was rejected")
 	}
@@ -37,19 +34,14 @@ func TestFinanceReportToolPermissionCheck(t *testing.T) {
 	}
 }
 
-func TestFinanceReportToolDoesNotUseLegacyAppMembershipFallback(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "legacy")
-
+func TestFinanceReportToolRequiresReportViewPermission(t *testing.T) {
 	user := financeReportToolUser("finance:invoices:view")
-	user.Role = "member"
 	if financeReportsToolCanRead(user) {
-		t.Fatal("legacy finance app membership unexpectedly authorized report reads")
+		t.Fatal("a finance app grant without finance:reports:view authorized report reads")
 	}
 }
 
 func TestFinanceReportToolsRequireReportViewPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
-
 	for _, toolName := range []string{getFinanceBalanceSheetToolName, getFinanceCashFlowReportToolName} {
 		t.Run(toolName, func(t *testing.T) {
 			ctx := authPkg.WithAuthUser(context.Background(), financeReportToolUser("finance:invoices:view"))

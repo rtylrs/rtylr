@@ -122,10 +122,10 @@ func TestRequireExpensePermissionChecksFinanceAppAndResolvedAccess(t *testing.T)
 		t.Fatalf("app without access permission status = %d, want %d", expensePermissionStatus(err), http.StatusForbidden)
 	}
 
-	// A license row is plan metadata and must not change the decision.
+	// A permission assignment cannot replace the app's active license.
 	unlicensed := expenseUser("finance:expenses:view")
 	unlicensed.EffectiveAccess.Apps[0].Licensed = false
-	if err := requireExpensePermission(authPkg.WithAuthUser(context.Background(), unlicensed), "finance:expenses:view"); err != nil {
-		t.Fatalf("a license row must not gate finance:expenses:view: %v", err)
+	if err := requireExpensePermission(authPkg.WithAuthUser(context.Background(), unlicensed), "finance:expenses:view"); expensePermissionStatus(err) != http.StatusForbidden {
+		t.Fatalf("an unlicensed app returned %v, want 403", err)
 	}
 }

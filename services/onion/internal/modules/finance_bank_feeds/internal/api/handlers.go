@@ -157,10 +157,7 @@ type (
 
 const (
 	// A feed sync is a state-changing bank operation, not a read of the feed.
-	// Keep the dedicated permission available for installations that grant it,
-	// while accepting the existing finance reconciliation-management grant for
-	// tenants whose role model already treats bank reconciliation as a manage
-	// capability. A view-only grant must never satisfy this check.
+	// A view-only grant must never satisfy this check.
 	bankFeedSyncPermission           = "finance:bank_feeds:sync"
 	bankFeedReconciliationPermission = "finance:reconciliation:manage"
 )
@@ -168,13 +165,6 @@ const (
 func canSyncBankFeeds(user *authPkg.AuthUser) bool {
 	if user == nil || !authPkg.HasAppAccess(user, authorization.AppFinance) {
 		return false
-	}
-	// HasAppPermission intentionally degrades to app membership in legacy
-	// mode. Do not let that compatibility fallback turn a view-only legacy
-	// session into a mutation grant; use the explicit role boundary instead.
-	if authPkg.LegacyAuthorizationMode() {
-		return authPkg.IsBusinessAdmin(user) ||
-			authPkg.HasAnyRole(user, "finance.manager", "manager", "finance.admin", "admin", "owner", "console_admin")
 	}
 	return authPkg.HasAppPermission(user, authorization.AppFinance, bankFeedSyncPermission) ||
 		authPkg.HasAppPermission(user, authorization.AppFinance, bankFeedReconciliationPermission)

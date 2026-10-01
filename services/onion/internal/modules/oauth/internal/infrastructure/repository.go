@@ -149,23 +149,16 @@ func (r *Repository) GetUserIDByEmail(ctx context.Context, email string) (int64,
 	return userID, err
 }
 
-func (r *Repository) GetUserBusinessIDAndRole(ctx context.Context, userID int64) (int64, string, error) {
-	// cross-schema read from shared users table and user_app_permissions — for JWT claims population
-	row, err := r.queries.GetUserBusinessIDAndRole(ctx, userID)
+func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64, error) {
+	businessID, err := r.queries.GetUserBusinessID(ctx, userID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, "", domain.ErrUserNotFound
+		return 0, domain.ErrUserNotFound
 	}
 	if err != nil {
-		return 0, "", err
+		return 0, err
 	}
-	role := ""
-	if row.Role != nil {
-		switch v := row.Role.(type) {
-		case string:
-			role = v
-		case []byte:
-			role = string(v)
-		}
+	if businessID.Valid {
+		return businessID.Int64, nil
 	}
-	return row.BusinessID.Int64, role, nil
+	return 0, nil
 }

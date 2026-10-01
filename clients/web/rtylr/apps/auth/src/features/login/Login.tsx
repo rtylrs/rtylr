@@ -16,7 +16,7 @@ import { licenseClient } from '../../shared/lib/clients';
 import { Button, HelmetContainer, LicenseBanner } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
-import { getCookie } from '@voxire/auth';
+import { getCookie, hasEffectiveAppAccess, parseEffectiveAccess } from '@voxire/auth';
 import { getEmailError } from '../../shared/lib/validation';
 
 const userClient = createOneKitClient(UserServiceClient, 'auth');
@@ -56,39 +56,24 @@ const Login: React.FC = (): React.JSX.Element => {
         window.location.href = APP_URLS.dash as string;
         return;
       }
-      // Explicit redirect param, honoured once MFA is satisfied.
-      if (redirectParam && redirectParam in APP_URLS) {
-        window.location.href = APP_URLS[redirectParam as KnownAppId] as string;
-        return;
-      }
-      // No explicit redirect, decide based on the user's subscription apps
-      const role = res.role;
-      // Both branches are optional on the response, and the reads below are
-      // `apps.length` and `apps[0]`, so an absent list would throw here and
-      // strand the user on the sign-in screen after a successful sign-in.
-      // No apps is a real state, and it means Dash, which is what the
-      // `apps.length === 0` branch already does.
-      const apps =
-        (res.effectiveAccess
-          ? res.effectiveAccess.apps
-              ?.filter((app) => app.licensed && app.hasAccess)
-              .map((app) => app.appId)
-          : res.apps) ?? [];
-      const hasDashManagement = res.effectiveAccess
-        ? res.effectiveAccess.isOwner || res.effectiveAccess.isAdmin
-        : role === 'owner' || role === 'admin';
-      // Owners and admins always land on Dash, the account center.
-      if (hasDashManagement || apps.length === 0) {
+      // Honor an explicit destination only when the resolved tenant access
+      // grants it. A stale or unauthorized redirect always returns to Dash.
+      if (redirectParam === 'dash') {
         window.location.href = APP_URLS.dash as string;
         return;
       }
-      // Single-app subscriber, skip Dash and go straight to their app
-      const only = apps.length === 1 ? apps[0] : undefined;
-      if (only !== undefined && only in APP_URLS) {
-        window.location.href = APP_URLS[only as KnownAppId] as string;
-        return;
+      if (redirectParam && redirectParam in APP_URLS) {
+        const hasAppAccess = hasEffectiveAppAccess(
+          parseEffectiveAccess(res.effectiveAccess),
+          redirectParam
+        );
+        if (hasAppAccess) {
+          window.location.href = APP_URLS[redirectParam as KnownAppId] as string;
+          return;
+        }
       }
-      // Multi-app, use Dash as the launcher
+      // Dash is the home for every signed-in member. App access never chooses
+      // a default destination.
       window.location.href = APP_URLS.dash as string;
     } catch {
       // Fail closed: if MFA state cannot be read, send the user to Dash rather

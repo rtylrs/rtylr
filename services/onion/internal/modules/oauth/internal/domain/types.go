@@ -69,5 +69,5 @@ type Repository interface {
 	RevokeToken(ctx context.Context, refreshToken string) error
 	GetUserPasswordHash(ctx context.Context, userID int64) (string, error)
 	GetUserIDByEmail(ctx context.Context, email string) (int64, error)
-	GetUserBusinessIDAndRole(ctx context.Context, userID int64) (businessID int64, role string, err error)
+	GetUserBusinessID(ctx context.Context, userID int64) (businessID int64, err error)
 }

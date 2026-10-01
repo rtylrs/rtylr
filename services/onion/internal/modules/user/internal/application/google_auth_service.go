@@ -196,11 +196,6 @@ func (s *Service) linkGoogleUser(
 				logger.Error(setErr),
 				logger.Any("user_id", userID),
 			)
-		} else if authErr := s.repo.EnsureOwnerAuthorizationMembership(ctx, bizID, userID); authErr != nil {
-			logger.Ctx(ctx).Warn("failed to write the owner authorization membership for google signup",
-				logger.Error(authErr),
-				logger.Any("user_id", userID),
-			)
 		} else if empErr := s.repo.EnsureEmployeeForUser(ctx, userID, bizID, userID); empErr != nil {
 			logger.Ctx(ctx).Warn("failed to create employee record for google-signup owner",
 				logger.Error(empErr),

@@ -137,8 +137,7 @@ const Suppliers: React.FC = () => {
     (pagePaused === true && pageFailureCount > 0) ||
     (allPaused === true && allFailureCount > 0);
   const createMut = useCreateSupplier();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageSuppliers = canErpPermission(role, 'erp:suppliers:create');
+  const canManageSuppliers = canErpPermission('erp:suppliers:create');
   const [showScorecards, setShowScorecards] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');

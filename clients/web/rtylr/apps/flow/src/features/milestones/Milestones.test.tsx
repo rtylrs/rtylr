@@ -44,8 +44,7 @@ vi.mock('../../shared/lib/roleUtils', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (s: unknown) => unknown) =>
-    selector({ user: { role: 'member' }, effectiveAccess: {} }),
+  useUserStore: (selector: (s: unknown) => unknown) => selector({ effectiveAccess: {} }),
 }));
 
 const milestonesState = vi.hoisted(() => ({ data: [] as Array<Record<string, unknown>> }));

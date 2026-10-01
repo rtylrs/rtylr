@@ -26,7 +26,7 @@ func RegisterStatusRoutes(ctx context.Context, r *chi.Mux) {
 		w.Header().Set("Content-Type", "application/json")
 
 		systemStatus := status.GetSystemStatus(req.Context())
-		if !authPkg.HasAnyRole(authUser, "console_admin") {
+		if !authPkg.IsConsoleAdmin(authUser) {
 			redactStatusDetails(&systemStatus)
 		}
 		statusCode := http.StatusOK

@@ -4,7 +4,7 @@ import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useRouterState, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
-import { signOut, useUserStore } from '@voxire/auth';
+import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -171,7 +171,15 @@ const DefaultLayout: React.FC = () => {
     userClient
       .getMe({})
       .then((res) => {
-        setAuthUser({ id: String(res.id), name: res.fullName, email: res.email });
+        setAuthUser({
+          id: String(res.id),
+          businessId: String(res.businessId),
+          name: res.fullName ?? '',
+          email: res.email ?? '',
+          businessName: res.businessName ?? '',
+          isConsoleAdmin: res.isConsoleAdmin,
+          effectiveAccess: parseEffectiveAccess(res.effectiveAccess) ?? undefined,
+        });
       })
       .catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps

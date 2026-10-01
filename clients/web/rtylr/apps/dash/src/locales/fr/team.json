@@ -131,7 +131,7 @@
     "posLocationsManagerHint": "Points de vente gérés par ce responsable dans le périmètre qui lui est attribué",
     "posLocationsMemberHint": "Points de vente où ce membre peut travailler",
     "appAccessTitle": "Accès aux applications",
-    "appAccessDescription": "Applications que ce membre peut ouvrir.",
+    "appAccessDescription": "Applications attribuées directement à ce membre. Les accès hérités des groupes figurent dans les accès effectifs.",
     "groupsTitle": "Groupes",
     "manageGroups": "Gérer les groupes",
     "groupsDescription": "Groupes auxquels ce membre appartient.",

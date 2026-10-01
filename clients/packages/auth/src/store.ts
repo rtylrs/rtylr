@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { removeCookie, getDefaultCookieDomain } from './cookies';
-import type { User, UserState, UserActions, UserRole } from './types';
+import type { User, UserState, UserActions } from './types';
 
 type UserStore = UserState & UserActions;
 
@@ -12,7 +12,6 @@ export const useUserStore = create<UserStore>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      role: null,
       userId: null,
       addons: {},
       effectiveAccess: null,
@@ -23,7 +22,6 @@ export const useUserStore = create<UserStore>()(
         set({
           user,
           isAuthenticated: true,
-          role: user.role ?? null,
           userId: user.id ?? null,
           addons: user.addons ?? {},
           effectiveAccess: user.effectiveAccess ?? null,
@@ -36,7 +34,6 @@ export const useUserStore = create<UserStore>()(
           user: null,
           token: null,
           isAuthenticated: false,
-          role: null,
           userId: null,
           addons: {},
           effectiveAccess: null,
@@ -49,13 +46,10 @@ export const useUserStore = create<UserStore>()(
       setUser: (user: User) =>
         set({
           user,
-          role: user.role ?? null,
           userId: user.id ?? null,
           addons: user.addons ?? {},
           effectiveAccess: user.effectiveAccess ?? null,
         }),
-
-      setRole: (role: UserRole) => set({ role }),
 
       setUserId: (userId: string) => set({ userId }),
 
@@ -70,7 +64,6 @@ export const useUserStore = create<UserStore>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
-        role: state.role,
         userId: state.userId,
         addons: state.addons,
         effectiveAccess: state.effectiveAccess,

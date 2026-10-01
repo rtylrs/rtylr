@@ -7,13 +7,13 @@ message StaffUserPayload {
   full_name: string
   /// When the record was created.
   created_at: string
-  apps: string[]
-  role: string
   is_active: bool
-  /// Independent Dash role assignment.
-  dash_role: string?
-  /// Independent application role assignments.
-  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Administrative members inherit all business permissions.
+  member_type: string
+  /// Direct app license assignments.
+  licensed_app_ids: string[]
+  /// Direct application permission profile assignments.
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
   /// Server-resolved effective access.
   effective_access: hub.user.v1.EffectiveAccess?
 }
@@ -25,13 +25,13 @@ message StaffUserWithGroups {
   full_name: string
   /// When the record was created.
   created_at: string
-  apps: string[]
-  role: string
   is_active: bool
-  /// Independent Dash role assignment.
-  dash_role: string?
-  /// Independent application role assignments.
-  app_assignments: hub.user.v1.AppRoleAssignment[]
+  /// Administrative members inherit all business permissions.
+  member_type: string
+  /// Direct app license assignments.
+  licensed_app_ids: string[]
+  /// Direct application permission profile assignments.
+  permission_profile_assignments: hub.user.v1.PermissionProfileAssignment[]
   /// Server-resolved effective access.
   effective_access: hub.user.v1.EffectiveAccess?
   /// Groups the staff user belongs to.

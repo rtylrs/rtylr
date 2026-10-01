@@ -44,8 +44,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   const navigate = useNavigate();
   const { data: settings } = useHrSettings();
   const payrollConfigured = usePayrollConfigured();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
+  const canRunPayroll = canHrPermission('hr:payroll:execute');
   const { data: run, isLoading } = useGetPayrollRun(runId, { enabled: payrollConfigured });
   const approveRun = useApprovePayrollRun(payrollConfigured);
   // HR->FIN-01: posts the approved run to the finance journal server-side.

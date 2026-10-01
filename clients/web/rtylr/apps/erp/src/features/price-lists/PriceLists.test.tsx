@@ -3,11 +3,12 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import PriceLists from './PriceLists';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   usePriceLists: vi.fn(),
   refetch: vi.fn(),
-  role: 'admin' as string,
+  effectiveAccess: undefined as unknown,
 }));
 
 // i18next is deliberately not mocked. An identity `t` makes an assertion and
@@ -25,8 +26,21 @@ vi.mock('motion/react', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (select: (state: { user: { role: string } }) => unknown) =>
-    select({ user: { role: mocks.role } }),
+  useUserStore: Object.assign(
+    (
+      select: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      select({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('./usePriceLists', () => ({
@@ -41,11 +55,14 @@ beforeAll(async () => {
 describe('PriceLists empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
     mocks.usePriceLists.mockReturnValue({ data: [], isLoading: false, refetch: mocks.refetch });
   });
 
-  it('shows the create action and opens the create form for a role with erp:purchase_orders', () => {
-    mocks.role = 'admin';
+  it('shows the create action and opens the create form with price-list management permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', {
+      permissions: ['erp:price_lists:manage'],
+    });
     render(<PriceLists />);
 
     const title = screen.getByText('No price lists');
@@ -61,8 +78,8 @@ describe('PriceLists empty state', () => {
     expect(mocks.refetch).not.toHaveBeenCalled();
   });
 
-  it('falls back to Refresh for a role without erp:purchase_orders', () => {
-    mocks.role = 'staff';
+  it('falls back to Refresh without price-list management permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:price_lists:view'] });
     render(<PriceLists />);
 
     const title = screen.getByText('No price lists');

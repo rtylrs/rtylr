@@ -204,18 +204,20 @@ func resolveConfigBusinessID(ctx context.Context, authUser *authPkg.AuthUser, re
 		return 0, onekiterrors.PermissionDenied()
 	}
 
-	if strings.EqualFold(authUser.Role, "console_admin") {
+	if authPkg.IsConsoleAdmin(authUser) {
 		if !hasRequestedBusinessID {
 			return 0, onekiterrors.PermissionDenied()
 		}
 		return requestedBusinessID, nil
 	}
 
-	if !strings.EqualFold(authUser.Role, "owner") || authUser.UserID <= 0 {
+	if authUser.UserID <= 0 {
 		return 0, onekiterrors.PermissionDenied()
 	}
-
-	resolvedBusinessID, err := resolveOwnedConfigBusinessID(ctx, authUser.UserID, requestedBusinessID)
+	if !hasRequestedBusinessID {
+		return 0, onekiterrors.PermissionDenied()
+	}
+	resolvedBusinessID, err := tenant.ResolveBusinessID(ctx, requestedBusinessID, authUser.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, tenant.ErrNoBusinessScope) {
 			return 0, onekiterrors.PermissionDenied()

@@ -56,8 +56,7 @@ const WEEKDAY_KEYS = [
 const Operations: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const showCompensation = canViewCompensation(role);
+  const showCompensation = canViewCompensation();
   const [tab, setTab] = useState<(typeof TABS)[number]>(
     showCompensation ? 'Labor Cost' : 'Swap Shifts'
   );
@@ -66,7 +65,7 @@ const Operations: React.FC = () => {
   const { data: swaps = [], refetch: refetchSwaps } = useSwaps();
   const createSwap = useCreateSwap();
   const resolveSwap = useResolveSwap();
-  const canManageShifts = canHrPermission(role, 'hr:shifts:manage');
+  const canManageShifts = canHrPermission('hr:schedules:manage');
   const visibleTabs = showCompensation ? TABS : TABS.filter((name) => name !== 'Labor Cost');
   const activeTab = !showCompensation && tab === 'Labor Cost' ? 'Swap Shifts' : tab;
   const { data: availability = [], refetch: refetchAvailability } = useAvailability();

@@ -62,11 +62,6 @@ func (h *CreateLeaveTypeHandler) Validate(_ context.Context, req *CreateLeaveTyp
 }
 
 func canManageLeavePolicy(user *authPkg.AuthUser) bool {
-	if authPkg.LegacyAuthorizationMode() {
-		// Legacy mode collapses app permissions to app membership; use the
-		// elevated role boundary instead of inheriting that broad fallback.
-		return authPkg.IsBusinessAdmin(user) || authPkg.HasAnyRole(user, "manager", "hr_admin", "admin", "owner", "console_admin")
-	}
 	if authPkg.IsBusinessAdmin(user) {
 		return true
 	}

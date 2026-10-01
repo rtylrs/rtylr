@@ -260,7 +260,7 @@ func consoleAdmin(ctx context.Context) (*authPkg.AuthUser, error) {
 	if !ok || admin == nil {
 		return nil, onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
-	if admin.Role != "console_admin" {
+	if !authPkg.IsConsoleAdmin(admin) {
 		return nil, onekiterrors.New(http.StatusForbidden, "Console admin access required")
 	}
 	return admin, nil

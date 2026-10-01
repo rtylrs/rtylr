@@ -36,7 +36,6 @@ import {
   useMember,
   useDeactivateMember,
   useUpdateMember,
-  type TeamMember,
 } from '../../shared/hooks/queries/useTeam';
 import { useMySubscription } from '../../shared/hooks/queries/useSubscription';
 import { SeatSavingsNote } from '../../shared/components/SeatSavingsNote';
@@ -52,14 +51,10 @@ import {
 import { toast } from 'sonner';
 import type { GroupSummary } from '../../shared/hooks/queries/useGroups';
 import { groupsClient, permissionClient } from '../../shared/lib/clients';
-import { customRoleSchema } from '../../shared/schemas/permissions';
+import { permissionProfileSchema } from '../../shared/schemas/permissions';
 import { useUserStore } from '../../shared/stores/userStore';
 import { APP_NAMES } from '../../shared/config/appNames';
-import {
-  buildAppRoleAssignments,
-  dashRoleToLegacyRole,
-  legacyRoleToDashRole,
-} from './authorizationDraft';
+import { buildPermissionProfileAssignments } from './authorizationDraft';
 
 const ALL_APPS = [
   { key: 'pos', labelKey: APP_NAMES.pos.short, icon: MonitorSpeaker, color: 'var(--app-pos)' },
@@ -88,7 +83,7 @@ const ALL_APPS = [
   },
 ];
 
-const ROLE_IDS = ['admin', 'manager', 'member', 'viewer'] as const;
+const MEMBER_TYPES = ['admin', 'member'] as const;
 
 // Stable identity: useMemberLocations returns undefined while disabled, and a
 // fresh fallback array on every render would retrigger the seeding effect.
@@ -116,12 +111,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
-  const [roleDraft, setRoleDraft] = useState('member');
-  const [appsDraft, setAppsDraft] = useState<string[]>([]);
-  const [roleIdsDraft, setRoleIdsDraft] = useState<Record<string, string[]>>({});
+  const [memberTypeDraft, setMemberTypeDraft] = useState<'member' | 'admin'>('member');
+  const [licensedAppsDraft, setLicensedAppsDraft] = useState<string[]>([]);
+  const [profileIdsDraft, setProfileIdsDraft] = useState<Record<string, string[]>>({});
   const [locationsDraft, setLocationsDraft] = useState<number[]>([]);
 
-  const posSelected = appsDraft.includes('pos');
+  const posSelected = licensedAppsDraft.includes('pos');
   const assignLocation = useAssignPOSLocation();
   const removeLocation = useRemovePOSLocation();
   const { data: allLocations = [] } = usePOSLocations(isEditing && posSelected);
@@ -142,7 +137,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     queryKey: ['custom-roles', 'assignable'],
     queryFn: async () => {
       const res = await permissionClient.listRoles({ pageSize: 100 });
-      return z.array(customRoleSchema).parse(res.roles ?? []);
+      return z.array(permissionProfileSchema).parse(res.roles ?? []);
     },
     enabled: isEditing,
   });
@@ -163,16 +158,13 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   useEffect(() => {
     if (!member) return;
     setNameDraft(member.fullName || member.name || '');
-    setRoleDraft(member.dashRole ?? legacyRoleToDashRole(member.role));
-    const resolvedApps = member.effectiveAccess?.apps
-      .filter((app) => app.licensed && app.hasAccess)
-      .map((app) => app.appId);
-    setAppsDraft(resolvedApps ?? member.apps ?? []);
-    setRoleIdsDraft(
+    setMemberTypeDraft(member.memberType === 'admin' ? 'admin' : 'member');
+    setLicensedAppsDraft(member.licensedAppIds);
+    setProfileIdsDraft(
       Object.fromEntries(
-        (member.effectiveAccess?.apps ?? []).map((app) => [
-          app.appId,
-          app.primaryRoleId ? [app.primaryRoleId] : app.roleIds,
+        member.permissionProfileAssignments.map((assignment) => [
+          assignment.appId,
+          assignment.permissionProfileIds,
         ])
       )
     );
@@ -218,10 +210,13 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
 
   const canEditMember =
     currentUser?.effectiveAccess?.dashPermissions.includes('hub:team:edit') === true &&
-    member.role !== 'owner';
+    !member.isOwner;
+  const visibleLicensedApps =
+    member.effectiveAccess?.apps.filter((app) => app.licensed).map((app) => app.appId) ??
+    member.licensedAppIds;
 
   const toggleApp = (appKey: string): void => {
-    setAppsDraft((prev) =>
+    setLicensedAppsDraft((prev) =>
       prev.includes(appKey) ? prev.filter((key) => key !== appKey) : [...prev, appKey]
     );
   };
@@ -287,10 +282,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
         patch: {
           fullName: nameDraft.trim(),
           name: nameDraft.trim(),
-          role: dashRoleToLegacyRole(roleDraft) as TeamMember['role'],
-          apps: appsDraft,
-          dashRole: roleDraft,
-          appAssignments: buildAppRoleAssignments(appsDraft, undefined, roleIdsDraft),
+          memberType: memberTypeDraft,
+          licensedAppIds: memberTypeDraft === 'admin' ? [] : licensedAppsDraft,
+          permissionProfileAssignments:
+            memberTypeDraft === 'admin'
+              ? []
+              : buildPermissionProfileAssignments(licensedAppsDraft, profileIdsDraft),
           groupIds: memberGroups.map((group) => group.id),
         },
       });
@@ -317,7 +314,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
                 {member.name}
               </h1>
-              <RoleBadge role={member.dashRole ?? legacyRoleToDashRole(member.role)} />
+              <RoleBadge role={member.isOwner ? 'owner' : member.memberType} />
             </div>
             <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
               {member.email}
@@ -332,8 +329,16 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     onClick={() => {
                       setIsEditing(false);
                       setNameDraft(member.fullName || member.name || '');
-                      setRoleDraft(member.dashRole ?? legacyRoleToDashRole(member.role));
-                      setAppsDraft(member.apps ?? []);
+                      setMemberTypeDraft(member.memberType === 'admin' ? 'admin' : 'member');
+                      setLicensedAppsDraft(member.licensedAppIds);
+                      setProfileIdsDraft(
+                        Object.fromEntries(
+                          member.permissionProfileAssignments.map((assignment) => [
+                            assignment.appId,
+                            assignment.permissionProfileIds,
+                          ])
+                        )
+                      );
                       setLocationsDraft(memberLocations.map((l) => l.locationId));
                     }}
                   >
@@ -370,11 +375,11 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="member-role">{t('team.memberDetail.roleLabel')}</Label>
+                <Label htmlFor="member-type">{t('team.memberDetail.memberTypeLabel')}</Label>
                 <select
-                  id="member-role"
-                  value={roleDraft}
-                  onChange={(event) => setRoleDraft(event.target.value)}
+                  id="member-type"
+                  value={memberTypeDraft}
+                  onChange={(event) => setMemberTypeDraft(event.target.value as 'member' | 'admin')}
                   className="w-full rounded-lg px-3 py-2 text-sm"
                   style={{
                     background: 'var(--dash-bg)',
@@ -382,9 +387,9 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     color: 'var(--dash-text)',
                   }}
                 >
-                  {ROLE_IDS.map((roleId) => (
-                    <option key={roleId} value={roleId}>
-                      {t(`common.roleLabels.${roleId}`)}
+                  {MEMBER_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {t(`common.roleLabels.${type}`)}
                     </option>
                   ))}
                 </select>
@@ -393,12 +398,13 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
             <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
               {ALL_APPS.map((app) => {
                 const Icon = app.icon;
-                const selected = appsDraft.includes(app.key);
+                const selected = licensedAppsDraft.includes(app.key);
                 return (
                   <button
                     key={app.key}
                     type="button"
-                    onClick={() => toggleApp(app.key)}
+                    onClick={() => memberTypeDraft === 'member' && toggleApp(app.key)}
+                    disabled={memberTypeDraft === 'admin'}
                     className="flex items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors"
                     style={{
                       background: selected ? `${app.color}10` : 'var(--dash-bg)',
@@ -413,49 +419,53 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               })}
             </div>
 
-            <div className="mt-4 space-y-3">
-              <Label>{t('team.memberDetail.customAppRoles')}</Label>
-              {appsDraft.map((appKey) => {
-                const options = customRoles.filter((role) => role.appId === appKey);
-                if (options.length === 0) return null;
-                return (
-                  <div key={appKey} className="space-y-1.5">
-                    <Label htmlFor={`custom-role-${appKey}`}>{appKey}</Label>
-                    <select
-                      id={`custom-role-${appKey}`}
-                      value={roleIdsDraft[appKey]?.[0] ?? ''}
-                      onChange={(event) =>
-                        setRoleIdsDraft((current) => ({
-                          ...current,
-                          [appKey]: event.target.value ? [event.target.value] : [],
-                        }))
-                      }
-                      className="w-full rounded-lg px-3 py-2 text-base"
-                      style={{
-                        background: 'var(--dash-bg)',
-                        border: '1px solid var(--dash-border)',
-                        color: 'var(--dash-text)',
-                      }}
-                    >
-                      <option value="">{t('team.memberDetail.useDefaultAppRole')}</option>
-                      {options.map((role) => (
-                        <option key={role.id} value={role.id}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                );
-              })}
-            </div>
+            {memberTypeDraft === 'admin' ? (
+              <p className="mt-4 text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                {t('team.memberDetail.adminFullAccess')}
+              </p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                <Label>{t('team.memberDetail.permissionProfiles')}</Label>
+                {licensedAppsDraft.map((appKey) => {
+                  const options = customRoles.filter((profile) => profile.appId === appKey);
+                  if (options.length === 0) return null;
+                  return (
+                    <div key={appKey} className="space-y-1.5">
+                      <Label htmlFor={`permission-profile-${appKey}`}>{appKey}</Label>
+                      <select
+                        id={`permission-profile-${appKey}`}
+                        value={profileIdsDraft[appKey]?.[0] ?? ''}
+                        onChange={(event) =>
+                          setProfileIdsDraft((current) => ({
+                            ...current,
+                            [appKey]: event.target.value ? [event.target.value] : [],
+                          }))
+                        }
+                        className="w-full rounded-lg px-3 py-2 text-base"
+                        style={{
+                          background: 'var(--dash-bg)',
+                          border: '1px solid var(--dash-border)',
+                          color: 'var(--dash-text)',
+                        }}
+                      >
+                        <option value="">{t('team.memberDetail.noPermissionProfile')}</option>
+                        {options.map((profile) => (
+                          <option key={profile.id} value={profile.id}>
+                            {profile.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {posSelected && (
               <div className="mt-4 space-y-2">
                 <Label>{t('team.memberDetail.posLocationsLabel')}</Label>
                 <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                  {roleDraft === 'manager'
-                    ? t('team.memberDetail.posLocationsManagerHint')
-                    : t('team.memberDetail.posLocationsMemberHint')}
+                  {t('team.memberDetail.posLocationsMemberHint')}
                 </p>
                 {allLocations.length === 0 ? (
                   <EmptyState
@@ -526,10 +536,10 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
               style={{ color: 'var(--dash-text-dim)' }}
             >
-              <Shield size={11} /> Role
+              <Shield size={11} /> {t('team.memberDetail.memberTypeLabel')}
             </div>
             <p className="text-xs font-medium capitalize" style={{ color: 'var(--dash-text)' }}>
-              {member.dashRole ?? legacyRoleToDashRole(member.role)}
+              {member.isOwner ? 'owner' : member.memberType}
             </p>
           </div>
           <div
@@ -553,7 +563,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           description={t('team.memberDetail.appAccessDescription')}
         >
           <div className="flex flex-wrap gap-2">
-            {(member.apps ?? []).length === 0 ? (
+            {visibleLicensedApps.length === 0 ? (
               <EmptyState
                 icon={Package}
                 title={t('team.memberDetail.noAppsAssignedTitle')}
@@ -566,7 +576,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                 size="compact"
               />
             ) : (
-              (member.apps ?? []).map((a: string) => <AppBadge key={a} app={a} size="sm" />)
+              visibleLicensedApps.map((appId) => <AppBadge key={appId} app={appId} size="sm" />)
             )}
           </div>
         </SettingSection>
@@ -612,9 +622,6 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                         {app.sources.join(', ') || t('team.memberDetail.directSource')}
                       </span>
                     </div>
-                    <p className="mt-2 text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-                      {app.displayRole ?? t('team.memberDetail.defaultRole')}
-                    </p>
                     <div
                       className="mt-2 flex flex-wrap gap-1.5 text-[10px]"
                       style={{ color: 'var(--dash-text-dim)' }}
@@ -623,7 +630,14 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                         {t('team.memberDetail.permissionCount', { count: app.permissions.length })}
                       </span>
                       <span>•</span>
-                      <span>{t('team.memberDetail.scopeCount', { count: app.scopes.length })}</span>
+                      <span>
+                        {t('team.memberDetail.scopeCount', {
+                          count: Object.values(app.permissionScopes).reduce(
+                            (count, scopes) => count + scopes.length,
+                            0
+                          ),
+                        })}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -693,7 +707,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           </div>
         </div>
 
-        {member.role !== 'owner' && (
+        {!member.isOwner && (
           <DangerZone
             actions={[
               {

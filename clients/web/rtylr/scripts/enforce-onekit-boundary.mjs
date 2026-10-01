@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 
 const root = process.cwd();
@@ -268,6 +268,7 @@ function reviewedLines(base) {
   ])
     .split('\n')
     .filter(Boolean)
+    .filter((fileName) => statSync(join(repoRoot, fileName)).isFile())
     .filter((fileName) => sourceExtensions.has(fileName.slice(fileName.lastIndexOf('.'))));
   for (const fileName of untracked) lines.push(...wholeFile(fileName));
 

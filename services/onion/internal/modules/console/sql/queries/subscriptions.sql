@@ -63,13 +63,10 @@ FROM (
     JOIN users u ON u.id = b.owner_id
     WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
     UNION
-    SELECT p.user_id AS user_id
-    FROM user_app_permissions p
-    JOIN users u ON u.id = p.user_id
-    WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-    UNION
-    SELECT u.id AS user_id
-    FROM users u
-    JOIN businesses b ON b.id = u.business_id
-    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+    SELECT member.user_id AS user_id
+    FROM authorization_business_members member
+    JOIN businesses b ON b.id = member.business_id
+    JOIN users u ON u.id = member.user_id
+    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE
+      AND member.status = 'active' AND COALESCE(u.is_banned, FALSE) = FALSE
 ) active_users;

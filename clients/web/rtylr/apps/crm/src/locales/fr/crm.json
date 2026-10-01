@@ -280,20 +280,10 @@
     "consentDefaults": "Consentements par défaut",
     "optInByDefault": "Inscrire les nouveaux clients par défaut",
     "optInByDefaultHint": "Les nouveaux clients seront inscrits au marketing sauf avis contraire",
-    "emailAndNameRequired": "L’e-mail et le nom complet sont obligatoires",
-    "teamTitle": "Équipe",
-    "teamSubtitle": "Les personnes ayant accès au CRM.",
-    "inviteSomeone": "Inviter quelqu’un au CRM",
-    "invitePlaceholder": "Marie Durand",
+    "teamManagementTitle": "Accès de l’équipe",
+    "teamManagementDescription": "Gérez les membres, les groupes, les licences des applications et les autorisations dans Dash.",
+    "teamManagementAction": "Ouvrir la gestion de l’équipe",
     "subtitle": "Configurez les valeurs par défaut du CRM"
-  },
-  "team": {
-    "inviteSent": "Invitation sent",
-    "inviteFailed": "Failed to send invitation",
-    "memberRemoved": "Member removed",
-    "removeFailed": "Failed to remove member",
-    "emptyTitle": "Aucun membre d'équipe pour le moment",
-    "inviteMember": "Inviter un membre"
   },
   "customerProfile": {
     "noTagsTitle": "Aucune étiquette pour le moment",

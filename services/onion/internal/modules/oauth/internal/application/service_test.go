@@ -21,7 +21,6 @@ type mockRepo struct {
 	userID       int64
 	passwordHash string
 	businessID   int64
-	role         string
 	businessErr  error
 	clientErr    error
 	authCodeErr  error
@@ -60,8 +59,8 @@ func (m *mockRepo) GetUserIDByEmail(_ context.Context, _ string) (int64, error) 
 	return m.userID, m.err
 }
 
-func (m *mockRepo) GetUserBusinessIDAndRole(_ context.Context, _ int64) (int64, string, error) {
-	return m.businessID, m.role, m.businessErr
+func (m *mockRepo) GetUserBusinessID(_ context.Context, _ int64) (int64, error) {
+	return m.businessID, m.businessErr
 }
 
 func newTestService(repo domain.Repository) *Service {

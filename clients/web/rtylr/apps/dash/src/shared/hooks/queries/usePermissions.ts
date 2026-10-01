@@ -3,33 +3,34 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { permissionClient } from '../../lib/clients';
-import { permissionMatrixSchema, customRoleSchema } from '../../schemas/permissions';
+import { permissionCatalogSchema, permissionProfileSchema } from '../../schemas/permissions';
 import i18next from 'i18next';
 
-export type { PermissionDef, PermissionMatrix, CustomRole } from '../../schemas/permissions';
-export type Role = 'owner' | 'admin' | 'manager' | 'staff' | 'viewer' | string;
+export type {
+  PermissionDef,
+  PermissionCatalog,
+  PermissionProfile,
+} from '../../schemas/permissions';
 
-type PermissionMatrix = z.infer<typeof permissionMatrixSchema>;
-
-export const usePermissions = () => {
-  return useQuery<PermissionMatrix>({
-    queryKey: ['permissions'],
+export const usePermissionCatalog = () => {
+  return useQuery({
+    queryKey: ['permission-catalog'],
     queryFn: async () => {
-      const res = await permissionClient.getPermissions({});
-      return permissionMatrixSchema.parse(res.matrix ?? res);
+      const response = await permissionClient.listPermissionCatalog({});
+      return permissionCatalogSchema.parse(response);
     },
   });
 };
 
-export const useCustomRoles = () => {
+export const usePermissionProfiles = () => {
   return useQuery({
-    queryKey: ['custom-roles'],
+    queryKey: ['permission-profiles'],
     queryFn: async () => {
-      const roles: z.infer<typeof customRoleSchema>[] = [];
+      const roles: z.infer<typeof permissionProfileSchema>[] = [];
       let page = 1;
       for (let requestCount = 0; requestCount < 100; requestCount += 1) {
         const res = await permissionClient.listRoles({ page, pageSize: 100 });
-        roles.push(...z.array(customRoleSchema).parse(res.roles ?? []));
+        roles.push(...z.array(permissionProfileSchema).parse(res.roles ?? []));
         if (!res.nextPage) break;
         page = res.nextPage;
       }
@@ -38,31 +39,7 @@ export const useCustomRoles = () => {
   });
 };
 
-export const useUpdatePermissions = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (payload: { role: string; key: string; enabled: boolean }) => {
-      return permissionClient.updatePermissionMatrix({
-        role: payload.role,
-        permissionKey: payload.key,
-        enabled: payload.enabled,
-      });
-    },
-    onSuccess: () => {
-      toast.success(i18next.t('common.toasts.permissionUpdated', 'Permission updated'));
-      qc.invalidateQueries({ queryKey: ['permissions'] });
-    },
-    onError: (error) =>
-      toast.error(
-        getOneKitErrorMessage(
-          error,
-          i18next.t('common.toasts.failedUpdatePermission', 'Failed to update permission')
-        )
-      ),
-  });
-};
-
-export const useCreateCustomRole = () => {
+export const useCreatePermissionProfile = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
@@ -75,7 +52,7 @@ export const useCreateCustomRole = () => {
     },
     onSuccess: () => {
       toast.success(i18next.t('common.toasts.roleCreated', 'Role created'));
-      qc.invalidateQueries({ queryKey: ['custom-roles'] });
+      qc.invalidateQueries({ queryKey: ['permission-profiles'] });
     },
     onError: (error) =>
       toast.error(
@@ -87,7 +64,7 @@ export const useCreateCustomRole = () => {
   });
 };
 
-export const useUpdateCustomRole = () => {
+export const useUpdatePermissionProfile = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
@@ -106,7 +83,7 @@ export const useUpdateCustomRole = () => {
       }),
     onSuccess: () => {
       toast.success(i18next.t('common.toasts.roleUpdated', 'Role updated'));
-      qc.invalidateQueries({ queryKey: ['custom-roles'] });
+      qc.invalidateQueries({ queryKey: ['permission-profiles'] });
     },
     onError: (error) =>
       toast.error(
@@ -118,13 +95,13 @@ export const useUpdateCustomRole = () => {
   });
 };
 
-export const useArchiveCustomRole = () => {
+export const useArchivePermissionProfile = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => permissionClient.deleteRole({ id }),
     onSuccess: () => {
       toast.success(i18next.t('common.toasts.roleArchived', 'Role archived'));
-      qc.invalidateQueries({ queryKey: ['custom-roles'] });
+      qc.invalidateQueries({ queryKey: ['permission-profiles'] });
     },
     onError: (error) =>
       toast.error(

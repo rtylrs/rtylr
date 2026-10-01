@@ -3,12 +3,13 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import StockTakes from './StockTakes';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   useStockTakes: vi.fn(),
   updateStockTake: vi.fn(),
   refetch: vi.fn(),
-  role: 'admin' as string,
+  effectiveAccess: undefined as unknown,
 }));
 
 // i18next is deliberately not mocked. An identity `t` makes an assertion and
@@ -26,8 +27,21 @@ vi.mock('motion/react', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (select: (state: { user: { role: string } }) => unknown) =>
-    select({ user: { role: mocks.role } }),
+  useUserStore: Object.assign(
+    (
+      select: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      select({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('./useStockTakes', () => ({
@@ -55,7 +69,7 @@ beforeAll(async () => {
 describe('StockTakes physical counts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
     mocks.updateStockTake.mockResolvedValue({ message: 'completed' });
     mocks.useStockTakes.mockReturnValue({
       data: {
@@ -105,6 +119,7 @@ describe('StockTakes physical counts', () => {
 describe('StockTakes empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
     mocks.updateStockTake.mockResolvedValue({ message: 'completed' });
     mocks.useStockTakes.mockReturnValue({
       data: { stockTakes: [], hasMore: false },
@@ -113,8 +128,8 @@ describe('StockTakes empty state', () => {
     });
   });
 
-  it('shows the create action and opens the create form for a role with erp:stock_takes', () => {
-    mocks.role = 'admin';
+  it('shows the create action and opens the create form with inventory adjustment permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:inventory:adjust'] });
     render(<StockTakes />);
 
     const title = screen.getByText('No stock takes');
@@ -128,8 +143,8 @@ describe('StockTakes empty state', () => {
     expect(mocks.refetch).not.toHaveBeenCalled();
   });
 
-  it('falls back to Refresh for a role without erp:stock_takes', () => {
-    mocks.role = 'operator';
+  it('falls back to Refresh without inventory adjustment permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:inventory:view'] });
     render(<StockTakes />);
 
     const title = screen.getByText('No stock takes');

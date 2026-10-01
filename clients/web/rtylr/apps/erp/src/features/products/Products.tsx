@@ -57,8 +57,7 @@ const Products: React.FC = () => {
   const { data: categories = [] } = useCategories();
   const deleteMut = useDeleteProduct();
   const createProduct = useCreateProduct();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canDeleteProduct = canErpPermission(role, 'erp:products:delete');
+  const canDeleteProduct = canErpPermission('erp:products:delete');
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((category) => map.set(String(category.id), category.name ?? ''));

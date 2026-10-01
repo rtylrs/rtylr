@@ -6,13 +6,25 @@ const groupSummarySchema = z.object({
   color: z.string(),
 });
 
+export const permissionProfileAssignmentSchema = z.object({
+  appId: z.string(),
+  permissionProfileIds: z.array(z.string()),
+  assignmentSource: z.string(),
+  status: z.string(),
+  scopes: z.array(z.object({ scopeType: z.string(), scopeId: z.string() })),
+  groupId: z.string().optional(),
+});
+
+export type PermissionProfileAssignment = z.infer<typeof permissionProfileAssignmentSchema>;
+
 export const teamMemberSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(String),
   fullName: z.string().optional(),
   name: z.string().optional(),
   email: z.string(),
-  role: z.string(),
-  apps: z.array(z.string()).default([]),
+  memberType: z.string(),
+  licensedAppIds: z.array(z.string()).default([]),
+  permissionProfileAssignments: z.array(permissionProfileAssignmentSchema).default([]),
   isActive: z.boolean().optional(),
   avatarUrl: z.string().optional(),
   lastActive: z.string().optional(),

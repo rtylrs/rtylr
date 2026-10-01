@@ -21,7 +21,6 @@ func invoiceToolUser(permissions ...string) *authPkg.AuthUser {
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      []authorization.Scope{{Type: "finance", ID: "9201"}},
 			}},
 		},
 	}
@@ -30,7 +29,6 @@ func invoiceToolUser(permissions ...string) *authPkg.AuthUser {
 // The module maps tenant-resolution failure to the same error as a permission
 // failure, so the gate is asserted directly rather than through the executor.
 func TestRequireInvoiceToolPermission(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	for _, tc := range []struct {
 		tool       string
@@ -63,15 +61,12 @@ func TestRequireInvoiceToolPermission(t *testing.T) {
 	}
 }
 
-func TestRequireInvoiceToolPermissionRejectsLegacyRoleAndMissingAuth(t *testing.T) {
-	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
+func TestRequireInvoiceToolPermissionRejectsMissingAccessAndMissingAuth(t *testing.T) {
 
 	required := invoiceToolPermissions[sendInvoiceToolName]
 
-	legacy := invoiceToolUser()
-	legacy.Role = "owner"
-	if err := requireInvoiceToolPermission(authPkg.WithAuthUser(context.Background(), legacy), required); err == nil {
-		t.Fatal("a legacy owner role authorized an invoice send")
+	if err := requireInvoiceToolPermission(authPkg.WithAuthUser(context.Background(), invoiceToolUser()), required); err == nil {
+		t.Fatal("a member without a permission assignment authorized an invoice send")
 	}
 
 	// Assignment, not licensing. HasAppPermission and HasAppAccess both gate on

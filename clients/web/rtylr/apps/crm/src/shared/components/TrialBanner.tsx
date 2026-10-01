@@ -57,9 +57,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
 
   const userId = nonEmptyString(user?.id) ?? nonEmptyString(user?.userId);
   const businessId =
-    nonEmptyString(user?.effectiveAccess?.businessId) ??
-    nonEmptyString(user?.businessId) ??
-    nonEmptyString(user?.business_id);
+    nonEmptyString(user?.effectiveAccess?.businessId) ?? nonEmptyString(user?.businessId);
   const dismissalScope = userId
     ? `${DISMISSED_KEY_PREFIX}:${userId}:${businessId ?? 'business'}`
     : null;

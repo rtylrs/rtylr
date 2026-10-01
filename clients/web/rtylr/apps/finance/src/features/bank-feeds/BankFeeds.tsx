@@ -56,8 +56,7 @@ const BankFeeds: React.FC = () => {
     isError: transactionsError,
     refetch: refetchTransactions,
   } = useBankTransactions(selected);
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageAccounts = canFinancePermission(role, 'finance:accounts');
+  const canManageAccounts = canFinancePermission('finance:bank_feeds:manage');
 
   const total = accounts.reduce((s: number, a) => s + (a.balance ?? 0), 0);
 

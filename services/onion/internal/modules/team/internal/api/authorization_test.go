@@ -17,9 +17,7 @@ func teamAuthorizationUser(permission string) *authPkg.AuthUser {
 	return &authPkg.AuthUser{
 		UserID:     7,
 		BusinessID: 9,
-		Role:       "member",
 		EffectiveAccess: &authorization.EffectiveAccess{
-			DashRole:        "member",
 			DashPermissions: []string{permission},
 		},
 	}

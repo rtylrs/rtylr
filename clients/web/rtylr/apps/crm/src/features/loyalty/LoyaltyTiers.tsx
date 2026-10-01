@@ -161,8 +161,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
 
 const LoyaltyTiers: React.FC = () => {
   const { t } = useTranslation();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
+  const canConfigureLoyalty = canCrmPermission('crm:loyalty:manage');
   const { data: fetched, isLoading } = useLoyaltyTiers();
   const tiers = (fetched ?? []).sort((a, b) => a.threshold - b.threshold);
   const [editingId, setEditingId] = useState<number | null>(null);

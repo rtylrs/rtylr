@@ -21,7 +21,28 @@ vi.mock('../signOut', () => ({
 }));
 
 const fetchUserAllowed = (): Promise<Record<string, unknown>> =>
-  Promise.resolve({ id: 1, email: 'a@b.c', fullName: 'A', role: 'owner', apps: ['crm'] });
+  Promise.resolve({
+    id: 1,
+    email: 'a@b.c',
+    fullName: 'A',
+    effectiveAccess: {
+      business_id: '1',
+      dash_permissions: [],
+      subscribed_apps: ['crm'],
+      licenses: [],
+      apps: [{
+        app_id: 'crm',
+        licensed: true,
+        has_access: true,
+        permissions: [],
+        permission_scopes: [],
+        sources: ['explicit'],
+      }],
+      is_owner: false,
+      is_admin: false,
+      authorization_version: 1,
+    },
+  });
 
 afterEach(() => cleanup());
 

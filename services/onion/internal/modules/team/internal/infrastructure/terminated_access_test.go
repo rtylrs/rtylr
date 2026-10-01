@@ -18,21 +18,20 @@ func TestTerminatedAccessReconciliation_DeactivatesTerminatedOnly(t *testing.T) 
 	ctx := context.Background()
 	service := application.NewService(ctx, db)
 
-	// Fixture precondition: staff 1002 is employed and active. Assert it so a
-	// drifted fixture fails loudly here rather than passing vacuously.
-	var isActive int
+	// Fixture precondition: staff 1002 has active business membership.
+	var membershipStatus string
 	if err := db.QueryRowContext(ctx,
-		"SELECT is_active FROM user_app_permissions WHERE owner_id = ? AND user_id = ?",
-		testutil.OwnerID, teamStaffUserID,
-	).Scan(&isActive); err != nil {
-		t.Fatalf("fixture permission row missing: %v", err)
+		"SELECT status FROM authorization_business_members WHERE business_id = ? AND user_id = ?",
+		testutil.BusinessID, teamStaffUserID,
+	).Scan(&membershipStatus); err != nil {
+		t.Fatalf("fixture membership missing: %v", err)
 	}
-	if isActive != 1 {
-		t.Fatalf("fixture precondition failed: staff %d permission inactive", teamStaffUserID)
+	if membershipStatus != "active" {
+		t.Fatalf("fixture precondition failed: staff %d membership status is %q", teamStaffUserID, membershipStatus)
 	}
 
-	// Mark the fixture employee terminated, sweep, and expect the permission
-	// row to flip off. Restore both rows afterwards.
+	// Mark the fixture employee terminated, sweep, and expect membership to be
+	// revoked. Restore the shared fixture afterwards.
 	setStatus := func(status string) {
 		t.Helper()
 		if _, err := db.ExecContext(ctx,
@@ -45,11 +44,15 @@ func TestTerminatedAccessReconciliation_DeactivatesTerminatedOnly(t *testing.T) 
 	setStatus("terminated")
 	t.Cleanup(func() {
 		setStatus("active")
-		if _, err := db.ExecContext(ctx,
-			"UPDATE user_app_permissions SET is_active = TRUE WHERE owner_id = ? AND user_id = ?",
-			testutil.OwnerID, teamStaffUserID,
-		); err != nil {
-			t.Errorf("restore permission: %v", err)
+		if _, err := db.ExecContext(ctx, `
+			UPDATE authorization_business_members SET status = 'active'
+			WHERE business_id = ? AND user_id = ?`, testutil.BusinessID, teamStaffUserID); err != nil {
+			t.Errorf("restore membership: %v", err)
+		}
+		for _, table := range []string{"authorization_license_assignments", "authorization_role_assignments"} {
+			if _, err := db.ExecContext(ctx, "UPDATE "+table+" SET status = 'active', revoked_at = NULL, revoked_by = NULL WHERE business_id = ? AND user_id = ?", testutil.BusinessID, teamStaffUserID); err != nil {
+				t.Errorf("restore %s: %v", table, err)
+			}
 		}
 	})
 
@@ -58,15 +61,15 @@ func TestTerminatedAccessReconciliation_DeactivatesTerminatedOnly(t *testing.T) 
 		t.Fatalf("RunTerminatedAccessReconciliation: %v", err)
 	}
 
-	var after int
+	var after string
 	if err := db.QueryRowContext(ctx,
-		"SELECT is_active FROM user_app_permissions WHERE owner_id = ? AND user_id = ?",
-		testutil.OwnerID, teamStaffUserID,
+		"SELECT status FROM authorization_business_members WHERE business_id = ? AND user_id = ?",
+		testutil.BusinessID, teamStaffUserID,
 	).Scan(&after); err != nil {
-		t.Fatalf("read permission after sweep: %v", err)
+		t.Fatalf("read membership after sweep: %v", err)
 	}
-	if after != 0 {
-		t.Fatalf("permission still active after reconciliation for terminated employee")
+	if after != "revoked" {
+		t.Fatalf("membership status after reconciliation = %q, want revoked", after)
 	}
 
 	// Scoped path: restoring employment then revoking by (business, user) must

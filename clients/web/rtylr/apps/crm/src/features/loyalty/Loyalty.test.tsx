@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const configState = vi.hoisted(() => ({
   data: undefined as unknown,
@@ -13,10 +14,20 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('@voxire/auth', () => ({
-  useUserStore: (selector: (state: { user: { role: string } }) => unknown) =>
-    selector({ user: { role: 'admin' } }),
-}));
+const auth = vi.hoisted(() => ({ effectiveAccess: null as unknown }));
+
+vi.mock('@voxire/auth', () => {
+  const state = () => ({
+    user: { effectiveAccess: auth.effectiveAccess },
+    effectiveAccess: auth.effectiveAccess,
+  });
+  return {
+    useUserStore: Object.assign(
+      (selector: (value: ReturnType<typeof state>) => unknown) => selector(state()),
+      { getState: state }
+    ),
+  };
+});
 
 vi.mock('../../shared/hooks/queries/useLoyalty', () => ({
   useLoyaltyConfig: () => ({ data: configState.data, isError: configState.isError }),
@@ -37,6 +48,7 @@ const loadedConfig = {
 const saveButton = () => screen.getByRole('button', { name: 'Save' });
 
 beforeEach(() => {
+  auth.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
   configState.data = undefined;
   configState.isError = false;
   updateConfig.mutate.mockClear();

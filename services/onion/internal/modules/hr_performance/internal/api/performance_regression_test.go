@@ -31,7 +31,6 @@ func performanceAuthContext(userID, businessID int64, permissions ...string) con
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     userID,
 		BusinessID: businessID,
-		Role:       "member",
 		EffectiveAccess: &authorization.EffectiveAccess{
 			BusinessID:           businessID,
 			AuthorizationVersion: 1,
@@ -40,7 +39,6 @@ func performanceAuthContext(userID, businessID int64, permissions ...string) con
 				Licensed:    true,
 				HasAccess:   true,
 				Permissions: permissions,
-				Scopes:      nil,
 			}},
 		},
 	})
@@ -60,9 +58,9 @@ func ensurePerformanceBusiness(t *testing.T, db *sql.DB, businessID int64) {
 func grantPerformanceBusiness(t *testing.T, db *sql.DB, userID, businessID int64) {
 	t.Helper()
 	if _, err := db.ExecContext(context.Background(), `
-		INSERT INTO user_business_access (user_id, business_id, role)
-		VALUES (?, ?, 'viewer')
-		ON DUPLICATE KEY UPDATE role = 'viewer'`, userID, businessID); err != nil {
+		INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+		VALUES (?, ?, 'member', 'active')
+		ON DUPLICATE KEY UPDATE status = 'active'`, businessID, userID); err != nil {
 		t.Fatalf("grant business access: %v", err)
 	}
 }
@@ -98,7 +96,7 @@ func TestCreateCycleUsesResolvedBusinessAndRequiresManagePermission(t *testing.T
 	ensurePerformanceBusiness(t, db, otherBusinessID)
 	grantPerformanceBusiness(t, db, userID, businessID)
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?", userID, businessID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE user_id = ? AND business_id = ?", userID, businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id IN (?, ?)", businessID, otherBusinessID)
 	})
 
@@ -157,7 +155,7 @@ func TestCreateGoalAuthorizesEmployeeSubject(t *testing.T) {
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_performance_review_goals WHERE business_id IN (?, ?)", businessID, foreignBusinessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_performance_review_cycles WHERE business_id = ?", businessID)
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?", userID, businessID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE user_id = ? AND business_id = ?", userID, businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employees WHERE id IN (?, ?, ?)", employeeID, peerEmployeeID, foreignEmployeeID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id IN (?, ?)", businessID, foreignBusinessID)
 	})
@@ -214,7 +212,7 @@ func TestGeneratedPerformanceListsPageAndPreserveOptionalFilters(t *testing.T) {
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_performance_review_goals WHERE business_id = ?", businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_performance_review_cycles WHERE business_id = ?", businessID)
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?", userID, businessID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE user_id = ? AND business_id = ?", userID, businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employees WHERE id IN (?, ?)", employeeID, otherEmployeeID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id = ?", businessID)
 	})

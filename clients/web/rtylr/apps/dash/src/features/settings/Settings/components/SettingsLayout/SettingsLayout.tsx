@@ -15,7 +15,7 @@ import {
 import { allFeaturesEnabled } from '@voxire/config';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
-import { isAdminOrOwner } from '../../../../../shared/utils/requireAdminOrOwner';
+import { canManageDash } from '../../../../../shared/utils/canManageDash';
 import {
   isAddonEnabled,
   type AddonData,
@@ -95,7 +95,7 @@ const SettingsLayout: React.FC = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useUserStore();
   const { data: addons = [] } = useAddons();
-  const canManageSettings = isAdminOrOwner(user);
+  const canManageSettings = canManageDash(user);
   const navGroups = getNavGroups(canManageSettings, addons, allFeaturesEnabled());
 
   return (

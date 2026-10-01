@@ -38,7 +38,7 @@ import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
-import { canFlowPermission, toFlowMemberRole } from '../shared/lib/roleUtils';
+import { canFlowPermission } from '../shared/lib/roleUtils';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useLifePreferences } from '../shared/lib/lifePreferences';
 import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
@@ -182,11 +182,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { data: businessName } = useFlowBusinessName();
   const { data: realtimeBusinessId } = useFlowBusinessId();
 
-  const canCreateProject = canFlowPermission(
-    authUser?.role,
-    'flow:projects:create',
-    effectiveAccess
-  );
+  const canCreateProject = canFlowPermission('flow:projects:create', effectiveAccess);
   const createProjectGateReason = canCreateProject ? '' : t('flow.shell.createNeedsRole');
 
   // Workspace-scoped routes are authoritative even when the workspace list
@@ -222,13 +218,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     const mapped: Member[] = teamMembers
       .filter((m) => m.isActive)
       .map((m) => {
-        const role = toFlowMemberRole(m.role);
         return {
           id: String(m.id),
           name: m.name,
           email: m.email,
           initials: initialsFromName(m.name),
-          role,
           capacity: capacityHours[String(m.id)],
         };
       });

@@ -256,20 +256,14 @@ const AppsSection: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useUserStore();
   const { data: apps = [] } = useApps();
-  const userApps = (user?.apps as string[] | undefined) ?? [];
   const effectiveAccess = user?.effectiveAccess;
-  const isOwner = effectiveAccess?.isOwner ?? (user?.role === 'owner' || user?.role === 'admin');
 
   const visible = apps.filter((a) => {
     if (!(a.key in APP_URLS)) return false;
     if (a.status !== 'active') return false;
-    if (effectiveAccess) {
-      return effectiveAccess.apps.some(
-        (app) => app.appId === a.key && app.licensed && app.hasAccess
-      );
-    }
-    if (isOwner) return userApps.length === 0 || userApps.includes(a.key);
-    return userApps.includes(a.key);
+    return Boolean(
+      effectiveAccess?.apps.some((app) => app.appId === a.key && app.licensed && app.hasAccess)
+    );
   });
 
   if (visible.length === 0) return null;
@@ -463,10 +457,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         pathname,
         search,
         businessName: user?.businessName,
-        role: user?.role,
-        apps: user?.apps,
+        apps: user?.effectiveAccess?.apps
+          .filter((app) => app.licensed && app.hasAccess)
+          .map((app) => app.appId),
       }),
-    [pathname, search, user?.apps, user?.businessName, user?.role]
+    [pathname, search, user?.businessName, user?.effectiveAccess]
   );
   const caretPageContext = React.useMemo(
     () =>
@@ -474,10 +469,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         pathname,
         search,
         businessName: user?.businessName,
-        role: user?.role,
-        apps: user?.apps,
+        apps: user?.effectiveAccess?.apps
+          .filter((app) => app.licensed && app.hasAccess)
+          .map((app) => app.appId),
       }),
-    [pathname, search, user?.apps, user?.businessName, user?.role]
+    [pathname, search, user?.businessName, user?.effectiveAccess]
   );
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);

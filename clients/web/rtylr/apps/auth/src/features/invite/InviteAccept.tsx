@@ -9,7 +9,6 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
 import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
 import type { InviteAcceptRequest } from '@voxire/voxie/common/auth/v1/types';
-import type { AppId } from '@voxire/types';
 import { isStrongPassword } from '../../shared/lib/validation';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'auth');
@@ -22,7 +21,7 @@ const InviteAccept: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
-  const [apps, setApps] = useState<string[]>([]);
+  const [licensedAppIds, setLicensedAppIds] = useState<string[]>([]);
   const [valid, setValid] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,7 +41,7 @@ const InviteAccept: React.FC = () => {
           setValid(true);
           setEmail(res.email || '');
           setFullName(res.fullName || '');
-          setApps(res.apps ?? []);
+          setLicensedAppIds(res.licensedAppIds ?? []);
         } else {
           setValid(false);
         }
@@ -116,12 +115,7 @@ const InviteAccept: React.FC = () => {
     );
   }
 
-  // Success, redirect to the app they were invited to, falling back to dash.
-  // Validate the first app is a known AppId before indexing APP_URLS - an
-  // empty/malformed apps array used to slip through `as AppId | undefined`.
-  const firstApp =
-    apps.length > 0 && (apps[0] as string) in APP_URLS ? (apps[0] as AppId) : undefined;
-  const signInHref = firstApp ? APP_URLS[firstApp] : APP_URLS.dash;
+  const signInHref = APP_URLS.dash;
 
   if (success) {
     return (
@@ -155,7 +149,7 @@ const InviteAccept: React.FC = () => {
       <HelmetContainer title={t('auth.invite.metaTitle')} />
       <AuthShell
         title={t('auth.invite.setPasswordTitle')}
-        subtitle={`You've been invited to join rtylr${apps.length > 0 ? ` (${apps.join(', ')})` : ''}${email ? ` as ${email}` : ''}.`}
+        subtitle={`You've been invited to join rtylr${licensedAppIds.length > 0 ? ` (${licensedAppIds.join(', ')})` : ''}${email ? ` as ${email}` : ''}.`}
       >
         <form
           onSubmit={(e) => {

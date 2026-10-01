@@ -19,12 +19,13 @@ import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
-  const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
   const search = useSearch({ from: '/layout/campaigns/email' });
   const campaignId = search.id;
   const isEditing = !!campaignId;
+  const canCreateCampaign = canCrmPermission('crm:campaigns:create');
+  const canManageCampaign = canCrmPermission('crm:campaigns:manage');
+  const canWriteCampaign = isEditing ? canManageCampaign : canCreateCampaign;
+  const canSendCampaigns = canCrmPermission('crm:campaigns:send');
   // Set after a create that could not be activated, so clicking "Save & activate"
   // again updates that campaign instead of creating a duplicate.
   const [createdId, setCreatedId] = useState<number | undefined>(undefined);
@@ -151,7 +152,7 @@ const EmailCampaign: React.FC = () => {
                 <Eye size={13} />
                 {t('crm.campaignEditor.preview')}
               </Button>
-              {canManageCampaigns && (
+              {canWriteCampaign && (
                 <Button
                   variant="outline"
                   onClick={() => handleSave(false)}
@@ -161,7 +162,7 @@ const EmailCampaign: React.FC = () => {
                   {pending ? 'Saving…' : 'Save draft'}
                 </Button>
               )}
-              {canSendCampaigns && (
+              {canWriteCampaign && canSendCampaigns && (
                 <Button
                   variant="primary"
                   onClick={() => handleSave(true)}

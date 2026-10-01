@@ -111,9 +111,8 @@ func (s *Service) workspaceRoleFor(ctx context.Context, workspaceID, userID int6
 	return role
 }
 
-// hubProfileBypasses reports whether the central Flow app permission permits
-// business-wide reporting visibility. It is intentionally not consulted by
-// project, workspace, or task resource checks.
+// hubProfileBypasses reports whether central Flow access permits business-wide
+// reporting visibility.
 func (s *Service) hubProfileBypasses(ctx context.Context, userID, businessID int64) bool {
 	if s.hubProfiles == nil {
 		return false
@@ -124,6 +123,9 @@ func (s *Service) hubProfileBypasses(ctx context.Context, userID, businessID int
 	}
 	if profile.EffectiveAccess == nil {
 		return false
+	}
+	if profile.EffectiveAccess.IsOwner || profile.EffectiveAccess.IsAdmin {
+		return true
 	}
 	for _, app := range profile.EffectiveAccess.Apps {
 		if app.AppID != "flow" {
@@ -138,10 +140,21 @@ func (s *Service) hubProfileBypasses(ctx context.Context, userID, businessID int
 	return false
 }
 
+func (s *Service) isBusinessAdministrator(ctx context.Context, userID, businessID int64) bool {
+	if s.hubProfiles == nil || userID <= 0 || businessID <= 0 {
+		return false
+	}
+	profile, err := s.hubProfiles.GetProfile(ctx, userID, businessID)
+	return err == nil && profile.EffectiveAccess != nil && (profile.EffectiveAccess.IsOwner || profile.EffectiveAccess.IsAdmin)
+}
+
 // RequireProjectRole reports whether userID holds at least minRole on a
 // project, returning domain.ErrUnauthorized when they do not. Flow project
 // membership and project scope are the only source of this authorization.
-func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, _ int64, minRole string) error {
+func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, businessID int64, minRole string) error {
+	if s.isBusinessAdministrator(ctx, userID, businessID) {
+		return nil
+	}
 	if domain.RoleAllows(s.projectRoleFor(ctx, projectID, userID), minRole) {
 		return nil
 	}
@@ -150,7 +163,10 @@ func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, _ i
 
 // RequireWorkspaceRole reports whether userID holds at least minRole on a
 // workspace, including the workspace owner who has no membership row.
-func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID, _ int64, minRole string) error {
+func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID, businessID int64, minRole string) error {
+	if s.isBusinessAdministrator(ctx, userID, businessID) {
+		return nil
+	}
 	if domain.RoleAllows(s.workspaceRoleFor(ctx, workspaceID, userID), minRole) {
 		return nil
 	}
@@ -164,6 +180,9 @@ func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID,
 func (s *Service) RequireTaskRole(ctx context.Context, taskID, userID, businessID int64, minRole string) error {
 	if taskID == 0 || userID == 0 {
 		return domain.ErrUnauthorized
+	}
+	if s.isBusinessAdministrator(ctx, userID, businessID) {
+		return nil
 	}
 	task, err := s.repo.GetTaskByID(ctx, taskID)
 	if err != nil {

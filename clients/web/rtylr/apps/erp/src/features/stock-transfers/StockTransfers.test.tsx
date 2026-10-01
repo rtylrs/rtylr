@@ -2,12 +2,13 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import StockTransfers from './StockTransfers';
 import { initTestI18n } from '../../shared/testing/i18n';
+import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   createTransfer: vi.fn(),
   updateTransferStatus: vi.fn(),
   useStockTransfers: vi.fn(),
-  role: 'admin' as string,
+  effectiveAccess: undefined as unknown,
   refetch: vi.fn(),
 }));
 
@@ -20,8 +21,21 @@ vi.mock('@voxire/components', () => ({
 }));
 
 vi.mock('@voxire/auth', () => ({
-  useUserStore: (select: (state: { user: { role: string } }) => unknown) =>
-    select({ user: { role: mocks.role } }),
+  useUserStore: Object.assign(
+    (
+      select: (state: { user: { effectiveAccess: unknown }; effectiveAccess: unknown }) => unknown
+    ) =>
+      select({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    {
+      getState: () => ({
+        user: { effectiveAccess: mocks.effectiveAccess },
+        effectiveAccess: mocks.effectiveAccess,
+      }),
+    }
+  ),
 }));
 
 vi.mock('./useStockTransfers', () => ({
@@ -72,11 +86,11 @@ describe('StockTransfers', () => {
       refetch: mocks.refetch,
     });
     mocks.refetch.mockReset();
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
   });
 
   it('hides the New Transfer action for an operator, who lacks erp:inventory:transfer', () => {
-    mocks.role = 'operator';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:inventory:view'] });
     render(<StockTransfers />);
 
     expect(screen.queryByRole('button', { name: 'New Transfer' })).not.toBeInTheDocument();
@@ -145,11 +159,13 @@ describe('StockTransfers empty state', () => {
       isError: false,
       refetch: mocks.refetch,
     });
-    mocks.role = 'admin';
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isOwner: true });
   });
 
-  it('shows the create action and opens the create form for a role with erp:inventory:transfer', () => {
-    mocks.role = 'admin';
+  it('shows the create action and opens the create form with inventory transfer permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', {
+      permissions: ['erp:inventory:transfer'],
+    });
     render(<StockTransfers />);
 
     const title = screen.getByText('No transfers');
@@ -163,8 +179,8 @@ describe('StockTransfers empty state', () => {
     expect(mocks.refetch).not.toHaveBeenCalled();
   });
 
-  it('falls back to Refresh for a role without erp:inventory:transfer', () => {
-    mocks.role = 'operator';
+  it('falls back to Refresh without inventory transfer permission', () => {
+    mocks.effectiveAccess = createEffectiveAccess('erp', { permissions: ['erp:inventory:view'] });
     render(<StockTransfers />);
 
     const title = screen.getByText('No transfers');

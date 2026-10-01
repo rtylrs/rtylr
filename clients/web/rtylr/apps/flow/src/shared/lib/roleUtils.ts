@@ -1,69 +1,38 @@
-import type { Member } from '../stores/flowStore';
+import { canEffectiveAccess } from '@voxire/permissions';
+import type { EffectiveAccess, PermissionKey } from '@voxire/types';
 import type { FlowProjectRole } from '../services/flowApi';
-import type { EffectiveAccess } from '@voxire/auth';
 
-/**
- * Two different role vocabularies live in this file and they are not
- * interchangeable:
- *
- * - `Member['role']` (owner|admin|member|viewer) is the business-wide team role.
- *   Workspace-level questions - managing the workspace, creating projects,
- *   inviting people - are answered with it.
- * - `FlowProjectRole` (admin|member|viewer) comes from `flow_project_members` and
- *   answers per-project questions. Editing and deleting inside a project are
- *   scoped to a single project, so they use this one.
- *
- * A company admin who is only a viewer on a project must not be able to edit its
- * tasks, which is why the two must stay separate.
- */
-
-/**
- * Returns the i18n key for a member role's display label. Role names are
- * user-facing copy, not business logic, so this hands back a translation key
- * rather than an English string - callers render it with `t(roleLabel(role))`.
- */
-export function roleLabel(role: Member['role']): string {
-  const keys: Record<Member['role'], string> = {
-    owner: 'common.roles.owner',
-    admin: 'common.roles.admin',
-    member: 'common.roles.member',
-    viewer: 'common.roles.viewer',
-  };
-  return keys[role];
+/** Flow-wide permissions use the server-resolved authorization document. */
+export function hasFlowPermission(
+  effectiveAccess: EffectiveAccess | null | undefined,
+  permission: PermissionKey
+): boolean {
+  return canEffectiveAccess(effectiveAccess, permission, 'flow');
 }
 
-/** Returns true if the role can manage workspace settings. */
-export function canManageWorkspace(role: Member['role']): boolean {
-  return role === 'owner' || role === 'admin';
+export function canFlowPermission(
+  permission: PermissionKey,
+  effectiveAccess: EffectiveAccess | null | undefined
+): boolean {
+  return hasFlowPermission(effectiveAccess, permission);
 }
 
-/** Returns true if the role can create projects. */
-export function canCreateProject(role: Member['role']): boolean {
-  return role === 'owner' || role === 'admin' || role === 'member';
-}
-
-/** Returns true if the project role can edit tasks in that project. */
+/** These helpers apply only to project-scoped collaborators. */
 export function canEditTask(role: FlowProjectRole): boolean {
   return role !== 'viewer';
 }
 
-/** Returns true if the project role can delete resources in that project. */
 export function canDelete(role: FlowProjectRole): boolean {
   return role === 'admin';
 }
 
-/** Project roles ordered most to least privileged. */
 const PROJECT_ROLE_RANK: Record<FlowProjectRole, number> = {
   admin: 0,
   member: 1,
   viewer: 2,
 };
 
-/**
- * Returns the least privileged of the given project roles, or undefined for an
- * empty list. Used to gate an action that spans several projects at once: the
- * user may only do it if they may do it everywhere it would apply.
- */
+/** Returns the least privileged role across a set of project collaborators. */
 export function mostRestrictiveProjectRole(roles: FlowProjectRole[]): FlowProjectRole | undefined {
   return roles.reduce<FlowProjectRole | undefined>(
     (lowest, role) =>
@@ -72,100 +41,11 @@ export function mostRestrictiveProjectRole(roles: FlowProjectRole[]): FlowProjec
   );
 }
 
-/** Whether the central effective-access result grants a Flow permission. */
-export function hasFlowPermission(
-  effectiveAccess: EffectiveAccess | null | undefined,
-  permission: string
-): boolean {
-  const flowAccess = effectiveAccess?.apps.find(
-    (app) => app.appId === 'flow' && app.licensed && app.hasAccess
-  );
-  return flowAccess?.permissions.some((value) => value === permission) ?? false;
-}
-
-/**
- * The Flow permissions that have a legacy business-role equivalent, and the
- * equivalent itself.
- *
- * Kept as an explicit map rather than a blanket "owner or admin" so the
- * fallback grants exactly what the pre-effective-access build granted:
- * `flow:projects:create` was open to members too, while managing settings and
- * the team was not.
- */
-export type FlowPermission = 'flow:settings:manage' | 'flow:team:manage' | 'flow:projects:create';
-
-const LEGACY_FLOW_PERMISSION: Record<FlowPermission, (role: Member['role']) => boolean> = {
-  'flow:settings:manage': canManageWorkspace,
-  'flow:team:manage': canManageWorkspace,
-  'flow:projects:create': canCreateProject,
-};
-
-/**
- * Whether the signed-in user holds a Flow permission, preferring the central
- * effective-access payload and falling back to the legacy business role while
- * that payload is not guaranteed to be sent.
- *
- * The fallback is load bearing, not defensive. `getMe` can still answer with a
- * `role` and no `effectiveAccess`, and reading that as "no access" denied
- * owners and admins project creation and the management settings sections
- * outright (#1025). This mirrors `canHrPermission` and `canCrmPermission`,
- * which kept their `can({ platformRole: role }, ...)` fallback for the same
- * reason.
- *
- * An absent role still denies: absent access data plus no role is no evidence
- * of anything.
- */
-export function canFlowPermission(
-  role: string | null | undefined,
-  permission: FlowPermission,
-  effectiveAccess: EffectiveAccess | null | undefined
-): boolean {
-  if (effectiveAccess) return hasFlowPermission(effectiveAccess, permission);
-  if (!role) return false;
-  return LEGACY_FLOW_PERMISSION[permission](toFlowMemberRole(role));
-}
-
-/** Returns true if the role can invite members. */
-export function canInviteMembers(role: Member['role']): boolean {
-  return role === 'owner' || role === 'admin';
-}
-
-/**
- * Maps a raw business-wide role string (as decoded from the auth token, or as
- * returned by the team API for a member) onto Flow's own `Member['role']`
- * vocabulary. Flow only understands owner/admin/member/viewer; a business type
- * that isn't Flow-shaped can hand back roles like `operator`, `staff`,
- * `billing`, `menu_manager` or `store_manager`.
- *
- * Roles Flow doesn't recognize default to `viewer`, not `member`: an
- * unrecognized role carries no evidence the holder should be able to create
- * projects or invite members, and `canCreateProject`/`canInviteMembers` both
- * read the result of this mapping, so the default is a real permission
- * decision, not a display fallback.
- */
-export function toFlowMemberRole(role: string): Member['role'] {
-  return role === 'owner' || role === 'admin' || role === 'member' || role === 'viewer'
-    ? role
-    : 'viewer';
-}
-
-/** Returns the numeric priority of a role (owner highest). */
-export function rolePriority(role: Member['role']): number {
-  const priorities: Record<Member['role'], number> = {
-    owner: 0,
-    admin: 1,
-    member: 2,
-    viewer: 3,
+export function projectRoleLabel(role: FlowProjectRole): string {
+  const labels: Record<FlowProjectRole, string> = {
+    admin: 'common.roles.admin',
+    member: 'common.roles.member',
+    viewer: 'common.roles.viewer',
   };
-  return priorities[role];
-}
-
-/** Sorts members by role priority (owners first). */
-export function sortMembersByRole(members: Member[]): Member[] {
-  return [...members].sort((a, b) => rolePriority(a.role) - rolePriority(b.role));
-}
-
-/** Returns members with a specific role. */
-export function membersByRole(members: Member[], role: Member['role']): Member[] {
-  return members.filter((m) => m.role === role);
+  return labels[role];
 }

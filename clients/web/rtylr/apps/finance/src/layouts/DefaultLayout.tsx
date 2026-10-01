@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@voxire/ui';
-import { signOut, useUserStore } from '@voxire/auth';
+import { parseEffectiveAccess, signOut, useUserStore } from '@voxire/auth';
 import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
@@ -250,7 +250,7 @@ const DefaultLayout: React.FC = () => {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const financeUser = useUserStore((s) => s.user);
   const setAuthUser = useUserStore((s) => s.setUser);
-  const role = useUserStore((s) => s.user?.role ?? s.role);
+  const effectiveAccess = financeUser?.effectiveAccess;
   const userId = Number(financeUser?.id) || 0;
   const userEmail = financeUser?.email || financeUser?.emailAddress || null;
   const userName = financeUser?.name || financeUser?.firstName || userEmail || 'User';
@@ -261,12 +261,11 @@ const DefaultLayout: React.FC = () => {
         .map((group) => ({
           ...group,
           items: group.items.filter(
-            (item) =>
-              !item.requiredPermission || canFinancePermission(role, item.requiredPermission)
+            (item) => !item.requiredPermission || canFinancePermission(item.requiredPermission)
           ),
         }))
         .filter((group) => group.items.length > 0),
-    [role]
+    [effectiveAccess]
   );
 
   useEffect(() => {
@@ -275,7 +274,15 @@ const DefaultLayout: React.FC = () => {
       .getMe({})
       .then((res) => {
         if (res?.id) {
-          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
+          setAuthUser({
+            id: String(res.id),
+            businessId: String(res.businessId),
+            name: res.fullName ?? '',
+            email: res.email ?? '',
+            businessName: res.businessName ?? '',
+            isConsoleAdmin: res.isConsoleAdmin,
+            effectiveAccess: parseEffectiveAccess(res.effectiveAccess) ?? undefined,
+          });
         }
       })
       .catch(() => undefined);

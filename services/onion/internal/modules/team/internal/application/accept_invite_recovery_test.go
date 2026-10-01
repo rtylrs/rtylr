@@ -143,16 +143,6 @@ func TestAcceptInviteActivatesInTheInviteBusinessNotTheMemberDefault(t *testing.
 		inviteBusinessID, userID); err != nil {
 		t.Fatalf("insert pending membership: %v", err)
 	}
-	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx,
-			`DELETE FROM user_app_permissions WHERE owner_id = ? AND user_id = ?`, testutil.OwnerID, userID)
-	})
-	if _, err := db.ExecContext(ctx,
-		`INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role) VALUES (?, ?, ?, '[]', 'staff')`,
-		inviteBusinessID, testutil.OwnerID, userID); err != nil {
-		t.Fatalf("insert app permission: %v", err)
-	}
-
 	if _, err := service.AcceptInvite(ctx, token, acceptInvitePassword); err != nil {
 		t.Fatalf("AcceptInvite: %v", err)
 	}

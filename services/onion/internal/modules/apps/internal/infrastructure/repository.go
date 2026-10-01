@@ -3,7 +3,6 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 
 	"github.com/voxire/onion/internal/modules/apps/internal/infrastructure/persistence/sqlc"
@@ -53,38 +52,4 @@ func (r *Repository) GetEnabledAddons(ctx context.Context, businessID int64) (ma
 		enabled[addonID] = true
 	}
 	return enabled, nil
-}
-
-// GetUserAllowedApps returns the list of app IDs a user has permission to access.
-// A missing permission row is an empty (and cacheable) result; a query or decode
-// failure is returned as an error so it is not cached as an empty catalogue.
-func (r *Repository) GetUserAllowedApps(ctx context.Context, businessID, userID int64) ([]string, error) {
-	// cross-schema read from user_app_permissions — app permissions are owned by another module
-	appsJSON, err := r.queries.GetUserAllowedAppsJSON(ctx, sqlc.GetUserAllowedAppsJSONParams{
-		UserID:     userID,
-		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
-		ID:         businessID,
-	})
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return []string{}, nil
-		}
-		logger.Ctx(ctx).Error("failed to query user allowed apps",
-			logger.Any("business_id", businessID),
-			logger.Any("user_id", userID),
-			logger.Error(err),
-		)
-		return []string{}, err
-	}
-
-	var apps []string
-	if jsonErr := json.Unmarshal(appsJSON, &apps); jsonErr != nil {
-		logger.Ctx(ctx).Warn("failed to unmarshal user allowed apps json",
-			logger.Any("business_id", businessID),
-			logger.Any("user_id", userID),
-			logger.Error(jsonErr),
-		)
-		return []string{}, jsonErr
-	}
-	return apps, nil
 }

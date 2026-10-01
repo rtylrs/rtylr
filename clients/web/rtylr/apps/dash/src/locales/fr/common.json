@@ -20,6 +20,25 @@
     "application": "Application",
     "permissions": "Permissions"
   },
+  "permissionProfiles": {
+    "title": "Profils d’autorisation",
+    "description": "Créez des profils d’accès par application et attribuez-les aux membres ou aux groupes.",
+    "new": "Nouveau profil",
+    "create": "Créer un profil d’autorisation",
+    "edit": "Modifier le profil d’autorisation",
+    "name": "Nom du profil",
+    "optionalDescription": "Description facultative du profil",
+    "assignedMembers": "{{count}} membres",
+    "permissionCount": "{{count}} permissions",
+    "highImpact": "Impact élevé",
+    "sensitive": "Sensible"
+  },
+  "permissionCatalog": {
+    "title": "Catalogue des autorisations",
+    "description": "Consultez les actions sur les ressources disponibles pour créer des profils d’autorisation.",
+    "loadErrorTitle": "Impossible de charger les autorisations",
+    "loadError": "Impossible de charger le catalogue des autorisations."
+  },
   "refresh": "Actualiser",
   "clearSearch": "Effacer la recherche",
   "clearFilters": "Effacer les filtres",

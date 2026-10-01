@@ -52,13 +52,6 @@ func financeReportsToolCanRead(authUser *authPkg.AuthUser) bool {
 	if authUser == nil || !authPkg.HasAppAccess(authUser, authorization.AppFinance) {
 		return false
 	}
-	if authPkg.LegacyAuthorizationMode() {
-		// The legacy compatibility helper treats any finance permission as a
-		// match. Keep the Caret boundary role-scoped so an ordinary legacy app
-		// member cannot use the tool as a report reader.
-		return authPkg.IsBusinessAdmin(authUser) ||
-			authPkg.HasAnyRole(authUser, "finance.viewer", "viewer", "finance.manager", "manager", "finance.admin", "admin", "owner", "console_admin")
-	}
 	return authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:reports:view")
 }
 

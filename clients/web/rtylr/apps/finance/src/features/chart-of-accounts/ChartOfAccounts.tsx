@@ -34,11 +34,10 @@ const ChartOfAccounts: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [newType, setNewType] = useState<(typeof ACCOUNT_TYPES)[number]>('asset');
   const [newCode, setNewCode] = useState('');
-  const role = useUserStore((state) => state.user?.role ?? state.role);
   // There is no dedicated chart-of-accounts resource in the permission matrix;
   // creating a ledger account is an accounts-management action, so it is
   // gated on the same 'finance:accounts' resource used for bank accounts.
-  const canCreateAccount = canFinancePermission(role, 'finance:accounts');
+  const canCreateAccount = canFinancePermission('finance:accounts:manage');
 
   const handleCreate = async (): Promise<void> => {
     if (!canCreateAccount) return;

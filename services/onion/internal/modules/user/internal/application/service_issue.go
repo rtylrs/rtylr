@@ -82,18 +82,6 @@ func (s *Service) CreateBusinessForUser(ctx context.Context, userID int64, busin
 		return err
 	}
 
-	// The owner's authorization row. Without it GetAuthorizationSnapshot finds
-	// nothing for the person who just created the business, EffectiveAccess.IsOwner
-	// stays false, and every requireHubPermission check answers 403 to them.
-	//
-	// Logged rather than fatal, matching the employee record above: the business
-	// and its owner exist and are usable through the legacy path, and failing
-	// creation at this point would leave a half-made business behind.
-	if err := s.repo.EnsureOwnerAuthorizationMembership(ctx, businessID, userID); err != nil {
-		logger.Ctx(ctx).Error("failed to write the owner authorization membership",
-			logger.Int("business_id", int(businessID)), logger.Int("user_id", int(userID)), logger.Error(err))
-	}
-
 	if err := s.repo.EnsureEmployeeForUser(ctx, userID, businessID, userID); err != nil {
 		logger.Ctx(ctx).Error("failed to create employee record for business owner",
 			logger.Int("owner_id", int(userID)), logger.Error(err))
@@ -162,22 +150,8 @@ func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTo
 		}
 	}
 
-	if claims.BusinessID > 0 {
-		// Re-read the role on every validation instead of trusting the JWT:
-		// a demoted member must not keep "admin" until the token expires.
-		if role, err := s.repo.GetUserRole(ctx, claims.BusinessID, claims.UserID); err == nil {
-			claims.Role = role
-		}
-	}
-
-	// console_admin is additive while the flag is set, but a stale claim from
-	// before a demotion must be cleared rather than carried forward.
 	if err == nil && user != nil {
-		if user.IsConsoleAdmin {
-			claims.Role = "console_admin"
-		} else if claims.Role == "console_admin" {
-			claims.Role = ""
-		}
+		claims.IsConsoleAdmin = user.IsConsoleAdmin
 	}
 
 	return user

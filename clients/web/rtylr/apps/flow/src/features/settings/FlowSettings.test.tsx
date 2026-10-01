@@ -4,27 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { EffectiveAccess } from '@voxire/types';
 
-// FlowSettings statically imports TimeSection, whose own import chain reaches
-// the app's real i18next bootstrap module (shared/services/i18next.ts), which
-// calls `.use(initReactI18next)` at import time - so this mock must keep the
-// real exports and only override useTranslation, unlike the simpler
-// object-literal mock other Flow tests use.
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>();
-  return {
-    ...actual,
-    useTranslation: () => ({ t: (key: string) => key }),
-  };
+  return { ...actual, useTranslation: () => ({ t: (key: string) => key }) };
 });
-
-vi.mock('@voxire/components', () => ({
-  HelmetContainer: () => null,
-}));
-
-vi.mock('sonner', () => ({
-  toast: { error: vi.fn(), success: vi.fn() },
-}));
-
+vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 vi.mock('@voxire/config', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@voxire/config')>();
   return {
@@ -33,18 +18,10 @@ vi.mock('@voxire/config', async (importOriginal) => {
     FLAG_KEYS: { APP_FLOW_PREVIEW_ROUTES: 'app.flow.previewRoutes' },
   };
 });
-
-// Same reason as the react-i18next mock above: TimeSection's import chain
-// (via WorkTypesSection -> useWorkDay) calls createOneKitClient at module
-// load time, so the real exports must survive alongside the unwrap override.
 vi.mock('@voxire/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@voxire/api')>();
-  return {
-    ...actual,
-    unwrap: () => Promise.resolve({}),
-  };
+  return { ...actual, unwrap: () => Promise.resolve({}) };
 });
-
 vi.mock('../../shared/services/flowApi', () => ({
   flowApi: {
     getUserSettings: () => Promise.resolve({}),
@@ -57,19 +34,16 @@ const flowTeamData = vi.hoisted(() => ({
     id: string;
     name: string;
     email: string;
-    role?: string;
-    apps?: string[];
-    isActive?: boolean;
+    memberType: string;
+    isOwner: boolean;
+    hasFlowAccess: boolean;
+    isActive: boolean;
   }>,
 }));
-const grantMutate = vi.hoisted(() => vi.fn());
-const deactivateMutate = vi.hoisted(() => vi.fn());
 vi.mock('../../shared/hooks/queries/useFlowTeam', () => ({
   useFlowTeam: () => ({ data: flowTeamData.data, isLoading: false }),
-  useFlowGrantAccess: () => ({ mutate: grantMutate, isPending: false }),
-  useFlowDeactivateMember: () => ({ mutate: deactivateMutate, isPending: false }),
+  useFlowDeactivateMember: () => ({ mutate: vi.fn(), isPending: false }),
 }));
-
 vi.mock('../../shared/hooks/queries/useFlowSubscription', () => ({
   useFlowSubscription: () => ({ data: undefined }),
   centsToDisplay: (cents: number) => `$${(cents / 100).toFixed(2)}`,
@@ -80,7 +54,6 @@ vi.mock('../../shared/hooks/queries/useFlowSubscription', () => ({
     nextMonthName: 'January',
   }),
 }));
-
 vi.mock('../../features/workspace-dashboard/useWorkspaces', () => ({
   useWorkspaces: () => ({ data: [], isLoading: false }),
   useCreateWorkspace: () => ({ mutate: vi.fn(), isPending: false }),
@@ -96,23 +69,14 @@ vi.mock('../../features/tasks/useLabels', () => ({
   useDeleteLabel: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
-// A mutable "cookie" the tests flip per role, decoded by FlowSettings' own
-// getRoleFromToken exactly as it would decode a real auth cookie.
-const tokenState = vi.hoisted(() => ({ token: null as string | null }));
-const authState = vi.hoisted(() => ({
-  effectiveAccess: undefined as EffectiveAccess | undefined,
-  // The legacy business role, which is all getMe sends when it does not send
-  // effectiveAccess. Kept separate so a test can present one without the other.
-  user: undefined as { role?: string } | undefined,
-}));
+const authState = vi.hoisted(() => ({ effectiveAccess: undefined as EffectiveAccess | undefined }));
 vi.mock('@voxire/auth', () => ({
-  getCookie: () => tokenState.token,
+  getCookie: () => undefined,
+  setCookie: vi.fn(),
+  getDefaultCookieDomain: () => undefined,
   useUserStore: (selector: (state: typeof authState) => unknown): unknown => selector(authState),
 }));
 
-// A mutable stand-in for `?section=...`. FlowSettings reads this via
-// settingsRouteApi.useSearch() - this is the exact hole #793 flagged: the
-// value is user-controlled and must be validated against the role gate.
 const searchState = vi.hoisted(() => ({ section: undefined as string | undefined }));
 vi.mock('@tanstack/react-router', () => ({
   getRouteApi: () => ({ useSearch: () => searchState }),
@@ -120,345 +84,145 @@ vi.mock('@tanstack/react-router', () => ({
 
 import FlowSettings, { TeamSection, LabelsSection } from './FlowSettings';
 
-function makeToken(role: string): string {
-  const payload = btoa(JSON.stringify({ role }));
-  return `header.${payload}.sig`;
-}
-
-function makeFlowAccess(permissions: EffectiveAccess['dashPermissions']): EffectiveAccess {
+function makeFlowAccess(
+  permissions: string[] = [],
+  flags: Partial<Pick<EffectiveAccess, 'isOwner' | 'isAdmin'>> = {}
+): EffectiveAccess {
   return {
     businessId: '10',
-    dashRole: 'admin',
-    dashRoleId: null,
     dashPermissions: [],
     subscribedApps: ['flow'],
-    licenses: [
-      {
-        appId: 'flow',
-        status: 'active',
-        source: 'explicit',
-        groupId: null,
-        grantedAt: '2026-01-01T00:00:00Z',
-        revokedAt: null,
-      },
-    ],
+    licenses: [],
     apps: [
       {
         appId: 'flow',
         licensed: true,
         hasAccess: true,
-        roleIds: [],
-        primaryRoleId: null,
-        displayRole: 'admin',
         permissions,
-        scopes: [],
+        permissionScopes: Object.fromEntries(permissions.map((permission) => [permission, []])),
         sources: ['explicit'],
-        permissionSources: {},
       },
     ],
-    isOwner: false,
-    isAdmin: true,
-    authorizationVersion: 2,
+    isOwner: flags.isOwner ?? false,
+    isAdmin: flags.isAdmin ?? false,
+    authorizationVersion: 1,
   };
 }
 
-function renderSettings() {
+function renderWith(component: React.ReactElement) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <FlowSettings />
-    </QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
 }
 
-function renderTeamSection() {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <TeamSection />
-    </QueryClientProvider>
-  );
-}
+beforeEach(() => {
+  flowTeamData.data = [];
+  labelsData.data = [];
+  createLabelMutate.mockClear();
+  searchState.section = undefined;
+  authState.effectiveAccess = undefined;
+});
 
-function renderLabelsSection() {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <LabelsSection />
-    </QueryClientProvider>
-  );
-}
-
-// #793 finding 2 & 3: TeamSection was listed unconditionally in the sidebar
-// (any role could grant/revoke Flow access), and `?section=workspaces` /
-// `?section=time` rendered role-gated sections for any role because
-// activeSection was never checked against the same gate that hides the tab.
-describe('FlowSettings section gating (#793)', () => {
-  beforeEach(() => {
-    flowTeamData.data = [];
-    grantMutate.mockClear();
-    deactivateMutate.mockClear();
-    searchState.section = undefined;
-    authState.effectiveAccess = undefined;
-    authState.user = undefined;
-  });
-
-  it('shows Team and Time in the sidebar for an admin, and no Workspaces', () => {
-    tokenState.token = makeToken('admin');
-    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
-    renderSettings();
+describe('Flow settings permissions', () => {
+  it('gives an administrator full access to management sections', () => {
+    authState.effectiveAccess = makeFlowAccess([], { isAdmin: true });
+    renderWith(<FlowSettings />);
 
     expect(screen.getByRole('button', { name: 'common.settings.team' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'flow.settings.time.section' })).toBeInTheDocument();
-    // Workspaces were removed from the product. The tab had no content
-    // component, so it rendered "This section is not yet available", and it
-    // was unshifted to position 0, which made that dead tab the default.
+    expect(screen.getByRole('button', { name: 'flow.settings.bin.section' })).toBeInTheDocument();
+  });
+
+  it('shows personal settings to members and gates business actions by permission', () => {
+    authState.effectiveAccess = makeFlowAccess(['flow:team:manage']);
+    renderWith(<FlowSettings />);
+
+    expect(screen.getByRole('button', { name: 'common.settings.team' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'flow.settings.time.section' })).toBeInTheDocument();
     expect(
-      screen.queryByRole('button', { name: 'flow.settings.workspaces.section' })
+      screen.queryByRole('button', { name: 'flow.settings.bin.section' })
     ).not.toBeInTheDocument();
   });
 
-  it('hides Team, Workspaces and Time from the sidebar for a plain member', () => {
-    tokenState.token = makeToken('member');
-    renderSettings();
-
+  it('keeps personal settings available when effective access is absent', () => {
+    renderWith(<FlowSettings />);
     expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'flow.settings.time.section' })).toBeInTheDocument();
     expect(
-      screen.queryByRole('button', { name: 'flow.settings.workspaces.section' })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'flow.settings.time.section' })
+      screen.queryByRole('button', { name: 'flow.settings.bin.section' })
     ).not.toBeInTheDocument();
   });
 
-  it('hides Team from an unrecognized business-wide role (operator/staff/etc.)', () => {
-    tokenState.token = makeToken('store_manager');
-    renderSettings();
-
-    expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
-  });
-
-  it('does not render WorkspacesSection for a member who reaches it via ?section=workspaces', () => {
-    tokenState.token = makeToken('member');
-    searchState.section = 'workspaces';
-    renderSettings();
-
-    expect(
-      screen.queryByRole('heading', { name: 'flow.settings.workspaces.section' })
-    ).not.toBeInTheDocument();
-  });
-
-  it('does not render TeamSection for a member who reaches it via ?section=team', () => {
-    tokenState.token = makeToken('member');
+  it('validates a requested section against the same effective permission gate', () => {
+    authState.effectiveAccess = makeFlowAccess([]);
     searchState.section = 'team';
-    renderSettings();
-
+    renderWith(<FlowSettings />);
     expect(
       screen.queryByRole('heading', { name: 'flow.settings.team.section' })
     ).not.toBeInTheDocument();
   });
 
-  // The positive case for ?section=workspaces is deliberately gone. #925 removed
-  // WorkspacesSection along with the workspace layer, and SECTION_CONTENT no
-  // longer maps the id, so an admin selecting Workspaces now falls through to
-  // PlaceholderSection. There is no heading to assert.
-  //
-  // The three sibling cases above still hold and are still worth keeping: the
-  // nav entry is still built for an admin and still withheld from a member, so
-  // the #793 gate itself is unchanged.
-  //
-  // Left alone on purpose: that nav entry is now dead, offering a Workspaces
-  // item that renders a placeholder. Removing it means changing buildSections
-  // and would break the two sibling assertions, so it belongs in its own change
-  // rather than in a test repair.
+  it('uses Notifications as the default section for both members and admins', () => {
+    authState.effectiveAccess = makeFlowAccess([], { isAdmin: true });
+    renderWith(<FlowSettings />);
+    expect(
+      screen.getByText('flow.settings.notifications.items.taskAssigned.label')
+    ).toBeInTheDocument();
+  });
 });
 
-// Flow team membership is read-only here. Dash owns app licenses and role
-// assignments, so these tests protect the boundary from accidental mutations.
-describe('TeamSection read-only boundary', () => {
-  beforeEach(() => {
+describe('Flow team section', () => {
+  it('shows only members with resolved Flow access and has no access mutation controls', () => {
     flowTeamData.data = [
-      { id: '1', name: 'Ada Lovelace', email: 'ada@example.com', apps: ['flow'], isActive: true },
+      {
+        id: '1',
+        name: 'Ada Lovelace',
+        email: 'ada@example.com',
+        memberType: 'member',
+        isOwner: false,
+        hasFlowAccess: true,
+        isActive: true,
+      },
+      {
+        id: '2',
+        name: 'Grace Hopper',
+        email: 'grace@example.com',
+        memberType: 'member',
+        isOwner: false,
+        hasFlowAccess: false,
+        isActive: true,
+      },
     ];
-    grantMutate.mockClear();
-    deactivateMutate.mockClear();
-    authState.effectiveAccess = undefined;
-  });
-
-  it('lists Flow members without mutation controls for a non-admin', () => {
-    tokenState.token = makeToken('member');
-    renderTeamSection();
+    renderWith(<TeamSection />);
 
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
-    expect(
-      // These two names no longer resolve to anything: e5d28904f removed the
-      // controls and the keys went with them in #1047. That is the point of
-      // the assertion, and the string is kept as the record of what must stay
-      // absent.
-      screen.queryByRole('button', { name: 'flow.settings.team.addMember' })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'flow.settings.team.removeMemberLabel' })
-    ).not.toBeInTheDocument();
-  });
-
-  it('keeps mutation controls absent for an admin as well', () => {
-    tokenState.token = makeToken('admin');
-    authState.effectiveAccess = makeFlowAccess(['flow:team:manage']);
-    renderTeamSection();
-
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.queryByText('Grace Hopper')).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'flow.settings.team.addMember' })
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'flow.settings.team.removeMemberLabel' })
-    ).not.toBeInTheDocument();
+  });
+
+  it('shows an empty state when no member has Flow access', () => {
+    flowTeamData.data = [
+      {
+        id: '2',
+        name: 'Grace Hopper',
+        email: 'grace@example.com',
+        memberType: 'member',
+        isOwner: false,
+        hasFlowAccess: false,
+        isActive: true,
+      },
+    ];
+    renderWith(<TeamSection />);
+    expect(screen.getByText('flow.settings.team.noMembersYet')).toBeInTheDocument();
   });
 });
 
-// The shared EmptyState (title + CTA) now covers both the team-member list
-// and the labels list when they have nothing to show.
-describe('TeamSection empty state', () => {
-  beforeEach(() => {
-    flowTeamData.data = [];
-    grantMutate.mockClear();
-    deactivateMutate.mockClear();
-    authState.effectiveAccess = undefined;
-  });
-
-  it('shows the empty title with a Refresh CTA for an admin', () => {
-    tokenState.token = makeToken('admin');
-    authState.effectiveAccess = makeFlowAccess(['flow:team:manage']);
-    renderTeamSection();
-
-    expect(screen.getByText('flow.settings.team.noMembersYet')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'flow.settings.team.refreshCta' })).toBeEnabled();
-  });
-
-  it('shows the empty title with a Refresh CTA for a non-admin', () => {
-    tokenState.token = makeToken('member');
-    renderTeamSection();
-
-    expect(screen.getByText('flow.settings.team.noMembersYet')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'flow.settings.team.addMember' })
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'flow.settings.team.refreshCta' })).toBeEnabled();
-  });
-});
-
-describe('LabelsSection empty state', () => {
-  beforeEach(() => {
-    labelsData.data = [];
-  });
-
-  it('shows the empty title with a CTA that focuses the new-label input', () => {
-    renderLabelsSection();
-
-    expect(screen.getByText('flow.settings.labels.emptyList')).toBeInTheDocument();
-    const button = screen.getByRole('button', { name: 'flow.settings.labels.newLabel' });
-    expect(button).toBeEnabled();
+describe('Labels section', () => {
+  it('focuses the new-label input from the empty-state action', () => {
+    renderWith(<LabelsSection />);
     const input = screen.getByPlaceholderText('flow.settings.labels.namePlaceholder');
-    fireEvent.click(button);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.settings.labels.newLabel' }));
     expect(input).toHaveFocus();
-  });
-});
-
-// #1025: getMe can answer with a role and no effectiveAccess. Reading that as
-// "no access" hid the management sections from the people who own the business.
-describe('FlowSettings gating on a legacy payload (#1025)', () => {
-  beforeEach(() => {
-    flowTeamData.data = [];
-    searchState.section = undefined;
-    authState.effectiveAccess = undefined;
-    authState.user = undefined;
-  });
-
-  it.each(['owner', 'admin'])(
-    'shows Team to %s when the payload carries no effective access',
-    (role) => {
-      authState.user = { role };
-      renderSettings();
-
-      expect(screen.getByRole('button', { name: 'common.settings.team' })).toBeInTheDocument();
-      // Workspaces no longer appears for any role, legacy payload included.
-      expect(
-        screen.queryByRole('button', { name: 'flow.settings.workspaces.section' })
-      ).not.toBeInTheDocument();
-    }
-  );
-
-  it('still hides them from a member on the same legacy payload', () => {
-    authState.user = { role: 'member' };
-    renderSettings();
-
-    expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'flow.settings.workspaces.section' })
-    ).not.toBeInTheDocument();
-  });
-
-  it('hides them when there is neither effective access nor a role', () => {
-    renderSettings();
-
-    expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
-  });
-
-  it('lets effective access override a privileged legacy role rather than widening it', () => {
-    authState.user = { role: 'owner' };
-    authState.effectiveAccess = makeFlowAccess(['flow:projects:view']);
-    renderSettings();
-
-    expect(screen.queryByRole('button', { name: 'common.settings.team' })).not.toBeInTheDocument();
-  });
-});
-
-describe('FlowSettings default section (#1092)', () => {
-  beforeEach(() => {
-    flowTeamData.data = [];
-    searchState.section = undefined;
-    authState.effectiveAccess = undefined;
-    authState.user = undefined;
-  });
-
-  it('opens on Notifications for an admin, not on the first role-gated tab', () => {
-    // Workspaces was unshifted to position 0 and the default was
-    // sections[0], so an admin opened Settings on a dead tab while a member
-    // opened it somewhere else entirely.
-    tokenState.token = makeToken('admin');
-    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
-    renderSettings();
-
-    expect(
-      screen.getByText('flow.settings.notifications.items.taskAssigned.label')
-    ).toBeInTheDocument();
-  });
-
-  it('opens on Notifications for a plain member too, so the landing screen is the same', () => {
-    tokenState.token = makeToken('member');
-    renderSettings();
-
-    expect(
-      screen.getByText('flow.settings.notifications.items.taskAssigned.label')
-    ).toBeInTheDocument();
-  });
-
-  it('never shows the not-available placeholder for the removed section', () => {
-    tokenState.token = makeToken('admin');
-    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
-    searchState.section = 'workspaces';
-    renderSettings();
-
-    expect(screen.queryByText('flow.settings.sectionNotAvailable')).not.toBeInTheDocument();
-  });
-
-  it('still honours a valid ?section for a role that can reach it', () => {
-    tokenState.token = makeToken('admin');
-    authState.effectiveAccess = makeFlowAccess(['flow:settings:manage', 'flow:team:manage']);
-    searchState.section = 'time';
-    renderSettings();
-
-    expect(screen.getByRole('button', { name: 'flow.settings.time.section' })).toBeInTheDocument();
   });
 });

@@ -31,14 +31,14 @@ function assertContractPayload(messageName: string, payload: Record<string, unkn
  * back as the string "undefined" and leave the user signed in to nothing, so
  * the absence is returned and each caller surfaces its own error instead.
  */
-function persistSession(login: (role: string) => void, token: string | undefined): boolean {
+function persistSession(login: () => void, token: string | undefined): boolean {
   if (token === undefined || token === '') return false;
   setCookie('token', token, {
     days: 30,
     sameSite: 'lax',
     domain: getDefaultCookieDomain(),
   });
-  login('');
+  login();
   return true;
 }
 

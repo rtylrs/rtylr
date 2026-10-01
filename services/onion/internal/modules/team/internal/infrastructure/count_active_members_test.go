@@ -37,15 +37,14 @@ func seedSeatOwner(t *testing.T, db *sql.DB) (ownerID, businessID int64) {
 	}
 
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_app_permissions WHERE owner_id = ?", ownerID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE business_id = ?", businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM businesses WHERE id = ?", businessID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", ownerID)
 	})
 	return ownerID, businessID
 }
 
-// insertTenantMember creates a user attached to the given business with the
-// permission row state "active", "inactive", or "none" and returns the user id.
+// insertTenantMember creates a user and optional normalized business membership.
 // Rows are removed on cleanup.
 func insertTenantMember(t *testing.T, db *sql.DB, businessID int64, permission string) int64 {
 	t.Helper()
@@ -65,24 +64,21 @@ func insertTenantMember(t *testing.T, db *sql.DB, businessID int64, permission s
 	}
 
 	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx, "DELETE FROM user_app_permissions WHERE user_id = ?", userID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM authorization_business_members WHERE user_id = ?", userID)
 		_, _ = db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", userID)
 	})
 
 	if permission == "none" {
 		return userID
 	}
-
-	var ownerID int64
-	if err := db.QueryRowContext(ctx, `SELECT owner_id FROM businesses WHERE id = ?`, businessID).Scan(&ownerID); err != nil {
-		t.Fatalf("read business owner: %v", err)
+	status := "active"
+	if permission == "inactive" {
+		status = "revoked"
 	}
-	active := permission == "active"
 	if _, err := db.ExecContext(ctx,
-		`INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
-		 VALUES (?, ?, ?, JSON_ARRAY(), 'staff', ?)`,
-		businessID, ownerID, userID, active); err != nil {
-		t.Fatalf("insert permission: %v", err)
+		`INSERT INTO authorization_business_members (business_id, user_id, member_type, status) VALUES (?, ?, 'member', ?)`,
+		businessID, userID, status); err != nil {
+		t.Fatalf("insert business membership: %v", err)
 	}
 	return userID
 }
@@ -115,7 +111,7 @@ func TestTeam_CountActiveMembers_DeactivatedMemberFreesSeat(t *testing.T) {
 		t.Fatalf("count with active member = %d, want %d", active, before+1)
 	}
 
-	if err := repo.DeactivateUser(ctx, ownerID, userID); err != nil {
+	if err := repo.DeactivateUser(ctx, businessID, ownerID, ownerID, userID); err != nil {
 		t.Fatalf("DeactivateUser: %v", err)
 	}
 
@@ -128,9 +124,8 @@ func TestTeam_CountActiveMembers_DeactivatedMemberFreesSeat(t *testing.T) {
 	}
 }
 
-// Attached users without a permission row predate the permission-table check and
-// must keep counting: only an explicitly inactive row removes a seat.
-func TestTeam_CountActiveMembers_AttachedUserWithoutPermissionRowStillCounts(t *testing.T) {
+// Users without a business-membership row do not occupy a business seat.
+func TestTeam_CountActiveMembers_UnprovisionedUserDoesNotCount(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -147,7 +142,7 @@ func TestTeam_CountActiveMembers_AttachedUserWithoutPermissionRowStillCounts(t *
 	if err != nil {
 		t.Fatalf("CountActiveMembers after: %v", err)
 	}
-	if after != before+1 {
-		t.Fatalf("count with attached permission-less member = %d, want %d", after, before+1)
+	if after != before {
+		t.Fatalf("count without membership = %d, want %d", after, before)
 	}
 }

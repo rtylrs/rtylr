@@ -7,39 +7,24 @@ import (
 	"testing"
 )
 
-// GrantBusinessAccess makes businessID a real, active business owned by the
-// first user given, and grants every user access to it. Rows are removed
-// afterwards.
-//
-// Needed because v2 handlers resolve the tenant through
-// tenant.ResolveBusinessID, and that check starts FROM the businesses table:
-//
-//	SELECT 1 FROM businesses b
-//	WHERE b.id = ? AND COALESCE(b.is_active, TRUE) = TRUE
-//	  AND (b.owner_id = ? OR EXISTS (SELECT 1 FROM user_business_access ...))
-//
-// So seeding user_business_access alone is not enough - with no businesses row
-// the query matches nothing, returns sql.ErrNoRows, and ResolveBusinessID maps
-// that to ErrNoBusinessScope. Callers turn that into a 403.
-//
-// That is the trap worth naming: the fixture business id every integration test
-// scopes by has never existed in the businesses table, so any handler resolving
-// the tenant is denied for a reason that has nothing to do with the permission
-// it is testing, and the error is indistinguishable from a real denial.
+// GrantBusinessAccess creates a business owned by the first user and adds the
+// remaining users as active members for tenant-resolution tests.
 func GrantBusinessAccess(tb testing.TB, db *sql.DB, businessID int64, userIDs ...int64) {
 	tb.Helper()
-
 	if len(userIDs) == 0 {
 		tb.Fatal("GrantBusinessAccess: need at least one user to own the business")
 	}
 
 	ctx := context.Background()
 	ownerID := userIDs[0]
-
-	// The business name must be unique per id: businesses.name has a UNIQUE key,
-	// and cleanup can fail on FK constraints, so a fixed name would make every
-	// later INSERT IGNORE for a different id silently match nothing and leave
-	// ResolveBusinessID denying with a 403.
+	for _, userID := range userIDs {
+		if _, err := db.ExecContext(ctx,
+			`INSERT IGNORE INTO users (id, email, password_hash, full_name) VALUES (?, ?, 'test', ?)`,
+			userID, fmt.Sprintf("integration-test-%d@test.local", userID), fmt.Sprintf("Integration Test User %d", userID),
+		); err != nil {
+			tb.Fatalf("seed users row (%d): %v", userID, err)
+		}
+	}
 	if _, err := db.ExecContext(ctx,
 		`INSERT IGNORE INTO businesses (id, name, owner_id) VALUES (?, ?, ?)`,
 		businessID, fmt.Sprintf("Integration Test Business %d", businessID), ownerID,
@@ -48,9 +33,11 @@ func GrantBusinessAccess(tb testing.TB, db *sql.DB, businessID int64, userIDs ..
 	}
 
 	for _, userID := range userIDs {
-		if _, err := db.ExecContext(ctx,
-			`INSERT IGNORE INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'owner')`,
-			userID, businessID,
+		if _, err := db.ExecContext(ctx, `
+			INSERT INTO authorization_business_members (business_id, user_id, member_type, status)
+			VALUES (?, ?, 'member', 'active')
+			ON DUPLICATE KEY UPDATE member_type = VALUES(member_type), status = 'active'`,
+			businessID, userID,
 		); err != nil {
 			tb.Fatalf("GrantBusinessAccess(%d, %d): %v", userID, businessID, err)
 		}
@@ -59,7 +46,7 @@ func GrantBusinessAccess(tb testing.TB, db *sql.DB, businessID int64, userIDs ..
 	tb.Cleanup(func() {
 		for _, userID := range userIDs {
 			_, _ = db.ExecContext(ctx,
-				`DELETE FROM user_business_access WHERE user_id = ? AND business_id = ?`,
+				`DELETE FROM authorization_business_members WHERE user_id = ? AND business_id = ?`,
 				userID, businessID,
 			)
 		}
@@ -67,28 +54,14 @@ func GrantBusinessAccess(tb testing.TB, db *sql.DB, businessID int64, userIDs ..
 	})
 }
 
-// EnsureBusiness makes businessID exist as an active business owned by ownerID
-// without registering a cleanup that deletes it. Use it for tests that only
-// need the shared fixture business to exist (FK targets, tenant resolution);
-// GrantBusinessAccess is for tests that own the business exclusively.
-//
-// The delete in GrantBusinessAccess can fail on FK constraints and is ignored,
-// which historically leaked fixture rows and broke later suites; not deleting
-// keeps the fixture stable for everything that follows.
+// EnsureBusiness ensures an active test business exists without registering
+// cleanup, because shared fixture businesses are referenced by other tests.
 func EnsureBusiness(tb testing.TB, db *sql.DB, businessID, ownerID int64) {
 	tb.Helper()
-
-	ctx := context.Background()
-	if _, err := db.ExecContext(ctx,
+	if _, err := db.ExecContext(context.Background(),
 		`INSERT IGNORE INTO businesses (id, name, owner_id) VALUES (?, ?, ?)`,
 		businessID, fmt.Sprintf("Integration Test Business %d", businessID), ownerID,
 	); err != nil {
 		tb.Fatalf("ensure businesses row (%d): %v", businessID, err)
-	}
-	if _, err := db.ExecContext(ctx,
-		`INSERT IGNORE INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'owner')`,
-		ownerID, businessID,
-	); err != nil {
-		tb.Fatalf("ensure business access (%d, %d): %v", ownerID, businessID, err)
 	}
 }

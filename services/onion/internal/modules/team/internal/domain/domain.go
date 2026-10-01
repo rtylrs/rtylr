@@ -8,15 +8,14 @@ import (
 )
 
 var (
-	ErrPermissionNotFound     = errors.New("user app permission not found")
-	ErrUserNotFound           = errors.New("user not found")
-	ErrTokenAlreadyUsed       = errors.New("invite token already used")
-	ErrTokenExpired           = errors.New("invite token expired")
-	ErrForbidden              = errors.New("permission denied")
-	ErrSeatLimitExceeded      = errors.New("subscription seat limit exceeded")
-	ErrGroupNotFound          = errors.New("group not found")
-	ErrInvalidPermissionLevel = errors.New("invalid group resource permission level")
-	ErrDelegationCeiling      = errors.New("authorization exceeds delegation ceiling")
+	ErrPermissionNotFound = errors.New("user app permission not found")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrTokenAlreadyUsed   = errors.New("invite token already used")
+	ErrTokenExpired       = errors.New("invite token expired")
+	ErrForbidden          = errors.New("permission denied")
+	ErrSeatLimitExceeded  = errors.New("subscription seat limit exceeded")
+	ErrGroupNotFound      = errors.New("group not found")
+	ErrDelegationCeiling  = errors.New("authorization exceeds delegation ceiling")
 )
 
 // ValidApps is the set of recognized app identifiers.
@@ -39,55 +38,28 @@ type MyProfile struct {
 	ID                 int64                             `json:"id"`
 	Email              string                            `json:"email"`
 	FullName           string                            `json:"full_name"`
-	Apps               []string                          `json:"apps"`
-	Role               string                            `json:"role"`
 	BusinessID         int64                             `json:"business_id"`
 	BusinessName       string                            `json:"business_name"`
-	IsOwner            bool                              `json:"is_owner"`
 	IsConsoleAdmin     bool                              `json:"is_console_admin"`
 	Onboarded          bool                              `json:"onboarded"`
 	PlanSlug           string                            `json:"plan_slug"`
 	SubscriptionStatus string                            `json:"subscription_status"`
-	EffectiveResources map[string]string                 `json:"effective_resources"`
 	EffectiveAccess    *authorization.EffectiveAccess    `json:"effective_access,omitempty"`
 	ProvisioningStatus *authorization.ProvisioningStatus `json:"provisioning_status,omitempty"`
 }
 
-type Role string
-
-const (
-	RoleOwner        Role = "owner"
-	RoleAdmin        Role = "admin"
-	RoleOperator     Role = "operator"
-	RoleBilling      Role = "billing"
-	RoleMenuManager  Role = "menu_manager"
-	RoleStoreManager Role = "store_manager"
-	RoleStaff        Role = "staff"
-	RoleViewer       Role = "viewer"
-)
-
-// UserAppPermission maps a staff user to a set of app IDs and a role for a given owner.
-type UserAppPermission struct {
-	ID        int64
-	OwnerID   int64
-	UserID    int64
-	Apps      []string
-	Role      Role
-	IsActive  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
 // StaffUser combines basic user info with their app permissions.
 type StaffUser struct {
-	ID        int64
-	Email     string
-	FullName  string
-	CreatedAt time.Time
-	Apps      []string
-	Role      Role
-	IsActive  bool
-	Groups    []GroupSummary
+	ID                           int64
+	MemberType                   string
+	Email                        string
+	FullName                     string
+	CreatedAt                    time.Time
+	LicensedAppIDs               []string
+	PermissionProfileAssignments []authorization.RoleAssignment
+	EffectiveAccess              *authorization.EffectiveAccess
+	IsActive                     bool
+	Groups                       []GroupSummary
 }
 
 // InviteToken is the authoritative binding carried by an outstanding
@@ -102,16 +74,15 @@ type InviteToken struct {
 }
 
 type InviteUserInput struct {
-	Email            string
-	Username         string
-	FullName         string
-	Password         string
-	Apps             []string
-	Role             Role
-	ProvisioningMode string
-	DashRole         string
-	AppAssignments   []AppRoleAssignmentInput
-	GroupIDs         []int64
+	Email                        string
+	MemberType                   string
+	LicensedAppIDs               []string
+	PermissionProfileAssignments []AppRoleAssignmentInput
+	Username                     string
+	FullName                     string
+	Password                     string
+	ProvisioningMode             string
+	GroupIDs                     []int64
 }
 
 type AppRoleAssignmentInput struct {
@@ -130,25 +101,12 @@ type AuthorizationRoleGrant struct {
 }
 
 type UpdatePermissionsInput struct {
-	UserID         int64
-	FullName       *string
-	Apps           *[]string
-	Role           Role
-	DashRole       string
-	AppAssignments []AppRoleAssignmentInput
-	GroupIDs       []int64
-}
-
-type PermissionLevel string
-
-const (
-	PermLevelViewer PermissionLevel = "viewer"
-	PermLevelEditor PermissionLevel = "editor"
-)
-
-type ResourcePermission struct {
-	ResourceKey     string
-	PermissionLevel PermissionLevel
+	UserID                       int64
+	MemberType                   string
+	LicensedAppIDs               *[]string
+	PermissionProfileAssignments *[]AppRoleAssignmentInput
+	FullName                     *string
+	GroupIDs                     *[]int64
 }
 
 type GroupSummary struct {
@@ -158,15 +116,17 @@ type GroupSummary struct {
 }
 
 type Group struct {
-	ID                  int64
-	OwnerID             int64
-	Name                string
-	Description         string
-	Color               string
-	ResourcePermissions []ResourcePermission
-	MemberCount         int
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	ID                           int64
+	OwnerID                      int64
+	BusinessID                   int64
+	Name                         string
+	Description                  string
+	Color                        string
+	LicensedAppIDs               []string
+	PermissionProfileAssignments []authorization.RoleAssignment
+	MemberCount                  int
+	CreatedAt                    time.Time
+	UpdatedAt                    time.Time
 }
 
 type GroupMember struct {
@@ -182,27 +142,29 @@ type GroupDetail struct {
 }
 
 type CreateGroupInput struct {
-	Name                string
-	Description         string
-	Color               string
-	ResourcePermissions []ResourcePermission
+	BusinessID                   int64
+	Name                         string
+	Description                  string
+	Color                        string
+	LicensedAppIDs               []string
+	PermissionProfileAssignments []AppRoleAssignmentInput
 }
 
 type UpdateGroupInput struct {
-	Name                string
-	Description         string
-	Color               string
-	ResourcePermissions []ResourcePermission
+	BusinessID                   int64
+	Name                         string
+	Description                  string
+	Color                        string
+	LicensedAppIDs               []string
+	PermissionProfileAssignments []AppRoleAssignmentInput
 }
 
 type BulkInviteInput struct {
-	Emails         []string
-	Role           Role
-	Apps           []string
-	DashRole       string
-	AppAssignments []AppRoleAssignmentInput
-	GroupIDs       []int64
-	GroupID        int64
+	Emails                       []string
+	MemberType                   string
+	LicensedAppIDs               []string
+	PermissionProfileAssignments []AppRoleAssignmentInput
+	GroupIDs                     []int64
 }
 
 type BulkInviteResult struct {
