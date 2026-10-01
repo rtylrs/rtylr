@@ -109,8 +109,17 @@ EOF
 }
 
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-if [[ -z "$repo_root" ]]; then
-  fail "$EXIT_LAYOUT" "not inside a git work tree; cannot locate the repository root"
+if [[ -z "$repo_root" || ! -f "$repo_root/voxie/onekit.toml" ]]; then
+  # Git hooks can export worktree variables that make nested commands report
+  # their invocation directory as the root. Resolve the monorepo by its
+  # contract manifest when that reported root does not contain the source.
+  repo_root="$PWD"
+  while [[ "$repo_root" != / && ! -f "$repo_root/voxie/onekit.toml" ]]; do
+    repo_root="$(dirname "$repo_root")"
+  done
+fi
+if [[ ! -f "$repo_root/voxie/onekit.toml" ]]; then
+  fail "$EXIT_LAYOUT" "not inside a git work tree or RTYLR checkout; cannot locate voxie/onekit.toml"
 fi
 
 voxie_dir="$repo_root/voxie"
