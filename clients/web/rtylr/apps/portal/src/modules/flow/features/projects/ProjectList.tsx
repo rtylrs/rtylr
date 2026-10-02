@@ -17,9 +17,7 @@ import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskC
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
-import { useCanEditTask } from '../../shared/lib/currentUser';
-import { useUserStore } from '../../shared/stores/userStore';
-import { canFlowPermission } from '../../shared/lib/roleUtils';
+import { useCanEditTask, useCanCreateTask } from '../../shared/lib/currentUser';
 import ProjectViewTabs from './ProjectViewTabs';
 
 interface StatusGroupDef {
@@ -190,9 +188,8 @@ export const StatusGroup: React.FC<{
 }> = ({ group, tasks, showCount = true }) => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
-  const canCreate = useUserStore((state) =>
-    canFlowPermission('flow:tasks:create', state.user?.effectiveAccess)
-  );
+  const { projectId } = useParams({ strict: false });
+  const canCreate = useCanCreateTask(projectId);
 
   return (
     <div className="mb-2">
@@ -259,9 +256,7 @@ const ProjectList: React.FC = () => {
   const { t } = useTranslation();
   const { projectId = '' } = useParams({ strict: false });
   const statusLabels = useStatusLabels();
-  const canCreate = useUserStore((state) =>
-    canFlowPermission('flow:tasks:create', state.user?.effectiveAccess)
-  );
+  const canCreate = useCanCreateTask(projectId);
   const STATUS_GROUPS: StatusGroupDef[] = useMemo(
     () => STATUS_GROUP_COLORS.map((def) => ({ ...def, label: statusLabels[def.id] })),
     [statusLabels]

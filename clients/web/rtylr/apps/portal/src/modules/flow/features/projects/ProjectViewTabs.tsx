@@ -13,9 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 import ProjectIcon from '../../shared/components/ProjectIcon';
-import { useUserStore } from '../../shared/stores/userStore';
-import { canFlowPermission } from '../../shared/lib/roleUtils';
-import { useCanAdministerProject } from '../../shared/lib/currentUser';
+import { useCanAdministerProject, useCanCreateTask } from '../../shared/lib/currentUser';
 
 interface ProjectViewTabsProps {
   project: { name: string; color: string; icon?: string };
@@ -111,9 +109,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
 }) => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
-  const canCreate = useUserStore((state) =>
-    canFlowPermission('flow:tasks:create', state.user?.effectiveAccess)
-  );
+  const canCreate = useCanCreateTask(projectId);
   const canAdminister = useCanAdministerProject(projectId);
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const visibleViews = VIEWS.filter((v) => !v.previewOnly || showPreviewRoutes);

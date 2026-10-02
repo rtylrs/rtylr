@@ -5,6 +5,7 @@ import ProjectViewTabs from './ProjectViewTabs';
 import { initTestI18n } from '../../shared/testing/i18n';
 const state = vi.hoisted(() => ({ pathname: '/flow/p/2', canAdminister: true, canCreate: true }));
 vi.mock('../../shared/lib/currentUser', () => ({
+  useCanCreateTask: () => state.canCreate,
   useCanAdministerProject: () => state.canAdminister,
 }));
 vi.mock('../../shared/stores/userStore', () => ({

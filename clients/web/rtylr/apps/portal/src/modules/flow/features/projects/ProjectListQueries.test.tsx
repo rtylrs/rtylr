@@ -25,6 +25,7 @@ vi.mock('@tanstack/react-router', () => ({
 }));
 vi.mock('../../shared/lib/currentUser', () => ({
   useCanEditTask: () => true,
+  useCanCreateTask: () => true,
   useCanAdministerProject: () => true,
 }));
 vi.mock('../../shared/stores/userStore', () => ({

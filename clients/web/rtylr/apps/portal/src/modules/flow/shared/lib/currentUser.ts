@@ -100,6 +100,12 @@ export function useMostRestrictiveProjectRole(projectIds: string[]): FlowProject
   return mostRestrictiveProjectRole(roles);
 }
 
+export function useCanCreateTask(projectId?: string): boolean {
+  const role = useCurrentProjectRole(projectId);
+  const access = useUserStore((state) => state.user?.effectiveAccess);
+  return canFlowPermission('flow:tasks:create', access) && role !== undefined && canEditTask(role);
+}
+
 /** Whether the current user can edit task fields (title, status, assignee, etc) in a project. */
 export function useCanEditTask(projectId?: string): boolean {
   const projectRole = useCurrentProjectRole(projectId);

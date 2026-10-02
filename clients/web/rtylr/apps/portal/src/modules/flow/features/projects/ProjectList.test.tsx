@@ -96,7 +96,9 @@ describe('Status label consistency (issue #756)', () => {
     const todoLabel = STATUS_LABEL_KEYS.todo;
 
     const { container: groupContainer } = render(
-      <StatusGroup group={{ id: 'todo', label: todoLabel, color: '#6b7280' }} tasks={[]} />
+      <QueryClientProvider client={new QueryClient()}>
+        <StatusGroup group={{ id: 'todo', label: todoLabel, color: '#6b7280' }} tasks={[]} />
+      </QueryClientProvider>
     );
     const { container: iconContainer } = render(<StatusIcon status="todo" showLabel />);
 

@@ -4,7 +4,13 @@ import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createEffectiveAccess } from '../../../../../../../test/effectiveAccess';
 import { useUserStore } from '../stores/userStore';
-import { useCanEditTask, useCanDeleteResource, isTaskMine, findProjectRole } from './currentUser';
+import {
+  useCanCreateTask,
+  useCanEditTask,
+  useCanDeleteResource,
+  isTaskMine,
+  findProjectRole,
+} from './currentUser';
 
 const mocks = vi.hoisted(() => ({ members: vi.fn(), project: vi.fn() }));
 vi.mock('../../features/projects/useProjectMembers', () => ({
@@ -122,5 +128,21 @@ describe('Flow authorization in Portal', () => {
         String(useUserStore.getState().user?.id)
       )
     ).toBe('viewer');
+  });
+});
+
+describe('Flow project task creation', () => {
+  it.each(['member', 'viewer'])('requires a writable project role for %s', (role) => {
+    mocks.members.mockReturnValue([{ userId: '7', role }]);
+    useUserStore.setState({
+      user: {
+        id: 7,
+        effectiveAccess: createEffectiveAccess('flow', {
+          permissions: ['flow:tasks:create', 'flow:projects:view'],
+        }),
+      },
+    });
+    const { result } = renderHook(() => useCanCreateTask('p1'), { wrapper });
+    expect(result.current).toBe(role === 'member');
   });
 });

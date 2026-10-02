@@ -29,7 +29,11 @@ import {
   type ColumnRect,
 } from './boardDrag';
 import { useCurrentProject } from './useCurrentProject';
-import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
+import {
+  useCanEditTask,
+  useCanCreateTask,
+  useCanDeleteResource,
+} from '../../shared/lib/currentUser';
 import BoardSettingsPanel from './components/BoardSettingsPanel';
 import StatusSettingsPanel from './components/StatusSettingsPanel';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
@@ -189,6 +193,7 @@ const ProjectBoard: React.FC = () => {
   } = useCurrentProject(projectId);
   const moveTask = useMoveTaskToColumn();
   const canEdit = useCanEditTask(projectId);
+  const canCreate = useCanCreateTask(projectId);
   // "Manage project" for board setup. A viewer still opens the panel and sees
   // why it is read-only, rather than the board's behaviour being unexplainable.
   const canManageBoard = useCanDeleteResource(projectId);
@@ -407,15 +412,17 @@ const ProjectBoard: React.FC = () => {
         rightSlot={
           <div className="flex items-center gap-1.5">
             <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
-            <button
-              type="button"
-              onClick={() => setStatusSettingsOpen(true)}
-              aria-label={t('flow.status.openSettings')}
-              className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <ListChecks size={14} aria-hidden="true" />
-            </button>
+            {canManageBoard && (
+              <button
+                type="button"
+                onClick={() => setStatusSettingsOpen(true)}
+                aria-label={t('flow.status.openSettings')}
+                className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                <ListChecks size={14} aria-hidden="true" />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setBoardSettingsOpen(true)}
@@ -460,6 +467,8 @@ const ProjectBoard: React.FC = () => {
               isOver={dragOver === String(col.id)}
               selectedTaskIds={selectedTaskIds}
               canEdit={canEdit}
+              canCreate={canCreate}
+              canManage={canManageBoard}
               draggingTaskId={draggingTaskId}
               moveTargets={moveTargets}
               registerRef={(el) => columnRefs.current.set(String(col.id), el)}
@@ -482,59 +491,64 @@ const ProjectBoard: React.FC = () => {
           ))}
 
           {/* Add column */}
-          <div className="w-[248px] shrink-0">
-            {addingColumn ? (
-              <div
-                className="rounded-md p-2"
-                style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
-              >
-                <input
-                  autoFocus
-                  value={newColumnName}
-                  onChange={(e) => setNewColumnName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAddColumn();
-                    if (e.key === 'Escape') setAddingColumn(false);
-                  }}
-                  placeholder={t('flow.board.columnName')}
-                  className="w-full bg-transparent text-flow-meta font-medium mb-1.5"
-                  style={{ color: 'var(--flow-text)' }}
-                />
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={handleAddColumn}
-                    disabled={!newColumnName.trim() || createColumn.isPending}
-                    className="h-6 px-2.5 rounded-sm text-flow-meta font-semibold disabled:opacity-40"
-                    style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
-                  >
-                    {t('flow.taskDetail.add')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAddingColumn(false)}
-                    className="h-6 px-2 rounded-sm text-flow-meta hover:bg-[var(--flow-hover)]"
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    {t('flowCommon.cancel')}
-                  </button>
+          {canManageBoard && (
+            <div className="w-[248px] shrink-0">
+              {addingColumn ? (
+                <div
+                  className="rounded-md p-2"
+                  style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+                >
+                  <input
+                    autoFocus
+                    value={newColumnName}
+                    onChange={(e) => setNewColumnName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddColumn();
+                      if (e.key === 'Escape') setAddingColumn(false);
+                    }}
+                    placeholder={t('flow.board.columnName')}
+                    className="w-full bg-transparent text-flow-meta font-medium mb-1.5"
+                    style={{ color: 'var(--flow-text)' }}
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handleAddColumn}
+                      disabled={!newColumnName.trim() || createColumn.isPending}
+                      className="h-6 px-2.5 rounded-sm text-flow-meta font-semibold disabled:opacity-40"
+                      style={{
+                        background: 'var(--flow-action-bg)',
+                        color: 'var(--flow-on-accent)',
+                      }}
+                    >
+                      {t('flow.taskDetail.add')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAddingColumn(false)}
+                      className="h-6 px-2 rounded-sm text-flow-meta hover:bg-[var(--flow-hover)]"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {t('flowCommon.cancel')}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setAddingColumn(true)}
-                className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-flow-meta transition-colors hover:bg-[var(--flow-hover)]"
-                style={{
-                  color: 'var(--flow-text-dim)',
-                  border: '1px dashed var(--flow-border)',
-                }}
-              >
-                <Plus size={12} />
-                {t('flow.board.addColumn')}
-              </button>
-            )}
-          </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAddingColumn(true)}
+                  className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-flow-meta transition-colors hover:bg-[var(--flow-hover)]"
+                  style={{
+                    color: 'var(--flow-text-dim)',
+                    border: '1px dashed var(--flow-border)',
+                  }}
+                >
+                  <Plus size={12} />
+                  {t('flow.board.addColumn')}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
       <ConfirmDialog
@@ -571,6 +585,8 @@ const KanbanColumn: React.FC<{
   isOver: boolean;
   selectedTaskIds: string[];
   canEdit: boolean;
+  canCreate: boolean;
+  canManage: boolean;
   draggingTaskId: string | null;
   moveTargets: readonly MoveTarget[];
   registerRef: (el: HTMLDivElement | null) => void;
@@ -589,6 +605,8 @@ const KanbanColumn: React.FC<{
   isOver,
   selectedTaskIds,
   canEdit,
+  canCreate,
+  canManage,
   draggingTaskId,
   moveTargets,
   registerRef,
@@ -688,6 +706,7 @@ const KanbanColumn: React.FC<{
         ) : (
           <button
             type="button"
+            disabled={!canManage}
             onClick={() => setEditing(true)}
             className="flex-1 text-start text-flow-meta font-semibold truncate hover:opacity-70 transition-opacity"
             style={{ color: 'var(--flow-text)' }}
@@ -706,19 +725,21 @@ const KanbanColumn: React.FC<{
         {/* Actions (visible on header hover). Add is not among them any more: it
             lives in the persistent row below, because a hover-only control is
             unreachable on a touch screen and this one was 20px besides. */}
-        <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
-          <button
-            type="button"
-            onClick={onDelete}
-            // hover:text-red-400 was a Tailwind palette colour on a screen whose
-            // every other colour is a token, and it does not follow the theme.
-            className="flow-focus flex h-11 w-11 items-center justify-center rounded-sm text-[var(--flow-text-dim)] hover:bg-[var(--flow-hover)] hover:text-[var(--flow-danger-fg)] md:h-6 md:w-6"
-            title={t('flow.board.deleteColumnLabel')}
-            aria-label={t('flow.board.deleteColumnLabel')}
-          >
-            <Trash2 size={11} />
-          </button>
-        </div>
+        {canManage && (
+          <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
+            <button
+              type="button"
+              onClick={onDelete}
+              // hover:text-red-400 was a Tailwind palette colour on a screen whose
+              // every other colour is a token, and it does not follow the theme.
+              className="flow-focus flex h-11 w-11 items-center justify-center rounded-sm text-[var(--flow-text-dim)] hover:bg-[var(--flow-hover)] hover:text-[var(--flow-danger-fg)] md:h-6 md:w-6"
+              title={t('flow.board.deleteColumnLabel')}
+              aria-label={t('flow.board.deleteColumnLabel')}
+            >
+              <Trash2 size={11} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Add task, directly under the header and on every column.
@@ -727,16 +748,18 @@ const KanbanColumn: React.FC<{
           alternative in the header was hover-only at 20px, which a touch screen
           cannot reach at all (rtylr#1078, Asana rule 1.2). 32px on a pointer,
           44px where a finger has to hit it. */}
-      <button
-        type="button"
-        onClick={onAddTask}
-        aria-label={t('flow.board.addTaskLabel')}
-        className="flow-focus mb-1.5 flex min-h-11 w-full items-center gap-1.5 rounded-md px-1.5 text-flow-meta font-medium transition-colors hover:bg-[var(--flow-hover)] md:min-h-8"
-        style={{ color: 'var(--flow-text-muted)' }}
-      >
-        <Plus size={12} />
-        {t('flow.board.addTask')}
-      </button>
+      {canCreate && (
+        <button
+          type="button"
+          onClick={onAddTask}
+          aria-label={t('flow.board.addTaskLabel')}
+          className="flow-focus mb-1.5 flex min-h-11 w-full items-center gap-1.5 rounded-md px-1.5 text-flow-meta font-medium transition-colors hover:bg-[var(--flow-hover)] md:min-h-8"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          <Plus size={12} />
+          {t('flow.board.addTask')}
+        </button>
+      )}
 
       {/* Cards */}
       <div className="flex flex-col gap-1.5 flex-1 min-h-[80px] overflow-y-auto">
