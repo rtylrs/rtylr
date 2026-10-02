@@ -51,7 +51,8 @@ export default function SettingsNavigation({
               {items.map((item) => (
                 <div key={item.path}>
                   <PortalNavLink
-                    {...item}
+                    path={item.path}
+                    icon={item.icon}
                     label={t(`common.nav.${item.key}`)}
                     onNavigate={onNavigate}
                   />

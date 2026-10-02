@@ -65,13 +65,13 @@ const MyIssues: React.FC = () => {
           <h1 className="text-flow-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.shell.myTasks')}
           </h1>
-          <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-            {isLoading
-              ? t('flow.myIssues.loading')
-              : loadFailed
-                ? t('flow.loadFailed.title')
+          {!loadFailed && (
+            <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+              {isLoading
+                ? t('flow.myIssues.loading')
                 : t('flow.myIssues.taskCount', { count: tasks.length })}
-          </p>
+            </p>
+          )}
         </div>
         {canCreate && (
           <Button onClick={() => setQuickCreateOpen(true)}>

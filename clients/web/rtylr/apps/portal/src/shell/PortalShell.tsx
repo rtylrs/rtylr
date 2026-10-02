@@ -226,7 +226,8 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         ) : (
           nav.map((item) => (
             <PortalNavLink
-              {...item}
+              path={item.path}
+              icon={item.icon}
               key={item.path}
               tourId={mobile ? undefined : item.key}
               label={t(`common.nav.${item.key}`)}
