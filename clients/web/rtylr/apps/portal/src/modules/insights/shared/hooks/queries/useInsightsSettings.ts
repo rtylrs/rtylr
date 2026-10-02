@@ -20,6 +20,8 @@ const reportClient = createOneKitClient(ReportServiceClient, 'insights');
 const DEFAULT_API_SETTINGS: ApiInsightsSettings = {
   defaultPeriod: '',
   currency: 'USD',
+  fiscalYearStart: '01-01',
+  timezone: 'UTC',
   comparePrevious: false,
   dashboardWidgets: [],
   favoriteReports: [],
@@ -32,10 +34,8 @@ function fromApiSettings(settings: ApiInsightsSettings): InsightsSettingsRespons
     comparePrevious: settings.comparePrevious ?? false,
     dashboardWidgets: settings.dashboardWidgets ?? [],
     favoriteReports: settings.favoriteReports ?? [],
-    // insights.setting.v1.InsightsSettings has no fiscal-year-start or
-    // timezone field - these are UI-only and never persisted server-side.
-    fiscalYearStart: '01-01',
-    timezone: 'UTC',
+    fiscalYearStart: settings.fiscalYearStart || '01-01',
+    timezone: settings.timezone || 'UTC',
   };
 }
 
@@ -82,6 +82,11 @@ export const useUpdateInsightsSettings = (): UseMutationResult<
             data.defaultPeriod ?? current?.defaultPeriod ?? DEFAULT_API_SETTINGS.defaultPeriod,
           currency:
             data.defaultCurrency ?? current?.defaultCurrency ?? DEFAULT_API_SETTINGS.currency,
+          fiscalYearStart:
+            data.fiscalYearStart ??
+            current?.fiscalYearStart ??
+            DEFAULT_API_SETTINGS.fiscalYearStart,
+          timezone: data.timezone ?? current?.timezone ?? DEFAULT_API_SETTINGS.timezone,
           comparePrevious:
             data.comparePrevious ??
             current?.comparePrevious ??
@@ -96,13 +101,10 @@ export const useUpdateInsightsSettings = (): UseMutationResult<
             DEFAULT_API_SETTINGS.favoriteReports,
         },
       });
-      return {
-        ...fromApiSettings(res.settings ?? DEFAULT_API_SETTINGS),
-        fiscalYearStart: data.fiscalYearStart ?? current?.fiscalYearStart ?? '01-01',
-        timezone: data.timezone ?? current?.timezone ?? 'UTC',
-      };
+      return fromApiSettings(res.settings ?? DEFAULT_API_SETTINGS);
     },
-    onSuccess: (): void => {
+    onSuccess: (settings): void => {
+      qc.setQueryData(['insights-settings'], settings);
       void qc.invalidateQueries({ queryKey: ['insights-settings'] });
       toast.success(t('insights.settings.saved'));
     },

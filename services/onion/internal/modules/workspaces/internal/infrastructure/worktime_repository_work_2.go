@@ -166,3 +166,50 @@ func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, bus
 	}
 	return days, total, nil
 }
+
+// ListTeamWorkDays resolves user-keyed and HR-keyed days within one business.
+// A nil roster is reserved for the application's business-wide visibility gate.
+func (r *Repository) ListTeamWorkDays(ctx context.Context, businessID int64, userIDs []int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
+	fromDate, err := parseDate(from)
+	if err != nil {
+		return nil, 0, err
+	}
+	toDate, err := parseDate(to)
+	if err != nil {
+		return nil, 0, err
+	}
+	includeAll := userIDs == nil
+	if len(userIDs) == 0 {
+		if !includeAll {
+			return []domain.WorkDay{}, 0, nil
+		}
+		userIDs = []int64{-1}
+	}
+	hrUserIDs := make([]sql.NullInt64, 0, len(userIDs))
+	for _, id := range userIDs {
+		hrUserIDs = append(hrUserIDs, sql.NullInt64{Int64: id, Valid: true})
+	}
+	rows, err := r.queries.ListTeamWorkDaysV2(ctx, sqlc.ListTeamWorkDaysV2Params{
+		BusinessID: businessID, IncludeAll: includeAll, UserIds: userIDs, HrUserIds: hrUserIDs,
+		FromDate: fromDate, ToDate: toDate, Limit: limit, Offset: int32(offset),
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	days := make([]domain.WorkDay, 0, len(rows))
+	for _, row := range rows {
+		day := toDomainWorkDay(sqlc.FlowWorkDay{
+			ID: row.ID, EmployeeID: row.EmployeeID, Date: row.Date, Timezone: row.Timezone,
+			WorkMode: row.WorkMode, StartTime: row.StartTime, EndTime: row.EndTime, BreakMinutes: row.BreakMinutes,
+			Status: row.Status, LoggedBy: row.LoggedBy, ApprovedBy: row.ApprovedBy, ApprovedAt: row.ApprovedAt,
+			ReopenedBy: row.ReopenedBy, ReopenedAt: row.ReopenedAt, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
+		})
+		day.UserID = sumToInt64(row.UserID)
+		days = append(days, day)
+	}
+	total, err := r.queries.CountTeamWorkDaysV2(ctx, sqlc.CountTeamWorkDaysV2Params{
+		BusinessID: businessID, IncludeAll: includeAll, UserIds: userIDs, HrUserIds: hrUserIDs,
+		FromDate: fromDate, ToDate: toDate,
+	})
+	return days, total, err
+}

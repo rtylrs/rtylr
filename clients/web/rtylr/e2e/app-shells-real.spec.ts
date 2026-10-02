@@ -21,7 +21,7 @@ const OWNER_PASSWORD = process.env.REAL_OWNER_PASSWORD;
 const APPS = [
   { name: 'portal', grant: 'dash', url: process.env.REAL_PORTAL_URL ?? 'http://localhost:5175' },
   { name: 'crm', url: process.env.REAL_CRM_URL ?? 'http://localhost:5181' },
-  { name: 'flow', url: process.env.REAL_FLOW_URL ?? 'http://localhost:5183' },
+  { name: 'flow', url: process.env.REAL_FLOW_URL ?? 'http://localhost:5175/flow' },
   { name: 'hr', url: process.env.REAL_HR_URL ?? 'http://localhost:5180' },
   { name: 'erp', url: process.env.REAL_ERP_URL ?? 'http://localhost:5179' },
   { name: 'finance', url: process.env.REAL_FINANCE_URL ?? 'http://localhost:5182' },

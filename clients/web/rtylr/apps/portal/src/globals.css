@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '../../../../../packages/tailwind-config/theme.css';
 @import './shared/components/dash/management.css';
+@import './modules/flow/globals.css';
 
 /* Include shared components in Tailwind's source discovery. */
 @source '../../../../../packages/**/*.{ts,tsx}';

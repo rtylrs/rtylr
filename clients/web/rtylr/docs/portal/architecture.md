@@ -36,8 +36,11 @@ rejected. The existing `.rtylr.com` auth cookie spans SSO and Portal.
 
 ## Moving the next app
 
-Home and Insights now use the shared Portal entry point. Insights keeps its
-page selector in a top header; its routes live under `/insights`. Flow, ERP, HR,
+Home, Insights and Flow now use the shared Portal entry point. Insights keeps its
+page selector in a top header; its routes live under `/insights`. Flow has native
+`/flow` routes, its own navigation and the shared launcher, Caret, business and
+account context. Personal and app settings share `/settings`, including
+`/settings/flow` and `/settings/insights`. ERP, HR,
 CRM, Finance and web POS still open their standalone frontends in another tab.
 Menu and Recruit are setup and public products rather than workspace app entries.
 No standalone frontend is embedded in an iframe.
@@ -57,6 +60,8 @@ Business subdomains are a later routing feature and are not enabled here.
 2. Promote the source release's Portal build through `tryrtylr/deploy` and verify it.
 3. Enable the Dash-to-Portal and Insights-to-Portal edge rules, then retire their
    standalone deployment manifests. Insights deep links map beneath `/insights`.
+   Flow moves with the same order: deploy Portal first, redirect Flow links beneath
+   `/flow`, then retire its Pages project and deployment manifest.
 4. Promote Auth and shared-URL consumers, including Onion's generated email links.
 
 Do not activate the Dash redirect before Portal is deployed and reachable.

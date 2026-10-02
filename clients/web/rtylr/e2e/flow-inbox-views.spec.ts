@@ -1,10 +1,11 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Route } from './fixtures';
 
 /**
  * Flow Inbox, Views, My Issues, Today, Archive, Backlog & Settings E2E Specs
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 const FAKE_USER = {
@@ -12,8 +13,7 @@ const FAKE_USER = {
   email: 'owner@test.local',
   full_name: 'Test Owner',
   business_id: '1',
-  role: 'owner',
-  apps: ['flow'],
+  ...flowAuthFields('owner'),
 };
 
 const FAKE_NOTIFICATIONS = [
@@ -148,7 +148,7 @@ test.describe('Flow - Inbox & Features Sweep', () => {
   });
 
   test('settings page renders all sections', async ({ page }) => {
-    await page.goto(`${FLOW_URL}/settings`);
+    await page.goto(`${FLOW_URL.replace(/\/flow$/, '')}/settings/flow`);
     await page.waitForLoadState('networkidle');
 
     await expect(

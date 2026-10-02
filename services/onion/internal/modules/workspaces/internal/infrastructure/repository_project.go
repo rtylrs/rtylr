@@ -47,9 +47,18 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		priority = "none"
 	}
 
+	if input.Status == "" {
+		input.Status = domain.TaskStatusTodo
+	}
+
 	var estHours sql.NullString
 	if input.EstimatedHours != nil {
 		estHours = sql.NullString{String: strconv.FormatFloat(*input.EstimatedHours, 'f', 2, 64), Valid: true}
+	}
+
+	var effortMinutes sql.NullInt32
+	if input.EffortMinutes != nil && *input.EffortMinutes > 0 {
+		effortMinutes = sql.NullInt32{Int32: *input.EffortMinutes, Valid: true}
 	}
 
 	res, err := r.queries.CreateTask(ctx, sqlc.CreateTaskParams{
@@ -67,6 +76,10 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		StartDate:      nullTimePtrToSql(input.StartDate),
 		EstimatedHours: estHours,
 		Labels:         labelsJSON,
+		Status:         sqlc.NullFlowTasksStatus{FlowTasksStatus: sqlc.FlowTasksStatus(input.Status), Valid: true},
+		EffortMinutes:  effortMinutes,
+		InitialStatus:  input.Status,
+		SectionID:      nullInt64Ptr(input.SectionID),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateTask failed", logger.Error(err))

@@ -1,3 +1,4 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Route } from './fixtures';
 import { captureResponsivePair } from './support/screenshot';
 
@@ -19,7 +20,7 @@ import { captureResponsivePair } from './support/screenshot';
  * a user can see, and the two screens changed in rtylr#1077 and rtylr#1215 are
  * both behind the guard.
  */
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 const FAKE_USER = {
@@ -27,8 +28,7 @@ const FAKE_USER = {
   email: 'owner@test.local',
   full_name: 'Test Owner',
   business_id: '1',
-  role: 'owner',
-  apps: ['flow'],
+  ...flowAuthFields('owner'),
 };
 
 /** Relative to the run, so the sections are the ones being demonstrated. */

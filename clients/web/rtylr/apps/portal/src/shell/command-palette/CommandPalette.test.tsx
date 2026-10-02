@@ -10,7 +10,17 @@ import { useKeyboardShortcuts } from '../../shared/hooks/useKeyboardShortcuts';
 import CommandPalette from './CommandPalette';
 
 const navigate = vi.hoisted(() => vi.fn());
-vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }));
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigate,
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: { location: { pathname: string } }) => unknown;
+  }) => select({ location: { pathname: '/' } }),
+}));
+vi.mock('../../modules/flow/useFlowCommands', () => ({
+  useFlowCommands: () => ({ commands: [], loading: false, failed: false }),
+}));
 
 const locales = path.resolve(import.meta.dirname, '../../locales');
 
@@ -169,13 +179,16 @@ describe('Portal command launcher', () => {
   it('searches app descriptions and safely opens an app that has not moved into Portal', async () => {
     const ui = userEvent.setup();
     const external = vi.spyOn(window, 'open').mockImplementation(() => null);
+    useUserStore.setState({
+      user: { effectiveAccess: createEffectiveAccess('erp', { isOwner: true }) },
+    });
     render(<Launcher />);
     await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
-    await ui.type(screen.getByRole('combobox'), 'flow projects');
+    await ui.type(screen.getByRole('combobox'), 'inventory');
     expect(screen.getAllByRole('option')).toHaveLength(1);
     await ui.keyboard('{ArrowDown}{Enter}');
     expect(external).toHaveBeenCalledWith(
-      expect.stringContaining('5183'),
+      expect.stringContaining('5179'),
       '_blank',
       'noopener,noreferrer'
     );

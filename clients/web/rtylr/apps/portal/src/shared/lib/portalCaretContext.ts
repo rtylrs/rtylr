@@ -20,6 +20,11 @@ const PAGE_HINTS: Record<string, PageInfo> = {
     page: 'Portal Home',
     hint: 'account shortcuts and available business apps',
   },
+  '/flow': {
+    module: 'flow',
+    page: 'Flow',
+    hint: 'projects, tasks, time tracking and team planning',
+  },
   '/insights': {
     module: 'insights',
     page: 'Business Overview',
@@ -110,6 +115,8 @@ function pageInfo(pathname: string): PageInfo {
 function selectedFromPath(pathname: string): Record<string, string> | undefined {
   const selected: Record<string, string> = {};
   const routes: Array<[RegExp, string]> = [
+    [/^\/flow\/p\/([^/]+)/, 'project_id'],
+    [/^\/flow\/task\/([^/]+)/, 'task_id'],
     [/^\/orders\/([^/]+)/, 'order_id'],
     [/^\/menus\/([^/]+)/, 'menu_id'],
     [/^\/team\/groups\/(\d+)(?:\/|$)/, 'group_id'],
@@ -214,8 +221,13 @@ export function buildPortalPageContext({
   const selected = selectedFromPath(pathname);
   const cacheContext = buildCacheContext(info, pathname, selected);
   const context = buildCaretRouteContext({
-    appId: info.module === 'insights' ? 'insights' : 'dash',
-    appName: info.module === 'insights' ? 'RTYLR Insights' : 'RTYLR Portal',
+    appId: info.module === 'flow' ? 'flow' : info.module === 'insights' ? 'insights' : 'dash',
+    appName:
+      info.module === 'flow'
+        ? 'RTYLR Flow'
+        : info.module === 'insights'
+          ? 'RTYLR Insights'
+          : 'RTYLR Portal',
     pathname,
     search,
     routeLabels: ROUTE_LABELS,

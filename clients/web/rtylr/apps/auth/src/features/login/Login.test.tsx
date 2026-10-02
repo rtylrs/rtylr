@@ -194,7 +194,7 @@ describe('Login redirect target and the MFA gate', () => {
     await signIn();
 
     await waitFor(() => expect(assigned.length).toBeGreaterThan(0));
-    expect(assigned[0]).toBe('http://localhost:5183');
+    expect(assigned[0]).toBe('http://localhost:5175/flow');
   });
 
   it('fails closed to Dash when the MFA state cannot be read', async () => {

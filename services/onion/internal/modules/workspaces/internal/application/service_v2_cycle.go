@@ -14,17 +14,19 @@ func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64
 	if dateErr != nil {
 		return domain.Cycle{}, dateErr
 	}
+	status := "upcoming"
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	if today.After(ed) {
+		status = "completed"
+	} else if !today.Before(sd) {
+		status = "active"
+	}
 	id, err := s.repo.CreateCycleV2(ctx, domain.CycleInput{
 		BusinessID: businessID, ProjectID: &projectID,
-		Name: name, StartDate: sd, EndDate: ed,
+		Name: name, StartDate: sd, EndDate: ed, Status: status,
 	})
 	if err != nil {
 		return domain.Cycle{}, err
-	}
-	status := "upcoming"
-	now := time.Now().UTC()
-	if now.After(sd) && now.Before(ed) {
-		status = "active"
 	}
 	// The normalized dates go back out with the cycle. Without them the create
 	// response carries no dates, so a client that renders straight from it has
@@ -138,10 +140,10 @@ func (s *Service) GetFlowProfile(
 	}
 
 	return domain.FlowProfile{
-		UserID:   hub.ID,
-		Name:     hub.FullName,
-		Email:    hub.Email,
-		Initials: initialsOf(hub.FullName),
+		UserID:         hub.ID,
+		Name:           hub.FullName,
+		Email:          hub.Email,
+		Initials:       initialsOf(hub.FullName),
 		RoleTitle:      "",
 		Bio:            "",
 		PublicProjects: projects,

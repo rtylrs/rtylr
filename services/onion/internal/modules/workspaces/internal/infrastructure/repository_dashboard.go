@@ -90,7 +90,10 @@ func enrichedTaskColumns(includeDescription bool) []string {
 		"COALESCE(p.color, '') AS project_color",
 		"COALESCE(u.full_name, '') AS assignee_name",
 		"COALESCE((SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id), 0) AS subtask_count",
-		"t.status_id",
+		"(SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id AND st.status = 'done') AS completed_subtasks",
+		"(SELECT COUNT(*) FROM flow_task_comments c WHERE c.task_id = t.id) AS comment_count",
+		"(SELECT COUNT(*) FROM flow_task_attachments a WHERE a.task_id = t.id) AS attachment_count",
+		"t.status_id", "COALESCE(t.waiting_on, '')", "COALESCE(t.decision_note, '')",
 		"COALESCE(fs.name, '') AS status_name",
 		"COALESCE(fs.color, '') AS status_color",
 	}
@@ -171,7 +174,8 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		&estHours, &actHours, &effortMinutes, &t.SortOrder, &labelsRaw, &t.Archived,
 		&t.CreatedAt, &t.UpdatedAt,
 		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
-		&statusID, &t.StatusName, &t.StatusColor,
+		&t.CompletedSubtasks, &t.CommentCount, &t.AttachmentCount,
+		&statusID, &t.WaitingOn, &t.DecisionNote, &t.StatusName, &t.StatusColor,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("scanEnrichedTask row scan failed", logger.Error(err))

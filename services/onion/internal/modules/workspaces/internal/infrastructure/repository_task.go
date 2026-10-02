@@ -58,11 +58,15 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		archivedParam = *input.Archived
 	}
 
-	// These five use a conditional Set rather than COALESCE so that a caller can
-	// distinguish "leave it alone" (nil) from "clear it" (zero value). The
-	// COALESCE fields above cannot express a clear, which is the reason a task
-	// description can never be emptied once set.
+	// Conditional setters distinguish an explicit clear from an omitted field.
 	builder := sq.Update("flow_tasks")
+	if input.SectionID != nil {
+		if *input.SectionID == 0 {
+			builder = builder.Set("section_id", nil)
+		} else {
+			builder = builder.Set("section_id", *input.SectionID)
+		}
+	}
 	if input.EffortMinutes != nil {
 		if *input.EffortMinutes == 0 {
 			builder = builder.Set("effort_minutes", nil)
@@ -101,14 +105,30 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	// preserves the existing value when the param is NULL, and every nullable param
 	// above is left NULL when the request omits that field. The completed_at CASE only
 	// fires when a non-NULL status is explicitly supplied.
+	if input.ClearDescription {
+		builder = builder.Set("description", "")
+	} else {
+		builder = builder.Set("description", sq.Expr("COALESCE(?, description)", sql.NullString{String: input.Description, Valid: input.Description != ""}))
+	}
+	if input.AssigneeID != nil && *input.AssigneeID == 0 {
+		builder = builder.Set("assignee_id", nil)
+	} else {
+		builder = builder.Set("assignee_id", sq.Expr("COALESCE(?, assignee_id)", assigneeParam))
+	}
+	if input.ClearDueDate {
+		builder = builder.Set("due_date", nil)
+	} else {
+		builder = builder.Set("due_date", sq.Expr("COALESCE(?, due_date)", dueDateParam))
+	}
+	if input.ClearStartDate {
+		builder = builder.Set("start_date", nil)
+	} else {
+		builder = builder.Set("start_date", sq.Expr("COALESCE(?, start_date)", startDateParam))
+	}
 	q, args, err := builder.
 		Set("title", sq.Expr("COALESCE(?, title)", titleParam)).
-		Set("description", sq.Expr("COALESCE(?, description)", sql.NullString{String: input.Description, Valid: input.Description != ""})).
 		Set("status", sq.Expr("COALESCE(?, status)", statusParam)).
 		Set("priority", sq.Expr("COALESCE(?, priority)", priorityParam)).
-		Set("assignee_id", sq.Expr("COALESCE(?, assignee_id)", assigneeParam)).
-		Set("due_date", sq.Expr("COALESCE(?, due_date)", dueDateParam)).
-		Set("start_date", sq.Expr("COALESCE(?, start_date)", startDateParam)).
 		Set("labels", sq.Expr("COALESCE(?, labels)", labelsParam)).
 		Set("archived", sq.Expr("COALESCE(?, archived)", archivedParam)).
 		Set("completed_at", sq.Expr(

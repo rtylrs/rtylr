@@ -193,7 +193,9 @@
     "createBanner": "Create banner",
     "groups": "Groups",
     "businesses": "Businesses",
-    "aiUsage": "AI usage"
+    "aiUsage": "AI usage",
+    "flowSettings": "Flow",
+    "insightsSettings": "Insights"
   },
   "launch": "Launch",
   "pagination": {
@@ -248,8 +250,13 @@
       "home": "Home",
       "insights": "Insights",
       "settings": "Settings",
-      "actions": "Actions"
-    }
+      "actions": "Actions",
+      "flow": "Flow",
+      "projects": "Projects",
+      "tasks": "Tasks"
+    },
+    "loadingFlow": "Searching Flow…",
+    "flowSearchFailed": "Flow search could not load. Try again."
   },
   "webhook": {
     "active": "Active",

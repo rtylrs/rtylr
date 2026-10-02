@@ -196,7 +196,9 @@
     "createBanner": "إنشاء لافتة",
     "groups": "المجموعات",
     "businesses": "المؤسسات",
-    "aiUsage": "استخدام الذكاء الاصطناعي"
+    "aiUsage": "استخدام الذكاء الاصطناعي",
+    "flowSettings": "فلو",
+    "insightsSettings": "إنسايتس"
   },
   "launch": "تشغيل",
   "pagination": {
@@ -251,8 +253,13 @@
       "home": "الرئيسية",
       "insights": "التحليلات",
       "settings": "الإعدادات",
-      "actions": "الإجراءات"
-    }
+      "actions": "الإجراءات",
+      "flow": "فلو",
+      "projects": "المشاريع",
+      "tasks": "المهام"
+    },
+    "loadingFlow": "جارٍ البحث في فلو…",
+    "flowSearchFailed": "تعذّر تحميل بحث فلو. حاول مجددًا."
   },
   "webhook": {
     "active": "نشط",

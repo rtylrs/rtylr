@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	sqlc "github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
@@ -83,19 +82,28 @@ func (r *Repository) ListCyclesV2(ctx context.Context, projectID, businessID, ca
 	}
 	cycles := make([]domain.Cycle, 0, len(rows))
 	for _, c := range rows {
-		cycles = append(cycles, domain.Cycle{
+		cycle := domain.Cycle{
 			ID: c.ID, Name: c.Name, Status: string(c.Status.FlowCyclesStatus),
+			StartDate: c.StartDate.Time, EndDate: c.EndDate.Time,
 			Scope: int(c.Scope), Completed: int(c.Completed),
-		})
+		}
+		if c.ProjectID.Valid {
+			cycle.ProjectID = &c.ProjectID.Int64
+		}
+		cycles = append(cycles, cycle)
 	}
 	return cycles, total, nil
 }
 
 func (r *Repository) CreateCycleV2(ctx context.Context, input domain.CycleInput) (int64, error) {
+	if input.Status == "" {
+		input.Status = "upcoming"
+	}
 	res, err := r.queries.CreateCycleV2(ctx, sqlc.CreateCycleV2Params{
 		BusinessID: input.BusinessID,
 		ProjectID:  nullInt64Ptr(input.ProjectID),
 		Name:       input.Name,
+		Status:     sqlc.NullFlowCyclesStatus{FlowCyclesStatus: sqlc.FlowCyclesStatus(input.Status), Valid: input.Status != ""},
 		StartDate:  sql.NullTime{Time: input.StartDate, Valid: !input.StartDate.IsZero()},
 		EndDate:    sql.NullTime{Time: input.EndDate, Valid: !input.EndDate.IsZero()},
 	})
@@ -129,7 +137,7 @@ func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, pro
 	milestones := make([]domain.Milestone, 0, len(rows))
 	for _, m := range rows {
 		milestone := domain.Milestone{
-			ID: m.ID, ProjectID: m.ProjectID, Name: m.Name,
+			ID: m.ID, ProjectID: m.ProjectID, Name: m.Name, Description: m.Description,
 			Status: string(m.Status), DoneCount: int(m.DoneCount), TaskCount: int(m.TaskCount),
 		}
 		if m.TargetDate.Valid {
@@ -213,69 +221,6 @@ func (r *Repository) CreateViewV2(ctx context.Context, input domain.ViewInput) (
 
 func filtersJSON(m map[string]interface{}) (json.RawMessage, error) {
 	return json.Marshal(m)
-}
-
-// BusinessEmployeeIDs returns every HR employee id for a business.
-func (r *Repository) BusinessEmployeeIDs(ctx context.Context, businessID int64) ([]int64, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		"SELECT e.id FROM hr_employees e WHERE e.business_id = ? AND e.status = 'active'", businessID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var ids []int64
-	for rows.Next() {
-		var id int64
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, rows.Err()
-}
-
-// EmployeeUserIDs resolves HR employee ids to the auth user ids they belong to,
-// for the work-day team view. Work days are keyed on hr_employees.id while every
-// roster the client holds is keyed on users.id, and the two are different id
-// spaces, so without this join a day cannot be attached to a person.
-//
-// hr_employees.user_id is nullable. An employee with no user is simply absent
-// from the result: there is no account to attribute their day to, which is a
-// real state rather than an error.
-func (r *Repository) EmployeeUserIDs(ctx context.Context, businessID int64, employeeIDs []int64) (map[int64]int64, error) {
-	if len(employeeIDs) == 0 {
-		return map[int64]int64{}, nil
-	}
-
-	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(employeeIDs)), ",")
-	args := make([]any, 0, len(employeeIDs)+1)
-	args = append(args, businessID)
-	for _, id := range employeeIDs {
-		args = append(args, id)
-	}
-
-	rows, err := r.pool.QueryContext(ctx,
-		"SELECT e.id, e.user_id FROM hr_employees e WHERE e.business_id = ? AND e.id IN ("+placeholders+")",
-		args...,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("EmployeeUserIDs failed", logger.Error(err))
-		return nil, err
-	}
-	defer rows.Close()
-
-	byEmployeeID := make(map[int64]int64, len(employeeIDs))
-	for rows.Next() {
-		var employeeID int64
-		var userID sql.NullInt64
-		if scanErr := rows.Scan(&employeeID, &userID); scanErr != nil {
-			return nil, scanErr
-		}
-		if userID.Valid {
-			byEmployeeID[employeeID] = userID.Int64
-		}
-	}
-	return byEmployeeID, rows.Err()
 }
 
 // GetProjectsByCreatorOrMembership lists projects where the caller is the

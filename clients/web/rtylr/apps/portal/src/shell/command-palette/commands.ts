@@ -1,15 +1,25 @@
 import type { ComponentType } from 'react';
-import { Bell, UserPlus } from 'lucide-react';
+import { Bell, UserPlus, Plus } from 'lucide-react';
 import { resolveAppUrl } from '@voxire/config';
 import { canEffectiveAccess, hasEffectiveAppAccess } from '@voxire/permissions';
 import { APP_ICONS, WORKSPACE_APP_IDS } from '../../shared/config/appIcons';
 import { APP_NAMES } from '../../shared/config/appNames';
 import type { StoredUser } from '../../shared/stores/userStore';
 import { canAccessPortalPath } from '../../shared/utils/canAccessPortalPath';
+import { flowNavItems } from '../../modules/flow/navigation';
 import { insightsNavItems } from '../../modules/insights/navigation';
 import { rawNavItems, rawMenuSubItems, settingsNavItems, type PortalNavItem } from '../navigation';
 
-export const COMMAND_GROUPS = ['apps', 'home', 'insights', 'settings', 'actions'] as const;
+export const COMMAND_GROUPS = [
+  'apps',
+  'home',
+  'insights',
+  'flow',
+  'projects',
+  'tasks',
+  'settings',
+  'actions',
+] as const;
 export type CommandGroup = (typeof COMMAND_GROUPS)[number];
 export interface PortalCommand {
   id: string;
@@ -17,12 +27,14 @@ export interface PortalCommand {
   description?: string;
   group: CommandGroup;
   icon: ComponentType<{ size?: number; className?: string }>;
-  destination: { path: string } | { href: string };
+  destination:
+    { path: string } | { href: string } | { newFlowTask: true } | { openFlowTask: string };
 }
 
 export function getPortalCommands(
   user: StoredUser | null,
-  t: (key: string) => string
+  t: (key: string) => string,
+  flowPreview = false
 ): PortalCommand[] {
   const commands: PortalCommand[] = [];
   const insightsPages = insightsNavItems.filter((page) => canAccessPortalPath(user, page.path));
@@ -36,7 +48,11 @@ export function getPortalCommands(
       group: 'apps',
       icon: APP_ICONS[id],
       destination:
-        id === 'insights' ? { path: insightsPages[0].path } : { href: resolveAppUrl(id) },
+        id === 'insights'
+          ? { path: insightsPages[0].path }
+          : id === 'flow'
+            ? { path: '/flow' }
+            : { href: resolveAppUrl(id) },
     });
   }
   const addPages = (pages: PortalNavItem[], group: CommandGroup, namespace = 'common.nav') => {
@@ -44,7 +60,13 @@ export function getPortalCommands(
       if (!canAccessPortalPath(user, page.path)) continue;
       commands.push({
         id: `page-${page.path}`,
-        label: t(`${namespace}.${page.key}`),
+        label: t(
+          page.key === 'flowSettings'
+            ? 'settingsCenter.flowCommand'
+            : page.key === 'insightsSettings'
+              ? 'settingsCenter.insightsCommand'
+              : `${namespace}.${page.key}`
+        ),
         group,
         icon: page.icon,
         destination: { path: page.path },
@@ -60,6 +82,29 @@ export function getPortalCommands(
     'home'
   );
   addPages(insightsPages, 'insights', 'insightsNav');
+  for (const page of flowNavItems) {
+    if (
+      ('preview' in page && page.preview && !flowPreview) ||
+      !canAccessPortalPath(user, page.path)
+    )
+      continue;
+    commands.push({
+      id: `page-${page.path}`,
+      label: t(page.key),
+      icon: page.icon,
+      group: 'flow',
+      destination: { path: page.path },
+    });
+  }
+  if (canEffectiveAccess(user?.effectiveAccess, 'flow:tasks:create', 'flow')) {
+    commands.push({
+      id: 'flow-new-task',
+      label: t('flow.shell.newTask'),
+      group: 'actions',
+      icon: Plus,
+      destination: { newFlowTask: true },
+    });
+  }
   addPages(
     settingsNavItems.filter((page) => page.key !== 'integrations'),
     'settings'

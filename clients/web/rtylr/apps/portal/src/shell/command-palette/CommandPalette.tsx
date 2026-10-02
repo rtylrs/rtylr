@@ -1,8 +1,11 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, CornerDownLeft, Search, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
+import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
+import { useFlowCommands } from '../../modules/flow/useFlowCommands';
+import { useFlowStore } from '../../modules/flow/shared/stores/flowStore';
 import { useCommandPalette } from '../../shared/stores/commandPaletteStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import {
@@ -19,12 +22,18 @@ export default function CommandPalette() {
   const user = useUserStore((state) => state.user);
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const flowPreview = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
+  const flowSearch = useFlowCommands(user, open && pathname.startsWith('/flow/'), query);
   const [activeId, setActiveId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const id = useId();
-  const commands = useMemo(() => getPortalCommands(user, t), [user, t]);
+  const commands = useMemo(
+    () => [...getPortalCommands(user, t, flowPreview), ...flowSearch.commands],
+    [user, t, flowPreview, flowSearch.commands]
+  );
   const filtered = useMemo(
     () =>
       searchPortalCommands(commands, query, (group) => t(`common.commandPalette.groups.${group}`)),
@@ -47,10 +56,22 @@ export default function CommandPalette() {
     }
   }, [open, active?.id, id]);
 
-  const run = (command: PortalCommand) => {
+  const run = async (command: PortalCommand) => {
     setOpen(false);
     if ('path' in command.destination) navigate({ to: command.destination.path });
-    else window.open(command.destination.href, '_blank', 'noopener,noreferrer');
+    else if ('href' in command.destination)
+      window.open(command.destination.href, '_blank', 'noopener,noreferrer');
+    else if ('newFlowTask' in command.destination) {
+      useFlowStore.getState().setQuickCreateOpen(true);
+    } else if ('openFlowTask' in command.destination) {
+      const taskId = command.destination.openFlowTask;
+      if (pathname.startsWith('/flow/'))
+        navigate({
+          to: '.',
+          search: (previous: Record<string, unknown>) => ({ ...previous, openTask: taskId }),
+        });
+      else navigate({ to: '/flow/my-issues', search: { openTask: taskId } });
+    }
   };
 
   const handleKeys = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -133,6 +154,16 @@ export default function CommandPalette() {
           aria-label={t('common.commandPalette.resultsLabel')}
           className="portal-command-results"
         >
+          {flowSearch.loading && (
+            <p role="status" className="px-5 py-2 text-sm">
+              {t('common.commandPalette.loadingFlow')}
+            </p>
+          )}
+          {flowSearch.failed && (
+            <p role="alert" className="px-5 py-2 text-sm">
+              {t('common.commandPalette.flowSearchFailed')}
+            </p>
+          )}
           {COMMAND_GROUPS.map((group) => {
             const groupCommands = filtered.filter((command) => command.group === group);
             if (!groupCommands.length) return null;

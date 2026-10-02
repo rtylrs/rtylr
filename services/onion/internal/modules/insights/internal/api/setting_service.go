@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"time"
 
 	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
@@ -23,6 +24,8 @@ func settingsToProto(payload application.SettingsPayload) *insightssettingv1.Ins
 	return &insightssettingv1.InsightsSettings{
 		DefaultPeriod:    payload.DefaultPeriod,
 		Currency:         payload.DefaultCurrency,
+		FiscalYearStart:  payload.FiscalYearStart,
+		Timezone:         payload.Timezone,
 		ComparePrevious:  payload.ComparePrevious,
 		DashboardWidgets: append([]string(nil), payload.DashboardWidgets...),
 		FavoriteReports:  append([]string(nil), payload.FavoriteReports...),
@@ -49,21 +52,39 @@ func (a *SettingAPI) UpdateInsightsSettings(ctx context.Context, req *insightsse
 		return nil, err
 	}
 
-	body := req.GetSettings()
-	payload, err := a.Service.UpdateSettings(ctx, businessID, application.SettingsPayload{
-		DefaultPeriod:    body.GetDefaultPeriod(),
-		DefaultCurrency:  body.GetCurrency(),
-		ComparePrevious:  body.GetComparePrevious(),
-		DashboardWidgets: append([]string(nil), body.GetDashboardWidgets()...),
-		FavoriteReports:  append([]string(nil), body.GetFavoriteReports()...),
-		FiscalYearStart:  "01-01",
-		Timezone:         "UTC",
-	})
+	input, err := settingsPayloadFromProto(req.GetSettings())
+	if err != nil {
+		return nil, err
+	}
+	payload, err := a.Service.UpdateSettings(ctx, businessID, input)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to save insights settings")
 	}
 
 	return &insightssettingv1.UpdateInsightsSettingsResponse{Settings: settingsToProto(payload)}, nil
+}
+
+func settingsPayloadFromProto(body *insightssettingv1.InsightsSettings) (application.SettingsPayload, error) {
+	fiscalYearStart, timezone := body.GetFiscalYearStart(), body.GetTimezone()
+	if fiscalYearStart == "" {
+		fiscalYearStart = "01-01"
+	}
+	if timezone == "" {
+		timezone = "UTC"
+	}
+	if _, err := time.Parse("01-02", fiscalYearStart); err != nil || len(fiscalYearStart) != 5 {
+		return application.SettingsPayload{}, onekiterrors.New(http.StatusBadRequest, "Fiscal year start must be a valid MM-DD date")
+	}
+	if _, err := time.LoadLocation(timezone); err != nil || timezone == "Local" {
+		return application.SettingsPayload{}, onekiterrors.New(http.StatusBadRequest, "Timezone must be a valid IANA timezone")
+	}
+	return application.SettingsPayload{
+		DefaultPeriod: body.GetDefaultPeriod(), DefaultCurrency: body.GetCurrency(),
+		ComparePrevious:  body.GetComparePrevious(),
+		DashboardWidgets: append([]string(nil), body.GetDashboardWidgets()...),
+		FavoriteReports:  append([]string(nil), body.GetFavoriteReports()...),
+		FiscalYearStart:  fiscalYearStart, Timezone: timezone,
+	}, nil
 }
 
 // FlowReader is the slice of Flow's insights module that the dashboard needs.

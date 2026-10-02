@@ -1,8 +1,7 @@
 -- Flow daily time logging: work days, their lines and the work-type tree.
 --
--- Every statement scopes on owner_id AND business_id. Scoping on owner alone is
--- what turns the older tables' `business_id DEFAULT 0` into a cross-tenant read,
--- and these tables deliberately have no such default to fall back on.
+-- Every read and write is scoped to a business. Personal day and work-type
+-- queries also retain the historical owner key.
 
 -- name: GetWorkDay :one
 SELECT id, employee_id, date, timezone, work_mode, start_time,
@@ -17,7 +16,7 @@ SELECT id, employee_id, date, timezone, work_mode, start_time,
          end_time, break_minutes, status, logged_by, approved_by,
          approved_at, reopened_by, reopened_at, created_at, updated_at
 FROM flow_work_days
-WHERE id = ? AND owner_id = ? AND business_id = ?
+WHERE id = ? AND business_id = ?
 LIMIT 1;
 
 -- Upsert, because a day is identified by who and when rather than by an id the
@@ -126,7 +125,7 @@ WHERE owner_id = ? AND business_id = ? AND work_day_id = ?;
 -- name: SumWorkDayLineMinutesByDayIDs :many
 SELECT work_day_id, COALESCE(SUM(duration_minutes), 0) AS logged_minutes
 FROM hr_time_entries
-WHERE owner_id = ? AND business_id = ?
+WHERE business_id = ?
   AND work_day_id IN (sqlc.slice('work_day_ids'))
 GROUP BY work_day_id;
 
@@ -149,8 +148,8 @@ LIMIT 1;
 
 -- name: CreateWorkType :execresult
 INSERT INTO flow_work_types (
-    owner_id, business_id, parent_id, name, description, hr_category_id, sort_order
-) VALUES (?, ?, ?, ?, ?, ?, ?);
+    workspace_id, owner_id, business_id, parent_id, name, description, hr_category_id, sort_order
+) VALUES (0, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateWorkType :execresult
 UPDATE flow_work_types
@@ -204,3 +203,37 @@ SELECT COUNT(*) FROM flow_work_days
 WHERE owner_id = ? AND business_id = ?
   AND employee_id IN (sqlc.slice('employee_ids'))
   AND date >= ? AND date <= ?;
+
+-- Self-recorded v2 days use user IDs; historical HR days use employee IDs.
+-- Resolve them in the tenant-scoped query before applying pagination.
+-- name: ListTeamWorkDaysV2 :many
+SELECT d.id, d.employee_id, d.date, d.timezone, d.work_mode, d.start_time,
+       d.end_time, d.break_minutes, d.status, d.logged_by, d.approved_by,
+       d.approved_at, d.reopened_by, d.reopened_at, d.created_at, d.updated_at,
+       COALESCE(CASE WHEN d.employee_id = d.logged_by AND (m.status = 'active' OR b.owner_id = d.employee_id) THEN d.employee_id ELSE e.user_id END, 0) AS user_id
+FROM flow_work_days d
+JOIN businesses b ON b.id = d.business_id
+LEFT JOIN hr_employees e ON e.id = d.employee_id AND e.business_id = d.business_id AND e.status <> 'terminated'
+LEFT JOIN authorization_business_members m ON m.user_id = d.employee_id AND m.business_id = d.business_id
+WHERE d.business_id = sqlc.arg('business_id')
+  AND (e.id IS NOT NULL OR (d.employee_id = d.logged_by AND (m.status = 'active' OR b.owner_id = d.employee_id)))
+  AND (sqlc.arg('include_all') = TRUE
+       OR (d.employee_id = d.logged_by AND (m.status = 'active' OR b.owner_id = d.employee_id) AND d.employee_id IN (sqlc.slice('user_ids')))
+       OR (NOT COALESCE((d.employee_id = d.logged_by AND (m.status = 'active' OR b.owner_id = d.employee_id)), FALSE) AND e.user_id IN (sqlc.slice('hr_user_ids'))))
+  AND d.date >= sqlc.arg('from_date') AND d.date <= sqlc.arg('to_date')
+ORDER BY d.employee_id, d.date DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountTeamWorkDaysV2 :one
+SELECT COUNT(*)
+FROM flow_work_days d
+JOIN businesses b ON b.id = d.business_id
+LEFT JOIN hr_employees e ON e.id = d.employee_id AND e.business_id = d.business_id AND e.status <> 'terminated'
+LEFT JOIN authorization_business_members m ON m.user_id = d.employee_id AND m.business_id = d.business_id
+WHERE d.business_id = sqlc.arg('business_id')
+  AND (e.id IS NOT NULL OR (d.employee_id = d.logged_by AND (m.status = 'active' OR b.owner_id = d.employee_id)))
+  AND (sqlc.arg('include_all') = TRUE
+       OR (d.employee_id = d.logged_by AND (m.status = 'active' OR b.owner_id = d.employee_id) AND d.employee_id IN (sqlc.slice('user_ids')))
+       OR (NOT COALESCE((d.employee_id = d.logged_by AND (m.status = 'active' OR b.owner_id = d.employee_id)), FALSE) AND e.user_id IN (sqlc.slice('hr_user_ids'))))
+  AND d.date >= sqlc.arg('from_date') AND d.date <= sqlc.arg('to_date')
+;

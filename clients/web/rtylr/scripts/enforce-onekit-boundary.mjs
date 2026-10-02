@@ -10,7 +10,7 @@ const scanAll = process.argv.includes('--all') || !changedOnly;
 
 const sourceExtensions = new Set(['.js', '.jsx', '.mjs', '.ts', '.tsx']);
 const rawFetchAllowlist = new Set([
-  'apps/flow/src/shared/lib/realtime.ts',
+  'apps/portal/src/modules/flow/shared/lib/realtime.ts',
   // Recruit uploads directly to a presigned R2 URL; it must not receive the
   // authenticated API transport's headers or base URL.
   'apps/recruit/src/shared/hooks/queries/usePublic.ts',

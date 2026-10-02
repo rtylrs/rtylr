@@ -34,6 +34,9 @@ func projectVisibilityExpr(callerID int64, includeAll bool) squirrel.Sqlizer {
 // workspace-scoped mode.
 func (r *Repository) GetTasksByBusinessV2(ctx context.Context, filter domain.ListTasksFilter, callerID int64, includeAll bool) ([]domain.Task, int64, error) {
 	conds := taskListConditions("t.business_id", filter.BusinessID, filter)
+	if filter.ProjectID != 0 {
+		conds = append(conds, squirrel.Eq{"t.project_id": filter.ProjectID})
+	}
 	if vis := projectVisibilityExpr(callerID, includeAll); vis != nil {
 		conds = append(conds, vis)
 	}

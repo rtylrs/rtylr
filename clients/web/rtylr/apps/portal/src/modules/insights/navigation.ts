@@ -6,7 +6,6 @@ import {
   Activity,
   Wallet,
   FileText,
-  Settings,
 } from 'lucide-react';
 import type { PortalNavItem } from '../../shell/navigation';
 
@@ -18,5 +17,4 @@ export const insightsNavItems: PortalNavItem[] = [
   { key: 'operations', path: '/insights/operations', icon: Activity },
   { key: 'financial', path: '/insights/financial', icon: Wallet },
   { key: 'reports', path: '/insights/reports', icon: FileText },
-  { key: 'settings', path: '/insights/settings', icon: Settings },
 ];

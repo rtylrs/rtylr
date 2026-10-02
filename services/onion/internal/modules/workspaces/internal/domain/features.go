@@ -30,6 +30,7 @@ type CycleInput struct {
 	StartDate   time.Time
 	EndDate     time.Time
 	CreatedBy   int64
+	Status      string
 }
 
 type UpdateCycleInput struct {

@@ -196,7 +196,9 @@
     "createBanner": "Créer une bannière",
     "groups": "Groupes",
     "businesses": "Entreprises",
-    "aiUsage": "Utilisation de l’IA"
+    "aiUsage": "Utilisation de l’IA",
+    "flowSettings": "Flow",
+    "insightsSettings": "Insights"
   },
   "launch": "Ouvrir",
   "pagination": {
@@ -251,8 +253,13 @@
       "home": "Accueil",
       "insights": "Insights",
       "settings": "Paramètres",
-      "actions": "Actions"
-    }
+      "actions": "Actions",
+      "flow": "Flow",
+      "projects": "Projets",
+      "tasks": "Tâches"
+    },
+    "loadingFlow": "Recherche dans Flow…",
+    "flowSearchFailed": "La recherche Flow a échoué. Réessayez."
   },
   "webhook": {
     "active": "Actif",

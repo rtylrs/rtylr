@@ -148,19 +148,5 @@ export default defineConfig({
       stdout: 'pipe',
       stderr: 'pipe',
     },
-    {
-      command: 'pnpm --filter @rtylr/flow dev',
-      url: 'http://localhost:5183',
-      // Without this the app falls back to the production API, so every
-      // `page.route(/localhost:9999/)` stub in the flow specs matched nothing
-      // and the specs asserted against whatever prod returned to an
-      // unauthenticated request. Pointing the dev server at the stub host is
-      // what makes those stubs mean anything.
-      env: { VITE_API_URL: 'http://localhost:9999/' },
-      reuseExistingServer: !process.env.CI,
-      timeout: 120_000,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
   ],
 });

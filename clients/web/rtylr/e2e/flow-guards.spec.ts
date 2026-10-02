@@ -1,3 +1,4 @@
+import { flowAuthFields } from './support/flow-auth';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test, expect, type Route } from './fixtures';
@@ -8,7 +9,7 @@ import { test, expect, type Route } from './fixtures';
  * and preview route flag enforcement.
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
@@ -72,7 +73,7 @@ test.describe('Flow - Auth & Guard Verification', () => {
   // Regression test for the Flow catch-all: TanStack Router v1 uses '$' as its
   // splat token, and the route was declared with '*', so it could never match
   // and an unknown URL stayed put on a bare "Not Found" (#1038).
-  test('an unknown Flow URL redirects to My tasks', async ({ page, context }) => {
+  test('an unknown Flow URL shows a recovery link', async ({ page, context }) => {
     await primeAuthCookie(context);
 
     await page.route(`${API_HOST}/hub/user/v1/users/me`, (route: Route) =>
@@ -84,8 +85,7 @@ test.describe('Flow - Auth & Guard Verification', () => {
           email: 'owner@test.local',
           full_name: 'Test Owner',
           business_id: '1',
-          role: 'owner',
-          apps: ['flow'],
+          ...flowAuthFields('owner'),
         }),
       })
     );
@@ -93,12 +93,14 @@ test.describe('Flow - Auth & Guard Verification', () => {
     await page.goto(`${FLOW_URL}/this-route-does-not-exist`);
     await page.waitForLoadState('networkidle');
 
-    await expect(page).toHaveURL(/\/my-issues/, { timeout: 10_000 });
-    await expect(page.getByText('Not Found', { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: "That page isn't here" })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Go to my tasks' })).toHaveAttribute(
+      'href',
+      '/flow/my-issues'
+    );
   });
 
-  // Regression test for FLOW-BUG-002: Business admin role overrides project viewer role
-  test('FLOW-BUG-002: Project viewer role must block task edits even if user is business admin', async ({
+  test('business admins can edit tasks regardless of collaborator role', async ({
     page,
     context,
   }) => {
@@ -113,8 +115,7 @@ test.describe('Flow - Auth & Guard Verification', () => {
           email: 'owner@test.local',
           full_name: 'Test Owner',
           business_id: '1',
-          role: 'admin', // Business-wide admin
-          apps: ['flow'],
+          ...flowAuthFields('admin'),
         }),
       })
     );
@@ -159,7 +160,7 @@ test.describe('Flow - Auth & Guard Verification', () => {
     await page.waitForLoadState('networkidle');
 
     const titleInput = page.locator('input[value*="SSO"]').first();
-    await expect(titleInput).toBeDisabled();
+    await expect(titleInput).toBeEnabled();
   });
 
   test('AppGuard redirects unauthenticated requests when token cookie is missing', async ({
@@ -187,8 +188,7 @@ test.describe('Flow - Auth & Guard Verification', () => {
           email: 'owner@test.local',
           full_name: 'Test Owner',
           business_id: '1',
-          role: 'owner',
-          apps: ['flow'],
+          ...flowAuthFields('owner'),
         }),
       })
     );

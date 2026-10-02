@@ -25,6 +25,8 @@ func IsValidTaskStatus(status string) bool {
 }
 
 type Task struct {
+	WaitingOn      string
+	DecisionNote   string
 	ID             int64
 	ProjectID      int64
 	WorkspaceID    int64
@@ -56,15 +58,18 @@ type Task struct {
 
 	// Display projections populated by list/detail reads via JOINs.
 	// Safe to ignore on writes — populated server-side from related tables.
-	Identifier       string // e.g. "T-42"
-	ProjectName      string
-	ProjectColor     string
-	AssigneeName     string
-	AssigneeInitials string
-	SubtaskCount     int32
-	StatusName       string
-	StatusColor      string
-	Dependencies     []int64
+	Identifier        string // e.g. "T-42"
+	ProjectName       string
+	ProjectColor      string
+	AssigneeName      string
+	AssigneeInitials  string
+	SubtaskCount      int32
+	CompletedSubtasks int32
+	CommentCount      int32
+	AttachmentCount   int32
+	StatusName        string
+	StatusColor       string
+	Dependencies      []int64
 }
 
 type ProjectColumn struct {
@@ -137,6 +142,8 @@ type TaskInput struct {
 	SectionID      *int64
 	Title          string
 	Description    string
+	Status         string
+	EffortMinutes  *int32
 	Priority       string
 	AssigneeID     *int64
 	ReporterID     int64
@@ -160,14 +167,14 @@ type UpdateTaskInput struct {
 	StartDate   *time.Time
 	Labels      []int64
 	Archived    *bool
-	// The fields below use pointers rather than the zero-value-means-absent
-	// convention above, so they can express "clear this value" as well as
-	// "leave it alone". Title and friends cannot, which is why a description
-	// can never be emptied once set.
-	EffortMinutes  *int32
-	EstimatedHours *float64
-	WaitingOn      *string
-	DecisionNote   *string
+	// V2 carries explicit clears separately from omitted legacy fields.
+	ClearDescription bool
+	ClearDueDate     bool
+	ClearStartDate   bool
+	EffortMinutes    *int32
+	EstimatedHours   *float64
+	WaitingOn        *string
+	DecisionNote     *string
 	// FocusPin is per-user, so the repository writes flow_task_focus_pins
 	// keyed on the caller rather than a column on flow_tasks.
 	FocusPin *bool

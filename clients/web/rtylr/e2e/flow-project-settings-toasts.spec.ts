@@ -1,3 +1,4 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Page, type Route } from './fixtures';
 
 /**
@@ -14,7 +15,7 @@ import { test, expect, type Page, type Route } from './fixtures';
  * in ProjectSettings.test.tsx instead.
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 const FAKE_USER = {
@@ -22,8 +23,7 @@ const FAKE_USER = {
   email: 'owner@acme.test',
   full_name: 'Acme Owner',
   business_id: '1',
-  role: 'owner',
-  apps: ['flow'],
+  ...flowAuthFields('owner'),
   plan_slug: 'pro',
 };
 
@@ -177,7 +177,7 @@ async function installBaseStubs(
   // Project members list - GET only. Mutations on this exact path/sub-paths
   // are overridden per-test below to return 500.
   await page.route(
-    /localhost:9999\/flow\/project\/v1\/projects\/members(\?.*)?$/,
+    /localhost:9999\/flow\/project\/v2\/projects\/members(\?.*)?$/,
     (route: Route) => {
       if (route.request().method() === 'GET') {
         route.fulfill({

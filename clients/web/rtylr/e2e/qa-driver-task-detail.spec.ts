@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const FLOW_URL = 'http://localhost:5183';
+const FLOW_URL = 'http://localhost:5175/flow';
 const EVIDENCE_DIR = '/Users/abedamouneh/Development/vault/rtylr/audit/flow-qa-2026-08-v2/evidence';
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {

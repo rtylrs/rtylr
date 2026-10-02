@@ -126,11 +126,14 @@ describe('Settings empty state', () => {
     fireEvent.change(screen.getByLabelText('Default Currency'), { target: { value: 'EUR' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
 
-    expect(mocks.useUpdateInsightsSettings().mutate).toHaveBeenCalledWith({
-      defaultCurrency: 'EUR',
-      fiscalYearStart: '01-01',
-      timezone: 'UTC',
-    });
+    expect(mocks.useUpdateInsightsSettings().mutate).toHaveBeenCalledWith(
+      {
+        defaultCurrency: 'EUR',
+        fiscalYearStart: '01-01',
+        timezone: 'UTC',
+      },
+      { onSuccess: expect.any(Function) }
+    );
     expect(mocks.useScheduledReports).toHaveBeenCalledWith({ enabled: false });
   });
 
@@ -159,7 +162,7 @@ describe('Settings form seeding', () => {
     });
   };
 
-  it('keeps the values the user entered when the save-triggered refetch returns defaults', () => {
+  it('keeps edits while a save is pending', () => {
     const mutate = vi.fn();
     mocks.useUpdateInsightsSettings.mockReturnValue({ mutate, isPending: false });
     settings('USD', '01-01', 'UTC');
@@ -169,14 +172,16 @@ describe('Settings form seeding', () => {
     fireEvent.change(screen.getByLabelText('Default Currency'), { target: { value: 'EUR' } });
     fireEvent.change(screen.getByLabelText('Timezone'), { target: { value: 'Africa/Cairo' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    expect(mutate).toHaveBeenCalledWith({
-      defaultCurrency: 'EUR',
-      fiscalYearStart: '01-01',
-      timezone: 'Africa/Cairo',
-    });
+    expect(mutate).toHaveBeenCalledWith(
+      {
+        defaultCurrency: 'EUR',
+        fiscalYearStart: '01-01',
+        timezone: 'Africa/Cairo',
+      },
+      { onSuccess: expect.any(Function) }
+    );
 
-    // onSuccess invalidates ['insights-settings']; timezone has no server field,
-    // so the refetched object carries the default again.
+    // A background refetch must not discard unsaved edits.
     settings('EUR', '01-01', 'UTC');
     rerender(<Settings />);
 

@@ -148,7 +148,7 @@ ORDER BY name ASC LIMIT ? OFFSET ?;
 SELECT COUNT(*) FROM flow_labels WHERE business_id = ?;
 
 -- name: CreateLabelV2 :execresult
-INSERT INTO flow_labels (business_id, name, color) VALUES (?, ?, ?);
+INSERT INTO flow_labels (workspace_id, business_id, name, color) VALUES (0, ?, ?, ?);
 
 -- name: GetInsightsTimeByMemberV2 :many
 SELECT CAST(u.id AS CHAR) AS member_id,
@@ -169,8 +169,8 @@ ORDER BY hours DESC;
 --
 -- 0 is the same value a v2 project carries. The column is dropped in Phase 4,
 -- at which point this literal comes out with it.
-INSERT INTO flow_cycles (business_id, workspace_id, project_id, name, start_date, end_date)
-VALUES (?, 0, ?, ?, ?, ?);
+INSERT INTO flow_cycles (business_id, workspace_id, project_id, name, start_date, end_date, status)
+VALUES (?, 0, ?, ?, ?, ?, ?);
 
 -- name: ListMilestonesByBusiness :many
 SELECT m.id, m.project_id, m.name,
@@ -212,8 +212,8 @@ WHERE business_id = ?
 ORDER BY created_at DESC LIMIT ? OFFSET ?;
 
 -- name: CreateViewV2 :execresult
-INSERT INTO flow_views (business_id, name, icon, filters, group_by, sort_by, sort_dir, visibility, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_views (workspace_id, business_id, name, icon, filters, group_by, sort_by, sort_dir, visibility, created_by)
+VALUES (0, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- ListPublicProjectsByOwnerV2 backs the profile page. Deliberately narrower
 -- than ListProjectsV2: it returns metadata only, never task-level fields,

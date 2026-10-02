@@ -15,6 +15,9 @@ import { canManageDash } from './shared/utils/canManageDash';
 import { useUserStore } from './shared/stores/userStore';
 import SettingsLayout from './features/settings/Settings/components/SettingsLayout';
 import NoMatch from './features/extras/NoMatch';
+import { createFlowRoutes } from './modules/flow/routes';
+import { settingsSearchSchema } from './modules/flow/shared/schemas/settings';
+import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { createInsightsRoutes } from './modules/insights/routes';
 
 const Orders = React.lazy(() => import('./features/orders/Orders'));
@@ -27,6 +30,10 @@ const QrCodes = React.lazy(() => import('./features/qr-codes/QrCodes.tsx'));
 const QrCode = React.lazy(() => import('./features/qr-codes/QrCode.tsx'));
 const Design = React.lazy(() => import('./features/design/Design.tsx'));
 const Chat = React.lazy(() => import('./features/chat/Chat'));
+
+const SettingsOverview = React.lazy(() => import('./features/settings/SettingsOverview'));
+const FlowSettings = React.lazy(() => import('./modules/flow/features/settings/FlowSettings'));
+const InsightsSettings = React.lazy(() => import('./modules/insights/features/settings/Settings'));
 
 const Account = React.lazy(() => import('./features/settings/Settings/components/Account'));
 const Businesses = React.lazy(() => import('./features/settings/Settings/components/Businesses'));
@@ -206,7 +213,7 @@ const notificationsRoute = createRoute({
 const accountRedirectRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/account',
-  component: () => <Navigate to="/settings/account" replace />,
+  component: () => wrap(<SettingsOverview />),
 });
 
 const billingRedirectRoute = createRoute({
@@ -267,7 +274,24 @@ const settingsRoute = createRoute({
 const settingsIndexRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/',
-  component: () => <Navigate to="/settings/account" replace />,
+  component: () => wrap(<SettingsOverview />),
+});
+
+const settingsFlowRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/flow',
+  validateSearch: settingsSearchSchema,
+  component: () => wrap(<FlowSettings />),
+});
+const settingsInsightsRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/insights',
+  component: () =>
+    wrap(
+      <AppFlagGuard flag={FLAG_KEYS.APP_INSIGHTS}>
+        <InsightsSettings />
+      </AppFlagGuard>
+    ),
 });
 
 const settingsAccountRoute = createRoute({
@@ -385,6 +409,7 @@ const notFoundRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   businessRoute.addChildren([
     createInsightsRoutes(businessRoute),
+    createFlowRoutes(businessRoute),
     dashboardRoute,
     menusRoute,
     menuRoute,
@@ -415,6 +440,8 @@ const routeTree = rootRoute.addChildren([
     settingsRoute.addChildren([
       settingsIndexRoute,
       settingsAccountRoute,
+      settingsFlowRoute,
+      settingsInsightsRoute,
       settingsBusinessesRoute,
       settingsGeneralRoute,
       settingsIndustryRoute,
