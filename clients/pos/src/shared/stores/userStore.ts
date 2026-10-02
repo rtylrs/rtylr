@@ -215,7 +215,9 @@ export const useUserStore = create<UserState & UserActions>()(
             set({
               user: {
                 ...state.user,
-                theme: response.settings?.theme ? JSON.parse(response.settings.theme) : payload.themeData,
+                theme: response.settings?.theme
+                  ? JSON.parse(response.settings.theme)
+                  : payload.themeData,
               },
               loading: false,
               error: null,

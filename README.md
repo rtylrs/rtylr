@@ -5,17 +5,17 @@ change a contract and every consumer with it.
 
 ## Layout
 
-| Path | What it is |
-|---|---|
-| `clients/` | The pnpm workspace root. Everything JavaScript/TypeScript lives under it. |
-| `clients/app/` | Single Portal application with business modules and separate SSO, public Menu and public Recruit build entrypoints. |
-| `clients/web/landing/` | The marketing site (Next.js static export). |
-| `clients/web/docs/` | The documentation site (Next.js static export). |
-| `clients/mcp/` | The MCP server. Build-only; nothing deploys it. |
-| `clients/pos/` | The POS terminal: Vite web app plus the Tauri desktop shell in `core/`. |
-| `clients/packages/` | The shared library layer (`@voxire/*`) and the generated contracts package (`contracts/`). |
-| `voxie/` | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth. |
-| `services/onion/` | The Go backend: modules, platform packages, sqlc, worker. |
+| Path                   | What it is                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `clients/`             | The pnpm workspace root. Everything JavaScript/TypeScript lives under it.                                           |
+| `clients/app/`         | Single Portal application with business modules and separate SSO, public Menu and public Recruit build entrypoints. |
+| `clients/web/landing/` | The marketing site (Next.js static export).                                                                         |
+| `clients/web/docs/`    | The documentation site (Next.js static export).                                                                     |
+| `clients/mcp/`         | The MCP server. Build-only; nothing deploys it.                                                                     |
+| `clients/pos/`         | The POS terminal: Vite web app plus the Tauri desktop shell in `core/`.                                             |
+| `clients/packages/`    | The shared library layer (`@voxire/*`) and the generated contracts package (`contracts/`).                          |
+| `voxie/`               | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth.            |
+| `services/onion/`      | The Go backend: modules, platform packages, sqlc, worker.                                                           |
 
 `tryrtylr/deploy`, `tryrtylr/infra` and `tryrtylr/pipelines` stay separate:
 they are the release control plane, the infrastructure, and the reusable

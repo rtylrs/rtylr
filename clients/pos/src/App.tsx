@@ -18,7 +18,12 @@ import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
 import CommandPalette from './shared/components/CommandPalette';
 import HelpOverlay from './shared/components/HelpOverlay';
-import { useKeyboardShortcuts, useAutoLogout, useOnlineStatus, useStockAlerts } from './shared/hooks';
+import {
+  useKeyboardShortcuts,
+  useAutoLogout,
+  useOnlineStatus,
+  useStockAlerts,
+} from './shared/hooks';
 import { restoreUserSessionFromCookie } from './shared/services/auth/sessionRestore';
 import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueueAutoSync';
 import { reportReactError } from './shared/services/observability/appErrors';
@@ -122,12 +127,18 @@ const AppShell = (): React.JSX.Element => {
     setSettingsReady(false);
     setSettingsError(null);
     void loadPOSSettings(() => active)
-      .then(() => { if (active) setSettingsReady(true); })
+      .then(() => {
+        if (active) setSettingsReady(true);
+      })
       .catch((error: unknown) => {
         if (!active) return;
-        setSettingsError(error instanceof Error ? error : new Error('Could not load terminal configuration'));
+        setSettingsError(
+          error instanceof Error ? error : new Error('Could not load terminal configuration')
+        );
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [token]);
 
   useEffect(() => {
@@ -143,7 +154,12 @@ const AppShell = (): React.JSX.Element => {
   }, [employee, endSession, isActive, locationId, setContext, terminalId]);
 
   if (embedded && settingsError) throw settingsError;
-  if (embedded && !settingsReady) return <div className="flex min-h-48 items-center justify-center"><Spinner /></div>;
+  if (embedded && !settingsReady)
+    return (
+      <div className="flex min-h-48 items-center justify-center">
+        <Spinner />
+      </div>
+    );
 
   // No location/terminal selected → show LocationSelect.
   if (!locationId || !terminalId) {

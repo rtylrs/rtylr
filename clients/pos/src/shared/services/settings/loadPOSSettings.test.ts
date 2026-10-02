@@ -13,7 +13,11 @@ beforeEach(() => {
 describe('terminal configuration loading', () => {
   it('does not apply a response after its business context is left', async () => {
     let resolve!: (value: { settings: { receiptFooter: string; businessProfile: string } }) => void;
-    getPOSSettings.mockReturnValue(new Promise((done) => { resolve = done; }));
+    getPOSSettings.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      })
+    );
     let current = true;
     const loading = loadPOSSettings(() => current);
     current = false;
