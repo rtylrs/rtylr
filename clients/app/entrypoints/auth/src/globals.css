@@ -1,0 +1,120 @@
+@import 'tailwindcss';
+@import '../../../../packages/tailwind-config/theme.css';
+
+/* v4 auto-detects content relative to this CSS file. We add an
+ * explicit @source for the cross-workspace packages we pull classes
+ * from (shared components, menu package, etc.). The shared
+ * `@voxire/tailwind-config` theme extensions are ported below into
+ * v4's native `@theme` block - JS configs via `@config` break v4's
+ * auto content scanner in monorepo setups. */
+@source '../../../../packages/**/*.{ts,tsx}';
+
+/* Brand/semantic color tokens ported from @voxire/tailwind-config. Without
+ * these, the shared @voxire/ui Button (bg-primary, ring-ring, bg-destructive,
+ * …) resolves to nothing and renders unstyled/black. */
+@theme {
+  --color-primary: #040428;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #4485c4;
+  --color-secondary-foreground: #ffffff;
+  --color-accent: #03aed2;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-ring: #03aed2;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --auth-bg: #ffffff;
+    --auth-card: #ffffff;
+    --auth-text: #111111;
+    --auth-text-muted: #6b7280;
+    --auth-border: #e5e7eb;
+    --auth-input-bg: #f9fafb;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --auth-bg: #0a0a0a;
+      --auth-card: #141414;
+      --auth-text: #f0f0ee;
+      --auth-text-muted: #9ca3af;
+      --auth-border: #262626;
+      --auth-input-bg: #1a1a1a;
+      color-scheme: dark;
+    }
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+    background-color: var(--auth-bg);
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--auth-bg);
+    color: var(--auth-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #111111 !important;
+    caret-color: #111111;
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    box-shadow: 0 0 0 1000px #ffffff inset !important;
+  }
+}
+
+button.voxire-button.auth-provider-button {
+  border: 2px solid var(--auth-border);
+  background: var(--auth-card);
+  color: var(--auth-text);
+  box-shadow: 0 1px 2px rgb(17 17 17 / 0.04);
+}
+
+button.voxire-button.auth-provider-button:hover:not(.voxire-button-disabled) {
+  border-color: #d1d5db;
+  background: #f9fafb;
+  color: var(--auth-text);
+  box-shadow: 0 6px 16px rgb(17 17 17 / 0.08);
+}
+
+button.voxire-button.auth-provider-button:active:not(.voxire-button-disabled) {
+  background: #f3f4f6;
+  box-shadow: 0 1px 2px rgb(17 17 17 / 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  button.voxire-button.auth-provider-button {
+    background: #ffffff;
+    border-color: #111111;
+    color: #111111;
+  }
+
+  button.voxire-button.auth-provider-button:hover:not(.voxire-button-disabled) {
+    background: #f4f4f4;
+    border-color: #111111;
+    color: #111111;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 0.12);
+  }
+
+  button.voxire-button.auth-provider-button:active:not(.voxire-button-disabled) {
+    background: #eeeeee;
+    box-shadow: none;
+  }
+}

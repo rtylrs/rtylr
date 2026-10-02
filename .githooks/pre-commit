@@ -17,7 +17,10 @@ set -e
 #
 # Scoped to staged files, nobody inherits anyone else's debt and a direct push
 # cannot poison the gate.
-cd "$(git rev-parse --show-toplevel)/clients/web/rtylr"
+# Hooks can supply a relative work tree; preserve it before changing directories.
+GIT_WORK_TREE="$(git rev-parse --show-toplevel)"
+export GIT_WORK_TREE
+cd "$GIT_WORK_TREE/clients/app"
 pnpm exec lint-staged
 
 echo "Checking OneKit boundary..."

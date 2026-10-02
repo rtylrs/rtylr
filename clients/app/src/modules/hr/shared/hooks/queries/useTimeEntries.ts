@@ -1,0 +1,68 @@
+import { unwrap } from '@voxire/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type {
+  ListTimeEntriesRequest,
+  ListTimeEntriesResponse,
+} from '@voxire/voxie/hr/time_entry/v1/types';
+import type {
+  CreateTimeEntryRequest,
+  CreateTimeEntryResponse,
+} from '@voxire/voxie/hr/time_entry/v1/types';
+import { hrTransport } from '../../lib/clients';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+
+export const useListTimeEntries = (
+  params: ListTimeEntriesRequest,
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<ListTimeEntriesResponse>({
+    queryKey: ['hr', 'time-entries', 'filter', params],
+    enabled: options?.enabled ?? true,
+    queryFn: async (): Promise<ListTimeEntriesResponse> => {
+      const res = await unwrap(
+        hrTransport.get<ListTimeEntriesResponse>('/hr/time-entries', { params })
+      );
+      return res as ListTimeEntriesResponse;
+    },
+  });
+};
+
+export const useCreateTimeEntry = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation('hrCommon');
+
+  return useMutation({
+    mutationFn: async (data: CreateTimeEntryRequest): Promise<CreateTimeEntryResponse> => {
+      const res = await unwrap(hrTransport.post<CreateTimeEntryResponse>('/hr/time-entries', data));
+      return res as CreateTimeEntryResponse;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hr', 'time-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['hr', 'timesheets'] });
+      toast.success(t('hrTimeLogging.created'));
+    },
+    onError: () => {
+      toast.error(t('hrErrors.generic'));
+    },
+  });
+};
+
+export const useDeleteTimeEntry = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation('hrCommon');
+
+  return useMutation({
+    mutationFn: async (id: number): Promise<void> => {
+      await unwrap(hrTransport.delete(`/hr/time-entries/${id}`));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hr', 'time-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['hr', 'timesheets'] });
+      toast.success(t('hrTimeLogging.deleted'));
+    },
+    onError: () => {
+      toast.error(t('hrErrors.generic'));
+    },
+  });
+};

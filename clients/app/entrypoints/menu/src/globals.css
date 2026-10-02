@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+@import '../../../../packages/tailwind-config/theme.css';
+
+/* v4 auto-detects content relative to this CSS file. We add an
+ * explicit @source for the cross-workspace packages we pull classes
+ * from (shared components, menu package, etc.). The shared
+ * `@voxire/tailwind-config` theme extensions are ported below into
+ * v4's native `@theme` block - JS configs via `@config` break v4's
+ * auto content scanner in monorepo setups. */
+@source '../../../../packages/**/*.{ts,tsx}';
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 9999px;
+  }
+}
+
+/* CSS custom properties used by @voxire/menu package */
+:root {
+  --menu-accent: #03aed2;
+  --menu-accent-text: #ffffff;
+  --menu-bg: #ffffff;
+}

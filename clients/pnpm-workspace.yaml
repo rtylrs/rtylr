@@ -4,11 +4,10 @@
 # must resolve the same files, not merely the same versions.
 packages:
   - 'packages/*'
-  - 'web/rtylr'
-  - 'web/rtylr/apps/*'
+  - 'app'
   - 'web/landing'
   - 'web/docs'
-  - 'web/mcp'
+  - 'mcp'
   - 'pos'
 
 onlyBuiltDependencies:

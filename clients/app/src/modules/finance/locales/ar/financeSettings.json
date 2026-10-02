@@ -1,0 +1,44 @@
+{
+  "title": "الإعدادات",
+  "reset": "تمت إعادة ضبط الإعدادات",
+  "saved": "تم حفظ الإعدادات",
+  "company": {
+    "heading": "الشركة",
+    "name": "اسم الشركة",
+    "billingEmail": "بريد الفوترة",
+    "brandColor": "لون العلامة",
+    "logoUrl": "رابط الشعار",
+    "uploadLogo": "رفع الشعار"
+  },
+  "invoicing": {
+    "heading": "الفوترة",
+    "prefix": "بادئة رقم الفاتورة",
+    "defaultTaxRate": "نسبة الضريبة الافتراضية (%)",
+    "lateFee": "رسوم التأخير (%)",
+    "gracePeriod": "فترة السماح (أيام)",
+    "defaultNotes": "ملاحظات افتراضية"
+  },
+  "accounting": {
+    "heading": "المحاسبة",
+    "currency": "العملة",
+    "fiscalYearStart": "بداية السنة المالية"
+  },
+  "shortcuts": {
+    "heading": "الاختصارات",
+    "globalSearch": "البحث العام",
+    "newInvoice": "فاتورة جديدة",
+    "newExpense": "مصروف جديد",
+    "focusSearch": "الانتقال إلى البحث"
+  },
+  "team": {
+    "accessTitle": "صلاحيات الفريق",
+    "accessDescription": "أدِر الأعضاء والمجموعات وتراخيص التطبيقات والصلاحيات معًا في Dash.",
+    "accessAction": "فتح إدارة الفريق"
+  },
+  "tabs": {
+    "general": "عام",
+    "team": "الفريق"
+  },
+  "resetAction": "إعادة ضبط",
+  "localPersistence": "تُحفظ التغييرات في هذا المتصفح للنشاط التجاري المحدد."
+}

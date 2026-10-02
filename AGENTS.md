@@ -9,12 +9,11 @@ This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch,
 | Path               | Responsibility                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- |
 | `clients/`         | pnpm workspace root; every JavaScript/TypeScript package lives under it                      |
-| `clients/web/rtylr/apps/` | Auth, Portal, CRM, ERP, HR, Finance, Flow, Recruit and Menu frontends               |
-| `clients/web/rtylr/apps/portal/` | Shared web workspace; Home and Insights modules, team and account settings |
+| `clients/app/` | Single Portal package; business modules in `src/modules`, SSO and public Menu/Recruit entrypoints in `entrypoints/` |
 | `clients/web/landing/` | Next.js marketing site, public legal pages and localized copy; production uses static export |
 | `clients/pos/`     | POS frontend and native/Tauri code; web and native checks are separate                       |
 | `clients/web/docs/` | Product documentation site                                                                  |
-| `clients/web/mcp/` | MCP server and tool integration                                                             |
+| `clients/mcp/` | MCP server and tool integration                                                             |
 | `clients/packages/` | Shared `@voxire/*` libraries and the generated contracts package; changes can affect multiple products |
 | `voxie/`           | API contracts (`.onk`) and the generated Go/TypeScript/OpenAPI output consumed on both sides  |
 | `services/onion/`  | Go backend: modules, platform packages, sqlc, worker                                         |
@@ -29,7 +28,7 @@ Deployment repositories (`tryrtylr/deploy`, `tryrtylr/infra`, `tryrtylr/pipeline
 - Follow nearby feature structure and existing shared components, hooks, API helpers and styling conventions. Keep shared behavior in the appropriate package instead of copying it between apps.
 - Keep TypeScript types meaningful. Avoid `any`, unsafe assertions and suppressed errors as substitutes for understanding a contract.
 - Use the established generated-client/API boundary and result/error conventions. Do not invent request fields, bypass transport helpers or hand-edit generated code. Contract changes belong in `voxie/api/`; run `make -C voxie generate` so the contract, its generated consumers and the Go handlers land in one change.
-- `voxie/gen/` is generated and gitignored. Never commit it; regenerate with `make -C voxie generate` (or `pnpm --filter rtylr typecheck`, which generates it when missing) instead of editing it.
+- `voxie/gen/` is generated and gitignored. Never commit it; regenerate with `make -C voxie generate` (or `pnpm -C clients --filter @rtylr/portal typecheck`, which generates it when missing) instead of editing it.
 - Preserve tenant boundaries, authorization, offline behavior and account/session handling. Client-side visibility is not server-side authorization. Surface failures honestly instead of disguising them as empty or successful results.
 - Keep user-facing text in the existing locale system. Update affected English, French and Arabic resources together, preserve interpolation and check RTL where relevant. Do not enable an unshipped locale just because its strings exist.
 - Preserve accessible names, keyboard behavior, focus, semantic markup and loading/error states when changing UI.
@@ -57,30 +56,30 @@ Run package-specific scripts with `pnpm -C clients --filter <package-name> <scri
 Examples, all invoked from the repository root:
 
 ```sh
-# One app; replace @rtylr/auth with the affected package.
-pnpm -C clients --filter @rtylr/auth typecheck
-pnpm -C clients --filter @rtylr/auth build
+# Portal and public entrypoints.
+pnpm -C clients --filter @rtylr/portal typecheck
+pnpm -C clients --filter @rtylr/portal build
 
 # Focused main-frontend/shared-package tests; supply actual test-file paths.
-clients/web/rtylr/scripts/vitest.sh run clients/web/rtylr/apps/auth/src/features/register/Register.test.tsx
+clients/app/scripts/vitest.sh run clients/app/entrypoints/auth/src/features/register/Register.test.tsx
 
 # Full main-frontend/shared-package suite, including its collected-file check.
-pnpm -C clients/web/rtylr test
+pnpm -C clients/app test
 
 # Broader main-frontend checks when the change warrants them.
-pnpm -C clients -r --filter './web/rtylr/apps/*' typecheck
+pnpm -C clients -r --filter @rtylr/portal typecheck:all
 pnpm -C clients -r --filter './packages/*' typecheck
-pnpm -C clients -r --filter './web/rtylr/apps/*' build
+pnpm -C clients -r --filter @rtylr/portal build
 
 # Landing checks read exported HTML, so build first.
 pnpm -C clients --filter @rtylr/landing build
 pnpm -C clients --filter @rtylr/landing test:unit
 
 # Check changed app transport boundaries.
-pnpm -C clients/web/rtylr contracts:enforce
+pnpm -C clients/app contracts:enforce
 ```
 
-pnpm filters are relative to the workspace root at `clients/`. Some aggregate scripts under `clients/web/rtylr` use workspace-root-relative filters: verify what actually ran. **“No projects matched” or zero collected tests is not a successful check.** Use explicit `pnpm -C clients` filters when needed. Inspect scripts again before relying on this workaround.
+pnpm filters are relative to the workspace root at `clients/`. Some aggregate scripts under `clients/app` use workspace-root-relative filters: verify what actually ran. **“No projects matched” or zero collected tests is not a successful check.** Use explicit `pnpm -C clients` filters when needed. Inspect scripts again before relying on this workaround.
 
 ## Testing that earns its cost
 

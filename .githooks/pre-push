@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
 echo "Running tests, typecheck and build before push..."
-cd clients/web/rtylr
+set -e
+GIT_WORK_TREE="$(git rev-parse --show-toplevel)"
+export GIT_WORK_TREE
+cd "$GIT_WORK_TREE/clients/app"
 pnpm test && pnpm build

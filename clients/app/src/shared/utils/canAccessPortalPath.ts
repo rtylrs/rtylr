@@ -1,0 +1,131 @@
+import { canAccessPosPath } from '../../modules/pos/navigation';
+import { canAccessRecruitPath } from '../../modules/recruit/navigation';
+import { canAccessHrPath } from '../../modules/hr/navigation';
+import { canAccessFinancePath } from '../../modules/finance/navigation';
+import { canAccessErpPath } from '../../modules/erp/navigation';
+import { canAccessCrmPath } from '../../modules/crm/navigation';
+import type { StoredUser } from '../stores/userStore';
+import { canEffectiveAccess, hasEffectiveAppAccess } from '@voxire/permissions';
+
+const DASH_ROUTE_PERMISSIONS: Array<[string, string]> = [
+  ['/extensions', 'hub:business:settings:view'],
+  ['/team/invite', 'hub:team:invite'],
+  ['/team/groups', 'hub:groups:manage'],
+  ['/team', 'hub:team:view'],
+  ['/roles', 'hub:roles:view'],
+  ['/audit', 'hub:audit:view'],
+  ['/api-keys', 'hub:api_keys:manage'],
+  ['/webhooks', 'hub:api_keys:manage'],
+  ['/settings/billing', 'hub:billing:view'],
+  ['/settings', 'hub:business:settings:view'],
+  ['/menus', 'menu:menus:view'],
+  ['/menu', 'menu:menus:view'],
+  ['/orders', 'menu:orders:view'],
+  ['/qr-codes', 'menu:menus:view'],
+  ['/design', 'menu:branding:edit'],
+  ['/customers', 'crm:customers:view'],
+  ['/products', 'erp:products:view'],
+];
+
+export function canAccessPortalPath(user: StoredUser | null, pathname: string): boolean {
+  pathname = pathname.replace(/\/+$/, '') || '/';
+  if (!user?.effectiveAccess) return false;
+  if (user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin) return true;
+  if (
+    pathname === '/recruit' ||
+    pathname.startsWith('/recruit/') ||
+    pathname === '/settings/recruit'
+  )
+    return canAccessRecruitPath(user, pathname);
+  if (pathname === '/pos' || pathname.startsWith('/pos/') || pathname === '/settings/pos')
+    return canAccessPosPath(user, pathname);
+  if (
+    pathname === '/hr' ||
+    pathname.startsWith('/hr/') ||
+    pathname === '/settings/hr' ||
+    pathname.startsWith('/settings/hr/')
+  )
+    return canAccessHrPath(user, pathname);
+  if (
+    pathname === '/finance' ||
+    pathname.startsWith('/finance/') ||
+    pathname === '/settings/finance'
+  )
+    return canAccessFinancePath(user, pathname);
+  if (pathname === '/erp' || pathname.startsWith('/erp/') || pathname === '/settings/erp')
+    return canAccessErpPath(user, pathname);
+  if (pathname === '/crm' || pathname.startsWith('/crm/') || pathname === '/settings/crm')
+    return canAccessCrmPath(user, pathname);
+  if (pathname === '/settings') return true;
+  if (pathname === '/settings/flow') return hasEffectiveAppAccess(user.effectiveAccess, 'flow');
+  if (pathname === '/settings/insights')
+    return (
+      hasEffectiveAppAccess(user.effectiveAccess, 'insights') &&
+      ['insights:dashboard:view', 'insights:settings:edit'].some((permission) =>
+        canEffectiveAccess(user.effectiveAccess, permission)
+      )
+    );
+  if (pathname === '/flow' || pathname.startsWith('/flow/')) {
+    if (!hasEffectiveAppAccess(user.effectiveAccess, 'flow')) return false;
+    if (
+      pathname === '/flow' ||
+      pathname === '/flow/start' ||
+      pathname.startsWith('/flow/settings') ||
+      pathname.startsWith('/flow/u/') ||
+      pathname === '/flow/leave' ||
+      pathname.startsWith('/flow/time') ||
+      pathname === '/flow/directory' ||
+      pathname === '/flow/presence' ||
+      pathname === '/flow/inbox'
+    )
+      return true;
+    const projects = [
+      '/flow/projects',
+      '/flow/p/',
+      '/flow/cycles',
+      '/flow/milestones',
+      '/flow/roadmap',
+      '/flow/team',
+      '/flow/views',
+      '/flow/insights',
+    ];
+    return canEffectiveAccess(
+      user.effectiveAccess,
+      projects.some(
+        (prefix) =>
+          pathname === prefix || pathname.startsWith(prefix.endsWith('/') ? prefix : `${prefix}/`)
+      )
+        ? 'flow:projects:view'
+        : 'flow:tasks:view'
+    );
+  }
+  if (pathname === '/insights' || pathname.startsWith('/insights/')) {
+    if (!hasEffectiveAppAccess(user.effectiveAccess, 'insights')) return false;
+    if (pathname === '/insights/reports') {
+      return ['insights:reports:create', 'insights:reports:export', 'insights:reports:share'].some(
+        (permission) => canEffectiveAccess(user.effectiveAccess, permission)
+      );
+    }
+    const permission =
+      pathname === '/insights/financial'
+        ? 'insights:financial:view'
+        : pathname === '/insights/customers'
+          ? 'insights:customers:view'
+          : 'insights:dashboard:view';
+    return canEffectiveAccess(user.effectiveAccess, permission);
+  }
+  if (
+    pathname === '/' ||
+    pathname === '/caret' ||
+    pathname === '/chat' ||
+    pathname === '/settings/account' ||
+    pathname === '/security' ||
+    pathname === '/notifications'
+  ) {
+    return true;
+  }
+  const match = DASH_ROUTE_PERMISSIONS.find(
+    ([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+  return match ? canEffectiveAccess(user.effectiveAccess, match[1]) : false;
+}

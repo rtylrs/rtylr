@@ -57,10 +57,10 @@ jobs:
 
           component_for() {
             case "$1" in
-              clients/web/rtylr|clients/web/rtylr/*) echo rtylr ;;
+              clients/app|clients/app/*) echo rtylr ;;
               clients/web/landing|clients/web/landing/*) echo landing ;;
               clients/web/docs|clients/web/docs/*) echo docs ;;
-              clients/web/mcp|clients/web/mcp/*) echo mcp ;;
+              clients/mcp|clients/mcp/*) echo mcp ;;
               clients/pos|clients/pos/*) echo pos ;;
               clients/packages|clients/packages/*) echo packages ;;
               clients|clients/*) echo clients ;;
@@ -96,10 +96,10 @@ jobs:
 
           component_path() {
             case "$1" in
-              rtylr) echo clients/web/rtylr ;;
+              rtylr) echo clients/app ;;
               landing) echo clients/web/landing ;;
               docs) echo clients/web/docs ;;
-              mcp) echo clients/web/mcp ;;
+              mcp) echo clients/mcp ;;
               pos) echo clients/pos ;;
               packages) echo clients/packages ;;
               clients) echo clients ;;

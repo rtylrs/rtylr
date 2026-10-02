@@ -232,7 +232,7 @@ export const useUserStore = create<UserState & UserActions>()(
       },
     }),
     {
-      name: 'user-store',
+      name: 'pos-user-store',
       version: 1,
       partialize: (state) => ({
         user: state.user,

@@ -1,0 +1,164 @@
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { initTestI18n } from '../../../shared/testing/i18n';
+import enRolesPermissions from '../../../locales/en/hrRolesPermissions.json';
+
+// This app's i18n bootstrap (`shared/services/i18next.ts`) loads every
+// namespace file into a single 'translation' namespace, keyed by filename, so
+// `t('hrRolesPermissions.save')` resolves as a dot-path within that one
+// namespace. Reproduce that here with the real, shipped English copy so the
+// assertions below check actual production strings, not raw i18n keys.
+beforeEach(async () => {
+  await initTestI18n();
+});
+
+const mocks = vi.hoisted(() => ({
+  useListRoles: vi.fn(),
+  useListPermissionCatalog: vi.fn(),
+  useCreateRole: vi.fn(),
+  useUpdateRole: vi.fn(),
+}));
+
+vi.mock('../../../shared/hooks/queries/useRoles', () => ({
+  useListRoles: mocks.useListRoles,
+  useListPermissionCatalog: mocks.useListPermissionCatalog,
+  useCreateRole: mocks.useCreateRole,
+  useUpdateRole: mocks.useUpdateRole,
+}));
+
+vi.mock('@voxire/components', () => ({
+  HelmetContainer: () => null,
+}));
+
+import RolesPermissions from './RolesPermissions';
+
+const catalog = [
+  { key: 'manage_employees', label: 'Manage employees', description: '', category: 'employees' },
+  { key: 'approve_time_off', label: 'Approve time off', description: '', category: 'time_off' },
+];
+
+const roles = [
+  {
+    id: 1,
+    ownerId: 1001,
+    name: 'Manager',
+    description: 'Team manager',
+    permissions: { approve_time_off: true },
+    isSystem: true,
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  },
+];
+
+describe('RolesPermissions', () => {
+  const updateMutate = vi.fn();
+
+  beforeEach(() => {
+    updateMutate.mockReset();
+    mocks.useListRoles.mockReturnValue({ data: roles, isLoading: false, isError: false });
+    mocks.useListPermissionCatalog.mockReturnValue({
+      data: catalog,
+      isLoading: false,
+      isError: false,
+    });
+    mocks.useCreateRole.mockReturnValue({ mutate: vi.fn(), isPending: false });
+    mocks.useUpdateRole.mockReturnValue({ mutate: updateMutate, isPending: false });
+  });
+
+  it('shows a loading state while roles are fetching', () => {
+    mocks.useListRoles.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+    render(<RolesPermissions />);
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+
+  it('shows a retryable error state when roles fail to load', () => {
+    mocks.useListRoles.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    render(<RolesPermissions />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load roles');
+  });
+
+  it('shows the error state when only the permission catalog fails to load', () => {
+    mocks.useListPermissionCatalog.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
+    render(<RolesPermissions />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load roles');
+  });
+
+  it('renders each role with its granted/total permission count', () => {
+    render(<RolesPermissions />);
+    expect(screen.getByText('Manager')).toBeInTheDocument();
+    expect(screen.getByText('1/2 permissions')).toBeInTheDocument();
+  });
+
+  it('toggling a permission and saving calls updateRole with the merged permissions JSON', () => {
+    render(<RolesPermissions />);
+
+    fireEvent.click(screen.getByText('Manager'));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Manage employees' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(updateMutate).toHaveBeenCalledWith({
+      id: 1,
+      name: 'Manager',
+      description: 'Team manager',
+      permissions: JSON.stringify({ approve_time_off: true, manage_employees: true }),
+    });
+  });
+
+  it('re-seeds the permission buffer when a refetch reports a newer snapshot', () => {
+    const { rerender } = render(<RolesPermissions />);
+
+    // Another admin granted a permission while this card was open. Every
+    // mutation invalidates ['roles'], so the list refetches and updates the
+    // prop without remounting the card (keyed by role.id).
+    mocks.useListRoles.mockReturnValue({
+      data: [{ ...roles[0], permissions: { approve_time_off: true, manage_employees: true } }],
+      isLoading: false,
+      isError: false,
+    });
+    rerender(<RolesPermissions />);
+
+    expect(screen.getByText('2/2 permissions')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Manager'));
+
+    expect(screen.getByRole('checkbox', { name: 'Manage employees' })).toBeChecked();
+    // Nothing was edited locally, so Save must not be offered: a click would
+    // PUT the mount-time buffer and revert the other admin's grant.
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('keeps in-progress edits when a refetch returns the same snapshot', () => {
+    const { rerender } = render(<RolesPermissions />);
+
+    fireEvent.click(screen.getByText('Manager'));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Manage employees' }));
+    expect(screen.getByRole('checkbox', { name: 'Manage employees' })).toBeChecked();
+
+    rerender(<RolesPermissions />);
+
+    expect(screen.getByRole('checkbox', { name: 'Manage employees' })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+  });
+
+  it('creating a role calls createRole with the entered name', () => {
+    const createMutate = vi.fn();
+    mocks.useCreateRole.mockReturnValue({ mutate: createMutate, isPending: false });
+
+    render(<RolesPermissions />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add role' }));
+    fireEvent.change(screen.getByPlaceholderText('Role name'), { target: { value: 'Shift Lead' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create role' }));
+
+    expect(createMutate.mock.calls[0][0]).toEqual({
+      name: 'Shift Lead',
+      description: '',
+      permissions: '{}',
+    });
+  });
+});

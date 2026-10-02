@@ -1,0 +1,15 @@
+:root {
+  --recruit-admin-bg: var(--dash-surface);
+  --recruit-admin-card: var(--dash-surface);
+  --recruit-admin-border: var(--dash-border);
+}
+.portal-page.is-recruit {
+  padding: 0;
+}
+.portal-page.is-recruit :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--dash-text-dim);
+  outline-offset: 2px;
+}
+.portal-page.is-recruit table {
+  box-shadow: none;
+}

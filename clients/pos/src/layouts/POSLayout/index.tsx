@@ -1,3 +1,4 @@
+import { usePOSPortal } from '../../shared/components/PortalContext';
 import React from 'react';
 import {
   buildCaretRouteContext,
@@ -84,6 +85,7 @@ function selectedOrderId(pathname: string): string | null {
 }
 
 const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
+  const embedded = usePOSPortal();
   const location = useLocation();
   const { theme, toggleTheme } = useThemeStore();
   const endSession = useEmployeeSessionStore((s) => s.endSession);
@@ -191,6 +193,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
     ]
   );
 
+  if (embedded) return <div className="flex h-full min-h-0 flex-col bg-pos-bg text-pos-text">{children}</div>;
   return (
     <div className="flex flex-col h-screen bg-pos-bg text-pos-text" data-theme={theme}>
       <header className="flex items-center justify-between px-5 py-3 bg-pos-card border-b border-pos-border shrink-0">

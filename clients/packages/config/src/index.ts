@@ -10,3 +10,5 @@ export * from './flags';
 export * from './appGuards';
 export * from './serviceUrls';
 export * from './portal';
+
+export { RECRUIT_PUBLIC_URL } from './apps';
