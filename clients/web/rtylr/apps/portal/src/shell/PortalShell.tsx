@@ -53,7 +53,8 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const { data: notifications = [] } = useNotifications();
   const { data: addons = [] } = useAddons();
   const unreadCount = notifications.filter((notification) => !notification.read).length;
-  const isSettings = pathname.startsWith('/settings') || pathname === '/security';
+  const isSettings =
+    pathname.startsWith('/settings') || ['/security', '/api-keys', '/webhooks'].includes(pathname);
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
   const availableInsights = insightsNavItems.filter((item) => canAccessPortalPath(user, item.path));
   const insightsPage = insightsNavItems.find((item) => item.path === pathname);

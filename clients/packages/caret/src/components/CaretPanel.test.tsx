@@ -73,7 +73,7 @@ describe("CaretPanel history loading", () => {
     expect(document.activeElement).toBe(button);
     expect(screen.queryByRole("complementary", { name: "Caret AI assistant" })).toBeNull();
     act(() => useCaretStore.getState().open());
-    expect(screen.getByRole("textbox", { name: "Message Caret" })).toHaveFocus();
+    expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Message Caret" }));
   });
   it("keeps a prompt sent while the history request is in flight", async () => {
     renderPanel();

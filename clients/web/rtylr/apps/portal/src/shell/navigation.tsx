@@ -15,6 +15,8 @@ import {
   Sparkles,
   QrCode,
   Palette,
+  KeyRound,
+  Webhook,
 } from 'lucide-react';
 import { HomeIcon, MenuIcon } from '@voxire/ui';
 import type { ComponentType } from 'react';
@@ -49,6 +51,8 @@ export const settingsNavItems: PortalNavItem[] = [
   { key: 'billing', path: '/settings/billing', icon: CreditCard },
   { key: 'addons', path: '/settings/addons', icon: Puzzle },
   { key: 'integrations', path: '/settings/integrations', icon: Plug2 },
+  { key: 'apiKeys', path: '/api-keys', icon: KeyRound },
+  { key: 'webhooks', path: '/webhooks', icon: Webhook },
 ];
 export const addonSettingsItems = [
   { key: 'customDomain', path: '/settings/domain', icon: Globe, addonId: 'custom_domain' },

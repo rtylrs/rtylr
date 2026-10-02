@@ -6,6 +6,9 @@ const DASH_ROUTE_PERMISSIONS: Array<[string, string]> = [
   ['/team/groups', 'hub:groups:manage'],
   ['/team', 'hub:team:view'],
   ['/roles', 'hub:roles:view'],
+  ['/audit', 'hub:audit:view'],
+  ['/api-keys', 'hub:api_keys:manage'],
+  ['/webhooks', 'hub:api_keys:manage'],
   ['/settings/billing', 'hub:billing:view'],
   ['/settings', 'hub:business:settings:view'],
   ['/menus', 'menu:menus:view'],
@@ -43,6 +46,8 @@ export function canAccessPortalPath(user: StoredUser | null, pathname: string): 
   ) {
     return true;
   }
-  const match = DASH_ROUTE_PERMISSIONS.find(([prefix]) => pathname.startsWith(prefix));
+  const match = DASH_ROUTE_PERMISSIONS.find(
+    ([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
   return match ? canEffectiveAccess(user.effectiveAccess, match[1]) : false;
 }

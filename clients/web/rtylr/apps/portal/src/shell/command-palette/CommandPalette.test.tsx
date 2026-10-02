@@ -146,6 +146,26 @@ describe('Portal command launcher', () => {
     expect(external).not.toHaveBeenCalled();
   });
 
+  it('offers delegated audit and developer access while hiding unrelated management pages', async () => {
+    const ui = userEvent.setup();
+    useUserStore.setState({
+      user: {
+        effectiveAccess: createEffectiveAccess('insights', {
+          permissions: ['insights:dashboard:view'],
+          dashPermissions: ['hub:audit:view', 'hub:api_keys:manage'],
+        }),
+      },
+    });
+    render(<Launcher />);
+    await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
+    expect(screen.getByRole('option', { name: 'Audit Log' })).toBeVisible();
+    expect(screen.getByRole('option', { name: 'API Keys' })).toBeVisible();
+    expect(screen.getByRole('option', { name: 'Webhooks' })).toBeVisible();
+    expect(screen.queryByRole('option', { name: 'Add a member' })).toBeNull();
+    await ui.click(screen.getByRole('option', { name: 'Audit Log' }));
+    expect(navigate).toHaveBeenCalledWith({ to: '/audit' });
+  });
+
   it('searches app descriptions and safely opens an app that has not moved into Portal', async () => {
     const ui = userEvent.setup();
     const external = vi.spyOn(window, 'open').mockImplementation(() => null);
