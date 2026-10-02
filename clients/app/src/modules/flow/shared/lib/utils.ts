@@ -27,12 +27,13 @@ export function getInitials(name?: string | null): string {
 export function formatShortDate(date: string, locale = 'en-US'): string {
   if (!date || String(date).trim() === '') return '-';
   const d = new Date(date);
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  // Date-only values have no timezone; timestamps still use the viewer's zone.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) options.timeZone = 'UTC';
   try {
-    return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(locale, options);
   } catch {
-    // The locale comes from translation resources; if it is ever not a valid
-    // BCP 47 tag, render in the default rather than take the screen down.
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString('en-US', options);
   }
 }
 

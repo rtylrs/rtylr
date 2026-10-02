@@ -13,6 +13,8 @@ import { captureForPR, captureResponsivePair } from './support/screenshot';
 const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5197/flow';
 const API_HOST = 'http://localhost:9999';
 
+test.use({ timezoneId: 'America/Los_Angeles' });
+
 const FAKE_USER = {
   id: '1001',
   email: 'owner@test.local',
@@ -327,6 +329,7 @@ test.describe('Flow - Task Detail', () => {
         FAKE_TASK_DETAIL.task.title
       );
       const trigger = drawer.locator('.flow-due-date-trigger');
+      if (language === 'en') await expect(trigger).toContainText('Oct 9');
       await trigger.click();
       const picker = page.getByRole('dialog', { name: flow.taskDetail.dueDate, exact: true });
       await expect(picker).toBeVisible();
