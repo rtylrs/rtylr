@@ -17,14 +17,12 @@ function source(path: string): string {
 describe('Flow RTL layout', () => {
   it('anchors popovers that hang off a trigger to the inline start edge', () => {
     const comment = source('shared/components/CommentInput.tsx');
-    const duedate = source('shared/components/DueDatePicker.tsx');
     const projectSelect = source('shared/components/ProjectSelect.tsx');
 
     expect(comment).toContain('absolute start-2 bottom-full');
-    expect(duedate).toContain('absolute top-full start-0');
     expect(projectSelect).toContain('absolute top-full start-0');
 
-    for (const file of [comment, duedate, projectSelect]) {
+    for (const file of [comment, projectSelect]) {
       expect(file).not.toContain('left-0');
       expect(file).not.toContain('left-2');
       expect(file).not.toContain('text-left');

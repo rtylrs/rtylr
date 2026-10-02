@@ -38,7 +38,7 @@ export const TaskDrawer: React.FC = () => {
         closeLabel={t('flowCommon.close')}
         aria-describedby={undefined}
       >
-        <DialogTitle className="px-6 py-4 text-flow-body font-medium">
+        <DialogTitle className="flow-task-drawer-title px-6 py-4 text-flow-body font-medium">
           {t('flow.taskDetail.drawerLabel')}
         </DialogTitle>
         <div className="min-h-0 flex-1 overflow-y-auto">
