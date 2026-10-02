@@ -3,7 +3,6 @@ import {
   Gift,
   Megaphone,
   Filter,
-  Zap,
   FileText,
   MessageSquare,
   Kanban,
@@ -20,7 +19,6 @@ export const crmNavItems = [
   { key: 'loyalty', path: '/crm/loyalty', icon: Gift },
   { key: 'campaigns', path: '/crm/campaigns', icon: Megaphone },
   { key: 'segments', path: '/crm/segments', icon: Filter },
-  { key: 'automations', path: '/crm/automations', icon: Zap },
   { key: 'templates', path: '/crm/templates', icon: FileText },
   { key: 'feedback', path: '/crm/feedback', icon: MessageSquare },
 ] as const;
@@ -65,6 +63,7 @@ export function canAccessCrmPath(user: StoredUser | null, pathname: string): boo
 export function getCrmHomePath(user: StoredUser | null): string {
   if (canEffectiveAccess(user?.effectiveAccess, 'crm:customers:view', 'crm')) return '/crm';
   return (
-    crmNavItems.slice(1).find((item) => canAccessCrmPath(user, item.path))?.path ?? '/settings/crm'
+    crmNavItems.slice(1).find((item) => canAccessCrmPath(user, item.path))?.path ??
+    (canAccessCrmPath(user, '/crm/automations') ? '/automations' : '/settings/crm')
   );
 }

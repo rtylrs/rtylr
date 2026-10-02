@@ -66,6 +66,7 @@ dummy-non-existing-folder/
 
 # e2e screenshots are review artefacts for PR bodies, not fixtures.
 e2e/__screenshots__/
+clients/app/e2e/__screenshots__/
 
 # Machine-readable record of the last suite run, so a flake that appears once
 # leaves evidence behind. See rtylr#988.

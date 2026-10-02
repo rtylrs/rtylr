@@ -114,7 +114,8 @@ export function PortalNavLink({
     path === '/hr' ||
     path === '/pos' ||
     path === '/crm/sales' ||
-    path === '/settings'
+    path === '/settings' ||
+    path === '/automations'
       ? pathname === path
       : path === '/team'
         ? pathname === '/team' ||

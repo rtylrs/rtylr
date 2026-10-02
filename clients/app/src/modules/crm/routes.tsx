@@ -30,8 +30,6 @@ const CampaignDetail = React.lazy(() => import('./features/campaigns/CampaignDet
 const Segments = React.lazy(() => import('./features/segments/Segments'));
 const SegmentBuilder = React.lazy(() => import('./features/segments/SegmentBuilder'));
 const SegmentDetail = React.lazy(() => import('./features/segments/SegmentDetail'));
-const Automations = React.lazy(() => import('./features/automations/Automations'));
-const AutomationBuilder = React.lazy(() => import('./features/automations/AutomationBuilder'));
 const Templates = React.lazy(() => import('./features/templates/Templates'));
 const Feedback = React.lazy(() => import('./features/feedback/Feedback'));
 const Pipeline = React.lazy(() => import('./features/sales/Pipeline'));
@@ -195,7 +193,7 @@ export function createCrmRoutes<TParent extends AnyRoute>(parent: TParent) {
   const automationsRoute = createRoute({
     getParentRoute: () => layoutRoute,
     path: '/automations',
-    component: () => <>{lazy(<Automations />)}</>,
+    component: () => <Navigate to="/automations" replace />,
   });
 
   const automationsNewRoute = createRoute({
@@ -204,7 +202,9 @@ export function createCrmRoutes<TParent extends AnyRoute>(parent: TParent) {
     validateSearch: z.object({
       id: z.number().int().positive().optional().catch(undefined),
     }),
-    component: () => <>{lazy(<AutomationBuilder />)}</>,
+    component: () => (
+      <Navigate to="/automations/new" search={automationsNewRoute.useSearch()} replace />
+    ),
   });
 
   // Templates, feedback, settings

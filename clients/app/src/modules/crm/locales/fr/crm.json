@@ -597,7 +597,8 @@
   "automationTriggers": {
     "customer_signup": "Nouveau client",
     "tag_added": "Étiquette ajoutée",
-    "points_threshold": "Seuil de points"
+    "points_threshold": "Seuil de points",
+    "order_created": "Commande créée"
   },
   "automationTriggerDescriptions": {
     "customer_signup": "Quand un client est créé",

@@ -36,6 +36,8 @@ const CreateBanner = React.lazy(() => import('./features/menu/Components/CreateB
 const QrCodes = React.lazy(() => import('./features/qr-codes/QrCodes.tsx'));
 const QrCode = React.lazy(() => import('./features/qr-codes/QrCode.tsx'));
 const Design = React.lazy(() => import('./features/design/Design.tsx'));
+const Automations = React.lazy(() => import('./features/automations/Automations'));
+const AutomationBuilder = React.lazy(() => import('./features/automations/AutomationBuilder'));
 const CaretWorkspace = React.lazy(() => import('./features/caret/CaretWorkspace'));
 
 const SettingsOverview = React.lazy(() => import('./features/settings/SettingsOverview'));
@@ -108,6 +110,28 @@ const dashboardRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/',
   component: () => wrap(<Home />),
+});
+
+const automationsRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/automations',
+  component: () =>
+    wrap(
+      <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>
+        <Automations />
+      </AppFlagGuard>
+    ),
+});
+const automationBuilderRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/automations/new',
+  validateSearch: z.object({ id: z.number().int().positive().optional().catch(undefined) }),
+  component: () =>
+    wrap(
+      <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>
+        <AutomationBuilder key={automationBuilderRoute.useSearch().id ?? 'new'} />
+      </AppFlagGuard>
+    ),
 });
 
 const menusRoute = createRoute({
@@ -492,6 +516,8 @@ const routeTree = rootRoute.addChildren([
     createPosRoutes(businessRoute),
     createRecruitRoutes(businessRoute),
     dashboardRoute,
+    automationsRoute,
+    automationBuilderRoute,
     menusRoute,
     menuRoute,
     createItemRoute,

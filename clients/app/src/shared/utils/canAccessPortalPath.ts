@@ -30,6 +30,8 @@ const DASH_ROUTE_PERMISSIONS: Array<[string, string]> = [
 export function canAccessPortalPath(user: StoredUser | null, pathname: string): boolean {
   pathname = pathname.replace(/\/+$/, '') || '/';
   if (!user?.effectiveAccess) return false;
+  if (pathname === '/automations' || pathname === '/automations/new')
+    return canAccessCrmPath(user, '/crm/automations');
   if (user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin) return true;
   if (
     pathname === '/recruit' ||

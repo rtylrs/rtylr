@@ -615,7 +615,8 @@
   "automationTriggers": {
     "customer_signup": "عميل جديد",
     "tag_added": "أُضيف وسم",
-    "points_threshold": "حد النقاط"
+    "points_threshold": "حد النقاط",
+    "order_created": "إنشاء طلب"
   },
   "automationTriggerDescriptions": {
     "customer_signup": "عند إنشاء عميل",

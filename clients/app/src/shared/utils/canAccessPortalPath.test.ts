@@ -63,3 +63,40 @@ describe('remaining app member routes', () => {
     expect(canAccessPortalPath(user, '/settings/hr')).toBe(false);
   });
 });
+
+describe('standalone Automations access', () => {
+  it('allows automation managers at both canonical routes without granting other CRM features', () => {
+    const user = {
+      effectiveAccess: createEffectiveAccess('crm', { permissions: ['crm:automations:manage'] }),
+    };
+    expect(canAccessPortalPath(user, '/automations')).toBe(true);
+    expect(canAccessPortalPath(user, '/automations/new')).toBe(true);
+    expect(canAccessPortalPath(user, '/crm/automations/new')).toBe(true);
+    expect(canAccessPortalPath(user, '/crm/customers')).toBe(false);
+  });
+  it('does not widen access for other app members or unlicensed members', () => {
+    expect(
+      canAccessPortalPath(
+        { effectiveAccess: createEffectiveAccess('flow', { permissions: ['flow:tasks:view'] }) },
+        '/automations'
+      )
+    ).toBe(false);
+    expect(
+      canAccessPortalPath(
+        { effectiveAccess: createEffectiveAccess('crm', { permissions: ['crm:customers:view'] }) },
+        '/automations/new'
+      )
+    ).toBe(false);
+    expect(
+      canAccessPortalPath(
+        {
+          effectiveAccess: createEffectiveAccess('crm', {
+            permissions: ['crm:automations:manage'],
+            licensed: false,
+          }),
+        },
+        '/automations'
+      )
+    ).toBe(false);
+  });
+});

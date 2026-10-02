@@ -211,7 +211,10 @@
     "posSettings": "POS",
     "recruitSettings": "Recruit",
     "hrPayrollSettings": "HR payroll",
-    "hrLeaveSettings": "HR leave policy"
+    "hrLeaveSettings": "HR leave policy",
+    "automations": "Automations",
+    "automationWorkflows": "Workflows",
+    "newAutomation": "New automation"
   },
   "launch": "Launch",
   "pagination": {

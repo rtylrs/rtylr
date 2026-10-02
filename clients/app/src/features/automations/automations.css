@@ -1,0 +1,145 @@
+.portal-automations {
+  width: 100%;
+  min-width: 0;
+}
+.automation-filters {
+  display: flex;
+  gap: 12px;
+  margin-block: 24px;
+}
+.automation-filters input {
+  flex: 1;
+  min-width: 0;
+}
+.automation-filters :is(input, select),
+.automation-trigger select {
+  border: 1px solid var(--dash-border);
+  border-radius: 8px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.portal-automations :is(input, textarea, select, button):focus-visible {
+  outline: 2px solid var(--dash-text-dim);
+  outline-offset: 2px;
+}
+.automation-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border-top: 1px solid var(--dash-border);
+}
+.automation-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 1px solid var(--dash-border);
+  padding-block: 16px;
+}
+.automation-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: start;
+  color: var(--dash-text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+}
+.automation-open:hover {
+  background: var(--dash-hover);
+}
+.automation-open svg {
+  flex-shrink: 0;
+  color: var(--dash-text-dim);
+}
+.automation-open strong {
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.automation-open small {
+  display: block;
+  margin-top: 5px;
+  color: var(--dash-text-dim);
+  font-size: 12px;
+}
+.automation-status {
+  font-size: 12px;
+  color: var(--dash-text-dim);
+}
+.automation-row-actions {
+  display: flex;
+  gap: 2px;
+}
+.automation-empty {
+  text-align: center;
+  padding-block: 40px;
+  color: var(--dash-text-dim);
+}
+.automation-builder {
+  max-width: 860px;
+  margin-inline: auto;
+}
+.automation-builder form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.automation-trigger {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.automation-step {
+  border-top: 1px solid var(--dash-border);
+  padding-block: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.automation-step-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.automation-step-heading h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.automation-note {
+  color: var(--dash-text-dim);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .automation-filters {
+    flex-direction: column;
+  }
+  .automation-row {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .automation-open {
+    flex-basis: calc(100% - 100px);
+  }
+  .automation-status {
+    margin-inline-start: 39px;
+  }
+  .automation-row-actions {
+    margin-inline-start: auto;
+  }
+  .portal-automations > div:first-child {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+}

@@ -77,9 +77,9 @@ function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
   const triggerType =
     data.triggerType ?? data.nodes?.[0]?.automationType ?? triggerTypeFor(data.trigger);
   const triggerConfig =
-    data.triggerConfig && typeof data.triggerConfig === 'object'
-      ? (data.triggerConfig as Record<string, unknown>)
-      : {};
+    typeof data.triggerConfig === 'string'
+      ? z.record(z.string(), z.unknown()).parse(JSON.parse(data.triggerConfig))
+      : (data.triggerConfig ?? {});
   return {
     name: data.name ?? '',
     triggerType,

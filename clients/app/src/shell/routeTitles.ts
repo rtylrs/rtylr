@@ -1,5 +1,6 @@
 export const routeKeys: Record<string, string> = {
   '/': 'dashboard',
+  '/automations': 'automations',
   '/chat': 'chat',
   '/menus': 'menus',
   '/orders': 'orders',

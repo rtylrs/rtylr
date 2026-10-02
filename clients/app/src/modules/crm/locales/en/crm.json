@@ -591,7 +591,8 @@
   "automationTriggers": {
     "customer_signup": "New customer",
     "tag_added": "Tag added",
-    "points_threshold": "Points threshold"
+    "points_threshold": "Points threshold",
+    "order_created": "Order created"
   },
   "automationTriggerDescriptions": {
     "customer_signup": "When a customer is created",

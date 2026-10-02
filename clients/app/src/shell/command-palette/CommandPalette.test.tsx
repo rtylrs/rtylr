@@ -251,3 +251,18 @@ describe('Portal command launcher', () => {
     expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
   });
 });
+
+it('opens the standalone Automations tool once without retaining the CRM navigation entry', async () => {
+  useUserStore.setState({
+    user: {
+      effectiveAccess: createEffectiveAccess('crm', { permissions: ['crm:automations:manage'] }),
+    },
+  });
+  const ui = userEvent.setup();
+  render(<Launcher />);
+  await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
+  await ui.type(screen.getByRole('combobox'), 'automations');
+  expect(screen.getAllByRole('option')).toHaveLength(1);
+  await ui.keyboard('{Enter}');
+  expect(navigate).toHaveBeenCalledWith({ to: '/automations' });
+});
