@@ -1,6 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import path from 'node:path';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { initTestI18nFrom } from '../../../../../test/i18nTestInstance';
 import { BusinessRoute } from './BusinessRoute';
 import { useUserStore } from '../stores/userStore';
 
@@ -63,7 +66,7 @@ function accessDocument(
       licensed: true,
       hasAccess: true,
       permissions: grant.permissions,
-      permissionScopes: grant.permissions.map((permissionKey) => ({ permissionKey, scopes: [] })),
+      permissionScopes: grant.permissions.map((permissionKey) => ({ permissionKey })),
       sources: ['explicit'],
     })),
     isOwner: options.isOwner ?? false,
@@ -73,6 +76,8 @@ function accessDocument(
 }
 
 describe('BusinessRoute authorization', () => {
+  beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales')));
+
   beforeEach(() => {
     vi.clearAllMocks();
     useUserStore.setState({ user: null, token: null });
@@ -94,12 +99,54 @@ describe('BusinessRoute authorization', () => {
       id: 1,
       email: 'owner@example.com',
       businessId: 10,
-      effectiveAccess: accessDocument({ isOwner: true }),
+      effectiveAccess: accessDocument({
+        isOwner: true,
+        appGrants: [{ appId: 'flow', permissions: ['flow:tasks:view'] }],
+      }),
     });
 
     render(<BusinessRoute />);
 
     await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
+  });
+
+  it('shows a retryable error instead of cached member restrictions when account loading fails', async () => {
+    useUserStore.setState({
+      user: { id: 1, email: 'owner@example.com', fullName: 'Cached User', businessId: 10 },
+    });
+    mockGetMe.mockRejectedValueOnce(new Error('Authorization schema unavailable'));
+    mockGetMe.mockResolvedValueOnce({
+      id: 1,
+      email: 'owner@example.com',
+      businessId: 10,
+      effectiveAccess: accessDocument({ isOwner: true }),
+    });
+
+    render(<BusinessRoute />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load your account");
+    expect(screen.queryByText(/Welcome/i)).toBeNull();
+    expect(screen.queryByTestId('outlet')).toBeNull();
+    expect(mockGetConfig).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+    await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('shows an account error when a business profile has no valid authorization document', async () => {
+    mockGetMe.mockResolvedValue({
+      id: 1,
+      email: 'owner@example.com',
+      businessId: 10,
+    });
+
+    render(<BusinessRoute />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load your account");
+    expect(screen.queryByText(/Welcome/i)).toBeNull();
+    expect(screen.queryByTestId('outlet')).toBeNull();
   });
 
   it('allows the admin to enter Dash without per-page grants', async () => {

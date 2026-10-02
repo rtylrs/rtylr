@@ -256,5 +256,9 @@
   "accessRequested": "Demandé",
   "requestAccess": "Demander l’accès",
   "posMenuName": "Menu du point de vente",
-  "defaultPageTitle": "Rtylr - Menu sans contact par QR code"
+  "defaultPageTitle": "Rtylr - Menu sans contact par QR code",
+  "accountLoad": {
+    "title": "Impossible de charger votre compte",
+    "description": "Vos droits d’accès n’ont pas pu être vérifiés. Actualisez pour réessayer."
+  }
 }

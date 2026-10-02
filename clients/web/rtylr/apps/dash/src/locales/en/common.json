@@ -253,5 +253,9 @@
   "accessRequested": "Requested",
   "requestAccess": "Request access",
   "posMenuName": "POS Menu",
-  "defaultPageTitle": "Rtylr - Contactless QR Menu"
+  "defaultPageTitle": "Rtylr - Contactless QR Menu",
+  "accountLoad": {
+    "title": "Couldn't load your account",
+    "description": "Your account access could not be checked. Refresh to try again."
+  }
 }

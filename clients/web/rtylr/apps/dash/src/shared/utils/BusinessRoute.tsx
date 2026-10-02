@@ -459,11 +459,14 @@ function MFAAccessGate({ enrollmentRequired }: { enrollmentRequired: boolean }):
 }
 
 function BusinessRoute(): React.JSX.Element | null {
+  const { t } = useTranslation();
   const token = getCookieToken();
   const { user, setUser, setToken } = useUserStore();
   const { setWebsiteData, setContactInfo, setMaintanance, setAboutContent } = useConfigStore();
   const logoUrl = useConfigStore((s) => s.websiteData?.logoUrl as string | undefined);
   const [loading, setLoading] = useState(true);
+  const [authLoadFailed, setAuthLoadFailed] = useState(false);
+  const [reloadCount, setReloadCount] = useState(0);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useBusinessFavicon(logoUrl);
@@ -475,11 +478,16 @@ function BusinessRoute(): React.JSX.Element | null {
     }
 
     setToken(token);
+    setLoading(true);
+    setAuthLoadFailed(false);
 
     userClient
       .getMe({})
       .then((res) => {
         const effectiveAccess = parseEffectiveAccess(res.effectiveAccess);
+        if (Number(res.businessId ?? 0) > 0 && !effectiveAccess) {
+          throw new Error('Account authorization is unavailable');
+        }
         setUser({
           ...res,
           effectiveAccess: effectiveAccess ?? undefined,
@@ -523,10 +531,19 @@ function BusinessRoute(): React.JSX.Element | null {
           });
       })
       .catch(() => {
-        // auth interceptor handles 401 redirect
+        setAuthLoadFailed(true);
       })
       .finally(() => setLoading(false));
-  }, [token, setAboutContent, setContactInfo, setMaintanance, setToken, setUser, setWebsiteData]);
+  }, [
+    token,
+    reloadCount,
+    setAboutContent,
+    setContactInfo,
+    setMaintanance,
+    setToken,
+    setUser,
+    setWebsiteData,
+  ]);
 
   if (!token) return null;
 
@@ -553,6 +570,18 @@ function BusinessRoute(): React.JSX.Element | null {
         />
         <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       </div>
+    );
+  }
+
+  if (authLoadFailed || !user) {
+    return (
+      <main role="alert" style={{ maxWidth: 480, margin: '15vh auto', padding: 24 }}>
+        <h1>{t('common.accountLoad.title')}</h1>
+        <p>{t('common.accountLoad.description')}</p>
+        <button type="button" onClick={() => setReloadCount((count) => count + 1)}>
+          {t('common.refresh')}
+        </button>
+      </main>
     );
   }
 
