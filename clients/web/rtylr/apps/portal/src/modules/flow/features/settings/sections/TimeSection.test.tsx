@@ -2,15 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Interpolates params, unlike the bare key-returning mock used elsewhere: the
-// labels under test are only distinguishable once their values are substituted.
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: Record<string, unknown>) =>
-      params ? `${key}:${Object.values(params).join(',')}` : key,
-    i18n: { language: 'en-US' },
-  }),
-}));
+import { initTestI18n } from '../../../shared/testing/i18n';
 
 vi.mock('../../../shared/hooks/queries/useFlowTeam', () => ({
   useFlowTeam: () => ({
@@ -39,7 +31,8 @@ import {
   useTimeSettingsStore,
 } from '../../../shared/stores/timeSettingsStore';
 
-beforeEach(() => {
+beforeEach(async () => {
+  await initTestI18n();
   localStorage.clear();
   useTimeSettingsStore.setState({ ...DEFAULT_TIME_SETTINGS });
 });
@@ -48,7 +41,7 @@ describe('TimeSection: week and targets', () => {
   it('writes the week start through to the store', () => {
     render(<TimeSection />);
 
-    fireEvent.change(screen.getByLabelText('flow.settings.time.weekStart'), {
+    fireEvent.change(screen.getByLabelText('Week starts'), {
       target: { value: 'sunday' },
     });
 
@@ -58,7 +51,7 @@ describe('TimeSection: week and targets', () => {
   it('writes the rounding increment through as a number, not a string', () => {
     render(<TimeSection />);
 
-    fireEvent.change(screen.getByLabelText('flow.settings.time.rounding'), {
+    fireEvent.change(screen.getByLabelText('Rounding'), {
       target: { value: '30' },
     });
 
@@ -68,7 +61,7 @@ describe('TimeSection: week and targets', () => {
   it('stores one day’s target in minutes while accepting hours, without touching the others', () => {
     render(<TimeSection />);
 
-    fireEvent.change(screen.getByLabelText('flow.settings.time.saturday'), {
+    fireEvent.change(screen.getByLabelText('Saturday'), {
       target: { value: '6' },
     });
 
@@ -80,7 +73,7 @@ describe('TimeSection: week and targets', () => {
   it('accepts a zero target, for a genuinely non-working day', () => {
     render(<TimeSection />);
 
-    fireEvent.change(screen.getByLabelText('flow.settings.time.friday'), {
+    fireEvent.change(screen.getByLabelText('Friday'), {
       target: { value: '0' },
     });
 
@@ -90,60 +83,12 @@ describe('TimeSection: week and targets', () => {
   it('refuses an overtime threshold below the weekly target', () => {
     render(<TimeSection />);
 
-    fireEvent.change(screen.getByLabelText('flow.settings.time.overtimeThreshold'), {
+    fireEvent.change(screen.getByLabelText('Overtime warns past, in hours'), {
       target: { value: '20' },
     });
 
     expect(useTimeSettingsStore.getState().overtimeThresholdMinutes).toBe(45 * 60);
-    expect(screen.getByText('flow.settings.time.overtimeBelowTarget')).toBeInTheDocument();
-  });
-});
-
-describe('TimeSection: the approval lock', () => {
-  it('states both irreversible consequences before the switch is touched', () => {
-    render(<TimeSection />);
-
-    expect(screen.getByText('flow.settings.time.lockConsequence')).toBeInTheDocument();
-  });
-
-  it('offers an undo after flipping it, because it changes what everyone else can edit', () => {
-    render(<TimeSection />);
-
-    fireEvent.click(screen.getByRole('switch', { name: 'flow.settings.time.approvalLocks' }));
-
-    expect(useTimeSettingsStore.getState().approvalLocksEntry).toBe(false);
-    fireEvent.click(screen.getByRole('button', { name: 'flow.settings.time.undo' }));
-    expect(useTimeSettingsStore.getState().approvalLocksEntry).toBe(true);
-  });
-});
-
-describe('TimeSection: categories', () => {
-  it('adds a category', () => {
-    render(<TimeSection />);
-
-    fireEvent.change(screen.getByLabelText('flow.settings.time.newCategoryName'), {
-      target: { value: 'Travel' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'flow.settings.time.addCategory' }));
-
-    expect(useTimeSettingsStore.getState().categories.map((c) => c.name)).toContain('Travel');
-  });
-
-  it('labels each remove control by the category it removes, not by the verb', () => {
-    render(<TimeSection />);
-
-    expect(
-      screen.getByRole('button', { name: 'flow.settings.time.removeCategoryLabel:Development' })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'flow.settings.time.removeCategoryLabel:Admin' })
-    ).toBeInTheDocument();
-  });
-
-  it('says a category configures nothing yet, because TimeLog has no category field', () => {
-    render(<TimeSection />);
-
-    expect(screen.getByText('flow.settings.time.categoriesNotWired')).toBeInTheDocument();
+    expect(screen.getByText(/overtime.*weekly target/i)).toBeInTheDocument();
   });
 });
 
@@ -153,14 +98,14 @@ describe('TimeSection: attendance tracking', () => {
 
     expect(useTimeSettingsStore.getState().trackAttendance).toBe(true);
     expect(
-      screen.getByRole('switch', { name: 'flow.settings.time.trackAttendance' })
+      screen.getByRole('switch', { name: 'Track attendance (Clocked hours)' })
     ).toHaveAttribute('aria-checked', 'true');
   });
 
   it('writes the toggle through to the store', () => {
     render(<TimeSection />);
 
-    fireEvent.click(screen.getByRole('switch', { name: 'flow.settings.time.trackAttendance' }));
+    fireEvent.click(screen.getByRole('switch', { name: 'Track attendance (Clocked hours)' }));
 
     expect(useTimeSettingsStore.getState().trackAttendance).toBe(false);
   });
@@ -168,7 +113,7 @@ describe('TimeSection: attendance tracking', () => {
   it('explains what changes on My Day and reports in each direction', () => {
     render(<TimeSection />);
 
-    expect(screen.getByText('flow.settings.time.trackAttendanceExplained')).toBeInTheDocument();
+    expect(screen.getByText(/When on, My Day asks/)).toBeInTheDocument();
   });
 });
 
@@ -176,6 +121,6 @@ describe('TimeSection: the missing endpoint', () => {
   it('says plainly that these values are per-browser until the endpoint lands', () => {
     render(<TimeSection />);
 
-    expect(screen.getByText('flow.settings.time.localOnlyWarning')).toBeInTheDocument();
+    expect(screen.getByText(/These settings are saved in this browser only/)).toBeInTheDocument();
   });
 });

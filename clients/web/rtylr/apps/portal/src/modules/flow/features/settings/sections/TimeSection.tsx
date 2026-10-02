@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Switch } from '@voxire/ui';
 import {
@@ -10,11 +9,9 @@ import {
 } from '../../../shared/stores/timeSettingsStore';
 import { DAY_KEYS, type DayKey } from '../../../shared/lib/dateUtils';
 import { formatDurationClock } from '../../../shared/lib/durationUtils';
-import GateNotice from '../../../shared/components/GateNotice';
 import WorkTypesSection from './WorkTypesSection';
 
 const ROUNDING_OPTIONS: RoundingMinutes[] = [0, 5, 10, 15, 30];
-const UNDO_WINDOW_MS = 2000;
 // i18n keys for each day already exist as flow.settings.time.<day> (used by
 // the week-start dropdown), so daily targets reuse the same keys rather than
 // duplicating the seven day names under a new namespace.
@@ -40,53 +37,11 @@ function inputStyle(): React.CSSProperties {
   };
 }
 
-/**
- * Settings → Time. A new section in the existing settings rail, not a new screen.
- *
- * Every value here is a workspace value with a shipped default, because a law
- * firm and a restaurant need different defaults rather than different code.
- *
- * There is no workspace time-settings endpoint yet, so these persist per-browser
- * through useTimeSettingsStore and the pane says so at the top. Categories and
- * rates additionally have no server field to attach to - stated inline rather
- * than implied by a control that appears to work.
- */
 const TimeSection = (): React.JSX.Element => {
   const { t } = useTranslation();
   const settings = useTimeSettingsStore();
 
   const [overtimeError, setOvertimeError] = useState(false);
-  const [newCategory, setNewCategory] = useState('');
-  const [lockUndo, setLockUndo] = useState<boolean | null>(null);
-  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(
-    () => () => {
-      if (undoTimer.current) clearTimeout(undoTimer.current);
-    },
-    []
-  );
-
-  const flipLock = (next: boolean): void => {
-    const previous = settings.approvalLocksEntry;
-    settings.setApprovalLocksEntry(next);
-    setLockUndo(previous);
-    if (undoTimer.current) clearTimeout(undoTimer.current);
-    undoTimer.current = setTimeout(() => setLockUndo(null), UNDO_WINDOW_MS);
-  };
-
-  const undoLock = (): void => {
-    if (lockUndo === null) return;
-    settings.setApprovalLocksEntry(lockUndo);
-    setLockUndo(null);
-    if (undoTimer.current) clearTimeout(undoTimer.current);
-  };
-
-  const addCategory = (): void => {
-    settings.addCategory(newCategory, true);
-    setNewCategory('');
-  };
-
   return (
     <div className="space-y-8">
       {/* The honest header. Without it this pane reads as a workspace setting
@@ -244,77 +199,6 @@ const TimeSection = (): React.JSX.Element => {
           className="mb-3 text-flow-meta font-semibold uppercase tracking-wider"
           style={{ color: 'var(--flow-text-muted)' }}
         >
-          {t('flow.settings.time.approval')}
-        </h2>
-
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-flow-body leading-snug" style={{ color: 'var(--flow-text)' }}>
-              {t('flow.settings.time.approvalLocksExplained')}
-            </p>
-            {/* Stated before the switch is touched: both directions are
-             * irreversible for entries that already exist. */}
-            <p
-              className="mt-1 text-flow-meta leading-snug"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              {t('flow.settings.time.lockConsequence')}
-            </p>
-            {lockUndo !== null && (
-              <button
-                type="button"
-                onClick={undoLock}
-                className="flow-focus mt-2 min-h-[44px] rounded-sm px-2 text-flow-meta font-semibold md:min-h-0 md:py-1"
-                style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
-              >
-                {t('flow.settings.time.undo')}
-              </button>
-            )}
-          </div>
-          <Switch
-            checked={settings.approvalLocksEntry}
-            onCheckedChange={flipLock}
-            aria-label={t('flow.settings.time.approvalLocks')}
-            className="mt-0.5 shrink-0"
-          />
-        </div>
-
-        <div className="mt-4">
-          <label
-            htmlFor="time-autolock"
-            className={labelClass}
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            {t('flow.settings.time.autoLockDays')}
-          </label>
-          <input
-            id="time-autolock"
-            type="number"
-            min={1}
-            max={90}
-            value={settings.autoLockDays}
-            onChange={(e) => {
-              const days = Number(e.target.value);
-              if (!Number.isFinite(days) || days <= 0) return;
-              settings.setAutoLockDays(days);
-            }}
-            className={`${inputClass} sm:max-w-[160px]`}
-            style={inputStyle()}
-          />
-          <p
-            className="mt-1 text-flow-meta leading-snug"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            {t('flow.settings.time.autoLockExplained', { count: settings.autoLockDays })}
-          </p>
-        </div>
-      </section>
-
-      <section>
-        <h2
-          className="mb-3 text-flow-meta font-semibold uppercase tracking-wider"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
           {t('flow.settings.time.attendance')}
         </h2>
 
@@ -334,77 +218,6 @@ const TimeSection = (): React.JSX.Element => {
       </section>
 
       <WorkTypesSection />
-
-      <section>
-        <h2
-          className="mb-3 text-flow-meta font-semibold uppercase tracking-wider"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
-          {t('flow.settings.time.categories')}
-        </h2>
-
-        <GateNotice className="mb-3" reason={t('flow.settings.time.categoriesNotWired')} />
-
-        <ul className="space-y-1.5">
-          {settings.categories.map((category) => (
-            <li
-              key={category.id}
-              className="flex flex-col gap-2 rounded-md p-2 sm:flex-row sm:items-center sm:gap-3"
-              style={{ background: 'var(--flow-hover)' }}
-            >
-              <input
-                aria-label={t('flow.settings.time.categoryName')}
-                value={category.name}
-                onChange={(e) => settings.renameCategory(category.id, e.target.value)}
-                className="flow-focus min-h-[44px] flex-1 rounded-sm bg-transparent px-2 text-flow-title md:min-h-0 md:py-1 md:text-flow-body"
-                style={{ color: 'var(--flow-text)' }}
-              />
-              <Switch
-                checked={category.billable}
-                onCheckedChange={(next) => settings.setCategoryBillable(category.id, next)}
-                aria-label={t('flow.settings.time.categoryBillable')}
-                className="shrink-0"
-              />
-              <button
-                type="button"
-                onClick={() => settings.deleteCategory(category.id)}
-                disabled={settings.categories.length === 1}
-                aria-label={t('flow.settings.time.removeCategoryLabel', { name: category.name })}
-                className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
-                style={{ color: 'var(--flow-text-muted)' }}
-              >
-                <X size={14} aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-          <input
-            aria-label={t('flow.settings.time.newCategoryName')}
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addCategory();
-              }
-            }}
-            placeholder={t('flow.settings.time.newCategoryPlaceholder')}
-            className={`${inputClass} sm:flex-1`}
-            style={inputStyle()}
-          />
-          <button
-            type="button"
-            onClick={addCategory}
-            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-flow-body font-semibold md:min-h-0 md:py-2"
-            style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
-          >
-            <Plus size={14} aria-hidden="true" />
-            {t('flow.settings.time.addCategory')}
-          </button>
-        </div>
-      </section>
     </div>
   );
 };

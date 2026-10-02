@@ -2,31 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DAY_KEYS, type DayKey } from '../lib/dateUtils';
 
-/**
- * Workspace time settings.
- *
- * These are workspace values with shipped defaults, not product constants: a law
- * firm approving weekly through a partner and a restaurant where the manager
- * clears everything on Sunday need different defaults, not different code.
- *
- * There is no workspace time-settings endpoint yet. This store is the seam that
- * keeps that fact in one file - every screen reads from here, so landing the
- * endpoint replaces this store's internals and touches nothing else. Until then
- * the values are per-browser, and the settings screen says so.
- *
- * See docs/flow-time-tracking.md for the full gap list.
- */
-
+// These display and entry preferences persist in this browser.
 export type WeekStart = 'monday' | 'sunday';
 
 /** 0 means no rounding. */
 export type RoundingMinutes = 0 | 5 | 10 | 15 | 30;
-
-interface TimeCategory {
-  id: string;
-  name: string;
-  billable: boolean;
-}
 
 interface TimeSettingsState {
   weekStart: WeekStart;
@@ -36,17 +16,11 @@ interface TimeSettingsState {
    * real shape a business has, not an edge case of a uniform one. */
   dailyTargetMinutes: Record<DayKey, number>;
   overtimeThresholdMinutes: number;
-  /** On: an approved entry is read-only until a manager unapproves it. */
-  approvalLocksEntry: boolean;
-  /** Entries auto-lock this many days after the week closes, either way. */
-  autoLockDays: number;
   /** On: My Day and reports show Clocked/Unaccounted (shift attendance) alongside
    * Logged. Off: task-based logging only. Different businesses want different
    * defaults here - a restaurant needs shift reconciliation, a law firm billing
    * by task usually doesn't. */
   trackAttendance: boolean;
-  categories: TimeCategory[];
-  /** userId to hourly rate. `null` is explicitly unset, never zero. */
 }
 
 interface TimeSettingsActions {
@@ -54,13 +28,7 @@ interface TimeSettingsActions {
   setRoundingMinutes: (value: RoundingMinutes) => void;
   setDailyTargetMinutes: (day: DayKey, minutes: number) => void;
   setOvertimeThresholdMinutes: (value: number) => void;
-  setApprovalLocksEntry: (value: boolean) => void;
-  setAutoLockDays: (value: number) => void;
   setTrackAttendance: (value: boolean) => void;
-  addCategory: (name: string, billable: boolean) => void;
-  renameCategory: (id: string, name: string) => void;
-  setCategoryBillable: (id: string, billable: boolean) => void;
-  deleteCategory: (id: string) => void;
 }
 
 export const TIME_SETTINGS_STORAGE_KEY = 'flow.timeSettings-v1';
@@ -71,11 +39,6 @@ export function getWeeklyTargetMinutes(dailyTargetMinutes: Record<DayKey, number
   return DAY_KEYS.reduce((sum, day) => sum + (dailyTargetMinutes[day] ?? 0), 0);
 }
 
-/**
- * The four seeded categories are a starting point, not a taxonomy - a workspace
- * is expected to rewrite them. Admin defaults to non-billable because internal
- * admin time is the one of the four that is usually absorbed.
- */
 export const DEFAULT_TIME_SETTINGS: TimeSettingsState = {
   weekStart: 'monday',
   roundingMinutes: 15,
@@ -89,20 +52,8 @@ export const DEFAULT_TIME_SETTINGS: TimeSettingsState = {
     sat: 4 * 60,
   },
   overtimeThresholdMinutes: 45 * 60,
-  approvalLocksEntry: true,
-  autoLockDays: 7,
   trackAttendance: true,
-  categories: [
-    { id: 'development', name: 'Development', billable: true },
-    { id: 'review', name: 'Review', billable: true },
-    { id: 'meeting', name: 'Meeting', billable: true },
-    { id: 'admin', name: 'Admin', billable: false },
-  ],
 };
-
-function slugify(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, '-');
-}
 
 /**
  * v0 stored a single flat weeklyTargetMinutes. Preserve a workspace's choice
@@ -154,52 +105,24 @@ export const useTimeSettingsStore = create<TimeSettingsState & TimeSettingsActio
       setDailyTargetMinutes: (day, minutes) =>
         set({ dailyTargetMinutes: { ...get().dailyTargetMinutes, [day]: minutes } }),
       setOvertimeThresholdMinutes: (overtimeThresholdMinutes) => set({ overtimeThresholdMinutes }),
-      setApprovalLocksEntry: (approvalLocksEntry) => set({ approvalLocksEntry }),
-      setAutoLockDays: (autoLockDays) => set({ autoLockDays }),
       setTrackAttendance: (trackAttendance) => set({ trackAttendance }),
-
-      addCategory: (name, billable) => {
-        const trimmed = name.trim();
-        if (!trimmed) return;
-        const existing = get().categories;
-        if (existing.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) return;
-        // Suffix the slug on collision so two categories renamed into the same
-        // shape cannot end up sharing an id.
-        let id = slugify(trimmed);
-        if (existing.some((c) => c.id === id)) id = `${id}-${existing.length + 1}`;
-        set({ categories: [...existing, { id, name: trimmed, billable }] });
-      },
-
-      renameCategory: (id, name) => {
-        const trimmed = name.trim();
-        if (!trimmed) return;
-        set({
-          categories: get().categories.map((c) => (c.id === id ? { ...c, name: trimmed } : c)),
-        });
-      },
-
-      setCategoryBillable: (id, billable) =>
-        set({
-          categories: get().categories.map((c) => (c.id === id ? { ...c, billable } : c)),
-        }),
-
-      deleteCategory: (id) => {
-        const remaining = get().categories.filter((c) => c.id !== id);
-        // An empty list would leave an entry with no category to pick.
-        if (remaining.length === 0) return;
-        set({ categories: remaining });
-      },
     }),
     {
       name: TIME_SETTINGS_STORAGE_KEY,
-      version: 2,
-      // Chained on purpose: a browser last written by v0 needs both steps, so
-      // v0's weekday spread runs first and then v1's key removal.
+      version: 3,
+      // Keep working preferences from earlier versions and discard retired fields.
       migrate: (persisted, version) => {
         const afterV0 =
           version >= 1 ? (persisted as object) : migrateTimeSettingsV0(persisted as object);
 
-        return version >= 2 ? afterV0 : migrateTimeSettingsV1(afterV0);
+        const afterV1 = version >= 2 ? afterV0 : migrateTimeSettingsV1(afterV0);
+        const {
+          approvalLocksEntry: _approval,
+          autoLockDays: _autoLock,
+          categories: _categories,
+          ...preferences
+        } = afterV1 as Record<string, unknown>;
+        return preferences;
       },
     }
   )

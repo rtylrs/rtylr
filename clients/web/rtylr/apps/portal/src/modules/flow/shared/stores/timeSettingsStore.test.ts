@@ -31,14 +31,6 @@ describe('time settings defaults', () => {
     });
     expect(getWeeklyTargetMinutes(s.dailyTargetMinutes)).toBe(44 * 60);
     expect(s.overtimeThresholdMinutes).toBe(45 * 60);
-    expect(s.approvalLocksEntry).toBe(true);
-    expect(s.autoLockDays).toBe(7);
-  });
-
-  it('seeds four categories as a starting point, not a taxonomy', () => {
-    const names = useTimeSettingsStore.getState().categories.map((c) => c.name);
-
-    expect(names).toEqual(['Development', 'Review', 'Meeting', 'Admin']);
   });
 });
 
@@ -100,61 +92,6 @@ describe('migrateTimeSettingsV0', () => {
   });
 });
 
-describe('categories', () => {
-  it('adds a category with a billable flag', () => {
-    useTimeSettingsStore.getState().addCategory('Travel', false);
-
-    const added = useTimeSettingsStore.getState().categories.at(-1);
-    expect(added?.name).toBe('Travel');
-    expect(added?.billable).toBe(false);
-  });
-
-  it('refuses a blank name rather than adding an unnameable row', () => {
-    const before = useTimeSettingsStore.getState().categories.length;
-    useTimeSettingsStore.getState().addCategory('   ', true);
-
-    expect(useTimeSettingsStore.getState().categories).toHaveLength(before);
-  });
-
-  it('refuses a duplicate name, case-insensitively', () => {
-    const before = useTimeSettingsStore.getState().categories.length;
-    useTimeSettingsStore.getState().addCategory('development', true);
-
-    expect(useTimeSettingsStore.getState().categories).toHaveLength(before);
-  });
-
-  it('renames a category in place', () => {
-    const id = useTimeSettingsStore.getState().categories[0].id;
-    useTimeSettingsStore.getState().renameCategory(id, 'Engineering');
-
-    expect(useTimeSettingsStore.getState().categories[0].name).toBe('Engineering');
-  });
-
-  it('toggles the billable flag', () => {
-    const first = useTimeSettingsStore.getState().categories[0];
-    useTimeSettingsStore.getState().setCategoryBillable(first.id, !first.billable);
-
-    expect(useTimeSettingsStore.getState().categories[0].billable).toBe(!first.billable);
-  });
-
-  it('deletes a category', () => {
-    const id = useTimeSettingsStore.getState().categories[0].id;
-    useTimeSettingsStore.getState().deleteCategory(id);
-
-    expect(useTimeSettingsStore.getState().categories.map((c) => c.id)).not.toContain(id);
-  });
-
-  it('keeps the last category, because an entry with no category to pick is unloggable', () => {
-    const { categories } = useTimeSettingsStore.getState();
-    categories.slice(1).forEach((c) => useTimeSettingsStore.getState().deleteCategory(c.id));
-    const lastId = useTimeSettingsStore.getState().categories[0].id;
-
-    useTimeSettingsStore.getState().deleteCategory(lastId);
-
-    expect(useTimeSettingsStore.getState().categories).toHaveLength(1);
-  });
-});
-
 describe('migrateTimeSettingsV1', () => {
   it('drops a stored rate table, so pay rates do not linger in a browser', () => {
     const stored = {
@@ -205,5 +142,30 @@ describe('roundLoggedMinutes', () => {
 
   it('leaves an exact multiple untouched', () => {
     expect(roundLoggedMinutes(105, 15)).toBe(105);
+  });
+});
+
+describe('retired time configuration', () => {
+  it('rehydrates working preferences and removes unused v2 fields', async () => {
+    localStorage.setItem(
+      TIME_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        version: 2,
+        state: {
+          weekStart: 'sunday',
+          roundingMinutes: 30,
+          approvalLocksEntry: false,
+          autoLockDays: 3,
+          categories: [{ id: 'legacy', name: 'Legacy', billable: true }],
+        },
+      })
+    );
+    await useTimeSettingsStore.persist.rehydrate();
+    expect(useTimeSettingsStore.getState().weekStart).toBe('sunday');
+    expect(useTimeSettingsStore.getState().roundingMinutes).toBe(30);
+    const saved = JSON.parse(localStorage.getItem(TIME_SETTINGS_STORAGE_KEY)!);
+    expect(saved.state).not.toHaveProperty('approvalLocksEntry');
+    expect(saved.state).not.toHaveProperty('autoLockDays');
+    expect(saved.state).not.toHaveProperty('categories');
   });
 });
