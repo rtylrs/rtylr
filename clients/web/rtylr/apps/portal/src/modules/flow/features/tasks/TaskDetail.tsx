@@ -712,7 +712,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               aria-label={t('flow.taskDetail.assignee')}
               value={task.assigneeId}
               onChange={(e) => {
-                const m = members.find((m) => m.id === e.target.value);
+                const m = members.find((m) => String(m.id) === e.target.value);
                 updateTask(task.id, {
                   assigneeId: m?.id ?? '',
                   assignee: m?.name ?? '',
@@ -724,6 +724,10 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               style={{ color: 'var(--flow-text)' }}
             >
               <option value="">{t('flow.quickCreate.unassigned')}</option>
+              {task.assigneeId &&
+                !members.some((member) => String(member.id) === String(task.assigneeId)) && (
+                  <option value={task.assigneeId}>{task.assignee}</option>
+                )}
               {members.map((m) => (
                 <option key={m.id} value={m.id} style={{ background: 'var(--flow-card)' }}>
                   {m.name}
