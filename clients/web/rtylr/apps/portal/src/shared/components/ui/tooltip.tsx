@@ -9,6 +9,7 @@ export interface TooltipProps {
   content: React.ReactNode;
   side?: TooltipSide;
   disabled?: boolean;
+  focusable?: boolean;
   className?: string;
   contentClassName?: string;
 }
@@ -105,6 +106,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   content,
   side = 'top',
   disabled = false,
+  focusable = true,
   className,
   contentClassName,
 }): React.JSX.Element => {
@@ -164,11 +166,15 @@ const Tooltip: React.FC<TooltipProps> = ({
       ref={triggerRef}
       className={cn('relative inline-flex', className)}
       aria-describedby={isVisible ? tooltipId : undefined}
-      tabIndex={0}
+      tabIndex={focusable ? 0 : undefined}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       onFocus={() => setOpen(true)}
       onBlur={() => setOpen(false)}
+      onClick={() => setOpen(false)}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setOpen(false);
+      }}
     >
       {children}
       {isVisible && typeof document !== 'undefined'

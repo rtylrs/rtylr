@@ -1,35 +1,39 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
-import { caretTokens, caretRadius } from '../../ui/tokens';
+import React from "react";
+import { Plus } from "lucide-react";
+import { caretTokens, caretRadius } from "../../ui/tokens";
 
 export interface NewChatButtonProps {
   onClick: () => void;
+  label?: string;
 }
 
-export const NewChatButton: React.FC<NewChatButtonProps> = ({ onClick }) => (
+export const NewChatButton: React.FC<NewChatButtonProps> = ({
+  onClick,
+  label = "New chat",
+}) => (
   <button
     className="caret-new-chat-button"
     type="button"
     onClick={onClick}
     style={{
-      display: 'flex',
-      alignItems: 'center',
+      display: "flex",
+      alignItems: "center",
       gap: 6,
-      width: '100%',
+      width: "100%",
       minHeight: 36,
-      padding: '8px 10px',
-      background: 'transparent',
+      padding: "8px 10px",
+      background: "transparent",
       color: caretTokens.textMuted,
-      border: '1px solid transparent',
+      border: "1px solid transparent",
       borderRadius: caretRadius.md,
       fontSize: 13,
       fontWeight: 550,
-      cursor: 'pointer',
-      transition: 'background 0.12s ease, color 0.12s ease',
+      cursor: "pointer",
+      transition: "background 0.12s ease, color 0.12s ease",
     }}
   >
     <Plus size={13} />
-    New chat
+    {label}
   </button>
 );
 

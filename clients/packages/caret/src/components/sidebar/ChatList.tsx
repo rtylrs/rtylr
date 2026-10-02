@@ -6,8 +6,25 @@ import NewChatButton from "./NewChatButton";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import type { CaretChatSummary } from "../../types/chat";
 
+export interface ChatListLabels {
+  heading: string;
+  description: string;
+  newChat: string;
+  search: string;
+  clearSearch: string;
+  loading: string;
+  empty: string;
+  noResults: string;
+  loadFailed: string;
+  retry: string;
+  deleteChat: string;
+  pinChat: string;
+  unpinChat: string;
+}
+
 export interface ChatListProps {
   chats: CaretChatSummary[];
+  labels?: Partial<ChatListLabels>;
   isLoading?: boolean;
   error?: Error | null;
   onRetry?: () => void;
@@ -20,6 +37,7 @@ export interface ChatListProps {
 
 export const ChatList: React.FC<ChatListProps> = ({
   chats,
+  labels,
   isLoading = false,
   error = null,
   onRetry,
@@ -48,6 +66,7 @@ export const ChatList: React.FC<ChatListProps> = ({
 
   return (
     <div
+      className="caret-chat-list"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -59,7 +78,7 @@ export const ChatList: React.FC<ChatListProps> = ({
         boxSizing: "border-box",
       }}
     >
-      <div style={{ margin: "0 2px 7px" }}>
+      <div className="caret-chat-list-heading" style={{ margin: "0 2px 7px" }}>
         <h2
           style={{
             margin: 0,
@@ -69,20 +88,27 @@ export const ChatList: React.FC<ChatListProps> = ({
             lineHeight: 1.4,
           }}
         >
-          History
+          {labels?.heading ?? "History"}
         </h2>
-        <p
-          style={{
-            margin: "3px 0 0",
-            color: caretTokens.textMuted,
-            fontSize: 11.5,
-          }}
-        >
-          Open a past chat or start another.
-        </p>
+        {labels?.description !== "" && (
+          <p
+            style={{
+              margin: "3px 0 0",
+              color: caretTokens.textMuted,
+              fontSize: 11.5,
+            }}
+          >
+            {labels?.description ?? "Open a past chat or start another."}
+          </p>
+        )}
       </div>
-      <NewChatButton onClick={onNew} />
-      <ChatSearch value={query} onChange={setQuery} />
+      <NewChatButton onClick={onNew} label={labels?.newChat} />
+      <ChatSearch
+        value={query}
+        onChange={setQuery}
+        label={labels?.search}
+        clearLabel={labels?.clearSearch}
+      />
       <div
         className="caret-chat-list-scroll"
         style={{
@@ -113,7 +139,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                 margin: 0,
               }}
             >
-              Unable to load saved chats.
+              {labels?.loadFailed ?? "Unable to load saved chats."}
             </p>
             {onRetry && (
               <button
@@ -129,7 +155,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                   padding: "5px 9px",
                 }}
               >
-                Try again
+                {labels?.retry ?? "Try again"}
               </button>
             )}
           </div>
@@ -143,7 +169,7 @@ export const ChatList: React.FC<ChatListProps> = ({
               margin: 0,
             }}
           >
-            Loading saved chats…
+            {labels?.loading ?? "Loading saved chats…"}
           </p>
         ) : (
           <>
@@ -156,13 +182,16 @@ export const ChatList: React.FC<ChatListProps> = ({
                   margin: 0,
                 }}
               >
-                {query ? "No chats match your search." : "No saved chats yet."}
+                {query
+                  ? (labels?.noResults ?? "No chats match your search.")
+                  : (labels?.empty ?? "No saved chats yet.")}
               </p>
             )}
             {filtered.map((c) => (
               <ChatListItem
                 key={c.id}
                 chat={c}
+                labels={labels}
                 active={c.id === activeId}
                 onSelect={onSelect}
                 onDelete={onDelete}

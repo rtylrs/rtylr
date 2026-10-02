@@ -20,7 +20,7 @@
     "deleteConfirm": "Delete",
     "loadFailed": "Unable to load groups",
     "loadFailedDescription": "Refresh the list before changing group access.",
-    "columnProfiles": "Permission profiles",
+    "columnProfiles": "Permissions",
     "profilesCount_one": "{{count}} profile",
     "profilesCount_other": "{{count}} profiles"
   },
@@ -63,7 +63,7 @@
     "loadFailedDescription": "Refresh the group before changing its access or members.",
     "columnApp": "App",
     "columnLicense": "License",
-    "columnPermissionProfile": "Permission profiles",
+    "columnPermissionProfile": "Permissions",
     "licenseAppAriaLabel": "License {{app}}",
     "permissionProfileForApp": "Permissions for {{app}}",
     "noPermissionProfile": "No permission profile",
@@ -164,7 +164,7 @@
     "confirmDeactivateDescription": "They will lose access to all apps immediately.",
     "memberTypeLabel": "Member type",
     "adminFullAccess": "Admins have full access to the business and all apps included in its plan.",
-    "permissionProfiles": "Permission profiles",
+    "permissionProfiles": "Permissions",
     "noPermissionProfile": "No permission profile"
   },
   "inviteUser": {
@@ -246,7 +246,7 @@
     "resultStatus": "Status",
     "resultNote": "Note",
     "appliedToAllInvited": "Applied to all invited members",
-    "permissionProfilesTitle": "Permission profiles",
+    "permissionProfilesTitle": "Permissions",
     "permissionProfilesDescription": "Select one or more profiles for each app. Read and write permissions can be assigned separately.",
     "noPermissionProfile": "No permission profile",
     "adminAccessDescription": "Full access to the business and all apps included in its plan",

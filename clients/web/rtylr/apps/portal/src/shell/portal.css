@@ -59,6 +59,18 @@
 .portal-rail-spacer {
   flex: 1;
 }
+.portal-rail-tooltip {
+  min-width: 0;
+  border: 0 !important;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: #181818 !important;
+  color: #fff !important;
+  box-shadow: none;
+}
+.portal-rail-tooltip > span {
+  display: none;
+}
 .portal-workspace {
   display: flex;
   flex: 1;

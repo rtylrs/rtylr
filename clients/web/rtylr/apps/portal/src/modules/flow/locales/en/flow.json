@@ -546,7 +546,6 @@
     }
   },
   "profile": {
-    "back": "Back",
     "notFound": "Profile not found.",
     "publicProjects": "Public projects",
     "noPublicProjects": "No public projects.",

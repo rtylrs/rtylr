@@ -1,0 +1,114 @@
+.portal-page.is-caret {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+}
+.portal-page.is-caret > .portal-caret-workspace {
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.portal-caret-workspace {
+  position: relative;
+  min-width: 0;
+}
+.caret-workspace-brand,
+.caret-workspace-header {
+  height: 58px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+}
+.caret-workspace-brand > span,
+.caret-workspace-header > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.caret-workspace-brand > span {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.caret-workspace-header > div:first-child > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  font-weight: 500;
+}
+.caret-workspace-welcome {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px 0;
+  text-align: center;
+}
+.caret-workspace-welcome h1 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 500;
+  letter-spacing: -0.8px;
+  line-height: 1.3;
+}
+.caret-workspace-welcome p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--dash-text-dim);
+}
+.portal-caret-workspace .caret-conversation {
+  padding-block: 16px;
+}
+.portal-caret-workspace .caret-chat-list {
+  padding-top: 14px !important;
+}
+.portal-caret-workspace .caret-composer {
+  border-radius: 16px !important;
+}
+@media (max-width: 700px) {
+  .portal-caret-workspace .caret-history-sidebar {
+    width: 100% !important;
+    border-inline-end: none !important;
+  }
+  .portal-caret-workspace .caret-history-sidebar:not([hidden]) + .caret-main-column {
+    display: none !important;
+  }
+  .caret-workspace-header {
+    padding-inline: 10px;
+  }
+  .caret-workspace-welcome {
+    gap: 12px;
+  }
+  .portal-caret-workspace .caret-composer-wrap {
+    padding-inline: 12px !important;
+  }
+  .portal-caret-workspace .caret-composer-row {
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    gap: 8px !important;
+  }
+  .portal-caret-workspace .caret-composer-input {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .portal-caret-workspace .caret-composer-actions {
+    justify-self: end;
+  }
+}
+.portal-caret-workspace .caret-chat-list-heading {
+  order: 2;
+  margin-top: 16px !important;
+}
+.portal-caret-workspace .caret-chat-search {
+  order: 1;
+}
+.portal-caret-workspace .caret-chat-list-scroll {
+  order: 3;
+}

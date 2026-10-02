@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } 
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { resolveApiBase } from '@voxire/config';
-import { PanelLeft, Search, Bell, Settings, Sparkles, X } from 'lucide-react';
+import { PanelLeft, Search, Bell, Settings, X } from 'lucide-react';
 import { HomeIcon, InsightsIcon, FlowIcon } from '@voxire/ui';
-import { CaretPanel, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
+import { CaretIcon, CaretPanel, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useCommandPalette } from '../shared/stores/commandPaletteStore';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
@@ -18,6 +18,7 @@ import InsightsHeader from '../modules/insights/InsightsHeader';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { insightsNavItems } from '../modules/insights/navigation';
 import ProfileMenu from './ProfileMenu';
+import { Tooltip } from '../shared/components/ui/tooltip';
 import SettingsNavigation from './SettingsNavigation';
 import { PortalHeaderActionsProvider } from './PortalHeaderActions';
 import {
@@ -42,7 +43,7 @@ function initialCollapsed() {
 }
 
 export default function PortalShell({ children }: { children: ReactNode }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useUserStore();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const search = useRouterState({ select: (state) => state.location.searchStr });
@@ -62,6 +63,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const isSettings =
     pathname.startsWith('/settings') || ['/security', '/api-keys', '/webhooks'].includes(pathname);
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
+  const isCaret = pathname === '/caret';
   const isFlow = pathname === '/flow' || pathname.startsWith('/flow/');
   const availableInsights = insightsNavItems.filter((item) => canAccessPortalPath(user, item.path));
   const insightsPage = insightsNavItems.find((item) => item.path === pathname);
@@ -125,7 +127,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       if (event.defaultPrevented || event.repeat) return;
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'j') {
         event.preventDefault();
-        toggleCaret();
+        if (!isCaret) toggleCaret();
         return;
       }
       if ((event.metaKey || event.ctrlKey) && event.key === '\\') {
@@ -135,24 +137,26 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [toggleCaret]);
+  }, [toggleCaret, isCaret]);
   const toggleNavigation = () => {
     if (window.matchMedia('(max-width: 900px)').matches) setMobileOpen((value) => !value);
     else setCollapsed((value) => !value);
   };
   const actions = (
     <div className="portal-topbar-actions">
-      <button
-        type="button"
-        className="portal-icon-button"
-        onClick={toggleCaret}
-        aria-label="Caret"
-        title="Caret"
-        aria-pressed={caretOpen}
-        data-tour="caret"
-      >
-        <Sparkles size={18} />
-      </button>
+      {!isCaret && (
+        <button
+          type="button"
+          className="portal-icon-button"
+          onClick={toggleCaret}
+          aria-label="Caret"
+          title="Caret"
+          aria-pressed={caretOpen}
+          data-tour="caret"
+        >
+          <CaretIcon size={18} />
+        </button>
+      )}
       <button
         type="button"
         className="portal-icon-button"
@@ -244,38 +248,71 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         {t('common.skipToMainContent')}
       </a>
       <nav className="portal-rail" aria-label={t('common.portal.appNavigation')}>
-        <Link
-          to="/"
-          className={`portal-rail-button${!isSettings && !isInsights && !isFlow ? ' is-active' : ''}`}
-          title={t('common.portal.home')}
-          aria-label={t('common.portal.home')}
-          aria-current={!isSettings && !isInsights && !isFlow ? 'page' : undefined}
+        <Tooltip
+          content={t('common.portal.home')}
+          side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+          focusable={false}
+          contentClassName="portal-rail-tooltip"
         >
-          <HomeIcon size={21} />
-        </Link>
-        {availableInsights[0] && (
           <Link
-            to={availableInsights[0].path}
-            className={`portal-rail-button${isInsights ? ' is-active' : ''}`}
-            title={t('appNames.short.insights')}
-            aria-label={t('appNames.short.insights')}
-            aria-current={isInsights ? 'page' : undefined}
+            to="/"
+            className={`portal-rail-button${!isSettings && !isInsights && !isFlow && !isCaret ? ' is-active' : ''}`}
+            aria-label={t('common.portal.home')}
+            aria-current={!isSettings && !isInsights && !isFlow && !isCaret ? 'page' : undefined}
           >
-            <InsightsIcon size={21} />
+            <HomeIcon size={21} />
           </Link>
+        </Tooltip>
+        {availableInsights[0] && (
+          <Tooltip
+            content={t('appNames.short.insights')}
+            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+            focusable={false}
+            contentClassName="portal-rail-tooltip"
+          >
+            <Link
+              to={availableInsights[0].path}
+              className={`portal-rail-button${isInsights ? ' is-active' : ''}`}
+              aria-label={t('appNames.short.insights')}
+              aria-current={isInsights ? 'page' : undefined}
+            >
+              <InsightsIcon size={21} />
+            </Link>
+          </Tooltip>
         )}
         {canAccessPortalPath(user, '/flow') && (
-          <Link
-            to="/flow"
-            className={`portal-rail-button${isFlow ? ' is-active' : ''}`}
-            title={t('appNames.short.flow')}
-            aria-label={t('appNames.short.flow')}
-            aria-current={isFlow ? 'page' : undefined}
+          <Tooltip
+            content={t('appNames.short.flow')}
+            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+            focusable={false}
+            contentClassName="portal-rail-tooltip"
           >
-            <FlowIcon size={21} />
-          </Link>
+            <Link
+              to="/flow"
+              className={`portal-rail-button${isFlow ? ' is-active' : ''}`}
+              aria-label={t('appNames.short.flow')}
+              aria-current={isFlow ? 'page' : undefined}
+            >
+              <FlowIcon size={21} />
+            </Link>
+          </Tooltip>
         )}
         <div className="portal-rail-spacer" />
+        <Tooltip
+          content={'Caret'}
+          side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+          focusable={false}
+          contentClassName="portal-rail-tooltip"
+        >
+          <Link
+            to="/caret"
+            className={`portal-rail-button${isCaret ? ' is-active' : ''}`}
+            aria-label="Caret"
+            aria-current={isCaret ? 'page' : undefined}
+          >
+            <CaretIcon size={21} />
+          </Link>
+        </Tooltip>
         <Link
           data-tour="settings"
           to="/settings"
@@ -288,13 +325,13 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         <ProfileMenu />
       </nav>
       <div className="portal-workspace">
-        {!isInsights && !isFlow && !collapsed && (
+        {!isInsights && !isFlow && !isCaret && !collapsed && (
           <aside className="portal-sidebar">{sidebar()}</aside>
         )}
         <div className="portal-app-panel">
           {isInsights ? (
             <InsightsHeader actions={actions} />
-          ) : !isFlow ? (
+          ) : !isFlow && !isCaret ? (
             <header className="portal-topbar">
               <div className="portal-topbar-start">
                 {!isFlow && (
@@ -318,24 +355,25 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             id="main-content"
             ref={mainRef}
             tabIndex={-1}
-            className={`portal-page${isFlow ? ' is-flow' : ''}`}
+            className={`portal-page${isFlow ? ' is-flow' : ''}${isCaret ? ' is-caret' : ''}`}
           >
             <PortalHeaderActionsProvider value={actions}>{children}</PortalHeaderActionsProvider>
           </main>
         </div>
         <div
           className="portal-caret"
-          inert={!caretOpen}
-          aria-hidden={!caretOpen}
+          inert={!caretOpen || isCaret}
+          aria-hidden={!caretOpen || isCaret}
           style={{
-            width: caretOpen ? `min(${caretWidth}px, calc(100vw - 72px))` : 0,
-            visibility: caretOpen ? 'visible' : 'hidden',
+            width: caretOpen && !isCaret ? `min(${caretWidth}px, calc(100vw - 72px))` : 0,
+            visibility: caretOpen && !isCaret ? 'visible' : 'hidden',
           }}
         >
-          {(caretOpen || caretMounted) && (
+          {!isCaret && (caretOpen || caretMounted) && (
             <CaretPanel
               apiBaseUrl={resolveApiBase()}
               variant="inline"
+              shortcutsEnabled={false}
               appId={isFlow ? 'flow' : isInsights ? 'insights' : 'dash'}
               userId={Number(user?.id) || 0}
               systemContext={buildPortalSystemContext(caretContext)}
@@ -350,7 +388,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         onCancel={() => setMobileOpen(false)}
         onClose={() => setMobileOpen(false)}
       >
-        {mobileOpen && !isInsights && !isFlow && sidebar(true)}
+        {mobileOpen && !isInsights && !isFlow && !isCaret && sidebar(true)}
       </dialog>
       <CommandPalette />
       {quickCreateOpen && (

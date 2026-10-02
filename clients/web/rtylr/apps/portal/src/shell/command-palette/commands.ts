@@ -1,3 +1,4 @@
+import { CaretIcon } from '@voxire/caret';
 import type { ComponentType } from 'react';
 import { Bell, UserPlus, Plus } from 'lucide-react';
 import { resolveAppUrl } from '@voxire/config';
@@ -37,6 +38,15 @@ export function getPortalCommands(
   flowPreview = false
 ): PortalCommand[] {
   const commands: PortalCommand[] = [];
+  if (canAccessPortalPath(user, '/caret')) {
+    commands.push({
+      id: 'app-caret',
+      label: 'Caret',
+      group: 'apps',
+      icon: CaretIcon,
+      destination: { path: '/caret' },
+    });
+  }
   const insightsPages = insightsNavItems.filter((page) => canAccessPortalPath(user, page.path));
   for (const id of WORKSPACE_APP_IDS) {
     if (!hasEffectiveAppAccess(user?.effectiveAccess, id)) continue;

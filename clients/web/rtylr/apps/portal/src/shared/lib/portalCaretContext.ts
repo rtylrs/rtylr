@@ -83,7 +83,7 @@ const PAGE_HINTS: Record<string, PageInfo> = {
     page: 'Settings',
     hint: 'business settings',
   },
-  '/chat': {
+  '/caret': {
     module: 'caret',
     page: 'Caret chat',
     hint: 'full-page AI assistant',

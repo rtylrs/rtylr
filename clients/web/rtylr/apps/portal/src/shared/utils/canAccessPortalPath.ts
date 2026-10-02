@@ -83,6 +83,8 @@ export function canAccessPortalPath(user: StoredUser | null, pathname: string): 
   }
   if (
     pathname === '/' ||
+    pathname === '/caret' ||
+    pathname === '/chat' ||
     pathname === '/settings/account' ||
     pathname === '/security' ||
     pathname === '/notifications'
