@@ -17,7 +17,10 @@ import {
 import { useTeam } from '../../shared/hooks/queries/useTeam';
 import { usePermissionProfiles } from '../../shared/hooks/queries/usePermissions';
 import { APP_NAMES } from '../../shared/config/appNames';
-import { buildPermissionProfileAssignments } from './authorizationDraft';
+import {
+  buildPermissionProfileAssignments,
+  getAssignedProfileIdsByApp,
+} from './authorizationDraft';
 
 const APP_IDS = ['pos', 'erp', 'hr', 'crm', 'finance', 'flow', 'insights', 'menu', 'recruit'];
 
@@ -76,14 +79,7 @@ const GroupDetail = (): React.JSX.Element => {
       setDescription(group.description ?? '');
       setColor(group.color ?? '#6366f1');
       setLicensedAppIds(group.licensedAppIds);
-      setProfileIdsByApp(
-        Object.fromEntries(
-          group.permissionProfileAssignments.map((assignment) => [
-            assignment.appId,
-            assignment.permissionProfileIds,
-          ])
-        )
-      );
+      setProfileIdsByApp(getAssignedProfileIdsByApp(group.permissionProfileAssignments, 'group'));
       setDirty(false);
     } else if (isNew && initializedGroupId.current !== 'new') {
       initializedGroupId.current = 'new';
@@ -105,7 +101,8 @@ const GroupDetail = (): React.JSX.Element => {
     const permissionProfileAssignments = buildPermissionProfileAssignments(
       licensedAppIds,
       profileIdsByApp,
-      'group'
+      'group',
+      group?.permissionProfileAssignments
     );
     try {
       if (isNew) {

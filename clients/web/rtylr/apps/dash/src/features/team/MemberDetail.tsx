@@ -54,7 +54,10 @@ import { groupsClient, permissionClient } from '../../shared/lib/clients';
 import { permissionProfileSchema } from '../../shared/schemas/permissions';
 import { useUserStore } from '../../shared/stores/userStore';
 import { APP_NAMES } from '../../shared/config/appNames';
-import { buildPermissionProfileAssignments } from './authorizationDraft';
+import {
+  buildPermissionProfileAssignments,
+  getAssignedProfileIdsByApp,
+} from './authorizationDraft';
 
 const ALL_APPS = [
   { key: 'pos', labelKey: APP_NAMES.pos.short, icon: MonitorSpeaker, color: 'var(--app-pos)' },
@@ -160,14 +163,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     setNameDraft(member.fullName || member.name || '');
     setMemberTypeDraft(member.memberType === 'admin' ? 'admin' : 'member');
     setLicensedAppsDraft(member.licensedAppIds);
-    setProfileIdsDraft(
-      Object.fromEntries(
-        member.permissionProfileAssignments.map((assignment) => [
-          assignment.appId,
-          assignment.permissionProfileIds,
-        ])
-      )
-    );
+    setProfileIdsDraft(getAssignedProfileIdsByApp(member.permissionProfileAssignments, 'explicit'));
   }, [member]);
 
   // Seed the location selection from query data once per edit session, when it
@@ -287,7 +283,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           permissionProfileAssignments:
             memberTypeDraft === 'admin'
               ? []
-              : buildPermissionProfileAssignments(licensedAppsDraft, profileIdsDraft),
+              : buildPermissionProfileAssignments(
+                  licensedAppsDraft,
+                  profileIdsDraft,
+                  'explicit',
+                  member.permissionProfileAssignments
+                ),
           groupIds: memberGroups.map((group) => group.id),
         },
       });

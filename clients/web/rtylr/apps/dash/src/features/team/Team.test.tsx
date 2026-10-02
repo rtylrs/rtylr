@@ -1,15 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-  // Team renders <Trans> in the deactivate dialog's seat-savings line. A mock
-  // that supplies only useTranslation throws the moment that dialog opens, and
-  // the failure reads as "the dialog is broken" rather than "the mock is half a
-  // mock".
-  Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
-}));
+import path from 'node:path';
+import i18next from 'i18next';
+import { initTestI18nFrom } from '../../../../../test/i18nTestInstance';
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -41,6 +36,8 @@ const teamData = vi.hoisted(() => ({
   data: { members: [] as TeamMember[], hasMore: false } as
     { members: TeamMember[]; hasMore: boolean } | undefined,
   isLoading: false,
+  isError: false,
+  refetch: vi.fn(),
 }));
 
 vi.mock('../../shared/hooks/queries/useTeam', () => ({
@@ -73,25 +70,42 @@ vi.mock('../../shared/hooks/queries/useAddons', () => ({
 
 import Team from './Team';
 
+beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales')));
+
 beforeEach(() => {
   vi.clearAllMocks();
   teamData.data = { members: [], hasMore: false };
   teamData.isLoading = false;
+  teamData.isError = false;
 });
 
 describe('Team list empty state', () => {
+  it('shows a retryable load error instead of an empty team or member count', () => {
+    teamData.data = undefined;
+    teamData.isError = true;
+    render(<Team />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load team members');
+    expect(screen.queryByText('No team members yet')).not.toBeInTheDocument();
+    expect(screen.queryByText('0 members')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    expect(teamData.refetch).toHaveBeenCalledOnce();
+  });
+
   it('shows the true-empty title, description and add-member call-to-action when there are no members', () => {
     render(<Team />);
 
-    expect(screen.getByText('team.list.noMembersTitle')).toBeInTheDocument();
-    expect(screen.getByText('team.list.noMembersDescription')).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'common.nav.addMember' })).toHaveLength(2);
+    expect(screen.getByText(i18next.t('team.list.noMembersTitle'))).toBeInTheDocument();
+    expect(screen.getByText(i18next.t('team.list.noMembersDescription'))).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: i18next.t('common.nav.addMember') })).toHaveLength(
+      2
+    );
   });
 
   it('navigates to the invite screen when the true-empty call-to-action is clicked', () => {
     render(<Team />);
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'common.nav.addMember' })[1]);
+    fireEvent.click(screen.getAllByRole('button', { name: i18next.t('common.nav.addMember') })[1]);
 
     expect(navigateMock).toHaveBeenCalledWith({ to: '/team/invite' });
   });
@@ -114,13 +128,15 @@ describe('Team list empty state', () => {
     };
     render(<Team />);
 
-    fireEvent.change(screen.getByPlaceholderText('team.list.searchPlaceholder'), {
+    fireEvent.change(screen.getByPlaceholderText(i18next.t('team.list.searchPlaceholder')), {
       target: { value: 'no such person' },
     });
 
-    expect(screen.getByText('team.list.noMembersMatchTitle')).toBeInTheDocument();
-    expect(screen.getByText('team.list.noMembersMatchDescription')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'common.clearSearch' })).toBeInTheDocument();
+    expect(screen.getByText(i18next.t('team.list.noMembersMatchTitle'))).toBeInTheDocument();
+    expect(screen.getByText(i18next.t('team.list.noMembersMatchDescription'))).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: i18next.t('common.clearSearch') })
+    ).toBeInTheDocument();
   });
 
   it('clears the search query when the search-empty call-to-action is clicked', () => {
@@ -141,13 +157,13 @@ describe('Team list empty state', () => {
     };
     render(<Team />);
 
-    const searchInput = screen.getByPlaceholderText('team.list.searchPlaceholder');
+    const searchInput = screen.getByPlaceholderText(i18next.t('team.list.searchPlaceholder'));
     fireEvent.change(searchInput, { target: { value: 'no such person' } });
-    expect(screen.getByText('team.list.noMembersMatchTitle')).toBeInTheDocument();
+    expect(screen.getByText(i18next.t('team.list.noMembersMatchTitle'))).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'common.clearSearch' }));
+    fireEvent.click(screen.getByRole('button', { name: i18next.t('common.clearSearch') }));
 
-    expect(screen.queryByText('team.list.noMembersMatchTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText(i18next.t('team.list.noMembersMatchTitle'))).not.toBeInTheDocument();
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
   });
 
@@ -169,6 +185,6 @@ describe('Team list empty state', () => {
     };
     render(<Team />);
 
-    expect(screen.queryByText('team.list.noMembersTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText(i18next.t('team.list.noMembersTitle'))).not.toBeInTheDocument();
   });
 });

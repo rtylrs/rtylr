@@ -21,7 +21,9 @@
     "sectionsCount_other": "{{count}} قسم",
     "deleteTitle": "حذف \"{{name}}\"؟",
     "deleteDescription": "سيفقد الأعضاء الوصول الممنوح من هذه المجموعة. لا يمكن التراجع عن هذا الإجراء.",
-    "deleteConfirm": "حذف"
+    "deleteConfirm": "حذف",
+    "loadFailed": "تعذر تحميل المجموعات",
+    "loadFailedDescription": "حدّث القائمة قبل تغيير صلاحيات المجموعات."
   },
   "groupDetail": {
     "newGroupTitle": "مجموعة جديدة",
@@ -107,7 +109,9 @@
     "deactivateFallbackName": "العضو",
     "deactivateDescription": "سيفقد العضو الوصول إلى جميع التطبيقات فورًا. يمكنك إعادة تفعيله لاحقًا.",
     "deactivateConfirm": "تعطيل",
-    "seatSavings": "توفير <0>{{saved}}</0> هذا الشهر ({{daysRemaining}}/{{daysInMonth}} يومًا)، ثم <1>{{perSeat}}/شهريًا</1> اعتبارًا من 1 {{month}}."
+    "seatSavings": "توفير <0>{{saved}}</0> هذا الشهر ({{daysRemaining}}/{{daysInMonth}} يومًا)، ثم <1>{{perSeat}}/شهريًا</1> اعتبارًا من 1 {{month}}.",
+    "loadFailed": "تعذر تحميل أعضاء الفريق",
+    "loadFailedDescription": "حدّث القائمة قبل تغيير صلاحيات الفريق."
   },
   "memberDetail": {
     "notFoundTitle": "العضو غير موجود",

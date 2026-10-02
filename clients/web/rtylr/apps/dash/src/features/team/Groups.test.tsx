@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+import path from 'node:path';
+import i18next from 'i18next';
+import { initTestI18nFrom } from '../../../../../test/i18nTestInstance';
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
@@ -33,6 +33,8 @@ type Group = {
 const groupsData = vi.hoisted(() => ({
   data: [] as Group[],
   isLoading: false,
+  isError: false,
+  refetch: vi.fn(),
 }));
 
 vi.mock('../../shared/hooks/queries/useGroups', () => ({
@@ -42,24 +44,39 @@ vi.mock('../../shared/hooks/queries/useGroups', () => ({
 
 import Groups from './Groups';
 
+beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales')));
+
 beforeEach(() => {
   vi.clearAllMocks();
   groupsData.data = [];
   groupsData.isLoading = false;
+  groupsData.isError = false;
 });
 
 describe('Groups list empty state', () => {
+  it('shows a retryable load error instead of claiming there are no groups', () => {
+    groupsData.isError = true;
+    render(<Groups />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load groups');
+    expect(screen.queryByText('No groups yet')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    expect(groupsData.refetch).toHaveBeenCalledOnce();
+  });
+
   it('shows the true-empty title, description and new-group call-to-action when there are no groups', () => {
     render(<Groups />);
 
-    expect(screen.getByText('team.groups.noGroupsTitle')).toBeInTheDocument();
-    expect(screen.getByText('team.groups.noGroupsDescription')).toBeInTheDocument();
+    expect(screen.getByText(i18next.t('team.groups.noGroupsTitle'))).toBeInTheDocument();
+    expect(screen.getByText(i18next.t('team.groups.noGroupsDescription'))).toBeInTheDocument();
   });
 
   it('navigates to the new-group screen when the true-empty call-to-action is clicked', () => {
     render(<Groups />);
 
-    const emptyStateButtons = screen.getAllByRole('button', { name: 'team.groups.newGroup' });
+    const emptyStateButtons = screen.getAllByRole('button', {
+      name: i18next.t('team.groups.newGroup'),
+    });
     // The page header also has a "New group" button; click the one inside the empty state card.
     fireEvent.click(emptyStateButtons[emptyStateButtons.length - 1]);
 
@@ -79,12 +96,12 @@ describe('Groups list empty state', () => {
     ];
     render(<Groups />);
 
-    fireEvent.change(screen.getByPlaceholderText('team.groups.searchPlaceholder'), {
+    fireEvent.change(screen.getByPlaceholderText(i18next.t('team.groups.searchPlaceholder')), {
       target: { value: 'no such group' },
     });
 
-    expect(screen.getByText('team.groups.noGroupsMatch')).toBeInTheDocument();
-    expect(screen.queryByText('team.groups.noGroupsTitle')).not.toBeInTheDocument();
+    expect(screen.getByText(i18next.t('team.groups.noGroupsMatch'))).toBeInTheDocument();
+    expect(screen.queryByText(i18next.t('team.groups.noGroupsTitle'))).not.toBeInTheDocument();
   });
 
   it('does not show the empty state when groups match', () => {
@@ -100,7 +117,7 @@ describe('Groups list empty state', () => {
     ];
     render(<Groups />);
 
-    expect(screen.queryByText('team.groups.noGroupsTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText(i18next.t('team.groups.noGroupsTitle'))).not.toBeInTheDocument();
     expect(screen.getByText('Managers')).toBeInTheDocument();
   });
 });

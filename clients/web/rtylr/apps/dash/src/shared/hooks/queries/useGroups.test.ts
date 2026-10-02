@@ -2,9 +2,11 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { decodeGroup } from '@voxire/voxie/hub/team/groups/v1/types';
 
 const mocks = vi.hoisted(() => ({
   groupsClient: {
+    listGroups: vi.fn(),
     removeGroupMember: vi.fn(),
   },
   invitationsClient: {
@@ -25,7 +27,7 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-import { useRemoveGroupMember } from './useGroups';
+import { useGroups, useRemoveGroupMember } from './useGroups';
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -35,6 +37,39 @@ function createWrapper() {
     React.createElement(QueryClientProvider, { client: queryClient }, children);
   return { queryClient, wrapper };
 }
+
+describe('useGroups', () => {
+  it('loads group assignments when unscoped grants omit the empty scopes list', async () => {
+    mocks.groupsClient.listGroups.mockResolvedValue({
+      groups: [
+        decodeGroup({
+          id: '7',
+          name: 'Readers',
+          permission_profile_assignments: [
+            {
+              app_id: 'flow',
+              permission_profile_ids: ['23'],
+              assignment_source: 'group',
+              status: 'active',
+            },
+          ],
+        }),
+      ],
+    });
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useGroups(), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.[0].permissionProfileAssignments).toEqual([
+      {
+        appId: 'flow',
+        permissionProfileIds: ['23'],
+        assignmentSource: 'group',
+        status: 'active',
+        scopes: [],
+      },
+    ]);
+  });
+});
 
 describe('useRemoveGroupMember', () => {
   beforeEach(() => {

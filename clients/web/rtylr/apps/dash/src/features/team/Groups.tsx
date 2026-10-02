@@ -24,7 +24,7 @@ const appLabelKey = (appId: string): string =>
 const Groups = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: groups = [], isLoading } = useGroups();
+  const { data: groups = [], isLoading, isError, refetch } = useGroups();
   const deleteGroup = useDeleteGroup();
   const [query, setQuery] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<Group | null>(null);
@@ -73,7 +73,16 @@ const Groups = (): React.JSX.Element => {
           className="rounded-xl"
           style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
-          {isLoading ? (
+          {isError ? (
+            <div className="p-4" role="alert">
+              <EmptyState
+                icon={Users}
+                title={t('team.groups.loadFailed')}
+                description={t('team.groups.loadFailedDescription')}
+                action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+              />
+            </div>
+          ) : isLoading ? (
             <div className="p-2">
               <SkeletonList rows={5} />
             </div>

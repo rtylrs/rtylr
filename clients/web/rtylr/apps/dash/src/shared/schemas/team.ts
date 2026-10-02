@@ -11,7 +11,7 @@ export const permissionProfileAssignmentSchema = z.object({
   permissionProfileIds: z.array(z.string()),
   assignmentSource: z.string(),
   status: z.string(),
-  scopes: z.array(z.object({ scopeType: z.string(), scopeId: z.string() })),
+  scopes: z.array(z.object({ scopeType: z.string(), scopeId: z.string() })).default([]),
   groupId: z.string().optional(),
 });
 

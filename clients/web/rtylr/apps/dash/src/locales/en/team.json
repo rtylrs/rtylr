@@ -17,7 +17,9 @@
     "sectionsCount_other": "{{count}} sections",
     "deleteTitle": "Delete \"{{name}}\"?",
     "deleteDescription": "Members will lose access granted by this group. This cannot be undone.",
-    "deleteConfirm": "Delete"
+    "deleteConfirm": "Delete",
+    "loadFailed": "Unable to load groups",
+    "loadFailedDescription": "Refresh the list before changing group access."
   },
   "groupDetail": {
     "newGroupTitle": "New group",
@@ -87,7 +89,9 @@
     "deactivateFallbackName": "member",
     "deactivateDescription": "The member will lose access to all apps immediately. You can reactivate them later.",
     "deactivateConfirm": "Deactivate",
-    "seatSavings": "Saves <0>{{saved}}</0> this month ({{daysRemaining}}/{{daysInMonth}} days), then <1>{{perSeat}}/mo</1> from {{month}} 1st."
+    "seatSavings": "Saves <0>{{saved}}</0> this month ({{daysRemaining}}/{{daysInMonth}} days), then <1>{{perSeat}}/mo</1> from {{month}} 1st.",
+    "loadFailed": "Unable to load team members",
+    "loadFailedDescription": "Refresh the list before changing team access."
   },
   "memberDetail": {
     "notFoundTitle": "Member not found",

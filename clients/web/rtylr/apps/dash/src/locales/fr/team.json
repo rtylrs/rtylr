@@ -18,7 +18,9 @@
     "sectionsCount_other": "{{count}} sections",
     "deleteTitle": "Supprimer \"{{name}}\" ?",
     "deleteDescription": "Les membres perdront l'accès accordé par ce groupe. Cette action est irréversible.",
-    "deleteConfirm": "Supprimer"
+    "deleteConfirm": "Supprimer",
+    "loadFailed": "Impossible de charger les groupes",
+    "loadFailedDescription": "Actualisez la liste avant de modifier les accès des groupes."
   },
   "groupDetail": {
     "newGroupTitle": "Nouveau groupe",
@@ -92,7 +94,9 @@
     "deactivateFallbackName": "ce membre",
     "deactivateDescription": "Le membre perdra immédiatement l’accès à toutes les applications. Vous pourrez le réactiver plus tard.",
     "deactivateConfirm": "Désactiver",
-    "seatSavings": "Économie de <0>{{saved}}</0> ce mois-ci ({{daysRemaining}}/{{daysInMonth}} jours), puis <1>{{perSeat}}/mois</1> à partir du 1er {{month}}."
+    "seatSavings": "Économie de <0>{{saved}}</0> ce mois-ci ({{daysRemaining}}/{{daysInMonth}} jours), puis <1>{{perSeat}}/mois</1> à partir du 1er {{month}}.",
+    "loadFailed": "Impossible de charger les membres",
+    "loadFailedDescription": "Actualisez la liste avant de modifier les accès de l’équipe."
   },
   "memberDetail": {
     "notFoundTitle": "Membre introuvable",
