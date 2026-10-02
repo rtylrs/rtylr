@@ -3,7 +3,7 @@
   backdrop-filter: blur(4px);
 }
 .portal-command-dialog {
-  top: clamp(48px, 13vh, 144px);
+  top: 50%;
   width: calc(100vw - 32px);
   max-width: 640px;
   max-height: calc(100dvh - 96px);
@@ -11,7 +11,7 @@
   flex-direction: column;
   padding: 0;
   overflow: hidden;
-  translate: -50% 0;
+  translate: -50% -50%;
   transform: none;
   border: 1px solid var(--dash-border);
   border-radius: 20px;
@@ -224,7 +224,6 @@
 }
 @media (max-width: 480px) {
   .portal-command-dialog {
-    top: 24px;
     max-height: calc(100dvh - 48px);
     border-radius: 16px;
   }
