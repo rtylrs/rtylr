@@ -413,8 +413,9 @@ export const useListPlans = () =>
     select: (data) => (data.plans ?? []).map(normalizePlan),
   });
 
-export const useBillingDetail = () =>
+export const useBillingDetail = (enabled = true) =>
   useQuery({
+    enabled,
     queryKey: ['subscription', 'billing'],
     queryFn: () => subscriptionClient.getBillingDetail({}) as Promise<BillingDetailResponse>,
     select: (data) => normalizeBilling(data.billing),

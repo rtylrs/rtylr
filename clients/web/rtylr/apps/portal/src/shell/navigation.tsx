@@ -4,13 +4,12 @@ import {
   Folder,
   Shield,
   History,
-  Plug2,
   User,
   Building2,
   Globe,
   Mail,
   CreditCard,
-  Puzzle,
+  ToyBrick,
   Briefcase,
   Sparkles,
   QrCode,
@@ -19,7 +18,7 @@ import {
   Webhook,
   Settings,
 } from 'lucide-react';
-import { HomeIcon, MenuIcon, FlowIcon, InsightsIcon } from '@voxire/ui';
+import { HomeIcon, MenuIcon, FlowIcon, InsightsIcon, CrmIcon, ErpIcon } from '@voxire/ui';
 import type { ComponentType } from 'react';
 import { routeKeys } from './routeTitles';
 export { routeKeys };
@@ -36,7 +35,7 @@ export const rawNavItems: PortalNavItem[] = [
   { key: 'groups', path: '/team/groups', icon: Folder },
   { key: 'roles', path: '/roles', icon: Shield },
   { key: 'auditLog', path: '/audit', icon: History },
-  { key: 'integrations', path: '/integrations', icon: Plug2, section: 'business' },
+  { key: 'extensions', path: '/extensions', icon: ToyBrick },
 ];
 export const rawMenuSubItems: PortalNavItem[] = [
   { key: 'menus', path: '/menus', icon: MenuIcon },
@@ -52,10 +51,10 @@ export const settingsNavItems: PortalNavItem[] = [
   { key: 'industry', path: '/settings/industry', icon: Briefcase, section: 'business' },
   { key: 'aiUsage', path: '/settings/ai', icon: Sparkles, section: 'business' },
   { key: 'billing', path: '/settings/billing', icon: CreditCard, section: 'business' },
-  { key: 'addons', path: '/settings/addons', icon: Puzzle, section: 'business' },
-  { key: 'integrations', path: '/settings/integrations', icon: Plug2, section: 'business' },
   { key: 'apiKeys', path: '/api-keys', icon: KeyRound, section: 'business' },
   { key: 'webhooks', path: '/webhooks', icon: Webhook, section: 'business' },
+  { key: 'erpSettings', path: '/settings/erp', icon: ErpIcon, section: 'apps' },
+  { key: 'crmSettings', path: '/settings/crm', icon: CrmIcon, section: 'apps' },
   { key: 'flowSettings', path: '/settings/flow', icon: FlowIcon, section: 'apps' },
   { key: 'insightsSettings', path: '/settings/insights', icon: InsightsIcon, section: 'apps' },
 ];
@@ -85,7 +84,12 @@ export function PortalNavLink({
 }: PortalNavItem & { label: string; tourId?: string; onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const active =
-    path === '/' || path === '/insights' || path === '/settings'
+    path === '/' ||
+    path === '/insights' ||
+    path === '/crm' ||
+    path === '/erp' ||
+    path === '/crm/sales' ||
+    path === '/settings'
       ? pathname === path
       : path === '/team'
         ? pathname === '/team' ||

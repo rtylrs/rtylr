@@ -205,7 +205,10 @@
     "businesses": "Entreprises",
     "aiUsage": "Utilisation de l’IA",
     "flowSettings": "Flow",
-    "insightsSettings": "Insights"
+    "insightsSettings": "Insights",
+    "crmSettings": "CRM",
+    "erpSettings": "ERP",
+    "extensions": "Extensions"
   },
   "launch": "Ouvrir",
   "pagination": {
@@ -263,7 +266,9 @@
       "actions": "Actions",
       "flow": "Flow",
       "projects": "Projets",
-      "tasks": "Tâches"
+      "tasks": "Tâches",
+      "crm": "CRM",
+      "erp": "ERP"
     },
     "loadingFlow": "Recherche dans Flow…",
     "flowSearchFailed": "La recherche Flow a échoué. Réessayez."

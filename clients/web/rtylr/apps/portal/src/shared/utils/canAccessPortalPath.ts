@@ -1,7 +1,10 @@
+import { canAccessErpPath } from '../../modules/erp/navigation';
+import { canAccessCrmPath } from '../../modules/crm/navigation';
 import type { StoredUser } from '../stores/userStore';
 import { canEffectiveAccess, hasEffectiveAppAccess } from '@voxire/permissions';
 
 const DASH_ROUTE_PERMISSIONS: Array<[string, string]> = [
+  ['/extensions', 'hub:business:settings:view'],
   ['/team/invite', 'hub:team:invite'],
   ['/team/groups', 'hub:groups:manage'],
   ['/team', 'hub:team:view'],
@@ -21,8 +24,13 @@ const DASH_ROUTE_PERMISSIONS: Array<[string, string]> = [
 ];
 
 export function canAccessPortalPath(user: StoredUser | null, pathname: string): boolean {
+  pathname = pathname.replace(/\/+$/, '') || '/';
   if (!user?.effectiveAccess) return false;
   if (user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin) return true;
+  if (pathname === '/erp' || pathname.startsWith('/erp/') || pathname === '/settings/erp')
+    return canAccessErpPath(user, pathname);
+  if (pathname === '/crm' || pathname.startsWith('/crm/') || pathname === '/settings/crm')
+    return canAccessCrmPath(user, pathname);
   if (pathname === '/settings') return true;
   if (pathname === '/settings/flow') return hasEffectiveAppAccess(user.effectiveAccess, 'flow');
   if (pathname === '/settings/insights')

@@ -61,15 +61,19 @@ export default function Home() {
           <div className="portal-home-app-grid">
             {visibleApps.map((id) => {
               const Icon = APP_ICONS[id];
-              if (id === 'insights' || id === 'flow') {
+              if (id === 'insights' || id === 'flow' || id === 'crm' || id === 'erp') {
                 return (
                   <Link
                     key={id}
                     to={
-                      id === 'flow'
-                        ? '/flow'
-                        : insightsNavItems.find((page) => canAccessPortalPath(user, page.path))
-                            ?.path || '/'
+                      id === 'erp'
+                        ? '/erp'
+                        : id === 'crm'
+                          ? '/crm'
+                          : id === 'flow'
+                            ? '/flow'
+                            : insightsNavItems.find((page) => canAccessPortalPath(user, page.path))
+                                ?.path || '/'
                     }
                     aria-label={t('common.portal.openWorkspaceApp', { app: t(APP_NAMES[id].full) })}
                   >

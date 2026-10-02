@@ -209,7 +209,10 @@
     "businesses": "المؤسسات",
     "aiUsage": "استخدام الذكاء الاصطناعي",
     "flowSettings": "فلو",
-    "insightsSettings": "إنسايتس"
+    "insightsSettings": "إنسايتس",
+    "crmSettings": "CRM",
+    "erpSettings": "ERP",
+    "extensions": "الإضافات"
   },
   "launch": "تشغيل",
   "pagination": {
@@ -267,7 +270,9 @@
       "actions": "الإجراءات",
       "flow": "فلو",
       "projects": "المشاريع",
-      "tasks": "المهام"
+      "tasks": "المهام",
+      "crm": "CRM",
+      "erp": "ERP"
     },
     "loadingFlow": "جارٍ البحث في فلو…",
     "flowSearchFailed": "تعذّر تحميل بحث فلو. حاول مجددًا."

@@ -3,7 +3,7 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { resolveApiBase } from '@voxire/config';
 import { PanelLeft, Search, Bell, Settings, X } from 'lucide-react';
-import { HomeIcon, InsightsIcon, FlowIcon } from '@voxire/ui';
+import { HomeIcon, InsightsIcon, FlowIcon, CrmIcon, ErpIcon } from '@voxire/ui';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useCommandPalette } from '../shared/stores/commandPaletteStore';
@@ -16,6 +16,8 @@ import { buildPortalPageContext, buildPortalSystemContext } from '../shared/lib/
 import { canAccessPortalPath } from '../shared/utils/canAccessPortalPath';
 import InsightsHeader from '../modules/insights/InsightsHeader';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
+import { erpNavItems } from '../modules/erp/navigation';
+import { crmNavItems, crmSalesNavItems } from '../modules/crm/navigation';
 import { insightsNavItems } from '../modules/insights/navigation';
 import ProfileMenu from './ProfileMenu';
 import { Tooltip } from '../shared/components/ui/tooltip';
@@ -33,6 +35,8 @@ import { useFlowStore } from '../modules/flow/shared/stores/flowStore';
 const FlowQuickCreate = lazy(() => import('../modules/flow/shared/components/QuickCreate'));
 import './portal.css';
 import './caret.css';
+import '../modules/crm/crm.css';
+import '../modules/erp/erp.css';
 
 function initialCollapsed() {
   try {
@@ -58,12 +62,14 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const [caretMounted, setCaretMounted] = useState(caretOpen);
   const caretWidth = useCaretSettingsStore((state) => state.panelWidth);
   const { data: notifications = [] } = useNotifications();
-  const { data: addons = [] } = useAddons();
+  const { data: addons = [], isError: addonsError } = useAddons();
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const isSettings =
     pathname.startsWith('/settings') || ['/security', '/api-keys', '/webhooks'].includes(pathname);
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
   const isCaret = pathname === '/caret';
+  const isErp = pathname === '/erp' || pathname.startsWith('/erp/');
+  const isCrm = pathname === '/crm' || pathname.startsWith('/crm/');
   const isFlow = pathname === '/flow' || pathname.startsWith('/flow/');
   const availableInsights = insightsNavItems.filter((item) => canAccessPortalPath(user, item.path));
   const insightsPage = insightsNavItems.find((item) => item.path === pathname);
@@ -73,22 +79,47 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       .filter((key) => key !== '/' && pathname.startsWith(`${key}/`))
       .sort((a, b) => b.length - a.length)
       .map((key) => routeKeys[key])[0];
-  const pageTitle = isFlow
-    ? t('appNames.short.flow')
-    : isInsights
-      ? t(`insightsNav.${insightsPage?.key || 'overview'}`)
-      : pathname.startsWith('/team/groups')
-        ? t('common.nav.groups')
-        : pageKey
-          ? t(`common.nav.${pageKey}`)
-          : t('common.portal.home');
+  const crmPage = [...crmNavItems, ...crmSalesNavItems]
+    .filter(
+      (item) =>
+        pathname === item.path || (item.path !== '/crm' && pathname.startsWith(`${item.path}/`))
+    )
+    .sort((a, b) => b.path.length - a.path.length)[0];
+  const erpPage = erpNavItems
+    .filter(
+      (item) =>
+        pathname === item.path || (item.path !== '/erp' && pathname.startsWith(`${item.path}/`))
+    )
+    .sort((a, b) => b.path.length - a.path.length)[0];
+  const pageTitle = isErp
+    ? t(`erpNav.${erpPage?.key ?? 'appName'}`)
+    : isCrm
+      ? t(`crmNav.${crmPage?.key ?? 'appName'}`)
+      : isFlow
+        ? t('appNames.short.flow')
+        : isInsights
+          ? t(`insightsNav.${insightsPage?.key || 'overview'}`)
+          : pathname.startsWith('/team/groups')
+            ? t('common.nav.groups')
+            : pageKey
+              ? t(`common.nav.${pageKey}`)
+              : t('common.portal.home');
   const nav = (
     isSettings
       ? [
           ...settingsNavItems,
           ...addonSettingsItems.filter((item) => isAddonEnabled(addons, item.addonId)),
         ]
-      : [...rawNavItems, ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : [])]
+      : isErp
+        ? [...erpNavItems]
+        : isCrm
+          ? [
+              ...crmNavItems,
+              ...(addonsError || isAddonEnabled(addons, 'sales_pipeline') ? crmSalesNavItems : []),
+            ]
+          : [...rawNavItems, ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : [])].sort(
+              (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
+            )
   ).filter((item) => canAccessPortalPath(user, item.path));
   const apps = useMemo(
     () =>
@@ -205,7 +236,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           {mobile ? <X size={18} /> : <PanelLeft size={18} />}
         </button>
       </div>
-      {!isSettings && <BusinessSwitcher />}
+      {!isSettings && !isCrm && !isErp && <BusinessSwitcher />}
       <nav
         id={mobile ? 'portal-mobile-navigation' : 'portal-app-navigation'}
         className="portal-app-navigation"
@@ -213,11 +244,15 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       >
         {!isSettings && (
           <p className="portal-section-label">
-            {isInsights
-              ? t('appNames.short.insights')
-              : isSettings
-                ? t('common.nav.manageAccount')
-                : t('common.portal.workspace')}
+            {isErp
+              ? t('appNames.short.erp')
+              : isCrm
+                ? t('appNames.short.crm')
+                : isInsights
+                  ? t('appNames.short.insights')
+                  : isSettings
+                    ? t('common.nav.manageAccount')
+                    : t('common.portal.workspace')}
           </p>
         )}
         {isSettings ? (
@@ -234,7 +269,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               icon={item.icon}
               key={item.path}
               tourId={mobile ? undefined : item.key}
-              label={t(`common.nav.${item.key}`)}
+              label={t(`${isErp ? 'erpNav' : isCrm ? 'crmNav' : 'common.nav'}.${item.key}`)}
               onNavigate={() => setMobileOpen(false)}
             />
           ))
@@ -256,9 +291,13 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         >
           <Link
             to="/"
-            className={`portal-rail-button${!isSettings && !isInsights && !isFlow && !isCaret ? ' is-active' : ''}`}
+            className={`portal-rail-button${!isSettings && !isInsights && !isFlow && !isCaret && !isCrm && !isErp ? ' is-active' : ''}`}
             aria-label={t('common.portal.home')}
-            aria-current={!isSettings && !isInsights && !isFlow && !isCaret ? 'page' : undefined}
+            aria-current={
+              !isSettings && !isInsights && !isFlow && !isCaret && !isCrm && !isErp
+                ? 'page'
+                : undefined
+            }
           >
             <HomeIcon size={21} />
           </Link>
@@ -294,6 +333,40 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               aria-current={isFlow ? 'page' : undefined}
             >
               <FlowIcon size={21} />
+            </Link>
+          </Tooltip>
+        )}
+        {canAccessPortalPath(user, '/crm') && (
+          <Tooltip
+            content={t('appNames.short.crm')}
+            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+            focusable={false}
+            contentClassName="portal-rail-tooltip"
+          >
+            <Link
+              to="/crm"
+              className={`portal-rail-button${isCrm ? ' is-active' : ''}`}
+              aria-label={t('appNames.short.crm')}
+              aria-current={isCrm ? 'page' : undefined}
+            >
+              <CrmIcon size={21} />
+            </Link>
+          </Tooltip>
+        )}
+        {canAccessPortalPath(user, '/erp') && (
+          <Tooltip
+            content={t('appNames.short.erp')}
+            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+            focusable={false}
+            contentClassName="portal-rail-tooltip"
+          >
+            <Link
+              to="/erp"
+              className={`portal-rail-button${isErp ? ' is-active' : ''}`}
+              aria-label={t('appNames.short.erp')}
+              aria-current={isErp ? 'page' : undefined}
+            >
+              <ErpIcon size={21} />
             </Link>
           </Tooltip>
         )}
@@ -355,7 +428,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             id="main-content"
             ref={mainRef}
             tabIndex={-1}
-            className={`portal-page${isFlow ? ' is-flow' : ''}${isCaret ? ' is-caret' : ''}`}
+            className={`portal-page${isErp ? ' is-erp' : ''}${isCrm ? ' is-crm' : ''}${isFlow ? ' is-flow' : ''}${isCaret ? ' is-caret' : ''}`}
           >
             <PortalHeaderActionsProvider value={actions}>{children}</PortalHeaderActionsProvider>
           </main>
@@ -374,7 +447,9 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               apiBaseUrl={resolveApiBase()}
               variant="inline"
               shortcutsEnabled={false}
-              appId={isFlow ? 'flow' : isInsights ? 'insights' : 'dash'}
+              appId={
+                isErp ? 'erp' : isCrm ? 'crm' : isFlow ? 'flow' : isInsights ? 'insights' : 'dash'
+              }
               userId={Number(user?.id) || 0}
               systemContext={buildPortalSystemContext(caretContext)}
               pageContext={buildPortalPageContext(caretContext)}

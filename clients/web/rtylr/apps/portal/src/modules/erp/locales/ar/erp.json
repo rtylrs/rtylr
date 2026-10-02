@@ -1,0 +1,498 @@
+{
+  "productCreated": "Product created",
+  "productUpdated": "Product updated",
+  "productDeleted": "Product deleted",
+  "supplierCreated": "Supplier created",
+  "supplierUpdated": "Supplier updated",
+  "supplierDeleted": "Supplier deleted",
+  "warehouseCreated": "Warehouse created",
+  "categoryCreated": "Category created",
+  "brandCreated": "Brand created",
+  "stockTransferCreated": "Stock transfer created",
+  "stockTakeCreated": "Stock take created",
+  "priceListCreated": "Price list created",
+  "purchaseOrderCreated": "Purchase order created",
+  "purchaseOrderStatusUpdated": "Purchase order status updated",
+  "purchaseOrderApproved": "Purchase order approved",
+  "inventoryAdjusted": "Inventory adjusted",
+  "products": {
+    "title": "Products",
+    "new": "New Product",
+    "create": "Create Product",
+    "creating": "Creating…",
+    "catalogCount": "{{count}} products in your catalog",
+    "empty": {
+      "title": "No products found",
+      "description": "Try adjusting your filters or create your first product."
+    },
+    "detail": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "notFound": "Product not found",
+      "notFoundDescription": "The product you are looking for does not exist or has been deleted.",
+      "backToInventory": "Back to Inventory",
+      "noActivity": "لا يوجد نشاط مسجل حتى الآن."
+    },
+    "toast": {
+      "created": "Product \"{{name}}\" created",
+      "createFailed": "Could not create product. Please try again.",
+      "deleted": "Product deleted",
+      "deleteFailed": "Could not delete product. Please try again."
+    },
+    "fields": {
+      "name": "Product name",
+      "sku": "SKU",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "stock": "Stock",
+      "costPrice": "Cost price",
+      "salePrice": "Sale price",
+      "brand": "Brand",
+      "selectBrand": "Select brand",
+      "supplier": "Supplier",
+      "selectSupplier": "Select supplier",
+      "none": "None",
+      "barcode": "Barcode",
+      "description": "Description",
+      "unit": "Unit",
+      "lowStock": "Low-stock threshold",
+      "reorderPoint": "Reorder point",
+      "trackInventory": "Track inventory",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusDraft": "Draft",
+      "margin": "Margin",
+      "compareAt": "Compare-at price",
+      "taxRate": "Tax rate %",
+      "currency": "Currency",
+      "weight": "Weight (kg)",
+      "length": "Length (cm)",
+      "width": "Width (cm)",
+      "height": "Height (cm)",
+      "countryOfOrigin": "Country of origin",
+      "hsCode": "HS code",
+      "leadTime": "Lead time (days)",
+      "allowBackorder": "Allow backorder",
+      "attrName": "Attribute",
+      "attrValue": "Value",
+      "addAttribute": "Add attribute"
+    },
+    "validation": {
+      "requiredFields": "Please fill required fields",
+      "negativeCost": "Cost price cannot be negative",
+      "negativePrice": "Sale price cannot be negative"
+    },
+    "sections": {
+      "basics": "Basics",
+      "organization": "Organization",
+      "pricing": "Pricing",
+      "inventory": "Inventory",
+      "logistics": "Logistics",
+      "attributes": "Custom attributes"
+    },
+    "variants": {
+      "title": "المتغيرات",
+      "subtitle": "أنشئ أرقام SKU فردية للأحجام والألوان وخيارات أخرى",
+      "empty": "لا توجد متغيرات بعد. أضف خياراً أدناه لإنشائها.",
+      "variant": "المتغير",
+      "sku": "SKU",
+      "price": "السعر",
+      "stock": "المخزون",
+      "save": "حفظ",
+      "saved": "تم تحديث المتغير",
+      "deleted": "تم حذف المتغير",
+      "created": "تم إنشاء {{count}} متغير",
+      "createPartial": "تم إنشاء {{count}} من {{total}} متغيرات؛ أعد محاولة الصفوف المتبقية",
+      "createFailed": "فشل إنشاء المتغيرات",
+      "allExist": "جميع التركيبات موجودة بالفعل",
+      "optionName": "اسم الخيار (مثل المقاس، اللون)",
+      "addOption": "إضافة خيار",
+      "addValuePlaceholder": "أضف قيمة، اضغط Enter",
+      "generateBtn": "إنشاء {{count}} جديد",
+      "preview": "متغيرات جديدة لإنشائها",
+      "createAll": "إنشاء {{count}} متغير",
+      "creating": "جارٍ الإنشاء…",
+      "createFailedOne": "تعذر إنشاء المتغير",
+      "updateFailed": "تعذر تحديث المتغير",
+      "deleteFailed": "تعذر حذف المتغير"
+    },
+    "updateFailed": "تعذر تحديث المنتج",
+    "deleteFailed": "تعذر حذف المنتج",
+    "barcodeLookupFailed": "تعذر البحث عن الباركود",
+    "searchPlaceholder": "ابحث عن المنتجات…",
+    "category": "الفئة",
+    "brand": "العلامة التجارية",
+    "allCategories": "كل الفئات",
+    "allStatuses": "كل الحالات",
+    "status": {
+      "inStock": "متوفر",
+      "lowStock": "مخزون منخفض",
+      "outOfStock": "غير متوفر"
+    },
+    "costPrice": "سعر التكلفة",
+    "salePrice": "سعر البيع",
+    "margin": "هامش الربح",
+    "noStockHistory": "لا توجد بيانات لسجل المخزون بعد.",
+    "noSalesHistory": "لا توجد بيانات لسجل المبيعات بعد.",
+    "barcode": "الباركود",
+    "leadTime": "مهلة التوريد",
+    "reorderPoint": "نقطة إعادة الطلب",
+    "unit": "الوحدة",
+    "unitsCount_zero": "لا توجد وحدات",
+    "unitsCount_one": "وحدة واحدة",
+    "unitsCount_two": "وحدتان",
+    "unitsCount_few": "{{count}} وحدات",
+    "unitsCount_many": "{{count}} وحدة",
+    "unitsCount_other": "{{count}} وحدة",
+    "loadFailed": "تعذر تحميل المنتجات.",
+    "retry": "حاول مجدداً"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "addProduct": "Add Product",
+    "search": "Search products…",
+    "empty": "No products found.",
+    "clearSearch": "مسح البحث",
+    "adjustFailed": "تعذر تعديل المخزون",
+    "decreaseUnsupported": "تقليل المخزون غير مدعوم في واجهة برمجة المخزون بعد"
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "add": "Add Supplier",
+    "comingSoon": "Supplier management is coming soon.",
+    "scorecards": "Scorecards",
+    "requiredFields": "اسم المورد والبريد الإلكتروني والمدينة والدولة مطلوبة",
+    "created": "تم إنشاء المورد",
+    "createFailed": "تعذر إنشاء المورد",
+    "newSupplier": "مورد جديد",
+    "activeCount_zero": "لا يوجد موردون نشطون",
+    "activeCount_one": "مورد نشط واحد",
+    "activeCount_two": "موردان نشطان",
+    "activeCount_few": "{{count}} موردين نشطين",
+    "activeCount_many": "{{count}} موردًا نشطًا",
+    "activeCount_other": "{{count}} مورد نشط",
+    "companyName": "اسم الشركة",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "city": "المدينة",
+    "country": "الدولة",
+    "address": "العنوان",
+    "retry": "إعادة المحاولة"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "create": "إنشاء",
+    "creating": "جارٍ الإنشاء…",
+    "delete": "حذف",
+    "comingSoon": "This action is not available yet."
+  },
+  "warehouses": {
+    "title": "المستودعات",
+    "new": "مستودع جديد",
+    "count": "{{count}} موقع تخزين نشط",
+    "empty": {
+      "title": "لا توجد مستودعات",
+      "description": "أنشئ مستودعك الأول لتتبع مواقع المخزون"
+    },
+    "status": {
+      "default": "افتراضي",
+      "inactive": "غير نشط"
+    },
+    "delete": "حذف المستودع",
+    "managedBy": "يديره {{name}}",
+    "capacity": "السعة",
+    "deleteConfirm": {
+      "title": "حذف المستودع؟",
+      "description": "ستصبح المنتجات المعيّنة لهذا المستودع غير معيّنة."
+    },
+    "fields": {
+      "name": "اسم المستودع",
+      "address": "العنوان (اختياري)",
+      "manager": "اسم المدير (اختياري)",
+      "capacity": "السعة (اختياري)"
+    },
+    "validation": {
+      "nameRequired": "اسم المستودع مطلوب"
+    },
+    "toast": {
+      "created": "تم إنشاء المستودع",
+      "createFailed": "فشل إنشاء المستودع",
+      "deleted": "تم حذف المستودع"
+    },
+    "createFailed": "تعذر إنشاء المستودع",
+    "deleteFailed": "تعذر حذف المستودع"
+  },
+  "receiving": {
+    "title": "استلام البضائع",
+    "description": "استلم العناصر من أوامر الشراء المفتوحة",
+    "receiveFor": "استلام عناصر أمر الشراء {{id}}",
+    "closeDetails": "إغلاق تفاصيل الاستلام",
+    "expected": "المتوقع {{count}}",
+    "ok": "موافق",
+    "markReceived": "تحديد كمستلم",
+    "empty": {
+      "title": "لا توجد أوامر مفتوحة للاستلام",
+      "description": "تم استلام جميع الطلبات"
+    },
+    "goToPurchasing": "الانتقال إلى أوامر الشراء",
+    "orderSummary": "{{count}} عناصر / الموعد {{date}}",
+    "validation": {
+      "overReceived": "لا يمكن استلام وحدات أكثر من الكمية المطلوبة",
+      "noItems": "لا توجد بنود متاحة للاستلام"
+    },
+    "error": {
+      "loadFailed": "تعذّر تحميل بنود أمر الشراء"
+    },
+    "toast": {
+      "completed": "اكتمل الاستلام، تم استلام جميع العناصر",
+      "completedVariance": "اكتمل الاستلام مع فرق {{count}} وحدة",
+      "updateFailed": "فشل تحديث حالة الاستلام"
+    }
+  },
+  "reorder": {
+    "empty": {
+      "title": "لا توجد اقتراحات",
+      "description": "جميع مستويات المخزون جيدة"
+    },
+    "refresh": "تحديث",
+    "subtitle": "توصيات ذكية بناءً على سرعة المبيعات ومهلة التوريد",
+    "avgDaily": "المتوسط اليومي",
+    "suggested": "المقترح",
+    "lead": "المهلة",
+    "confidence": "الثقة",
+    "error": {
+      "title": "تعذر تحميل اقتراحات إعادة الطلب",
+      "description": "تعذر تحميل بيانات المخزون الحالية. حدّث الصفحة للمحاولة مجددًا."
+    }
+  },
+  "variants": {
+    "empty": {
+      "title": "لا توجد متغيرات",
+      "description": "أضف متغيرات لتمييز منتجاتك"
+    },
+    "addVariant": "إضافة متغيّر",
+    "productIdRequired": "معرف المنتج مطلوب",
+    "nameRequired": "اسم المتغير مطلوب",
+    "priceNegative": "لا يمكن أن يكون السعر سالبًا",
+    "created": "تم إنشاء المتغير",
+    "createFailed": "تعذر إنشاء المتغير",
+    "subtitle": "وحدات تخزين منفصلة للمقاسات والألوان والنكهات وغيرها",
+    "newVariant": "متغير جديد",
+    "productIdPlaceholder": "معرف المنتج",
+    "productSearch": "البحث عن المنتجات",
+    "selectProduct": "اختر منتجًا",
+    "loadingProducts": "جارٍ تحميل المنتجات…",
+    "productsUnavailable": "المنتجات غير متاحة",
+    "noProducts": "لا توجد منتجات متاحة",
+    "namePlaceholder": "اسم المتغير (مثل كبير / أحمر)",
+    "skuPlaceholder": "رمز التخزين (اختياري)",
+    "attributes": "الخصائص"
+  },
+  "priceLists": {
+    "empty": {
+      "title": "لا توجد قوائم أسعار",
+      "description": "أنشئ أول قائمة أسعار لتفعيل التسعير المتدرّج"
+    },
+    "newPriceList": "قائمة أسعار جديدة",
+    "refresh": "تحديث",
+    "nameRequired": "اسم قائمة الأسعار مطلوب",
+    "created": "تم إنشاء قائمة الأسعار",
+    "createFailed": "تعذر إنشاء قائمة الأسعار",
+    "subtitle": "استراتيجيات تسعير حسب العملة",
+    "currencyPlaceholder": "العملة (مثل USD)",
+    "setDefault": "تعيين كقائمة أسعار افتراضية"
+  },
+  "brands": {
+    "empty": {
+      "title": "لا توجد علامات تجارية بعد",
+      "description": "أضف علامتك التجارية الأولى لتجميع المنتجات."
+    },
+    "newBrand": "علامة تجارية جديدة",
+    "nameRequired": "اسم العلامة التجارية مطلوب",
+    "created": "تم إنشاء العلامة التجارية",
+    "createFailed": "تعذر إنشاء العلامة التجارية",
+    "countAcrossCatalog_zero": "لا توجد علامات تجارية في الكتالوج",
+    "countAcrossCatalog_one": "علامة تجارية واحدة في الكتالوج",
+    "countAcrossCatalog_two": "علامتان تجاريتان في الكتالوج",
+    "countAcrossCatalog_few": "{{count}} علامات تجارية في الكتالوج",
+    "countAcrossCatalog_many": "{{count}} علامة تجارية في الكتالوج",
+    "countAcrossCatalog_other": "{{count}} علامة تجارية في الكتالوج",
+    "deleteAria": "حذف العلامة التجارية",
+    "confirmDeleteTitle": "حذف العلامة التجارية؟",
+    "confirmDeleteBody": "لن تُحذف المنتجات المرتبطة بهذه العلامة التجارية، لكنها ستصبح بدون علامة تجارية.",
+    "deleted": "تم حذف العلامة التجارية",
+    "namePlaceholder": "اسم العلامة التجارية",
+    "descriptionPlaceholder": "الوصف (اختياري)"
+  },
+  "expiry": {
+    "empty": {
+      "title": "لا توجد عناصر منتهية الصلاحية قريبًا",
+      "description": "لا توجد دفعات بتواريخ انتهاء صلاحية متتبَّعة"
+    },
+    "refresh": "تحديث",
+    "expiryColumn": "انتهاء الصلاحية",
+    "daysLeft": "الأيام المتبقية"
+  },
+  "stockTransfers": {
+    "empty": {
+      "title": "لا توجد عمليات نقل",
+      "description": "أنشئ أول عملية نقل مخزون"
+    },
+    "newTransfer": "نقل جديد",
+    "refresh": "تحديث",
+    "warehousesRequired": "مستودعا المصدر والوجهة مطلوبان",
+    "warehousesMustDiffer": "يجب أن يختلف المصدر عن الوجهة",
+    "itemRequired": "مطلوب عنصر واحد على الأقل بمنتج وكمية موجبة",
+    "draftCreated": "تم إنشاء مسودة التحويل",
+    "createFailed": "تعذر إنشاء التحويل",
+    "subtitle": "نقل المخزون بين المستودعات",
+    "idColumn": "المعرف",
+    "from": "من",
+    "to": "إلى",
+    "items": "العناصر",
+    "created": "تاريخ الإنشاء",
+    "fromWarehouse": "من مستودع…",
+    "toWarehouse": "إلى مستودع…",
+    "newTransferTitle": "تحويل مخزون جديد",
+    "receive": "استلام",
+    "received": "تم استلام التحويل",
+    "receiveFailed": "تعذر استلام التحويل",
+    "receiveAria": "استلام تحويل المخزون رقم {{id}}",
+    "reloadBeforeCreate": "أعد تحميل نموذج التحويل قبل إنشاء تحويل",
+    "loadingWarehouses": "جارٍ تحميل المستودعات…",
+    "warehousesUnavailable": "المستودعات غير متاحة",
+    "searchProducts": "البحث عن المنتجات",
+    "loadingProducts": "جارٍ تحميل المنتجات…",
+    "productsUnavailable": "المنتجات غير متاحة",
+    "noProducts": "لا توجد منتجات متاحة",
+    "selectProduct": "اختر منتجًا"
+  },
+  "lowStockAlerts": {
+    "empty": {
+      "title": "جميع مستويات المخزون جيدة",
+      "description": "لا شيء يحتاج إلى إعادة الطلب الآن."
+    },
+    "viewInventory": "عرض المخزون"
+  },
+  "stockTakes": {
+    "empty": {
+      "title": "لا توجد عمليات جرد",
+      "description": "ابدأ عملية جرد لإيجاد الفروقات"
+    },
+    "newStockTake": "جرد جديد",
+    "refresh": "تحديث",
+    "warehouseRequired": "المستودع مطلوب",
+    "stillLoading": "لا يزال المخزون قيد التحميل",
+    "created": "تم إنشاء عملية الجرد",
+    "createFailed": "تعذر إنشاء عملية الجرد",
+    "completed": "تم إكمال عملية الجرد",
+    "completeFailed": "تعذر إكمال عملية الجرد",
+    "complete": "إكمال",
+    "subtitle": "عمليات جرد دورية وتقارير الفروقات",
+    "completeAria": "إكمال عملية الجرد",
+    "variance": "الفرق",
+    "selectWarehouse": "اختر المستودع…",
+    "loadingInventory": "جارٍ تحميل المخزون الحالي…",
+    "inventoryLoadFailed": "تعذر تحميل المخزون.",
+    "inventoryRequiredForCreate": "تعذر تحميل المخزون لعملية الجرد هذه",
+    "noInventoryToCount": "لا توجد عناصر مخزون لعدها",
+    "itemsWillBeIncluded": "سيتم تسجيل المنتجات من المستودع المحدد.",
+    "uncountedWarning_zero": "لا توجد عناصر غير معدودة. إكمال؟",
+    "uncountedWarning_one": "عنصر واحد غير معدود. إكمال على أي حال؟",
+    "uncountedWarning_two": "عنصران غير معدودين. إكمال على أي حال؟",
+    "uncountedWarning_few": "{{count}} عناصر غير معدودة. إكمال على أي حال؟",
+    "uncountedWarning_many": "{{count}} عنصرًا غير معدود. إكمال على أي حال؟",
+    "uncountedWarning_other": "{{count}} عنصر غير معدود. إكمال على أي حال؟"
+  },
+  "categories": {
+    "empty": {
+      "title": "لا توجد فئات بعد",
+      "description": "أنشئ فئتك الأولى لتنظيم المنتجات"
+    },
+    "addCategory": "إضافة فئة",
+    "nameRequired": "اسم الفئة مطلوب",
+    "created": "تم إنشاء الفئة \"{{name}}\"",
+    "createFailed": "تعذر إنشاء الفئة",
+    "subtitle": "تنظيم المنتجات في فئات هرمية",
+    "newNamePlaceholder": "اسم فئة جديدة…",
+    "saveAria": "حفظ الفئة",
+    "cancelEditAria": "إلغاء التعديل",
+    "editAria": "تعديل الفئة",
+    "confirmDeleteTitle": "حذف الفئة؟",
+    "confirmDeleteBody": "لن تُحذف المنتجات في هذه الفئة، لكنها ستصبح بدون فئة.",
+    "deleted": "تم حذف الفئة",
+    "updated": "تم تحديث الفئة"
+  },
+  "settings": {
+    "team": {
+      "managementTitle": "صلاحيات الفريق",
+      "managementDescription": "أدِر الأعضاء والمجموعات وتراخيص التطبيقات والصلاحيات معًا في Dash.",
+      "managementAction": "فتح إدارة الفريق"
+    }
+  },
+  "barcodes": {
+    "previewEmpty": {
+      "title": "اختر منتجات لمعاينة الملصقات",
+      "description": "اختر منتجًا واحدًا أو أكثر من القائمة لعرض ملصقات الرموز الشريطية هنا."
+    },
+    "selectFirst": "تحديد أول منتج",
+    "goToProducts": "الانتقال إلى المنتجات",
+    "selectFirstToast": "اختر المنتجات أولًا",
+    "printing_zero": "لا توجد ملصقات للطباعة",
+    "printing_one": "طباعة ملصق واحد",
+    "printing_two": "طباعة ملصقين",
+    "printing_few": "طباعة {{count}} ملصقات",
+    "printing_many": "طباعة {{count}} ملصقًا",
+    "printing_other": "طباعة {{count}} ملصق",
+    "subtitle": "اختر المنتجات وعدد النسخ واطبع الملصقات",
+    "copies": "النسخ",
+    "products": "المنتجات"
+  },
+  "valuation": {
+    "empty": {
+      "title": "لا توجد بيانات تقييم متاحة",
+      "description": "يظهر التقييم بعد تتبّع المخزون في أحد المستودعات."
+    },
+    "refresh": "تحديث"
+  },
+  "supplierBills": "{{count}} فاتورة",
+  "purchasing": {
+    "supplierAndPoRequired": "المورد ورقم أمر الشراء مطلوبان",
+    "itemRequired": "مطلوب عنصر واحد على الأقل بمنتج وكمية",
+    "draftCreated": "تم إنشاء مسودة أمر الشراء",
+    "createFailed": "تعذر إنشاء أمر الشراء",
+    "statusUpdateFailed": "تعذر تحديث حالة أمر الشراء",
+    "approveFailed": "تعذر اعتماد أمر الشراء",
+    "newOrder": "أمر جديد",
+    "approve": "اعتماد",
+    "send": "إرسال",
+    "newPurchaseOrder": "أمر شراء جديد",
+    "cost": "التكلفة"
+  },
+  "dashboard": {
+    "totalProducts": "إجمالي المنتجات",
+    "lowStockItems": "عناصر منخفضة المخزون",
+    "pendingOrders": "أوامر معلقة",
+    "totalSuppliers": "إجمالي الموردين",
+    "inventoryOverview": "نظرة عامة على المخزون",
+    "newProduct": "منتج جديد",
+    "inventoryValue": "قيمة المخزون",
+    "topItems": "أفضل 5 عناصر",
+    "noProducts": "لا توجد منتجات بعد",
+    "topCategories": "أهم الفئات",
+    "noCategories": "لا توجد فئات بعد",
+    "recentActivity": "النشاط الأخير",
+    "noRecentActivity": "لا يوجد نشاط حديث",
+    "lowStockAlert": "تنبيه انخفاض المخزون",
+    "noLowStockItems": "لا توجد عناصر منخفضة المخزون",
+    "recentPurchaseOrders": "أوامر الشراء الأخيرة",
+    "noPurchaseOrders": "لا توجد أوامر شراء بعد",
+    "criticalCount_zero": "لا توجد حالات حرجة",
+    "criticalCount_one": "حالة حرجة واحدة",
+    "criticalCount_two": "حالتان حرجتان",
+    "criticalCount_few": "{{count}} حالات حرجة",
+    "criticalCount_many": "{{count}} حالة حرجة",
+    "criticalCount_other": "{{count}} حالة حرجة",
+    "needsReview": "بحاجة إلى مراجعة"
+  }
+}

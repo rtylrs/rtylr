@@ -180,7 +180,7 @@ describe('Login redirect target and the MFA gate', () => {
     await signIn();
 
     await waitFor(() => expect(assigned.length).toBeGreaterThan(0));
-    expect(assigned[0]).toBe('http://localhost:5181');
+    expect(assigned[0]).toBe('http://localhost:5175/crm');
   });
 
   it('honours the redirect when MFA is not required at all', async () => {

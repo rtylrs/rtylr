@@ -18,5 +18,7 @@
   "search": "ابحث في الإعدادات…",
   "flowCommand": "إعدادات Flow",
   "insightsCommand": "إعدادات Insights",
-  "noResults": "لم يتم العثور على إعدادات."
+  "noResults": "لم يتم العثور على إعدادات.",
+  "crmCommand": "إعدادات CRM",
+  "erpCommand": "إعدادات ERP"
 }

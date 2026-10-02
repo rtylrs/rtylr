@@ -158,7 +158,7 @@ function cacheDomainsForModule(module: string): string[] {
     case 'team':
       return ['hr', 'team'];
     case 'settings':
-      return ['settings', 'billing', 'addons'];
+      return ['settings', 'billing', 'extensions'];
     case 'insights':
       return ['analytics', 'crm', 'erp', 'finance', 'hr', 'pos'];
     case 'caret':

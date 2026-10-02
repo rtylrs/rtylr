@@ -1498,7 +1498,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/products/internal/api/product_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/products/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp products view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1549,7 +1549,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/products/internal/api/product_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/products/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp products create",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1600,7 +1600,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/products/internal/api/product_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/products/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp products edit",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1651,7 +1651,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/products/internal/api/product_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/products/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp products delete",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1702,7 +1702,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/inventory/internal/api/inventory_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/inventory/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp inventory view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1753,7 +1753,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/inventory/internal/api/inventory_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/inventory/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp inventory adjust",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1804,7 +1804,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/stock_transfers/internal/api/stock_transfer_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/stock_transfers/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp inventory transfer",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1855,7 +1855,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/stock_takes/internal/api/stock_take_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/stock_takes/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp inventory approve",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1906,7 +1906,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/warehouses/internal/api/warehouse_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/warehouses/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp warehouses manage",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -1957,7 +1957,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/purchase_orders/internal/api/purchase_order_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/purchase_orders/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp purchasing view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -2008,7 +2008,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/purchase_orders/internal/api/purchase_order_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/purchase_orders/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp purchasing create",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -2059,7 +2059,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/purchase_orders/internal/api/purchase_order_service.go",
-      "frontendGate": "apps/erp/src/shared/lib/erpPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/erp/shared/lib/erpPermissions.ts",
       "testReferences": [
         "internal/modules/purchase_orders/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/erp purchasing approve",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -2713,7 +2713,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/crm_sales/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers view",
         "internal/modules/crm_sales/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers view",
@@ -2766,7 +2766,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/crm_sales/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers create",
         "internal/modules/crm_sales/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers create",
@@ -2819,7 +2819,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/crm_sales/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers edit",
         "internal/modules/crm_sales/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers edit",
@@ -2872,7 +2872,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/crm_sales/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers delete",
         "internal/modules/crm_sales/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers delete",
@@ -2925,7 +2925,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/customers/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers export",
         "internal/modules/customers/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm customers export",
@@ -2978,7 +2978,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/campaigns/internal/routes/handlers/campaign_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/campaigns/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm campaigns view",
         "internal/modules/campaigns/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm campaigns view",
@@ -3031,7 +3031,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/campaigns/internal/routes/handlers/campaign_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/campaigns/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm campaigns create",
         "internal/modules/campaigns/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm campaigns create",
@@ -3084,7 +3084,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/campaigns/internal/routes/handlers/campaign_handlers.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/campaigns/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm campaigns send",
         "internal/modules/campaigns/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm campaigns send",
@@ -3137,7 +3137,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/customers/internal/routes/handlers/loyalty_config_handler.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/customers/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm loyalty manage",
         "internal/modules/customers/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm loyalty manage",
@@ -3190,7 +3190,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/automations/internal/routes/handlers/automation_handler.go",
-      "frontendGate": "apps/crm/src/shared/lib/crmPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/crm/shared/lib/crmPermissions.ts",
       "testReferences": [
         "internal/modules/automations/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm automations manage",
         "internal/modules/automations/internal/routes/handlers/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/crm automations manage",

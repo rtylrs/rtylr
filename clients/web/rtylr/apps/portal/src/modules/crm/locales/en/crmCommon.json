@@ -1,0 +1,20 @@
+{
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "back": "Back",
+  "search": "Search",
+  "create": "Create",
+  "confirm": "Confirm",
+  "noData": "No data available",
+  "actions": "Actions",
+  "status": "Status",
+  "name": "Name",
+  "email": "Email",
+  "phone": "Phone",
+  "date": "Date",
+  "retry": "Try again"
+}

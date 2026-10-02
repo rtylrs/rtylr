@@ -202,7 +202,10 @@
     "businesses": "Businesses",
     "aiUsage": "AI usage",
     "flowSettings": "Flow",
-    "insightsSettings": "Insights"
+    "insightsSettings": "Insights",
+    "crmSettings": "CRM",
+    "erpSettings": "ERP",
+    "extensions": "Extensions"
   },
   "launch": "Launch",
   "pagination": {
@@ -260,7 +263,9 @@
       "actions": "Actions",
       "flow": "Flow",
       "projects": "Projects",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "crm": "CRM",
+      "erp": "ERP"
     },
     "loadingFlow": "Searching Flow…",
     "flowSearchFailed": "Flow search could not load. Try again."

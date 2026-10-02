@@ -204,6 +204,9 @@ func (h *GenerateTextStreamHandler) streamDirectResponse(ctx context.Context, w 
 	if err := renderer.AppendText(response); err != nil {
 		return
 	}
+	if err := renderer.FlushPending(); err != nil {
+		return
+	}
 	if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
 		h.writeErrorResponse(w, "Failed to persist response")
 		return

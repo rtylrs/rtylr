@@ -18,6 +18,8 @@ import NoMatch from './features/extras/NoMatch';
 import { createFlowRoutes } from './modules/flow/routes';
 import { settingsSearchSchema } from './modules/flow/shared/schemas/settings';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
+import { createCrmRoutes } from './modules/crm/routes';
+import { createErpRoutes } from './modules/erp/routes';
 import { createInsightsRoutes } from './modules/insights/routes';
 
 const Orders = React.lazy(() => import('./features/orders/Orders'));
@@ -33,6 +35,8 @@ const CaretWorkspace = React.lazy(() => import('./features/caret/CaretWorkspace'
 
 const SettingsOverview = React.lazy(() => import('./features/settings/SettingsOverview'));
 const FlowSettings = React.lazy(() => import('./modules/flow/features/settings/FlowSettings'));
+const ErpSettings = React.lazy(() => import('./modules/erp/features/settings/Settings'));
+const CrmSettings = React.lazy(() => import('./modules/crm/features/settings/Settings'));
 const InsightsSettings = React.lazy(() => import('./modules/insights/features/settings/Settings'));
 
 const Account = React.lazy(() => import('./features/settings/Settings/components/Account'));
@@ -43,7 +47,7 @@ const Domain = React.lazy(() => import('./features/settings/Settings/components/
 const Email = React.lazy(() => import('./features/settings/Settings/components/Email/Email'));
 const AiUsage = React.lazy(() => import('./features/settings/Settings/components/AiUsage'));
 const Billing = React.lazy(() => import('./features/billing/Billing.tsx'));
-const Addons = React.lazy(() => import('./features/addons/Addons.tsx'));
+const Extensions = React.lazy(() => import('./features/extensions/Extensions'));
 
 const Team = React.lazy(() => import('./features/team/Team'));
 const InviteUser = React.lazy(() => import('./features/team/InviteUser'));
@@ -53,7 +57,6 @@ const GroupDetail = React.lazy(() => import('./features/team/GroupDetail'));
 const Roles = React.lazy(() => import('./features/permissions/Roles'));
 const Audit = React.lazy(() => import('./features/activity/Audit'));
 const Notifications = React.lazy(() => import('./features/notifications/Notifications'));
-const Integrations = React.lazy(() => import('./features/integrations/Integrations'));
 const ApiKeys = React.lazy(() => import('./features/developer/ApiKeys'));
 const Webhooks = React.lazy(() => import('./features/developer/Webhooks'));
 const Security = React.lazy(() => import('./features/security/Security'));
@@ -260,10 +263,22 @@ const helpRoute = createRoute({
   component: () => wrap(<HelpCenter />),
 });
 
+const extensionsRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/extensions',
+  component: () => wrap(<Extensions />),
+});
+
+const storeRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/store',
+  component: () => <Navigate to="/extensions" replace />,
+});
+
 const integrationsRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/integrations',
-  component: () => wrap(<Integrations />),
+  component: () => <Navigate to="/extensions" replace />,
 });
 
 // Settings layout routes
@@ -296,6 +311,27 @@ const settingsInsightsRoute = createRoute({
     wrap(
       <AppFlagGuard flag={FLAG_KEYS.APP_INSIGHTS}>
         <InsightsSettings />
+      </AppFlagGuard>
+    ),
+});
+
+const settingsErpRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/erp',
+  component: () =>
+    wrap(
+      <AppFlagGuard flag={FLAG_KEYS.APP_ERP}>
+        <ErpSettings />
+      </AppFlagGuard>
+    ),
+});
+const settingsCrmRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/crm',
+  component: () =>
+    wrap(
+      <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>
+        <CrmSettings />
       </AppFlagGuard>
     ),
 });
@@ -386,24 +422,22 @@ const settingsBillingRoute = createRoute({
   ),
 });
 
+const settingsStoreRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/store',
+  component: () => <Navigate to="/extensions" replace />,
+});
+
 const settingsAddonsRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/addons',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Addons />
-    </Suspense>
-  ),
+  component: () => <Navigate to="/extensions" replace />,
 });
 
 const settingsIntegrationsRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/integrations',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Integrations />
-    </Suspense>
-  ),
+  component: () => <Navigate to="/extensions" replace />,
 });
 
 const notFoundRoute = createRoute({
@@ -416,6 +450,8 @@ const routeTree = rootRoute.addChildren([
   businessRoute.addChildren([
     createInsightsRoutes(businessRoute),
     createFlowRoutes(businessRoute),
+    createCrmRoutes(businessRoute),
+    createErpRoutes(businessRoute),
     dashboardRoute,
     menusRoute,
     menuRoute,
@@ -443,11 +479,15 @@ const routeTree = rootRoute.addChildren([
     securityRoute,
     themeRoute,
     helpRoute,
+    extensionsRoute,
+    storeRoute,
     integrationsRoute,
     settingsRoute.addChildren([
       settingsIndexRoute,
       settingsAccountRoute,
       settingsFlowRoute,
+      settingsCrmRoute,
+      settingsErpRoute,
       settingsInsightsRoute,
       settingsBusinessesRoute,
       settingsGeneralRoute,
@@ -457,6 +497,7 @@ const routeTree = rootRoute.addChildren([
       settingsAiRoute,
       settingsSubscriptionRoute,
       settingsBillingRoute,
+      settingsStoreRoute,
       settingsAddonsRoute,
       settingsIntegrationsRoute,
     ]),

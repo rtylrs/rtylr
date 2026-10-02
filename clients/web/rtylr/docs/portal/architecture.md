@@ -11,8 +11,9 @@ as Dash. Auth remains at `sso.rtylr.com`.
   onboarding and MFA gates before the workspace renders.
 - `shell/`: persistent app rail, collapsible page navigation, profile,
   business switcher, notifications, command palette and Caret.
-- `features/`: Home, team, groups, permission profiles and account/business settings.
+- `features/`: Home, team, groups, permissions, Extensions and account/business settings.
 - `modules/insights/`: analytics pages with their own header inside the shared shell.
+- `modules/flow/`, `modules/crm/`, `modules/erp/`: routes and page navigation in the shared workspace.
 - `shared/utils/canAccessPortalPath.ts`: the route visibility rule shared by
   page navigation and the rendered route gate. The API enforces authorization.
 
@@ -36,12 +37,13 @@ rejected. The existing `.rtylr.com` auth cookie spans SSO and Portal.
 
 ## Moving the next app
 
-Home, Insights and Flow now use the shared Portal entry point. Insights keeps its
+Home, Insights, Flow, CRM and ERP now use the shared Portal entry point. Insights keeps its
 page selector in a top header; its routes live under `/insights`. Flow has native
 `/flow` routes, its own navigation and the shared launcher, Caret, business and
 account context. Personal and app settings share `/settings`, including
-`/settings/flow` and `/settings/insights`. ERP, HR,
-CRM, Finance and web POS still open their standalone frontends in another tab.
+`/settings/flow`, `/settings/insights`, `/settings/crm` and `/settings/erp`.
+CRM and ERP use `/crm` and `/erp` prefixes. HR, Finance and web POS still
+open their standalone frontends in another tab.
 Menu and Recruit are setup and public products rather than workspace app entries.
 No standalone frontend is embedded in an iframe.
 
@@ -61,7 +63,8 @@ Business subdomains are a later routing feature and are not enabled here.
 3. Enable the Dash-to-Portal and Insights-to-Portal edge rules, then retire their
    standalone deployment manifests. Insights deep links map beneath `/insights`.
    Flow moves with the same order: deploy Portal first, redirect Flow links beneath
-   `/flow`, then retire its Pages project and deployment manifest.
+   `/flow`, then retire its Pages project and deployment manifest. CRM and ERP follow
+   the same sequence with `/crm` and `/erp` prefixes.
 4. Promote Auth and shared-URL consumers, including Onion's generated email links.
 
 Do not activate the Dash redirect before Portal is deployed and reachable.

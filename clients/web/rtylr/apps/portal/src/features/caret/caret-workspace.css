@@ -31,9 +31,8 @@
   min-width: 0;
 }
 .caret-workspace-brand > span {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.4px;
+  font-size: 14px;
+  font-weight: 500;
 }
 .caret-workspace-header > div:first-child > span {
   white-space: nowrap;

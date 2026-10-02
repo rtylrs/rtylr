@@ -47,21 +47,28 @@ func TestDrainProviderStreamEmitsHeartbeatWhileProviderIsQuiet(t *testing.T) {
 }
 
 func TestStreamDirectResponsePersistsBeforeDoneEvent(t *testing.T) {
-	rec := httptest.NewRecorder()
-	memory := &detachedMemoryFake{}
-	memory.storeHook = func() {
-		if strings.Contains(rec.Body.String(), `"type":"done"`) {
-			t.Error("assistant response was persisted after the done event")
-		}
-	}
-	handler := &GenerateTextStreamHandler{MemoryService: memory}
+	for _, answer := range []string{"answer", caretSmokeCheckReply, strings.Repeat("A longer reply. ", 20)} {
+		t.Run(answer[:6], func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			memory := &detachedMemoryFake{}
+			memory.storeHook = func() {
+				if strings.Contains(rec.Body.String(), `"type":"done"`) {
+					t.Error("assistant response was persisted after the done event")
+				}
+				if memory.storedContent != answer {
+					t.Errorf("persisted response = %q, want complete answer %q", memory.storedContent, answer)
+				}
+			}
+			handler := &GenerateTextStreamHandler{MemoryService: memory}
 
-	handler.streamDirectResponse(context.Background(), rec, &GenerateTextStreamRequest{SessionID: "session-1", UserID: 7}, "answer")
-	if memory.storeCalls != 1 {
-		t.Fatalf("StoreMessage calls = %d, want 1", memory.storeCalls)
-	}
-	if !strings.Contains(rec.Body.String(), `"type":"done"`) {
-		t.Fatalf("stream did not finish: %q", rec.Body.String())
+			handler.streamDirectResponse(context.Background(), rec, &GenerateTextStreamRequest{SessionID: "session-1", UserID: 7}, answer)
+			if memory.storeCalls != 1 {
+				t.Fatalf("StoreMessage calls = %d, want 1", memory.storeCalls)
+			}
+			if !strings.Contains(rec.Body.String(), `"type":"done"`) {
+				t.Fatalf("stream did not finish: %q", rec.Body.String())
+			}
+		})
 	}
 }
 

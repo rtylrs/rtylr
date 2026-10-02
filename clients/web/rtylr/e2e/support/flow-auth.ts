@@ -15,7 +15,10 @@ export function flowAuthFields(memberType: 'owner' | 'admin' | 'member' = 'owner
           licensed: true,
           has_access: true,
           permissions: ['flow:tasks:view', 'flow:projects:view'],
-          permission_scopes: [],
+          permission_scopes: ['flow:tasks:view', 'flow:projects:view'].map((permission_key) => ({
+            permission_key,
+            scopes: [],
+          })),
           sources: ['explicit'],
         },
       ],

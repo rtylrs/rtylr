@@ -189,6 +189,11 @@
   padding: 0;
   overflow: hidden;
 }
+.portal-page.is-flow > .portal-flow {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
 .portal-flow {
   display: flex;
   min-height: 0;
