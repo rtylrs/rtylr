@@ -24,7 +24,7 @@ func newVoidTestOrder(ctx context.Context, t *testing.T, repo *infrastructure.Re
 	productID := insertTestProduct(ctx, t, db, label, unitPrice)
 
 	orderID, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101,
-		fmt.Sprintf("TEST-ORD-%s-%d", label, time.Now().UnixNano()), domain.OrderInput{
+		fmt.Sprintf("TEST-ORD-%d", time.Now().UnixNano()), domain.OrderInput{
 			SessionID: 3201,
 			Type:      domain.OrderTypeTakeaway,
 			Items: []domain.OrderItemInput{

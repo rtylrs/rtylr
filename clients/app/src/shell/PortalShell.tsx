@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } 
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { resolveApiBase } from '@voxire/config';
+import { useMediaQuery } from '@voxire/utils';
 import { PanelLeft, Search, Bell, Settings, Workflow, Plus, X } from 'lucide-react';
 import {
   HomeIcon,
@@ -73,6 +74,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const search = useRouterState({ select: (state) => state.location.searchStr });
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 900px)');
   const [settingsQuery, setSettingsQuery] = useState('');
   const quickCreateOpen = useFlowStore((state) => state.quickCreateOpen);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -244,7 +246,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', key);
   }, [toggleCaret, isCaret]);
   const toggleNavigation = () => {
-    if (window.matchMedia('(max-width: 900px)').matches) setMobileOpen((value) => !value);
+    if (isMobile) setMobileOpen((value) => !value);
     else setCollapsed((value) => !value);
   };
   const actions = (
@@ -605,7 +607,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
                     className={`portal-icon-button portal-show-sidebar${collapsed ? ' is-visible' : ''}`}
                     onClick={toggleNavigation}
                     aria-label={t('common.toggleNavigation')}
-                    aria-expanded={!collapsed || mobileOpen}
+                    aria-expanded={isMobile ? mobileOpen : !collapsed}
                     aria-controls="portal-app-navigation"
                   >
                     <PanelLeft size={19} />

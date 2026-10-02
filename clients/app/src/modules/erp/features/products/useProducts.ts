@@ -14,6 +14,7 @@ import type {
   UpdateProductRequest,
   UpdateProductResponse,
 } from '@voxire/voxie/erp/product/v1/types';
+import { invalidateStockDerivedQueries } from '../../shared/lib/stockInvalidation';
 
 const productClient = createOneKitClient(ProductServiceClient, 'erp');
 
@@ -171,7 +172,7 @@ export function useCreateProduct() {
   const qc = useQueryClient();
   return useMutation<CreateProductResponse, Error, CreateProductInput>({
     mutationFn: (data) => productClient.createProduct(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => invalidateStockDerivedQueries(qc),
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : 'Failed to create product'),
   });
@@ -183,7 +184,7 @@ export function useUpdateProduct() {
   return useMutation<UpdateProductResponse, Error, UpdateProductInput>({
     mutationFn: (data) => productClient.updateProduct(data),
     onSuccess: (_res, variables) => {
-      qc.invalidateQueries({ queryKey: ['products'] });
+      invalidateStockDerivedQueries(qc);
       qc.invalidateQueries({ queryKey: ['product', variables.id] });
       qc.invalidateQueries({ queryKey: ['product-full', variables.id] });
     },
@@ -197,7 +198,7 @@ export function useDeleteProduct() {
   return useMutation<DeleteProductResponse, Error, string>({
     mutationFn: (id) => productClient.deleteProduct({ id }),
     onSuccess: (_res, id) => {
-      qc.invalidateQueries({ queryKey: ['products'] });
+      invalidateStockDerivedQueries(qc);
       qc.invalidateQueries({ queryKey: ['product', id] });
       qc.invalidateQueries({ queryKey: ['product-full', id] });
     },

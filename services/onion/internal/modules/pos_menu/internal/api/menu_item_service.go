@@ -22,6 +22,28 @@ func NewMenuItemAPI(service *application.Service) *MenuItemAPI {
 	return &MenuItemAPI{Service: service}
 }
 
+func (a *MenuItemAPI) ListPOSCatalog(ctx context.Context, _ *posmenuitemv1.ListMenuItemsRequest) (*posmenuitemv1.ListMenuItemsResponse, error) {
+	user := authPkg.DeviceCtx(ctx).User
+	if !authPkg.HasAppPermission(user, authorization.AppPOS, "pos:orders:create") || !authPkg.HasAnyAppScope(user, authorization.AppPOS) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	businessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	items, err := a.Service.List(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load POS catalog")
+	}
+	payloads := make([]*posmenuitemv1.MenuItem, len(items))
+	for i, item := range items {
+		payloads[i] = toProtoMenuItem(item)
+		// Selling a product does not grant access to its purchase cost.
+		payloads[i].UnitCost = nil
+	}
+	return &posmenuitemv1.ListMenuItemsResponse{Items: payloads}, nil
+}
+
 func (a *MenuItemAPI) ListMenuItems(ctx context.Context, _ *posmenuitemv1.ListMenuItemsRequest) (*posmenuitemv1.ListMenuItemsResponse, error) {
 	_, businessID, err := requireMenuPermission(ctx, "menu:menus:view")
 	if err != nil {

@@ -77,3 +77,22 @@ func TestMenuItemPermissionRequiresLicensedMenuApp(t *testing.T) {
 		})
 	}
 }
+
+func TestPOSCatalogRejectsUsersWithoutLicensedOrderCreationAccess(t *testing.T) {
+	for name, user := range map[string]*authPkg.AuthUser{
+		"anonymous":        nil,
+		"no permission":    posMenuUser(authorization.AppPOS, true),
+		"view orders only": posMenuUser(authorization.AppPOS, true, "pos:orders:view"),
+		"wrong app":        posMenuUser(authorization.AppMenu, true, "pos:orders:create"),
+		"unlicensed":       posMenuUser(authorization.AppPOS, false, "pos:orders:create"),
+		"unscoped":         posMenuUser(authorization.AppPOS, true, "pos:orders:create"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			ctx := authPkg.WithAuthUser(context.Background(), user)
+			_, err := (&MenuItemAPI{}).ListPOSCatalog(ctx, nil)
+			if posMenuPermissionStatus(err) != http.StatusForbidden {
+				t.Fatalf("status = %d, want 403", posMenuPermissionStatus(err))
+			}
+		})
+	}
+}

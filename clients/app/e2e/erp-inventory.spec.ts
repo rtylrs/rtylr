@@ -734,6 +734,10 @@ test.describe('ERP inventory flow', () => {
     await expect(page.getByText(/No products found/i)).toBeVisible({ timeout: 10_000 });
 
     // Open the Quick Add modal.
+    await page
+      .getByRole('dialog', { name: 'Cookie consent' })
+      .getByRole('button', { name: 'Decline' })
+      .click();
     await page.getByTestId('products-new-button').click();
     await expect(page.getByTestId('quick-add-product-modal')).toBeVisible();
 
@@ -782,6 +786,10 @@ test.describe('ERP inventory flow', () => {
     });
 
     // Open edit modal, rename the product, save.
+    await page
+      .getByRole('dialog', { name: 'Cookie consent' })
+      .getByRole('button', { name: 'Decline' })
+      .click();
     await page.getByTestId('product-edit-button').click();
     await expect(page.getByTestId('quick-add-product-modal')).toBeVisible();
 

@@ -211,6 +211,9 @@ func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, per
 
 func appForPath(path string) (authorization.AppID, bool) {
 	normalized := strings.ToLower(strings.TrimRight(path, "/"))
+	if normalized == "/pos/menu-item/v1/menu-items" || strings.HasPrefix(normalized, "/pos/menu-item/v1/menu-items/") {
+		return authorization.AppMenu, true
+	}
 	if normalized == "/hub/menu" || strings.HasPrefix(normalized, "/hub/menu/") {
 		return authorization.AppMenu, true
 	}

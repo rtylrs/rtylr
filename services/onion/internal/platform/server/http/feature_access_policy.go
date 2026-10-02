@@ -391,6 +391,8 @@ func posFeaturePermission(method, path string) (string, bool) {
 	}
 
 	switch {
+	case method == http.MethodGet && path == "/pos/menu-item/v1/catalog":
+		return "pos:orders:create", true
 	case strings.Contains(path, "/void"):
 		if strings.Contains(path, "/approve") {
 			return "pos:orders:void:approve", true
@@ -476,6 +478,15 @@ func flowFeaturePermission(method, path string) (string, bool) {
 }
 
 func menuFeaturePermission(method, path string) (string, bool) {
+	if path == "/pos/menu-item/v1/menu-items/public" {
+		return "", false
+	}
+	if path == "/pos/menu-item/v1/menu-items" || strings.HasPrefix(path, "/pos/menu-item/v1/menu-items/") {
+		if method == http.MethodGet {
+			return "menu:menus:view", true
+		}
+		return "menu:menus:edit", true
+	}
 	if !strings.HasPrefix(path, "/menu/") && !strings.HasPrefix(path, "/hub/menu/") {
 		return "", false
 	}

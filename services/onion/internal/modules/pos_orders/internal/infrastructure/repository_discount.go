@@ -207,22 +207,20 @@ func (r *Repository) ListHeldOrders(ctx context.Context, businessID int64) ([]do
 	return orders, err
 }
 
-// generateOrderNumber builds the next order number from the rows the given
-// queries can see. It is only ever called with the transaction-scoped queries:
-// a pooled count cannot see rows the transaction has already inserted, so two
-// orders in one transaction would be offered the same number and the second
-// would fail on uq_pos_orders_number. Counting through the transaction does
-// not by itself prevent two *concurrent* transactions from picking the same
-// number, so the create paths also retry a duplicate.
-func generateOrderNumber(ctx context.Context, q *sqlc.Queries, businessID int64) (string, error) {
-	today := time.Now().Format("20060102")
-
-	count, err := q.CountTodaysOrders(ctx, businessID)
+// Hold the business lock until commit so concurrent register, public-menu,
+// and split-order writes cannot allocate the same number.
+func generateOrderNumber(ctx context.Context, tx *sql.Tx, q *sqlc.Queries, businessID int64) (string, error) {
+	var lockedID int64
+	if err := tx.QueryRowContext(ctx, "SELECT id FROM businesses WHERE id = ? FOR UPDATE", businessID).Scan(&lockedID); err != nil {
+		return "", err
+	}
+	prefix := "ORD-" + time.Now().UTC().Format("20060102") + "-"
+	sequence, err := q.MaxOrderNumberSequence(ctx, sqlc.MaxOrderNumberSequenceParams{BusinessID: businessID, Prefix: prefix})
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("ORD-%s-%04d", today, count+1), nil
+	return fmt.Sprintf("%s%04d", prefix, sequence+1), nil
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -424,11 +422,7 @@ func (r *Repository) GetPublicMenuItem(ctx context.Context, businessID, menuItem
 	return item, nil
 }
 
-// CreatePublicOrder inserts an online order, generating its order number
-// inside the insert transaction and retrying a lost race on
-// uq_pos_orders_number. Same reasoning as CreateOrder: counting on a separate
-// connection let two customers checking out at the same moment pick the same
-// number, and the loser of the unique key lost the whole order.
+// CreatePublicOrder shares the register's order-number allocator.
 func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, string, error) {
 	// Only a generated number is worth retrying; see CreateOrder.
 	if orderNumber != "" {
@@ -454,13 +448,7 @@ func (r *Repository) createPublicOrderOnce(ctx context.Context, businessID int64
 		return 0, "", err
 	}
 
-	defer func() {
-		if err != nil {
-			if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
-				logger.Ctx(ctx).Error("failed to rollback public order tx", logger.Error(rollbackErr))
-			}
-		}
-	}()
+	defer tx.Rollback()
 
 	// Mirror the in-store ComputeTotals math: online orders must charge the
 	// same per-item tax as the POS path instead of silently dropping it.
@@ -468,10 +456,9 @@ func (r *Repository) createPublicOrderOnce(ctx context.Context, businessID int64
 
 	qtx := r.queries.WithTx(tx)
 
-	// Counted through the transaction so the number reflects every order this
-	// business has, not just the ones a pooled connection can see.
+	// Allocation shares the transaction with the order insert.
 	if orderNumber == "" {
-		orderNumber, err = generateOrderNumber(ctx, qtx, businessID)
+		orderNumber, err = generateOrderNumber(ctx, tx, qtx, businessID)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to generate public order number", logger.Error(err))
 			return 0, "", err
