@@ -320,12 +320,46 @@
   gap: 12px;
   padding: 8px 7px;
 }
-.portal-language select {
+.portal-language-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 106px;
+  min-height: 32px;
   background: var(--dash-hover);
   color: var(--dash-text);
   border: 1px solid var(--dash-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.portal-language-trigger:hover,
+.portal-language-trigger[data-state='open'] {
+  background: var(--dash-active);
+}
+.portal-language-trigger > svg {
+  color: var(--dash-text-dim);
+}
+.portal-language-menu {
+  padding: 4px;
+  border: 1px solid var(--dash-border);
+  border-radius: 10px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  box-shadow: var(--dash-shadow);
+}
+.portal-language-option {
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 36px;
+  padding: 8px 10px;
   border-radius: 7px;
-  padding: 5px 8px;
+  font-size: 13px;
+  font-weight: 400;
+}
+.portal-language-option[data-highlighted] {
+  background: var(--dash-hover);
 }
 .portal-skip-link {
   position: fixed;
