@@ -148,7 +148,7 @@ ORDER BY name ASC LIMIT ? OFFSET ?;
 SELECT COUNT(*) FROM flow_labels WHERE business_id = ?;
 
 -- name: CreateLabelV2 :execresult
-INSERT INTO flow_labels (business_id, name, color) VALUES (?, ?, ?);
+INSERT INTO flow_labels (workspace_id, business_id, name, color) VALUES (0, ?, ?, ?);
 
 -- name: GetInsightsTimeByMemberV2 :many
 SELECT CAST(u.id AS CHAR) AS member_id,

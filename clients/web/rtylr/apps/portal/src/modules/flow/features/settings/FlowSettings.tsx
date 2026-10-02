@@ -359,7 +359,6 @@ export const LabelsSection: React.FC = () => {
           setNewColor(LABEL_COLORS[0]);
           toast.success(t('flowToasts.label.created'));
         },
-        onError: () => toast.error(t('flowToasts.label.createFailed')),
       }
     );
   };
