@@ -19,7 +19,7 @@ const OWNER_EMAIL = process.env.REAL_OWNER_EMAIL;
 const OWNER_PASSWORD = process.env.REAL_OWNER_PASSWORD;
 
 const APPS = [
-  { name: 'dash', url: process.env.REAL_DASH_URL ?? 'http://localhost:5175' },
+  { name: 'portal', grant: 'dash', url: process.env.REAL_PORTAL_URL ?? 'http://localhost:5175' },
   { name: 'crm', url: process.env.REAL_CRM_URL ?? 'http://localhost:5181' },
   { name: 'flow', url: process.env.REAL_FLOW_URL ?? 'http://localhost:5183' },
   { name: 'hr', url: process.env.REAL_HR_URL ?? 'http://localhost:5180' },
@@ -27,7 +27,10 @@ const APPS = [
   { name: 'finance', url: process.env.REAL_FINANCE_URL ?? 'http://localhost:5182' },
   { name: 'menu', url: process.env.REAL_MENU_URL ?? 'http://localhost:5174' },
   { name: 'recruit', url: process.env.REAL_RECRUIT_URL ?? 'http://localhost:5184' },
-  { name: 'insights', url: process.env.REAL_INSIGHTS_URL ?? 'http://localhost:5187' },
+  {
+    name: 'insights',
+    url: `${process.env.REAL_PORTAL_URL ?? 'http://localhost:5175'}/insights`,
+  },
 ];
 const enabled = Boolean(REAL_API && OWNER_EMAIL && OWNER_PASSWORD);
 
@@ -58,7 +61,7 @@ test.describe('Every app shell opens for a real tenant session', () => {
       // Skip (do not fail) when the fixture set does not grant this app, so a
       // narrower seed does not produce a false red.
       test.skip(
-        !grantedApps.includes(app.name),
+        !grantedApps.includes('grant' in app ? app.grant : app.name),
         `owner is not granted ${app.name} in this fixture set`
       );
 

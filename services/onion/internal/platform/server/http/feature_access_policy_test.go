@@ -15,6 +15,23 @@ func TestCustomerExportUsesCanonicalPermission(t *testing.T) {
 	}
 }
 
+func TestInsightsSettingsSeparateReadAndWritePermissions(t *testing.T) {
+	for _, request := range []struct {
+		method     string
+		permission string
+	}{
+		{http.MethodGet, "insights:dashboard:view"},
+		{http.MethodPut, "insights:settings:edit"},
+	} {
+		t.Run(request.method, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(request.method, "/insights/setting/v1/settings")
+			if !ok || appID != authorization.AppInsights || permission != request.permission {
+				t.Fatalf("settings mapping = %s:%s,%t, want insights:%s,true", appID, permission, ok, request.permission)
+			}
+		})
+	}
+}
+
 func TestERPFeatureRoutesUseCanonicalPermissions(t *testing.T) {
 	tests := []struct {
 		name       string

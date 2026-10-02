@@ -11,6 +11,7 @@ import (
 	insightsdashboard "github.com/voxire/voxie/gen/go/insights/dashboard/v1"
 	insightsfinancial "github.com/voxire/voxie/gen/go/insights/financial/v1"
 	insightsreport "github.com/voxire/voxie/gen/go/insights/report/v1"
+	insightssetting "github.com/voxire/voxie/gen/go/insights/setting/v1"
 )
 
 func TestDirectAuthorizationMatrix(t *testing.T) {
@@ -41,6 +42,10 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 		}},
 		{Name: "insights dashboard settings boundary", App: authorization.AppInsights, Permission: "insights:dashboard:view", Call: func(ctx context.Context) (any, error) {
 			response, err := NewSettingAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).GetInsightsSettings(ctx, nil)
+			return response, err
+		}},
+		{Name: "insights settings edit", App: authorization.AppInsights, Permission: "insights:settings:edit", Call: func(ctx context.Context) (any, error) {
+			response, err := NewSettingAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).UpdateInsightsSettings(ctx, &insightssetting.UpdateInsightsSettingsRequest{Settings: &insightssetting.InsightsSettings{Currency: "EUR", DefaultPeriod: "month", ComparePrevious: true}})
 			return response, err
 		}},
 		{Name: "insights financial endpoint boundary", App: authorization.AppInsights, Permission: "insights:financial:view", Call: func(ctx context.Context) (any, error) {

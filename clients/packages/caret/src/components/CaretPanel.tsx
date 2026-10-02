@@ -457,7 +457,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           background: caretTokens.bg,
           boxSizing: "border-box",
           minWidth: 0,
-          borderLeft: isFullscreen ? "none" : `1px solid ${caretTokens.border}`,
+          borderInlineStart: isFullscreen ? "none" : `1px solid ${caretTokens.border}`,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -578,6 +578,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             <div style={composerWrapStyle}>
               <Composer
                 key={activeTabId}
+                autoFocus={isOpen || isFullscreen}
                 size={isBig ? "lg" : "md"}
                 isStreaming={isStreaming}
                 onSubmit={(t) => sendPromptWithIntent(t)}
@@ -610,6 +611,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     <aside
       role="complementary"
       aria-label="Caret AI assistant"
+      inert={!isOpen && !isFullscreen}
+      aria-hidden={!isOpen && !isFullscreen}
       className={
         (introPlaying ? "caret-panel-shell caret-intro" : "caret-panel-shell") +
         (isBig ? " caret-panel-textured" : "")

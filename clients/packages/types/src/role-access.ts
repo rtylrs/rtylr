@@ -154,6 +154,7 @@ export const KNOWN_PERMISSION_KEYS = [
   "insights:dashboard:view",
   "insights:financial:view",
   "insights:customers:view",
+  "insights:settings:edit",
   "insights:reports:create",
   "insights:reports:share",
   "insights:reports:export",

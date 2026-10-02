@@ -266,6 +266,7 @@ VALUES
     ('insights:dashboard:view', 'insights', 'view', FALSE, FALSE),
     ('insights:financial:view', 'insights', 'view', TRUE, FALSE),
     ('insights:customers:view', 'insights', 'view', TRUE, FALSE),
+    ('insights:settings:edit', 'insights', 'edit', FALSE, FALSE),
     ('insights:reports:create', 'insights', 'create', FALSE, FALSE),
     ('insights:reports:share', 'insights', 'share', FALSE, FALSE),
     ('insights:reports:export', 'insights', 'export', FALSE, FALSE),
@@ -352,6 +353,7 @@ WHERE r.business_id = 0
       'insights.analyst', 'menu.manager', 'recruit.manager'
   )
   AND p.action IN ('view', 'create', 'edit', 'send', 'share', 'export')
+  AND (r.role_key <> 'insights.analyst' OR p.permission_key <> 'insights:settings:edit')
 ON DUPLICATE KEY UPDATE permission_key = VALUES(permission_key);
 
 -- The generic manager grant above intentionally excludes high-risk `manage`

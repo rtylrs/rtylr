@@ -9,7 +9,8 @@ This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch,
 | Path               | Responsibility                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- |
 | `clients/`         | pnpm workspace root; every JavaScript/TypeScript package lives under it                      |
-| `clients/web/rtylr/apps/` | Auth, Dash, CRM, ERP, HR, Finance, Flow, Insights, Recruit and Menu frontends         |
+| `clients/web/rtylr/apps/` | Auth, Portal, CRM, ERP, HR, Finance, Flow, Recruit and Menu frontends               |
+| `clients/web/rtylr/apps/portal/` | Shared web workspace; Home and Insights modules, team and account settings |
 | `clients/web/landing/` | Next.js marketing site, public legal pages and localized copy; production uses static export |
 | `clients/pos/`     | POS frontend and native/Tauri code; web and native checks are separate                       |
 | `clients/web/docs/` | Product documentation site                                                                  |

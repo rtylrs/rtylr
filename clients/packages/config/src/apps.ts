@@ -14,12 +14,16 @@ function isLocalDevHost(hostname: string): boolean {
 const IS_LOCAL =
   typeof window !== "undefined" && isLocalDevHost(window.location.hostname);
 
+export const PORTAL_URL = IS_LOCAL
+  ? "http://localhost:5175"
+  : "https://portal.rtylr.com";
+
 export const APP_URLS: Record<AppId, string> & {
   api: string;
   status: string;
   console: string;
 } = {
-  dash: IS_LOCAL ? "http://localhost:5175" : "https://dash.rtylr.com",
+  dash: PORTAL_URL,
   auth: IS_LOCAL ? "http://localhost:5176" : "https://sso.rtylr.com",
   menu: IS_LOCAL ? "http://localhost:5174" : "https://menu.rtylr.com",
   pos: IS_LOCAL ? "http://localhost:5178" : "https://pos.rtylr.com",
@@ -28,7 +32,7 @@ export const APP_URLS: Record<AppId, string> & {
   crm: IS_LOCAL ? "http://localhost:5181" : "https://crm.rtylr.com",
   finance: IS_LOCAL ? "http://localhost:5182" : "https://finance.rtylr.com",
   flow: IS_LOCAL ? "http://localhost:5183" : "https://flow.rtylr.com",
-  insights: IS_LOCAL ? "http://localhost:5187" : "https://insights.rtylr.com",
+  insights: `${PORTAL_URL}/insights`,
   recruit: IS_LOCAL ? "http://localhost:5184" : "https://recruit.rtylr.com",
   landing: IS_LOCAL ? "http://localhost:4200" : "https://rtylr.com",
   api: "https://api.voxire.com",
@@ -36,23 +40,8 @@ export const APP_URLS: Record<AppId, string> & {
   console: "https://voxire.partials.app",
 };
 
-/**
- * Per-app display name and dev port.
- *
- * This carried an `allowedRoles: UserRole[]` per app until tryrtylr/rtylr#795.
- * Nothing ever read it: `AppGuard` does not import APP_CONFIG, and its actual
- * rule is `role === 'owner' || role === 'admin' || apps.includes(appId)` - the
- * per-user `apps` array is authoritative and the role name carries no weight
- * beyond that owner/admin special case.
- *
- * The table is not deleted lightly; it encoded a real intent, and it is recorded
- * on #795 so re-introducing app-level role gating does not start from scratch.
- * It is removed because a table that looks like authorization and enforces
- * nothing is worse than no table: the RBAC audit that produced #795 was itself
- * misled by it before tracing the real path.
- */
 export const APP_CONFIG: Record<AppId, { name: string; devPort: number }> = {
-  dash: { name: "Dash", devPort: 5175 },
+  dash: { name: "Home", devPort: 5175 },
   auth: { name: "Auth", devPort: 5176 },
   menu: { name: "Menu", devPort: 5174 },
   pos: { name: "POS", devPort: 5178 },

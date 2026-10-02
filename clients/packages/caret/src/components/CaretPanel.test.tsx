@@ -40,6 +40,7 @@ function renderPanel(): void {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
   resolveHistory = null;
   useCaretUIStore.setState({ view: "chat" });
   useCaretSettingsStore.setState({ voiceEnabled: false, mode: "ask" });
@@ -59,9 +60,21 @@ beforeEach(() => {
   useCaretStore
     .getState()
     .newTab({ sessionId: "chat-1", title: "Weekly report" });
+  useCaretStore.getState().open();
 });
 
 describe("CaretPanel history loading", () => {
+  it("keeps a closed panel out of keyboard navigation and focuses the composer when opened", () => {
+    useCaretStore.getState().close();
+    render(<button>Page action</button>);
+    const button = screen.getByRole("button", { name: "Page action" });
+    button.focus();
+    renderPanel();
+    expect(document.activeElement).toBe(button);
+    expect(screen.queryByRole("complementary", { name: "Caret AI assistant" })).toBeNull();
+    act(() => useCaretStore.getState().open());
+    expect(screen.getByRole("textbox", { name: "Message Caret" })).toHaveFocus();
+  });
   it("keeps a prompt sent while the history request is in flight", async () => {
     renderPanel();
 

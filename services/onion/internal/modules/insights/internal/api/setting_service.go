@@ -44,7 +44,7 @@ func (a *SettingAPI) GetInsightsSettings(ctx context.Context, _ *insightssetting
 }
 
 func (a *SettingAPI) UpdateInsightsSettings(ctx context.Context, req *insightssettingv1.UpdateInsightsSettingsRequest) (*insightssettingv1.UpdateInsightsSettingsResponse, error) {
-	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
+	businessID, err := resolveBusinessIDFor(ctx, "insights:settings:edit")
 	if err != nil {
 		return nil, err
 	}

@@ -356,6 +356,11 @@ func hrFeaturePermission(method, path string) (string, bool) {
 
 func insightsFeaturePermission(method, path string) (string, bool) {
 	switch {
+	case strings.Contains(path, "/insights/setting"):
+		if method == http.MethodGet {
+			return "insights:dashboard:view", true
+		}
+		return "insights:settings:edit", true
 	case strings.Contains(path, "/insights/report"):
 		if strings.HasSuffix(path, "/export") {
 			return "insights:reports:export", true

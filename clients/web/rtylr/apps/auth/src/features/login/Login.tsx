@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, PORTAL_URL, resolvePortalReturn } from '@voxire/config';
 
 import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin } from '../../shared/hooks/useAuth';
@@ -43,18 +43,20 @@ const Login: React.FC = (): React.JSX.Element => {
       const provisioningStatus = res.provisioningStatus;
       // MFA is resolved before any destination is chosen, including an explicit
       // `redirect` param. Honouring that param first let a user who owes MFA
-      // enrolment name another app and skip the Dash enrolment gate entirely.
+      // enrolment name another app and skip the Portal enrolment gate entirely.
       if (
         provisioningStatus?.mfaRequired &&
         (!provisioningStatus.mfaEnrolled || !provisioningStatus.mfaVerified)
       ) {
-        window.location.href = APP_URLS.dash as string;
+        window.location.href = PORTAL_URL;
         return;
       }
       // Honor an explicit destination only when the resolved tenant access
-      // grants it. A stale or unauthorized redirect always returns to Dash.
-      if (redirectParam === 'dash') {
-        window.location.href = APP_URLS.dash as string;
+      // grants it. A stale or unauthorized redirect always returns to Portal.
+      if (redirectParam === 'dash' || redirectParam === 'portal') {
+        window.location.href = resolvePortalReturn(
+          new URLSearchParams(window.location.search).get('returnTo')
+        );
         return;
       }
       if (redirectParam && redirectParam in APP_URLS) {
@@ -67,13 +69,13 @@ const Login: React.FC = (): React.JSX.Element => {
           return;
         }
       }
-      // Dash is the home for every signed-in member. App access never chooses
+      // Portal is the home for every signed-in member. App access never chooses
       // a default destination.
-      window.location.href = APP_URLS.dash as string;
+      window.location.href = PORTAL_URL;
     } catch {
-      // Fail closed: if MFA state cannot be read, send the user to Dash rather
+      // Fail closed: if MFA state cannot be read, send the user to Portal rather
       // than to a redirect target that may be behind the gate.
-      window.location.href = APP_URLS.dash as string;
+      window.location.href = PORTAL_URL;
     }
   }, [redirectParam]);
 
@@ -84,7 +86,11 @@ const Login: React.FC = (): React.JSX.Element => {
 
   const handleGoogleLogin = async (): Promise<void> => {
     try {
-      await startGoogleLogin(redirectParam);
+      await startGoogleLogin(
+        redirectParam,
+        undefined,
+        new URLSearchParams(window.location.search).get('returnTo')
+      );
     } catch {
       notify.error(t('auth.common.socialUnavailable'));
     }

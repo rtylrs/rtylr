@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
-import { APP_CONFIG, APP_URLS } from '@voxire/config';
+import { APP_CONFIG, APP_URLS, PORTAL_URL } from '@voxire/config';
 
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -29,7 +29,7 @@ function getRedirectAppId(value: string | null): RedirectableAppId | null {
 }
 
 function getRedirectUrl(appId: RedirectableAppId | null): string {
-  return appId ? (APP_URLS[appId] as string) : (APP_URLS.dash as string);
+  return appId ? (APP_URLS[appId] as string) : PORTAL_URL;
 }
 
 // ── Register ────────────────────────────────────────────────────────────────

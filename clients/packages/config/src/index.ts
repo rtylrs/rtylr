@@ -9,3 +9,4 @@ export * from './industries';
 export * from './flags';
 export * from './appGuards';
 export * from './serviceUrls';
+export * from './portal';

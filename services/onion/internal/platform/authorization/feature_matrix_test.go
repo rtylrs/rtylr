@@ -124,6 +124,7 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppInsights, "insights:dashboard:view"},
 	{authorization.AppInsights, "insights:financial:view"},
 	{authorization.AppInsights, "insights:customers:view"},
+	{authorization.AppInsights, "insights:settings:edit"},
 	{authorization.AppInsights, "insights:reports:create"},
 	{authorization.AppInsights, "insights:reports:share"},
 	{authorization.AppInsights, "insights:reports:export"},
@@ -141,9 +142,9 @@ var featureMatrixPermissions = []matrixPermission{
 	{authorization.AppRecruit, "recruit:candidates:export"},
 }
 
-func TestFeatureMatrixContainsExactly126UniquePermissions(t *testing.T) {
-	if len(featureMatrixPermissions) != 126 {
-		t.Fatalf("feature matrix permissions = %d, want 126", len(featureMatrixPermissions))
+func TestFeatureMatrixContainsExactly127UniquePermissions(t *testing.T) {
+	if len(featureMatrixPermissions) != 127 {
+		t.Fatalf("feature matrix permissions = %d, want 127", len(featureMatrixPermissions))
 	}
 	seen := make(map[string]struct{}, len(featureMatrixPermissions))
 	for _, entry := range featureMatrixPermissions {

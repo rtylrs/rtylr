@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { Button, HelmetContainer } from '@voxire/components';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, PORTAL_URL } from '@voxire/config';
 import AuthShell from '../../shared/components/AuthShell';
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
@@ -115,7 +115,7 @@ const InviteAccept: React.FC = () => {
     );
   }
 
-  const signInHref = APP_URLS.dash;
+  const signInHref = PORTAL_URL;
 
   if (success) {
     return (
