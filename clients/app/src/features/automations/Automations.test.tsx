@@ -1,11 +1,11 @@
+import path from 'node:path';
+import { initTestI18nFrom } from '../../../test/i18nTestInstance';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  effectiveAccess: null as unknown,
   automations: {
     data: [] as unknown[],
     isLoading: false,
@@ -22,20 +22,7 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('../../../../shared/stores/userStore', () => {
-  const state = () => ({
-    user: { effectiveAccess: mocks.effectiveAccess },
-    effectiveAccess: mocks.effectiveAccess,
-  });
-  return {
-    useUserStore: Object.assign(
-      (selector: (value: ReturnType<typeof state>) => unknown) => selector(state()),
-      { getState: state }
-    ),
-  };
-});
-
-vi.mock('../../shared/hooks/queries/useAutomations', () => ({
+vi.mock('../../modules/crm/shared/hooks/queries/useAutomations', () => ({
   useListAutomations: () => mocks.automations,
   useUpdateAutomation: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteAutomation: () => ({ mutate: vi.fn(), isPending: false }),
@@ -47,8 +34,10 @@ function renderAutomations(): void {
   render(<Automations />);
 }
 
-beforeEach(() => {
-  mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
+beforeEach(async () => {
+  await initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales'), 'en', [
+    path.resolve(import.meta.dirname, '../../modules/crm/locales'),
+  ]);
   mocks.navigate.mockClear();
   mocks.automations.data = [];
   mocks.automations.isLoading = false;
@@ -62,21 +51,23 @@ describe('Automations list states', () => {
 
     renderAutomations();
 
-    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
-    expect(screen.queryByText('crm.automations.emptyTitle')).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong. Please try again.');
+    expect(screen.queryByText('No automations yet')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
     expect(mocks.automations.refetch).toHaveBeenCalledTimes(1);
   });
 
   it('shows a "create one" call-to-action that navigates to the automation builder', () => {
     renderAutomations();
 
-    expect(screen.getByText('crm.automations.emptyTitle')).toBeInTheDocument();
-    expect(screen.getByText('crm.automations.emptyDescription')).toBeInTheDocument();
+    expect(screen.getByText('No automations yet')).toBeInTheDocument();
+    expect(
+      screen.getByText('Create a workflow to run automatically when an order is placed.')
+    ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'crm.automations.createOne' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create one' }));
 
-    expect(mocks.navigate).toHaveBeenCalledWith({ to: '/crm/automations/new' });
+    expect(mocks.navigate).toHaveBeenCalledWith({ to: '/automations/new' });
   });
 });

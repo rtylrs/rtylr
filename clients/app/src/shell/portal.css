@@ -589,3 +589,10 @@
 [dir='rtl'] .portal-settings-subnav {
   margin: 4px 18px 8px 0;
 }
+
+.portal-rail-divider {
+  width: 24px;
+  border-top: 1px solid var(--dash-border);
+  margin-block: 2px;
+  flex-shrink: 0;
+}

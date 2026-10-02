@@ -218,7 +218,10 @@
     "posSettings": "نقطة البيع",
     "recruitSettings": "التوظيف",
     "hrPayrollSettings": "رواتب الموارد البشرية",
-    "hrLeaveSettings": "سياسة إجازات الموارد البشرية"
+    "hrLeaveSettings": "سياسة إجازات الموارد البشرية",
+    "automations": "الأتمتة",
+    "automationWorkflows": "سير العمل",
+    "newAutomation": "أتمتة جديدة"
   },
   "launch": "تشغيل",
   "pagination": {

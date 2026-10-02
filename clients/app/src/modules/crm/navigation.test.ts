@@ -34,3 +34,7 @@ describe('CRM navigation inside Portal', () => {
     ).toBe(false);
   });
 });
+
+it('lands an automations-only member in the standalone tool', () => {
+  expect(getCrmHomePath(member(['crm:automations:manage']))).toBe('/automations');
+});

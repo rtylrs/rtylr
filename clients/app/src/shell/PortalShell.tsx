@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } 
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { resolveApiBase } from '@voxire/config';
-import { PanelLeft, Search, Bell, Settings, X } from 'lucide-react';
+import { PanelLeft, Search, Bell, Settings, Workflow, Plus, X } from 'lucide-react';
 import {
   HomeIcon,
   InsightsIcon,
@@ -87,6 +87,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const isSettings =
     pathname.startsWith('/settings') || ['/security', '/api-keys', '/webhooks'].includes(pathname);
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
+  const isAutomations = pathname === '/automations' || pathname.startsWith('/automations/');
   const isCaret = pathname === '/caret';
   const isPos = pathname === '/pos' || pathname.startsWith('/pos/');
   const isRecruit = pathname === '/recruit' || pathname.startsWith('/recruit/');
@@ -158,36 +159,41 @@ export default function PortalShell({ children }: { children: ReactNode }) {
                       ? t(`common.nav.${pageKey}`)
                       : t('common.portal.home');
   const nav = (
-    isSettings
+    isAutomations
       ? [
-          ...settingsNavItems,
-          ...addonSettingsItems.filter((item) => isAddonEnabled(addons, item.addonId)),
+          { key: 'automationWorkflows', path: '/automations', icon: Workflow },
+          { key: 'newAutomation', path: '/automations/new', icon: Plus },
         ]
-      : isPos
-        ? posNavItems.filter((item) => !('feature' in item) || posFeatures[item.feature])
-        : isRecruit
-          ? [...recruitNavItems]
-          : isHr
-            ? getHrNavItems(hrConfig)
-            : isFinance
-              ? financeNavItems.filter(
-                  (item) => item.path !== '/finance' || getFinanceHomePath(user) === '/finance'
-                )
-              : isErp
-                ? [...erpNavItems]
-                : isCrm
-                  ? [
-                      ...crmNavItems,
-                      ...(addonsError || isAddonEnabled(addons, 'sales_pipeline')
-                        ? crmSalesNavItems
-                        : []),
-                    ]
-                  : [
-                      ...rawNavItems,
-                      ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : []),
-                    ].sort(
-                      (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
-                    )
+      : isSettings
+        ? [
+            ...settingsNavItems,
+            ...addonSettingsItems.filter((item) => isAddonEnabled(addons, item.addonId)),
+          ]
+        : isPos
+          ? posNavItems.filter((item) => !('feature' in item) || posFeatures[item.feature])
+          : isRecruit
+            ? [...recruitNavItems]
+            : isHr
+              ? getHrNavItems(hrConfig)
+              : isFinance
+                ? financeNavItems.filter(
+                    (item) => item.path !== '/finance' || getFinanceHomePath(user) === '/finance'
+                  )
+                : isErp
+                  ? [...erpNavItems]
+                  : isCrm
+                    ? [
+                        ...crmNavItems,
+                        ...(addonsError || isAddonEnabled(addons, 'sales_pipeline')
+                          ? crmSalesNavItems
+                          : []),
+                      ]
+                    : [
+                        ...rawNavItems,
+                        ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : []),
+                      ].sort(
+                        (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
+                      )
   ).filter((item) => canAccessPortalPath(user, item.path));
   const apps = useMemo(
     () =>
@@ -304,9 +310,14 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           {mobile ? <X size={18} /> : <PanelLeft size={18} />}
         </button>
       </div>
-      {!isSettings && !isCrm && !isErp && !isFinance && !isHr && !isPos && !isRecruit && (
-        <BusinessSwitcher />
-      )}
+      {!isSettings &&
+        !isAutomations &&
+        !isCrm &&
+        !isErp &&
+        !isFinance &&
+        !isHr &&
+        !isPos &&
+        !isRecruit && <BusinessSwitcher />}
       <nav
         id={mobile ? 'portal-mobile-navigation' : 'portal-app-navigation'}
         className="portal-app-navigation"
@@ -314,23 +325,25 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       >
         {!isSettings && (
           <p className="portal-section-label">
-            {isPos
-              ? t('appNames.short.pos')
-              : isRecruit
-                ? t('appNames.short.recruit')
-                : isHr
-                  ? t('appNames.short.hr')
-                  : isFinance
-                    ? t('appNames.short.finance')
-                    : isErp
-                      ? t('appNames.short.erp')
-                      : isCrm
-                        ? t('appNames.short.crm')
-                        : isInsights
-                          ? t('appNames.short.insights')
-                          : isSettings
-                            ? t('common.nav.manageAccount')
-                            : t('common.portal.workspace')}
+            {isAutomations
+              ? t('common.nav.automations')
+              : isPos
+                ? t('appNames.short.pos')
+                : isRecruit
+                  ? t('appNames.short.recruit')
+                  : isHr
+                    ? t('appNames.short.hr')
+                    : isFinance
+                      ? t('appNames.short.finance')
+                      : isErp
+                        ? t('appNames.short.erp')
+                        : isCrm
+                          ? t('appNames.short.crm')
+                          : isInsights
+                            ? t('appNames.short.insights')
+                            : isSettings
+                              ? t('common.nav.manageAccount')
+                              : t('common.portal.workspace')}
           </p>
         )}
         {isSettings ? (
@@ -371,13 +384,14 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         >
           <Link
             to="/"
-            className={`portal-rail-button${!isSettings && !isInsights && !isFlow && !isCaret && !isCrm && !isErp && !isFinance && !isHr && !isPos && !isRecruit ? ' is-active' : ''}`}
+            className={`portal-rail-button${!isSettings && !isInsights && !isFlow && !isCaret && !isAutomations && !isCrm && !isErp && !isFinance && !isHr && !isPos && !isRecruit ? ' is-active' : ''}`}
             aria-label={t('common.portal.home')}
             aria-current={
               !isSettings &&
               !isInsights &&
               !isFlow &&
               !isCaret &&
+              !isAutomations &&
               !isCrm &&
               !isErp &&
               !isFinance &&
@@ -526,6 +540,27 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               <RecruitIcon size={21} />
             </Link>
           </Tooltip>
+        )}
+        {canAccessPortalPath(user, '/automations') && (
+          <>
+            <div className="portal-rail-divider" role="separator" />
+            <Tooltip
+              content={t('common.nav.automations')}
+              side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+              focusable={false}
+              contentClassName="portal-rail-tooltip"
+            >
+              <Link
+                to="/automations"
+                className={`portal-rail-button${isAutomations ? ' is-active' : ''}`}
+                aria-label={t('common.nav.automations')}
+                aria-current={isAutomations ? 'page' : undefined}
+                onClick={() => setMobileOpen(false)}
+              >
+                <Workflow size={20} />
+              </Link>
+            </Tooltip>
+          </>
         )}
         <div className="portal-rail-spacer" />
         <Tooltip

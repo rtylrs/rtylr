@@ -2,6 +2,7 @@ import { financeNavItems } from '../../modules/finance/navigation';
 import { hrNavItems } from '../../modules/hr/navigation';
 import { posNavItems } from '../../modules/pos/navigation';
 import { recruitNavItems } from '../../modules/recruit/navigation';
+import { Workflow } from 'lucide-react';
 import { CaretIcon } from '@voxire/caret';
 import type { ComponentType } from 'react';
 import { Bell, UserPlus, Plus } from 'lucide-react';
@@ -57,6 +58,15 @@ export function getPortalCommands(
       group: 'apps',
       icon: CaretIcon,
       destination: { path: '/caret' },
+    });
+  }
+  if (canAccessPortalPath(user, '/automations')) {
+    commands.push({
+      id: 'tool-automations',
+      label: t('common.nav.automations'),
+      group: 'actions',
+      icon: Workflow,
+      destination: { path: '/automations' },
     });
   }
   const insightsPages = insightsNavItems.filter((page) => canAccessPortalPath(user, page.path));
