@@ -21,7 +21,7 @@
     "deleteConfirm": "Supprimer",
     "loadFailed": "Impossible de charger les groupes",
     "loadFailedDescription": "Actualisez la liste avant de modifier les accès des groupes.",
-    "columnProfiles": "Profils de permissions",
+    "columnProfiles": "Permissions",
     "profilesCount_one": "{{count}} profil",
     "profilesCount_other": "{{count}} profils"
   },
@@ -65,7 +65,7 @@
     "loadFailedDescription": "Actualisez le groupe avant de modifier ses accès ou ses membres.",
     "columnApp": "Application",
     "columnLicense": "Licence",
-    "columnPermissionProfile": "Profils de permissions",
+    "columnPermissionProfile": "Permissions",
     "licenseAppAriaLabel": "Licence pour {{app}}",
     "permissionProfileForApp": "Permissions pour {{app}}",
     "noPermissionProfile": "Aucun profil de permissions",
@@ -169,7 +169,7 @@
     "confirmDeactivateDescription": "Il perdra immédiatement l’accès à toutes les applications.",
     "memberTypeLabel": "Type de membre",
     "adminFullAccess": "Les administrateurs ont un accès complet à l’entreprise et aux applications incluses dans son forfait.",
-    "permissionProfiles": "Profils de permissions",
+    "permissionProfiles": "Permissions",
     "noPermissionProfile": "Aucun profil de permissions"
   },
   "inviteUser": {
@@ -252,7 +252,7 @@
     "resultStatus": "Statut",
     "resultNote": "Note",
     "appliedToAllInvited": "Appliqué à tous les membres invités",
-    "permissionProfilesTitle": "Profils de permissions",
+    "permissionProfilesTitle": "Permissions",
     "permissionProfilesDescription": "Sélectionnez un ou plusieurs profils par application. Les permissions de lecture et d’écriture peuvent être attribuées séparément.",
     "noPermissionProfile": "Aucun profil de permissions",
     "adminAccessDescription": "Accès complet à l’entreprise et aux applications incluses dans son forfait",

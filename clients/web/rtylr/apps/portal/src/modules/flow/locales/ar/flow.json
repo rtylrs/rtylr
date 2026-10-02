@@ -562,7 +562,6 @@
     }
   },
   "profile": {
-    "back": "رجوع",
     "notFound": "لم يتم العثور على الملف الشخصي.",
     "publicProjects": "المشاريع العامة",
     "noPublicProjects": "لا توجد مشاريع عامة.",

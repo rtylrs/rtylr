@@ -29,7 +29,7 @@ const CreateBanner = React.lazy(() => import('./features/menu/Components/CreateB
 const QrCodes = React.lazy(() => import('./features/qr-codes/QrCodes.tsx'));
 const QrCode = React.lazy(() => import('./features/qr-codes/QrCode.tsx'));
 const Design = React.lazy(() => import('./features/design/Design.tsx'));
-const Chat = React.lazy(() => import('./features/chat/Chat'));
+const CaretWorkspace = React.lazy(() => import('./features/caret/CaretWorkspace'));
 
 const SettingsOverview = React.lazy(() => import('./features/settings/SettingsOverview'));
 const FlowSettings = React.lazy(() => import('./modules/flow/features/settings/FlowSettings'));
@@ -148,7 +148,13 @@ const designRoute = createRoute({
 const chatRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/chat',
-  component: () => wrap(<Chat />),
+  component: () => <Navigate to="/caret" replace />,
+});
+
+const caretRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/caret',
+  component: () => wrap(<CaretWorkspace />),
 });
 
 const teamRoute = createRoute({
@@ -420,6 +426,7 @@ const routeTree = rootRoute.addChildren([
     qrCodeCreateRoute,
     designRoute,
     chatRoute,
+    caretRoute,
     teamRoute,
     teamInviteRoute,
     teamGroupsRoute,

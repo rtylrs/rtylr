@@ -27,10 +27,22 @@ import MessageSkeleton from "./MessageSkeleton";
 import { Composer } from "./composer";
 import WelcomeHero from "./WelcomeHero";
 import SettingsPanel from "./SettingsPanel";
-import { ChatList } from "./sidebar";
+import { ChatList, type ChatListLabels } from "./sidebar";
+
+export interface CaretWorkspaceOptions {
+  header: React.ReactNode;
+  sidebarHeader: React.ReactNode;
+  welcome: React.ReactNode;
+  historyLabels: ChatListLabels;
+  composerPlaceholder: string;
+  sidebarOpen: boolean;
+  onSelectChat: () => void;
+}
 
 export interface CaretPanelProps {
   appId: string;
+  workspace?: CaretWorkspaceOptions;
+  shortcutsEnabled?: boolean;
   systemContext?: string;
   pageContext?: CaretPageContext;
   userId: number;
@@ -110,8 +122,10 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   userId,
   apiBaseUrl,
   variant,
+  workspace,
+  shortcutsEnabled = true,
 }) => {
-  useShortcuts();
+  useShortcuts(shortcutsEnabled);
   const caret = useCaretStore();
   const activeTab =
     caret.tabs.find((tab) => tab.id === caret.activeTabId) ?? caret.tabs[0];
@@ -164,7 +178,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const newChat = useCallback((): void => {
     caret.newTab();
     setView("chat");
-  }, [caret, setView]);
+    workspace?.onSelectChat();
+  }, [caret, setView, workspace]);
 
   const selectChat = useCallback(
     (id: string): void => {
@@ -178,8 +193,9 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         caret.newTab({ sessionId: id, title: summary?.title });
       }
       setView("chat");
+      workspace?.onSelectChat();
     },
-    [caret, sessions, setView],
+    [caret, sessions, setView, workspace],
   );
 
   useEffect(() => {
@@ -457,7 +473,9 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           background: caretTokens.bg,
           boxSizing: "border-box",
           minWidth: 0,
-          borderInlineStart: isFullscreen ? "none" : `1px solid ${caretTokens.border}`,
+          borderInlineStart: isFullscreen
+            ? "none"
+            : `1px solid ${caretTokens.border}`,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -514,6 +532,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
   const mainColumn = (
     <div
+      className="caret-main-column"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -522,30 +541,34 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         overflow: "hidden",
       }}
     >
-      <HeaderBar
-        onNewChat={newChat}
-        hideClose={isFullscreen}
-        title={activeTab?.title}
-        expanded={!isFullscreen ? expanded : undefined}
-        onToggleExpand={
-          !isFullscreen ? () => setExpanded((v) => !v) : undefined
-        }
-      />
+      {workspace?.header ?? (
+        <HeaderBar
+          onNewChat={newChat}
+          hideClose={isFullscreen}
+          title={activeTab?.title}
+          expanded={!isFullscreen ? expanded : undefined}
+          onToggleExpand={
+            !isFullscreen ? () => setExpanded((v) => !v) : undefined
+          }
+        />
+      )}
       {mainShowsChat && (
         <>
           <div
             id={`caret-chat-panel-${activeTabId}`}
+            className="caret-conversation"
             style={{
               display: "flex",
               flex: 1,
               flexDirection: "column",
               minHeight: 0,
               overflow: "hidden",
+              justifyContent: workspace && isEmpty ? "center" : undefined,
             }}
           >
             <div
               style={{
-                flex: 1,
+                flex: workspace && isEmpty ? undefined : 1,
                 minHeight: 0,
                 display: "flex",
                 flexDirection: "column",
@@ -553,11 +576,13 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               }}
             >
               {isEmpty ? (
-                <WelcomeHero
-                  size={isBig ? "lg" : "sm"}
-                  emptyState={emptyState}
-                  onStarter={sendStarter}
-                />
+                (workspace?.welcome ?? (
+                  <WelcomeHero
+                    size={isBig ? "lg" : "sm"}
+                    emptyState={emptyState}
+                    onStarter={sendStarter}
+                  />
+                ))
               ) : isLoading ? (
                 <div style={{ flex: 1, overflowY: "auto", padding: 18 }}>
                   <MessageSkeleton />
@@ -575,7 +600,13 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                 />
               )}
             </div>
-            <div style={composerWrapStyle}>
+            <div
+              className="caret-composer-wrap"
+              style={{
+                ...composerWrapStyle,
+                ...(workspace && isEmpty ? { paddingBottom: 0 } : {}),
+              }}
+            >
               <Composer
                 key={activeTabId}
                 autoFocus={isOpen || isFullscreen}
@@ -583,7 +614,10 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                 isStreaming={isStreaming}
                 onSubmit={(t) => sendPromptWithIntent(t)}
                 onStop={() => stopStreaming(activeTabId)}
-                placeholder={emptyState.composerPlaceholder}
+                placeholder={
+                  workspace?.composerPlaceholder ??
+                  emptyState.composerPlaceholder
+                }
               />
             </div>
           </div>
@@ -642,18 +676,23 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}
         >
           <div
+            className="caret-history-sidebar"
+            id={workspace ? "caret-chat-history" : undefined}
+            hidden={workspace && !workspace.sidebarOpen}
             style={{
               width: 260,
               flexShrink: 0,
               minHeight: 0,
-              borderRight: `1px solid ${caretTokens.border}`,
-              display: "flex",
+              borderInlineEnd: `1px solid ${caretTokens.border}`,
+              display: workspace && !workspace.sidebarOpen ? "none" : "flex",
               flexDirection: "column",
               overflow: "hidden",
               background: caretTokens.bg,
             }}
           >
+            {workspace?.sidebarHeader}
             <ChatList
+              labels={workspace?.historyLabels}
               chats={sessions}
               isLoading={sessionsLoading}
               error={sessionsError}

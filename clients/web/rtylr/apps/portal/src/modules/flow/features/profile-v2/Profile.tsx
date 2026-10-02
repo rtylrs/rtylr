@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, UserX } from 'lucide-react';
+import { UserX } from 'lucide-react';
 import { profileClient } from '../../shared/lib/clients';
 
 interface ProfileProject {
@@ -75,17 +75,6 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-        {/* Back */}
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="inline-flex items-center gap-1 text-xs mb-4 hover:opacity-80 transition-opacity"
-          style={{ color: 'var(--flow-text-muted)' }}
-          aria-label={t('flow.profile.back')}
-        >
-          <ChevronLeft size={14} /> {t('flow.profile.back')}
-        </button>
-
         {/* Identity header */}
         {/* S-23: avatar 64px, name 20px/600, role 13px muted. The contract
             carries no department field, so only the role can be shown. */}

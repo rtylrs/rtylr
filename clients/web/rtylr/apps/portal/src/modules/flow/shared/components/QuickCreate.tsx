@@ -191,8 +191,7 @@ export const QuickCreate: React.FC = () => {
             aria-label={t('flow.quickCreate.titlePlaceholder')}
             placeholder={t('flow.quickCreate.titlePlaceholder')}
             rows={2}
-            className="w-full rounded-md bg-transparent resize-none text-flow-screen font-semibold leading-snug placeholder:opacity-40 mb-1"
-            style={{ color: 'var(--flow-text)' }}
+            className="flow-task-name"
           />
 
           <div className="mt-1">

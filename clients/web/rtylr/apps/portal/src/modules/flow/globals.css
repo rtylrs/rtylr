@@ -268,6 +268,33 @@
   --accent: var(--flow-action-bg);
   --accent-foreground: var(--dash-text);
 }
+.portal-flow-dialog .flow-task-name {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  resize: none;
+  border: 1px solid var(--flow-border-control);
+  border-radius: 10px;
+  background: var(--flow-hover);
+  color: var(--flow-text);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.portal-flow-dialog .flow-task-name::placeholder {
+  color: var(--flow-text-muted);
+  font-weight: 400;
+}
+.portal-flow-dialog .flow-task-name:focus {
+  border-color: var(--flow-text-muted);
+  background: var(--flow-input-bg);
+  outline: none !important;
+}
 @media (max-width: 900px) {
   .portal-flow-sidebar {
     display: none;

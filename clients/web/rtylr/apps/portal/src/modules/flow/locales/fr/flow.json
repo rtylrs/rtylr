@@ -550,7 +550,6 @@
     }
   },
   "profile": {
-    "back": "Retour",
     "notFound": "Profil introuvable.",
     "publicProjects": "Projets publics",
     "noPublicProjects": "Aucun projet public.",
