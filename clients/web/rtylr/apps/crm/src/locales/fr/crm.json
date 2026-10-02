@@ -443,7 +443,8 @@
     "title": "Pipeline commercial",
     "subtitle": "Suivez les affaires du premier contact à la signature",
     "addLead": "Ajouter un prospect",
-    "addNewLead": "Ajouter un nouveau prospect"
+    "addNewLead": "Ajouter un nouveau prospect",
+    "loadMore": "Charger plus de prospects"
   },
   "createCustomer": {
     "pageTitle": "Nouveau client",

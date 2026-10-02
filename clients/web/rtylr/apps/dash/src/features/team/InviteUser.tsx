@@ -1,3 +1,4 @@
+import { PermissionProfilePicker } from './PermissionProfilePicker';
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -136,6 +137,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [bulkEmailsRaw, setBulkEmailsRaw] = useState('');
   const [bulkMemberType, setBulkMemberType] = useState<'member' | 'admin'>('member');
   const [bulkApps, setBulkApps] = useState<string[]>([]);
+  const [bulkProfileIdsByApp, setBulkProfileIdsByApp] = useState<Record<string, string[]>>({});
   const [bulkLocations, setBulkLocations] = useState<number[]>([]);
   const [bulkGroupId, setBulkGroupId] = useState<string>('');
   const [bulkResults, setBulkResults] = useState<BulkResult[] | null>(null);
@@ -238,7 +240,11 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     setSingleStep(1);
   };
 
-  const renderAppRoleSelectors = (): React.JSX.Element => (
+  const renderAppRoleSelectors = (
+    appIds: string[],
+    selectedProfiles: Record<string, string[]>,
+    setSelectedProfiles: React.Dispatch<React.SetStateAction<Record<string, string[]>>>
+  ): React.JSX.Element => (
     <div className="space-y-3">
       <div>
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
@@ -248,35 +254,16 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           {t('team.inviteUser.permissionProfilesDescription')}
         </p>
       </div>
-      {selectedApps.map((appKey) => {
+      {appIds.map((appKey) => {
         const options = customRoles.filter((customRole) => customRole.appId === appKey);
         return (
-          <div key={appKey} className="space-y-1.5">
-            <Label htmlFor={`invite-app-role-${appKey}`}>{appKey.toUpperCase()}</Label>
-            <select
-              id={`invite-app-role-${appKey}`}
-              value={profileIdsByApp[appKey]?.[0] ?? ''}
-              onChange={(event) =>
-                setProfileIdsByApp((current) => ({
-                  ...current,
-                  [appKey]: event.target.value ? [event.target.value] : [],
-                }))
-              }
-              className="w-full rounded-lg px-3 py-2.5 text-base"
-              style={{
-                background: 'var(--dash-bg)',
-                border: '1px solid var(--dash-border)',
-                color: 'var(--dash-text)',
-              }}
-            >
-              <option value="">{t('team.inviteUser.noPermissionProfile')}</option>
-              {options.map((customRole) => (
-                <option key={customRole.id} value={customRole.id}>
-                  {customRole.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <PermissionProfilePicker
+            key={appKey}
+            label={appKey.toUpperCase()}
+            profiles={options}
+            selectedIds={selectedProfiles[appKey] ?? []}
+            onChange={(ids) => setSelectedProfiles((current) => ({ ...current, [appKey]: ids }))}
+          />
         );
       })}
     </div>
@@ -290,7 +277,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         memberType: bulkMemberType,
         licensedAppIds: bulkMemberType === 'admin' ? [] : bulkApps,
         permissionProfileAssignments:
-          bulkMemberType === 'admin' ? [] : buildPermissionProfileAssignments(bulkApps, {}),
+          bulkMemberType === 'admin'
+            ? []
+            : buildPermissionProfileAssignments(bulkApps, bulkProfileIdsByApp),
         ...(bulkGroupId ? { groupIds: [Number(bulkGroupId)] } : {}),
       });
       setBulkResults(res.results);
@@ -744,7 +733,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                       toggleApp('pos')
                     )}
 
-                  {memberType === 'member' && selectedApps.length > 0 && renderAppRoleSelectors()}
+                  {memberType === 'member' &&
+                    selectedApps.length > 0 &&
+                    renderAppRoleSelectors(selectedApps, profileIdsByApp, setProfileIdsByApp)}
 
                   {/* Seat cost preview */}
                   {sub &&
@@ -1026,6 +1017,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               ) : (
                 renderAppSelector(bulkApps, toggleBulkApp)
               )}
+
+              {bulkMemberType === 'member' &&
+                bulkApps.length > 0 &&
+                renderAppRoleSelectors(bulkApps, bulkProfileIdsByApp, setBulkProfileIdsByApp)}
 
               {bulkMemberType === 'member' &&
                 posSelectedBulk &&

@@ -32,7 +32,7 @@ import type {
   SidebarItemPreference,
   SidebarPreferences,
 } from '../lib/sidebarPreferences';
-import { updatePreferencesCopy } from '../lib/sidebarPreferences';
+import { createDefaultSidebarPreferences, updatePreferencesCopy } from '../lib/sidebarPreferences';
 
 const ICONS: Record<SidebarIconKey, React.ComponentType<{ size?: number; className?: string }>> = {
   archive: Archive,
@@ -74,8 +74,18 @@ const isAvailable = (item: SidebarItemPreference, showPreviewRoutes: boolean): b
   return true;
 };
 
-const itemLabel = (item: SidebarItemPreference, t: (key: string) => string): string =>
-  item.kind === 'builtin' ? t(item.label) : item.label;
+const builtinLabelsByRoute = new Map(
+  createDefaultSidebarPreferences().items.map((item) => [item.route, item.label])
+);
+
+const itemLabel = (item: SidebarItemPreference, t: (key: string) => string): string => {
+  if (item.kind === 'builtin') return t(item.label);
+  if (item.kind === 'recent' && item.route) {
+    const label = builtinLabelsByRoute.get(item.route);
+    if (label) return t(label);
+  }
+  return item.label;
+};
 
 type SidebarDragState = { kind: 'item'; id: string } | { kind: 'group'; id: string };
 

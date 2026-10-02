@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import { decodeStaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
 
 const mockMembersClient = vi.hoisted(() => ({
   listTeam: vi.fn(),
@@ -60,6 +61,54 @@ function createWrapper() {
 
 describe('useTeam', () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it('loads a member with unrestricted assignments whose empty scopes are omitted on the wire', async () => {
+    mockMembersClient.listTeam.mockResolvedValue({
+      users: [
+        decodeStaffUserPayload({
+          id: '1',
+          full_name: 'Owner',
+          email: 'owner@example.test',
+          member_type: 'member',
+          is_active: true,
+          permission_profile_assignments: [
+            {
+              app_id: 'flow',
+              permission_profile_ids: ['23'],
+              assignment_source: 'explicit',
+              status: 'active',
+            },
+          ],
+          effective_access: {
+            business_id: '1',
+            dash_permissions: ['hub:team:view'],
+            subscribed_apps: ['flow'],
+            is_owner: true,
+            authorization_version: '3',
+            apps: [
+              {
+                app_id: 'flow',
+                licensed: true,
+                has_access: true,
+                permissions: ['flow:tasks:view'],
+                permission_scopes: [{ permission_key: 'flow:tasks:view' }],
+                sources: ['system'],
+              },
+            ],
+          },
+        }),
+      ],
+      total: 1,
+    });
+
+    const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.members[0]).toMatchObject({
+      id: '1',
+      isOwner: true,
+      permissionProfileAssignments: [{ appId: 'flow', permissionProfileIds: ['23'], scopes: [] }],
+    });
+  });
 
   it('fetches team members', async () => {
     mockMembersClient.listTeam.mockResolvedValue({

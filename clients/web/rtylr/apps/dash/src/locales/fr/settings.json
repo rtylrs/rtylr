@@ -80,7 +80,8 @@
       "tablet": "Tablette",
       "desktop": "Ordinateur",
       "unknown": "Inconnu"
-    }
+    },
+    "loginHistoryStale": "Impossible d’actualiser l’historique des connexions. Les dernières données disponibles sont affichées."
   },
   "email": {
     "pageTitle": "Paramètres e-mail",

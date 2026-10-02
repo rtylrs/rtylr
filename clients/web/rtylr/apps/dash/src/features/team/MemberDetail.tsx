@@ -1,3 +1,4 @@
+import { PermissionProfilePicker } from './PermissionProfilePicker';
 import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -54,7 +55,10 @@ import { groupsClient, permissionClient } from '../../shared/lib/clients';
 import { permissionProfileSchema } from '../../shared/schemas/permissions';
 import { useUserStore } from '../../shared/stores/userStore';
 import { APP_NAMES } from '../../shared/config/appNames';
-import { buildPermissionProfileAssignments } from './authorizationDraft';
+import {
+  buildPermissionProfileAssignments,
+  getAssignedProfileIdsByApp,
+} from './authorizationDraft';
 
 const ALL_APPS = [
   { key: 'pos', labelKey: APP_NAMES.pos.short, icon: MonitorSpeaker, color: 'var(--app-pos)' },
@@ -160,14 +164,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     setNameDraft(member.fullName || member.name || '');
     setMemberTypeDraft(member.memberType === 'admin' ? 'admin' : 'member');
     setLicensedAppsDraft(member.licensedAppIds);
-    setProfileIdsDraft(
-      Object.fromEntries(
-        member.permissionProfileAssignments.map((assignment) => [
-          assignment.appId,
-          assignment.permissionProfileIds,
-        ])
-      )
-    );
+    setProfileIdsDraft(getAssignedProfileIdsByApp(member.permissionProfileAssignments, 'explicit'));
   }, [member]);
 
   // Seed the location selection from query data once per edit session, when it
@@ -287,7 +284,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           permissionProfileAssignments:
             memberTypeDraft === 'admin'
               ? []
-              : buildPermissionProfileAssignments(licensedAppsDraft, profileIdsDraft),
+              : buildPermissionProfileAssignments(
+                  licensedAppsDraft,
+                  profileIdsDraft,
+                  'explicit',
+                  member.permissionProfileAssignments
+                ),
           groupIds: memberGroups.map((group) => group.id),
         },
       });
@@ -430,32 +432,15 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                   const options = customRoles.filter((profile) => profile.appId === appKey);
                   if (options.length === 0) return null;
                   return (
-                    <div key={appKey} className="space-y-1.5">
-                      <Label htmlFor={`permission-profile-${appKey}`}>{appKey}</Label>
-                      <select
-                        id={`permission-profile-${appKey}`}
-                        value={profileIdsDraft[appKey]?.[0] ?? ''}
-                        onChange={(event) =>
-                          setProfileIdsDraft((current) => ({
-                            ...current,
-                            [appKey]: event.target.value ? [event.target.value] : [],
-                          }))
-                        }
-                        className="w-full rounded-lg px-3 py-2 text-base"
-                        style={{
-                          background: 'var(--dash-bg)',
-                          border: '1px solid var(--dash-border)',
-                          color: 'var(--dash-text)',
-                        }}
-                      >
-                        <option value="">{t('team.memberDetail.noPermissionProfile')}</option>
-                        {options.map((profile) => (
-                          <option key={profile.id} value={profile.id}>
-                            {profile.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <PermissionProfilePicker
+                      key={appKey}
+                      label={appKey.toUpperCase()}
+                      profiles={options}
+                      selectedIds={profileIdsDraft[appKey] ?? []}
+                      onChange={(ids) =>
+                        setProfileIdsDraft((current) => ({ ...current, [appKey]: ids }))
+                      }
+                    />
                   );
                 })}
               </div>

@@ -23,5 +23,6 @@
   "batch": "الدفعة",
   "qtyShort": "الكمية",
   "notesOptional": "ملاحظات (اختياري)",
-  "stock": "المخزون"
+  "stock": "المخزون",
+  "refresh": "تحديث"
 }

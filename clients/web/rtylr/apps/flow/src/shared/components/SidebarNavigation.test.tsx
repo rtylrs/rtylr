@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { beforeAll, describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import path from 'node:path';
+import { initTestI18nFrom } from '../../../../../test/i18nTestInstance';
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }));
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children }: { children: React.ReactNode }) => <a href="/">{children}</a>,
   useNavigate: () => vi.fn(),
@@ -11,7 +12,10 @@ vi.mock('@tanstack/react-router', () => ({
 }));
 
 import { SidebarNavigation } from './SidebarNavigation';
-import { createDefaultSidebarPreferences } from '../lib/sidebarPreferences';
+import {
+  createDefaultSidebarPreferences,
+  recordRecentSidebarPage,
+} from '../lib/sidebarPreferences';
 import type { ApiProject } from '../services/flowApi';
 
 function project(over: Partial<ApiProject> = {}): ApiProject {
@@ -27,10 +31,10 @@ function project(over: Partial<ApiProject> = {}): ApiProject {
   } as unknown as ApiProject;
 }
 
-function renderNav(projects: ApiProject[]) {
+function renderNav(projects: ApiProject[], preferences = createDefaultSidebarPreferences()) {
   return render(
     <SidebarNavigation
-      preferences={createDefaultSidebarPreferences()}
+      preferences={preferences}
       update={vi.fn()}
       showPreviewRoutes={false}
       unreadNotifications={0}
@@ -42,6 +46,22 @@ function renderNav(projects: ApiProject[]) {
     />
   );
 }
+
+beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales')));
+
+it('translates recent builtin routes from current labels and preserves project names', () => {
+  let preferences = createDefaultSidebarPreferences();
+  preferences = recordRecentSidebarPage(preferences, '/today', 'nav.focusToday');
+  preferences = recordRecentSidebarPage(preferences, '/inbox', 'nav.inbox');
+  preferences = recordRecentSidebarPage(preferences, '/projects/41', 'Launch project');
+  renderNav([], preferences);
+
+  expect(screen.queryByText('nav.focusToday')).not.toBeInTheDocument();
+  expect(screen.queryByText('nav.inbox')).not.toBeInTheDocument();
+  expect(screen.getAllByText('Today')).toHaveLength(2);
+  expect(screen.getAllByText('Inbox')).toHaveLength(2);
+  expect(screen.getByText('Launch project')).toBeInTheDocument();
+});
 
 /**
  * A project row showed its open-task count unconditionally, so a project with

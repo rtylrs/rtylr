@@ -1,3 +1,4 @@
+import { PermissionProfilePicker } from './PermissionProfilePicker';
 import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useParams } from '@tanstack/react-router';
@@ -17,7 +18,10 @@ import {
 import { useTeam } from '../../shared/hooks/queries/useTeam';
 import { usePermissionProfiles } from '../../shared/hooks/queries/usePermissions';
 import { APP_NAMES } from '../../shared/config/appNames';
-import { buildPermissionProfileAssignments } from './authorizationDraft';
+import {
+  buildPermissionProfileAssignments,
+  getAssignedProfileIdsByApp,
+} from './authorizationDraft';
 
 const APP_IDS = ['pos', 'erp', 'hr', 'crm', 'finance', 'flow', 'insights', 'menu', 'recruit'];
 
@@ -76,14 +80,7 @@ const GroupDetail = (): React.JSX.Element => {
       setDescription(group.description ?? '');
       setColor(group.color ?? '#6366f1');
       setLicensedAppIds(group.licensedAppIds);
-      setProfileIdsByApp(
-        Object.fromEntries(
-          group.permissionProfileAssignments.map((assignment) => [
-            assignment.appId,
-            assignment.permissionProfileIds,
-          ])
-        )
-      );
+      setProfileIdsByApp(getAssignedProfileIdsByApp(group.permissionProfileAssignments, 'group'));
       setDirty(false);
     } else if (isNew && initializedGroupId.current !== 'new') {
       initializedGroupId.current = 'new';
@@ -105,7 +102,8 @@ const GroupDetail = (): React.JSX.Element => {
     const permissionProfileAssignments = buildPermissionProfileAssignments(
       licensedAppIds,
       profileIdsByApp,
-      'group'
+      'group',
+      group?.permissionProfileAssignments
     );
     try {
       if (isNew) {
@@ -357,33 +355,18 @@ const GroupDetail = (): React.JSX.Element => {
                     />
                   </div>
                   <div className="col-span-6">
-                    <select
-                      aria-label={t('team.groupDetail.permissionProfileForApp', {
+                    <PermissionProfilePicker
+                      label={t('team.groupDetail.permissionProfileForApp', {
                         app: t(appName.short),
                       })}
-                      value={profileIdsByApp[appId]?.[0] ?? ''}
+                      profiles={appProfiles}
+                      selectedIds={profileIdsByApp[appId] ?? []}
                       disabled={!licensed}
-                      onChange={(event) => {
-                        setProfileIdsByApp((current) => ({
-                          ...current,
-                          [appId]: event.target.value ? [event.target.value] : [],
-                        }));
+                      onChange={(ids) => {
+                        setProfileIdsByApp((current) => ({ ...current, [appId]: ids }));
                         setDirty(true);
                       }}
-                      className="w-full rounded-lg px-3 py-2 text-xs disabled:opacity-50"
-                      style={{
-                        background: 'var(--dash-bg)',
-                        border: '1px solid var(--dash-border)',
-                        color: 'var(--dash-text)',
-                      }}
-                    >
-                      <option value="">{t('team.groupDetail.noPermissionProfile')}</option>
-                      {appProfiles.map((profile) => (
-                        <option key={profile.id} value={profile.id}>
-                          {profile.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
               );

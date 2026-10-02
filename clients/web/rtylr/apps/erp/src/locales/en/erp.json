@@ -166,7 +166,8 @@
     "phone": "Phone",
     "city": "City",
     "country": "Country",
-    "address": "Address"
+    "address": "Address",
+    "retry": "Retry"
   },
   "common": {
     "cancel": "Cancel",
@@ -248,7 +249,11 @@
     "avgDaily": "Avg Daily",
     "suggested": "Suggested",
     "lead": "Lead",
-    "confidence": "Confidence"
+    "confidence": "Confidence",
+    "error": {
+      "title": "Unable to load reorder suggestions",
+      "description": "The current inventory data could not be loaded. Refresh to try again."
+    }
   },
   "variants": {
     "empty": {

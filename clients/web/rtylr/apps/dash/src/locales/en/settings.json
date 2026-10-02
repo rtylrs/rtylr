@@ -80,7 +80,8 @@
       "tablet": "Tablet",
       "desktop": "Desktop",
       "unknown": "Unknown"
-    }
+    },
+    "loginHistoryStale": "Unable to refresh login history. Showing the last available data."
   },
   "email": {
     "pageTitle": "Email settings",

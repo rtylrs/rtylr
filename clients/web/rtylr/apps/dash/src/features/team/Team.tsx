@@ -64,7 +64,12 @@ const Team: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const { data: teamData, isLoading } = useTeam({
+  const {
+    data: teamData,
+    isLoading,
+    isError,
+    refetch,
+  } = useTeam({
     page: 1,
     pageSize: FETCH_WINDOW_SIZE,
   });
@@ -184,9 +189,11 @@ const Team: React.FC = (): React.JSX.Element => {
             <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
               {t('common.nav.team')}
             </h1>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-              {t('team.list.memberCount', { count: members.length })}
-            </p>
+            {!isLoading && !isError && (
+              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                {t('team.list.memberCount', { count: members.length })}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate({ to: '/team/groups' })}>
@@ -301,7 +308,16 @@ const Team: React.FC = (): React.JSX.Element => {
           className="rounded-xl overflow-hidden"
           style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
-          {isLoading ? (
+          {isError ? (
+            <div className="p-4" role="alert">
+              <EmptyState
+                icon={Users}
+                title={t('team.list.loadFailed')}
+                description={t('team.list.loadFailedDescription')}
+                action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+              />
+            </div>
+          ) : isLoading ? (
             <div className="p-2">
               <SkeletonList rows={6} />
             </div>
