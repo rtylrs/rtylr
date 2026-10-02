@@ -15,7 +15,7 @@ import { test, expect, type Page, type Route } from './fixtures';
  * screen + detail screen touches should have a handler there.
  */
 
-const ERP_URL = process.env.ERP_URL ?? 'http://localhost:5179';
+const ERP_URL = process.env.ERP_URL ?? 'http://localhost:5175/erp';
 
 interface StubProduct {
   id: number;
@@ -36,7 +36,26 @@ const FAKE_USER = {
   email: 'owner@acme.test',
   full_name: 'Acme Owner',
   business_id: '1',
-  role: 'owner',
+  member_type: 'owner',
+  effective_access: {
+    business_id: '1',
+    is_owner: true,
+    is_admin: false,
+    dash_permissions: [],
+    subscribed_apps: ['erp'],
+    licenses: [],
+    apps: [
+      {
+        app_id: 'erp',
+        licensed: true,
+        has_access: true,
+        permissions: [],
+        permission_scopes: [],
+        sources: ['system'],
+      },
+    ],
+    authorization_version: '1',
+  },
   apps: ['erp'],
   plan_slug: 'pro',
 };

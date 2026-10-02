@@ -7,6 +7,8 @@ import { APP_ICONS, WORKSPACE_APP_IDS } from '../../shared/config/appIcons';
 import { APP_NAMES } from '../../shared/config/appNames';
 import type { StoredUser } from '../../shared/stores/userStore';
 import { canAccessPortalPath } from '../../shared/utils/canAccessPortalPath';
+import { erpNavItems } from '../../modules/erp/navigation';
+import { crmNavItems } from '../../modules/crm/navigation';
 import { flowNavItems } from '../../modules/flow/navigation';
 import { insightsNavItems } from '../../modules/insights/navigation';
 import { rawNavItems, rawMenuSubItems, settingsNavItems, type PortalNavItem } from '../navigation';
@@ -16,6 +18,8 @@ export const COMMAND_GROUPS = [
   'home',
   'insights',
   'flow',
+  'crm',
+  'erp',
   'projects',
   'tasks',
   'settings',
@@ -60,9 +64,13 @@ export function getPortalCommands(
       destination:
         id === 'insights'
           ? { path: insightsPages[0].path }
-          : id === 'flow'
-            ? { path: '/flow' }
-            : { href: resolveAppUrl(id) },
+          : id === 'erp'
+            ? { path: '/erp' }
+            : id === 'crm'
+              ? { path: '/crm' }
+              : id === 'flow'
+                ? { path: '/flow' }
+                : { href: resolveAppUrl(id) },
     });
   }
   const addPages = (pages: PortalNavItem[], group: CommandGroup, namespace = 'common.nav') => {
@@ -73,9 +81,13 @@ export function getPortalCommands(
         label: t(
           page.key === 'flowSettings'
             ? 'settingsCenter.flowCommand'
-            : page.key === 'insightsSettings'
-              ? 'settingsCenter.insightsCommand'
-              : `${namespace}.${page.key}`
+            : page.key === 'erpSettings'
+              ? 'settingsCenter.erpCommand'
+              : page.key === 'crmSettings'
+                ? 'settingsCenter.crmCommand'
+                : page.key === 'insightsSettings'
+                  ? 'settingsCenter.insightsCommand'
+                  : `${namespace}.${page.key}`
         ),
         group,
         icon: page.icon,
@@ -91,6 +103,8 @@ export function getPortalCommands(
     ],
     'home'
   );
+  addPages([...erpNavItems], 'erp', 'erpNav');
+  addPages([...crmNavItems], 'crm', 'crmNav');
   addPages(insightsPages, 'insights', 'insightsNav');
   for (const page of flowNavItems) {
     if (
@@ -115,10 +129,7 @@ export function getPortalCommands(
       destination: { newFlowTask: true },
     });
   }
-  addPages(
-    settingsNavItems.filter((page) => page.key !== 'integrations'),
-    'settings'
-  );
+  addPages(settingsNavItems, 'settings');
   if (canEffectiveAccess(user?.effectiveAccess, 'hub:team:invite')) {
     commands.push({
       id: 'invite-member',

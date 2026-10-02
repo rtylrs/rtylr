@@ -895,324 +895,6 @@ importers:
         specifier: ^6.1.1
         version: 6.1.1(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
 
-  web/rtylr/apps/crm:
-    dependencies:
-      '@tanstack/react-router':
-        specifier: ^1.170.8
-        version: 1.170.8(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@voxire/api':
-        specifier: workspace:*
-        version: link:../../../../packages/api
-      '@voxire/auth':
-        specifier: workspace:*
-        version: link:../../../../packages/auth
-      '@voxire/caret':
-        specifier: workspace:*
-        version: link:../../../../packages/caret
-      '@voxire/config':
-        specifier: workspace:*
-        version: link:../../../../packages/config
-      '@voxire/i18n':
-        specifier: workspace:*
-        version: link:../../../../packages/i18n
-      '@voxire/observability':
-        specifier: workspace:*
-        version: link:../../../../packages/observability
-      '@voxire/permissions':
-        specifier: workspace:*
-        version: link:../../../../packages/permissions
-      '@voxire/types':
-        specifier: workspace:*
-        version: link:../../../../packages/types
-      '@voxire/ui':
-        specifier: workspace:*
-        version: link:../../../../packages/ui
-      '@voxire/voxie':
-        specifier: workspace:*
-        version: link:../../../../packages/contracts
-      lucide-react:
-        specifier: ^1.8.0
-        version: 1.8.0(react@19.2.5)
-      motion:
-        specifier: ^12.38.0
-        version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      react:
-        specifier: 19.2.5
-        version: 19.2.5
-      react-cookie:
-        specifier: ^8.1.0
-        version: 8.1.2(@types/react@19.2.14)(react@19.2.5)
-      react-dom:
-        specifier: 19.2.5
-        version: 19.2.5(react@19.2.5)
-      sonner:
-        specifier: ^2.0.7
-        version: 2.0.8(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      zustand:
-        specifier: ^5.0.12
-        version: 5.0.12(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.7.0(react@19.2.5))
-    devDependencies:
-      '@types/node':
-        specifier: ^25.6.0
-        version: 25.9.7
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: ^6.0.1
-        version: 6.1.1(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.104.1)(tsx@4.23.13)(yaml@2.9.1))
-      autoprefixer:
-        specifier: ^10.5.0
-        version: 10.6.1(postcss@8.5.28)
-      postcss:
-        specifier: '>=8.5.23'
-        version: 8.5.28
-      tailwindcss:
-        specifier: ^4.2.4
-        version: 4.3.3
-      typescript:
-        specifier: ~6.0.3
-        version: 6.0.3
-      vite:
-        specifier: ^8.0.16
-        version: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.104.1)(tsx@4.23.13)(yaml@2.9.1)
-      vite-plugin-svgr:
-        specifier: ^5.2.0
-        version: 5.2.0(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.104.1)(tsx@4.23.13)(yaml@2.9.1))
-
-  web/rtylr/apps/portal:
-    dependencies:
-      '@tanstack/react-query':
-        specifier: ^5.99.2
-        version: 5.99.2(react@19.2.5)
-      '@tanstack/react-router':
-        specifier: ^1.170.8
-        version: 1.170.8(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@voxire/api':
-        specifier: workspace:*
-        version: link:../../../../packages/api
-      '@voxire/auth':
-        specifier: workspace:*
-        version: link:../../../../packages/auth
-      '@voxire/caret':
-        specifier: workspace:*
-        version: link:../../../../packages/caret
-      '@voxire/config':
-        specifier: workspace:*
-        version: link:../../../../packages/config
-      '@voxire/consent':
-        specifier: workspace:*
-        version: link:../../../../packages/consent
-      '@voxire/i18n':
-        specifier: workspace:*
-        version: link:../../../../packages/i18n
-      '@voxire/menu':
-        specifier: workspace:*
-        version: link:../../../../packages/menu
-      '@voxire/observability':
-        specifier: workspace:*
-        version: link:../../../../packages/observability
-      '@voxire/permissions':
-        specifier: workspace:*
-        version: link:../../../../packages/permissions
-      '@voxire/types':
-        specifier: workspace:*
-        version: link:../../../../packages/types
-      '@voxire/ui':
-        specifier: workspace:*
-        version: link:../../../../packages/ui
-      '@voxire/utils':
-        specifier: workspace:*
-        version: link:../../../../packages/utils
-      '@voxire/voxie':
-        specifier: workspace:*
-        version: link:../../../../packages/contracts
-      chart.js:
-        specifier: ^4.5.1
-        version: 4.5.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      file-saver:
-        specifier: ^2.0.5
-        version: 2.0.5
-      html2canvas:
-        specifier: ^1.4.1
-        version: 1.4.1
-      i18next:
-        specifier: ^26.0.6
-        version: 26.0.6(typescript@6.0.3)
-      lucide-react:
-        specifier: ^1.8.0
-        version: 1.8.0(react@19.2.5)
-      motion:
-        specifier: ^12.38.0
-        version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      react:
-        specifier: 19.2.5
-        version: 19.2.5
-      react-chartjs-2:
-        specifier: ^5.3.1
-        version: 5.3.1(chart.js@4.5.1)(react@19.2.5)
-      react-cookie:
-        specifier: ^8.1.0
-        version: 8.1.2(@types/react@19.2.14)(react@19.2.5)
-      react-dom:
-        specifier: 19.2.5
-        version: 19.2.5(react@19.2.5)
-      react-dropzone:
-        specifier: ^15.0.0
-        version: 15.0.0(react@19.2.5)
-      react-helmet-async:
-        specifier: ^3.0.0
-        version: 3.0.0(react@19.2.5)
-      react-i18next:
-        specifier: ^17.0.4
-        version: 17.0.14(i18next@26.0.6(typescript@6.0.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3)
-      react-lazy-load-image-component:
-        specifier: ^1.6.3
-        version: 1.6.3(react@19.2.5)
-      react-qrcode-logo:
-        specifier: ^4.0.0
-        version: 4.1.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      shepherd.js:
-        specifier: ^15.3.0
-        version: 15.3.0
-      sonner:
-        specifier: ^2.0.7
-        version: 2.0.8(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      tailwind-merge:
-        specifier: ^3.5.0
-        version: 3.5.0
-      zustand:
-        specifier: ^5.0.12
-        version: 5.0.12(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.7.0(react@19.2.5))
-    devDependencies:
-      '@types/file-saver':
-        specifier: ^2.0.7
-        version: 2.0.7
-      '@types/node':
-        specifier: ^25.6.0
-        version: 25.9.7
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: ^6.0.1
-        version: 6.1.1(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
-      jiti:
-        specifier: 2.6.1
-        version: 2.6.1
-      jsdom:
-        specifier: ~29.0.2
-        version: 29.0.2(@noble/hashes@1.8.0)
-      sass:
-        specifier: ^1.99.0
-        version: 1.99.0
-      typescript:
-        specifier: ~6.0.3
-        version: 6.0.3
-      vite:
-        specifier: ^8.0.16
-        version: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
-      vite-plugin-svgr:
-        specifier: ^5.2.0
-        version: 5.2.0(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
-      vitest:
-        specifier: ^4.1.5
-        version: 4.1.11(@types/node@25.9.7)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(happy-dom@20.9.0)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.15.0(@types/node@25.9.7)(typescript@6.0.3))(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
-
-  web/rtylr/apps/erp:
-    dependencies:
-      '@tanstack/react-query':
-        specifier: ^5.99.2
-        version: 5.99.2(react@19.2.5)
-      '@tanstack/react-router':
-        specifier: ^1.170.8
-        version: 1.170.8(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      '@voxire/api':
-        specifier: workspace:*
-        version: link:../../../../packages/api
-      '@voxire/auth':
-        specifier: workspace:*
-        version: link:../../../../packages/auth
-      '@voxire/caret':
-        specifier: workspace:*
-        version: link:../../../../packages/caret
-      '@voxire/config':
-        specifier: workspace:*
-        version: link:../../../../packages/config
-      '@voxire/i18n':
-        specifier: workspace:*
-        version: link:../../../../packages/i18n
-      '@voxire/observability':
-        specifier: workspace:*
-        version: link:../../../../packages/observability
-      '@voxire/permissions':
-        specifier: workspace:*
-        version: link:../../../../packages/permissions
-      '@voxire/types':
-        specifier: workspace:*
-        version: link:../../../../packages/types
-      '@voxire/ui':
-        specifier: workspace:*
-        version: link:../../../../packages/ui
-      '@voxire/voxie':
-        specifier: workspace:*
-        version: link:../../../../packages/contracts
-      lucide-react:
-        specifier: ^1.8.0
-        version: 1.8.0(react@19.2.5)
-      motion:
-        specifier: ^12.38.0
-        version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      react:
-        specifier: 19.2.5
-        version: 19.2.5
-      react-dom:
-        specifier: 19.2.5
-        version: 19.2.5(react@19.2.5)
-      sonner:
-        specifier: ^2.0.7
-        version: 2.0.8(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      zustand:
-        specifier: ^5.0.12
-        version: 5.0.12(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.7.0(react@19.2.5))
-    devDependencies:
-      '@types/node':
-        specifier: ^25.6.0
-        version: 25.9.7
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: ^6.0.1
-        version: 6.1.1(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
-      jiti:
-        specifier: 2.6.1
-        version: 2.6.1
-      sass:
-        specifier: ^1.99.0
-        version: 1.99.0
-      typescript:
-        specifier: ~6.0.3
-        version: 6.0.3
-      vite:
-        specifier: ^8.0.16
-        version: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
-      vite-plugin-svgr:
-        specifier: ^5.2.0
-        version: 5.2.0(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
-
   web/rtylr/apps/finance:
     dependencies:
       '@tanstack/react-query':
@@ -1407,7 +1089,6 @@ importers:
         specifier: ^8.0.16
         version: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.104.1)(tsx@4.23.13)(yaml@2.9.1)
 
-
   web/rtylr/apps/menu:
     dependencies:
       '@tanstack/react-router':
@@ -1489,6 +1170,151 @@ importers:
       vite-tsconfig-paths:
         specifier: ^6.1.1
         version: 6.1.1(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
+
+  web/rtylr/apps/portal:
+    dependencies:
+      '@tanstack/react-query':
+        specifier: ^5.99.2
+        version: 5.99.2(react@19.2.5)
+      '@tanstack/react-router':
+        specifier: ^1.170.8
+        version: 1.170.8(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../../../packages/api
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../../../../packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:../../../../packages/caret
+      '@voxire/config':
+        specifier: workspace:*
+        version: link:../../../../packages/config
+      '@voxire/consent':
+        specifier: workspace:*
+        version: link:../../../../packages/consent
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../../../packages/i18n
+      '@voxire/menu':
+        specifier: workspace:*
+        version: link:../../../../packages/menu
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../../../packages/observability
+      '@voxire/permissions':
+        specifier: workspace:*
+        version: link:../../../../packages/permissions
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../../../../packages/types
+      '@voxire/ui':
+        specifier: workspace:*
+        version: link:../../../../packages/ui
+      '@voxire/utils':
+        specifier: workspace:*
+        version: link:../../../../packages/utils
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../../../packages/contracts
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      file-saver:
+        specifier: ^2.0.5
+        version: 2.0.5
+      html2canvas:
+        specifier: ^1.4.1
+        version: 1.4.1
+      i18next:
+        specifier: ^26.0.6
+        version: 26.0.6(typescript@6.0.3)
+      lucide-react:
+        specifier: ^1.8.0
+        version: 1.8.0(react@19.2.5)
+      motion:
+        specifier: ^12.38.0
+        version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      react:
+        specifier: 19.2.5
+        version: 19.2.5
+      react-chartjs-2:
+        specifier: ^5.3.1
+        version: 5.3.1(chart.js@4.5.1)(react@19.2.5)
+      react-cookie:
+        specifier: ^8.1.0
+        version: 8.1.2(@types/react@19.2.14)(react@19.2.5)
+      react-dom:
+        specifier: 19.2.5
+        version: 19.2.5(react@19.2.5)
+      react-dropzone:
+        specifier: ^15.0.0
+        version: 15.0.0(react@19.2.5)
+      react-helmet-async:
+        specifier: ^3.0.0
+        version: 3.0.0(react@19.2.5)
+      react-i18next:
+        specifier: ^17.0.4
+        version: 17.0.14(i18next@26.0.6(typescript@6.0.3))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@6.0.3)
+      react-lazy-load-image-component:
+        specifier: ^1.6.3
+        version: 1.6.3(react@19.2.5)
+      react-qrcode-logo:
+        specifier: ^4.0.0
+        version: 4.1.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      shepherd.js:
+        specifier: ^15.3.0
+        version: 15.3.0
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.8(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+      zustand:
+        specifier: ^5.0.12
+        version: 5.0.12(@types/react@19.2.14)(react@19.2.5)(use-sync-external-store@1.7.0(react@19.2.5))
+    devDependencies:
+      '@types/file-saver':
+        specifier: ^2.0.7
+        version: 2.0.7
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.9.7
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: ^6.0.1
+        version: 6.1.1(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
+      jiti:
+        specifier: 2.6.1
+        version: 2.6.1
+      jsdom:
+        specifier: ~29.0.2
+        version: 29.0.2(@noble/hashes@1.8.0)
+      sass:
+        specifier: ^1.99.0
+        version: 1.99.0
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.0.16
+        version: 8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1)
+      vite-plugin-svgr:
+        specifier: ^5.2.0
+        version: 5.2.0(typescript@6.0.3)(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
+      vitest:
+        specifier: ^4.1.5
+        version: 4.1.11(@types/node@25.9.7)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(happy-dom@20.9.0)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.15.0(@types/node@25.9.7)(typescript@6.0.3))(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.99.0)(tsx@4.23.13)(yaml@2.9.1))
 
   web/rtylr/apps/recruit:
     dependencies:

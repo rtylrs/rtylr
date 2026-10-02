@@ -62,7 +62,7 @@ export const useKeyboardShortcuts = () => {
           s: '/settings/account',
           n: '/notifications',
           b: '/settings/billing',
-          i: '/integrations',
+          i: '/extensions',
           k: '/api-keys',
           h: '/audit',
           u: '/audit',

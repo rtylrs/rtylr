@@ -1,0 +1,51 @@
+:root {
+  --crm-accent: var(--dash-text);
+  --crm-on-accent: var(--dash-surface);
+  --crm-text: var(--dash-text);
+  --crm-border: var(--dash-border);
+}
+.portal-page.is-crm {
+  padding: clamp(20px, 3vw, 40px);
+}
+.portal-crm-settings {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.portal-crm-settings h4 {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 15px !important;
+}
+.portal-crm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.portal-crm-button:not(:disabled):hover {
+  filter: brightness(0.94);
+}
+.portal-page.is-crm :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--dash-text-dim) !important;
+  outline-offset: 2px;
+}
+.portal-page.is-crm table {
+  box-shadow: none;
+}
+@keyframes crm-skeleton {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@keyframes crm-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.portal-page.is-crm button.bg-accent {
+  background: var(--dash-active);
+  color: var(--dash-text);
+  border-radius: 8px;
+}

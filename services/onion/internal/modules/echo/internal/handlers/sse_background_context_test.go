@@ -9,6 +9,7 @@ type detachedMemoryFake struct {
 	storeContextErr     error
 	summarizeContextErr error
 	storeCalls          int
+	storedContent       string
 	storeHook           func()
 }
 
@@ -16,9 +17,10 @@ func (m *detachedMemoryFake) CreateSession(context.Context, int, string) (string
 	return "", nil
 }
 
-func (m *detachedMemoryFake) StoreMessage(ctx context.Context, _ string, _ int, _, _ string, _ int) (any, error) {
+func (m *detachedMemoryFake) StoreMessage(ctx context.Context, _ string, _ int, _ string, content string, _ int) (any, error) {
 	m.storeContextErr = ctx.Err()
 	m.storeCalls++
+	m.storedContent = content
 	if m.storeHook != nil {
 		m.storeHook()
 	}

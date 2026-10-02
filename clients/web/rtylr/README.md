@@ -1,6 +1,6 @@
 # rtylr
 
-The business workspace for RTYLR. Portal brings Home, Insights and Flow into one browser app.
+The business workspace for RTYLR. Portal brings Home, Insights, Flow, CRM and ERP into one browser app.
 
 ## Architecture
 
@@ -10,23 +10,23 @@ pnpm workspace with shared libraries and standalone products migrating into Port
 
 ## Apps
 
-| App     | Port | Package          | Description                                             |
-| ------- | ---- | ---------------- | ------------------------------------------------------- |
-| Portal  | 5175 | `@rtylr/portal`  | Home, team, groups, account settings, Insights and Flow |
-| Auth    | 5176 | `@rtylr/auth`    | Login, register, password reset, invite accept          |
-| Menu    | 5177 | `@rtylr/menu`    | Customer-facing digital menu with QR codes              |
-| POS     | 5178 | `vbitez`         | Point of sale terminal (Tauri v2 desktop)               |
-| ERP     | 5179 | `@rtylr/erp`     | Inventory, suppliers, purchasing, stock management      |
-| HR      | 5180 | `@rtylr/hr`      | Staff, shifts, payroll, time off, reviews               |
-| CRM     | 5181 | `@rtylr/crm`     | Customers, loyalty, campaigns, segments                 |
-| Finance | 5182 | `@rtylr/finance` | Invoices, expenses, P&L, tax, reconciliation            |
-| Recruit | 5184 | `@rtylr/recruit` | Candidate careers sites + HR submissions inbox          |
-| Docs    | 5186 | `@rtylr/docs`    | Internal + public product documentation                 |
-| Landing | 4200 | `@rtylr/landing` | Marketing site - rtylr.com (Next.js 15 static export)   |
+| App     | Port | Package          | Description                                           |
+| ------- | ---- | ---------------- | ----------------------------------------------------- |
+| Portal  | 5175 | `@rtylr/portal`  | Home, account settings, Insights, Flow, CRM and ERP   |
+| Auth    | 5176 | `@rtylr/auth`    | Login, register, password reset, invite accept        |
+| Menu    | 5177 | `@rtylr/menu`    | Customer-facing digital menu with QR codes            |
+| POS     | 5178 | `vbitez`         | Point of sale terminal (Tauri v2 desktop)             |
+| HR      | 5180 | `@rtylr/hr`      | Staff, shifts, payroll, time off, reviews             |
+| Finance | 5182 | `@rtylr/finance` | Invoices, expenses, P&L, tax, reconciliation          |
+| Recruit | 5184 | `@rtylr/recruit` | Candidate careers sites + HR submissions inbox        |
+| Docs    | 5186 | `@rtylr/docs`    | Internal + public product documentation               |
+| Landing | 4200 | `@rtylr/landing` | Marketing site - rtylr.com (Next.js 15 static export) |
 
 Portal runs at `portal.rtylr.com`; Insights lives under `/insights` with its own
 header inside the shared workspace. Flow lives under `/flow`; app settings share
-`/settings/flow` and `/settings/insights`. Auth stays at `sso.rtylr.com`. The other
+`/settings/flow`, `/settings/insights`, `/settings/crm` and `/settings/erp`.
+CRM lives under `/crm` and ERP under `/erp`. Extensions combines feature entitlements
+and connections under `/extensions` in Home. Auth stays at `sso.rtylr.com`. The other
 workspace apps currently open separately while their modules move into Portal.
 Menu and Recruit are setup/public products, not entries in the workspace launcher.
 See [Portal architecture](docs/portal/architecture.md) for module boundaries and cutover order.
@@ -155,7 +155,7 @@ pnpm install
 pnpm dev
 
 # Run a single app
-pnpm --filter @rtylr/crm dev
+pnpm --filter @rtylr/portal dev
 
 # Build all
 pnpm build

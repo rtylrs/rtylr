@@ -23,17 +23,6 @@ vi.mock('../../shell/PortalShell', () => ({
 
 vi.mock('@voxire/ui', () => ({ Avatar: () => <div data-testid="avatar" /> }));
 
-vi.mock('lucide-react', () => ({
-  MonitorSpeaker: () => <span data-testid="icon" />,
-  Package: () => <span data-testid="icon" />,
-  UserCheck: () => <span data-testid="icon" />,
-  Users: () => <span data-testid="icon" />,
-  CreditCard: () => <span data-testid="icon" />,
-  Layers: () => <span data-testid="icon" />,
-  Lock: () => <span data-testid="icon" />,
-  BarChart3: () => <span data-testid="icon" />,
-}));
-
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ to, children }: React.PropsWithChildren<{ to: string }>) => <a href={to}>{children}</a>,
   Outlet: () => <div data-testid="outlet">Outlet Content</div>,

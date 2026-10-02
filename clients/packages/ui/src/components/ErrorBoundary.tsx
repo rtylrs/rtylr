@@ -26,19 +26,6 @@ function dynamicImportReloadKey(): string {
   return `${window.location.origin}${window.location.pathname}${window.location.search}`;
 }
 
-function clearDynamicImportReloadMarker(): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    const key = dynamicImportReloadKey();
-    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === key) {
-      window.sessionStorage.removeItem(DYNAMIC_IMPORT_RELOAD_KEY);
-    }
-  } catch {
-    // Storage can be unavailable in private browsing; the loop guard is optional.
-  }
-}
-
 export function isDynamicImportError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error ?? "");
 
@@ -73,17 +60,6 @@ export class ErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { error: error instanceof Error ? error : new Error(String(error)) };
-  }
-
-  componentDidMount(): void {
-    if (!this.state.error) clearDynamicImportReloadMarker();
-  }
-
-  componentDidUpdate(
-    _prevProps: ErrorBoundaryProps,
-    prevState: ErrorBoundaryState,
-  ): void {
-    if (prevState.error && !this.state.error) clearDynamicImportReloadMarker();
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {

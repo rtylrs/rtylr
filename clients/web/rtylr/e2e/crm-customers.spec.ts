@@ -14,7 +14,7 @@ import { test, expect, type Page, type Route } from './fixtures';
  * optimistic on error, but returning a valid user keeps the happy path honest.
  */
 
-const CRM_URL = process.env.CRM_URL ?? 'http://localhost:5181';
+const CRM_URL = process.env.CRM_URL ?? 'http://localhost:5175/crm';
 
 // Keys land as snake_case on the wire and are converted to camelCase by the
 // shared axios interceptor before the hooks see them. Stubs mirror the
@@ -25,9 +25,29 @@ const FAKE_USER = {
   business_id: '1',
   full_name: 'CRM Tester',
   email: 'tester@example.com',
-  role: 'owner',
+  effective_access: {
+    business_id: '1',
+    is_owner: true,
+    is_admin: false,
+    dash_permissions: [],
+    subscribed_apps: ['crm'],
+    licenses: [],
+    authorization_version: '1',
+    apps: [
+      {
+        app_id: 'crm',
+        licensed: true,
+        has_access: true,
+        permissions: [],
+        permission_scopes: [],
+        sources: ['system'],
+      },
+    ],
+  },
+  member_type: 'owner',
   apps: ['crm'],
   plan_slug: 'pro',
+  onboarded: true,
 };
 
 const FAKE_CUSTOMER = {
@@ -123,7 +143,7 @@ async function stubCrmAPI(page: Page): Promise<void> {
   // use the generated customer/v1 paths; legacy detail helpers remain on the
   // compatibility routes.
   await page.route(
-    /\/crm\/(?:customers|customer\/v1\/customers)(?:\/|\?|$)/,
+    /^http:\/\/localhost:9999\/crm\/(?:customers|customer\/v1\/customers)(?:\/|\?|$)/,
     async (route: Route) => {
       const req = route.request();
       const url = new URL(req.url());
@@ -309,18 +329,18 @@ test.describe('CRM customers flow', () => {
     await nameInput.click();
     await nameInput.pressSequentially('Jamie Doe', { delay: 10 });
     await expect(page.getByRole('button', { name: /^Next/i })).toBeEnabled();
-    await page.getByRole('button', { name: /^Next/i }).click({ force: true });
+    await page.getByRole('button', { name: /^Next/i }).click();
 
     // Step 2: contact - email or phone required.
     const emailInput = page.getByPlaceholder('jane@example.com');
     await emailInput.click();
     await emailInput.pressSequentially('jamie@example.com', { delay: 10 });
     await expect(page.getByRole('button', { name: /^Next/i })).toBeEnabled();
-    await page.getByRole('button', { name: /^Next/i }).click({ force: true });
+    await page.getByRole('button', { name: /^Next/i }).click();
 
     // Step 3: consent - submit.
     await expect(page.getByRole('button', { name: /^Create customer/i })).toBeEnabled();
-    await page.getByRole('button', { name: /^Create customer/i }).click({ force: true });
+    await page.getByRole('button', { name: /^Create customer/i }).click();
 
     // Wizard returns to the list on success; the stub injected our fake
     // customer, so the empty state is gone.

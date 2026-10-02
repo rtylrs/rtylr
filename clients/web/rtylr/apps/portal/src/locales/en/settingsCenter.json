@@ -18,5 +18,7 @@
   "search": "Search settings…",
   "flowCommand": "Flow settings",
   "insightsCommand": "Insights settings",
-  "noResults": "No settings found."
+  "noResults": "No settings found.",
+  "crmCommand": "CRM settings",
+  "erpCommand": "ERP settings"
 }

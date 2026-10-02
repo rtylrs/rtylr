@@ -10,6 +10,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/customers/internal/api"
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
+	crmdashboardv1 "github.com/voxire/voxie/gen/go/crm/dashboard/v1"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
@@ -28,6 +30,13 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := crmcustomerv1.RegisterCustomerServiceServer(api.NewCustomerAPI(m.service), crmcustomerv1.WithMux(mux)); err != nil {
+		panic(fmt.Errorf("register crm customer service: %w", err))
+	}
+	if err := crmdashboardv1.RegisterDashboardServiceServer(api.NewDashboardAPI(m.service), crmdashboardv1.WithMux(mux)); err != nil {
+		panic(fmt.Errorf("register crm dashboard service: %w", err))
+	}
+
 	if err := crmloyaltyv1.RegisterLoyaltyServiceServer(
 		api.NewLoyaltyAPI(m.service),
 		crmloyaltyv1.WithMux(mux),

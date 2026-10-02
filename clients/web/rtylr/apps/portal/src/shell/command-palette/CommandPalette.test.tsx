@@ -176,23 +176,43 @@ describe('Portal command launcher', () => {
     expect(navigate).toHaveBeenCalledWith({ to: '/audit' });
   });
 
-  it('searches app descriptions and safely opens an app that has not moved into Portal', async () => {
+  it('searches app descriptions and opens migrated ERP inside Portal', async () => {
     const ui = userEvent.setup();
-    const external = vi.spyOn(window, 'open').mockImplementation(() => null);
     useUserStore.setState({
       user: { effectiveAccess: createEffectiveAccess('erp', { isOwner: true }) },
     });
     render(<Launcher />);
     await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
     await ui.type(screen.getByRole('combobox'), 'inventory');
-    expect(screen.getAllByRole('option')).toHaveLength(1);
-    await ui.keyboard('{ArrowDown}{Enter}');
+    await ui.click(screen.getByRole('option', { name: /ERP/ }));
+    expect(navigate).toHaveBeenCalledWith({ to: '/erp' });
+  });
+
+  it('safely opens an app that has not moved into Portal', async () => {
+    const ui = userEvent.setup();
+    const external = vi.spyOn(window, 'open').mockImplementation(() => null);
+    useUserStore.setState({
+      user: { effectiveAccess: createEffectiveAccess('finance', { isOwner: true }) },
+    });
+    render(<Launcher />);
+    await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
+    await ui.click(screen.getByRole('option', { name: /^Finance/ }));
     expect(external).toHaveBeenCalledWith(
-      expect.stringContaining('5179'),
+      expect.stringContaining('5182'),
       '_blank',
       'noopener,noreferrer'
     );
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('offers a single Extensions command in Workspace', async () => {
+    const ui = userEvent.setup();
+    render(<Launcher />);
+    await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
+    await ui.type(screen.getByRole('combobox'), 'extensions');
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    await ui.click(screen.getByRole('option', { name: 'Extensions' }));
+    expect(navigate).toHaveBeenCalledWith({ to: '/extensions' });
   });
 
   it('uses canonical account and billing destinations without duplicate audit entries', async () => {

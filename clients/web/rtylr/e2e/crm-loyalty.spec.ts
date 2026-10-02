@@ -11,13 +11,19 @@ import { test, expect, type Page, type Route } from './fixtures';
  * shared axios interceptor converts them to camelCase before hooks see them.
  */
 
-const CRM_URL = process.env.CRM_URL ?? 'http://localhost:5181';
+const CRM_URL = process.env.CRM_URL ?? 'http://localhost:5175/crm';
 
 const FAKE_USER = {
   id: 1,
   business_id: '1',
   full_name: 'CRM Tester',
   email: 'tester@example.com',
+  effective_access: JSON.stringify({
+    business_id: '1',
+    is_owner: true,
+    is_admin: false,
+    apps: [{ app_id: 'crm', licensed: true, has_access: true, permissions: [] }],
+  }),
   role: 'owner',
   apps: ['crm'],
   plan_slug: 'pro',

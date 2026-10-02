@@ -4,7 +4,12 @@ import { initI18n } from '@voxire/i18n';
 // The filename (without .json) becomes the i18next namespace key,
 // so t('common.save') maps to locales/{lang}/common.json → save.
 const modules = import.meta.glob<{ default: Record<string, unknown> }>(
-  ['../../locales/**/*.json', '../../modules/flow/locales/**/*.json'],
+  [
+    '../../locales/**/*.json',
+    '../../modules/flow/locales/**/*.json',
+    '../../modules/crm/locales/**/*.json',
+    '../../modules/erp/locales/**/*.json',
+  ],
   {
     eager: true,
   }

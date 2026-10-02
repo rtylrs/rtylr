@@ -18,5 +18,7 @@
   "search": "Rechercher des paramètres…",
   "flowCommand": "Paramètres de Flow",
   "insightsCommand": "Paramètres d’Insights",
-  "noResults": "Aucun paramètre trouvé."
+  "noResults": "Aucun paramètre trouvé.",
+  "crmCommand": "Paramètres CRM",
+  "erpCommand": "Paramètres ERP"
 }

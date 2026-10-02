@@ -128,4 +128,16 @@ test.describe('Flow sidebar puts projects above the fold @screenshots', () => {
     expect(hittable.length, 'no new-task control has a non-zero box at 1440px').toBeGreaterThan(0);
     expect(hittable[0].box!.y).toBeLessThan(900);
   });
+  test('Flow fills the Portal workspace on a wide display', async ({ page }) => {
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    await page.goto(`${FLOW_URL}/my-issues`);
+    await expect(page.getByRole('heading', { name: 'My tasks', exact: true })).toBeVisible();
+    const workspace = await page.locator('.portal-page.is-flow').boundingBox();
+    const flow = await page.locator('.portal-flow').boundingBox();
+    expect(workspace).not.toBeNull();
+    expect(flow).not.toBeNull();
+    expect(flow!.width).toBeGreaterThan(2000);
+    expect(Math.abs(flow!.x - workspace!.x)).toBeLessThan(1);
+    expect(Math.abs(flow!.width - workspace!.width)).toBeLessThan(1);
+  });
 });
