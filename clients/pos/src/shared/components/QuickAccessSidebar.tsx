@@ -1,3 +1,4 @@
+import { usePOSPortal } from './PortalContext';
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -47,10 +48,11 @@ const LINKS: QuickLink[] = [
 ];
 
 const QuickAccessSidebar: React.FC = () => {
+  const embedded = usePOSPortal();
   const enabled = useSettingsStore((s) => s.quickAccessSidebar);
   const features = useSettingsStore((s) => s.features);
   const businessProfile = useSettingsStore((s) => s.businessProfile);
-  if (!enabled) return null;
+  if (embedded || !enabled) return null;
   return (
     <aside className="hidden md:flex shrink-0 w-[4.5rem] flex-col border-r border-pos-border bg-pos-card overflow-y-auto">
       {LINKS.filter((l) => !l.feature || features[l.feature]).map((l) => {

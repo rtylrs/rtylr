@@ -1,9 +1,9 @@
-import React, { useEffect, Suspense, useRef } from 'react';
+import { usePOSPortal } from './shared/components/PortalContext';
+import React, { useEffect, Suspense, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
-import { createOneKitClient } from '@voxire/api';
-import { SettingsServiceClient } from '@voxire/voxie/pos/settings/v1/client';
-import { ErrorBoundary } from '@voxire/ui';
+import { loadPOSSettings } from './shared/services/settings/loadPOSSettings';
+import { ErrorBoundary, Spinner } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
 import {
@@ -12,14 +12,18 @@ import {
   useCartStore,
   useTerminalContextStore,
   useSettingsStore,
-  useThemeStore,
 } from './shared/stores';
 import { resolveAuthUrl } from './shared/services/server/serverConfig';
 import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
 import CommandPalette from './shared/components/CommandPalette';
 import HelpOverlay from './shared/components/HelpOverlay';
-import { useKeyboardShortcuts, useAutoLogout, useOnlineStatus, useStockAlerts } from './shared/hooks';
+import {
+  useKeyboardShortcuts,
+  useAutoLogout,
+  useOnlineStatus,
+  useStockAlerts,
+} from './shared/hooks';
 import { restoreUserSessionFromCookie } from './shared/services/auth/sessionRestore';
 import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueueAutoSync';
 import { reportReactError } from './shared/services/observability/appErrors';
@@ -32,19 +36,13 @@ import {
   businessContactPhone,
   businessDisplayName,
 } from './shared/stores/userStore';
-import type { POSBusinessProfile } from './shared/stores/settingsStore';
 
 // Single shared cookie parser (the App.tsx copy broke on '='-padded JWTs
 // and skipped decoding).
 const getTokenFromCookie = (): string | null => getCookie('token');
 
-const settingsClient = createOneKitClient(SettingsServiceClient, 'pos');
-
-function isPOSBusinessProfile(value: string): value is POSBusinessProfile {
-  return value === 'retail' || value === 'restaurant' || value === 'quick_service';
-}
-
 const AppInner = (): React.JSX.Element => {
+  const embedded = usePOSPortal();
   useKeyboardShortcuts();
   useAutoLogout();
   useOnlineStatus();
@@ -73,25 +71,23 @@ const AppInner = (): React.JSX.Element => {
           <Route path="*" element={<NoMatch />} />
         </Routes>
       </AppFlagGuard>
-      <CommandPalette />
+      {!embedded && <CommandPalette />}
       <HelpOverlay />
     </Suspense>
   );
 };
 
 const AppShell = (): React.JSX.Element => {
+  const embedded = usePOSPortal();
+  const [settingsReady, setSettingsReady] = useState(false);
+  const [settingsError, setSettingsError] = useState<Error | null>(null);
   const { token, setToken, getUserInfo } = useUserStore();
   const userBusinessProfile = useUserStore((s) => s.businessProfile);
   const { isActive, employee, endSession } = useEmployeeSessionStore();
   const setContext = useCartStore((s) => s.setContext);
   const setBusiness = useSettingsStore((s) => s.setBusiness);
-  const setPOSBusinessProfile = useSettingsStore((s) => s.setBusinessProfile);
-  const setPOSFeatures = useSettingsStore((s) => s.setFeatures);
-  const setReceiptFooter = useSettingsStore((s) => s.setReceiptFooter);
-  const setTheme = useThemeStore((s) => s.setTheme);
   const { locationId, terminalId, setTerminalContext } = useTerminalContextStore();
   const hasRestoredSession = useRef(false);
-  const hasLoadedPOSSettings = useRef(false);
 
   useEffect(() => {
     runDesktopAutoUpdater();
@@ -125,29 +121,25 @@ const AppShell = (): React.JSX.Element => {
   }, [setBusiness, userBusinessProfile]);
 
   useEffect(() => {
-    if (hasLoadedPOSSettings.current) return;
     if (!token && !getTokenFromCookie()) return;
 
-    hasLoadedPOSSettings.current = true;
-    void settingsClient
-      .getPOSSettings({})
-      .then((data) => {
-        const settings = data.settings;
-        if (!settings) return;
-        const businessProfile = settings.businessProfile ?? '';
-        if (isPOSBusinessProfile(businessProfile)) {
-          setPOSBusinessProfile(businessProfile);
-        }
-        if (settings.features) {
-          setPOSFeatures(settings.features);
-        }
-        setReceiptFooter(settings.receiptFooter ?? '');
-        setTheme(settings.theme ?? '');
+    let active = true;
+    setSettingsReady(false);
+    setSettingsError(null);
+    void loadPOSSettings(() => active)
+      .then(() => {
+        if (active) setSettingsReady(true);
       })
-      .catch(() => {
-        hasLoadedPOSSettings.current = false;
+      .catch((error: unknown) => {
+        if (!active) return;
+        setSettingsError(
+          error instanceof Error ? error : new Error('Could not load terminal configuration')
+        );
       });
-  }, [setPOSBusinessProfile, setPOSFeatures, setReceiptFooter, setTheme, token]);
+    return () => {
+      active = false;
+    };
+  }, [token]);
 
   useEffect(() => {
     if (!locationId || !terminalId || !isActive || !employee) return;
@@ -160,6 +152,14 @@ const AppShell = (): React.JSX.Element => {
 
     setContext(context.branchId, context.terminalId, context.employeeId);
   }, [employee, endSession, isActive, locationId, setContext, terminalId]);
+
+  if (embedded && settingsError) throw settingsError;
+  if (embedded && !settingsReady)
+    return (
+      <div className="flex min-h-48 items-center justify-center">
+        <Spinner />
+      </div>
+    );
 
   // No location/terminal selected → show LocationSelect.
   if (!locationId || !terminalId) {

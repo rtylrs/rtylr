@@ -5,17 +5,17 @@ change a contract and every consumer with it.
 
 ## Layout
 
-| Path | What it is |
-|---|---|
-| `clients/` | The pnpm workspace root. Everything JavaScript/TypeScript lives under it. |
-| `clients/web/rtylr/` | The rtylr suite: the ten product apps (`dash`, `auth`, `crm`, `erp`, `finance`, `flow`, `hr`, `insights`, `menu`, `recruit`) plus their tests, docs and scripts. |
-| `clients/web/landing/` | The marketing site (Next.js static export). |
-| `clients/web/docs/` | The documentation site (Next.js static export). |
-| `clients/web/mcp/` | The MCP server. Build-only; nothing deploys it. |
-| `clients/pos/` | The POS terminal: Vite web app plus the Tauri desktop shell in `core/`. |
-| `clients/packages/` | The shared library layer (`@voxire/*`) and the generated contracts package (`contracts/`). |
-| `voxie/` | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth. |
-| `services/onion/` | The Go backend: modules, platform packages, sqlc, worker. |
+| Path                   | What it is                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `clients/`             | The pnpm workspace root. Everything JavaScript/TypeScript lives under it.                                           |
+| `clients/app/`         | Single Portal application with business modules and separate SSO, public Menu and public Recruit build entrypoints. |
+| `clients/web/landing/` | The marketing site (Next.js static export).                                                                         |
+| `clients/web/docs/`    | The documentation site (Next.js static export).                                                                     |
+| `clients/mcp/`         | The MCP server. Build-only; nothing deploys it.                                                                     |
+| `clients/pos/`         | The POS terminal: Vite web app plus the Tauri desktop shell in `core/`.                                             |
+| `clients/packages/`    | The shared library layer (`@voxire/*`) and the generated contracts package (`contracts/`).                          |
+| `voxie/`               | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth.            |
+| `services/onion/`      | The Go backend: modules, platform packages, sqlc, worker.                                                           |
 
 `tryrtylr/deploy`, `tryrtylr/infra` and `tryrtylr/pipelines` stay separate:
 they are the release control plane, the infrastructure, and the reusable
@@ -34,12 +34,12 @@ same declaration files, not the same versions.
 ```sh
 pnpm -C clients install          # installs every workspace member
 pnpm -C clients -r typecheck     # every member
-pnpm -C clients --filter @rtylr/dash test
-pnpm -C clients --filter dash dev
-pnpm -C clients/web/rtylr build  # the ten rtylr apps, one command
+pnpm -C clients --filter @rtylr/portal test
+pnpm -C clients --filter @rtylr/portal dev
+pnpm -C clients/app build  # Portal, SSO and public entrypoints
 ```
 
-The rtylr workspace keeps its own scripts (`clients/web/rtylr/package.json`)
+The rtylr workspace keeps its own scripts (`clients/app/package.json`)
 for the things that only concern it: the contracts guard, contracts, the vitest
 suite across packages and apps, and the app build fan-out.
 
@@ -67,7 +67,7 @@ Nothing in this repository deploys itself:
    the promoted tag through `tryrtylr/pipelines` and ships it — Pages apps and
    ECS services through the same adapter.
 
-Manifests carry `working_directory` (for example `clients/web/rtylr`) plus
+Manifests carry `working_directory` (for example `clients/app`) plus
 `dist_dir`, so one adapter serves every product.
 
 Other workflows:

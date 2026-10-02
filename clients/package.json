@@ -8,8 +8,8 @@
     "typecheck": "pnpm run typecheck:coverage && pnpm -r typecheck",
     "typecheck:coverage": "pnpm -r --no-bail exec node -e \"const p=require('./package.json'),f=require('fs');const X={'@voxire/auth':'no @types/node devDependency, src/cookies.ts reads process.env','@voxire/i18n':'typechecks @voxire/auth source, same missing @types/node'};let b=0;if((f.existsSync('tsconfig.json')||f.existsSync('tsconfig.app.json'))&&!(p.scripts&&p.scripts.typecheck)&&!X[p.name]){console.error('typecheck:coverage FAIL '+p.name+': has a tsconfig but no typecheck script');b=1}if(f.existsSync('tsconfig.test.json')&&!(p.scripts&&p.scripts['typecheck:tests'])){console.error('typecheck:coverage FAIL '+p.name+': tsconfig.test.json but no typecheck:tests script');b=1}process.exitCode=b\"",
     "typecheck:tests": "pnpm -r --no-bail typecheck:tests || echo \"typecheck:tests is ADVISORY (non-blocking) until the test-file backlog below reaches 0; every error is listed above\"",
-    "lint": "eslint web/rtylr/apps packages",
-    "lint:fix": "eslint web/rtylr/apps packages --fix"
+    "lint": "eslint app packages",
+    "lint:fix": "eslint app packages --fix"
   },
   "devDependencies": {
     "eslint": "^10.2.1",
