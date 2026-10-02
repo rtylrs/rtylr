@@ -1,27 +1,9 @@
 import { test, expect } from './fixtures';
 
-/**
- * Insights e2e - dashboard loads, pillar screens switch, scheduled
- * reports CRUD works through the UI. All /insights/* endpoints are
- * stubbed via page.route() matching generated OneKit routes.
- */
+import { PORTAL_URL, stubPortalSession } from './portal-session';
 
-const INSIGHTS_URL = process.env.INSIGHTS_URL ?? 'http://localhost:5187';
+const INSIGHTS_URL = `${PORTAL_URL}/insights`;
 const API_URL = 'http://localhost:9999';
-
-async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  await context.addCookies([
-    {
-      name: 'token',
-      value: 'fake-jwt',
-      domain: 'localhost',
-      path: '/',
-      httpOnly: false,
-      sameSite: 'Lax',
-      secure: false,
-    },
-  ]);
-}
 
 async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<void> {
   await page.route(`${API_URL}/insights/dashboard/**`, (route) =>
@@ -32,7 +14,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
         revenue: { value: 12500, delta_pct: 12.4 },
         customers: { value: 42, delta_pct: 8.1 },
         orders: { value: 210, delta_pct: -2.0 },
-        margin: { value: 3890, delta_pct: 6.5 },
+        margin: { value: 38.9, delta_pct: 6.5 },
       }),
     })
   );
@@ -99,8 +81,8 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
         body: JSON.stringify({
           settings: {
             currency: 'USD',
-            defaultPeriod: '',
-            comparePrevious: false,
+            default_period: '',
+            compare_previous: false,
           },
         }),
       });
@@ -112,38 +94,26 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
       body: JSON.stringify({
         settings: {
           currency: 'USD',
-          defaultPeriod: '',
-          comparePrevious: false,
+          default_period: '',
+          compare_previous: false,
         },
       }),
     });
   });
-
-  await page.route(`${API_URL}/hub/user/v1/users/me`, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        id: '1',
-        email: 'test@example.com',
-        full_name: 'Test User',
-        business_id: '1',
-        role: 'owner',
-        apps: ['insights'],
-      }),
-    })
-  );
 }
 
 test.describe('Insights', () => {
   test.beforeEach(async ({ page, context }) => {
-    await primeAuthCookie(context);
+    await stubPortalSession(page, context, { isOwner: true });
     await stubInsightsAPIs(page);
   });
 
   test('dashboard loads past auth guard', async ({ page }) => {
     await page.goto(INSIGHTS_URL);
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Business Overview', exact: true })).toBeVisible(
+      { timeout: 10_000 }
+    );
+    await expect(page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
   });
 
   test('renders without console errors', async ({ page }) => {

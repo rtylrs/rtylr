@@ -187,7 +187,7 @@ func TestInsightsAPIsRequireExactPermissionsBeforeServiceAccess(t *testing.T) {
 			_, err := (&SettingAPI{}).GetInsightsSettings(ctx, &insightssettingv1.GetInsightsSettingsRequest{})
 			return err
 		}},
-		{"insights settings update", "insights:dashboard:view", func(ctx context.Context) error {
+		{"insights settings update", "insights:settings:edit", func(ctx context.Context) error {
 			_, err := (&SettingAPI{}).UpdateInsightsSettings(ctx, &insightssettingv1.UpdateInsightsSettingsRequest{})
 			return err
 		}},
@@ -197,6 +197,14 @@ func TestInsightsAPIsRequireExactPermissionsBeforeServiceAccess(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			assertInsightsDeniedBeforeService(t, tc.permission, tc.call)
 		})
+	}
+}
+
+func TestInsightsSettingsRejectDashboardReadPermissionForUpdates(t *testing.T) {
+	ctx := authPkg.WithAuthUser(context.Background(), insightsUser("insights:dashboard:view"))
+	_, err := (&SettingAPI{}).UpdateInsightsSettings(ctx, &insightssettingv1.UpdateInsightsSettingsRequest{})
+	if insightsStatus(err) != http.StatusForbidden {
+		t.Fatalf("dashboard reader updated settings: %v", err)
 	}
 }
 

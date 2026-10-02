@@ -17,6 +17,7 @@ export function useShortcuts(): void {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
+      if (e.defaultPrevented) return;
       const mod = e.metaKey || e.ctrlKey;
       const target = e.target as HTMLElement | null;
       const editable =

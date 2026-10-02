@@ -18,17 +18,17 @@ function fail(message) {
   failures.push(message);
 }
 
-if (matrix.records.length !== 103)
-  fail(`expected 103 matrix records, got ${matrix.records.length}`);
+if (matrix.records.length !== 104)
+  fail(`expected 104 matrix records, got ${matrix.records.length}`);
 if (actionColumns.length !== 22) fail(`expected 22 action columns, got ${actionColumns.length}`);
-if (coverage.recordCount !== 103) fail(`coverage recordCount is ${coverage.recordCount}`);
+if (coverage.recordCount !== 104) fail(`coverage recordCount is ${coverage.recordCount}`);
 if (coverage.actionColumnCount !== 22)
   fail(`coverage actionColumnCount is ${coverage.actionColumnCount}`);
 
 const applicableRecords = matrix.records.filter((record) => !publicMenu.has(record.permissionKey));
 const publicRecords = matrix.records.filter((record) => publicMenu.has(record.permissionKey));
-if (applicableRecords.length !== 101)
-  fail(`expected 101 applicable records, got ${applicableRecords.length}`);
+if (applicableRecords.length !== 102)
+  fail(`expected 102 applicable records, got ${applicableRecords.length}`);
 if (publicRecords.length !== 2) fail(`expected 2 public Menu records, got ${publicRecords.length}`);
 if (
   JSON.stringify(publicRecords.map((record) => record.permissionKey).sort()) !==
@@ -89,11 +89,11 @@ for (const record of applicableRecords) {
 }
 
 const ledger = coverage.evidenceLedger ?? [];
-if (ledger.length !== 101) fail(`expected 101 evidence ledger rows, got ${ledger.length}`);
+if (ledger.length !== 102) fail(`expected 102 evidence ledger rows, got ${ledger.length}`);
 if ((coverage.uncoveredActions ?? []).length !== 0)
   fail(`uncovered actions remain: ${coverage.uncoveredActions.join(', ')}`);
-if (coverage.directPermissionCount !== 101)
-  fail(`expected 101 direct permissions, got ${coverage.directPermissionCount}`);
+if (coverage.directPermissionCount !== 102)
+  fail(`expected 102 direct permissions, got ${coverage.directPermissionCount}`);
 if (coverage.notApplicablePermissionCount !== 2)
   fail(`expected 2 not-applicable permissions, got ${coverage.notApplicablePermissionCount}`);
 
@@ -285,6 +285,6 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    'Authorization evidence validation passed: 103 records, 22 actions, 99 API/service operation tests, 2 sensitive-field projection tests, 2 public Menu not-applicable records, and no uncovered applicable cells.'
+    `Authorization evidence validation passed: ${coverage.recordCount} records, ${coverage.actionColumnCount} actions, ${coverage.directServiceOperationCount} API/service operation tests, ${coverage.sensitiveProjectionCount} sensitive-field projection tests, ${coverage.notApplicablePermissionCount} public Menu not-applicable records, and no uncovered applicable cells.`
   );
 }

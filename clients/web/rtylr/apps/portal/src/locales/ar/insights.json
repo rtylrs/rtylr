@@ -1,0 +1,219 @@
+{
+  "errors": {
+    "generic": "Something went wrong. Please try again."
+  },
+  "dashboard": {
+    "title": "Business Overview",
+    "caretAskBar": {
+      "placeholder": "Ask Caret anything about your business…"
+    },
+    "cards": {
+      "revenue": "Revenue (MTD)",
+      "customers": "Customers",
+      "orders": "Orders",
+      "margin": "Gross Margin"
+    },
+    "emptyTitle": "No KPI data yet",
+    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "vsPrior": "مقابل السابق",
+    "metaTitle": "لوحة المعلومات · rtylr"
+  },
+  "revenue": {
+    "title": "Revenue",
+    "subtitle": "Track revenue across all channels",
+    "currentPeriod": "Current Period",
+    "previousPeriod": "Previous Period",
+    "difference": "Difference",
+    "trend": "Revenue Trend",
+    "byApp": "Revenue by App",
+    "emptyTrend": {
+      "title": "لا توجد بيانات اتجاه إيرادات حتى الآن",
+      "description": "ستظهر بيانات الإيرادات هنا بعد تسجيل المعاملات."
+    },
+    "emptyByApp": {
+      "title": "لا يوجد توزيع للإيرادات حتى الآن",
+      "description": "سيظهر التوزيع حسب التطبيق بعد ورود إيرادات من أكثر من تطبيق واحد."
+    },
+    "vsPrevious": "مقابل السابق",
+    "metaTitle": "الإيرادات · rtylr"
+  },
+  "customers": {
+    "title": "Customers",
+    "kpis": {
+      "total": "Total Customers",
+      "newThisMonth": "New This Month",
+      "active": "Active",
+      "churned": "Churned"
+    },
+    "top": "Top Customers",
+    "ltv": "Lifetime Value Distribution",
+    "churn": "Churn Rates",
+    "emptyTop": {
+      "title": "لا يوجد عملاء بارزون حتى الآن",
+      "description": "سيظهر هنا العملاء الأعلى إنفاقًا بعد بدء استقبال الطلبات."
+    },
+    "emptyLtv": {
+      "title": "لا توجد بيانات قيمة دائمة حتى الآن",
+      "description": "ستظهر شرائح القيمة الدائمة بعد تراكم سجل طلبات للعملاء."
+    },
+    "emptyChurn": {
+      "title": "لا توجد بيانات تسرب حتى الآن",
+      "description": "ستظهر معدلات التسرب بعد توفر سجل كافٍ من نشاط العملاء لقياس الاحتفاظ بهم."
+    },
+    "churnedCount": "متوقفون",
+    "customers_zero": "لا عملاء",
+    "customers_one": "عميل واحد",
+    "customers_two": "عميلان",
+    "customers_few": "{{formatted}} عملاء",
+    "customers_many": "{{formatted}} عميلًا",
+    "customers_other": "{{formatted}} عميل",
+    "metaTitle": "العملاء · rtylr"
+  },
+  "products": {
+    "title": "Products",
+    "kpis": {
+      "totalSkus": "Total SKUs",
+      "activeSkus": "Active SKUs",
+      "outOfStock": "Out of Stock",
+      "avgMargin": "Avg Margin"
+    },
+    "bestSellers": "Best Sellers",
+    "margins": "Margin Distribution",
+    "slowMovers": "Slow Movers",
+    "categoryMix": "Category Mix",
+    "emptyBestSellers": {
+      "title": "لا توجد أفضل المبيعات حتى الآن",
+      "description": "ستظهر هنا منتجاتك الأكثر مبيعًا بعد بدء استقبال الطلبات."
+    },
+    "emptyMargins": {
+      "title": "لا توجد بيانات هامش ربح حتى الآن",
+      "description": "سيظهر توزيع هامش الربح بعد تسجيل تكاليف المنتجات ومبيعاتها."
+    },
+    "emptySlowMovers": {
+      "title": "لا توجد منتجات بطيئة الحركة حتى الآن",
+      "description": "ستظهر هنا المنتجات ذات الدوران المنخفض بعد توفر سجل مبيعات كافٍ."
+    },
+    "emptyCategoryMix": {
+      "title": "لا توجد بيانات تصنيف حتى الآن",
+      "description": "سيظهر التوزيع حسب الفئة بعد تعيين المنتجات إلى فئات وبيعها."
+    },
+    "inStock": "في المخزون",
+    "units_zero": "لا وحدات",
+    "units_one": "وحدة واحدة",
+    "units_two": "وحدتان",
+    "units_few": "{{formatted}} وحدات",
+    "units_many": "{{formatted}} وحدة",
+    "units_other": "{{formatted}} وحدة",
+    "products_zero": "لا منتجات",
+    "products_one": "منتج واحد",
+    "products_two": "منتجان",
+    "products_few": "{{formatted}} منتجات",
+    "products_many": "{{formatted}} منتجًا",
+    "products_other": "{{formatted}} منتج",
+    "metaTitle": "المنتجات · rtylr"
+  },
+  "financial": {
+    "title": "Financial",
+    "cashFlow": "Cash Flow",
+    "expenses": "Expenses by Category",
+    "aging": "Invoice Aging",
+    "emptyExpenses": {
+      "title": "لا توجد بيانات مصروفات حتى الآن",
+      "description": "ستظهر المصروفات هنا بعد تصنيفها وتسجيلها."
+    },
+    "emptyAging": {
+      "title": "لا توجد بيانات تقادم فواتير حتى الآن",
+      "description": "ستظهر الفواتير المستحقة هنا بعد إصدارها."
+    },
+    "emptyCashFlow": {
+      "title": "لا توجد بيانات تدفق نقدي حتى الآن",
+      "description": "سيظهر التدفق النقدي هنا بعد تسجيل التدفقات الداخلة والخارجة."
+    },
+    "invoices_zero": "لا فواتير",
+    "invoices_one": "فاتورة واحدة",
+    "invoices_two": "فاتورتان",
+    "invoices_few": "{{formatted}} فواتير",
+    "invoices_many": "{{formatted}} فاتورة",
+    "invoices_other": "{{formatted}} فاتورة",
+    "metaTitle": "المالية · rtylr"
+  },
+  "operations": {
+    "title": "Operations",
+    "kpis": {
+      "activeStaff": "Active Staff",
+      "shiftsThisWeek": "Shifts This Week",
+      "pendingTimeOff": "Pending Time-Off",
+      "openLeaveRequests": "Open Leave Requests"
+    },
+    "headcount": "Headcount",
+    "shifts": "Shift Metrics",
+    "timeOff": "Time-Off",
+    "utilization": "Utilization",
+    "emptyHeadcount": {
+      "title": "لا توجد بيانات عن عدد الموظفين حتى الآن",
+      "description": "سيظهر عدد الموظفين هنا بعد إضافة سجلات الموظفين."
+    },
+    "emptyUtilization": {
+      "title": "لا توجد بيانات استخدام حتى الآن",
+      "description": "سيظهر معدل الاستخدام بعد جدولة المناوبات وتنفيذها."
+    },
+    "emptyShifts": {
+      "title": "لا توجد بيانات مناوبات حتى الآن",
+      "description": "ستظهر مقاييس المناوبات هنا بعد جدولتها."
+    },
+    "emptyTimeOff": {
+      "title": "لا توجد بيانات إجازات حتى الآن",
+      "description": "ستظهر طلبات الإجازة هنا بعد تقديمها من الموظفين."
+    },
+    "hours": "ساعات",
+    "scheduled": "مجدول",
+    "completed": "مكتمل",
+    "noShows": "عدم حضور",
+    "completion": "نسبة الإتمام",
+    "pending": "قيد الانتظار",
+    "approved": "معتمد",
+    "metaTitle": "العمليات · rtylr"
+  },
+  "reports": {
+    "title": "Reports",
+    "templates": "Report Templates",
+    "exportRevenue": "Export Revenue CSV",
+    "generateRevenue": "Generate Revenue Report",
+    "generateQueued": "Report queued",
+    "empty": {
+      "title": "لا توجد قوالب تقارير حتى الآن",
+      "description": "ستظهر قوالب التقارير هنا بعد توفرها لمساحة العمل هذه."
+    },
+    "metaTitle": "التقارير · rtylr"
+  },
+  "settings": {
+    "title": "Insights Settings",
+    "defaultCurrency": "Default Currency",
+    "fiscalYearStart": "Fiscal Year Start",
+    "timezone": "Timezone",
+    "scheduledReports": {
+      "title": "Scheduled Reports",
+      "create": "Create Scheduled Report",
+      "update": "Update Scheduled Report",
+      "delete": "Delete Scheduled Report",
+      "created": "Scheduled report created",
+      "updated": "Scheduled report updated",
+      "deleted": "Scheduled report deleted",
+      "empty": {
+        "title": "لا توجد تقارير مجدولة حتى الآن",
+        "description": "ستظهر هنا التقارير التي تجدولها للتسليم الدوري."
+      }
+    },
+    "saved": "Settings saved",
+    "save": "حفظ الإعدادات",
+    "saving": "جارٍ الحفظ…",
+    "metaTitle": "الإعدادات · rtylr",
+    "readOnly": "يمكنك عرض هذه الإعدادات. تواصل مع المالك أو أحد المسؤولين إذا كنت بحاجة إلى تعديلها."
+  },
+  "charts": {
+    "revenueTrend": "مخطط اتجاه الإيرادات",
+    "revenueByApp": "مخطط الإيرادات حسب التطبيق",
+    "revenueSparkline": "مخطط مصغر للإيرادات",
+    "topCustomers": "مخطط أفضل العملاء"
+  }
+}

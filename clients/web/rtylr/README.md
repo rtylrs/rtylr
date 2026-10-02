@@ -1,35 +1,35 @@
 # rtylr
 
-The all-in-one business operating system for SMBs. 13 apps, 13 shared packages.
+The business workspace for RTYLR. Portal brings Home and Insights into one browser app.
 
 ## Architecture
 
-Frontend monorepo with 13 apps and 13 shared packages. pnpm workspaces + Turborepo.
+pnpm workspace with shared libraries and standalone products migrating into Portal.
 
-**Stack:** React 19, Vite 7, Next.js 15 (landing), TypeScript 5.9 (strict), Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
+**Stack:** React 19, Vite 8, TypeScript 6 (strict), Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
 
 ## Apps
 
-| App      | Port | Package           | Description                                                    |
-| -------- | ---- | ----------------- | -------------------------------------------------------------- |
-| Dash     | 5175 | `dash`            | Account center - billing, plan, profile. Entry point from auth |
-| Auth     | 5176 | `@rtylr/auth`     | Login, register, password reset, invite accept                 |
-| Menu     | 5177 | `@rtylr/menu`     | Customer-facing digital menu with QR codes                     |
-| POS      | 5178 | `vbitez`          | Point of sale terminal (Tauri v2 desktop)                      |
-| ERP      | 5179 | `@rtylr/erp`      | Inventory, suppliers, purchasing, stock management             |
-| HR       | 5180 | `@rtylr/hr`       | Staff, shifts, payroll, time off, reviews                      |
-| CRM      | 5181 | `@rtylr/crm`      | Customers, loyalty, campaigns, segments                        |
-| Finance  | 5182 | `@rtylr/finance`  | Invoices, expenses, P&L, tax, reconciliation                   |
-| Flow     | 5183 | `@rtylr/flow`     | Projects, tasks, roadmaps, cycles, team workload               |
-| Recruit  | 5184 | `@rtylr/recruit`  | Candidate careers sites + HR submissions inbox                 |
-| Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports              |
-| Docs     | 5186 | `@rtylr/docs`     | Internal + public product documentation                        |
-| Landing  | 4200 | `@rtylr/landing`  | Marketing site - rtylr.com (Next.js 15 static export)          |
+| App     | Port | Package          | Description                                           |
+| ------- | ---- | ---------------- | ----------------------------------------------------- |
+| Portal  | 5175 | `@rtylr/portal`  | Home, team, groups, account settings and Insights     |
+| Auth    | 5176 | `@rtylr/auth`    | Login, register, password reset, invite accept        |
+| Menu    | 5177 | `@rtylr/menu`    | Customer-facing digital menu with QR codes            |
+| POS     | 5178 | `vbitez`         | Point of sale terminal (Tauri v2 desktop)             |
+| ERP     | 5179 | `@rtylr/erp`     | Inventory, suppliers, purchasing, stock management    |
+| HR      | 5180 | `@rtylr/hr`      | Staff, shifts, payroll, time off, reviews             |
+| CRM     | 5181 | `@rtylr/crm`     | Customers, loyalty, campaigns, segments               |
+| Finance | 5182 | `@rtylr/finance` | Invoices, expenses, P&L, tax, reconciliation          |
+| Flow    | 5183 | `@rtylr/flow`    | Projects, tasks, roadmaps, cycles, team workload      |
+| Recruit | 5184 | `@rtylr/recruit` | Candidate careers sites + HR submissions inbox        |
+| Docs    | 5186 | `@rtylr/docs`    | Internal + public product documentation               |
+| Landing | 4200 | `@rtylr/landing` | Marketing site - rtylr.com (Next.js 15 static export) |
 
-Apps are standalone - each has its own auth gate (via `@voxire/auth` `AppGuard`),
-its own settings, and its own in-app team/invite flow. Dash is the account
-center, not a hub-of-apps. A business can buy one app and use it without ever
-touching the others.
+Portal runs at `portal.rtylr.com`; Insights lives under `/insights` with its own
+header inside the shared workspace. Auth stays at `sso.rtylr.com`. The other
+workspace apps currently open separately while their modules move into Portal.
+Menu and Recruit are setup/public products, not entries in the workspace launcher.
+See [Portal architecture](docs/portal/architecture.md) for module boundaries and cutover order.
 
 ## Shared Packages
 
@@ -42,7 +42,7 @@ touching the others.
 | `@voxire/voxie`           | Generated TypeScript types and clients from voxie protobuf contracts             |
 | `@voxire/ui`              | Radix-based primitives (Dialog, Select, Switch, etc.)                            |
 | `@voxire/components`      | HelmetContainer, Button, Modal, Spinner, FullScreenLoader                        |
-| `@voxire/auth`            | Cookie helpers, `AppGuard` with per-app `apps[]` gating, user store              |
+| `@voxire/auth`            | Cookie helpers, `AppGuard` with server-resolved effective access, user store     |
 | `@voxire/utils`           | `useDebounce`, `useMediaQuery`, `useTheme`, formatting, validation               |
 | `@voxire/i18n`            | Shared i18next setup and translation helpers                                     |
 | `@voxire/menu`            | Customer-facing menu page components                                             |

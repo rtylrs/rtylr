@@ -1,0 +1,203 @@
+{
+  "errors": {
+    "generic": "Something went wrong. Please try again."
+  },
+  "dashboard": {
+    "title": "Business Overview",
+    "caretAskBar": {
+      "placeholder": "Ask Caret anything about your business…"
+    },
+    "cards": {
+      "revenue": "Revenue (MTD)",
+      "customers": "Customers",
+      "orders": "Orders",
+      "margin": "Gross Margin"
+    },
+    "emptyTitle": "No KPI data yet",
+    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "vsPrior": "vs prior",
+    "metaTitle": "Dashboard · rtylr"
+  },
+  "revenue": {
+    "title": "Revenue",
+    "subtitle": "Track revenue across all channels",
+    "currentPeriod": "Current Period",
+    "previousPeriod": "Previous Period",
+    "difference": "Difference",
+    "trend": "Revenue Trend",
+    "byApp": "Revenue by App",
+    "emptyTrend": {
+      "title": "No revenue trend yet",
+      "description": "Revenue data will appear here once transactions are recorded."
+    },
+    "emptyByApp": {
+      "title": "No revenue breakdown yet",
+      "description": "A breakdown by app will appear once revenue comes in from more than one app."
+    },
+    "vsPrevious": "vs previous",
+    "metaTitle": "Revenue · rtylr"
+  },
+  "customers": {
+    "title": "Customers",
+    "kpis": {
+      "total": "Total Customers",
+      "newThisMonth": "New This Month",
+      "active": "Active",
+      "churned": "Churned"
+    },
+    "top": "Top Customers",
+    "ltv": "Lifetime Value Distribution",
+    "churn": "Churn Rates",
+    "emptyTop": {
+      "title": "No top customers yet",
+      "description": "Your highest-spending customers will appear here once orders start coming in."
+    },
+    "emptyLtv": {
+      "title": "No lifetime value data yet",
+      "description": "Lifetime value segments will appear once customers build up an order history."
+    },
+    "emptyChurn": {
+      "title": "No churn data yet",
+      "description": "Churn rates will appear once there is enough customer history to measure retention."
+    },
+    "churnedCount": "churned",
+    "customers_one": "{{formatted}} customer",
+    "customers_other": "{{formatted}} customers",
+    "metaTitle": "Customers · rtylr"
+  },
+  "products": {
+    "title": "Products",
+    "kpis": {
+      "totalSkus": "Total SKUs",
+      "activeSkus": "Active SKUs",
+      "outOfStock": "Out of Stock",
+      "avgMargin": "Avg Margin"
+    },
+    "bestSellers": "Best Sellers",
+    "margins": "Margin Distribution",
+    "slowMovers": "Slow Movers",
+    "categoryMix": "Category Mix",
+    "emptyBestSellers": {
+      "title": "No best sellers yet",
+      "description": "Your top-selling products will appear here once orders start coming in."
+    },
+    "emptyMargins": {
+      "title": "No margin data yet",
+      "description": "Margin distribution will appear once product costs and sales are recorded."
+    },
+    "emptySlowMovers": {
+      "title": "No slow movers yet",
+      "description": "Products with low turnover will appear here once you have enough sales history."
+    },
+    "emptyCategoryMix": {
+      "title": "No category data yet",
+      "description": "A breakdown by category will appear once products are assigned to categories and sold."
+    },
+    "inStock": "in stock",
+    "units_one": "{{formatted}} unit",
+    "units_other": "{{formatted}} units",
+    "products_one": "{{formatted}} product",
+    "products_other": "{{formatted}} products",
+    "metaTitle": "Products · rtylr"
+  },
+  "financial": {
+    "title": "Financial",
+    "cashFlow": "Cash Flow",
+    "expenses": "Expenses by Category",
+    "aging": "Invoice Aging",
+    "emptyExpenses": {
+      "title": "No expense data yet",
+      "description": "Expenses will appear here once they are categorized and recorded."
+    },
+    "emptyAging": {
+      "title": "No invoice aging data yet",
+      "description": "Outstanding invoices will appear here once invoices are issued."
+    },
+    "emptyCashFlow": {
+      "title": "No cash flow data yet",
+      "description": "Cash flow will appear here once inflows and outflows are recorded."
+    },
+    "invoices_one": "{{formatted}} invoice",
+    "invoices_other": "{{formatted}} invoices",
+    "metaTitle": "Financial · rtylr"
+  },
+  "operations": {
+    "title": "Operations",
+    "kpis": {
+      "activeStaff": "Active Staff",
+      "shiftsThisWeek": "Shifts This Week",
+      "pendingTimeOff": "Pending Time-Off",
+      "openLeaveRequests": "Open Leave Requests"
+    },
+    "headcount": "Headcount",
+    "shifts": "Shift Metrics",
+    "timeOff": "Time-Off",
+    "utilization": "Utilization",
+    "emptyHeadcount": {
+      "title": "No headcount data yet",
+      "description": "Headcount will appear here once staff records are added."
+    },
+    "emptyUtilization": {
+      "title": "No utilization data yet",
+      "description": "Utilization will appear here once shifts are scheduled and worked."
+    },
+    "emptyShifts": {
+      "title": "No shift data yet",
+      "description": "Shift metrics will appear here once shifts are scheduled."
+    },
+    "emptyTimeOff": {
+      "title": "No time-off data yet",
+      "description": "Time-off requests will appear here once staff submit them."
+    },
+    "hours": "hours",
+    "scheduled": "Scheduled",
+    "completed": "Completed",
+    "noShows": "No-shows",
+    "completion": "Completion",
+    "pending": "Pending",
+    "approved": "Approved",
+    "metaTitle": "Operations · rtylr"
+  },
+  "reports": {
+    "title": "Reports",
+    "templates": "Report Templates",
+    "exportRevenue": "Export Revenue CSV",
+    "generateRevenue": "Generate Revenue Report",
+    "generateQueued": "Report queued",
+    "empty": {
+      "title": "No report templates yet",
+      "description": "Report templates will appear here once they are made available for this workspace."
+    },
+    "metaTitle": "Reports · rtylr"
+  },
+  "settings": {
+    "title": "Insights Settings",
+    "defaultCurrency": "Default Currency",
+    "fiscalYearStart": "Fiscal Year Start",
+    "timezone": "Timezone",
+    "scheduledReports": {
+      "title": "Scheduled Reports",
+      "create": "Create Scheduled Report",
+      "update": "Update Scheduled Report",
+      "delete": "Delete Scheduled Report",
+      "created": "Scheduled report created",
+      "updated": "Scheduled report updated",
+      "deleted": "Scheduled report deleted",
+      "empty": {
+        "title": "No scheduled reports yet",
+        "description": "Reports you schedule for recurring delivery will appear here."
+      }
+    },
+    "saved": "Settings saved",
+    "save": "Save settings",
+    "saving": "Saving…",
+    "metaTitle": "Settings · rtylr",
+    "readOnly": "You can view these settings. Ask an owner or admin if you need to make changes."
+  },
+  "charts": {
+    "revenueTrend": "Revenue trend chart",
+    "revenueByApp": "Revenue by app chart",
+    "revenueSparkline": "Revenue sparkline",
+    "topCustomers": "Top customers chart"
+  }
+}

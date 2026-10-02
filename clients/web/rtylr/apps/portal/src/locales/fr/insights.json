@@ -1,0 +1,207 @@
+{
+  "errors": {
+    "generic": "Something went wrong. Please try again."
+  },
+  "dashboard": {
+    "title": "Business Overview",
+    "caretAskBar": {
+      "placeholder": "Ask Caret anything about your business…"
+    },
+    "cards": {
+      "revenue": "Revenue (MTD)",
+      "customers": "Customers",
+      "orders": "Orders",
+      "margin": "Gross Margin"
+    },
+    "emptyTitle": "No KPI data yet",
+    "emptyDescription": "Metrics will appear here once your business starts generating activity.",
+    "vsPrior": "vs période précédente",
+    "metaTitle": "Tableau de bord · rtylr"
+  },
+  "revenue": {
+    "title": "Revenue",
+    "subtitle": "Track revenue across all channels",
+    "currentPeriod": "Current Period",
+    "previousPeriod": "Previous Period",
+    "difference": "Difference",
+    "trend": "Revenue Trend",
+    "byApp": "Revenue by App",
+    "emptyTrend": {
+      "title": "Aucune tendance de revenus pour l’instant",
+      "description": "Les données de revenus s’afficheront ici une fois les transactions enregistrées."
+    },
+    "emptyByApp": {
+      "title": "Aucune répartition des revenus pour l’instant",
+      "description": "Une répartition par application s’affichera une fois que les revenus proviendront de plusieurs applications."
+    },
+    "vsPrevious": "vs précédent",
+    "metaTitle": "Chiffre d'affaires · rtylr"
+  },
+  "customers": {
+    "title": "Customers",
+    "kpis": {
+      "total": "Total Customers",
+      "newThisMonth": "New This Month",
+      "active": "Active",
+      "churned": "Churned"
+    },
+    "top": "Top Customers",
+    "ltv": "Lifetime Value Distribution",
+    "churn": "Churn Rates",
+    "emptyTop": {
+      "title": "Aucun client principal pour l’instant",
+      "description": "Vos clients qui dépensent le plus apparaîtront ici une fois les premières commandes reçues."
+    },
+    "emptyLtv": {
+      "title": "Aucune donnée de valeur à vie pour l’instant",
+      "description": "Les segments de valeur à vie apparaîtront une fois que les clients auront un historique de commandes."
+    },
+    "emptyChurn": {
+      "title": "Aucune donnée d’attrition pour l’instant",
+      "description": "Les taux d’attrition apparaîtront une fois qu’il y aura suffisamment d’historique client pour mesurer la fidélisation."
+    },
+    "churnedCount": "perdus",
+    "customers_one": "{{formatted}} client",
+    "customers_many": "{{formatted}} de clients",
+    "customers_other": "{{formatted}} clients",
+    "metaTitle": "Clients · rtylr"
+  },
+  "products": {
+    "title": "Products",
+    "kpis": {
+      "totalSkus": "Total SKUs",
+      "activeSkus": "Active SKUs",
+      "outOfStock": "Out of Stock",
+      "avgMargin": "Avg Margin"
+    },
+    "bestSellers": "Best Sellers",
+    "margins": "Margin Distribution",
+    "slowMovers": "Slow Movers",
+    "categoryMix": "Category Mix",
+    "emptyBestSellers": {
+      "title": "Aucun best-seller pour l’instant",
+      "description": "Vos produits les plus vendus apparaîtront ici une fois les premières commandes reçues."
+    },
+    "emptyMargins": {
+      "title": "Aucune donnée de marge pour l’instant",
+      "description": "La répartition des marges apparaîtra une fois les coûts et les ventes des produits enregistrés."
+    },
+    "emptySlowMovers": {
+      "title": "Aucun produit à rotation lente pour l’instant",
+      "description": "Les produits à faible rotation apparaîtront ici une fois que vous aurez suffisamment d’historique de ventes."
+    },
+    "emptyCategoryMix": {
+      "title": "Aucune donnée de catégorie pour l’instant",
+      "description": "Une répartition par catégorie apparaîtra une fois les produits assignés à des catégories et vendus."
+    },
+    "inStock": "en stock",
+    "units_one": "{{formatted}} unité",
+    "units_many": "{{formatted}} d'unités",
+    "units_other": "{{formatted}} unités",
+    "products_one": "{{formatted}} produit",
+    "products_many": "{{formatted}} de produits",
+    "products_other": "{{formatted}} produits",
+    "metaTitle": "Produits · rtylr"
+  },
+  "financial": {
+    "title": "Financial",
+    "cashFlow": "Cash Flow",
+    "expenses": "Expenses by Category",
+    "aging": "Invoice Aging",
+    "emptyExpenses": {
+      "title": "Aucune donnée de dépenses pour l’instant",
+      "description": "Les dépenses apparaîtront ici une fois catégorisées et enregistrées."
+    },
+    "emptyAging": {
+      "title": "Aucune donnée d’échéance de factures pour l’instant",
+      "description": "Les factures impayées apparaîtront ici une fois émises."
+    },
+    "emptyCashFlow": {
+      "title": "Aucune donnée de trésorerie pour l’instant",
+      "description": "Les flux de trésorerie apparaîtront ici une fois les entrées et sorties enregistrées."
+    },
+    "invoices_one": "{{formatted}} facture",
+    "invoices_many": "{{formatted}} de factures",
+    "invoices_other": "{{formatted}} factures",
+    "metaTitle": "Finances · rtylr"
+  },
+  "operations": {
+    "title": "Operations",
+    "kpis": {
+      "activeStaff": "Active Staff",
+      "shiftsThisWeek": "Shifts This Week",
+      "pendingTimeOff": "Pending Time-Off",
+      "openLeaveRequests": "Open Leave Requests"
+    },
+    "headcount": "Headcount",
+    "shifts": "Shift Metrics",
+    "timeOff": "Time-Off",
+    "utilization": "Utilization",
+    "emptyHeadcount": {
+      "title": "Aucune donnée d’effectifs pour l’instant",
+      "description": "Les effectifs apparaîtront ici une fois les fiches du personnel ajoutées."
+    },
+    "emptyUtilization": {
+      "title": "Aucune donnée d’utilisation pour l’instant",
+      "description": "Le taux d’utilisation apparaîtra une fois les quarts planifiés et effectués."
+    },
+    "emptyShifts": {
+      "title": "Aucune donnée de quarts pour l’instant",
+      "description": "Les indicateurs de quarts apparaîtront une fois les quarts planifiés."
+    },
+    "emptyTimeOff": {
+      "title": "Aucune donnée de congés pour l’instant",
+      "description": "Les demandes de congé apparaîtront ici une fois soumises par le personnel."
+    },
+    "hours": "heures",
+    "scheduled": "Planifié",
+    "completed": "Terminé",
+    "noShows": "Absences",
+    "completion": "Taux de réalisation",
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "metaTitle": "Opérations · rtylr"
+  },
+  "reports": {
+    "title": "Reports",
+    "templates": "Report Templates",
+    "exportRevenue": "Export Revenue CSV",
+    "generateRevenue": "Generate Revenue Report",
+    "generateQueued": "Report queued",
+    "empty": {
+      "title": "Aucun modèle de rapport pour l’instant",
+      "description": "Les modèles de rapport apparaîtront ici une fois disponibles pour cet espace de travail."
+    },
+    "metaTitle": "Rapports · rtylr"
+  },
+  "settings": {
+    "title": "Insights Settings",
+    "defaultCurrency": "Default Currency",
+    "fiscalYearStart": "Fiscal Year Start",
+    "timezone": "Timezone",
+    "scheduledReports": {
+      "title": "Scheduled Reports",
+      "create": "Create Scheduled Report",
+      "update": "Update Scheduled Report",
+      "delete": "Delete Scheduled Report",
+      "created": "Scheduled report created",
+      "updated": "Scheduled report updated",
+      "deleted": "Scheduled report deleted",
+      "empty": {
+        "title": "Aucun rapport programmé pour l’instant",
+        "description": "Les rapports que vous programmez pour un envoi récurrent apparaîtront ici."
+      }
+    },
+    "saved": "Settings saved",
+    "save": "Enregistrer les paramètres",
+    "saving": "Enregistrement…",
+    "metaTitle": "Paramètres · rtylr",
+    "readOnly": "Vous pouvez consulter ces paramètres. Contactez un propriétaire ou un administrateur pour les modifier."
+  },
+  "charts": {
+    "revenueTrend": "Graphique de l'évolution du chiffre d'affaires",
+    "revenueByApp": "Graphique du chiffre d'affaires par application",
+    "revenueSparkline": "Courbe du chiffre d'affaires",
+    "topCustomers": "Graphique des meilleurs clients"
+  }
+}

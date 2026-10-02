@@ -6,7 +6,7 @@ package config
 // env-overridable Config.AuthAppURL field.)
 const (
 	AuthAppURL     = "https://sso.rtylr.com"
-	HubAppURL      = "https://dash.rtylr.com"
+	HubAppURL      = "https://portal.rtylr.com"
 	POSAppURL      = "https://pos.rtylr.com"
 	ERPAppURL      = "https://erp.rtylr.com"
 	HRAppURL       = "https://hr.rtylr.com"

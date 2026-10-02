@@ -62,7 +62,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/access_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/kpis/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub dashboard view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -102,7 +102,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/members_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/team/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub team view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -142,7 +142,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/invitations_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/team/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub team invite",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -182,7 +182,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/members_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/team/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub team edit",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -222,7 +222,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/members_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/team/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub team deactivate",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -262,7 +262,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/roles/internal/api/permission_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/roles/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub roles view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -302,7 +302,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/roles/internal/api/permission_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/roles/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub roles create",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -342,7 +342,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/roles/internal/api/permission_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/roles/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub roles edit",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -382,7 +382,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/roles/internal/api/permission_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/roles/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub roles archive",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -422,7 +422,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/seat_changes.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/team/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub licenses manage",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -462,7 +462,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/groups_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/team/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub groups manage",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -502,7 +502,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/team/internal/api/access_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/team/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub hierarchy manage",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -542,7 +542,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/roles/internal/api/permission_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/activity/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub audit view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -582,7 +582,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/security/internal/api/security_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/security/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub security manage",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -622,7 +622,7 @@
       "standardRoles": ["Owner", "Admin", "Manager", "Member", "Viewer"],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/api_keys/internal/api/developer_service.go",
-      "frontendGate": "apps/dash/src/shared/utils/BusinessRoute.tsx",
+      "frontendGate": "apps/portal/src/shared/utils/BusinessRoute.tsx",
       "testReferences": [
         "internal/modules/api_keys/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/hub api keys manage",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4225,9 +4225,50 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/insights/internal/api/setting_service.go",
-      "frontendGate": "apps/insights/src/shared/lib/insightsPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/insights/shared/lib/insightsPermissions.ts",
       "testReferences": [
         "internal/modules/insights/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/insights dashboard view",
+        "internal/platform/authorization/feature_matrix_test.go"
+      ]
+    },
+    {
+      "app": "insights",
+      "featureArea": "settings",
+      "pageOrRoute": "/insights/setting/v1/settings",
+      "navigationKey": "nav:insights:settings",
+      "permissionKey": "insights:settings:edit",
+      "actions": {
+        "view": false,
+        "create": false,
+        "edit": true,
+        "delete": false,
+        "archive": false,
+        "approve": false,
+        "publish": false,
+        "send": false,
+        "export": false,
+        "sensitiveData": false,
+        "assign": false,
+        "manage": false,
+        "configure": false,
+        "execute": false,
+        "override": false,
+        "invite": false,
+        "deactivate": false,
+        "void": false,
+        "refund": false,
+        "discount": false,
+        "drop": false,
+        "pickup": false
+      },
+      "scopeType": "business",
+      "standardRoles": ["Owner", "Admin", "Insights Admin"],
+      "customRolesMayReceive": true,
+      "backendHandlerOrService": "internal/modules/insights/internal/api/setting_service.go",
+      "frontendGate": "apps/portal/src/modules/insights/features/settings/Settings.tsx",
+      "testReferences": [
+        "internal/modules/insights/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/insights settings edit",
+        "internal/modules/insights/internal/api/authorization_test.go#TestInsightsSettingsRejectDashboardReadPermissionForUpdates",
         "internal/platform/authorization/feature_matrix_test.go"
       ]
     },
@@ -4271,7 +4312,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/insights/internal/api/financial_service.go",
-      "frontendGate": "apps/insights/src/shared/lib/insightsPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/insights/shared/lib/insightsPermissions.ts",
       "testReferences": [
         "internal/modules/insights/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/insights financial view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4317,7 +4358,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/insights/internal/api/customer_service.go",
-      "frontendGate": "apps/insights/src/shared/lib/insightsPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/insights/shared/lib/insightsPermissions.ts",
       "testReferences": [
         "internal/modules/insights/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/insights customers view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4363,7 +4404,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/insights/internal/api/report_service.go",
-      "frontendGate": "apps/insights/src/shared/lib/insightsPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/insights/shared/lib/insightsPermissions.ts",
       "testReferences": [
         "internal/modules/insights/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/insights reports create",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4409,7 +4450,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/insights/internal/api/report_service.go",
-      "frontendGate": "apps/insights/src/shared/lib/insightsPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/insights/shared/lib/insightsPermissions.ts",
       "testReferences": [
         "internal/modules/insights/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/insights reports share",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4455,7 +4496,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/insights/internal/api/report_service.go",
-      "frontendGate": "apps/insights/src/shared/lib/insightsPermissions.ts",
+      "frontendGate": "apps/portal/src/modules/insights/shared/lib/insightsPermissions.ts",
       "testReferences": [
         "internal/modules/insights/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/insights reports export",
         "internal/platform/authorization/feature_matrix_test.go"

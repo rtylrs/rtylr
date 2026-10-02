@@ -1,0 +1,44 @@
+.portal-caret .caret-panel-shell {
+  --caret-bg: var(--dash-surface);
+  --caret-surface: var(--dash-surface);
+  --caret-surface-high: var(--dash-hover);
+  --caret-surface-raised: var(--dash-surface);
+  --caret-input-bg: var(--dash-surface);
+  --caret-text: var(--dash-text);
+  --caret-text-muted: var(--dash-text-dim);
+  --caret-text-dim: var(--dash-text-muted);
+  --caret-border: var(--dash-border);
+  --caret-border-strong: var(--dash-text-muted);
+  --caret-hover: var(--dash-hover);
+  --caret-active: var(--dash-active);
+  --caret-accent: var(--dash-text);
+  --caret-accent-strong: var(--dash-text);
+  --caret-accent-soft: var(--dash-hover);
+  --caret-accent-border: var(--dash-border);
+  --caret-on-accent: var(--dash-surface);
+  --caret-thinking: var(--dash-text-dim);
+  --caret-shadow: var(--dash-shadow);
+  --caret-scrollbar: var(--dash-text-muted);
+  --caret-danger: var(--status-cancelled);
+  --caret-danger-soft: var(--status-cancelled-bg);
+  --caret-danger-text: var(--status-cancelled);
+  --caret-warn: var(--status-trial);
+  --caret-warn-soft: var(--status-trial-bg);
+  --caret-success: var(--status-active);
+  --caret-radius-sm: 6px;
+  --caret-radius-md: 8px;
+  --caret-radius-lg: 10px;
+  --caret-radius-xl: 16px;
+  --caret-header-height: 58px;
+  color-scheme: inherit;
+}
+.portal-caret .caret-tab-shell,
+.portal-caret .caret-tab-button {
+  border-radius: 8px;
+}
+.portal-caret .caret-tab-shell.is-active:hover {
+  background: var(--caret-active) !important;
+}
+.portal-caret .caret-hero-row {
+  text-align: start !important;
+}

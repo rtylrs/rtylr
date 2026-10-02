@@ -123,7 +123,7 @@ export default defineConfig({
       stderr: 'pipe',
     },
     {
-      command: 'pnpm --filter dash dev',
+      command: 'pnpm --filter @rtylr/portal dev',
       url: 'http://localhost:5175',
       env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
@@ -156,15 +156,6 @@ export default defineConfig({
       // and the specs asserted against whatever prod returned to an
       // unauthenticated request. Pointing the dev server at the stub host is
       // what makes those stubs mean anything.
-      env: { VITE_API_URL: 'http://localhost:9999/' },
-      reuseExistingServer: !process.env.CI,
-      timeout: 120_000,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-    {
-      command: 'pnpm --filter @rtylr/insights dev',
-      url: 'http://localhost:5187',
       env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
