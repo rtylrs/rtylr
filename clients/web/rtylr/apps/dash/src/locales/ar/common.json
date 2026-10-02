@@ -256,5 +256,9 @@
   "accessRequested": "تم الطلب",
   "requestAccess": "طلب الوصول",
   "posMenuName": "قائمة نقاط البيع",
-  "defaultPageTitle": "Rtylr - قائمة بلا لمس عبر رمز QR"
+  "defaultPageTitle": "Rtylr - قائمة بلا لمس عبر رمز QR",
+  "accountLoad": {
+    "title": "تعذّر تحميل حسابك",
+    "description": "تعذّر التحقق من صلاحيات حسابك. حدّث الصفحة للمحاولة مرة أخرى."
+  }
 }

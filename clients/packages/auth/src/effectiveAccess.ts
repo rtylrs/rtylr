@@ -85,23 +85,33 @@ function parseScope(value: unknown): PermissionScope | null {
     "pos_location",
     "flow_project",
   ];
-  if (typeof scopeType !== "string" || !types.includes(scopeType as PermissionScopeType) || !scopeId) {
+  if (
+    typeof scopeType !== "string" ||
+    !types.includes(scopeType as PermissionScopeType) ||
+    !scopeId
+  ) {
     return null;
   }
   return { scopeType: scopeType as PermissionScopeType, scopeId };
 }
 
 function parseScopes(value: unknown): PermissionScope[] | null {
+  // Protobuf JSON omits an empty repeated field for unrestricted grants.
+  if (value == null) return [];
   if (!Array.isArray(value)) return null;
   const scopes = value.map(parseScope);
-  return scopes.some((scope) => scope === null) ? null : (scopes as PermissionScope[]);
+  return scopes.some((scope) => scope === null)
+    ? null
+    : (scopes as PermissionScope[]);
 }
 
 function parseLicense(value: unknown): LicenseAssignment | null {
   if (!isRecord(value)) return null;
   const appIdValue = appId(value.appId ?? value.app_id);
   const status = assignmentStatus(value.status);
-  const source = assignmentSource(value.source ?? value.assignmentSource ?? value.assignment_source);
+  const source = assignmentSource(
+    value.source ?? value.assignmentSource ?? value.assignment_source,
+  );
   const grantedAt = stringValue(value.grantedAt ?? value.granted_at);
   if (!appIdValue || !status || !source || !grantedAt) return null;
   const revokedAt = value.revokedAt ?? value.revoked_at;
@@ -116,7 +126,9 @@ function parseLicense(value: unknown): LicenseAssignment | null {
   };
 }
 
-function parsePermissionScopes(value: unknown): Record<string, PermissionScope[]> | null {
+function parsePermissionScopes(
+  value: unknown,
+): Record<string, PermissionScope[]> | null {
   if (value == null) return {};
   if (!Array.isArray(value)) return null;
   const result: Record<string, PermissionScope[]> = {};
@@ -124,7 +136,12 @@ function parsePermissionScopes(value: unknown): Record<string, PermissionScope[]
     if (!isRecord(entry)) return null;
     const permission = stringValue(entry.permissionKey ?? entry.permission_key);
     const scopes = parseScopes(entry.scopes);
-    if (!permission || !scopes || Object.prototype.hasOwnProperty.call(result, permission)) return null;
+    if (
+      !permission ||
+      !scopes ||
+      Object.prototype.hasOwnProperty.call(result, permission)
+    )
+      return null;
     result[permission] = scopes;
   }
   return result;
@@ -136,13 +153,16 @@ function parseAppAccess(value: unknown): EffectiveAppAccess | null {
   const licensed = optionalBoolean(value.licensed);
   const hasAccess = optionalBoolean(value.hasAccess ?? value.has_access);
   const permissions = optionalStringArray(value.permissions);
-  const permissionScopes = parsePermissionScopes(value.permissionScopes ?? value.permission_scopes);
+  const permissionScopes = parsePermissionScopes(
+    value.permissionScopes ?? value.permission_scopes,
+  );
   const rawSources = value.sources;
-  const sources = rawSources == null
-    ? []
-    : Array.isArray(rawSources)
-      ? rawSources.map(assignmentSource)
-      : null;
+  const sources =
+    rawSources == null
+      ? []
+      : Array.isArray(rawSources)
+        ? rawSources.map(assignmentSource)
+        : null;
   if (
     !app ||
     licensed === null ||
@@ -151,7 +171,10 @@ function parseAppAccess(value: unknown): EffectiveAppAccess | null {
     !permissionScopes ||
     !sources ||
     sources.some((source) => source === null) ||
-    permissions.some((permission) => !Object.prototype.hasOwnProperty.call(permissionScopes, permission))
+    permissions.some(
+      (permission) =>
+        !Object.prototype.hasOwnProperty.call(permissionScopes, permission),
+    )
   ) {
     return null;
   }
@@ -172,21 +195,24 @@ export function parseEffectiveAccess(value: unknown): EffectiveAccess | null {
   const rawDashPermissions = value.dashPermissions ?? value.dash_permissions;
   const dashPermissions = optionalStringArray(rawDashPermissions);
   const rawSubscribedApps = value.subscribedApps ?? value.subscribed_apps;
-  const subscribedApps = rawSubscribedApps == null
-    ? []
-    : Array.isArray(rawSubscribedApps)
-      ? rawSubscribedApps.map(appId)
-      : null;
-  const licenses = value.licenses == null
-    ? []
-    : Array.isArray(value.licenses)
-      ? value.licenses.map(parseLicense)
-      : null;
-  const apps = value.apps == null
-    ? []
-    : Array.isArray(value.apps)
-      ? value.apps.map(parseAppAccess)
-      : null;
+  const subscribedApps =
+    rawSubscribedApps == null
+      ? []
+      : Array.isArray(rawSubscribedApps)
+        ? rawSubscribedApps.map(appId)
+        : null;
+  const licenses =
+    value.licenses == null
+      ? []
+      : Array.isArray(value.licenses)
+        ? value.licenses.map(parseLicense)
+        : null;
+  const apps =
+    value.apps == null
+      ? []
+      : Array.isArray(value.apps)
+        ? value.apps.map(parseAppAccess)
+        : null;
   const isOwner = optionalBoolean(value.isOwner ?? value.is_owner);
   const isAdmin = optionalBoolean(value.isAdmin ?? value.is_admin);
   const authorizationVersion = numberValue(
@@ -225,7 +251,10 @@ export function hasEffectiveAppAccess(
 ): boolean {
   if (!access) return false;
   if (access.isOwner || access.isAdmin) {
-    return appId === "dash" || access.subscribedApps.some((subscribed) => subscribed === appId);
+    return (
+      appId === "dash" ||
+      access.subscribedApps.some((subscribed) => subscribed === appId)
+    );
   }
   if (appId === "dash") return access.dashPermissions.length > 0;
   return access.apps.some(
