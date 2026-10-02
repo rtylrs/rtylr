@@ -31,7 +31,7 @@ export function apiTaskToTask(t: ApiTask): Task {
 
   // Proto added `assigneeName` alongside the legacy `assignee` display name;
   // prefer whichever the backend sent.
-  const assignee = (t as { assigneeName?: string }).assigneeName ?? t.assignee ?? '';
+  const assignee = t.assigneeName ?? t.assignee ?? '';
 
   // sectionId is the column the task lives in on the kanban board.
   // The wire sends it as a number (or null for unsectioned); the store

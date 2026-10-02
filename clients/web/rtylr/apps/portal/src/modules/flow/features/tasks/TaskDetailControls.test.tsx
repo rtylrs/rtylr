@@ -113,7 +113,8 @@ describe('Task detail persistence controls', () => {
     state.canEdit = false;
     Object.assign(state.detail!.task, {
       assigneeId: '1001',
-      assignee: 'Taylor Reed',
+      assignee: '',
+      assigneeName: 'Taylor Reed',
       assigneeInitials: 'TR',
     });
     renderDetail();

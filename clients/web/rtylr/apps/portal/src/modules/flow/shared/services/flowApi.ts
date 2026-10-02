@@ -99,6 +99,7 @@ export interface ApiTask {
   status: 'todo' | 'in_progress' | 'in_review' | 'done' | 'cancelled' | 'backlog';
   priority: 'urgent' | 'high' | 'medium' | 'low' | 'no_priority';
   assignee: string;
+  assigneeName?: ContractTask['assigneeName'];
   assigneeId?: string;
   assigneeInitials: string;
   dueDate: string;

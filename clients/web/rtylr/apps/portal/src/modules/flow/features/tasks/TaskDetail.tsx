@@ -317,6 +317,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     );
   }
 
+  const { assignee, assigneeInitials } = apiTaskToTask(task);
   const project = taskProject ?? projects.find((p) => p.id === task.projectId);
   const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
@@ -707,7 +708,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
         <DetailField icon={UserIcon} label={t('flow.taskDetail.assignee')}>
           <div className="flex items-center gap-2">
-            <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
+            <AssigneeAvatar name={assignee} initials={assigneeInitials} size={18} />
             <select
               aria-label={t('flow.taskDetail.assignee')}
               value={task.assigneeId}
@@ -726,7 +727,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               <option value="">{t('flow.quickCreate.unassigned')}</option>
               {task.assigneeId &&
                 !members.some((member) => String(member.id) === String(task.assigneeId)) && (
-                  <option value={task.assigneeId}>{task.assignee}</option>
+                  <option value={task.assigneeId}>{assignee}</option>
                 )}
               {members.map((m) => (
                 <option key={m.id} value={m.id} style={{ background: 'var(--flow-card)' }}>
