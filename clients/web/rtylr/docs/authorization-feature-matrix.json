@@ -3738,7 +3738,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/project_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow projects view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -3787,7 +3787,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/project_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow projects create",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -3836,7 +3836,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/project_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow projects edit",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -3885,7 +3885,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/project_columns_members.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow projects assign",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -3934,7 +3934,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/task_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow tasks view",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -3983,7 +3983,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/task_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow tasks create",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4032,7 +4032,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/task_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow tasks edit",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4081,7 +4081,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/task_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow tasks assign",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4130,7 +4130,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/workspace_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow team manage",
         "internal/platform/authorization/feature_matrix_test.go"
@@ -4179,7 +4179,7 @@
       ],
       "customRolesMayReceive": true,
       "backendHandlerOrService": "internal/modules/workspaces/internal/api/workspace_service.go",
-      "frontendGate": "apps/flow/src/shared/lib/currentUser.ts",
+      "frontendGate": "apps/portal/src/modules/flow/shared/lib/currentUser.ts",
       "testReferences": [
         "internal/modules/workspaces/internal/api/direct_authorization_matrix_test.go#TestDirectAuthorizationMatrix/flow managers manage",
         "internal/platform/authorization/feature_matrix_test.go"

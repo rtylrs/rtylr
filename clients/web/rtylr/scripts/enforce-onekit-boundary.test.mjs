@@ -263,11 +263,14 @@ test('--all scans the working tree regardless of the base', () => {
 
 test('the allowlisted raw fetch call is not reported', () => {
   withRepo(({ repo }) => {
-    const file = join(repo, 'clients/web/rtylr/apps/flow/src/shared/lib/realtime.ts');
+    const file = join(
+      repo,
+      'clients/web/rtylr/apps/portal/src/modules/flow/shared/lib/realtime.ts'
+    );
     mkdirSync(join(file, '..'), { recursive: true });
     writeFileSync(
-      join(repo, 'clients/web/rtylr/apps/flow/package.json'),
-      '{"name":"@rtylr/flow","dependencies":{"@voxire/voxie":"workspace:*"}}\n'
+      join(repo, 'clients/web/rtylr/apps/portal/package.json'),
+      '{"name":"@rtylr/portal","dependencies":{"@voxire/voxie":"workspace:*"}}\n'
     );
     writeFileSync(file, "export const send = () => fetch('/ws');\n");
     git(repo, ['add', '-A']);

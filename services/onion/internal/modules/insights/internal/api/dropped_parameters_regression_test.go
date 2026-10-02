@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	insightssettingv1 "github.com/voxire/voxie/gen/go/insights/setting/v1"
 )
 
@@ -70,15 +69,21 @@ func TestScheduledReportPresenceMiddlewareRestoresBody(t *testing.T) {
 }
 
 func TestSettingsToProtoPersistsAllContractFields(t *testing.T) {
-	got := settingsToProto(application.SettingsPayload{
-		DefaultPeriod: "this_quarter", DefaultCurrency: "EUR", ComparePrevious: true,
+	payload, err := settingsPayloadFromProto(&insightssettingv1.InsightsSettings{
+		DefaultPeriod: "this_quarter", Currency: "EUR", ComparePrevious: true,
+		FiscalYearStart: "04-01", Timezone: "Asia/Beirut",
 		DashboardWidgets: []string{"revenue"}, FavoriteReports: []string{"weekly-revenue"},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := settingsToProto(payload)
 	want := &insightssettingv1.InsightsSettings{
 		DefaultPeriod: "this_quarter", Currency: "EUR", ComparePrevious: true,
+		FiscalYearStart: "04-01", Timezone: "Asia/Beirut",
 		DashboardWidgets: []string{"revenue"}, FavoriteReports: []string{"weekly-revenue"},
 	}
-	if got.DefaultPeriod != want.DefaultPeriod || got.Currency != want.Currency || got.ComparePrevious != want.ComparePrevious {
+	if got.DefaultPeriod != want.DefaultPeriod || got.Currency != want.Currency || got.ComparePrevious != want.ComparePrevious || got.FiscalYearStart != want.FiscalYearStart || got.Timezone != want.Timezone {
 		t.Fatalf("scalar settings = %+v, want %+v", got, want)
 	}
 	if len(got.DashboardWidgets) != 1 || got.DashboardWidgets[0] != "revenue" || len(got.FavoriteReports) != 1 || got.FavoriteReports[0] != "weekly-revenue" {

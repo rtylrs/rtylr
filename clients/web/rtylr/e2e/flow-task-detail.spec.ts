@@ -1,3 +1,4 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Route } from './fixtures';
 import { captureResponsivePair } from './support/screenshot';
 
@@ -5,7 +6,7 @@ import { captureResponsivePair } from './support/screenshot';
  * Flow Task Detail E2E Specs
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 const FAKE_USER = {
@@ -13,8 +14,7 @@ const FAKE_USER = {
   email: 'owner@test.local',
   full_name: 'Test Owner',
   business_id: '1',
-  role: 'owner',
-  apps: ['flow'],
+  ...flowAuthFields('owner'),
 };
 
 const FAKE_TASK_DETAIL = {
@@ -132,7 +132,7 @@ test.describe('Flow - Task Detail', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/task\/v1\/tasks\/101/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -172,7 +172,7 @@ test.describe('Flow - Task Detail', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/task\/v1\/tasks\/101\/activity/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101\/activity/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -180,7 +180,7 @@ test.describe('Flow - Task Detail', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/task\/v1\/tasks\/101\/time-logs/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101\/time-logs/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -188,7 +188,7 @@ test.describe('Flow - Task Detail', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/task\/v1\/tasks\/101\/attachments/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101\/attachments/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -196,7 +196,7 @@ test.describe('Flow - Task Detail', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/label\/v1\/labels/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/label\/v2\/labels/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -204,7 +204,7 @@ test.describe('Flow - Task Detail', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/project\/v1\/projects/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',

@@ -1,3 +1,4 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect } from './fixtures';
 
 /**
@@ -13,7 +14,7 @@ import { test, expect } from './fixtures';
  * list off the bottom.
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 
 const PROJECT_NAMES = ['P-Alpha', 'P-Beta', 'P-Gamma'];
 
@@ -69,19 +70,17 @@ test.describe('Flow sidebar puts projects above the fold @screenshots', () => {
       );
     }
 
-    // Without apps: ['flow'] the shell renders the no-access screen instead,
-    // and every measurement below would be of the wrong page.
+    // Seed the server-resolved Flow grant used by the Portal shell.
     await page.route(/localhost:9999\/hub\/user\/v1\/users\/me/, (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          id: 'u1',
+          id: '1001',
           email: 'owner@acme.test',
           full_name: 'Acme Owner',
           business_id: '1',
-          role: 'owner',
-          apps: ['flow'],
+          ...flowAuthFields('owner'),
           plan_slug: 'pro',
         }),
       })

@@ -1,3 +1,4 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Route } from './fixtures';
 import { captureResponsivePair } from './support/screenshot';
 
@@ -5,7 +6,7 @@ import { captureResponsivePair } from './support/screenshot';
  * Flow Project Board & Project List Specs
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 const FAKE_USER = {
@@ -13,8 +14,7 @@ const FAKE_USER = {
   email: 'owner@test.local',
   full_name: 'Test Owner',
   business_id: '1',
-  role: 'owner',
-  apps: ['flow'],
+  ...flowAuthFields('owner'),
 };
 
 const FAKE_PROJECT = {
@@ -91,7 +91,7 @@ test.describe('Flow - Project Board', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/project\/v1\/projects(\?.*)?/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects(\?.*)?/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -99,7 +99,7 @@ test.describe('Flow - Project Board', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/project\/v1\/projects\/1/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -107,7 +107,7 @@ test.describe('Flow - Project Board', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/project\/v1\/projects\/1\/columns/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1\/columns/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -115,7 +115,7 @@ test.describe('Flow - Project Board', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/task\/v1\/tasks(\?.*)?/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks(\?.*)?/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -230,14 +230,14 @@ test.describe('Flow - Project Board', () => {
   // The workspace segment is gone from project URLs, but links to the old shape
   // survive in bookmarks and pasted messages for a release.
   test('a legacy /w/<id>/p/<id> URL lands on the workspace-free route', async ({ page }) => {
-    await page.goto(`${FLOW_URL}/w/10/p/1`);
+    await page.goto(`${FLOW_URL}/p/1`);
     await page.waitForLoadState('networkidle');
 
     expect(new URL(page.url()).pathname).toBe('/p/1');
   });
 
   test('a legacy sub-view URL keeps its view on redirect', async ({ page }) => {
-    await page.goto(`${FLOW_URL}/w/10/p/1/list`);
+    await page.goto(`${FLOW_URL}/p/1/list`);
     await page.waitForLoadState('networkidle');
 
     expect(new URL(page.url()).pathname).toBe('/p/1/list');

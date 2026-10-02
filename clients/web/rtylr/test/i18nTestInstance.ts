@@ -39,18 +39,35 @@ function buildLocale(localesDir: string, lang: string): Record<string, unknown> 
   return out;
 }
 
-export async function initTestI18nFrom(localesDir: string, lang: string = 'en'): Promise<void> {
-  const namespaces = fs
-    .readdirSync(path.join(localesDir, lang))
-    .filter((file) => file.endsWith('.json'))
-    .map((file) => file.replace(/\.json$/, ''));
+export async function initTestI18nFrom(
+  localesDir: string,
+  lang: string = 'en',
+  additionalLocales: string[] = []
+): Promise<void> {
+  const directories = [localesDir, ...additionalLocales];
+  const namespaces = [
+    ...new Set(
+      directories.flatMap((directory) =>
+        fs
+          .readdirSync(path.join(directory, lang))
+          .filter((file) => file.endsWith('.json'))
+          .map((file) => file.replace(/\.json$/, ''))
+      )
+    ),
+  ];
 
   // Every namespace is preloaded rather than fetched on demand, because
   // `useSuspense: false` lets a component render before a lazy namespace
   // arrives, and it would render the key.
   await i18next
     .use(initReactI18next)
-    .use(resourcesToBackend(() => Promise.resolve(buildLocale(localesDir, lang))))
+    .use(
+      resourcesToBackend(() =>
+        Promise.resolve(
+          Object.assign({}, ...directories.map((directory) => buildLocale(directory, lang)))
+        )
+      )
+    )
     .init({
       lng: lang,
       fallbackLng: lang,

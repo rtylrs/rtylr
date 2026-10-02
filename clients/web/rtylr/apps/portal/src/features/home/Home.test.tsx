@@ -55,10 +55,11 @@ describe('Portal Home', () => {
       'href',
       '/settings/account'
     );
-    expect(screen.getByRole('link', { name: 'Open Flow in a new tab' })).toHaveAttribute(
-      'target',
-      '_blank'
+    expect(screen.getByRole('link', { name: 'Flow', exact: true })).toHaveAttribute(
+      'href',
+      '/flow'
     );
+    expect(screen.getByRole('link', { name: 'Flow', exact: true })).not.toHaveAttribute('target');
   });
   it('does not offer unlicensed apps or infer access from a stale role field', () => {
     useUserStore.setState({
@@ -70,7 +71,7 @@ describe('Portal Home', () => {
     });
     render(<Home />);
     expect(screen.queryByRole('link', { name: /Members and access/ })).toBeNull();
-    expect(screen.queryByRole('link', { name: /Open Flow/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Flow', exact: true })).toBeNull();
     expect(screen.getByText(/No apps are assigned/)).toBeVisible();
   });
 });

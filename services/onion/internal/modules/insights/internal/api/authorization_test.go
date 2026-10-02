@@ -208,6 +208,20 @@ func TestInsightsSettingsRejectDashboardReadPermissionForUpdates(t *testing.T) {
 	}
 }
 
+func TestInsightsSettingsRejectInvalidDateAndTimezone(t *testing.T) {
+	for _, settings := range []*insightssettingv1.InsightsSettings{
+		{FiscalYearStart: "02-30", Timezone: "UTC"},
+		{FiscalYearStart: "4-01", Timezone: "UTC"},
+		{FiscalYearStart: "04-01", Timezone: "invalid/timezone"},
+		{FiscalYearStart: "04-01", Timezone: "Local"},
+	} {
+		_, err := settingsPayloadFromProto(settings)
+		if insightsStatus(err) != http.StatusBadRequest {
+			t.Fatalf("invalid settings reached persistence: %v", err)
+		}
+	}
+}
+
 func TestInsightsPermissionHelperRejectsWrongAppAndUnlicensedUsers(t *testing.T) {
 	ctx := context.Background()
 	wrongApp := &authPkg.AuthUser{BusinessID: 9, UserID: 7, EffectiveAccess: &authorization.EffectiveAccess{

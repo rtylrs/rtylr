@@ -1,3 +1,4 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Page, type Route } from './fixtures';
 
 /**
@@ -10,18 +11,17 @@ import { test, expect, type Page, type Route } from './fixtures';
  * e2e/erp-inventory.spec.ts).
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 // ── Shared fixtures ────────────────────────────────────────────────────────
 
 const FAKE_USER = {
-  id: 'u1',
+  id: '1001',
   email: 'owner@acme.test',
   full_name: 'Acme Owner',
   business_id: '1',
-  role: 'owner',
-  apps: ['flow'],
+  ...flowAuthFields('owner'),
   plan_slug: 'pro',
 };
 
@@ -72,7 +72,7 @@ function fakeTask(overrides: Record<string, unknown> = {}): Record<string, unkno
     status: 'todo',
     priority: 'high',
     assignee: 'Acme Owner',
-    assigneeId: 'u1',
+    assigneeId: '1001',
     assigneeInitials: 'AO',
     dueDate: '',
     subtaskCount: 0,
@@ -89,12 +89,12 @@ function wireTask(task: Record<string, unknown>): Record<string, unknown> {
   return {
     id: task.id,
     project_id: task.projectId,
-    owner_id: task.ownerId ?? 'u1',
+    owner_id: task.ownerId ?? '1001',
     title: task.title,
     description: task.description ?? '',
     status: task.status,
     priority: task.priority,
-    assignee_id: task.assigneeId ?? 'u1',
+    assignee_id: task.assigneeId ?? '1001',
     assignee_name: task.assignee ?? '',
     assignee_initials: task.assigneeInitials ?? 'AO',
     due_date: task.dueDate ?? '',

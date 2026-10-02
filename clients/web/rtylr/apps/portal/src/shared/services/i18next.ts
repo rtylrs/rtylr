@@ -3,9 +3,12 @@ import { initI18n } from '@voxire/i18n';
 // Each file under locales/{lang}/*.json is auto-discovered.
 // The filename (without .json) becomes the i18next namespace key,
 // so t('common.save') maps to locales/{lang}/common.json → save.
-const modules = import.meta.glob<{ default: Record<string, unknown> }>('../../locales/**/*.json', {
-  eager: true,
-});
+const modules = import.meta.glob<{ default: Record<string, unknown> }>(
+  ['../../locales/**/*.json', '../../modules/flow/locales/**/*.json'],
+  {
+    eager: true,
+  }
+);
 
 function buildLocale(lang: string): Record<string, unknown> {
   const result: Record<string, unknown> = {};

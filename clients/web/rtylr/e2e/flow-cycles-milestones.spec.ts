@@ -1,10 +1,11 @@
+import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Route } from './fixtures';
 
 /**
  * Flow Cycles & Milestones E2E Specs
  */
 
-const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
+const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5175/flow';
 const API_HOST = 'http://localhost:9999';
 
 const FAKE_USER = {
@@ -12,8 +13,7 @@ const FAKE_USER = {
   email: 'owner@test.local',
   full_name: 'Test Owner',
   business_id: '1',
-  role: 'owner',
-  apps: ['flow'],
+  ...flowAuthFields('owner'),
 };
 
 const FAKE_CYCLES = [
@@ -70,7 +70,7 @@ test.describe('Flow - Cycles & Milestones', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/cycle\/v1\/cycles/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/cycle\/v2\/cycles/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -97,7 +97,7 @@ test.describe('Flow - Cycles & Milestones', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/milestone\/v1\/milestones/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/milestone\/v2\/milestones/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',

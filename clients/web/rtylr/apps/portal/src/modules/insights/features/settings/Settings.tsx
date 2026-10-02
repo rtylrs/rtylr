@@ -3,7 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
 import { Clock, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState } from '@voxire/ui';
+import { EmptyState } from '../../../../shared/components/dash/EmptyState';
 import {
   useInsightsSettings,
   useUpdateInsightsSettings,
@@ -45,10 +45,6 @@ const Settings: React.FC = (): React.JSX.Element => {
   const [timezone, setTimezone] = useState<string>('');
   const [dirty, setDirty] = useState(false);
 
-  // Re-seed from the server only while the form is untouched. Saving invalidates
-  // ['insights-settings'], and fiscal year/timezone have no server field
-  // (see useInsightsSettings), so the refetched defaults would otherwise wipe
-  // the values the user just entered.
   useEffect(() => {
     if (settings && !dirty) {
       setDefaultCurrency(settings.defaultCurrency);
@@ -72,7 +68,10 @@ const Settings: React.FC = (): React.JSX.Element => {
 
   const handleSave = (): void => {
     if (!canEditSettings) return;
-    updateSettings.mutate({ defaultCurrency, fiscalYearStart, timezone });
+    updateSettings.mutate(
+      { defaultCurrency, fiscalYearStart, timezone },
+      { onSuccess: () => setDirty(false) }
+    );
   };
 
   const handleDeleteScheduled = (id: string): void => {
@@ -88,11 +87,6 @@ const Settings: React.FC = (): React.JSX.Element => {
       className="space-y-6 max-w-3xl"
     >
       <HelmetContainer title={t('insights.settings.metaTitle')} />
-      <motion.div variants={itemVariants}>
-        <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          {t('insights.settings.title')}
-        </h1>
-      </motion.div>
 
       <motion.div
         variants={itemVariants}

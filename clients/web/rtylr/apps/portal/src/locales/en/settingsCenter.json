@@ -1,0 +1,22 @@
+{
+  "title": "Settings",
+  "description": "Your account, business, and app preferences in one place.",
+  "groups": {
+    "account": {
+      "title": "Account",
+      "description": "Your profile, security, and businesses."
+    },
+    "business": {
+      "title": "Business",
+      "description": "Configuration, billing, and connected services."
+    },
+    "apps": {
+      "title": "Apps",
+      "description": "Preferences for the apps you use."
+    }
+  },
+  "search": "Search settings…",
+  "flowCommand": "Flow settings",
+  "insightsCommand": "Insights settings",
+  "noResults": "No settings found."
+}

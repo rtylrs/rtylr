@@ -6,6 +6,8 @@ message InsightsSettings {
   default_period: string
   /// currency is the currency value for this contract.
   currency: string
+  fiscal_year_start: string
+  timezone: string
   /// compare_previous is the compare previous value for this contract.
   compare_previous: bool
   /// dashboard_widgets is the dashboard widgets value for this contract.

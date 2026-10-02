@@ -9,7 +9,7 @@ export function EmptyState({
   action,
   className,
   size = 'default',
-}: EmptyStateProps) {
+}: Omit<EmptyStateProps, 'action'> & { action?: EmptyStateProps['action'] }) {
   return (
     <div className={cn('portal-empty-state', size === 'compact' && 'is-compact', className)}>
       <div className="portal-empty-state-icon" aria-hidden="true">
@@ -17,7 +17,7 @@ export function EmptyState({
       </div>
       <h3>{title}</h3>
       {description && <p>{description}</p>}
-      <Button onClick={action.onClick}>{action.label}</Button>
+      {action && <Button onClick={action.onClick}>{action.label}</Button>}
     </div>
   );
 }

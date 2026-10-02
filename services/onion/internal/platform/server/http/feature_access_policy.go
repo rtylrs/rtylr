@@ -461,11 +461,11 @@ func flowFeaturePermission(method, path string) (string, bool) {
 		}
 		return "flow:tasks:edit", true
 	case strings.Contains(path, "/projects"):
-		if strings.Contains(path, "/assign") || strings.Contains(path, "/members") {
-			return "flow:projects:assign", true
-		}
 		if method == http.MethodGet {
 			return "flow:projects:view", true
+		}
+		if strings.Contains(path, "/assign") || strings.Contains(path, "/members") {
+			return "flow:projects:assign", true
 		}
 		if method == http.MethodPost {
 			return "flow:projects:create", true

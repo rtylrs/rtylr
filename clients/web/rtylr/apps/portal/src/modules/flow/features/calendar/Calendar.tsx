@@ -1,0 +1,443 @@
+import React, { useMemo, useState } from 'react';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@voxire/utils';
+import { HelmetContainer } from '@voxire/components';
+import { useTasks, useCreateTask } from '../tasks/useTasks';
+import { useLabels } from '../tasks/useLabels';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import PriorityIcon from '../../shared/components/PriorityIcon';
+import type { ApiTask } from '../../shared/services/flowApi';
+import { toLocalIso, todayIso } from '../../shared/lib/dateUtils';
+import { monthCells, tasksByLocalDay, agendaDays } from '../../shared/lib/monthGrid';
+import { CalendarAgenda } from '../../shared/components/CalendarAgenda';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import { withAlpha, onTint } from '../../shared/lib/colorUtils';
+
+const ACCENT_VAR = 'var(--accent)';
+
+/**
+ * The grid needs room; below that the month is a list.
+ *
+ * A min-width test rather than max-width, and it decides which layout is
+ * *rendered* rather than which is hidden. Two reasons: a month grid plus a full
+ * agenda is a lot of nodes to build and throw away on every render, and with
+ * both mounted every task title exists twice in the DOM, which a test cannot
+ * disambiguate and a screen reader only avoids because `display: none` happens
+ * to prune it.
+ */
+const WIDE = '(min-width: 768px)';
+
+interface CreateModal {
+  date: string;
+}
+
+const Calendar: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const openTask = useOpenTask();
+  const isWide = useMediaQuery(WIDE);
+  const tasksQuery = useTasks({});
+  const { data: apiTasks = [] } = tasksQuery;
+  const tasks = apiTasks as ApiTask[];
+  const tasksFailed = hasQueryFailed(tasksQuery);
+  const tasksLoading = tasksQuery.isPending && !tasksFailed;
+  const { projects } = useFlowStore();
+  const { data: labels = [] } = useLabels();
+  const createTask = useCreateTask();
+  const [cursor, setCursor] = useState(() => new Date());
+  const [createModal, setCreateModal] = useState<CreateModal | null>(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [newProjectId, setNewProjectId] = useState('');
+  const [newLabelId, setNewLabelId] = useState('');
+
+  React.useEffect(() => {
+    if (!newLabelId && labels.length > 0) setNewLabelId(String(labels[0].id));
+  }, [labels, newLabelId]);
+
+  const { days, monthLabel } = useMemo(
+    () => ({
+      days: monthCells(cursor),
+      monthLabel: cursor.toLocaleString(i18n.language, { month: 'long', year: 'numeric' }),
+    }),
+    [cursor, i18n.language]
+  );
+
+  // One lookup for the whole grid rather than a find() per pill per cell.
+  const projectColorById = useMemo(
+    () => new Map(projects.map((p) => [String(p.id), p.color])),
+    [projects]
+  );
+
+  const tasksByDate = useMemo(() => tasksByLocalDay(tasks), [tasks]);
+
+  const agenda = useMemo(() => agendaDays(days, tasksByDate), [days, tasksByDate]);
+
+  const today = todayIso();
+
+  const openCreate = (date: Date, inMonth: boolean) => {
+    if (!inMonth) return;
+    const iso = toLocalIso(date);
+    setCreateModal({ date: iso });
+    setNewTitle('');
+    setNewProjectId(projects[0]?.id ?? '');
+    setNewLabelId(labels[0] ? String(labels[0].id) : '');
+  };
+
+  const submitCreate = () => {
+    if (createTask.isPending) return;
+    if (!newTitle.trim()) {
+      toast.error(t('flowErrors.generic'));
+      return;
+    }
+    const projectId = newProjectId || projects[0]?.id;
+    // The guard used to also require `activeWorkspaceId`, which the removed
+    // workspace layer leaves permanently empty, so Create could never succeed
+    // and always blamed the project, which the modal had pre-filled. It also
+    // required a label, so a business with no labels could not create a task
+    // here at all; a label is optional on the create contract.
+    if (!projectId) {
+      toast.error(t('flowToasts.task.selectProjectFirst'));
+      return;
+    }
+    createTask.mutate(
+      {
+        projectId,
+        title: newTitle.trim(),
+        dueDate: createModal!.date,
+        ...(newLabelId ? { labels: [newLabelId] } : {}),
+      },
+      {
+        onSuccess: () => {
+          toast.success(t('flowToasts.task.created'));
+          setCreateModal(null);
+        },
+        onError: () => toast.error(t('flowToasts.task.createFailed')),
+      }
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <HelmetContainer title={`${t('flow.calendar.heading')} · Flow`} />
+      <div
+        className="flex items-center justify-between px-6 py-4 shrink-0"
+        style={{ borderBottom: '1px solid var(--flow-border)' }}
+      >
+        <div>
+          <h1 className="text-flow-title font-semibold" style={{ color: 'var(--flow-text)' }}>
+            {t('flow.calendar.heading')}
+          </h1>
+          <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+            {t('flow.calendar.subtitle')}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
+            aria-label={t('flow.calendar.prevMonthLabel')}
+            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            <ChevronLeft size={13} />
+          </button>
+          <span
+            className="text-flow-meta font-semibold w-[128px] text-center"
+            style={{ color: 'var(--flow-text)' }}
+          >
+            {monthLabel}
+          </span>
+          <button
+            type="button"
+            onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
+            aria-label={t('flow.calendar.nextMonthLabel')}
+            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            <ChevronRight size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setCursor(new Date())}
+            className="text-flow-meta px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)] font-medium"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            {t('flow.calendar.today')}
+          </button>
+        </div>
+      </div>
+
+      {/* At 390px a seven-column month gives each day about 55px, which truncates
+          a title to two or three characters and leaves the pills too small to
+          hit (rtylr#1215, S-10). The month navigation above is shared; only the
+          body swaps. */}
+      {tasksFailed && (
+        <div className="flex-1 overflow-auto p-4">
+          <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
+        </div>
+      )}
+      {tasksLoading && (
+        <div className="flex-1 p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+          {t('flowCommon.loading')}
+        </div>
+      )}
+
+      {!tasksFailed && !tasksLoading && !isWide && (
+        <div className="flex-1 overflow-auto">
+          <CalendarAgenda
+            entries={agenda}
+            todayIso={today}
+            taskId={(task) => String(task.id)}
+            taskTitle={(task) => task.title}
+            taskTone={(task) => projectColorById.get(String(task.projectId))}
+            onOpen={(task) => openTask(String(task.id))}
+            leading={(task) => <PriorityIcon priority={task.priority} size={11} />}
+          />
+        </div>
+      )}
+
+      {!tasksFailed && !tasksLoading && isWide && (
+        <div className="flex-1 overflow-auto p-4">
+          <div className="grid grid-cols-7 gap-px" style={{ background: 'var(--flow-border)' }}>
+            {days.slice(0, 7).map((c) => (
+              <div
+                key={c.date.toISOString()}
+                className="py-1.5 text-center text-flow-meta font-semibold uppercase"
+                style={{ background: 'var(--flow-bg)', color: 'var(--flow-text-dim)' }}
+              >
+                {new Intl.DateTimeFormat(i18n.language, { weekday: 'short' }).format(c.date)}
+              </div>
+            ))}
+            {days.map((c, i) => {
+              const iso = c.iso;
+              const dayTasks = tasksByDate.get(iso) ?? [];
+              const isToday = iso === today;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0 }}
+                  // The out-of-month dimming rides on `animate` rather than
+                  // sitting in `style` beside it. A style opacity pins the value
+                  // and the animation stops running; on TaskCard the same
+                  // conflict left every board card invisible (rtylr#1078). Here
+                  // the style always resolved to a number, so the cells showed
+                  // and only the entrance was dead.
+                  animate={{ opacity: c.inMonth ? 1 : 0.4 }}
+                  transition={{ duration: 0.1, delay: i * 0.002 }}
+                  onClick={() => openCreate(c.date, c.inMonth)}
+                  className="min-h-[100px] p-1.5 cursor-pointer group"
+                  style={{ background: 'var(--flow-bg)' }}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className="text-flow-meta font-semibold h-5 w-5 flex items-center justify-center rounded-full"
+                      style={{
+                        background: isToday ? ACCENT_VAR : 'transparent',
+                        color: isToday ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
+                      }}
+                    >
+                      {c.date.getDate()}
+                    </span>
+                    {c.inMonth && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCreate(c.date, c.inMonth);
+                        }}
+                        aria-label={t('flow.calendar.addTaskLabel', {
+                          date: c.date.toLocaleDateString(i18n.language, {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                          }),
+                        })}
+                        className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-flow-meta opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
+                        style={{ color: 'var(--flow-text-dim)' }}
+                      >
+                        {t('flow.calendar.addHint')}
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    {dayTasks.slice(0, 3).map((t) => {
+                      // Tinted by project. This calendar mixes every project
+                      // together, so a single card colour left no way to tell
+                      // whose work a day was full of (#1087). Falls back to the
+                      // card surface when the project is not in the store yet.
+                      const tone = projectColorById.get(String(t.projectId));
+                      return (
+                        <button
+                          type="button"
+                          key={t.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openTask(String(t.id));
+                          }}
+                          className="w-full text-left px-1.5 py-0.5 rounded-sm text-flow-meta truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+                          style={{
+                            // The tone appears once. Both the tint and the
+                            // foreground read it back, and a test can see it:
+                            // happy-dom drops any color-mix() set through the
+                            // style property, so the two derived values below are
+                            // invisible to the suite (rtylr#1249).
+                            ...(tone ? { ['--tone' as string]: tone } : {}),
+                            background: tone ? withAlpha('var(--tone)', 13) : 'var(--flow-card)',
+                            color: tone ? onTint('var(--tone)') : 'var(--flow-text)',
+                          }}
+                        >
+                          <PriorityIcon priority={t.priority} size={9} />
+                          {/* dir="auto" so a right-to-left title truncates at its
+                            own end rather than clipping the start of it. */}
+                          <span dir="auto" className="truncate">
+                            {t.title}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    {dayTasks.length > 3 && (
+                      <span
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-flow-meta px-1"
+                        style={{ color: 'var(--flow-text-dim)' }}
+                      >
+                        {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
+                      </span>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Create task modal */}
+      <AnimatePresence>
+        {createModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.4)' }}
+              onClick={() => setCreateModal(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-2xl p-5 w-[360px]"
+              style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-flow-body font-semibold" style={{ color: 'var(--flow-text)' }}>
+                  {t('flow.calendar.newTaskFor')}{' '}
+                  <span style={{ color: ACCENT_VAR }}>
+                    {new Date(createModal.date + 'T00:00:00').toLocaleDateString(i18n.language, {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setCreateModal(null)}
+                  aria-label={t('flowCommon.close')}
+                  className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
+                  style={{ color: 'var(--flow-text-dim)' }}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+
+              <input
+                autoFocus
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submitCreate()}
+                placeholder={t('flow.calendar.titlePlaceholder')}
+                className="w-full rounded-lg px-3 py-2 text-flow-body mb-3"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border-control)',
+                  color: 'var(--flow-text)',
+                }}
+              />
+
+              {projects.length > 0 && (
+                <select
+                  value={newProjectId}
+                  onChange={(e) => setNewProjectId(e.target.value)}
+                  className="w-full rounded-lg px-3 py-2 text-flow-meta mb-4"
+                  style={{
+                    background: 'var(--flow-input-bg)',
+                    border: '1px solid var(--flow-border-control)',
+                    color: 'var(--flow-text)',
+                  }}
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <select
+                aria-label={t('flowCommon.settings.labels')}
+                value={newLabelId}
+                onChange={(e) => setNewLabelId(e.target.value)}
+                disabled={labels.length === 0}
+                className="w-full rounded-lg px-3 py-2 text-flow-meta mb-4 disabled:opacity-50"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border-control)',
+                  color: 'var(--flow-text)',
+                }}
+              >
+                {labels.length === 0 ? (
+                  <option value="">{t('flowCommon.noData')}</option>
+                ) : (
+                  labels.map((label) => (
+                    <option key={label.id} value={label.id}>
+                      {label.name}
+                    </option>
+                  ))
+                )}
+              </select>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCreateModal(null)}
+                  className="px-3 py-1.5 rounded-sm text-flow-meta"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  {t('flow.calendar.cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={submitCreate}
+                  disabled={!newTitle.trim() || createTask.isPending}
+                  className="px-3 py-1.5 rounded-sm text-flow-meta font-semibold disabled:opacity-40"
+                  style={{ background: ACCENT_VAR, color: 'var(--flow-on-accent)' }}
+                >
+                  {createTask.isPending ? t('flow.calendar.creating') : t('flow.calendar.create')}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default Calendar;
