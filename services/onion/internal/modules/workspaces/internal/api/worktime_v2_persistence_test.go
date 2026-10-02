@@ -97,3 +97,53 @@ func TestWorkTimeV2PersistsTotalsWithoutHROnboarding(t *testing.T) {
 		t.Fatalf("deleted entry still counted: %+v %v", rangeResult, err)
 	}
 }
+
+func TestWorkTypeV2PersistsTreeAndArchives(t *testing.T) {
+	db := testutil.OpenDB(t)
+	const ownerID, businessID = int64(993011), int64(993012)
+	testutil.GrantBusinessAccess(t, db, businessID, ownerID)
+	svc := application.NewService(context.Background(), db)
+	svc.SetHubProfileResolver(timeOwnerProfile{})
+	handler := api.NewWorkTimeAPIV2(svc)
+	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: ownerID, BusinessID: businessID})
+	t.Cleanup(func() { _, _ = db.Exec("DELETE FROM flow_work_types WHERE business_id = ?", businessID) })
+	created, err := handler.CreateWorkType(ctx, &timev2.CreateWorkTypeRequest{Name: "Delivery", Description: "Initial description"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rootID := created.WorkType.Id
+	child, err := handler.CreateWorkType(ctx, &timev2.CreateWorkTypeRequest{ParentId: testutil.Int64Ptr(rootID), Name: "Review"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := handler.CreateWorkType(ctx, &timev2.CreateWorkTypeRequest{ParentId: testutil.Int64Ptr(child.WorkType.Id), Name: "Too deep"}); err == nil {
+		t.Fatal("accepted a third work-type level")
+	}
+	updated, err := handler.UpdateWorkType(ctx, &timev2.UpdateWorkTypeRequest{Id: rootID, Name: "Shipping", Description: "Updated description"})
+	if err != nil || updated.WorkType.GetName() != "Shipping" {
+		t.Fatalf("update: %+v %v", updated, err)
+	}
+	listed, err := handler.ListWorkTypes(ctx, &timev2.ListWorkTypesRequest{})
+	if err != nil || len(listed.WorkTypes) != 2 {
+		t.Fatalf("list: %+v %v", listed, err)
+	}
+	if _, err := handler.DeleteWorkType(ctx, &timev2.DeleteWorkTypeRequest{Id: child.WorkType.Id}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := handler.DeleteWorkType(ctx, &timev2.DeleteWorkTypeRequest{Id: rootID}); err != nil {
+		t.Fatal(err)
+	}
+	active, err := handler.ListWorkTypes(ctx, &timev2.ListWorkTypesRequest{})
+	if err != nil || len(active.WorkTypes) != 0 {
+		t.Fatalf("archive remained active: %+v %v", active, err)
+	}
+	archived, err := handler.ListWorkTypes(ctx, &timev2.ListWorkTypesRequest{IncludeArchived: true})
+	if err != nil || len(archived.WorkTypes) != 2 {
+		t.Fatalf("archive missing: %+v %v", archived, err)
+	}
+	for _, workType := range archived.WorkTypes {
+		if !workType.GetArchived() {
+			t.Fatal("type was not archived")
+		}
+	}
+}

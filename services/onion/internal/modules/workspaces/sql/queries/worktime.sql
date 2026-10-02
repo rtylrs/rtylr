@@ -148,8 +148,8 @@ LIMIT 1;
 
 -- name: CreateWorkType :execresult
 INSERT INTO flow_work_types (
-    owner_id, business_id, parent_id, name, description, hr_category_id, sort_order
-) VALUES (?, ?, ?, ?, ?, ?, ?);
+    workspace_id, owner_id, business_id, parent_id, name, description, hr_category_id, sort_order
+) VALUES (0, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateWorkType :execresult
 UPDATE flow_work_types
