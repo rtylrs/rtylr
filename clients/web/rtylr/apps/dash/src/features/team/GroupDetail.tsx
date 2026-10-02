@@ -43,7 +43,7 @@ const GroupDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
-  const isNew = id === 'new';
+  const isNew = id === undefined;
 
   const { data: group, isLoading, isError, refetch } = useGroup(isNew ? undefined : id);
   const createGroup = useCreateGroup();
@@ -204,15 +204,15 @@ const GroupDetail = (): React.JSX.Element => {
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
                   {t(
                     (group?.memberCount ?? 0) === 1
-                      ? 'groupDetail.membersCountSingular'
-                      : 'groupDetail.membersCountPlural',
+                      ? 'team.groupDetail.membersCountSingular'
+                      : 'team.groupDetail.membersCountPlural',
                     { count: group?.memberCount ?? 0 }
                   )}
                 </p>
               )}
             </div>
           </div>
-          <Button onClick={handleSave} disabled={isSaving || (!dirty && !isNew)}>
+          <Button onClick={handleSave} disabled={isSaving || !name.trim() || (!dirty && !isNew)}>
             <Save size={14} />
             {isSaving ? t('team.groupDetail.savingButton') : t('team.groupDetail.saveButton')}
           </Button>
@@ -381,8 +381,8 @@ const GroupDetail = (): React.JSX.Element => {
               <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
                 {t(
                   (group?.members?.length ?? 0) === 1
-                    ? 'groupDetail.membersCountSingular'
-                    : 'groupDetail.membersCountPlural',
+                    ? 'team.groupDetail.membersCountSingular'
+                    : 'team.groupDetail.membersCountPlural',
                   { count: group?.members?.length ?? 0 }
                 )}
               </p>
