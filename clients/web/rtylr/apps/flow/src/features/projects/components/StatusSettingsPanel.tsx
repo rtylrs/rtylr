@@ -273,7 +273,7 @@ const StatusSettingsPanel = ({
           </div>
         ) : statusesPending || statusesQuery.data === undefined ? (
           <p className="mb-4 text-meta" style={{ color: 'var(--flow-text-muted)' }}>
-            {t('shell.loading')}
+            {t('flow.shell.loading')}
           </p>
         ) : (
           <>

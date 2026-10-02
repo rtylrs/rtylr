@@ -50,10 +50,10 @@ export function formatDueDate(date: string, t: TFunction): string {
   if (!date || String(date).trim() === '') return '-';
   const days = daysUntil(date);
 
-  if (days === 0) return t('common.dueDate.today');
-  if (days === 1) return t('common.dueDate.tomorrow');
-  if (days === -1) return t('common.dueDate.yesterday');
-  if (days < 0) return t('common.dueDate.overdue', { days: Math.abs(days) });
+  if (days === 0) return t('common.dueDateLabel.today');
+  if (days === 1) return t('common.dueDateLabel.tomorrow');
+  if (days === -1) return t('common.dueDateLabel.yesterday');
+  if (days < 0) return t('common.dueDateLabel.overdue', { days: Math.abs(days) });
 
   return formatShortDate(date, t('common.dateLocale'));
 }

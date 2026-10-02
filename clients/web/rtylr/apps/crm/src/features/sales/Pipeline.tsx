@@ -382,7 +382,7 @@ const Pipeline: React.FC = () => {
                   onClick={() => setLeadOffset((current) => current + LEADS_PAGE_SIZE)}
                   disabled={leadsFetching}
                 >
-                  {leadsFetching ? t('common.loading') : t('crm.customers.loadMore')}
+                  {leadsFetching ? t('common.loading') : t('crm.pipeline.loadMore')}
                 </Button>
               </div>
             )}

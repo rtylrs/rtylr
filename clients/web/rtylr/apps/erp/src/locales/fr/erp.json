@@ -168,7 +168,8 @@
     "phone": "Téléphone",
     "city": "Ville",
     "country": "Pays",
-    "address": "Adresse"
+    "address": "Adresse",
+    "retry": "Réessayer"
   },
   "common": {
     "cancel": "Cancel",
@@ -250,7 +251,11 @@
     "avgDaily": "Moy. / jour",
     "suggested": "Suggéré",
     "lead": "Délai",
-    "confidence": "Confiance"
+    "confidence": "Confiance",
+    "error": {
+      "title": "Impossible de charger les suggestions de réapprovisionnement",
+      "description": "Les données de stock actuelles n’ont pas pu être chargées. Actualisez pour réessayer."
+    }
   },
   "variants": {
     "empty": {

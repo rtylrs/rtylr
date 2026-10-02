@@ -437,7 +437,8 @@
     "title": "Sales pipeline",
     "subtitle": "Track deals from cold outreach to closed contracts",
     "addLead": "Add lead",
-    "addNewLead": "Add new lead"
+    "addNewLead": "Add new lead",
+    "loadMore": "Load more leads"
   },
   "createCustomer": {
     "pageTitle": "New customer",

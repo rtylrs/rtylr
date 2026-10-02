@@ -23,5 +23,6 @@
   "batch": "Batch",
   "qtyShort": "Qty",
   "notesOptional": "Notes (optional)",
-  "stock": "Stock"
+  "stock": "Stock",
+  "refresh": "Refresh"
 }

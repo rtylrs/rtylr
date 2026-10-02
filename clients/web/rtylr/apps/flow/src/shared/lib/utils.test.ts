@@ -1,4 +1,7 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import path from 'node:path';
+import i18next from 'i18next';
+import { initTestI18nFrom } from '../../../../../test/i18nTestInstance';
+import { describe, it, expect, beforeEach, vi, afterEach, beforeAll } from 'vitest';
 
 import { cn, getInitials, formatDueDate, formatShortDate } from './utils';
 
@@ -58,18 +61,8 @@ describe('getInitials', () => {
 // formatShortDate and formatDueDate (rtylr#1221)
 // ---------------------------------------------------------------------------
 
-const LABELS: Record<string, string> = {
-  'common.dueDate.today': 'Today',
-  'common.dueDate.tomorrow': 'Tomorrow',
-  'common.dueDate.yesterday': 'Yesterday',
-  'common.dateLocale': 'en-US',
-};
-
-function fakeT(key: string, opts?: { days?: number }): string {
-  if (key === 'common.dueDate.overdue') return `${opts?.days}d overdue`;
-  return LABELS[key] ?? key;
-}
-const t = fakeT as unknown as import('i18next').TFunction;
+beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locales')));
+const t = i18next.t.bind(i18next);
 
 describe('formatShortDate', () => {
   it('returns a dash for an empty date', () => {
