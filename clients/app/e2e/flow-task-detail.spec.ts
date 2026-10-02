@@ -212,6 +212,16 @@ test.describe('Flow - Task Detail', () => {
       })
     );
 
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          project: { id: '1', name: 'Alpha Project', status: 'active', visibility: 'private' },
+        }),
+      })
+    );
+
     await page.route(/localhost:9999\/flow\/workspace\/v1\/members/, (route: Route) =>
       route.fulfill({
         status: 200,

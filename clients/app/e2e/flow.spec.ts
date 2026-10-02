@@ -365,6 +365,16 @@ async function installFlowStubs(
     })
   );
 
+  await page.route(/localhost:9999\/flow\/project\/v2\/projects\/\d+$/, (route: Route) => {
+    const id = route.request().url().split('/').at(-1);
+    const project = projects.find((candidate) => String(candidate.id) === id);
+    return route.fulfill({
+      status: project ? 200 : 404,
+      contentType: 'application/json',
+      body: JSON.stringify(project ? { project: wireProject(project) } : { error: 'Not found' }),
+    });
+  });
+
   await page.route(/localhost:9999\/flow\/project\/v2\/projects\/columns(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,

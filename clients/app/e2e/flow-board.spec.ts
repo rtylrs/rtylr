@@ -330,7 +330,9 @@ test.describe('Flow - Project Board', () => {
 
     // The drawer is open, and the board is still behind it. That is the whole
     // point: opening a task used to replace the board (rtylr#1079).
-    const drawer = page.getByRole('dialog');
+    const drawer = page.getByRole('dialog').filter({
+      has: page.getByText('Build SSO login screen and session handling.', { exact: true }),
+    });
     await expect(drawer).toBeVisible();
     // Loaded, not merely mounted. Without the task endpoint stubbed the drawer
     // opens and sits on "Loading task…", which every other assertion here
@@ -352,7 +354,7 @@ test.describe('Flow - Project Board', () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
-    await expect(page.getByRole('dialog')).toBeHidden();
+    await expect(drawer).toBeHidden();
     expect(page.url()).not.toContain('openTask');
     // Closing the drawer must not throw away the board underneath.
     await expect(page.getByText('Implement SSO Auth Flow')).toBeVisible();
