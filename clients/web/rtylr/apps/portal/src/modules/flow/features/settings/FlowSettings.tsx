@@ -17,7 +17,6 @@ import { flowApi } from '../../shared/services/flowApi';
 import type { ApiUserSettings } from '../../shared/services/flowApi';
 import { useUserStore as useAuthUserStore } from '../../../../shared/stores/userStore';
 import { getRouteApi } from '@tanstack/react-router';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import GateNotice from '../../shared/components/GateNotice';

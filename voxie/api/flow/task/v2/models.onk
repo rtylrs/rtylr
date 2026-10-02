@@ -67,6 +67,12 @@ message FlowTask {
   assignee_initials: string
   /// Number of direct subtasks. Powers the "N subtasks" pill on task rows.
   subtask_count: int32
+  /// Number of completed direct subtasks.
+  completed_subtasks: int32
+  /// Number of task comments.
+  comment_count: int32
+  /// Number of task attachments.
+  attachment_count: int32
   /// Section bucket within a project (e.g. "Backlog", "Sprint 5"). Empty if unbucketed.
   section_id: int64?
   /// Cycle (sprint) this task belongs to, if any. Cycles are project-scoped in v2.
@@ -263,6 +269,12 @@ message CreateTaskRequest {
   /// description is the description value for this contract. Optional in v2:
   /// quick-created tasks start bare and are fleshed out later.
   description: string
+  /// Optional board column within the selected project.
+  section_id: int64? @gt(0)
+  /// Initial built-in lifecycle status; empty uses todo.
+  status: string
+  /// Effort estimate in minutes; omitted means no estimate.
+  effort_minutes: int32? @gte(0)
   /// priority is the priority value for this contract. Optional in v2; empty
   /// means the backend default rather than a client-mandated value.
   priority: string
@@ -304,14 +316,15 @@ message GetTaskDetailResponse {
 message UpdateTaskBody {
   /// Every field here is optional on purpose. This is a partial update: the
   /// client sends only what changed, and the repository preserves omitted
-  /// columns with COALESCE(?, col). Marking a field @required here rejects a
+  /// columns when absent. Empty descriptions/dates and assignee_id = 0 clear
+  /// their fields. Marking a field @required here rejects a
   /// single-field patch with a 400 before the handler ever runs, which is
   /// exactly the defect this contract previously had.
   ///
   /// title is the title value for this contract.
   title: string
   /// description is the description value for this contract.
-  description: string
+  description: string?
   /// status is the current lifecycle state.
   status: string
   /// priority is the priority value for this contract.
@@ -319,20 +332,22 @@ message UpdateTaskBody {
   /// assignee_id is the assignee id value for this contract.
   assignee_id: int64?
   /// due_date is the due date value for this contract.
-  due_date: string
+  due_date: string?
   /// start_date is the start date value for this contract.
-  start_date: string
+  start_date: string?
   /// labels is the labels value for this contract. Absent leaves labels
   /// untouched; @min_items is deliberately absent because requiring one label
   /// made every task without labels permanently unupdatable.
   labels: int64[]
+  /// Board column; omitted keeps it, zero clears it.
+  section_id: int64?
   /// Updated archived status; absent to keep current value. True archives the
   /// task, false restores it.
   archived: bool?
   /// Quick effort estimate in minutes for the effort chips. Absent leaves the
   /// value untouched; 0 clears it. Zero minutes is meaningless as a stored
   /// value, so it is safe as the clear sentinel, and it keeps this field out
-  /// of the COALESCE ambiguity that makes description impossible to clear.
+  /// of ambiguity between an omitted value and an explicit clear.
   effort_minutes: int32?
   /// Estimated hours. Absent leaves untouched; 0 clears. Same sentinel rule as
   /// effort_minutes.

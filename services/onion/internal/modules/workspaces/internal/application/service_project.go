@@ -75,6 +75,12 @@ func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) 
 
 func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domain.Task, error) {
 	defer invalidateWorkspacesScope(ctx, input.BusinessID)
+	if input.Status == "" {
+		input.Status = domain.TaskStatusTodo
+	}
+	if input.Priority == "" {
+		input.Priority = "none"
+	}
 
 	// R13: an omitted project means "file into my My Tasks bucket", which is
 	// lazily provisioned on first use. Every task belongs to exactly one
@@ -88,7 +94,7 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 	}
 
 	// T1: assignment carries access with it.
-	if input.AssigneeID != nil && *input.AssigneeID != input.OwnerID {
+	if input.AssigneeID != nil && *input.AssigneeID > 0 && *input.AssigneeID != input.OwnerID {
 		if grantErr := s.EnsureAssigneeMembership(ctx, input.ProjectID, input.BusinessID, *input.AssigneeID); grantErr != nil {
 			return domain.Task{}, grantErr
 		}
@@ -106,23 +112,7 @@ func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domai
 		logger.Ctx(ctx).Error("CreateTask: failed to log activity", logger.Error(actErr))
 	}
 
-	return domain.Task{
-		ID:           id,
-		ProjectID:    input.ProjectID,
-		WorkspaceID:  input.WorkspaceID,
-		OwnerID:      input.OwnerID,
-		BusinessID:   input.BusinessID,
-		ParentTaskID: input.ParentTaskID,
-		Title:        input.Title,
-		Description:  input.Description,
-		Status:       "todo",
-		Priority:     input.Priority,
-		AssigneeID:   input.AssigneeID,
-		ReporterID:   input.ReporterID,
-		DueDate:      input.DueDate,
-		StartDate:    input.StartDate,
-		Labels:       input.Labels,
-	}, nil
+	return s.repo.GetTaskByID(ctx, id)
 }
 
 func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskDetail, error) {
@@ -255,6 +245,11 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 
 	var reassignment *assigneeChange
 	if input.AssigneeID != nil {
+		if *input.AssigneeID > 0 && *input.AssigneeID != userID {
+			if err := s.EnsureAssigneeMembership(ctx, existing.ProjectID, input.BusinessID, *input.AssigneeID); err != nil {
+				return err
+			}
+		}
 		existingAssignee := int64(0)
 		if existing.AssigneeID != nil {
 			existingAssignee = *existing.AssigneeID

@@ -131,3 +131,22 @@ describe('TaskCard labels (#1039)', () => {
     expect(screen.queryByText('qa-temp')).not.toBeInTheDocument();
   });
 });
+
+describe('TaskCard persisted activity', () => {
+  it('renders remote comment, attachment and completion counts with an empty local store', () => {
+    render(
+      <TaskCard
+        task={{
+          ...baseTask,
+          commentCount: 3,
+          attachmentCount: 2,
+          subtaskCount: 4,
+          completedSubtasks: 1,
+        }}
+      />
+    );
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('1/4')).toBeInTheDocument();
+  });
+});

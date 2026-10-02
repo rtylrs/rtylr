@@ -63,7 +63,7 @@ func TestWorkspaces_SumWorkDayLineMinutesByDayIDs_ReturnsEachDayTotal(t *testing
 		}
 	}
 
-	totals, err := repo.SumWorkDayLineMinutesByDayIDs(ctx, testutil.OwnerID, testutil.BusinessID, []int64{dayA.ID, dayB.ID})
+	totals, err := repo.SumWorkDayLineMinutesByDayIDs(ctx, testutil.BusinessID, []int64{dayA.ID, dayB.ID})
 	if err != nil {
 		t.Fatalf("SumWorkDayLineMinutesByDayIDs: %v", err)
 	}

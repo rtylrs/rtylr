@@ -42,7 +42,7 @@ vi.mock('../../shared/stores/flowStore', () => ({
   },
 }));
 const tasksData = vi.hoisted(() => ({ data: [] as Record<string, unknown>[] }));
-vi.mock('../tasks/useTasks', () => ({ useTasks: () => tasksData }));
+vi.mock('../tasks/useTasks', () => ({ useTasks: () => ({ ...tasksData, refetch: vi.fn() }) }));
 vi.mock('../../shared/lib/useProjectRealtime', () => ({ useProjectRealtime: () => undefined }));
 vi.mock('./ProjectViewTabs', () => ({ default: () => null }));
 const currentProjectState = vi.hoisted(() => ({

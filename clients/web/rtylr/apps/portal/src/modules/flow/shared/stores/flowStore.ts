@@ -171,6 +171,8 @@ export interface Task {
   focusPin?: boolean;
   subtaskCount: number;
   completedSubtasks?: number;
+  commentCount?: number;
+  attachmentCount?: number;
   projectName: string;
   labelIds?: string[];
   cycleId?: string;
@@ -246,205 +248,39 @@ export interface Notification {
 interface FlowState {
   members: Member[];
   projects: Project[];
-  tasks: Task[];
-  comments: Comment[];
-  activity: ActivityEntry[];
-  subtasks: Subtask[];
-  attachments: Attachment[];
-  milestones: Milestone[];
-  cycles: Cycle[];
-  labels: Label[];
-  views: SavedView[];
-  templates: TaskTemplate[];
-  notifications: Notification[];
-  timelogs: TimeLog[];
-  sections: ProjectSection[];
-  customFieldDefinitions: CustomFieldDefinition[];
-
-  // preferences
   quickCreateOpen: boolean;
+  quickCreateColumnId: string | undefined;
   projectCreateOpen: boolean;
   selectedTaskIds: string[];
-  defaultView: 'board' | 'list';
-  showArchived: boolean;
-
-  // setters for API data
-  setMembers: (m: Member[]) => void;
-  setProjects: (p: Project[]) => void;
-  setTasks: (t: Task[]) => void;
-  setComments: (c: Comment[]) => void;
-  setActivity: (a: ActivityEntry[]) => void;
-  setSubtasks: (s: Subtask[]) => void;
-  setAttachments: (a: Attachment[]) => void;
-  setMilestones: (m: Milestone[]) => void;
-  setCycles: (c: Cycle[]) => void;
-  setLabels: (l: Label[]) => void;
-  setViews: (v: SavedView[]) => void;
-  setTemplates: (t: TaskTemplate[]) => void;
-  setNotifications: (n: Notification[]) => void;
-  setTimelogs: (t: TimeLog[]) => void;
-  setSections: (s: ProjectSection[]) => void;
-  setCustomFieldDefinitions: (c: CustomFieldDefinition[]) => void;
-
-  // actions
-  setQuickCreateOpen: (open: boolean) => void;
+  setMembers: (members: Member[]) => void;
+  setProjects: (projects: Project[]) => void;
+  setQuickCreateOpen: (open: boolean, columnId?: string) => void;
   setProjectCreateOpen: (open: boolean) => void;
   toggleSelectTask: (id: string) => void;
   clearSelection: () => void;
   selectAll: (ids: string[]) => void;
-  updateTask: (id: string, patch: Partial<Task>) => void;
-  confirmTask: (tempId: string, realId: string) => void;
-  deleteTask: (id: string) => void;
-  archiveTask: (id: string) => void;
-  bulkUpdateTasks: (ids: string[], patch: Partial<Task>) => void;
-  addComment: (
-    taskId: string,
-    body: string,
-    author?: { name: string; initials: string; id: string }
-  ) => void;
-  toggleSubtask: (id: string) => void;
-  addSubtask: (taskId: string, title: string) => void;
-  markNotificationRead: (id: string) => void;
-  markAllNotificationsRead: () => void;
-  logTime: (taskId: string, minutes: number, note?: string) => void;
-  setDefaultView: (v: 'board' | 'list') => void;
-  setShowArchived: (v: boolean) => void;
-  addView: (view: SavedView) => void;
 }
 
-export const useFlowStore = create<FlowState>()((set, get) => ({
+export const useFlowStore = create<FlowState>()((set) => ({
   members: [],
   projects: [],
-  tasks: [],
-  comments: [],
-  activity: [],
-  subtasks: [],
-  attachments: [],
-  milestones: [],
-  cycles: [],
-  labels: [],
-  views: [],
-  templates: [],
-  notifications: [],
-  timelogs: [],
-  sections: [],
-  customFieldDefinitions: [],
-
   quickCreateOpen: false,
+  quickCreateColumnId: undefined,
   projectCreateOpen: false,
   selectedTaskIds: [],
-  defaultView: 'board',
-  showArchived: false,
-
-  // setters for API data
-  setMembers: (m) => set({ members: m }),
-  setProjects: (p) => set({ projects: p }),
-  setTasks: (t) => set({ tasks: t }),
-  setComments: (c) => set({ comments: c }),
-  setActivity: (a) => set({ activity: a }),
-  setSubtasks: (s) => set({ subtasks: s }),
-  setAttachments: (a) => set({ attachments: a }),
-  setMilestones: (m) => set({ milestones: m }),
-  setCycles: (c) => set({ cycles: c }),
-  setLabels: (l) => set({ labels: l }),
-  setViews: (v) => set({ views: v }),
-  setTemplates: (t) => set({ templates: t }),
-  setNotifications: (n) => set({ notifications: n }),
-  setTimelogs: (t) => set({ timelogs: t }),
-  setSections: (s) => set({ sections: s }),
-  setCustomFieldDefinitions: (c) => set({ customFieldDefinitions: c }),
-
-  setQuickCreateOpen: (open) => set({ quickCreateOpen: open }),
+  setMembers: (members) => set({ members }),
+  setProjects: (projects) => set({ projects }),
+  setQuickCreateOpen: (open, columnId) =>
+    set({ quickCreateOpen: open, quickCreateColumnId: open ? columnId : undefined }),
   setProjectCreateOpen: (open) => set({ projectCreateOpen: open }),
   toggleSelectTask: (id) =>
-    set((s) => ({
-      selectedTaskIds: s.selectedTaskIds.includes(id)
-        ? s.selectedTaskIds.filter((x) => x !== id)
-        : [...s.selectedTaskIds, id],
+    set((state) => ({
+      selectedTaskIds: state.selectedTaskIds.includes(id)
+        ? state.selectedTaskIds.filter((selected) => selected !== id)
+        : [...state.selectedTaskIds, id],
     })),
   clearSelection: () => set({ selectedTaskIds: [] }),
   selectAll: (ids) => set({ selectedTaskIds: ids }),
-
-  updateTask: (id, patch) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) =>
-        t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t
-      ),
-    })),
-
-  confirmTask: (tempId, realId) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) => (t.id === tempId ? { ...t, id: realId } : t)),
-    })),
-
-  deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
-
-  archiveTask: (id) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) => (t.id === id ? { ...t, archived: true } : t)),
-    })),
-
-  bulkUpdateTasks: (ids, patch) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) =>
-        ids.includes(t.id) ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t
-      ),
-    })),
-
-  addComment: (taskId, body, author) =>
-    set((s) => ({
-      comments: [
-        ...s.comments,
-        {
-          id: `cm${Date.now()}`,
-          taskId,
-          authorId: author?.id ?? '',
-          author: author?.name ?? 'You',
-          authorInitials: author?.initials ?? 'YO',
-          body,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    })),
-
-  toggleSubtask: (id) =>
-    set((s) => ({
-      subtasks: s.subtasks.map((x) => (x.id === id ? { ...x, completed: !x.completed } : x)),
-    })),
-
-  addSubtask: (taskId, title) =>
-    set((s) => ({
-      subtasks: [...s.subtasks, { id: `s${Date.now()}`, taskId, title, completed: false }],
-    })),
-
-  markNotificationRead: (id) =>
-    set((s) => ({
-      notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    })),
-
-  markAllNotificationsRead: () =>
-    set((s) => ({
-      notifications: s.notifications.map((n) => ({ ...n, read: true })),
-    })),
-
-  logTime: (taskId, minutes, note) =>
-    set((s) => ({
-      timelogs: [
-        ...s.timelogs,
-        {
-          id: `tl${Date.now()}`,
-          taskId,
-          userId: '',
-          minutes,
-          note,
-          loggedAt: new Date().toISOString(),
-        },
-      ],
-    })),
-
-  setDefaultView: (v) => set({ defaultView: v }),
-  setShowArchived: (v) => set({ showArchived: v }),
-  addView: (view) => set((s) => ({ views: [...s.views, view] })),
 }));
 
 // -- Utility selectors ---------------------------------------------------

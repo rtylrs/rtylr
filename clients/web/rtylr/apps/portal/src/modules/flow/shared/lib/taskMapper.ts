@@ -58,15 +58,18 @@ export function apiTaskToTask(t: ApiTask): Task {
     dueDate: t.dueDate ?? '',
     startDate: (t as { startDate?: string }).startDate,
     subtaskCount: t.subtaskCount ?? 0,
+    completedSubtasks: t.completedSubtasks ?? 0,
+    commentCount: t.commentCount ?? 0,
+    attachmentCount: t.attachmentCount ?? 0,
     projectName: t.projectName ?? '',
     labelIds: t.labels,
     identifier: t.identifier ?? id,
     createdAt: t.createdAt ?? new Date().toISOString(),
     updatedAt: t.updatedAt ?? new Date().toISOString(),
-    estimate: t.estimate,
-    // CreateTask has no effort_minutes field in the v2 contract, so the quick
-    // create path sends effort as estimated_hours. Prefer the explicit field
-    // when it exists and derive the legacy representation only as a fallback.
+    estimate: t.estimatedHours ?? t.estimate,
+    cycleId: t.cycleId != null ? String(t.cycleId) : undefined,
+    milestoneId: t.milestoneId != null ? String(t.milestoneId) : undefined,
+    // Older tasks stored effort as estimated hours.
     effortMinutes:
       t.effortMinutes ??
       (t.estimatedHours != null && Number.isFinite(t.estimatedHours) && t.estimatedHours > 0

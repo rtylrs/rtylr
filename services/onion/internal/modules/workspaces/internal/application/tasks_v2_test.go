@@ -107,3 +107,27 @@ func TestListTasksV2VisibilityGating(t *testing.T) {
 		t.Errorf("creator sees %d tasks, want >= 1", creatorTotal)
 	}
 }
+
+func TestListTasksV2FiltersProjectAndPagination(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+	first := createV2Project(ctx, t, svc, "first-project", "", v2UserA)
+	second := createV2Project(ctx, t, svc, "second-project", "", v2UserA)
+	for _, project := range []domain.Project{first, first, second} {
+		if _, err := svc.CreateTask(ctx, domain.TaskInput{ProjectID: project.ID, BusinessID: v2Business, OwnerID: v2UserA, Title: "project task", ReporterID: v2UserA}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, offset := range []int64{0, 1} {
+		rows, total, err := svc.ListTasksV2(ctx, v2UserA, v2Business, domain.ListTasksFilter{ProjectID: first.ID, Limit: 1, Offset: offset})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if total != 2 || len(rows) != 1 || rows[0].ProjectID != first.ID {
+			t.Fatalf("project page %d = %v, total %d", offset, rows, total)
+		}
+	}
+	rows, total, err := svc.ListTasksV2(ctx, v2UserA, v2Business, domain.ListTasksFilter{ProjectID: second.ID, Limit: 10})
+	if err != nil || total != 1 || len(rows) != 1 || rows[0].ProjectID != second.ID {
+		t.Fatalf("second project = %v, total %d, error %v", rows, total, err)
+	}
+}

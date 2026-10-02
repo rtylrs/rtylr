@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { WorkDay, WorkDayLine, WorkType } from '@voxire/voxie/flow/time/v2/types';
+import type {
+  ListTeamWorkDaysResponse,
+  WorkDay,
+  WorkDayLine,
+  WorkType,
+} from '@voxire/voxie/flow/time/v2/types';
 import { toast } from 'sonner';
 import { timeV2 } from '../../shared/lib/clients';
 import i18next from '../../shared/services/i18next';
@@ -114,19 +119,25 @@ export function useWorkDaysRange(from: string, to: string) {
   });
 }
 
-/**
- * Every member's work days across a range, for the team view and reports.
- * Requires at least admin on the workspace - enforced server-side, not just
- * hidden in the UI: a caller without it gets a real 403 from this same call.
- */
-// Business-scoped, not workspace-scoped. v1's listWorkDaysForWorkspace required a
-// workspace id, and activeWorkspaceId is '' outside the /w/ routes - so on
-// /time/team and /time/reports the query was permanently disabled and every row
-// read as not-started. v2's listTeamWorkDays takes no workspace at all.
+export async function fetchTeamWorkDays(
+  from: string,
+  to: string
+): Promise<ListTeamWorkDaysResponse> {
+  const workDays: WorkDay[] = [];
+  for (let page = 1; ; page += 1) {
+    const result = await timeV2.listTeamWorkDays({ fromDate: from, toDate: to, page, limit: 500 });
+    const rows = result.workDays ?? [];
+    workDays.push(...rows);
+    const more = result.pagination?.hasNext ?? (result.pagination?.total ?? 0) > workDays.length;
+    if (!more || rows.length === 0) return { ...result, workDays };
+  }
+}
+
+/** Business and project visibility is enforced by the team endpoint. */
 export function useTeamWorkDays(from: string, to: string) {
   return useQuery({
     queryKey: ['work-days-team', from, to],
-    queryFn: () => timeV2.listTeamWorkDays({ fromDate: from, toDate: to, limit: 500 }),
+    queryFn: () => fetchTeamWorkDays(from, to),
     enabled: !!from && !!to,
   });
 }
@@ -164,6 +175,7 @@ export function useUpsertWorkDay(options?: MutationOptions) {
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
       void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
+      void queryClient.invalidateQueries({ queryKey: ['work-days-team'] });
     },
     onError: () => {
       if (!options?.silent) toast.error(t('flow.time.daySaveFailed'));
@@ -202,6 +214,7 @@ export function useCreateWorkDayLine(options?: MutationOptions) {
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
       void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
+      void queryClient.invalidateQueries({ queryKey: ['work-days-team'] });
     },
     onError: () => {
       if (!options?.silent) toast.error(t('flow.time.lineSaveFailed'));
@@ -216,6 +229,7 @@ export function useDeleteWorkDayLine() {
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
       void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
+      void queryClient.invalidateQueries({ queryKey: ['work-days-team'] });
     },
     onError: () => toast.error(t('flow.time.lineDeleteFailed')),
   });

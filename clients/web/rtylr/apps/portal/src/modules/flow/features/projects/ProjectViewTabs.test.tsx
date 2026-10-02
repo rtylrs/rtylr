@@ -1,12 +1,37 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProjectViewTabs from './ProjectViewTabs';
+import { initTestI18n } from '../../shared/testing/i18n';
+const state = vi.hoisted(() => ({ pathname: '/flow/p/2', canAdminister: true, canCreate: true }));
+vi.mock('../../shared/lib/currentUser', () => ({
+  useCanAdministerProject: () => state.canAdminister,
+}));
+vi.mock('../../shared/stores/userStore', () => ({
+  useUserStore: (selector: (value: unknown) => unknown) =>
+    selector({
+      user: {
+        effectiveAccess: {
+          isOwner: state.canCreate,
+          subscribedApps: ['flow'],
+          apps: [],
+          dashPermissions: [],
+          appPermissions: {},
+        },
+      },
+    }),
+}));
+beforeEach(async () => {
+  await initTestI18n();
+  state.pathname = '/flow/p/2';
+  state.canAdminister = true;
+  state.canCreate = true;
+});
 
 const mockUseFeatureFlag = vi.fn();
 
 vi.mock('@tanstack/react-router', () => ({
-  useLocation: () => ({ pathname: '/w/1/p/2' }),
+  useLocation: () => ({ pathname: state.pathname }),
   Link: ({
     children,
     to,
@@ -36,13 +61,7 @@ function renderTabs(
   }
 ) {
   return render(
-    <ProjectViewTabs
-      project={project}
-      workspaceId="1"
-      projectId="2"
-      taskCount={3}
-      onNewTask={vi.fn()}
-    />
+    <ProjectViewTabs project={project} projectId="2" taskCount={3} onNewTask={vi.fn()} />
   );
 }
 
@@ -51,25 +70,25 @@ describe('ProjectViewTabs preview-route gating', () => {
     mockUseFeatureFlag.mockReturnValue(false);
     renderTabs();
 
-    expect(screen.queryByText('flow.projectViewTabs.overview')).not.toBeInTheDocument();
-    expect(screen.queryByText('flow.shell.timeline')).not.toBeInTheDocument();
-    expect(screen.queryByText('flowNav.dashboard')).not.toBeInTheDocument();
+    expect(screen.queryByText('Overview')).not.toBeInTheDocument();
+    expect(screen.queryByText('Timeline')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
 
-    expect(screen.getByText('flow.projectViewTabs.board')).toBeInTheDocument();
-    expect(screen.getByText('flow.projectViewTabs.list')).toBeInTheDocument();
-    expect(screen.getByText('flow.shell.calendar')).toBeInTheDocument();
+    expect(screen.getByText('Board')).toBeInTheDocument();
+    expect(screen.getByText('List')).toBeInTheDocument();
+    expect(screen.getByText('Calendar')).toBeInTheDocument();
   });
 
   it('shows all tabs when the preview-routes flag is on', () => {
     mockUseFeatureFlag.mockReturnValue(true);
     renderTabs();
 
-    expect(screen.getByText('flow.projectViewTabs.overview')).toBeInTheDocument();
-    expect(screen.getByText('flow.shell.timeline')).toBeInTheDocument();
-    expect(screen.getByText('flowNav.dashboard')).toBeInTheDocument();
-    expect(screen.getByText('flow.projectViewTabs.board')).toBeInTheDocument();
-    expect(screen.getByText('flow.projectViewTabs.list')).toBeInTheDocument();
-    expect(screen.getByText('flow.shell.calendar')).toBeInTheDocument();
+    expect(screen.getByText('Overview')).toBeInTheDocument();
+    expect(screen.getByText('Timeline')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Board')).toBeInTheDocument();
+    expect(screen.getByText('List')).toBeInTheDocument();
+    expect(screen.getByText('Calendar')).toBeInTheDocument();
   });
 });
 
@@ -99,5 +118,23 @@ describe('ProjectViewTabs shows the project glyph (#1085)', () => {
       (el.getAttribute('style') ?? '').includes('112233')
     );
     expect(tinted?.getAttribute('width')).toBe('20');
+  });
+});
+
+describe('Portal project navigation', () => {
+  it.each([
+    ['/flow/p/2', 'Board'],
+    ['/flow/p/2/calendar', 'Calendar'],
+  ])('marks the current view at %s', (pathname, label) => {
+    state.pathname = pathname;
+    renderTabs();
+    expect(screen.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
+  });
+  it('hides creation and settings for a viewer', () => {
+    state.canCreate = false;
+    state.canAdminister = false;
+    renderTabs();
+    expect(screen.queryByRole('button', { name: 'New task' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Settings' })).not.toBeInTheDocument();
   });
 });

@@ -44,17 +44,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const openTask = useOpenTask();
-  const { comments, attachments, subtasks, projects } = useFlowStore();
-  // Labels come from the query, not the store. `setLabels` has no call site
-  // anywhere in the app, so the store's `labels` was permanently [] and no
-  // chip ever rendered here even when the task had labels.
+  const { projects } = useFlowStore();
   const { data: allLabels = [] } = useLabels();
   const taskLabels = labelsForTask(allLabels, task);
   const project = projects.find((p) => p.id === task.projectId);
-  const commentCount = comments.filter((c) => c.taskId === task.id).length;
-  const attachmentCount = attachments.filter((a) => a.taskId === task.id).length;
-  const taskSubtasks = subtasks.filter((s) => s.taskId === task.id);
-  const doneSubtasks = taskSubtasks.filter((s) => s.completed).length;
+  const commentCount = task.commentCount ?? 0;
+  const attachmentCount = task.attachmentCount ?? 0;
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
   const due = dueState(task.dueDate);
@@ -74,21 +69,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   return (
     <>
       <motion.div
-        // `dimmed` goes through motion's own `animate`, not through `style`.
-        //
-        // This card used to set `style={{ opacity: dimmed ? 0.5 : undefined }}`
-        // beside an animated `opacity`, and the two fought. React writes
-        // `opacity: undefined` into the same style object motion is animating,
-        // which pins the value at whatever `initial` set, so **every card on
-        // the board stayed at opacity 0** and the columns, counts and empty
-        // states rendered around invisible cards until some later re-render
-        // shook them loose (rtylr#1078).
-        //
-        // Measured in headless and headed Chromium, on a dev server and a
-        // production build: opacity 0 four seconds after load, rAF running,
-        // `getAnimations()` empty. The inbox row has the same `layout` plus
-        // opacity-0 `initial` and animates correctly, which is what ruled the
-        // combination out as the cause and pointed at the competing style.
+        // Let Motion own opacity so React cannot overwrite the entrance animation.
         layout
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: dimmed ? 0.5 : 1, y: 0 }}
@@ -101,9 +82,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             openTask(String(task.id));
           }
         }}
+        role="button"
+        tabIndex={0}
+        aria-label={t('flowCommon.taskRow.openTask', {
+          identifier: task.identifier,
+          title: task.title,
+        })}
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+          e.preventDefault();
+          if (e.metaKey || e.ctrlKey) onSelect?.();
+          else openTask(String(task.id));
+        }}
         onContextMenu={handleContextMenu}
-        // p-3 rather than p-3.5: the rule is 10-12px and 14px was outside it.
-        className={cn('rounded-lg cursor-pointer group relative', compact ? 'p-2.5' : 'p-3')}
+        className={cn(
+          'flow-focus rounded-lg cursor-pointer group relative',
+          compact ? 'p-2.5' : 'p-3'
+        )}
         style={{
           background: 'var(--flow-card)',
           border: selected ? '1px solid var(--accent)' : '1px solid var(--flow-border)',
@@ -197,13 +192,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-2">
             <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
-            {taskSubtasks.length > 0 && (
+            {task.subtaskCount > 0 && (
               <span
                 className="flex items-center gap-0.5 text-flow-meta"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <GitBranch size={10} />
-                {doneSubtasks}/{taskSubtasks.length}
+                {task.completedSubtasks ?? 0}/{task.subtaskCount}
               </span>
             )}
             {commentCount > 0 && (

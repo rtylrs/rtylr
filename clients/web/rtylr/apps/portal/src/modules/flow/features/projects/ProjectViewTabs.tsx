@@ -13,6 +13,9 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 import ProjectIcon from '../../shared/components/ProjectIcon';
+import { useUserStore } from '../../shared/stores/userStore';
+import { canFlowPermission } from '../../shared/lib/roleUtils';
+import { useCanAdministerProject } from '../../shared/lib/currentUser';
 
 interface ProjectViewTabsProps {
   project: { name: string; color: string; icon?: string };
@@ -65,7 +68,7 @@ const VIEWS: ViewDef[] = [
     to: '/flow/p/$projectId',
     // The default project route is board - matches anything that isn't
     // explicitly another view.
-    match: (p) => /^\/p\/[^/]+$/.test(p) || p.endsWith('/board'),
+    match: (p) => /^\/flow\/p\/[^/]+$/.test(p) || p.endsWith('/board'),
   },
   {
     key: 'list',
@@ -79,7 +82,7 @@ const VIEWS: ViewDef[] = [
     labelKey: 'flow.shell.timeline',
     icon: GanttChart,
     to: '/flow/p/$projectId/timeline',
-    match: (p) => p.endsWith('/flow/timeline'),
+    match: (p) => p.endsWith('/timeline'),
     previewOnly: true,
   },
   {
@@ -87,7 +90,7 @@ const VIEWS: ViewDef[] = [
     labelKey: 'flow.shell.calendar',
     icon: Calendar,
     to: '/flow/p/$projectId/calendar',
-    match: (p) => p.endsWith('/flow/calendar'),
+    match: (p) => p.endsWith('/calendar'),
   },
   {
     key: 'dashboard',
@@ -99,12 +102,6 @@ const VIEWS: ViewDef[] = [
   },
 ];
 
-/**
- * Shared project header. Renders the project name + task count on the left
- * and the full view-tab switcher + primary "New task" CTA on the right.
- * Every project view (Overview, Board, List, Timeline, Calendar, Dashboard)
- * renders this so the navigation is stable across views.
- */
 const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
   project,
   projectId,
@@ -114,6 +111,10 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
 }) => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
+  const canCreate = useUserStore((state) =>
+    canFlowPermission('flow:tasks:create', state.user?.effectiveAccess)
+  );
+  const canAdminister = useCanAdministerProject(projectId);
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const visibleViews = VIEWS.filter((v) => !v.previewOnly || showPreviewRoutes);
 
@@ -123,10 +124,6 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
       style={{ borderBottom: '1px solid var(--flow-border)' }}
     >
       <div className="flex min-w-0 items-center gap-2.5">
-        {/* The project's own glyph, tinted with its colour, rather than a
-            plain dot. G-C5 puts the colour in three places: the sidebar dot,
-            this header icon and the chip. The dot said nothing the sidebar was
-            not already saying (#1085). 20px, per G-I1's header size. */}
         <ProjectIcon
           icon={project.icon}
           size={20}
@@ -166,6 +163,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
                 key={v.key}
                 to={v.to}
                 params={{ projectId }}
+                aria-current={active ? 'page' : undefined}
                 className={[
                   'flex items-center gap-1.5 px-2 py-1 rounded-sm text-flow-meta font-medium transition-colors',
                   active ? '' : 'hover:bg-[var(--flow-hover)]',
@@ -183,26 +181,28 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
           })}
         </div>
 
-        <Link
-          to="/flow/p/$projectId/settings"
-          params={{ projectId }}
-          className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] transition-colors"
-          style={{ color: 'var(--flow-text-dim)' }}
-          aria-label={t('flowNav.settings')}
-        >
-          <SettingsIcon size={13} />
-        </Link>
+        {canAdminister && (
+          <Link
+            to="/flow/p/$projectId/settings"
+            params={{ projectId }}
+            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] transition-colors"
+            style={{ color: 'var(--flow-text-dim)' }}
+            aria-label={t('flowNav.settings')}
+          >
+            <SettingsIcon size={13} />
+          </Link>
+        )}
 
-        {/* Primary CTA. White text on teal - the old near-black-on-teal
-            combo was failing WCAG on anything but the darkest teal. */}
-        <button
-          type="button"
-          onClick={onNewTask}
-          className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-flow-meta font-semibold transition-opacity hover:opacity-90"
-          style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
-        >
-          <Plus size={12} strokeWidth={2.5} /> New task
-        </button>
+        {canCreate && (
+          <button
+            type="button"
+            onClick={onNewTask}
+            className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-flow-meta font-semibold transition-opacity hover:opacity-90"
+            style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
+          >
+            <Plus size={12} strokeWidth={2.5} /> {t('flow.shell.newTask')}
+          </button>
+        )}
       </div>
     </div>
   );

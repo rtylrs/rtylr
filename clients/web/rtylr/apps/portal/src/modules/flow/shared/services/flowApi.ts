@@ -109,6 +109,9 @@ export interface ApiTask {
   // of hardcoding a placeholder.
   startDate?: string;
   subtaskCount: number;
+  completedSubtasks?: number;
+  commentCount?: number;
+  attachmentCount?: number;
   projectName: string;
   estimate?: number;
   estimatedHours?: number | null;
@@ -275,8 +278,10 @@ export const DEFAULT_PROJECT_ICON = '\u{1F4CB}';
 
 const toTaskCreatePayload = (data: {
   projectId?: string;
+  sectionId?: string;
   title: string;
   description?: string;
+  status?: ApiTask['status'];
   priority?: ApiTask['priority'];
   assigneeId?: string;
   dueDate?: string;
@@ -287,12 +292,15 @@ const toTaskCreatePayload = (data: {
   // OneKit-generated contracts wire-encode int64 fields as JSON strings, even
   // the personal-workspace/project sentinel value 0 - never send a bare number.
   project_id: String(data.projectId ? Number(data.projectId) : 0),
+  section_id: data.sectionId,
   title: data.title,
-  description: data.description ?? '-',
+  description: data.description ?? '',
   priority: toWirePriority(data.priority ?? 'medium'),
   assignee_id: data.assigneeId ? String(Number(data.assigneeId)) : undefined,
-  due_date: data.dueDate ?? '-',
-  start_date: '-',
+  due_date: data.dueDate ?? '',
+  start_date: '',
+  status: data.status,
+  effort_minutes: data.effortMinutes,
   estimated_hours:
     data.estimatedHours ?? (data.effortMinutes !== undefined ? data.effortMinutes / 60 : undefined),
   labels: data.labels?.map((label) => String(Number(label))),
@@ -623,12 +631,20 @@ export const flowApi = {
   // filters. activeOnly and compact were only ever collected into a local
   // object and dropped before the request; neither exists on either contract,
   // so they are gone rather than silently ignored.
-  getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) =>
-    flowResult<{ tasks: ApiTask[] }>(() =>
+  getTasks: (params: {
+    projectId?: string;
+    status?: ApiTask['status'];
+    assigneeId?: string;
+    page?: number;
+    limit?: number;
+  }) =>
+    flowResult<{ tasks: ApiTask[]; pagination?: ApiPagination }>(() =>
       taskV2.listTasks({
         projectId: params.projectId,
         status: params.status ?? '',
         assigneeId: params.assigneeId,
+        page: params.page ?? 1,
+        limit: params.limit ?? 500,
       })
     ),
 
@@ -654,6 +670,7 @@ export const flowApi = {
   // what lets quick-add post a task with nothing else filled in.
   createTask: (data: {
     projectId?: string;
+    sectionId?: string;
     title: string;
     description?: string;
     status?: ApiTask['status'];
@@ -668,8 +685,11 @@ export const flowApi = {
       const payload = toTaskCreatePayload(data);
       return taskV2.createTask({
         projectId: payload.project_id,
+        sectionId: payload.section_id,
         title: payload.title,
         description: payload.description,
+        status: payload.status,
+        effortMinutes: payload.effort_minutes,
         priority: payload.priority,
         assigneeId: payload.assignee_id,
         dueDate: payload.due_date,
@@ -694,6 +714,7 @@ export const flowApi = {
       taskV2.updateTask({
         id,
         body: {
+          sectionId: data.sectionId !== undefined ? data.sectionId || '0' : undefined,
           title: data.title,
           description: data.description,
           status: data.status,
@@ -702,7 +723,7 @@ export const flowApi = {
             data.assigneeId !== undefined
               ? data.assigneeId
                 ? String(Number(data.assigneeId))
-                : undefined
+                : '0'
               : undefined,
           dueDate: data.dueDate,
           startDate: data.startDate,
@@ -712,11 +733,21 @@ export const flowApi = {
           estimatedHours:
             data.estimatedHours ?? (data.estimate !== undefined ? data.estimate : undefined),
           focusPin: data.focusPin,
+          waitingOn: data.waitingOn,
+          decisionNote: data.decisionNote,
         },
       })
     ),
 
   deleteTask: (id: string) => flowResult<{ message: string }>(() => taskV2.deleteTask({ id })),
+
+  addTaskDependency: (taskId: string, dependsOnTaskId: string) =>
+    flowResult<{ message: string }>(() =>
+      taskV2.addTaskDependency({ taskId, body: { dependsOnTaskId } })
+    ),
+
+  removeTaskDependency: (taskId: string, dependsOnTaskId: string) =>
+    flowResult<{ message: string }>(() => taskV2.removeTaskDependency({ taskId, dependsOnTaskId })),
 
   updateTaskStatus: (id: string, status: ApiTask['status']) =>
     flowResult<{ message: string }>(() => taskV2.updateTaskStatus({ id, body: { status } })),

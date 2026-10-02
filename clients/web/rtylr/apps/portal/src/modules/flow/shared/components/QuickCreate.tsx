@@ -53,7 +53,7 @@ export const QuickCreate: React.FC = () => {
   const openTask = useOpenTask();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const { quickCreateOpen, setQuickCreateOpen } = useFlowStore();
+  const { quickCreateOpen, quickCreateColumnId, setQuickCreateOpen } = useFlowStore();
   const user = useUserStore((s) => s.user);
   const { projectId: currentProjectId } = useParams({ strict: false });
   const canCreate = canFlowPermission('flow:tasks:create', user?.effectiveAccess);
@@ -105,6 +105,7 @@ export const QuickCreate: React.FC = () => {
       const res = await createTaskMutation.mutateAsync({
         title: title.trim(),
         projectId: projectId || undefined,
+        sectionId: projectId === currentProjectId ? quickCreateColumnId : undefined,
         priority,
         description: description.trim() || undefined,
         dueDate: dueDate || undefined,
@@ -131,7 +132,7 @@ export const QuickCreate: React.FC = () => {
   const assigneeName = displayUserName(user);
 
   return (
-    <Dialog open={quickCreateOpen} onOpenChange={setQuickCreateOpen}>
+    <Dialog open={quickCreateOpen} onOpenChange={(open) => setQuickCreateOpen(open)}>
       <DialogContent
         className="portal-flow-dialog flex max-h-[calc(100dvh-32px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg"
         dir={i18n.dir()}

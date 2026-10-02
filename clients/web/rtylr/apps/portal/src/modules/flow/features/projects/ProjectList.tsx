@@ -1,16 +1,8 @@
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import React, { useMemo, useState, useEffect } from 'react';
-import { Link, useParams } from '@tanstack/react-router';
+import { useParams } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  Plus,
-  Calendar,
-  ChevronRight,
-  Check,
-  LayoutGrid,
-  List,
-  MoreHorizontal,
-  ChevronDown,
-} from 'lucide-react';
+import { Plus, Calendar, ChevronRight, Check, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
@@ -19,10 +11,16 @@ import { cn, formatDueDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
+import { useProjectColumns } from './useColumns';
 import { useStatusLabels } from '../../shared/hooks/useStatusLabels';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
+import { useCanEditTask } from '../../shared/lib/currentUser';
+import { useUserStore } from '../../shared/stores/userStore';
+import { canFlowPermission } from '../../shared/lib/roleUtils';
+import ProjectViewTabs from './ProjectViewTabs';
 
 interface StatusGroupDef {
   id: Task['status'];
@@ -31,16 +29,6 @@ interface StatusGroupDef {
   alwaysShown: boolean;
 }
 
-// Labels are filled in from useStatusLabels() at render time (the single
-// i18n-backed source of truth - see constantsFlow.ts's STATUS_LABEL_KEYS) so
-// this view can never hardcode a different string than the rest of the app.
-// Every value of the status enum has a group. backlog and cancelled were
-// absent, so a task in either state rendered in no group at all and was simply
-// invisible on this screen while showing up on the board (#1049).
-//
-// `alwaysShown` keeps the appearance of a project that has neither: those two
-// groups appear only when they hold something, so a list that looked like four
-// groups yesterday still does.
 export const STATUS_GROUP_COLORS: { id: Task['status']; color: string; alwaysShown: boolean }[] = [
   { id: 'backlog', color: 'var(--flow-neutral-fg)', alwaysShown: false },
   { id: 'todo', color: 'var(--flow-neutral-fg)', alwaysShown: true },
@@ -65,6 +53,8 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
   const [checked, setChecked] = useState(task.status === 'done');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const updateTaskStatus = useUpdateTaskStatus();
+  const openTask = useOpenTask();
+  const canEdit = useCanEditTask(task.projectId);
 
   useEffect(() => {
     setChecked(task.status === 'done');
@@ -95,6 +85,19 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
   return (
     <motion.div
+      role="button"
+      tabIndex={0}
+      aria-label={t('flowCommon.taskRow.openTask', {
+        identifier: task.identifier,
+        title: task.title,
+      })}
+      onClick={() => openTask(task.id)}
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          openTask(task.id);
+        }
+      }}
       layout
       initial={{ opacity: 0, x: -6 }}
       animate={{ opacity: 1, x: 0 }}
@@ -108,7 +111,11 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       {/* Checkbox */}
       <button
         type="button"
-        onClick={handleToggle}
+        disabled={!canEdit}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleToggle();
+        }}
         aria-label={t('flow.projectList.toggleDoneLabel')}
         aria-pressed={checked}
         className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center transition-colors border"
@@ -117,14 +124,9 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
           borderColor: checked ? 'var(--accent)' : 'var(--flow-border)',
         }}
       >
-        {checked && <Check size={10} strokeWidth={3} color="var(--flow-on-accent)" />}
+        {checked && <Check size={10} strokeWidth={3} color="var(--dash-on-accent)" />}
       </button>
 
-      {/* The same glyph the board uses for the same task. This was a 6px
-          filled circle, identical in shape and size at every priority, so the
-          only signal was the tint: WCAG 1.4.1, and the two views of one
-          project encoded priority differently. PriorityIcon carries the shape,
-          the tint and an aria-label. */}
       <span className="shrink-0">
         <PriorityIcon priority={task.priority} size={12} />
       </span>
@@ -144,7 +146,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
           style={{ color: 'var(--flow-text-dim)' }}
         >
           <ChevronRight size={11} />
-          {task.subtaskCount} subtasks
+          {task.subtaskCount} {t('flow.taskDetail.subtasks')}
         </span>
       )}
 
@@ -184,23 +186,13 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 export const StatusGroup: React.FC<{
   group: StatusGroupDef;
   tasks: Task[];
-  /**
-   * Whether to show the task count beside the status name.
-   *
-   * Off when the list is split into sections. There the count is that
-   * section's, while the board's identically labelled count is the whole
-   * project's, so the two read as a contradiction with nothing on screen
-   * saying which is which: "To Do 28" against "To Do 49" for the same status
-   * (#1166). Both are right. The section total one line above already gives
-   * the number, so the group count is what goes.
-   *
-   * On for an unsectioned list, where the group count and the board's count
-   * are the same number and there is nothing to confuse.
-   */
   showCount?: boolean;
 }> = ({ group, tasks, showCount = true }) => {
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
+  const canCreate = useUserStore((state) =>
+    canFlowPermission('flow:tasks:create', state.user?.effectiveAccess)
+  );
 
   return (
     <div className="mb-2">
@@ -242,22 +234,20 @@ export const StatusGroup: React.FC<{
               <TaskRow key={task.id} task={task} />
             ))}
 
-            {/* New task row */}
-            <div
-              className="flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors cursor-pointer opacity-50 hover:opacity-100"
-              style={{ borderBottom: '1px solid var(--flow-border)' }}
-              onClick={() => useFlowStore.getState().setQuickCreateOpen(true)}
-            >
-              <div
-                className="h-4 w-4 rounded-sm border flex items-center justify-center"
-                style={{ borderColor: 'var(--flow-border)' }}
+            {canCreate && (
+              <button
+                type="button"
+                className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors text-left"
+                style={{
+                  borderBottom: '1px solid var(--flow-border)',
+                  color: 'var(--flow-text-muted)',
+                }}
+                onClick={() => useFlowStore.getState().setQuickCreateOpen(true)}
               >
-                <Plus size={10} style={{ color: 'var(--flow-text-dim)' }} />
-              </div>
-              <span className="text-flow-body" style={{ color: 'var(--flow-text-dim)' }}>
-                {t('flow.shell.newTask')}
-              </span>
-            </div>
+                <Plus size={14} />
+                <span className="text-flow-body">{t('flow.shell.newTask')}</span>
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -269,6 +259,9 @@ const ProjectList: React.FC = () => {
   const { t } = useTranslation();
   const { projectId = '' } = useParams({ strict: false });
   const statusLabels = useStatusLabels();
+  const canCreate = useUserStore((state) =>
+    canFlowPermission('flow:tasks:create', state.user?.effectiveAccess)
+  );
   const STATUS_GROUPS: StatusGroupDef[] = useMemo(
     () => STATUS_GROUP_COLORS.map((def) => ({ ...def, label: statusLabels[def.id] })),
     [statusLabels]
@@ -276,25 +269,27 @@ const ProjectList: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { tasks, sections } = useFlowStore();
   const {
     project,
     isLoading: projectLoading,
-    loadFailed: projectLoadFailed,
-    refetch: refetchProjects,
+    loadFailed: projectMetadataFailed,
+    refetch: refetchProjectMetadata,
   } = useCurrentProject(projectId);
-  const { data: apiTasks } = useTasks({ projectId, activeOnly: true, compact: true });
+  const tasksQuery = useTasks({ projectId, activeOnly: true, compact: true });
+  const { data: apiTasks } = tasksQuery;
+  const columnsQuery = useProjectColumns(projectId);
+  const projectLoadFailed =
+    projectMetadataFailed || hasQueryFailed(tasksQuery) || hasQueryFailed(columnsQuery);
+  const refetchProjects = () => {
+    void refetchProjectMetadata();
+    void tasksQuery.refetch();
+    void columnsQuery.refetch();
+  };
 
-  // `activeOnly` is a query param the backend doesn't currently act on, so
-  // archived tasks still come back over the wire - filter client-side to
-  // match Triage/FocusToday/FlowLayout.
-  const projectTasks: Task[] = (
-    apiTasks ? apiTasks.map(apiTaskToTask) : tasks.filter((t) => t.projectId === projectId)
-  ).filter((t) => !t.archived);
-
+  const projectTasks = (apiTasks ?? []).map(apiTaskToTask).filter((task) => !task.archived);
   const projectSections = useMemo(
-    () => sections.filter((s) => s.projectId === projectId).sort((a, b) => a.order - b.order),
-    [sections, projectId]
+    () => [...(columnsQuery.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
+    [columnsQuery.data]
   );
 
   const sectionBlocks = useMemo(() => {
@@ -311,7 +306,7 @@ const ProjectList: React.FC = () => {
     return blocks;
   }, [projectSections, projectTasks, t]);
 
-  if (projectLoading && !project) {
+  if ((projectLoading && !project) || tasksQuery.isLoading || columnsQuery.isLoading) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
         {t('flow.project.loading')}
@@ -336,48 +331,12 @@ const ProjectList: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       <HelmetContainer title={t('flow.projectList.pageTitle')} />
-      {/* Header */}
-      <div
-        className="flex items-center justify-between px-6 py-4 shrink-0"
-        style={{ borderBottom: '1px solid var(--flow-border)' }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
-          <h1 className="text-flow-title font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {project.name}
-          </h1>
-        </div>
-
-        {/* View Switcher */}
-        <div
-          className="flex items-center rounded-lg p-0.5"
-          style={{
-            background: 'var(--flow-surface)',
-            border: '1px solid var(--flow-border)',
-          }}
-        >
-          <Link
-            to="/flow/p/$projectId"
-            params={{ projectId }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-flow-meta font-medium transition-colors hover:bg-[var(--flow-hover)] no-underline"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            <LayoutGrid size={13} />
-            {t('flow.projectViewTabs.board')}
-          </Link>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-flow-meta font-medium transition-colors"
-            style={{
-              background: 'var(--accent-muted)',
-              color: 'var(--accent-on-muted)',
-            }}
-          >
-            <List size={13} />
-            {t('flow.projectViewTabs.list')}
-          </button>
-        </div>
-      </div>
+      <ProjectViewTabs
+        project={project}
+        projectId={projectId}
+        taskCount={projectTasks.length}
+        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+      />
 
       {/* Column headers */}
       <div
@@ -417,18 +376,27 @@ const ProjectList: React.FC = () => {
                     {block.tasks.length}
                   </span>
                 </div>
-                {STATUS_GROUPS.map((group) => {
-                  const groupTasks = block.tasks.filter((t) => t.status === group.id);
-                  if (!groupIsVisible(group, groupTasks.length)) return null;
-                  return (
-                    <StatusGroup
-                      key={`${block.id}-${group.id}`}
-                      group={group}
-                      tasks={groupTasks}
-                      showCount={false}
-                    />
-                  );
-                })}
+                {block.tasks.map((task) => (
+                  <TaskRow key={task.id} task={task} />
+                ))}
+                {canCreate && (
+                  <button
+                    type="button"
+                    className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors text-left"
+                    style={{ color: 'var(--flow-text-muted)' }}
+                    onClick={() =>
+                      useFlowStore
+                        .getState()
+                        .setQuickCreateOpen(
+                          true,
+                          block.id === '_unsectioned' ? undefined : block.id
+                        )
+                    }
+                  >
+                    <Plus size={14} />
+                    <span className="text-flow-body">{t('flow.shell.newTask')}</span>
+                  </button>
+                )}
               </div>
             ))
           : STATUS_GROUPS.map((group) => {

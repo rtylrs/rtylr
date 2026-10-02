@@ -7,36 +7,27 @@ import { DatePicker } from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { todayLocalDate, useTeamWorkDays, type WorkDay } from './useWorkDay';
 
 const labelClass = 'mb-1 block text-flow-meta font-semibold uppercase tracking-wider';
 
-/**
- * The team view: one row per workspace member, for the day selected.
- *
- * Requires at least admin on the workspace, enforced server-side by the same
- * call this screen makes - a member without it gets a real 403, rendered as
- * teamAccessDenied rather than a raw error or an empty roster that looks like
- * nobody logged anything.
- */
 const TeamView = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [date, setDate] = useState(todayLocalDate());
 
-  // The roster was a hardcoded empty array, so the empty state below was the
-  // only branch this screen could ever render and the member table underneath
-  // it was unreachable. useFlowTeam already shipped, so the TODO it was waiting
-  // on was stale.
-  //
-  // It returns the whole business team; the people who can appear on a Flow
-  // time sheet are the ones with resolved Flow access, which is the same split
-  // FlowSettings makes. A member's `id` is their user id, which is what
-  // workDays is keyed on.
-  const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
+  const membersQuery = useFlowTeam();
+  const { data: allMembers = [], isLoading: membersLoading } = membersQuery;
   const members = useMemo(() => allMembers.filter((m) => m.hasFlowAccess), [allMembers]);
-  const { data, isLoading, isError } = useTeamWorkDays(date, date);
+  const daysQuery = useTeamWorkDays(date, date);
+  const { data, isLoading, isError, error } = daysQuery;
+  const accessDenied =
+    typeof error === 'object' &&
+    error !== null &&
+    (('statusCode' in error && error.statusCode === 403) ||
+      ('status' in error && error.status === 403));
 
   const dayByUserId = useMemo(() => {
     const map = new Map<string, WorkDay>();
@@ -71,8 +62,17 @@ const TeamView = (): React.JSX.Element => {
           />
         </header>
 
-        {isError ? (
-          <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-flow-body" />
+        {isError || membersQuery.isError ? (
+          accessDenied ? (
+            <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-flow-body" />
+          ) : (
+            <ListLoadFailed
+              onRetry={() => {
+                void daysQuery.refetch();
+                void membersQuery.refetch();
+              }}
+            />
+          )
         ) : membersLoading || isLoading ? (
           <p className="text-flow-body" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
@@ -85,7 +85,7 @@ const TeamView = (): React.JSX.Element => {
             action={{
               label: t('flow.time.teamEmptyCta'),
               onClick: (): void => {
-                void navigate({ to: '/settings/flow', search: { section: 'team' } });
+                void navigate({ to: '/team' });
               },
             }}
           />
@@ -113,7 +113,7 @@ const TeamView = (): React.JSX.Element => {
                       />
                       <Figure
                         label={t('flow.time.unaccounted')}
-                        value={formatDurationClock(Math.abs(day.gapMinutes ?? 0))}
+                        value={`${(day.gapMinutes ?? 0) < 0 ? '−' : ''}${formatDurationClock(Math.abs(day.gapMinutes ?? 0))}`}
                         tone={
                           (day.gapMinutes ?? 0) === 0 ? undefined : 'var(--flow-status-pending)'
                         }

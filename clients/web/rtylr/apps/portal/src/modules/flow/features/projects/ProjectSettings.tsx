@@ -136,7 +136,7 @@ const ProjectSettings: React.FC = () => {
           // The trail stops at the parent. The h1 directly below already says
           // Settings, and repeating it in the crumb put the same word twice in
           // two lines (#1097, D-029).
-          items={[{ label: project.name, to: `/flow/p/${project.id}/overview` }]}
+          items={[{ label: project.name, to: `/flow/p/${project.id}` }]}
         />
         <h1 className="text-flow-title font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
           {t('flowNav.settings')}

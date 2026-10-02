@@ -66,9 +66,11 @@ const MyIssues: React.FC = () => {
             {t('flow.shell.myTasks')}
           </h1>
           <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-            {isLoading || loadFailed
+            {isLoading
               ? t('flow.myIssues.loading')
-              : t('flow.myIssues.taskCount', { count: tasks.length })}
+              : loadFailed
+                ? t('flow.loadFailed.title')
+                : t('flow.myIssues.taskCount', { count: tasks.length })}
           </p>
         </div>
         {canCreate && (

@@ -9,6 +9,27 @@ import { fetchAllMyTasks } from './useMyIssues';
 
 const t = (key: string, opts?: Record<string, unknown>): string => i18next.t(key, opts) as string;
 
+type TaskListParams = {
+  projectId?: string;
+  status?: ApiTask['status'];
+  assigneeId?: string;
+  activeOnly?: boolean;
+  compact?: boolean;
+};
+
+export async function fetchAllTasks(params: TaskListParams): Promise<ApiTask[]> {
+  const all: ApiTask[] = [];
+  for (let page = 1; ; page += 1) {
+    const res = await unwrap(flowApi.getTasks({ ...params, page, limit: 500 }));
+    const rows = unwrapListResponse<ApiTask>(res, 'tasks');
+    all.push(...rows);
+    const pagination = Array.isArray(res) ? undefined : res.pagination;
+    const hasNext =
+      pagination?.hasNext ?? (pagination?.total !== undefined && pagination.total > all.length);
+    if (!hasNext || rows.length === 0) return all;
+  }
+}
+
 export function useTasks(params: {
   projectId?: string;
   status?: ApiTask['status'];
@@ -19,8 +40,7 @@ export function useTasks(params: {
   return useQuery<ApiTask[]>({
     queryKey: ['tasks', params],
     queryFn: async () => {
-      const res = await unwrap(flowApi.getTasks(params));
-      return unwrapListResponse<ApiTask>(res, 'tasks');
+      return fetchAllTasks(params);
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -67,6 +87,7 @@ export function useCreateTask() {
       // projectId is optional: the backend resolves the caller's auto-created
       // Inbox project when it is omitted (quick-create from My Tasks).
       projectId?: string;
+      sectionId?: string;
       title: string;
       description?: string;
       status?: ApiTask['status'];
@@ -82,6 +103,8 @@ export function useCreateTask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onError: () => toast.error(t('flowToasts.task.createFailed')),
   });
@@ -96,6 +119,8 @@ export function useUpdateTask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
     onError: () => toast.error(t('flowToasts.task.updateFailed')),
@@ -111,8 +136,30 @@ export function useDeleteTask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onError: () => toast.error(t('flowToasts.task.deleteFailed')),
+  });
+}
+
+export function useAddTaskDependency() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, dependsOnTaskId }: { taskId: string; dependsOnTaskId: string }) =>
+      unwrap(flowApi.addTaskDependency(taskId, dependsOnTaskId)),
+    onSuccess: (_data, { taskId }) => qc.invalidateQueries({ queryKey: ['task', taskId] }),
+    onError: () => toast.error(t('flowToasts.task.updateFailed')),
+  });
+}
+
+export function useRemoveTaskDependency() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, dependsOnTaskId }: { taskId: string; dependsOnTaskId: string }) =>
+      unwrap(flowApi.removeTaskDependency(taskId, dependsOnTaskId)),
+    onSuccess: (_data, { taskId }) => qc.invalidateQueries({ queryKey: ['task', taskId] }),
+    onError: () => toast.error(t('flowToasts.task.updateFailed')),
   });
 }
 
@@ -143,6 +190,10 @@ export function useAddAttachment() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
       qc.invalidateQueries({ queryKey: ['task-attachments', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onError: () => toast.error(t('flowToasts.attachment.addFailed')),
   });
@@ -156,6 +207,10 @@ export function useRemoveAttachment() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
       qc.invalidateQueries({ queryKey: ['task-attachments', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onError: () => toast.error(t('flowToasts.attachment.removeFailed')),
   });
@@ -170,6 +225,9 @@ export function useUpdateTaskStatus() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
+      qc.invalidateQueries({ queryKey: ['task'] });
     },
     onError: () => toast.error(t('flowToasts.task.statusUpdateFailed')),
   });
@@ -211,6 +269,8 @@ export function useBulkUpdateStatus() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
@@ -226,6 +286,8 @@ export function useBulkUpdatePriority() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
@@ -241,6 +303,8 @@ export function useBulkUpdateArchive() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkUpdated', 'flowToasts.task.bulkUpdateFailed'),
@@ -255,6 +319,8 @@ export function useBulkDelete() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onSuccess: (res) =>
       reportBulk(res, 'flowToasts.task.bulkDeleted', 'flowToasts.task.bulkDeleteFailed'),
@@ -270,6 +336,10 @@ export function useAddComment() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onError: () => toast.error(t('flowToasts.comment.postFailed')),
   });
@@ -283,6 +353,10 @@ export function useAddSubtask() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onError: () => toast.error(t('flowToasts.subtask.addFailed')),
   });
@@ -295,6 +369,10 @@ export function useToggleSubtask() {
       unwrap(flowApi.updateTask(id, { status: completed ? 'todo' : 'done' })).then(() => {}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['projects-v2'] });
     },
     onError: () => toast.error(t('flowToasts.subtask.updateFailed')),
   });

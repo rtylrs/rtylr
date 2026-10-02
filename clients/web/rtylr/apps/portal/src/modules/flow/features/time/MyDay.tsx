@@ -126,7 +126,7 @@ const MyDay = (): React.JSX.Element => {
                 aria-current={active ? 'date' : undefined}
                 className="flow-focus relative flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-md py-1.5 text-flow-meta font-medium md:min-h-0"
                 style={{
-                  background: active ? 'var(--accent)' : 'var(--flow-hover)',
+                  background: active ? 'var(--flow-active)' : 'var(--flow-hover)',
                   color: active ? 'var(--flow-on-accent)' : 'var(--flow-text)',
                 }}
               >

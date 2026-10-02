@@ -19,7 +19,9 @@ import {
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 
-import { useFlowStore, SavedView } from '../../shared/stores/flowStore';
+import type { SavedView } from '../../shared/stores/flowStore';
+import { useTasks } from '../tasks/useTasks';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import {
   useViews,
   useCreateView,
@@ -47,13 +49,14 @@ const Views: React.FC = () => {
   const createView = useCreateView();
   const updateView = useUpdateView();
   const deleteView = useDeleteView();
-  const { tasks: allTasks } = useFlowStore();
+  const tasksQuery = useTasks({});
+  const allTasks = (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived);
   const [selected, setSelected] = useState<SavedView | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [pendingDelete, setPendingDelete] = useState<SavedView | null>(null);
 
-  const displayView = selected || views[0] || null;
+  const displayView = views.find((view) => view.id === selected?.id) ?? views[0] ?? null;
   const tasks = useFilteredTasks(displayView, allTasks);
   const filtersActive = hasActiveFilters(displayView?.filters);
 
@@ -266,7 +269,7 @@ const Views: React.FC = () => {
             <ListLoadFailed onRetry={() => void viewsQuery.refetch()} />
           ) : null}
 
-          {views.length === 0 && !hasQueryFailed(viewsQuery) && (
+          {views.length === 0 && !viewsQuery.isLoading && !hasQueryFailed(viewsQuery) && (
             <EmptyState
               icon={Eye}
               title={t('flow.views.emptyList')}
@@ -285,9 +288,11 @@ const Views: React.FC = () => {
           <h1 className="text-flow-title font-semibold" style={{ color: 'var(--flow-text)' }}>
             {displayView?.name || t('flow.views.noViewSelected')}
           </h1>
-          <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-            {t('flow.views.taskCount', { count: tasks.length })}
-          </p>
+          {!tasksQuery.isLoading && !hasQueryFailed(tasksQuery) && (
+            <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
+              {t('flow.views.taskCount', { count: tasks.length })}
+            </p>
+          )}
         </div>
         {displayView && (
           <ViewFilterChips
@@ -302,41 +307,51 @@ const Views: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.18 }}
         >
-          {tasks.length === 0 && displayView && filtersActive && (
-            // G-E2: a filtered-empty result gets a plain sentence and a way to
-            // clear the filters, no illustration. Sending the user to My tasks
-            // was the only action available before, because there was no
-            // filter control for the empty state to point at.
-            <div className="px-6 py-10 text-center">
-              <p className="text-flow-body" style={{ color: 'var(--flow-text-muted)' }}>
-                {t('flow.views.emptyTasksForView')}
-              </p>
-              <button
-                type="button"
-                disabled={updateView.isPending}
-                onClick={() =>
-                  updateView.mutate({ id: displayView.id, data: { filters: EMPTY_FILTERS } })
-                }
-                className="mt-3 inline-flex min-h-11 items-center rounded-md px-4 text-flow-body font-semibold disabled:opacity-50"
-                style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
-              >
-                {t('flow.views.filters.clearAll')}
-              </button>
-            </div>
+          {tasksQuery.isLoading ? (
+            <p className="px-6 py-10 text-flow-body" role="status">
+              {t('flowCommon.loading')}
+            </p>
+          ) : hasQueryFailed(tasksQuery) ? (
+            <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
+          ) : (
+            <>
+              {tasks.length === 0 && displayView && filtersActive && (
+                // G-E2: a filtered-empty result gets a plain sentence and a way to
+                // clear the filters, no illustration. Sending the user to My tasks
+                // was the only action available before, because there was no
+                // filter control for the empty state to point at.
+                <div className="px-6 py-10 text-center">
+                  <p className="text-flow-body" style={{ color: 'var(--flow-text-muted)' }}>
+                    {t('flow.views.emptyTasksForView')}
+                  </p>
+                  <button
+                    type="button"
+                    disabled={updateView.isPending}
+                    onClick={() =>
+                      updateView.mutate({ id: displayView.id, data: { filters: EMPTY_FILTERS } })
+                    }
+                    className="mt-3 inline-flex min-h-11 items-center rounded-md px-4 text-flow-body font-semibold disabled:opacity-50"
+                    style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
+                  >
+                    {t('flow.views.filters.clearAll')}
+                  </button>
+                </div>
+              )}
+              {tasks.length === 0 && displayView && !filtersActive && (
+                <EmptyState
+                  icon={Eye}
+                  title={t('flow.views.emptyTasksForView')}
+                  action={{
+                    label: t('flow.shell.myTasks'),
+                    onClick: () => navigate({ to: '/flow/my-issues' }),
+                  }}
+                />
+              )}
+              {tasks.map((t) => (
+                <TaskRow key={t.id} task={t} showProject />
+              ))}
+            </>
           )}
-          {tasks.length === 0 && displayView && !filtersActive && (
-            <EmptyState
-              icon={Eye}
-              title={t('flow.views.emptyTasksForView')}
-              action={{
-                label: t('flow.shell.myTasks'),
-                onClick: () => navigate({ to: '/flow/my-issues' }),
-              }}
-            />
-          )}
-          {tasks.map((t) => (
-            <TaskRow key={t.id} task={t} showProject />
-          ))}
         </motion.div>
       </div>
       <ConfirmDialog

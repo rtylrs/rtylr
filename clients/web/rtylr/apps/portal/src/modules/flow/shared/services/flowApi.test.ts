@@ -145,16 +145,21 @@ describe('flowApi OneKit adapters', () => {
       projectId: '7',
       status: 'todo',
       assigneeId: undefined,
+      page: 1,
+      limit: 500,
     });
     // v2 create carries no workspace_id.
     expect(taskV2.createTask).toHaveBeenCalledWith({
       projectId: '7',
+      sectionId: undefined,
       title: 'Task',
-      description: '-',
+      description: '',
+      status: undefined,
+      effortMinutes: undefined,
       priority: 'medium',
       assigneeId: undefined,
-      dueDate: '-',
-      startDate: '-',
+      dueDate: '',
+      startDate: '',
       estimatedHours: undefined,
       labels: undefined,
     });
@@ -430,5 +435,44 @@ describe('flowApi.getTimeLogs coerces the int64 wire string (#1079)', () => {
   it('survives a response with no time logs', async () => {
     (taskV2.getTimeLogs as ReturnType<typeof vi.fn>).mockResolvedValueOnce({});
     expect((await flowApi.getTimeLogs('42'))._unsafeUnwrap().timeLogs).toEqual([]);
+  });
+});
+
+describe('Flow task persistence adapters', () => {
+  it('forwards creation effort, status and the chosen board column', async () => {
+    await flowApi.createTask({
+      projectId: '7',
+      sectionId: '12',
+      title: 'Review',
+      effortMinutes: 90,
+      status: 'in_review',
+    });
+    expect(taskV2.createTask).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        projectId: '7',
+        sectionId: '12',
+        effortMinutes: 90,
+        status: 'in_review',
+      })
+    );
+  });
+  it('sends explicit clears and blocker fields without changing omitted fields', async () => {
+    await flowApi.updateTask('9', {
+      description: '',
+      dueDate: '',
+      startDate: '',
+      assigneeId: '',
+      waitingOn: '',
+      decisionNote: 'Reviewed',
+    });
+    const body = vi.mocked(taskV2.updateTask).mock.lastCall?.[0].body;
+    expect(JSON.parse(JSON.stringify(body))).toEqual({
+      description: '',
+      dueDate: '',
+      startDate: '',
+      assigneeId: '0',
+      waitingOn: '',
+      decisionNote: 'Reviewed',
+    });
   });
 });

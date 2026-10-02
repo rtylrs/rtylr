@@ -30,9 +30,10 @@ export async function fetchAllMyTasks(): Promise<ApiTask[]> {
 }
 
 /** Tasks assigned to the current user (My tasks). */
-export function useMyIssues() {
+export function useMyIssues(enabled = true) {
   return useQuery<ApiTask[]>({
     queryKey: ['my-tasks'],
     queryFn: fetchAllMyTasks,
+    enabled,
   });
 }

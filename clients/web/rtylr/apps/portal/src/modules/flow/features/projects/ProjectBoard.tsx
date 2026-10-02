@@ -1,3 +1,4 @@
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useClickOutside } from '@voxire/utils';
@@ -183,8 +184,8 @@ const ProjectBoard: React.FC = () => {
   const {
     project,
     isLoading: projectLoading,
-    loadFailed: projectLoadFailed,
-    refetch: refetchProjects,
+    loadFailed: projectMetadataFailed,
+    refetch: refetchProjectMetadata,
   } = useCurrentProject(projectId);
   const moveTask = useMoveTaskToColumn();
   const canEdit = useCanEditTask(projectId);
@@ -194,8 +195,15 @@ const ProjectBoard: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
-  const { data: columns = [], isLoading: columnsLoading } = useProjectColumns(projectId);
+  const tasksQuery = useTasks({ projectId, activeOnly: true, compact: true });
+  const { data: apiTasks = [] } = tasksQuery;
+  const projectLoadFailed = projectMetadataFailed || hasQueryFailed(tasksQuery);
+  const refetchProjects = () => {
+    void refetchProjectMetadata();
+    void tasksQuery.refetch();
+  };
+  const columnsQuery = useProjectColumns(projectId);
+  const { data: columns = [], isLoading: columnsLoading } = columnsQuery;
   const createColumn = useCreateColumn(projectId);
   const updateColumn = useUpdateColumn(projectId);
   const deleteColumn = useDeleteColumn(projectId);
@@ -261,8 +269,15 @@ const ProjectBoard: React.FC = () => {
 
   // A failed project list leaves `project` undefined exactly as a missing one
   // does, so a 500 used to tell the user their project had gone.
-  if (projectLoadFailed) {
-    return <ListLoadFailed onRetry={() => void refetchProjects()} />;
+  if (projectLoadFailed || hasQueryFailed(columnsQuery)) {
+    return (
+      <ListLoadFailed
+        onRetry={() => {
+          refetchProjects();
+          void columnsQuery.refetch();
+        }}
+      />
+    );
   }
 
   if (!project) {
@@ -363,7 +378,7 @@ const ProjectBoard: React.FC = () => {
     setAddingColumn(false);
   };
 
-  if (columnsLoading) {
+  if (columnsLoading || tasksQuery.isLoading) {
     return (
       <div className="flex flex-col h-full">
         <ProjectViewTabs
@@ -374,7 +389,7 @@ const ProjectBoard: React.FC = () => {
         />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-flow-meta" style={{ color: 'var(--flow-text-dim)' }}>
-            Loading board…
+            {t('flow.project.loading')}
           </p>
         </div>
       </div>
@@ -453,7 +468,7 @@ const ProjectBoard: React.FC = () => {
               onDragPointerMove={handleDragPointerMove}
               onDragPointerEnd={endDrag}
               onSelect={toggleSelectTask}
-              onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+              onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true, String(col.id))}
               onRename={(name) =>
                 updateColumn.mutate({
                   id: String(col.id),

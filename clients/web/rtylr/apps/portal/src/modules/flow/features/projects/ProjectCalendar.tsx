@@ -1,3 +1,4 @@
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import React, { useMemo, useState } from 'react';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useParams } from '@tanstack/react-router';
@@ -44,10 +45,16 @@ const ProjectCalendar: React.FC = () => {
   const {
     project,
     isLoading: projectLoading,
-    loadFailed: projectLoadFailed,
-    refetch: refetchProjects,
+    loadFailed: projectMetadataFailed,
+    refetch: refetchProjectMetadata,
   } = useCurrentProject(projectId);
-  const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
+  const tasksQuery = useTasks({ projectId, activeOnly: true, compact: true });
+  const { data: apiTasks = [] } = tasksQuery;
+  const projectLoadFailed = projectMetadataFailed || hasQueryFailed(tasksQuery);
+  const refetchProjects = () => {
+    void refetchProjectMetadata();
+    void tasksQuery.refetch();
+  };
 
   const [cursor, setCursor] = useState(() => {
     const d = new Date();

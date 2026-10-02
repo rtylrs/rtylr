@@ -85,8 +85,8 @@ WHERE id = ? AND business_id = ?;
 -- name: CreateTask :execresult
 INSERT INTO flow_tasks
 (project_id, workspace_id, owner_id, business_id, parent_task_id, title, description, priority,
- assignee_id, reporter_id, due_date, start_date, estimated_hours, labels)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+ assignee_id, reporter_id, due_date, start_date, estimated_hours, labels, section_id, status, effort_minutes, completed_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN sqlc.arg(initial_status) = 'done' THEN NOW() ELSE NULL END);
 
 -- name: GetTaskByID :one
 SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,

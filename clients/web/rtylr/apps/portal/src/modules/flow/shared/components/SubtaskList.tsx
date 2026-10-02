@@ -64,7 +64,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
                     background: s.completed ? 'var(--accent)' : 'transparent',
                   }}
                 >
-                  {s.completed && <Check size={10} color="var(--flow-on-accent)" strokeWidth={3} />}
+                  {s.completed && <Check size={10} color="var(--dash-on-accent)" strokeWidth={3} />}
                 </span>
                 <span
                   className="text-flow-meta flex-1"

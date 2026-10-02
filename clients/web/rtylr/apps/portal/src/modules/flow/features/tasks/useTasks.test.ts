@@ -64,7 +64,25 @@ describe('useTasks (remote mode)', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
-    expect(flowApi.getTasks).toHaveBeenCalledWith(params);
+    expect(flowApi.getTasks).toHaveBeenCalledWith({ ...params, page: 1, limit: 500 });
+  });
+
+  it('loads all project task pages and preserves failures on later pages', async () => {
+    vi.mocked(flowApi.getTasks)
+      .mockResolvedValueOnce({ tasks: [{ id: '1' }], pagination: { hasNext: true } })
+      .mockResolvedValueOnce({ tasks: [{ id: '2' }], pagination: { hasNext: false } });
+    const { result } = renderHook(() => useTasks({ projectId: '7' }), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([{ id: '1' }, { id: '2' }]);
+    expect(flowApi.getTasks).toHaveBeenNthCalledWith(2, { projectId: '7', page: 2, limit: 500 });
+  });
+  it('does not report a partial task list as successful when a later page fails', async () => {
+    vi.mocked(flowApi.getTasks)
+      .mockResolvedValueOnce({ tasks: [{ id: '1' }], pagination: { hasNext: true } })
+      .mockRejectedValueOnce(new Error('API unavailable'));
+    const { result } = renderHook(() => useTasks({ projectId: '7' }), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toBeUndefined();
   });
 
   it('starts in loading state when projectId provided', () => {

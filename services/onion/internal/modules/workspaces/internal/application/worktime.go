@@ -87,7 +87,7 @@ func (s *Service) CreateWorkDayLine(ctx context.Context, input domain.WorkDayLin
 		return domain.WorkDayLine{}, ErrProjectRequired
 	}
 
-	day, found, err := s.repo.GetWorkDayByID(ctx, input.WorkDayID, input.OwnerID, input.BusinessID)
+	day, found, err := s.repo.GetWorkDayByID(ctx, input.WorkDayID, input.BusinessID)
 	if err != nil {
 		return domain.WorkDayLine{}, err
 	}
@@ -252,11 +252,16 @@ func (s *Service) assertParentIsTopLevel(ctx context.Context, ownerID, businessI
 	return nil
 }
 
-// ListWorkDays returns a person's days across a range. The lines are not loaded:
-// a week view needs each day's totals, not every line on every day, and the
-// totals are already on the row.
+// ListWorkDays adds totals without loading each day's individual lines.
 func (s *Service) ListWorkDays(ctx context.Context, ownerID, businessID, employeeID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
-	return s.repo.ListWorkDays(ctx, ownerID, businessID, employeeID, from, to, limit, offset)
+	days, total, err := s.repo.ListWorkDays(ctx, ownerID, businessID, employeeID, from, to, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	if err := s.stampWorkDayLoggedMinutes(ctx, businessID, days); err != nil {
+		return nil, 0, err
+	}
+	return days, total, nil
 }
 
 // workspaceMemberCap bounds the roster a team view resolves in one call. A
@@ -342,11 +347,8 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 	return days, total, nil
 }
 
-// ListTeamWorkDays is the v2 replacement for ListWorkDaysForWorkspace.
-// Instead of scoping by workspace membership, it uses the business team roster
-// resolved through hr_employees. Visibility is governed by the business's
-// configured policy; until the config surface lands, the default policy is
-// hub admin+ sees everyone, project admins see people sharing their projects.
+// ListTeamWorkDays supports self-recorded user days and legacy HR employee days.
+// Central team managers see the business; project admins see their project members.
 func (s *Service) ListTeamWorkDays(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
 	// Default policy gate: only the central Flow team-management permission
 	// grants business-wide visibility. Resource checks remain scope-bound.
@@ -355,9 +357,6 @@ func (s *Service) ListTeamWorkDays(ctx context.Context, callerID, businessID int
 		return nil, 0, err
 	}
 	if err := s.stampWorkDayLoggedMinutes(ctx, businessID, days); err != nil {
-		return nil, 0, err
-	}
-	if err := s.stampWorkDayUserIDs(ctx, businessID, days); err != nil {
 		return nil, 0, err
 	}
 	return days, total, nil
@@ -374,7 +373,7 @@ func (s *Service) stampWorkDayLoggedMinutes(ctx context.Context, businessID int6
 	for _, day := range days {
 		workDayIDs = append(workDayIDs, day.ID)
 	}
-	totals, err := s.repo.SumWorkDayLineMinutesByDayIDs(ctx, businessID, businessID, workDayIDs)
+	totals, err := s.repo.SumWorkDayLineMinutesByDayIDs(ctx, businessID, workDayIDs)
 	if err != nil {
 		return err
 	}
@@ -395,52 +394,8 @@ func (s *Service) listTeamWorkDaysForCaller(ctx context.Context, callerID, busin
 	return s.listVisibleProjectMemberDays(ctx, callerID, businessID, from, to, limit, offset)
 }
 
-// stampWorkDayUserIDs attaches the auth user id to each day in the team view.
-//
-// A work day is keyed on hr_employees.id while every roster the client holds
-// comes from /hub/team/members and is keyed on users.id. Those are different id
-// spaces, so a day with no user id cannot be attached to a person: the client
-// drops it, and Team shows "Not started" and Reports 0:00 for everyone even
-// though the hours are in the response. The contract assigns this to the server
-// for exactly this view, because only the server has the roster join.
-//
-// Applied here rather than in either branch above so both visibility paths get
-// it, and so a third path cannot be added without it.
-func (s *Service) stampWorkDayUserIDs(ctx context.Context, businessID int64, days []domain.WorkDay) error {
-	if len(days) == 0 {
-		return nil
-	}
-
-	employeeIDs := make([]int64, 0, len(days))
-	seen := make(map[int64]bool, len(days))
-	for _, day := range days {
-		if day.EmployeeID > 0 && !seen[day.EmployeeID] {
-			seen[day.EmployeeID] = true
-			employeeIDs = append(employeeIDs, day.EmployeeID)
-		}
-	}
-
-	byEmployeeID, err := s.repo.EmployeeUserIDs(ctx, businessID, employeeIDs)
-	if err != nil {
-		return err
-	}
-
-	// An employee with no user row keeps UserID zero, which the API mapper
-	// already treats as unset rather than sending a user id of 0.
-	for i := range days {
-		if userID, ok := byEmployeeID[days[i].EmployeeID]; ok {
-			days[i].UserID = userID
-		}
-	}
-	return nil
-}
-
 func (s *Service) listAllBusinessWorkDays(ctx context.Context, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
-	employeeIDs, err := s.repo.BusinessEmployeeIDs(ctx, businessID)
-	if err != nil {
-		return nil, 0, err
-	}
-	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	return s.repo.ListTeamWorkDays(ctx, businessID, nil, from, to, int32(limit), offset)
 }
 
 func (s *Service) listVisibleProjectMemberDays(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
@@ -452,9 +407,19 @@ func (s *Service) listVisibleProjectMemberDays(ctx context.Context, callerID, bu
 	userIDs := make([]int64, 0)
 	seen := make(map[int64]bool)
 	for _, p := range projects {
+		if roleErr := s.RequireProjectRole(ctx, p.ID, callerID, businessID, domain.FlowRoleAdmin); roleErr != nil {
+			if errors.Is(roleErr, domain.ErrUnauthorized) {
+				continue
+			}
+			return nil, 0, roleErr
+		}
+		if !seen[p.CreatedBy] {
+			seen[p.CreatedBy] = true
+			userIDs = append(userIDs, p.CreatedBy)
+		}
 		members, _, mErr := s.repo.ListProjectMembers(ctx, p.ID, 500, 0)
 		if mErr != nil {
-			continue
+			return nil, 0, mErr
 		}
 		for _, m := range members {
 			if !seen[m.UserID] {
@@ -466,13 +431,5 @@ func (s *Service) listVisibleProjectMemberDays(ctx context.Context, callerID, bu
 	if len(userIDs) == 0 {
 		return []domain.WorkDay{}, 0, nil
 	}
-	byUserID, err := s.repo.EmployeeIDsByUserIDs(ctx, businessID, businessID, userIDs)
-	if err != nil {
-		return nil, 0, err
-	}
-	employeeIDs := make([]int64, 0, len(byUserID))
-	for _, eid := range byUserID {
-		employeeIDs = append(employeeIDs, eid)
-	}
-	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	return s.repo.ListTeamWorkDays(ctx, businessID, userIDs, from, to, int32(limit), offset)
 }

@@ -111,7 +111,7 @@ describe('TeamView', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      error: new Error('Forbidden'),
+      error: { statusCode: 403 },
     };
     render(<TeamView />);
     expect(screen.getByText('flow.time.teamAccessDenied')).toBeInTheDocument();
@@ -130,6 +130,6 @@ describe('TeamView', () => {
     membersState.value = { data: [], isLoading: false };
     render(<TeamView />);
     await userEvent.click(screen.getByRole('button', { name: 'flow.time.teamEmptyCta' }));
-    expect(navigateSpy).toHaveBeenCalledWith({ to: '/settings/flow', search: { section: 'team' } });
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/team' });
   });
 });

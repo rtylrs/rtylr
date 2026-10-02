@@ -17,13 +17,12 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const Timeline: React.FC = () => {
   const { t, i18n } = useTranslation();
   const storeProjects = useFlowStore((s) => s.projects);
-  const storeMilestones = useFlowStore((s) => s.milestones);
   const { data: apiProjects } = useProjects();
   const { data: apiMilestones } = useMilestones();
   // API rows carry dueDate and no progress, so they need the same mapping the
   // rest of Flow uses before their bar geometry and label can be read.
   const projects: Project[] = apiProjects ? apiProjects.map(apiProjectToProject) : storeProjects;
-  const milestones = (apiMilestones ?? storeMilestones) as Milestone[];
+  const milestones = apiMilestones ?? [];
 
   const { start, end, days } = useMemo(() => {
     const now = new Date();

@@ -8,6 +8,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { startOfWeek, endOfWeek } from '../../shared/lib/dateUtils';
 import { todayLocalDate, useTeamWorkDays } from './useWorkDay';
@@ -19,13 +20,6 @@ interface PersonTotals {
   daysLogged: number;
 }
 
-/**
- * Totals per person across a range. Day-level only: WorkDay carries no
- * project or work-type breakdown, and there is no endpoint that lists lines
- * across a range - only per day. Grouping by project needs that endpoint,
- * which does not exist yet (docs/flow-time-tracking design, step 6). This
- * screen's data source swaps once it does; its layout does not have to.
- */
 const TimeReports = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -40,13 +34,16 @@ const TimeReports = (): React.JSX.Element => {
     setTo(endOfWeek(today, weekStart));
   }, [today, weekStart]);
 
-  // Same stale TODO as TeamView: the roster was a hardcoded empty array, so this
-  // screen could only ever render its empty state and the table below was
-  // unreachable. useFlowTeam had already shipped. A member's `id` is their user
-  // id, which is what the work-day totals are keyed on.
-  const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
+  const membersQuery = useFlowTeam();
+  const { data: allMembers = [], isLoading: membersLoading } = membersQuery;
   const members = useMemo(() => allMembers.filter((m) => m.hasFlowAccess), [allMembers]);
-  const { data, isLoading, isError } = useTeamWorkDays(from, to);
+  const daysQuery = useTeamWorkDays(from, to);
+  const { data, isLoading, isError, error } = daysQuery;
+  const accessDenied =
+    typeof error === 'object' &&
+    error !== null &&
+    (('statusCode' in error && error.statusCode === 403) ||
+      ('status' in error && error.status === 403));
 
   const totalsByUserId = useMemo(() => {
     const map = new Map<string, PersonTotals>();
@@ -115,8 +112,17 @@ const TimeReports = (): React.JSX.Element => {
           </p>
         </header>
 
-        {isError ? (
-          <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-flow-body" />
+        {isError || membersQuery.isError ? (
+          accessDenied ? (
+            <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-flow-body" />
+          ) : (
+            <ListLoadFailed
+              onRetry={() => {
+                void daysQuery.refetch();
+                void membersQuery.refetch();
+              }}
+            />
+          )
         ) : membersLoading || isLoading ? (
           <p className="text-flow-body" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
@@ -129,7 +135,7 @@ const TimeReports = (): React.JSX.Element => {
             action={{
               label: t('flow.time.reportsEmptyCta'),
               onClick: (): void => {
-                void navigate({ to: '/settings/flow', search: { section: 'team' } });
+                void navigate({ to: '/team' });
               },
             }}
           />
@@ -179,7 +185,7 @@ const TimeReports = (): React.JSX.Element => {
                       </td>
                       {trackAttendance && (
                         <td className="py-2 text-end tabular-nums">
-                          {formatDurationClock(Math.abs(totals.gapMinutes))}
+                          {`${totals.gapMinutes < 0 ? '−' : ''}${formatDurationClock(Math.abs(totals.gapMinutes))}`}
                         </td>
                       )}
                     </tr>

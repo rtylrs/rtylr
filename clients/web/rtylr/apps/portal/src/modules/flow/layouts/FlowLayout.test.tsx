@@ -46,6 +46,9 @@ vi.mock('../features/projects/useProjects', () => ({
 vi.mock('../features/tasks/useMyTasksProject', () => ({
   useMyTasksProject: () => ({ data: { projectId: 'personal' } }),
 }));
+vi.mock('../features/tasks/useMyIssues', () => ({
+  useMyIssues: () => ({ data: [] }),
+}));
 vi.mock('../shared/hooks/queries/useFlowTeam', () => ({
   useFlowTeam: () => ({ data: mocks.members }),
 }));
@@ -99,7 +102,6 @@ beforeEach(async () => {
   useFlowStore.setState({
     projects: [],
     members: [],
-    tasks: [],
     quickCreateOpen: false,
     projectCreateOpen: false,
   });

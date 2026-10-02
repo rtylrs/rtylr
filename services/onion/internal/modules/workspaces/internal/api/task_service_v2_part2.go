@@ -79,6 +79,9 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 		}
 	}
 
+	if req.SectionId != nil && (projectID == 0 || a.Service.GetColumnProject(ctx, *req.SectionId) != projectID) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Column must belong to the selected project")
+	}
 	dueDate, err := parseTaskDate(req.GetDueDate())
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid due_date")
@@ -88,13 +91,19 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid start_date")
 	}
 
+	if req.GetStatus() != "" && !domain.IsValidTaskStatus(req.GetStatus()) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid status")
+	}
 	input := domain.TaskInput{
 		ProjectID:      projectID,
 		OwnerID:        caller.UserID,
 		BusinessID:     businessID,
 		ParentTaskID:   req.ParentTaskId,
+		SectionID:      req.SectionId,
 		Title:          req.GetTitle(),
 		Description:    req.GetDescription(),
+		Status:         req.GetStatus(),
+		EffortMinutes:  req.EffortMinutes,
 		Priority:       req.GetPriority(),
 		AssigneeID:     req.AssigneeId,
 		ReporterID:     caller.UserID,
@@ -110,7 +119,7 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 	}
 
 	payload := toTaskV2(task)
-	publishTaskEventByProject("task.created", projectID, task.ID, caller.UserID)
+	publishTaskEventByProject("task.created", task.ProjectID, task.ID, caller.UserID)
 	publishBusinessEvent("business.task_created", businessID, task.ID, caller.UserID)
 	return &flowtaskv2.CreateTaskResponse{Task: payload}, nil
 }
@@ -180,22 +189,40 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid start_date")
 	}
 
+	if body.GetStatus() != "" && !domain.IsValidTaskStatus(body.GetStatus()) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid status")
+	}
+	if body.EffortMinutes != nil && *body.EffortMinutes < 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid effort_minutes")
+	}
+	if body.SectionId != nil && *body.SectionId != 0 {
+		detail, err := a.Service.GetTaskDetail(ctx, req.GetId())
+		if err != nil || a.Service.GetColumnProject(ctx, *body.SectionId) != detail.Task.ProjectID {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Column must belong to the task project")
+		}
+	}
 	input := domain.UpdateTaskInput{
-		ID:             req.GetId(),
-		OwnerID:        caller.UserID,
-		BusinessID:     businessID,
-		Title:          body.GetTitle(),
-		Description:    body.GetDescription(),
-		Status:         body.GetStatus(),
-		Priority:       body.GetPriority(),
-		AssigneeID:     body.AssigneeId,
-		DueDate:        dueDate,
-		StartDate:      startDate,
-		Labels:         body.GetLabels(),
-		Archived:       body.Archived,
-		EffortMinutes:  body.EffortMinutes,
-		EstimatedHours: body.EstimatedHours,
-		FocusPin:       body.FocusPin,
+		SectionID:        body.SectionId,
+		ID:               req.GetId(),
+		OwnerID:          caller.UserID,
+		BusinessID:       businessID,
+		Title:            body.GetTitle(),
+		Description:      body.GetDescription(),
+		Status:           body.GetStatus(),
+		Priority:         body.GetPriority(),
+		AssigneeID:       body.AssigneeId,
+		DueDate:          dueDate,
+		StartDate:        startDate,
+		Labels:           body.GetLabels(),
+		Archived:         body.Archived,
+		EffortMinutes:    body.EffortMinutes,
+		EstimatedHours:   body.EstimatedHours,
+		FocusPin:         body.FocusPin,
+		WaitingOn:        body.WaitingOn,
+		DecisionNote:     body.DecisionNote,
+		ClearDescription: body.Description != nil && body.GetDescription() == "",
+		ClearDueDate:     body.DueDate != nil && dueDate == nil,
+		ClearStartDate:   body.StartDate != nil && startDate == nil,
 	}
 
 	if err := a.Service.UpdateTask(ctx, input, caller.UserID); err != nil {

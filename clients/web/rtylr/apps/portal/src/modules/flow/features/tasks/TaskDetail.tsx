@@ -1,5 +1,5 @@
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -22,7 +22,6 @@ import {
   GitBranch,
   LayoutList,
   Link2,
-  ListChecks,
   Gauge,
   Hourglass,
   Pin,
@@ -35,6 +34,9 @@ import { HelmetContainer } from '@voxire/components';
 
 import { useTask } from './useTask';
 import {
+  useTasks,
+  useAddTaskDependency,
+  useRemoveTaskDependency,
   useUpdateTask,
   useDeleteTask,
   useAddComment,
@@ -44,6 +46,10 @@ import {
   useAddAttachment,
   useRemoveAttachment,
 } from './useTasks';
+import { useCycles } from '../cycles/useCycles';
+import { useMilestones } from '../milestones/useMilestones';
+import { useProjectColumns } from '../projects/useColumns';
+import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { useLabels, useSetTaskLabels } from './useLabels';
 import { useProjectStatuses, useSetTaskStatus } from '../projects/useStatuses';
@@ -170,6 +176,19 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const openTask = useOpenTask();
   const { id: routeId } = useParams({ strict: false });
   const id = taskId ?? routeId;
+  const closeTask = () => {
+    if (taskId) {
+      void navigate({
+        to: '.',
+        search: (previous: Record<string, unknown>) => {
+          const { openTask: _openTask, ...rest } = previous;
+          return rest;
+        },
+      });
+    } else {
+      void navigate({ to: '/flow/my-issues' });
+    }
+  };
   useTaskRealtime(id);
   const taskQuery = useTask(id);
   const { data: taskData, isLoading } = taskQuery;
@@ -198,6 +217,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const addSubtaskMut = useAddSubtask();
   const toggleSubtaskMut = useToggleSubtask();
   const setTaskLabelsMut = useSetTaskLabels();
+  const addDependency = useAddTaskDependency();
+  const removeDependency = useRemoveTaskDependency();
 
   const { data: taskActivityData = [] } = useTaskActivity(id ?? '');
   const { data: taskAttachmentData } = useTaskAttachments(id);
@@ -207,17 +228,12 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const taskProjectId = detail?.task?.projectId;
   const { project: taskProject } = useCurrentProject(taskProjectId);
   const { data: allLabels = [] } = useLabels();
-  const {
-    members,
-    cycles,
-    milestones,
-    archiveTask,
-    attachments,
-    projects,
-    tasks: allTasks,
-    sections,
-    customFieldDefinitions,
-  } = useFlowStore();
+  const tasksQuery = useTasks({});
+  const allTasks = (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived);
+  const { data: cycles = [] } = useCycles(taskProjectId);
+  const { data: milestones = [] } = useMilestones(taskProjectId ?? '');
+  const { data: projectSections = [] } = useProjectColumns(taskProjectId ?? '');
+  const { members, projects } = useFlowStore();
 
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -302,12 +318,6 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   }
 
   const project = taskProject ?? projects.find((p) => p.id === task.projectId);
-  const projectSections = sections
-    .filter((s) => s.projectId === task.projectId)
-    .sort((a, b) => a.order - b.order);
-  const fieldDefs = customFieldDefinitions
-    .filter((f) => f.projectId === task.projectId)
-    .sort((a, b) => a.order - b.order);
   const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
     (ot) => ot.id !== task.id && !task.dependencies?.includes(ot.id)
@@ -324,10 +334,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
       mime: inferAttachmentMime(attachment.name),
     })
   );
-  const taskAttachments =
-    taskAttachmentData !== undefined
-      ? apiAttachments
-      : attachments.filter((a) => a.taskId === task.id);
+  const taskAttachments = apiAttachments;
 
   // Labels may arrive as label_ids (snake_case from API before normalization)
   // or labels (post-mapping). Accept either shape.
@@ -377,7 +384,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
-              onClick={() => window.history.back()}
+              onClick={() => closeTask()}
               aria-label={t('flowCommon.back')}
               className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
@@ -397,9 +404,13 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <button
               type="button"
-              onClick={() => {
-                navigator.clipboard?.writeText(task.identifier ?? task.id);
-                toast.success(t('flowToasts.task.copied', { id: task.identifier ?? task.id }));
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(task.identifier ?? task.id);
+                  toast.success(t('flowToasts.task.copied', { id: task.identifier ?? task.id }));
+                } catch {
+                  toast.error(t('common.copyFailed'));
+                }
               }}
               className="flex h-8 items-center gap-1 rounded-sm px-2 text-flow-meta hover:bg-[var(--flow-hover)] sm:h-7"
               style={{ color: 'var(--flow-text-muted)' }}
@@ -415,9 +426,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   { id: task.id, data: { archived: true } },
                   {
                     onSuccess: () => {
-                      archiveTask(task.id);
                       toast.success(t('flowToasts.task.archived'));
-                      window.history.back();
+                      closeTask();
                     },
                   }
                 );
@@ -463,10 +473,12 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
         >
           <div className="max-w-3xl mx-auto px-4 py-6 sm:px-8 sm:py-8">
             {/* Title */}
-            <input
+            <TaskTextField
               aria-label={t('flow.taskDetail.taskTitle')}
+              key={`${task.id}-title`}
               value={task.title}
-              onChange={(e) => updateTask(task.id, { title: e.target.value })}
+              required
+              onSave={(title) => updateTask(task.id, { title })}
               disabled={!canEdit}
               // 20px at every width. S-12 asks for 20px; `sm:text-2xl` took it
               // to 24 on desktop, and the review measured 30px before that.
@@ -476,9 +488,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               }}
             />
             {/* Description */}
-            <textarea
+            <TaskTextField
+              key={`${task.id}-description`}
+              multiline
               value={displayDescription(task.description)}
-              onChange={(e) => updateTask(task.id, { description: e.target.value })}
+              onSave={(description) => updateTask(task.id, { description })}
               placeholder={t('flow.taskDetail.descriptionPlaceholder')}
               rows={5}
               disabled={!canEdit}
@@ -699,17 +713,17 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               value={task.assigneeId}
               onChange={(e) => {
                 const m = members.find((m) => m.id === e.target.value);
-                if (m)
-                  updateTask(task.id, {
-                    assigneeId: m.id,
-                    assignee: m.name,
-                    assigneeInitials: m.initials,
-                  });
+                updateTask(task.id, {
+                  assigneeId: m?.id ?? '',
+                  assignee: m?.name ?? '',
+                  assigneeInitials: m?.initials ?? '',
+                });
               }}
               disabled={!canEdit}
               className="bg-transparent text-flow-meta flex-1 disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
+              <option value="">{t('flow.quickCreate.unassigned')}</option>
               {members.map((m) => (
                 <option key={m.id} value={m.id} style={{ background: 'var(--flow-card)' }}>
                   {m.name}
@@ -750,14 +764,15 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
         </DetailField>
 
         <DetailField icon={Clock} label={t('flow.taskDetail.estimate')}>
-          <input
+          <TaskTextField
             type="number"
-            // The resolved value, the same one TimePanel is given. This read
-            // `task.estimate` alone, so whenever the API sent `estimatedHours`
-            // the field showed only its "hours" placeholder while the panel
-            // beside it said "of 40:00" (rtylr#1079).
-            value={estimatedHours ?? ''}
-            onChange={(e) => updateTask(task.id, { estimate: Number(e.target.value) })}
+            min={0}
+            step="any"
+            value={estimatedHours == null ? '' : String(estimatedHours)}
+            onSave={(value) => {
+              const estimate = Number(value);
+              if (Number.isFinite(estimate) && estimate >= 0) updateTask(task.id, { estimate });
+            }}
             placeholder={t('flow.taskDetail.hours')}
             disabled={!canEdit}
             className="bg-transparent text-flow-meta w-full disabled:opacity-70"
@@ -778,7 +793,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           <div className="flex flex-wrap gap-1">
             <button
               type="button"
-              onClick={() => updateTask(task.id, { effortMinutes: undefined })}
+              onClick={() => updateTask(task.id, { effortMinutes: 0, estimate: 0 })}
               disabled={!canEdit}
               className="text-flow-meta px-2 py-1 rounded-md disabled:opacity-40"
               style={{
@@ -815,9 +830,10 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
         </DetailField>
 
         <DetailField icon={Hourglass} label={t('flow.taskDetail.waitingOn')}>
-          <input
+          <TaskTextField
+            key={`${task.id}-waiting`}
             value={task.waitingOn || ''}
-            onChange={(e) => updateTask(task.id, { waitingOn: e.target.value || undefined })}
+            onSave={(waitingOn) => updateTask(task.id, { waitingOn })}
             placeholder={t('flow.taskDetail.waitingPlaceholder')}
             disabled={!canEdit}
             className="bg-transparent text-flow-meta w-full placeholder:opacity-50 disabled:opacity-70"
@@ -826,9 +842,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
         </DetailField>
 
         <DetailField icon={Lightbulb} label={t('flow.taskDetail.decision')}>
-          <textarea
+          <TaskTextField
+            key={`${task.id}-decision`}
+            multiline
             value={task.decisionNote || ''}
-            onChange={(e) => updateTask(task.id, { decisionNote: e.target.value || undefined })}
+            onSave={(decisionNote) => updateTask(task.id, { decisionNote })}
             placeholder={t('flow.taskDetail.decisionPlaceholder')}
             rows={2}
             disabled={!canEdit}
@@ -877,7 +895,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             <select
               aria-label={t('flow.taskDetail.section')}
               value={task.sectionId ?? ''}
-              onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
+              onChange={(e) => updateTask(task.id, { sectionId: e.target.value })}
               disabled={!canEdit}
               className="bg-transparent text-flow-meta w-full disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
@@ -892,70 +910,11 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </DetailField>
         )}
 
-        {fieldDefs.map((def) => (
-          <DetailField key={def.id} icon={ListChecks} label={def.name}>
-            {def.type === 'dropdown' ? (
-              <select
-                aria-label={def.name}
-                value={String(task.customFieldValues?.[def.id] ?? '')}
-                onChange={(e) =>
-                  updateTask(task.id, {
-                    customFieldValues: {
-                      ...(task.customFieldValues ?? {}),
-                      [def.id]: e.target.value,
-                    },
-                  })
-                }
-                disabled={!canEdit}
-                className="bg-transparent text-flow-meta w-full disabled:opacity-70"
-                style={{ color: 'var(--flow-text)' }}
-              >
-                <option value="">-</option>
-                {(def.options ?? []).map((opt) => (
-                  <option key={opt} value={opt} style={{ background: 'var(--flow-card)' }}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            ) : def.type === 'number' ? (
-              <input
-                aria-label={def.name}
-                type="number"
-                value={task.customFieldValues?.[def.id] ?? ''}
-                onChange={(e) =>
-                  updateTask(task.id, {
-                    customFieldValues: {
-                      ...(task.customFieldValues ?? {}),
-                      [def.id]: e.target.value === '' ? '' : Number(e.target.value),
-                    },
-                  })
-                }
-                disabled={!canEdit}
-                className="bg-transparent text-flow-meta w-full disabled:opacity-70"
-                style={{ color: 'var(--flow-text)' }}
-              />
-            ) : (
-              <input
-                aria-label={def.name}
-                value={String(task.customFieldValues?.[def.id] ?? '')}
-                onChange={(e) =>
-                  updateTask(task.id, {
-                    customFieldValues: {
-                      ...(task.customFieldValues ?? {}),
-                      [def.id]: e.target.value,
-                    },
-                  })
-                }
-                disabled={!canEdit}
-                className="bg-transparent text-flow-meta w-full disabled:opacity-70"
-                style={{ color: 'var(--flow-text)' }}
-              />
-            )}
-          </DetailField>
-        ))}
-
         <DetailField icon={Link2} label={t('flow.taskDetail.dependencies')}>
           <div className="space-y-1.5">
+            {hasQueryFailed(tasksQuery) && (
+              <ListLoadFailed onRetry={() => void tasksQuery.refetch()} />
+            )}
             {dependencyTasks.map((dt) => (
               <div key={dt.id} className="flex items-center justify-between gap-1">
                 <button
@@ -980,10 +939,9 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                     type="button"
                     className="text-flow-meta shrink-0"
                     style={{ color: 'var(--flow-text-dim)' }}
+                    disabled={removeDependency.isPending}
                     onClick={() =>
-                      updateTask(task.id, {
-                        dependencies: (task.dependencies ?? []).filter((x) => x !== dt.id),
-                      })
+                      removeDependency.mutate({ taskId: task.id, dependsOnTaskId: dt.id })
                     }
                   >
                     {t('flow.taskDetail.remove')}
@@ -1009,13 +967,15 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
                 </select>
                 <button
                   type="button"
-                  disabled={!depId}
+                  disabled={!depId || addDependency.isPending}
                   onClick={() => {
                     if (!depId) return;
-                    updateTask(task.id, {
-                      dependencies: [...(task.dependencies ?? []), depId],
-                    });
-                    setDepId('');
+                    addDependency.mutate(
+                      { taskId: task.id, dependsOnTaskId: depId },
+                      {
+                        onSuccess: () => setDepId(''),
+                      }
+                    );
                   }}
                   className="text-flow-meta px-1.5 py-0.5 rounded-sm font-semibold disabled:opacity-40"
                   style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
@@ -1123,7 +1083,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             onSuccess: () => {
               toast.success(t('flowToasts.task.deleted'));
               setConfirmingDelete(false);
-              window.history.back();
+              closeTask();
             },
             // useDeleteTask already toasts on error.
           });
@@ -1132,6 +1092,50 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
     </div>
   );
 };
+
+function TaskTextField({
+  value,
+  onSave,
+  multiline,
+  ...props
+}: {
+  value: string;
+  onSave: (value: string) => void;
+  multiline?: boolean;
+  type?: React.HTMLInputTypeAttribute;
+  min?: number;
+  step?: string;
+  required?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  rows?: number;
+  className?: string;
+  style?: React.CSSProperties;
+  'aria-label'?: string;
+}) {
+  const [draft, setDraft] = useState(value);
+  const focused = useRef(false);
+  useEffect(() => {
+    if (!focused.current) setDraft(value);
+  }, [value]);
+  const handlers = {
+    value: draft,
+    onFocus: () => {
+      focused.current = true;
+    },
+    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setDraft(event.target.value),
+    onBlur: () => {
+      focused.current = false;
+      if (props.required && !draft.trim()) {
+        setDraft(value);
+      } else if (draft !== value) {
+        onSave(draft);
+      }
+    },
+  };
+  return multiline ? <textarea {...props} {...handlers} /> : <input {...props} {...handlers} />;
+}
 
 // ── Activity Section ──────────────────────────────────────────────────────────
 

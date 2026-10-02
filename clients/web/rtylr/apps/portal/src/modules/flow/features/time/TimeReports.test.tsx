@@ -41,6 +41,7 @@ const workDaysState = vi.hoisted(() => ({
     data: undefined as { workDays: Array<Record<string, unknown>> } | undefined,
     isLoading: false,
     isError: false,
+    error: undefined as unknown,
   },
 }));
 
@@ -82,6 +83,7 @@ beforeEach(() => {
     },
     isLoading: false,
     isError: false,
+    error: undefined,
   };
 });
 
@@ -113,7 +115,12 @@ describe('TimeReports', () => {
   });
 
   it('renders a permission-denied message instead of crashing when the caller lacks access', () => {
-    workDaysState.value = { data: undefined, isLoading: false, isError: true };
+    workDaysState.value = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { statusCode: 403 },
+    };
     render(<TimeReports />);
     expect(screen.getByText('flow.time.teamAccessDenied')).toBeInTheDocument();
   });
@@ -143,7 +150,7 @@ describe('TimeReports', () => {
     membersState.value = { data: [], isLoading: false };
     render(<TimeReports />);
     await userEvent.click(screen.getByRole('button', { name: 'flow.time.reportsEmptyCta' }));
-    expect(navigateSpy).toHaveBeenCalledWith({ to: '/settings/flow', search: { section: 'team' } });
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/team' });
   });
 });
 

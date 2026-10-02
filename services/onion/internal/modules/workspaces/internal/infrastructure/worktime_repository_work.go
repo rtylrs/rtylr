@@ -94,7 +94,7 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, businessID, workDayID
 
 // SumWorkDayLineMinutesByDayIDs returns logged totals for a page of work days
 // with one grouped query.
-func (r *Repository) SumWorkDayLineMinutesByDayIDs(ctx context.Context, ownerID, businessID int64, workDayIDs []int64) (map[int64]int32, error) {
+func (r *Repository) SumWorkDayLineMinutesByDayIDs(ctx context.Context, businessID int64, workDayIDs []int64) (map[int64]int32, error) {
 	totals := make(map[int64]int32, len(workDayIDs))
 	if len(workDayIDs) == 0 {
 		return totals, nil
@@ -105,7 +105,6 @@ func (r *Repository) SumWorkDayLineMinutesByDayIDs(ctx context.Context, ownerID,
 	}
 
 	rows, err := r.queries.SumWorkDayLineMinutesByDayIDs(ctx, sqlc.SumWorkDayLineMinutesByDayIDsParams{
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 		WorkDayIds: workDayIDParams,
 	})
@@ -238,10 +237,9 @@ func (r *Repository) DeleteWorkDayLine(ctx context.Context, id, ownerID, busines
 }
 
 // GetWorkDayByID reads a day by id, scoped to the tenant.
-func (r *Repository) GetWorkDayByID(ctx context.Context, id, ownerID, businessID int64) (domain.WorkDay, bool, error) {
+func (r *Repository) GetWorkDayByID(ctx context.Context, id, businessID int64) (domain.WorkDay, bool, error) {
 	row, err := r.queries.GetWorkDayByID(ctx, sqlc.GetWorkDayByIDParams{
 		ID:         id,
-		OwnerID:    ownerID,
 		BusinessID: businessID,
 	})
 	if err != nil {

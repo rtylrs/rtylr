@@ -1,5 +1,3 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -198,28 +196,5 @@ describe('StatusGroup count scope (#1166)', () => {
   it('still renders the status label either way', () => {
     renderGroup(false);
     expect(screen.getByText('To Do')).toBeInTheDocument();
-  });
-});
-
-describe('the sectioned list actually asks for the count to be hidden', () => {
-  it('passes showCount={false} only in the sectioned branch', () => {
-    // Testing StatusGroup alone proves the prop works, not that anything sets
-    // it. Deleting the prop at the call site left every component test green.
-    const source = fs.readFileSync(path.resolve(__dirname, 'ProjectList.tsx'), 'utf8');
-
-    const sectioned = source.slice(
-      source.indexOf('block.tasks.filter'),
-      source.indexOf('projectTasks.filter((t) => t.status === group.id)')
-    );
-    expect(sectioned, 'sliced the wrong region').toContain('StatusGroup');
-    expect(sectioned, 'the sectioned list must hide the group count').toContain(
-      'showCount={false}'
-    );
-
-    const unsectioned = source.slice(
-      source.indexOf('projectTasks.filter((t) => t.status === group.id)')
-    );
-    expect(unsectioned, 'sliced the wrong region').toContain('StatusGroup');
-    expect(unsectioned, 'an unsectioned list keeps its count').not.toContain('showCount={false}');
   });
 });

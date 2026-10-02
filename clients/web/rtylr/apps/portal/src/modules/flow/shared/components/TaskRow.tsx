@@ -108,7 +108,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
             selected ? t('flowCommon.taskRow.deselectTask') : t('flowCommon.taskRow.selectTask')
           }
         >
-          {selected && <Check size={9} color="var(--flow-on-accent)" strokeWidth={3} />}
+          {selected && <Check size={9} color="var(--dash-on-accent)" strokeWidth={3} />}
         </button>
         <PriorityIcon priority={task.priority} />
         <span

@@ -12,6 +12,7 @@ import { canAccessPortalPath } from '../../../shared/utils/canAccessPortalPath';
 import { useFlowStore, type Member } from '../shared/stores/flowStore';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
+import { useMyIssues } from '../features/tasks/useMyIssues';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { useMemberCapacityHours } from '../shared/hooks/queries/useMemberCapacity';
 import { useNotifications } from '../features/inbox/useNotifications';
@@ -19,6 +20,7 @@ import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
 import { apiProjectToProject } from '../shared/lib/projectMapper';
+import { apiTaskToTask } from '../shared/lib/taskMapper';
 import { initialsFromName } from '../shared/lib/memberUtils';
 import { canFlowPermission } from '../shared/lib/roleUtils';
 import { isTaskMine } from '../shared/lib/currentUser';
@@ -43,7 +45,6 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
   const { preferences, update } = useSidebarPreferences();
   const { prefs: lifePrefs } = useLifePreferences();
   const {
-    tasks,
     setProjects,
     setMembers,
     setQuickCreateOpen,
@@ -56,6 +57,9 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
   const { data: personalProject } = useMyTasksProject({
     enabled: canFlowPermission('flow:tasks:view', user?.effectiveAccess),
   });
+  const { data: myTasks = [] } = useMyIssues(
+    canFlowPermission('flow:tasks:view', user?.effectiveAccess)
+  );
   const { data: members } = useFlowTeam();
   const { data: capacity } = useMemberCapacityHours();
   const { data: notifications = [] } = useNotifications();
@@ -123,13 +127,15 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
     if (!mobileOpen && mobileRef.current?.open) mobileRef.current.close();
   }, [mobileOpen]);
 
-  const activeTasks = tasks.filter(
-    (task) =>
-      !task.archived &&
-      task.status !== 'done' &&
-      task.status !== 'cancelled' &&
-      isTaskMine(task.assigneeId)
-  );
+  const activeTasks = myTasks
+    .map(apiTaskToTask)
+    .filter(
+      (task) =>
+        !task.archived &&
+        task.status !== 'done' &&
+        task.status !== 'cancelled' &&
+        isTaskMine(task.assigneeId)
+    );
   const navigation = (mobile = false) => (
     <>
       <div className="portal-flow-sidebar-header">

@@ -202,7 +202,10 @@ func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp d
 		return nil, err
 	}
 	if affected == 0 {
-		return nil, domain.ErrEmployeeNotFound
+		// MySQL reports zero changed rows for an unchanged record as well.
+		if _, err := r.GetEmployee(ctx, businessID, emp.ID); err != nil {
+			return nil, err
+		}
 	}
 	emp.OwnerID = businessID
 	emp.BusinessID = businessID

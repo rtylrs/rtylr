@@ -52,6 +52,9 @@ vi.mock('./useTask', () => ({
 const updateTaskMutate = vi.hoisted(() => vi.fn());
 const deleteTaskMutate = vi.hoisted(() => vi.fn());
 vi.mock('./useTasks', () => ({
+  useTasks: () => ({ data: [], isLoading: false, isError: false }),
+  useAddTaskDependency: () => ({ mutate: vi.fn(), isPending: false }),
+  useRemoveTaskDependency: () => ({ mutate: vi.fn(), isPending: false }),
   useUpdateTask: () => ({ mutate: updateTaskMutate, isPending: false }),
   useDeleteTask: () => ({ mutate: deleteTaskMutate, isPending: false }),
   useAddComment: () => ({ mutate: vi.fn(), isPending: false }),
@@ -61,6 +64,10 @@ vi.mock('./useTasks', () => ({
   useAddAttachment: () => ({ mutate: vi.fn(), isPending: false }),
   useRemoveAttachment: () => ({ mutate: vi.fn(), isPending: false }),
 }));
+
+vi.mock('../cycles/useCycles', () => ({ useCycles: () => ({ data: [] }) }));
+vi.mock('../milestones/useMilestones', () => ({ useMilestones: () => ({ data: [] }) }));
+vi.mock('../projects/useColumns', () => ({ useProjectColumns: () => ({ data: [] }) }));
 
 const useLabelsSpy = vi.hoisted(() => vi.fn(() => ({ data: [] })));
 vi.mock('./useLabels', () => ({
@@ -268,6 +275,8 @@ describe('TaskDetail description sentinel display', () => {
     fireEvent.change(screen.getByPlaceholderText('flow.taskDetail.descriptionPlaceholder'), {
       target: { value: 'New real description' },
     });
+    expect(updateTaskMutate).not.toHaveBeenCalled();
+    fireEvent.blur(screen.getByPlaceholderText('flow.taskDetail.descriptionPlaceholder'));
 
     expect(updateTaskMutate).toHaveBeenCalledWith({
       id: 't-1',

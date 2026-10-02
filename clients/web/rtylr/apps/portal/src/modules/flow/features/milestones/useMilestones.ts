@@ -14,6 +14,7 @@ export function useMilestones(projectId?: string) {
       const wrapped = res as { milestones?: ApiMilestone[] };
       return wrapped.milestones ?? [];
     },
+    enabled: projectId !== '',
   });
 }
 

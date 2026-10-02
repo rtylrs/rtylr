@@ -506,7 +506,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                       onClick={() => !locked && setLocation(loc)}
                       className="flow-focus min-h-[44px] h-auto rounded-xl px-4 py-2 text-flow-body font-semibold whitespace-normal md:min-h-0 md:h-[38px] md:py-0"
                       style={{
-                        background: active ? 'var(--accent)' : 'var(--flow-hover)',
+                        background: active ? 'var(--flow-active)' : 'var(--flow-hover)',
                         color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
                       }}
                     >
