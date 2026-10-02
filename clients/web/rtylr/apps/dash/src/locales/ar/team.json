@@ -23,7 +23,14 @@
     "deleteDescription": "سيفقد الأعضاء الوصول الممنوح من هذه المجموعة. لا يمكن التراجع عن هذا الإجراء.",
     "deleteConfirm": "حذف",
     "loadFailed": "تعذر تحميل المجموعات",
-    "loadFailedDescription": "حدّث القائمة قبل تغيير صلاحيات المجموعات."
+    "loadFailedDescription": "حدّث القائمة قبل تغيير صلاحيات المجموعات.",
+    "columnProfiles": "ملفات الصلاحيات",
+    "profilesCount_one": "ملف صلاحيات واحد",
+    "profilesCount_two": "ملفا صلاحيات",
+    "profilesCount_few": "{{count}} ملفات صلاحيات",
+    "profilesCount_many": "{{count}} ملف صلاحيات",
+    "profilesCount_other": "{{count}} ملف صلاحيات",
+    "profilesCount_zero": "لا توجد ملفات صلاحيات"
   },
   "groupDetail": {
     "newGroupTitle": "مجموعة جديدة",
@@ -63,7 +70,16 @@
     "loadMembersFailedDescription": "حدّث قائمة المرشحين قبل إضافة أعضاء.",
     "candidatePagination": "صفحات الأعضاء",
     "candidatePage": "الصفحة {{page}}",
-    "pageTitle": "تفاصيل المجموعة"
+    "pageTitle": "تفاصيل المجموعة",
+    "loadFailed": "تعذر تحميل هذه المجموعة",
+    "loadFailedDescription": "حدّث المجموعة قبل تغيير صلاحياتها أو أعضائها.",
+    "columnApp": "التطبيق",
+    "columnLicense": "الترخيص",
+    "columnPermissionProfile": "ملفات الصلاحيات",
+    "licenseAppAriaLabel": "ترخيص {{app}}",
+    "permissionProfileForApp": "صلاحيات {{app}}",
+    "noPermissionProfile": "لا يوجد ملف صلاحيات",
+    "membersTruncated": "يتم عرض أول {{count}} عضو."
   },
   "list": {
     "noMembersTitle": "لا يوجد أعضاء فريق بعد",
@@ -158,7 +174,11 @@
     "deactivateDescription": "إلغاء كل الصلاحيات فورًا. يمكن التراجع لاحقًا.",
     "deactivateButton": "تعطيل",
     "confirmDeactivateTitle": "تعطيل {{name}}؟",
-    "confirmDeactivateDescription": "سيفقد الوصول إلى جميع التطبيقات فورًا."
+    "confirmDeactivateDescription": "سيفقد الوصول إلى جميع التطبيقات فورًا.",
+    "memberTypeLabel": "نوع العضو",
+    "adminFullAccess": "يتمتع المسؤولون بوصول كامل إلى المؤسسة وجميع التطبيقات المشمولة في خطتها.",
+    "permissionProfiles": "ملفات الصلاحيات",
+    "noPermissionProfile": "لا يوجد ملف صلاحيات"
   },
   "inviteUser": {
     "progressLabel": "تقدم إنشاء العضو",
@@ -242,6 +262,16 @@
     "resultEmail": "البريد الإلكتروني",
     "resultStatus": "الحالة",
     "resultNote": "ملاحظة",
-    "appliedToAllInvited": "يُطبَّق على جميع الأعضاء المدعوين"
+    "appliedToAllInvited": "يُطبَّق على جميع الأعضاء المدعوين",
+    "permissionProfilesTitle": "ملفات الصلاحيات",
+    "permissionProfilesDescription": "اختر ملف صلاحيات واحدًا أو أكثر لكل تطبيق. يمكن منح صلاحيات القراءة والكتابة بشكل مستقل.",
+    "noPermissionProfile": "لا يوجد ملف صلاحيات",
+    "adminAccessDescription": "وصول كامل إلى المؤسسة وجميع التطبيقات المشمولة في خطتها",
+    "memberAccessDescription": "يُحدد الوصول حسب التراخيص وملفات الصلاحيات والمجموعات المعيّنة",
+    "adminReceivesFullAccess": "يحصل المسؤولون تلقائيًا على وصول كامل إلى جميع التطبيقات المشمولة في خطة المؤسسة.",
+    "reviewMemberType": "نوع العضو"
+  },
+  "authorization": {
+    "noProfilesAvailable": "لا تتوفر ملفات صلاحيات لهذا التطبيق."
   }
 }

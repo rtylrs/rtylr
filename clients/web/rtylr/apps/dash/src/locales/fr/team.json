@@ -20,7 +20,10 @@
     "deleteDescription": "Les membres perdront l'accès accordé par ce groupe. Cette action est irréversible.",
     "deleteConfirm": "Supprimer",
     "loadFailed": "Impossible de charger les groupes",
-    "loadFailedDescription": "Actualisez la liste avant de modifier les accès des groupes."
+    "loadFailedDescription": "Actualisez la liste avant de modifier les accès des groupes.",
+    "columnProfiles": "Profils de permissions",
+    "profilesCount_one": "{{count}} profil",
+    "profilesCount_other": "{{count}} profils"
   },
   "groupDetail": {
     "newGroupTitle": "Nouveau groupe",
@@ -57,7 +60,16 @@
     "loadMembersFailedDescription": "Actualisez la liste des candidats avant d'ajouter des membres.",
     "candidatePagination": "Pages des membres",
     "candidatePage": "Page {{page}}",
-    "pageTitle": "Détail du groupe"
+    "pageTitle": "Détail du groupe",
+    "loadFailed": "Impossible de charger ce groupe",
+    "loadFailedDescription": "Actualisez le groupe avant de modifier ses accès ou ses membres.",
+    "columnApp": "Application",
+    "columnLicense": "Licence",
+    "columnPermissionProfile": "Profils de permissions",
+    "licenseAppAriaLabel": "Licence pour {{app}}",
+    "permissionProfileForApp": "Permissions pour {{app}}",
+    "noPermissionProfile": "Aucun profil de permissions",
+    "membersTruncated": "Les {{count}} premiers membres sont affichés."
   },
   "list": {
     "noMembersTitle": "Aucun membre pour l'instant",
@@ -143,7 +155,11 @@
     "deactivateDescription": "Révoque immédiatement tous les accès. Réversible.",
     "deactivateButton": "Désactiver",
     "confirmDeactivateTitle": "Désactiver {{name}} ?",
-    "confirmDeactivateDescription": "Il perdra immédiatement l’accès à toutes les applications."
+    "confirmDeactivateDescription": "Il perdra immédiatement l’accès à toutes les applications.",
+    "memberTypeLabel": "Type de membre",
+    "adminFullAccess": "Les administrateurs ont un accès complet à l’entreprise et aux applications incluses dans son forfait.",
+    "permissionProfiles": "Profils de permissions",
+    "noPermissionProfile": "Aucun profil de permissions"
   },
   "inviteUser": {
     "progressLabel": "Progression de création du membre",
@@ -224,6 +240,16 @@
     "resultEmail": "E-mail",
     "resultStatus": "Statut",
     "resultNote": "Note",
-    "appliedToAllInvited": "Appliqué à tous les membres invités"
+    "appliedToAllInvited": "Appliqué à tous les membres invités",
+    "permissionProfilesTitle": "Profils de permissions",
+    "permissionProfilesDescription": "Sélectionnez un ou plusieurs profils par application. Les permissions de lecture et d’écriture peuvent être attribuées séparément.",
+    "noPermissionProfile": "Aucun profil de permissions",
+    "adminAccessDescription": "Accès complet à l’entreprise et aux applications incluses dans son forfait",
+    "memberAccessDescription": "L’accès dépend des licences, des profils de permissions et des groupes attribués",
+    "adminReceivesFullAccess": "Les administrateurs ont automatiquement un accès complet aux applications incluses dans le forfait de l’entreprise.",
+    "reviewMemberType": "Type de membre"
+  },
+  "authorization": {
+    "noProfilesAvailable": "Aucun profil de permissions disponible pour cette application."
   }
 }

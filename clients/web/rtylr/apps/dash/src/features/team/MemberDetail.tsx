@@ -1,3 +1,4 @@
+import { PermissionProfilePicker } from './PermissionProfilePicker';
 import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -431,32 +432,15 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                   const options = customRoles.filter((profile) => profile.appId === appKey);
                   if (options.length === 0) return null;
                   return (
-                    <div key={appKey} className="space-y-1.5">
-                      <Label htmlFor={`permission-profile-${appKey}`}>{appKey}</Label>
-                      <select
-                        id={`permission-profile-${appKey}`}
-                        value={profileIdsDraft[appKey]?.[0] ?? ''}
-                        onChange={(event) =>
-                          setProfileIdsDraft((current) => ({
-                            ...current,
-                            [appKey]: event.target.value ? [event.target.value] : [],
-                          }))
-                        }
-                        className="w-full rounded-lg px-3 py-2 text-base"
-                        style={{
-                          background: 'var(--dash-bg)',
-                          border: '1px solid var(--dash-border)',
-                          color: 'var(--dash-text)',
-                        }}
-                      >
-                        <option value="">{t('team.memberDetail.noPermissionProfile')}</option>
-                        {options.map((profile) => (
-                          <option key={profile.id} value={profile.id}>
-                            {profile.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <PermissionProfilePicker
+                      key={appKey}
+                      label={appKey.toUpperCase()}
+                      profiles={options}
+                      selectedIds={profileIdsDraft[appKey] ?? []}
+                      onChange={(ids) =>
+                        setProfileIdsDraft((current) => ({ ...current, [appKey]: ids }))
+                      }
+                    />
                   );
                 })}
               </div>

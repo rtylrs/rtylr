@@ -1,3 +1,4 @@
+import { PermissionProfilePicker } from './PermissionProfilePicker';
 import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useParams } from '@tanstack/react-router';
@@ -354,33 +355,18 @@ const GroupDetail = (): React.JSX.Element => {
                     />
                   </div>
                   <div className="col-span-6">
-                    <select
-                      aria-label={t('team.groupDetail.permissionProfileForApp', {
+                    <PermissionProfilePicker
+                      label={t('team.groupDetail.permissionProfileForApp', {
                         app: t(appName.short),
                       })}
-                      value={profileIdsByApp[appId]?.[0] ?? ''}
+                      profiles={appProfiles}
+                      selectedIds={profileIdsByApp[appId] ?? []}
                       disabled={!licensed}
-                      onChange={(event) => {
-                        setProfileIdsByApp((current) => ({
-                          ...current,
-                          [appId]: event.target.value ? [event.target.value] : [],
-                        }));
+                      onChange={(ids) => {
+                        setProfileIdsByApp((current) => ({ ...current, [appId]: ids }));
                         setDirty(true);
                       }}
-                      className="w-full rounded-lg px-3 py-2 text-xs disabled:opacity-50"
-                      style={{
-                        background: 'var(--dash-bg)',
-                        border: '1px solid var(--dash-border)',
-                        color: 'var(--dash-text)',
-                      }}
-                    >
-                      <option value="">{t('team.groupDetail.noPermissionProfile')}</option>
-                      {appProfiles.map((profile) => (
-                        <option key={profile.id} value={profile.id}>
-                          {profile.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
               );

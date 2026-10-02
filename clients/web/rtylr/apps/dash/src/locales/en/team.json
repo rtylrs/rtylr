@@ -19,7 +19,10 @@
     "deleteDescription": "Members will lose access granted by this group. This cannot be undone.",
     "deleteConfirm": "Delete",
     "loadFailed": "Unable to load groups",
-    "loadFailedDescription": "Refresh the list before changing group access."
+    "loadFailedDescription": "Refresh the list before changing group access.",
+    "columnProfiles": "Permission profiles",
+    "profilesCount_one": "{{count}} profile",
+    "profilesCount_other": "{{count}} profiles"
   },
   "groupDetail": {
     "newGroupTitle": "New group",
@@ -55,7 +58,16 @@
     "loadMembersFailedDescription": "Refresh the candidate list before adding members.",
     "candidatePagination": "Member pages",
     "candidatePage": "Page {{page}}",
-    "pageTitle": "Group detail"
+    "pageTitle": "Group detail",
+    "loadFailed": "Unable to load this group",
+    "loadFailedDescription": "Refresh the group before changing its access or members.",
+    "columnApp": "App",
+    "columnLicense": "License",
+    "columnPermissionProfile": "Permission profiles",
+    "licenseAppAriaLabel": "License {{app}}",
+    "permissionProfileForApp": "Permissions for {{app}}",
+    "noPermissionProfile": "No permission profile",
+    "membersTruncated": "Showing the first {{count}} members."
   },
   "list": {
     "noMembersTitle": "No team members yet",
@@ -138,7 +150,11 @@
     "deactivateDescription": "Immediately revoke all access. Can be undone later.",
     "deactivateButton": "Deactivate",
     "confirmDeactivateTitle": "Deactivate {{name}}?",
-    "confirmDeactivateDescription": "They will lose access to all apps immediately."
+    "confirmDeactivateDescription": "They will lose access to all apps immediately.",
+    "memberTypeLabel": "Member type",
+    "adminFullAccess": "Admins have full access to the business and all apps included in its plan.",
+    "permissionProfiles": "Permission profiles",
+    "noPermissionProfile": "No permission profile"
   },
   "inviteUser": {
     "progressLabel": "Member creation progress",
@@ -218,6 +234,16 @@
     "resultEmail": "Email",
     "resultStatus": "Status",
     "resultNote": "Note",
-    "appliedToAllInvited": "Applied to all invited members"
+    "appliedToAllInvited": "Applied to all invited members",
+    "permissionProfilesTitle": "Permission profiles",
+    "permissionProfilesDescription": "Select one or more profiles for each app. Read and write permissions can be assigned separately.",
+    "noPermissionProfile": "No permission profile",
+    "adminAccessDescription": "Full access to the business and all apps included in its plan",
+    "memberAccessDescription": "Access is controlled by assigned licenses, permission profiles and groups",
+    "adminReceivesFullAccess": "Admins automatically receive full access to all apps included in the business plan.",
+    "reviewMemberType": "Member type"
+  },
+  "authorization": {
+    "noProfilesAvailable": "No permission profiles available for this app."
   }
 }
