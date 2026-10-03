@@ -6,7 +6,14 @@ import {
   hexToRgb,
 } from '../../packages/utils/src/appearance/colorMath';
 
-const apps = { flow: '#64c5b9', crm: '#3b82f6', erp: '#4583c4', hr: '#8b5cf6', finance: '#10b981' };
+const apps = {
+  insights: '#4583c4',
+  flow: '#64c5b9',
+  crm: '#3b82f6',
+  erp: '#4583c4',
+  hr: '#8b5cf6',
+  finance: '#10b981',
+};
 for (const theme of ['light', 'dark'] as const) {
   test(`app navigation retains distinct accessible colors in ${theme} and returns Home to neutral`, async ({
     page,

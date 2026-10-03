@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { PORTAL_URL, stubPortalSession } from './portal-session';
+import { contrastRatio } from '../../packages/utils/src/appearance/colorMath';
 
 const API = 'http://localhost:9999';
 
@@ -50,6 +51,18 @@ test('General has one company name and HR inherits edits across navigation and r
   // Prime HR before editing General so this also exercises cached setup data.
   await page.goto(`${PORTAL_URL}/hr/setup`);
   await expect(page.getByLabel('Company name', { exact: true })).toHaveValue('Northwind');
+  const stepColors = await page.locator('button[aria-current="step"]').evaluate((el) => {
+    const css = getComputedStyle(el);
+    const hex = (color: string) =>
+      '#' +
+      color
+        .match(/\d+/g)!
+        .slice(0, 3)
+        .map((n) => Number(n).toString(16).padStart(2, '0'))
+        .join('');
+    return { fg: hex(css.color), bg: hex(css.backgroundColor) };
+  });
+  expect(contrastRatio(stepColors.fg, stepColors.bg)).toBeGreaterThanOrEqual(4.5);
   await page
     .getByRole('navigation', { name: 'Apps', exact: true })
     .getByRole('link', { name: 'Settings', exact: true })

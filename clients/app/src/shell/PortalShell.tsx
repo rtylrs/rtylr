@@ -66,6 +66,7 @@ import '../modules/erp/erp.css';
 import '../modules/finance/finance.css';
 
 const APP_ACCENTS: Partial<Record<string, string>> = {
+  insights: '#4583c4',
   flow: '#64c5b9',
   crm: '#3b82f6',
   erp: '#4583c4',
@@ -102,6 +103,8 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const appStyle: CSSProperties & Record<string, string> = accent
     ? {
         '--accent': accent,
+        '--color-accent': accent,
+        '--color-ring': deriveAccentFgAcross(accent, grounds),
         '--accent-muted': `color-mix(in srgb, ${accent} 12%, transparent)`,
         '--accent-border': `color-mix(in srgb, ${accent} 30%, transparent)`,
         '--accent-focus': deriveAccentFgAcross(accent, grounds),
@@ -111,6 +114,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           grounds.map((ground) => compositeOver(accent, 0.12, ground))
         ),
         '--dash-on-accent': deriveOnAccent(accent),
+        '--hub-on-accent': deriveOnAccent(accent),
         ...(appId === 'hr'
           ? {
               '--hr-accent': accent,
