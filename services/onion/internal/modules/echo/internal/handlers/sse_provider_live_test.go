@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http/httptest"
 	"os"
 	"strings"
@@ -35,6 +36,7 @@ func TestLiveProviderPersistence(t *testing.T) {
 			t.Errorf("remove fixture session: %v", err)
 		}
 	})
+	ctx = snips.WithConversation(ctx, session)
 	prompt := "Write one short sentence explaining what a project task is."
 	if _, err := m.StoreMessage(ctx, session, userID, "user", prompt, 16); err != nil {
 		t.Fatal(err)
@@ -44,6 +46,16 @@ func TestLiveProviderPersistence(t *testing.T) {
 		t.Fatal("provider initialization failed")
 	}
 	t.Cleanup(func() { _ = client.Close() })
+	planned, err := client.CompleteTextWithOptions(ctx, `Return a JSON object with a single key "ready" set to true.`, snips.DeterministicJSONCompletionOptions())
+	if err != nil {
+		t.Fatal("provider JSON completion failed")
+	}
+	var plan struct {
+		Ready bool `json:"ready"`
+	}
+	if json.Unmarshal([]byte(planned), &plan) != nil || !plan.Ready {
+		t.Fatal("provider did not return the requested JSON object")
+	}
 	tokens, err := client.CompleteTextStream(ctx, prompt)
 	if err != nil {
 		t.Fatal("provider stream initialization failed")

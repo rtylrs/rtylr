@@ -134,7 +134,7 @@ func IsDeepSeekConfigured() bool {
 }
 
 // GetAIPrimaryProvider returns the operator's preferred primary provider
-// or "" for the default DeepSeek, Gemini, OpenAI, OpenCode order.
+// or "" for the default Gemini, OpenCode, DeepSeek, OpenAI order.
 func GetAIPrimaryProvider() string {
 	if GlobalConfig != nil {
 		return GlobalConfig.AIPrimaryProvider

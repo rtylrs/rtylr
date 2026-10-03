@@ -19,10 +19,10 @@ const (
 )
 
 const (
-	// OpenCode Zen uses the product-selected model. The endpoint and model stay
+	// OpenCode Go is an optional final fallback. The endpoint and model stay
 	// product-controlled, like the other OpenAI-compatible providers.
 	OpenCodeAPIKeyEnvVar = "OPENCODE_API_KEY"
-	OpenCodeBaseURL      = "https://opencode.ai/zen/v1"
+	OpenCodeBaseURL      = "https://opencode.ai/zen/go/v1"
 	OpenCodeModel        = "deepseek-v4.1-flash"
 )
 
@@ -33,7 +33,7 @@ const (
 )
 
 const (
-	// DeepSeek is the primary LLM provider. Only the API key is an env secret
+	// Direct DeepSeek is an optional fallback provider. Only the API key is an env secret
 	// (set DEEPSEEK_API_KEY on AWS / in .env); the base URL and model are fixed
 	// here on purpose. The product chooses the model internally, users never do.
 	// #nosec G101 -- This is an environment variable name, not a secret value.
@@ -94,7 +94,7 @@ type AppConfig struct {
 	DBConnMaxLifetime time.Duration
 	DBConnMaxIdleTime time.Duration
 
-	// OpenAI, Gemini and OpenCode Zen (fallback providers)
+	// OpenAI, Gemini and OpenCode Go (fallback providers)
 	OpenAIAPIKey   string
 	OpenAIOrgID    string
 	OpenAIBaseURL  string

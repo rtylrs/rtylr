@@ -30,9 +30,9 @@ func TestOpenCodeRegistration(t *testing.T) {
 	}{
 		{name: "no keys"},
 		{name: "alone", cfg: config.AppConfig{OpenCodeAPIKey: "key"}, want: []string{"opencode"}},
-		{name: "last fallback", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenAIAPIKey: "key", OpenCodeAPIKey: "key"}, want: []string{"deepseek", "gemini", "openai", "opencode"}},
-		{name: "Gemini primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "gemini"}, want: []string{"gemini", "deepseek", "opencode"}},
-		{name: "OpenCode primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "opencode"}, want: []string{"opencode", "deepseek", "gemini"}},
+		{name: "Gemini then OpenCode defaults", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenAIAPIKey: "key", OpenCodeAPIKey: "key"}, want: []string{"gemini", "opencode", "deepseek", "openai"}},
+		{name: "Gemini primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "gemini"}, want: []string{"gemini", "opencode", "deepseek"}},
+		{name: "OpenCode primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "opencode"}, want: []string{"opencode", "gemini", "deepseek"}},
 		{name: "unconfigured preference", cfg: config.AppConfig{GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "deepseek"}, want: []string{"gemini", "opencode"}},
 		{name: "retired preference", cfg: config.AppConfig{GeminiAPIKey: "key", AIPrimaryProvider: "nvidia"}, want: []string{"gemini"}},
 		{name: "disabled", cfg: config.AppConfig{OpenAIAPIKey: "key"}, want: []string{"openai"}},
@@ -81,11 +81,14 @@ func mockOpenCode(t *testing.T, respond func(map[string]any) (string, string)) *
 	// Attach the mock to the actual SDK service so no network request can escape.
 	p.client.Chat.Completions.Options = append(p.client.Chat.Completions.Options, option.WithHTTPClient(&http.Client{
 		Transport: openCodeTransport(func(r *http.Request) (*http.Response, error) {
-			if r.Method != http.MethodPost || r.URL.String() != "https://opencode.ai/zen/v1/chat/completions" {
+			if r.Method != http.MethodPost || r.URL.String() != "https://opencode.ai/zen/go/v1/chat/completions" {
 				t.Errorf("unexpected endpoint: %s %s", r.Method, r.URL)
 			}
 			if r.Header.Get("Authorization") != "Bearer test-zen-key" {
 				t.Error("OpenCode key was not used")
+			}
+			if r.Header.Get("User-Agent") != "rtylr-caret/1.0" || r.Header.Get("x-opencode-session") == "" {
+				t.Error("missing OpenCode client/session headers")
 			}
 			defer r.Body.Close()
 			var body map[string]any
@@ -97,7 +100,7 @@ func mockOpenCode(t *testing.T, respond func(map[string]any) (string, string)) *
 			}
 			thinking, _ := body["thinking"].(map[string]any)
 			if thinking["type"] != "disabled" {
-				t.Error("DeepSeek thinking must be disabled for the visible-answer budget")
+				t.Error("DeepSeek thinking must be disabled")
 			}
 			contentType, content := respond(body)
 			return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {contentType}}, Body: io.NopCloser(strings.NewReader(content)), Request: r}, nil
@@ -178,5 +181,43 @@ func TestOpenCodeStreamFallback(t *testing.T) {
 				t.Fatalf("incorrect usage: %v", done)
 			}
 		})
+	}
+}
+
+func TestOpenCodeConversationRouting(t *testing.T) {
+	p := mockOpenCode(t, func(body map[string]any) (string, string) {
+		if body["stream"] == true {
+			return "text/event-stream", "data: {\"choices\":[{\"delta\":{\"content\":\"answer\"}}]}\n\ndata: [DONE]\n\n"
+		}
+		return "application/json", `{"choices":[{"message":{"content":"answer"}}]}`
+	})
+	var sessions []string
+	observer := p.client.Chat.Completions.Options
+	p.client.Chat.Completions.Options = append(observer, option.WithMiddleware(func(r *http.Request, next option.MiddlewareNext) (*http.Response, error) {
+		sessions = append(sessions, r.Header.Get("x-opencode-session"))
+		return next(r)
+	}))
+	for _, id := range []string{"chat-one", "chat-one", "chat-two", "", ""} {
+		ctx := WithConversation(context.Background(), id)
+		if _, err := p.CompleteText(ctx, "prompt"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	stream, err := p.CompleteTextStream(WithConversation(context.Background(), "chat-one"), "prompt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var answer string
+	for token := range stream {
+		if token.Error != "" {
+			t.Fatal(token.Error)
+		}
+		answer += token.Text
+	}
+	if answer != "answer" {
+		t.Fatalf("unexpected stream answer: %q", answer)
+	}
+	if len(sessions) != 6 || sessions[5] != sessions[0] || sessions[0] == "chat-one" || sessions[0] != sessions[1] || sessions[0] == sessions[2] || sessions[3] == sessions[4] {
+		t.Fatalf("conversation routing is not stable and isolated: %v", sessions)
 	}
 }

@@ -70,26 +70,23 @@ func NewClient(ctx context.Context) (*Client, error) {
 		}
 	}
 
-	if config.IsDeepSeekConfigured() {
-		if p, err := NewDeepSeekProvider(); err == nil {
-			register(p)
-		}
-	}
-
 	if config.IsGeminiConfigured() {
 		if p, err := NewGeminiProvider(ctx); err == nil {
 			register(p)
 		}
 	}
-
-	if config.IsOpenAIConfigured() {
-		if p, err := NewOpenAIProvider(); err == nil {
+	if config.IsOpenCodeConfigured() {
+		if p, err := NewOpenCodeProvider(); err == nil {
 			register(p)
 		}
 	}
-
-	if config.IsOpenCodeConfigured() {
-		if p, err := NewOpenCodeProvider(); err == nil {
+	if config.IsDeepSeekConfigured() {
+		if p, err := NewDeepSeekProvider(); err == nil {
+			register(p)
+		}
+	}
+	if config.IsOpenAIConfigured() {
+		if p, err := NewOpenAIProvider(); err == nil {
 			register(p)
 		}
 	}
@@ -118,6 +115,7 @@ func (c *Client) CompleteTextWithOptions(ctx context.Context, prompt string, opt
 	if c == nil || len(c.providers) == 0 {
 		return "", ErrNoProvidersConfigured
 	}
+	ctx = ensureConversation(ctx)
 	var lastErr error
 	// Try each healthy provider in order until one succeeds. A short circuit
 	// prevents a broken upstream from adding a full timeout to every request.
@@ -156,6 +154,7 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 	if c == nil || len(c.providers) == 0 {
 		return nil, ErrNoProvidersConfigured
 	}
+	ctx = ensureConversation(ctx)
 	providers := c.streamingProviderOrder()
 	var lastErr error
 	for i, provider := range providers {

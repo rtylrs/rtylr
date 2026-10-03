@@ -17,12 +17,12 @@ import (
 var (
 	ErrOpenAINotConfigured   = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
 	ErrDeepSeekNotConfigured = errors.New("DeepSeek is not configured. Please set DEEPSEEK_API_KEY environment variable")
-	ErrOpenCodeNotConfigured = errors.New("OpenCode Zen is not configured. Please set OPENCODE_API_KEY environment variable")
+	ErrOpenCodeNotConfigured = errors.New("OpenCode Go is not configured. Please set OPENCODE_API_KEY environment variable")
 	ErrOpenAINoChoices       = errors.New("no response choices received from provider")
 )
 
 // OpenAIProvider speaks the OpenAI chat-completions API, also used by DeepSeek,
-// and OpenCode Zen with provider-specific base URLs and models.
+// and OpenCode Go with provider-specific base URLs and models.
 type OpenAIProvider struct {
 	client    openai.Client
 	name      string
@@ -37,6 +37,10 @@ func newOpenAICompatProvider(name, apiKey, baseURL, model, orgID string) *OpenAI
 	}
 	if baseURL != "" {
 		opts = append(opts, option.WithBaseURL(baseURL))
+	}
+
+	if name == "opencode" {
+		opts = append(opts, option.WithHeader("User-Agent", "rtylr-caret/1.0"))
 	}
 
 	return &OpenAIProvider{
@@ -61,7 +65,7 @@ func NewOpenAIProvider() (*OpenAIProvider, error) {
 	), nil
 }
 
-// NewDeepSeekProvider builds the primary DeepSeek provider (OpenAI-compatible).
+// NewDeepSeekProvider builds the direct DeepSeek fallback provider (OpenAI-compatible).
 func NewDeepSeekProvider() (*OpenAIProvider, error) {
 	if !config.IsDeepSeekConfigured() {
 		return nil, ErrDeepSeekNotConfigured
@@ -75,7 +79,7 @@ func NewDeepSeekProvider() (*OpenAIProvider, error) {
 	), nil
 }
 
-// NewOpenCodeProvider builds the final OpenCode Zen fallback provider.
+// NewOpenCodeProvider builds the OpenCode Go fallback provider.
 func NewOpenCodeProvider() (*OpenAIProvider, error) {
 	if !config.IsOpenCodeConfigured() {
 		return nil, ErrOpenCodeNotConfigured
@@ -127,6 +131,7 @@ func (c *OpenAIProvider) CompleteText(ctx context.Context, prompt string) (strin
 }
 
 func (c *OpenAIProvider) CompleteTextWithOptions(ctx context.Context, prompt string, opts CompletionOptions) (string, error) {
+	ctx = ensureConversation(ctx)
 	var lastErr error
 	for attempt := 0; attempt <= config.AIMaxRetries; attempt++ {
 		if attempt > 0 {
@@ -159,11 +164,12 @@ func (c *OpenAIProvider) CompleteTextWithOptions(ctx context.Context, prompt str
 func (c *OpenAIProvider) completeTextOnce(ctx context.Context, prompt string, opts CompletionOptions) (*openai.ChatCompletion, error) {
 	callCtx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
 	defer cancel()
-	return c.client.Chat.Completions.New(callCtx, c.chatParams(prompt, false, opts))
+	return c.client.Chat.Completions.New(callCtx, c.chatParams(prompt, false, opts), c.requestOptions(ctx)...)
 }
 
 // CompleteTextStream implements the Provider interface.
 func (c *OpenAIProvider) CompleteTextStream(ctx context.Context, prompt string) (<-chan StreamToken, error) {
+	ctx = ensureConversation(ctx)
 	tokenChan := make(chan StreamToken, 100)
 
 	go func() {
@@ -188,7 +194,7 @@ func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string,
 	ctx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
 	defer cancel()
 
-	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(prompt, true, CompletionOptions{}))
+	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(prompt, true, CompletionOptions{}), c.requestOptions(ctx)...)
 	if stream == nil {
 		c.sendErrorToken(ctx, tokenChan, "failed to create streaming response")
 		return
@@ -258,4 +264,12 @@ func (c *OpenAIProvider) sendCompletionToken(ctx context.Context, tokenChan chan
 // Close implements the Provider interface.
 func (c *OpenAIProvider) Close() error {
 	return nil
+}
+
+func (c *OpenAIProvider) requestOptions(ctx context.Context) []option.RequestOption {
+	if c.name != "opencode" {
+		return nil
+	}
+	id, _ := ctx.Value(conversationKey{}).(string)
+	return []option.RequestOption{option.WithHeader("x-opencode-session", id)}
 }

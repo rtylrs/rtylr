@@ -12,6 +12,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -111,6 +112,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	req.UserID = prepared.Request.UserID
 	req.SystemContext = prepared.Request.SystemContext
 	req.PageContext = prepared.Request.PageContext
+	ctx = snips.WithConversation(ctx, req.SessionID)
 
 	// Do not spend a model call on connectivity checks. A content-free prompt
 	// gives a generative model room to invent a plausible business report even
