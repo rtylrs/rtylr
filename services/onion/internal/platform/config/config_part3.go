@@ -133,23 +133,8 @@ func IsDeepSeekConfigured() bool {
 	return GetDeepSeekAPIKey() != ""
 }
 
-func GetNvidiaNIMAPIKey() string {
-	if GlobalConfig != nil {
-		return GlobalConfig.NvidiaNIMAPIKey
-	}
-	return os.Getenv(NvidiaNIMAPIKeyEnvVar)
-}
-
-// GetNvidiaNIMBaseURL / GetNvidiaNIMModel return the hardcoded values.
-func GetNvidiaNIMBaseURL() string { return NvidiaNIMBaseURL }
-func GetNvidiaNIMModel() string   { return NvidiaNIMModel }
-
-func IsNvidiaNIMConfigured() bool {
-	return GetNvidiaNIMAPIKey() != ""
-}
-
 // GetAIPrimaryProvider returns the operator's preferred primary provider
-// ("deepseek" | "nvidia"), or "" for the default priority order.
+// or "" for the default DeepSeek, Gemini, OpenAI, OpenCode order.
 func GetAIPrimaryProvider() string {
 	if GlobalConfig != nil {
 		return GlobalConfig.AIPrimaryProvider
@@ -158,5 +143,5 @@ func GetAIPrimaryProvider() string {
 }
 
 func IsAnyAIConfigured() bool {
-	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
+	return IsDeepSeekConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
 }

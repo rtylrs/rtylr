@@ -21,9 +21,10 @@ func setConfigEnv(t *testing.T) {
 func TestOpenCodeConfiguration(t *testing.T) {
 	setConfigEnv(t)
 	GlobalConfig = nil
-	for _, key := range []string{DeepSeekAPIKeyEnvVar, NvidiaNIMAPIKeyEnvVar, GeminiAPIKeyEnvVar, OpenAIAPIKeyEnvVar, OpenCodeAPIKeyEnvVar} {
+	for _, key := range []string{DeepSeekAPIKeyEnvVar, GeminiAPIKeyEnvVar, OpenAIAPIKeyEnvVar, OpenCodeAPIKeyEnvVar} {
 		t.Setenv(key, "")
 	}
+	t.Setenv("NVIDIA_NIM_API_KEY", "retired-fixture-key")
 	if IsAnyAIConfigured() {
 		t.Fatal("AI must remain disabled without a provider key")
 	}

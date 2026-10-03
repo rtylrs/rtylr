@@ -19,11 +19,11 @@ const (
 )
 
 const (
-	// OpenCode Zen is an optional final fallback. The endpoint and model stay
+	// OpenCode Zen uses the product-selected model. The endpoint and model stay
 	// product-controlled, like the other OpenAI-compatible providers.
 	OpenCodeAPIKeyEnvVar = "OPENCODE_API_KEY"
 	OpenCodeBaseURL      = "https://opencode.ai/zen/v1"
-	OpenCodeModel        = "minimax-m2.7"
+	OpenCodeModel        = "deepseek-v4.1-flash"
 )
 
 const (
@@ -47,16 +47,8 @@ const (
 )
 
 const (
-	// NVIDIA NIM is an OpenAI-compatible inference provider.
-	// Only the API key is an env secret (NVIDIA_NIM_API_KEY); base URL + model are
-	// fixed here. Point NvidiaNIMBaseURL at the configured NIM endpoint.
-	// #nosec G101 -- This is an environment variable name, not a secret value.
-	NvidiaNIMAPIKeyEnvVar = "NVIDIA_NIM_API_KEY"
-	NvidiaNIMBaseURL      = "https://integrate.api.nvidia.com/v1"
-	NvidiaNIMModel        = "nvidia/nemotron-3.5-lightning-30b-a3b"
-
 	// AIPrimaryProviderEnvVar optionally forces which configured provider is
-	// primary ("deepseek" | "nvidia"). Empty = use the default priority order.
+	// primary ("deepseek", "gemini", "openai", "opencode"). Empty uses default order.
 	AIPrimaryProviderEnvVar = "AI_PRIMARY_PROVIDER"
 )
 
@@ -109,9 +101,8 @@ type AppConfig struct {
 	GeminiAPIKey   string
 	OpenCodeAPIKey string
 
-	// DeepSeek + NVIDIA NIM (primary providers) — only the keys are configurable.
+	// AI provider secrets and preferred provider.
 	DeepSeekAPIKey    string
-	NvidiaNIMAPIKey   string
 	AIPrimaryProvider string
 
 	// FormMappingCheckpointPath points the Caret document-to-form mapping tool at

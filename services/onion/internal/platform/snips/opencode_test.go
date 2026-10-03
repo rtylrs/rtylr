@@ -30,8 +30,11 @@ func TestOpenCodeRegistration(t *testing.T) {
 	}{
 		{name: "no keys"},
 		{name: "alone", cfg: config.AppConfig{OpenCodeAPIKey: "key"}, want: []string{"opencode"}},
-		{name: "last fallback", cfg: config.AppConfig{DeepSeekAPIKey: "key", NvidiaNIMAPIKey: "key", GeminiAPIKey: "key", OpenAIAPIKey: "key", OpenCodeAPIKey: "key"}, want: []string{"deepseek", "nvidia", "gemini", "openai", "opencode"}},
-		{name: "nvidia primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", NvidiaNIMAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "nvidia"}, want: []string{"nvidia", "deepseek", "opencode"}},
+		{name: "last fallback", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenAIAPIKey: "key", OpenCodeAPIKey: "key"}, want: []string{"deepseek", "gemini", "openai", "opencode"}},
+		{name: "Gemini primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "gemini"}, want: []string{"gemini", "deepseek", "opencode"}},
+		{name: "OpenCode primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "opencode"}, want: []string{"opencode", "deepseek", "gemini"}},
+		{name: "unconfigured preference", cfg: config.AppConfig{GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "deepseek"}, want: []string{"gemini", "opencode"}},
+		{name: "retired preference", cfg: config.AppConfig{GeminiAPIKey: "key", AIPrimaryProvider: "nvidia"}, want: []string{"gemini"}},
 		{name: "disabled", cfg: config.AppConfig{OpenAIAPIKey: "key"}, want: []string{"openai"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -89,8 +92,12 @@ func mockOpenCode(t *testing.T, respond func(map[string]any) (string, string)) *
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 				return nil, err
 			}
-			if body["model"] != "minimax-m2.7" || body["max_tokens"] != float64(config.AIMaxOutputTokens) {
+			if body["model"] != "deepseek-v4.1-flash" || body["max_tokens"] != float64(config.AIMaxOutputTokens) {
 				t.Errorf("unexpected model/token cap: %v", body)
+			}
+			thinking, _ := body["thinking"].(map[string]any)
+			if thinking["type"] != "disabled" {
+				t.Error("DeepSeek thinking must be disabled for the visible-answer budget")
 			}
 			contentType, content := respond(body)
 			return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {contentType}}, Body: io.NopCloser(strings.NewReader(content)), Request: r}, nil

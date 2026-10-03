@@ -1,5 +1,3 @@
-
-
 # Onion 🧅
 
 Onion is a full-featured backend framework that provides everything you need to build robust applications:
@@ -57,18 +55,20 @@ make setup
 make run
 ```
 
-### Optional AI fallback
+### AI providers
 
 Set `OPENCODE_API_KEY` to an [OpenCode Zen](https://opencode.ai/docs/zen/)
-API key and restart the API to enable the final AI fallback. The default order
-is DeepSeek → NVIDIA NIM → Gemini → OpenAI → OpenCode Zen; providers without
-keys are skipped. OpenCode can also run as the only configured AI provider.
+API key and restart the API to enable OpenCode. The default order
+is DeepSeek → Gemini → OpenAI → OpenCode Zen; providers without
+keys are skipped. Set `AI_PRIMARY_PROVIDER=opencode` to make it primary, with the remaining configured providers as fallbacks. OpenCode can also run as the only configured AI provider.
 
-The integration uses Zen's hosted chat-completions API with `minimax-m2.7`, not
+The integration uses Zen's hosted chat-completions API with `deepseek-v4.1-flash` at `/zen/v1`, not
 the local OpenCode CLI or its saved credentials. It supports ordinary and JSON
 completions, streaming failover, token accounting, provider cooldowns, and the
 existing request timeout. Streaming switches providers only before response
 text has been emitted.
+
+OpenCode Go is intended for coding-agent traffic and requires conversation session headers; Caret uses the metered Zen API for general assistant requests.
 
 The provider stays disabled when the key is empty. Configure Zen billing and
 usage limits before enabling it; no deployment or secret provisioning is

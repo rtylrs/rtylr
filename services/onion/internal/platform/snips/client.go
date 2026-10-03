@@ -62,9 +62,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 		cooldownUntil: make(map[string]time.Time),
 	}
 
-	// Default priority: DeepSeek, NVIDIA NIM, Gemini, OpenAI, then OpenCode Zen.
-	// AI_PRIMARY_PROVIDER can swap the first two. Unconfigured providers are
-	// skipped; the first registered becomes primary (used for streaming).
+	// Unconfigured providers are skipped; the first registered becomes primary.
 	register := func(p Provider) {
 		client.providers = append(client.providers, p)
 		if client.primaryProvider == nil {
@@ -72,28 +70,10 @@ func NewClient(ctx context.Context) (*Client, error) {
 		}
 	}
 
-	deepseekFirst := config.GetAIPrimaryProvider() != "nvidia"
-	addDeepSeek := func() {
-		if config.IsDeepSeekConfigured() {
-			if p, err := NewDeepSeekProvider(); err == nil {
-				register(p)
-			}
+	if config.IsDeepSeekConfigured() {
+		if p, err := NewDeepSeekProvider(); err == nil {
+			register(p)
 		}
-	}
-	addNvidia := func() {
-		if config.IsNvidiaNIMConfigured() {
-			if p, err := NewNvidiaNIMProvider(); err == nil {
-				register(p)
-			}
-		}
-	}
-
-	if deepseekFirst {
-		addDeepSeek()
-		addNvidia()
-	} else {
-		addNvidia()
-		addDeepSeek()
 	}
 
 	if config.IsGeminiConfigured() {
@@ -111,6 +91,15 @@ func NewClient(ctx context.Context) (*Client, error) {
 	if config.IsOpenCodeConfigured() {
 		if p, err := NewOpenCodeProvider(); err == nil {
 			register(p)
+		}
+	}
+
+	for i, provider := range client.providers {
+		if provider.Name() == config.GetAIPrimaryProvider() {
+			copy(client.providers[1:i+1], client.providers[:i])
+			client.providers[0] = provider
+			client.primaryProvider = provider
+			break
 		}
 	}
 

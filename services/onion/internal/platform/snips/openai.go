@@ -15,15 +15,14 @@ import (
 )
 
 var (
-	ErrOpenAINotConfigured    = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
-	ErrDeepSeekNotConfigured  = errors.New("DeepSeek is not configured. Please set DEEPSEEK_API_KEY environment variable")
-	ErrNvidiaNIMNotConfigured = errors.New("NVIDIA NIM is not configured. Please set NVIDIA_NIM_API_KEY environment variable")
-	ErrOpenCodeNotConfigured  = errors.New("OpenCode Zen is not configured. Please set OPENCODE_API_KEY environment variable")
-	ErrOpenAINoChoices        = errors.New("no response choices received from provider")
+	ErrOpenAINotConfigured   = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
+	ErrDeepSeekNotConfigured = errors.New("DeepSeek is not configured. Please set DEEPSEEK_API_KEY environment variable")
+	ErrOpenCodeNotConfigured = errors.New("OpenCode Zen is not configured. Please set OPENCODE_API_KEY environment variable")
+	ErrOpenAINoChoices       = errors.New("no response choices received from provider")
 )
 
 // OpenAIProvider speaks the OpenAI chat-completions API, also used by DeepSeek,
-// NVIDIA NIM and OpenCode Zen with provider-specific base URLs and models.
+// and OpenCode Zen with provider-specific base URLs and models.
 type OpenAIProvider struct {
 	client    openai.Client
 	name      string
@@ -76,20 +75,6 @@ func NewDeepSeekProvider() (*OpenAIProvider, error) {
 	), nil
 }
 
-// NewNvidiaNIMProvider builds an NVIDIA NIM provider (OpenAI-compatible).
-func NewNvidiaNIMProvider() (*OpenAIProvider, error) {
-	if !config.IsNvidiaNIMConfigured() {
-		return nil, ErrNvidiaNIMNotConfigured
-	}
-	return newOpenAICompatProvider(
-		"nvidia",
-		config.GetNvidiaNIMAPIKey(),
-		config.GetNvidiaNIMBaseURL(),
-		config.GetNvidiaNIMModel(),
-		"",
-	), nil
-}
-
 // NewOpenCodeProvider builds the final OpenCode Zen fallback provider.
 func NewOpenCodeProvider() (*OpenAIProvider, error) {
 	if !config.IsOpenCodeConfigured() {
@@ -115,9 +100,8 @@ func (c *OpenAIProvider) chatParams(prompt string, stream bool, opts CompletionO
 			openai.UserMessage(prompt),
 		},
 	}
-	if c.name == "nvidia" {
-		// Reserve the output budget for the visible answer, not model reasoning.
-		req.SetExtraFields(map[string]any{"chat_template_kwargs": map[string]any{"enable_thinking": false}})
+	if c.name == "opencode" {
+		req.SetExtraFields(map[string]any{"thinking": map[string]any{"type": "disabled"}})
 	}
 	if opts.Temperature != nil {
 		req.Temperature = openai.Float(*opts.Temperature)
