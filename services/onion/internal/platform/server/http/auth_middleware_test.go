@@ -52,6 +52,9 @@ func TestAppForPathCoversLicensedApplicationPrefixes(t *testing.T) {
 		want authorization.AppID
 	}{
 		{path: "/pos/orders/v1/orders", want: authorization.AppPOS},
+		{path: "/pos/menu-item/v1/catalog", want: authorization.AppPOS},
+		{path: "/pos/menu-item/v1/menu-items", want: authorization.AppMenu},
+		{path: "/pos/menu-item/v1/menu-items/42", want: authorization.AppMenu},
 		{path: "/erp/inventory/v1/items", want: authorization.AppERP},
 		{path: "/hr/employees/v1/staff", want: authorization.AppHR},
 		{path: "/crm/customers/v1/customers", want: authorization.AppCRM},

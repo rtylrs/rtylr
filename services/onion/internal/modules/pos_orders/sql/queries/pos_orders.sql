@@ -181,6 +181,13 @@ WHERE business_id = ?
   AND created_at >= CURDATE()
   AND created_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY);
 
+-- name: MaxOrderNumberSequence :one
+SELECT CAST(COALESCE(MAX(CAST(SUBSTRING_INDEX(order_number, '-', -1) AS UNSIGNED)), 0) AS UNSIGNED) AS sequence
+FROM pos_orders
+WHERE business_id = ?
+  AND order_number LIKE CONCAT(sqlc.arg(prefix), '%')
+  AND order_number REGEXP '^ORD-[0-9]{8}-[0-9]+$';
+
 -- name: MoveOrderItems :exec
 UPDATE pos_order_items SET order_id = ? WHERE id = ? AND order_id = ?;
 

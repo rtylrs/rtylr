@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMenuItems } from "./useMenuItems";
 
 const menuItemClient = vi.hoisted(() => ({
-  listMenuItems: vi.fn(),
+  listPOSCatalog: vi.fn(),
 }));
 
 vi.mock("@voxire/api", () => ({
@@ -23,8 +23,8 @@ const createWrapper = () => {
 describe("useMenuItems", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("loads menu items from the generated menu endpoint", async () => {
-    menuItemClient.listMenuItems.mockResolvedValue({
+  it("loads menu items from the generated POS catalog endpoint", async () => {
+    menuItemClient.listPOSCatalog.mockResolvedValue({
       items: [
         { id: "1", name: "Burger", price: 12.99, category: "Mains" },
         { id: "2", name: "Fries", price: 4.99, category: "Sides" },
@@ -37,7 +37,7 @@ describe("useMenuItems", () => {
     });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(menuItemClient.listMenuItems).toHaveBeenCalledWith({});
+    expect(menuItemClient.listPOSCatalog).toHaveBeenCalledWith({});
     expect(result.current.items).toHaveLength(3);
     expect(result.current.items[0].name).toBe("Burger");
   });
@@ -49,7 +49,7 @@ describe("useMenuItems", () => {
       price: index + 1,
       category: "Catalog",
     }));
-    menuItemClient.listMenuItems.mockResolvedValue({ items });
+    menuItemClient.listPOSCatalog.mockResolvedValue({ items });
 
     const { result } = renderHook(() => useMenuItems(), {
       wrapper: createWrapper(),
@@ -61,7 +61,7 @@ describe("useMenuItems", () => {
   });
 
   it("computes sorted unique categories", async () => {
-    menuItemClient.listMenuItems.mockResolvedValue({
+    menuItemClient.listPOSCatalog.mockResolvedValue({
       items: [
         { id: "1", name: "Burger", price: 12, category: "Mains" },
         { id: "2", name: "Fries", price: 5, category: "Sides" },
@@ -79,7 +79,7 @@ describe("useMenuItems", () => {
   });
 
   it("handles error state", async () => {
-    menuItemClient.listMenuItems.mockRejectedValue(new Error("Failed to load"));
+    menuItemClient.listPOSCatalog.mockRejectedValue(new Error("Failed to load"));
 
     const { result } = renderHook(() => useMenuItems(), {
       wrapper: createWrapper(),
@@ -91,14 +91,14 @@ describe("useMenuItems", () => {
   });
 
   it("reload refetches data", async () => {
-    menuItemClient.listMenuItems.mockResolvedValue({ items: [] });
+    menuItemClient.listPOSCatalog.mockResolvedValue({ items: [] });
 
     const { result } = renderHook(() => useMenuItems(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    menuItemClient.listMenuItems.mockResolvedValue({
+    menuItemClient.listPOSCatalog.mockResolvedValue({
       items: [{ id: "10", name: "New Item", price: 9.99, category: "New" }],
     });
 

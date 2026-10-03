@@ -166,7 +166,7 @@ const Dashboard: React.FC = () => {
             type="button"
             onClick={() => void refetchStats()}
             className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-            style={{ background: AMBER, color: 'var(--dash-text)' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             {t('erp.reorder.refresh')}
           </button>

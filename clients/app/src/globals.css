@@ -5,7 +5,6 @@
 
 /* Include shared components in Tailwind's source discovery. */
 @source '../../packages/**/*.{ts,tsx}';
-@source '../../pos/src/**/*.{ts,tsx}';
 
 @theme {
   --radius-xs: 0.125rem;

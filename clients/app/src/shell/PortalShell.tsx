@@ -1,15 +1,24 @@
-import { useSettingsStore as usePOSSettingsStore } from 'rtylr-pos/portal';
-import { posNavItems } from '../modules/pos/navigation';
 import { recruitNavItems } from '../modules/recruit/navigation';
-import '../modules/pos/pos.css';
 import '../modules/recruit/recruit.css';
 import { getHrNavItems, hrNavItems } from '../modules/hr/navigation';
 import { useHRConfigStore } from '../modules/hr/shared/stores/hrConfigStore';
 import '../modules/hr/hr.css';
-import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  lazy,
+  Suspense,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { resolveApiBase } from '@voxire/config';
+import { resolveApiBase, resolveAppUrl } from '@voxire/config';
+import { ThemeScopeProvider } from '@voxire/ui';
+import { useMediaQuery, deriveAccentFgAcross, deriveOnAccent, compositeOver } from '@voxire/utils';
+import { useThemeStore } from '../shared/stores/themeStore';
 import { PanelLeft, Search, Bell, Settings, Workflow, Plus, X } from 'lucide-react';
 import {
   HomeIcon,
@@ -20,7 +29,6 @@ import {
   FinanceIcon,
   HrIcon,
   PosIcon,
-  RecruitIcon,
 } from '@voxire/ui';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
@@ -58,6 +66,15 @@ import '../modules/crm/crm.css';
 import '../modules/erp/erp.css';
 import '../modules/finance/finance.css';
 
+const APP_ACCENTS: Partial<Record<string, string>> = {
+  insights: '#4583c4',
+  flow: '#64c5b9',
+  crm: '#3b82f6',
+  erp: '#4583c4',
+  hr: '#8b5cf6',
+  finance: '#10b981',
+};
+
 function initialCollapsed() {
   try {
     return localStorage.getItem('portal-sidebar-collapsed') === 'true';
@@ -73,6 +90,63 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const search = useRouterState({ select: (state) => state.location.searchStr });
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 900px)');
+  const systemDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const theme = useThemeStore((state) => state.theme);
+  const appId = (
+    pathname.startsWith('/settings/') ? pathname.split('/')[2] : pathname.split('/')[1]
+  )?.split('-')[0];
+  const accent = APP_ACCENTS[appId];
+  const grounds =
+    theme === 'dark' || (theme === 'system' && systemDark)
+      ? ['#0a0a0a', '#111111', '#161616']
+      : ['#f8f8f8', '#ffffff'];
+  const actionAccent = appId === 'erp' ? '#f59e0b' : (accent ?? '#111111');
+  const appStyle: CSSProperties & Record<string, string> = accent
+    ? {
+        '--app-action-bg': actionAccent,
+        '--app-on-action': deriveOnAccent(actionAccent),
+        '--app-action-hover': `color-mix(in srgb, ${actionAccent} 90%, white)`,
+        '--app-selection-bg': `color-mix(in srgb, ${accent} 12%, transparent)`,
+        '--app-on-selection': deriveAccentFgAcross(
+          accent,
+          grounds.map((ground) => compositeOver(accent, 0.12, ground))
+        ),
+        '--app-focus': deriveAccentFgAcross(accent, grounds),
+        '--accent': accent,
+        '--accent-foreground': deriveOnAccent(accent),
+        '--color-accent-foreground': deriveOnAccent(accent),
+        '--color-accent': accent,
+        '--color-ring': deriveAccentFgAcross(accent, grounds),
+        '--accent-muted': `color-mix(in srgb, ${accent} 12%, transparent)`,
+        '--accent-border': `color-mix(in srgb, ${accent} 30%, transparent)`,
+        '--accent-focus': deriveAccentFgAcross(accent, grounds),
+        '--accent-fg': deriveAccentFgAcross(accent, grounds),
+        '--accent-on-muted': deriveAccentFgAcross(
+          accent,
+          grounds.map((ground) => compositeOver(accent, 0.12, ground))
+        ),
+        '--dash-on-accent': deriveOnAccent(accent),
+        '--hub-on-accent': deriveOnAccent(accent),
+        ...(appId === 'flow'
+          ? {
+              '--flow-action-bg': accent,
+              '--flow-on-accent': deriveOnAccent(accent),
+              '--flow-active': `color-mix(in srgb, ${accent} 12%, transparent)`,
+              '--flow-border-focus': deriveAccentFgAcross(accent, grounds),
+              '--flow-focus-ring': deriveAccentFgAcross(accent, grounds),
+            }
+          : {}),
+        ...(appId === 'hr'
+          ? {
+              '--hr-accent': accent,
+              '--hr-payroll-accent': accent,
+              '--hr-on-accent': deriveOnAccent(accent),
+            }
+          : {}),
+        ...(appId === 'crm' ? { '--crm-on-accent': deriveOnAccent(accent) } : {}),
+      }
+    : {};
   const [settingsQuery, setSettingsQuery] = useState('');
   const quickCreateOpen = useFlowStore((state) => state.quickCreateOpen);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -89,7 +163,6 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
   const isAutomations = pathname === '/automations' || pathname.startsWith('/automations/');
   const isCaret = pathname === '/caret';
-  const isPos = pathname === '/pos' || pathname.startsWith('/pos/');
   const isRecruit = pathname === '/recruit' || pathname.startsWith('/recruit/');
   const isHr = pathname === '/hr' || pathname.startsWith('/hr/');
   const hrConfig = useHRConfigStore((state) => state.config);
@@ -129,35 +202,26 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         pathname === item.path || (item.path !== '/hr' && pathname.startsWith(`${item.path}/`))
     )
     .sort((a, b) => b.path.length - a.path.length)[0];
-  const posFeatures = usePOSSettingsStore((state) => state.features);
-  const posPage = posNavItems
-    .filter(
-      (item) =>
-        pathname === item.path || (item.path !== '/pos' && pathname.startsWith(`${item.path}/`))
-    )
-    .sort((a, b) => b.path.length - a.path.length)[0];
   const recruitPage = recruitNavItems.find((item) => pathname === item.path);
-  const pageTitle = isPos
-    ? t(`posNav.${posPage?.key ?? 'appName'}`)
-    : isRecruit
-      ? t(`recruitAdmin.nav.${recruitPage?.key ?? 'careers'}`)
-      : isHr
-        ? t(`hrNav.${hrPage?.key ?? 'appName'}`)
-        : isFinance
-          ? t(`financeNav.${financePage?.key ?? 'appName'}`)
-          : isErp
-            ? t(`erpNav.${erpPage?.key ?? 'appName'}`)
-            : isCrm
-              ? t(`crmNav.${crmPage?.key ?? 'appName'}`)
-              : isFlow
-                ? t('appNames.short.flow')
-                : isInsights
-                  ? t(`insightsNav.${insightsPage?.key || 'overview'}`)
-                  : pathname.startsWith('/team/groups')
-                    ? t('common.nav.groups')
-                    : pageKey
-                      ? t(`common.nav.${pageKey}`)
-                      : t('common.portal.home');
+  const pageTitle = isRecruit
+    ? t(`recruitAdmin.nav.${recruitPage?.key ?? 'careers'}`)
+    : isHr
+      ? t(`hrNav.${hrPage?.key ?? 'appName'}`)
+      : isFinance
+        ? t(`financeNav.${financePage?.key ?? 'appName'}`)
+        : isErp
+          ? t(`erpNav.${erpPage?.key ?? 'appName'}`)
+          : isCrm
+            ? t(`crmNav.${crmPage?.key ?? 'appName'}`)
+            : isFlow
+              ? t('appNames.short.flow')
+              : isInsights
+                ? t(`insightsNav.${insightsPage?.key || 'overview'}`)
+                : pathname.startsWith('/team/groups')
+                  ? t('common.nav.groups')
+                  : pageKey
+                    ? t(`common.nav.${pageKey}`)
+                    : t('common.portal.home');
   const nav = (
     isAutomations
       ? [
@@ -169,31 +233,29 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             ...settingsNavItems,
             ...addonSettingsItems.filter((item) => isAddonEnabled(addons, item.addonId)),
           ]
-        : isPos
-          ? posNavItems.filter((item) => !('feature' in item) || posFeatures[item.feature])
-          : isRecruit
-            ? [...recruitNavItems]
-            : isHr
-              ? getHrNavItems(hrConfig)
-              : isFinance
-                ? financeNavItems.filter(
-                    (item) => item.path !== '/finance' || getFinanceHomePath(user) === '/finance'
-                  )
-                : isErp
-                  ? [...erpNavItems]
-                  : isCrm
-                    ? [
-                        ...crmNavItems,
-                        ...(addonsError || isAddonEnabled(addons, 'sales_pipeline')
-                          ? crmSalesNavItems
-                          : []),
-                      ]
-                    : [
-                        ...rawNavItems,
-                        ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : []),
-                      ].sort(
-                        (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
-                      )
+        : isRecruit
+          ? [...recruitNavItems]
+          : isHr
+            ? getHrNavItems(hrConfig)
+            : isFinance
+              ? financeNavItems.filter(
+                  (item) => item.path !== '/finance' || getFinanceHomePath(user) === '/finance'
+                )
+              : isErp
+                ? [...erpNavItems]
+                : isCrm
+                  ? [
+                      ...crmNavItems,
+                      ...(addonsError || isAddonEnabled(addons, 'sales_pipeline')
+                        ? crmSalesNavItems
+                        : []),
+                    ]
+                  : [
+                      ...rawNavItems,
+                      ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : []),
+                    ].sort(
+                      (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
+                    )
   ).filter((item) => canAccessPortalPath(user, item.path));
   const apps = useMemo(
     () =>
@@ -244,7 +306,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', key);
   }, [toggleCaret, isCaret]);
   const toggleNavigation = () => {
-    if (window.matchMedia('(max-width: 900px)').matches) setMobileOpen((value) => !value);
+    if (isMobile) setMobileOpen((value) => !value);
     else setCollapsed((value) => !value);
   };
   const actions = (
@@ -310,14 +372,9 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           {mobile ? <X size={18} /> : <PanelLeft size={18} />}
         </button>
       </div>
-      {!isSettings &&
-        !isAutomations &&
-        !isCrm &&
-        !isErp &&
-        !isFinance &&
-        !isHr &&
-        !isPos &&
-        !isRecruit && <BusinessSwitcher />}
+      {!isSettings && !isAutomations && !isCrm && !isErp && !isFinance && !isHr && !isRecruit && (
+        <BusinessSwitcher />
+      )}
       <nav
         id={mobile ? 'portal-mobile-navigation' : 'portal-app-navigation'}
         className="portal-app-navigation"
@@ -327,23 +384,21 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           <p className="portal-section-label">
             {isAutomations
               ? t('common.nav.automations')
-              : isPos
-                ? t('appNames.short.pos')
-                : isRecruit
-                  ? t('appNames.short.recruit')
-                  : isHr
-                    ? t('appNames.short.hr')
-                    : isFinance
-                      ? t('appNames.short.finance')
-                      : isErp
-                        ? t('appNames.short.erp')
-                        : isCrm
-                          ? t('appNames.short.crm')
-                          : isInsights
-                            ? t('appNames.short.insights')
-                            : isSettings
-                              ? t('common.nav.manageAccount')
-                              : t('common.portal.workspace')}
+              : isRecruit
+                ? t('appNames.short.recruit')
+                : isHr
+                  ? t('appNames.short.hr')
+                  : isFinance
+                    ? t('appNames.short.finance')
+                    : isErp
+                      ? t('appNames.short.erp')
+                      : isCrm
+                        ? t('appNames.short.crm')
+                        : isInsights
+                          ? t('appNames.short.insights')
+                          : isSettings
+                            ? t('common.nav.manageAccount')
+                            : t('common.portal.workspace')}
           </p>
         )}
         {isSettings ? (
@@ -361,7 +416,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               key={item.path}
               tourId={mobile ? undefined : item.key}
               label={t(
-                `${isPos ? 'posNav' : isRecruit ? 'recruitAdmin.nav' : isHr ? 'hrNav' : isFinance ? 'financeNav' : isErp ? 'erpNav' : isCrm ? 'crmNav' : 'common.nav'}.${item.key}`
+                `${isRecruit ? 'recruitAdmin.nav' : isHr ? 'hrNav' : isFinance ? 'financeNav' : isErp ? 'erpNav' : isCrm ? 'crmNav' : 'common.nav'}.${item.key}`
               )}
               onNavigate={() => setMobileOpen(false)}
             />
@@ -370,8 +425,8 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       </nav>
     </>
   );
-  return (
-    <div className="portal-shell">
+  const shell = (
+    <div className="portal-shell" data-app={accent ? appId : undefined} style={appStyle}>
       <a className="portal-skip-link" href="#main-content">
         {t('common.skipToMainContent')}
       </a>
@@ -384,7 +439,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         >
           <Link
             to="/"
-            className={`portal-rail-button${!isSettings && !isInsights && !isFlow && !isCaret && !isAutomations && !isCrm && !isErp && !isFinance && !isHr && !isPos && !isRecruit ? ' is-active' : ''}`}
+            className={`portal-rail-button${!isSettings && !isInsights && !isFlow && !isCaret && !isAutomations && !isCrm && !isErp && !isFinance && !isHr && !isRecruit ? ' is-active' : ''}`}
             aria-label={t('common.portal.home')}
             aria-current={
               !isSettings &&
@@ -396,7 +451,6 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               !isErp &&
               !isFinance &&
               !isHr &&
-              !isPos &&
               !isRecruit
                 ? 'page'
                 : undefined
@@ -507,38 +561,20 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             </Link>
           </Tooltip>
         )}
-        {canAccessPortalPath(user, '/pos') && (
+        {apps?.includes('pos') && (
           <Tooltip
             content={t('appNames.short.pos')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
             contentClassName="portal-rail-tooltip"
           >
-            <Link
-              to="/pos"
-              className={`portal-rail-button${isPos ? ' is-active' : ''}`}
+            <a
+              href={resolveAppUrl('pos')}
+              className="portal-rail-button"
               aria-label={t('appNames.short.pos')}
-              aria-current={isPos ? 'page' : undefined}
             >
               <PosIcon size={21} />
-            </Link>
-          </Tooltip>
-        )}
-        {canAccessPortalPath(user, '/recruit') && (
-          <Tooltip
-            content={t('appNames.short.recruit')}
-            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
-            focusable={false}
-            contentClassName="portal-rail-tooltip"
-          >
-            <Link
-              to="/recruit"
-              className={`portal-rail-button${isRecruit ? ' is-active' : ''}`}
-              aria-label={t('appNames.short.recruit')}
-              aria-current={isRecruit ? 'page' : undefined}
-            >
-              <RecruitIcon size={21} />
-            </Link>
+            </a>
           </Tooltip>
         )}
         {canAccessPortalPath(user, '/automations') && (
@@ -605,7 +641,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
                     className={`portal-icon-button portal-show-sidebar${collapsed ? ' is-visible' : ''}`}
                     onClick={toggleNavigation}
                     aria-label={t('common.toggleNavigation')}
-                    aria-expanded={!collapsed || mobileOpen}
+                    aria-expanded={isMobile ? mobileOpen : !collapsed}
                     aria-controls="portal-app-navigation"
                   >
                     <PanelLeft size={19} />
@@ -620,7 +656,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             id="main-content"
             ref={mainRef}
             tabIndex={-1}
-            className={`portal-page${isPos || pathname === '/settings/pos' ? ' is-pos' : ''}${isRecruit ? ' is-recruit' : ''}${isHr ? ' is-hr' : ''}${isFinance ? ' is-finance' : ''}${isErp ? ' is-erp' : ''}${isCrm ? ' is-crm' : ''}${isFlow ? ' is-flow' : ''}${isCaret ? ' is-caret' : ''}`}
+            className={`portal-page${isRecruit ? ' is-recruit' : ''}${isHr ? ' is-hr' : ''}${isFinance ? ' is-finance' : ''}${isErp ? ' is-erp' : ''}${isCrm ? ' is-crm' : ''}${isFlow ? ' is-flow' : ''}${isCaret ? ' is-caret' : ''}`}
           >
             <PortalHeaderActionsProvider value={actions}>{children}</PortalHeaderActionsProvider>
           </main>
@@ -640,23 +676,21 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               variant="inline"
               shortcutsEnabled={false}
               appId={
-                isPos
-                  ? 'pos'
-                  : isRecruit
-                    ? 'recruit'
-                    : isHr
-                      ? 'hr'
-                      : isFinance
-                        ? 'finance'
-                        : isErp
-                          ? 'erp'
-                          : isCrm
-                            ? 'crm'
-                            : isFlow
-                              ? 'flow'
-                              : isInsights
-                                ? 'insights'
-                                : 'dash'
+                isRecruit
+                  ? 'recruit'
+                  : isHr
+                    ? 'hr'
+                    : isFinance
+                      ? 'finance'
+                      : isErp
+                        ? 'erp'
+                        : isCrm
+                          ? 'crm'
+                          : isFlow
+                            ? 'flow'
+                            : isInsights
+                              ? 'insights'
+                              : 'dash'
               }
               userId={Number(user?.id) || 0}
               systemContext={buildPortalSystemContext(caretContext)}
@@ -681,4 +715,5 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       )}
     </div>
   );
+  return <ThemeScopeProvider style={appStyle}>{shell}</ThemeScopeProvider>;
 }

@@ -15,6 +15,28 @@ func TestCustomerExportUsesCanonicalPermission(t *testing.T) {
 	}
 }
 
+func TestPOSCatalogAndMenuAdministrationUseSeparatePermissions(t *testing.T) {
+	for _, request := range []struct {
+		method, path string
+		app          authorization.AppID
+		permission   string
+	}{
+		{http.MethodGet, "/pos/menu-item/v1/catalog", authorization.AppPOS, "pos:orders:create"},
+		{http.MethodGet, "/pos/menu-item/v1/menu-items", authorization.AppMenu, "menu:menus:view"},
+		{http.MethodGet, "/pos/menu-item/v1/menu-items/7", authorization.AppMenu, "menu:menus:view"},
+		{http.MethodPost, "/pos/menu-item/v1/menu-items", authorization.AppMenu, "menu:menus:edit"},
+		{http.MethodPut, "/pos/menu-item/v1/menu-items/7", authorization.AppMenu, "menu:menus:edit"},
+		{http.MethodDelete, "/pos/menu-item/v1/menu-items/7", authorization.AppMenu, "menu:menus:edit"},
+	} {
+		t.Run(request.method+" "+request.path, func(t *testing.T) {
+			app, permission, ok := featurePermissionForRequest(request.method, request.path)
+			if !ok || app != request.app || permission != request.permission {
+				t.Fatalf("mapping = %s:%s,%t, want %s:%s,true", app, permission, ok, request.app, request.permission)
+			}
+		})
+	}
+}
+
 func TestInsightsSettingsSeparateReadAndWritePermissions(t *testing.T) {
 	for _, request := range []struct {
 		method     string

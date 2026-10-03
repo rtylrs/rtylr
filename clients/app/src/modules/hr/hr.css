@@ -20,9 +20,9 @@
   --hr-onboarding-complete: #10b981;
   --hr-onboarding-in-progress: #8b5cf6;
   --hr-onboarding-not-started: #6b7280;
-  --hr-accent: var(--dash-text);
-  --hr-payroll-accent: var(--dash-text);
-  --hr-on-accent: var(--dash-surface);
+  --hr-accent: #8b5cf6;
+  --hr-payroll-accent: #8b5cf6;
+  --hr-on-accent: #0a0a0a;
   --hr-bg: var(--dash-bg);
   --hr-surface: var(--dash-surface);
   --hr-card: var(--dash-surface);
@@ -37,14 +37,11 @@
 }
 .portal-page.is-hr {
   padding: clamp(20px, 3vw, 40px);
-  --accent: var(--dash-text);
-  --accent-on-muted: var(--dash-text);
-  --accent-fg: var(--dash-text);
 }
 .portal-page.is-hr table {
   box-shadow: none;
 }
 .portal-page.is-hr :is(input, textarea, select):focus-visible {
-  outline: 2px solid var(--dash-text-dim);
+  outline: 2px solid var(--app-focus, var(--dash-text-dim));
   outline-offset: 2px;
 }

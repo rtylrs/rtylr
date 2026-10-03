@@ -76,7 +76,7 @@ const Barcodes: React.FC = () => {
               type="button"
               onClick={handlePrint}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: 'var(--dash-text)' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               <Printer size={14} /> Print {selected.size > 0 ? `(${selected.size * copies})` : ''}
             </button>

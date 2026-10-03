@@ -352,13 +352,8 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 	newOrderIDs := make([]int64, 0, len(splits))
 
 	for _, splitItemIDs := range splits {
-		// Count through the transaction, not the pool. GenerateOrderNumber
-		// counts committed rows, so every group in this loop was offered the
-		// same ORD-<date>-NNNN; the second child insert then violated
-		// uq_pos_orders_number and the whole split failed. Counting through
-		// qtx includes the children this transaction has already inserted,
-		// so each one gets a distinct number.
-		orderNum, genErr := generateOrderNumber(ctx, qtx, businessID)
+		// The allocator sees earlier children inserted in this transaction.
+		orderNum, genErr := generateOrderNumber(ctx, tx, qtx, businessID)
 		if genErr != nil {
 			txErr = genErr
 			return nil, genErr

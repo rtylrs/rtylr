@@ -15,11 +15,15 @@ FROM hr_setup_steps
 WHERE business_id = ? AND step_key = ?;
 
 -- name: GetHRConfig :one
-SELECT id, owner_id, business_id, company_name, fiscal_year_start_month, default_currency,
-       default_timezone, default_work_schedule_id, overtime_enabled, overtime_multiplier,
-       directory_enabled, created_at, updated_at
-FROM hr_company_config
-WHERE business_id = ?;
+SELECT h.id, h.owner_id, h.business_id,
+       COALESCE(NULLIF(c.site_name, ''), NULLIF(b.name, ''), h.company_name) AS company_name,
+       h.fiscal_year_start_month, h.default_currency, h.default_timezone,
+       h.default_work_schedule_id, h.overtime_enabled, h.overtime_multiplier,
+       h.directory_enabled, h.created_at, h.updated_at
+FROM hr_company_config h
+LEFT JOIN config c ON c.business_id = h.business_id
+LEFT JOIN businesses b ON b.id = h.business_id
+WHERE h.business_id = ?;
 
 -- name: UpsertHRConfig :execresult
 INSERT INTO hr_company_config (

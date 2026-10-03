@@ -79,7 +79,7 @@ export const Button: React.FC<
     whiteSpace: 'nowrap',
   };
   const variants: Record<string, React.CSSProperties> = {
-    primary: { background: 'var(--dash-active)', color: 'var(--dash-text)' },
+    primary: { background: 'var(--crm-accent)', color: 'var(--crm-on-accent)' },
     ghost: { background: 'transparent', color: 'var(--hub-text-muted)' },
     outline: {
       background: 'transparent',

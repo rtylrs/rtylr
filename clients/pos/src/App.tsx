@@ -1,4 +1,3 @@
-import { usePOSPortal } from './shared/components/PortalContext';
 import React, { useEffect, Suspense, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
@@ -42,7 +41,6 @@ import {
 const getTokenFromCookie = (): string | null => getCookie('token');
 
 const AppInner = (): React.JSX.Element => {
-  const embedded = usePOSPortal();
   useKeyboardShortcuts();
   useAutoLogout();
   useOnlineStatus();
@@ -71,14 +69,13 @@ const AppInner = (): React.JSX.Element => {
           <Route path="*" element={<NoMatch />} />
         </Routes>
       </AppFlagGuard>
-      {!embedded && <CommandPalette />}
+      <CommandPalette />
       <HelpOverlay />
     </Suspense>
   );
 };
 
 const AppShell = (): React.JSX.Element => {
-  const embedded = usePOSPortal();
   const [settingsReady, setSettingsReady] = useState(false);
   const [settingsError, setSettingsError] = useState<Error | null>(null);
   const { token, setToken, getUserInfo } = useUserStore();
@@ -153,8 +150,8 @@ const AppShell = (): React.JSX.Element => {
     setContext(context.branchId, context.terminalId, context.employeeId);
   }, [employee, endSession, isActive, locationId, setContext, terminalId]);
 
-  if (embedded && settingsError) throw settingsError;
-  if (embedded && !settingsReady)
+  if (settingsError) throw settingsError;
+  if ((token || getTokenFromCookie()) && !settingsReady)
     return (
       <div className="flex min-h-48 items-center justify-center">
         <Spinner />

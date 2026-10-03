@@ -46,7 +46,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       <a
         href={`${resolveAppUrl('dash')}/settings/billing`}
         className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0"
-        style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+        style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
       >
         <Zap size={11} />
         Activate plan

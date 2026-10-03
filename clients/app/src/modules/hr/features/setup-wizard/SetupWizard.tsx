@@ -10,6 +10,8 @@ import {
 } from '../../shared/hooks/queries/useSetup';
 import { isHRSetupComplete } from '../../shared/lib/setupCompletion';
 import { useHRSetupStore } from '../../shared/stores/hrSetupStore';
+import { useConfigStore } from '../../../../shared/stores/configStore';
+import { useUserStore } from '../../../../shared/stores/userStore';
 import WizardProgress, { STEP_KEYS } from './components/WizardProgress';
 import CompanyProfileStep from './steps/CompanyProfileStep';
 import WorkScheduleStep from './steps/WorkScheduleStep';
@@ -46,6 +48,8 @@ const SetupWizard = (): React.JSX.Element => {
   const upsertConfig = useUpsertHRConfig();
   const { currentStepIndex, setCurrentStepIndex } = useHRSetupStore();
   const [showNewEmployee, setShowNewEmployee] = useState(false);
+  const sharedName = useConfigStore((state) => state.websiteData?.siteName);
+  const businessName = useUserStore((state) => state.user?.businessName);
 
   const steps = useMemo(() => data?.steps ?? [], [data]);
   // `GET /hr/setup/status` returns the config alongside the step list, so the
@@ -200,6 +204,14 @@ const SetupWizard = (): React.JSX.Element => {
 
         {currentKey === 'company_profile' && (
           <CompanyProfileStep
+            sharedName={
+              typeof sharedName === 'string' && sharedName.trim() ? sharedName : businessName
+            }
+            initialValues={{
+              name: data?.config?.companyName,
+              timezone: data?.config?.defaultTimezone,
+              currency: data?.config?.defaultCurrency,
+            }}
             onNext={handleCompanyProfile}
             isFirst={isFirst}
             isSubmitting={isSubmitting}

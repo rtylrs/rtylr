@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { resolveAppUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
 import { Search, Users, Folder, ChevronRight, Settings } from 'lucide-react';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -65,15 +66,23 @@ export default function Home() {
                   ? insightsNavItems.find((page) => canAccessPortalPath(user, page.path))?.path ||
                     '/'
                   : `/${id}`;
-              return (
-                <Link
-                  key={id}
-                  to={path}
-                  aria-label={t('common.portal.openWorkspaceApp', { app: t(APP_NAMES[id].full) })}
-                >
+              const content = (
+                <>
                   <Icon size={20} />
                   <span>{t(APP_NAMES[id].short)}</span>
                   <ChevronRight size={14} className="rtl:rotate-180" />
+                </>
+              );
+              const label = t('common.portal.openWorkspaceApp', { app: t(APP_NAMES[id].full) });
+              if (id === 'pos')
+                return (
+                  <a key={id} href={resolveAppUrl('pos')} aria-label={label}>
+                    {content}
+                  </a>
+                );
+              return (
+                <Link key={id} to={path} aria-label={label}>
+                  {content}
                 </Link>
               );
             })}

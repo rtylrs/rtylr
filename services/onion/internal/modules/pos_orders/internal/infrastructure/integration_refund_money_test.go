@@ -190,6 +190,10 @@ func TestCreateRefund_VoidedOrderIsStillRefusedAfterAPartialRefund(t *testing.T)
 	if err := repo.VoidOrder(ctx, testutil.OwnerID, orderID, "mistake"); !errors.Is(err, domain.ErrOrderAlreadyPaid) {
 		t.Fatalf("VoidOrder after a partial refund = %v, want ErrOrderAlreadyPaid", err)
 	}
+	// Model a legacy voided row; the current API correctly refused the void above.
+	if _, err := db.ExecContext(ctx, "UPDATE pos_orders SET status = 'voided' WHERE id = ?", orderID); err != nil {
+		t.Fatalf("seed legacy voided order: %v", err)
+	}
 	if _, err := repo.CreateRefund(ctx, testutil.OwnerID, orderID, 4101, 10.00, "after void"); !errors.Is(err, domain.ErrOrderNotEditable) {
 		t.Fatalf("refund of a voided order = %v, want ErrOrderNotEditable", err)
 	}
@@ -220,10 +224,7 @@ func TestProcessPayment_RefusesSecondChargeAfterAPartialRefund(t *testing.T) {
 	}
 }
 
-// Two sales created at the same moment used to be offered the same order
-// number, and the loser of uq_pos_orders_number lost the whole create: the
-// customer had their goods and the drawer was short with no order row. The
-// create now counts inside its transaction and retries a collision.
+// Register and public checkouts share a business-locked number allocator.
 func TestCreateOrder_ConcurrentCreatesAllGetDistinctOrderNumbers(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
@@ -241,6 +242,12 @@ func TestCreateOrder_ConcurrentCreatesAllGetDistinctOrderNumbers(t *testing.T) {
 		go func(i int) {
 			defer wg.Done()
 			<-start
+			if i%2 == 0 {
+				ids[i], _, errs[i] = repo.CreatePublicOrder(ctx, testutil.BusinessID, "", "Test Customer", "", "", []domain.OrderItemInput{
+					{MenuItemID: productID, Name: "Test product", Quantity: 1, UnitPrice: 10.00},
+				})
+				return
+			}
 			ids[i], errs[i] = repo.CreateOrder(ctx, testutil.OwnerID, 4101, "", domain.OrderInput{
 				SessionID: 3201,
 				Type:      domain.OrderTypeTakeaway,
@@ -256,7 +263,7 @@ func TestCreateOrder_ConcurrentCreatesAllGetDistinctOrderNumbers(t *testing.T) {
 	created := make([]int64, 0, workers)
 	for i := 0; i < workers; i++ {
 		if errs[i] != nil {
-			t.Errorf("concurrent CreateOrder %d failed: %v", i, errs[i])
+			t.Errorf("concurrent checkout %d failed: %v", i, errs[i])
 			continue
 		}
 		created = append(created, ids[i])

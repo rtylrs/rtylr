@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
@@ -193,62 +195,30 @@ func TestRunPayrollAfterPartialPaymentIsRefused(t *testing.T) {
 	}
 }
 
-func TestMarkPayrollPaidRefusesDuplicateSibling(t *testing.T) {
+func TestPayrollDatabaseRejectsDuplicateSibling(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 	period := aprilSpec(4101)
-
-	// A legacy duplicate: two unpaid rows for the same employee and period,
-	// which is the state a repeated run used to leave behind.
-	rows := period.records()
-	rows = append(rows, rows...)
-	for _, record := range rows {
-		if _, err := db.ExecContext(ctx,
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_payroll_records WHERE business_id = ? AND period_label = ?", idempotencyBusinessID, period.label)
+	})
+	record := period.records()[0]
+	insert := func() error {
+		_, err := db.ExecContext(ctx,
 			"INSERT INTO hr_payroll_records (owner_id, business_id, staff_id, period_start, period_end, period_label, net_pay) VALUES (?, ?, ?, ?, ?, ?, ?)",
 			idempotencyBusinessID, idempotencyBusinessID, record.StaffID, record.PeriodStart, record.PeriodEnd, record.PeriodLabel,
-			fmt.Sprintf("%.2f", record.NetPay)); err != nil {
-			t.Fatalf("seed duplicate row: %v", err)
-		}
+			fmt.Sprintf("%.2f", record.NetPay))
+		return err
 	}
-	t.Cleanup(func() {
-		db.ExecContext(ctx, "DELETE FROM hr_payroll_records WHERE business_id = ? AND period_label = ?", idempotencyBusinessID, period.label)
-	})
-
-	var ids []int64
-	rowsQuery, err := db.QueryContext(ctx,
-		"SELECT id FROM hr_payroll_records WHERE business_id = ? AND period_label = ? ORDER BY id",
-		idempotencyBusinessID, period.label)
-	if err != nil {
-		t.Fatalf("read duplicate ids: %v", err)
+	if err := insert(); err != nil {
+		t.Fatalf("seed payroll row: %v", err)
 	}
-	for rowsQuery.Next() {
-		var id int64
-		if err := rowsQuery.Scan(&id); err != nil {
-			t.Fatalf("scan duplicate id: %v", err)
-		}
-		ids = append(ids, id)
+	var duplicate *mysql.MySQLError
+	if err := insert(); !errors.As(err, &duplicate) || duplicate.Number != 1062 {
+		t.Fatalf("duplicate payroll row error = %v, want MySQL 1062", err)
 	}
-	rowsQuery.Close()
-	if len(ids) != 2 {
-		t.Skipf("unique key already applied to this database (%d duplicate rows), nothing to prove here", len(ids))
-	}
-
-	if err := repo.MarkPayrollPaid(ctx, idempotencyBusinessID, ids[0]); err != nil {
-		t.Fatalf("paying the first duplicate: %v", err)
-	}
-	if err := repo.MarkPayrollPaid(ctx, idempotencyBusinessID, ids[1]); !errors.Is(err, domain.ErrPayrollRecordHasPaidSibling) {
-		t.Fatalf("paying the duplicate sibling: err = %v, want ErrPayrollRecordHasPaidSibling", err)
-	}
-
-	var paid int
-	if err := db.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM hr_payroll_records WHERE business_id = ? AND period_label = ? AND status = 'paid'",
-		idempotencyBusinessID, period.label).Scan(&paid); err != nil {
-		t.Fatalf("count paid rows: %v", err)
-	}
-	if paid != 1 {
-		t.Errorf("%d records settled for one employee in one period, want 1", paid)
+	if got := countRows(t, db, period.label); got != 1 {
+		t.Fatalf("duplicate insert left %d payroll rows, want 1", got)
 	}
 }
 

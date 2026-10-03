@@ -62,9 +62,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 		cooldownUntil: make(map[string]time.Time),
 	}
 
-	// Default priority: DeepSeek, NVIDIA NIM, Gemini, OpenAI, then OpenCode Zen.
-	// AI_PRIMARY_PROVIDER can swap the first two. Unconfigured providers are
-	// skipped; the first registered becomes primary (used for streaming).
+	// Unconfigured providers are skipped; the first registered becomes primary.
 	register := func(p Provider) {
 		client.providers = append(client.providers, p)
 		if client.primaryProvider == nil {
@@ -72,45 +70,33 @@ func NewClient(ctx context.Context) (*Client, error) {
 		}
 	}
 
-	deepseekFirst := config.GetAIPrimaryProvider() != "nvidia"
-	addDeepSeek := func() {
-		if config.IsDeepSeekConfigured() {
-			if p, err := NewDeepSeekProvider(); err == nil {
-				register(p)
-			}
-		}
-	}
-	addNvidia := func() {
-		if config.IsNvidiaNIMConfigured() {
-			if p, err := NewNvidiaNIMProvider(); err == nil {
-				register(p)
-			}
-		}
-	}
-
-	if deepseekFirst {
-		addDeepSeek()
-		addNvidia()
-	} else {
-		addNvidia()
-		addDeepSeek()
-	}
-
 	if config.IsGeminiConfigured() {
 		if p, err := NewGeminiProvider(ctx); err == nil {
 			register(p)
 		}
 	}
-
+	if config.IsOpenCodeConfigured() {
+		if p, err := NewOpenCodeProvider(); err == nil {
+			register(p)
+		}
+	}
+	if config.IsDeepSeekConfigured() {
+		if p, err := NewDeepSeekProvider(); err == nil {
+			register(p)
+		}
+	}
 	if config.IsOpenAIConfigured() {
 		if p, err := NewOpenAIProvider(); err == nil {
 			register(p)
 		}
 	}
 
-	if config.IsOpenCodeConfigured() {
-		if p, err := NewOpenCodeProvider(); err == nil {
-			register(p)
+	for i, provider := range client.providers {
+		if provider.Name() == config.GetAIPrimaryProvider() {
+			copy(client.providers[1:i+1], client.providers[:i])
+			client.providers[0] = provider
+			client.primaryProvider = provider
+			break
 		}
 	}
 
@@ -129,6 +115,7 @@ func (c *Client) CompleteTextWithOptions(ctx context.Context, prompt string, opt
 	if c == nil || len(c.providers) == 0 {
 		return "", ErrNoProvidersConfigured
 	}
+	ctx = ensureConversation(ctx)
 	var lastErr error
 	// Try each healthy provider in order until one succeeds. A short circuit
 	// prevents a broken upstream from adding a full timeout to every request.
@@ -167,6 +154,7 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 	if c == nil || len(c.providers) == 0 {
 		return nil, ErrNoProvidersConfigured
 	}
+	ctx = ensureConversation(ctx)
 	providers := c.streamingProviderOrder()
 	var lastErr error
 	for i, provider := range providers {

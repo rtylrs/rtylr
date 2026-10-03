@@ -19,7 +19,7 @@ One package, `@rtylr/portal`, owns the browser applications:
 | Public Menu    | `pnpm dev:menu`    | 5174 | `dist/menu`    |
 | Public Recruit | `pnpm dev:recruit` | 5184 | `dist/recruit` |
 
-Portal contains Home, Insights, Flow, CRM, ERP, Finance, HR, web POS, Recruit administration, Caret and Automations. Each business app uses a route prefix and shares authentication, business selection, theme, launcher and `/settings`. Menu management remains in Home. SSO and public Menu/careers retain their public hosts and separate builds. Native POS remains in `clients/pos`; MCP is in `clients/mcp`.
+Portal contains Home, Insights, Flow, CRM, ERP, Finance, HR, Recruit administration, Caret and Automations. Each business app uses a route prefix and shares authentication, business selection, theme, launcher and `/settings`. Menu management remains in Home. SSO and public Menu/careers retain their public hosts and separate builds. POS web and native remain in `clients/pos`; MCP is in `clients/mcp`.
 
 Automations uses `/automations` and `/automations/new?id=…`, with legacy CRM links redirected. It retains the CRM automation API and `crm:automations:manage` permission. New workflows configure order-triggered emails and start paused; other saved definitions remain editable with their configuration preserved.
 
@@ -123,3 +123,5 @@ pnpm test:coverage
 # Format
 pnpm format
 ```
+
+For a same-origin local preview against the hosted API, run `VITE_API_URL=/api VITE_API_PROXY_TARGET=https://api.voxire.com pnpm dev`.

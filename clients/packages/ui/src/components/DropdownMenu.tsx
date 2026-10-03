@@ -1,6 +1,7 @@
-import React from 'react';
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import { cn } from '../lib/cn';
+import React from "react";
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { cn } from "../lib/cn";
+import { useThemeScope } from "./ThemeScope";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
@@ -11,22 +12,27 @@ const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        'z-50 min-w-[180px] overflow-hidden rounded-xl border border-black/8 bg-white dark:bg-admin dark:border-white/10',
-        'p-1 shadow-dropdown',
-        'data-[state=open]:animate-dropdown-in',
-        className
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-));
-DropdownMenuContent.displayName = 'DropdownMenuContent';
+>(({ className, sideOffset = 4, style, ...props }, ref) => {
+  const scope = useThemeScope();
+  return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        data-theme-scope={scope ? "" : undefined}
+        style={{ ...scope, ...style }}
+        className={cn(
+          "z-50 min-w-[180px] overflow-hidden rounded-xl border border-black/8 bg-white dark:bg-admin dark:border-white/10",
+          "p-1 shadow-dropdown",
+          "data-[state=open]:animate-dropdown-in",
+          className,
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  );
+});
+DropdownMenuContent.displayName = "DropdownMenuContent";
 
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
@@ -38,22 +44,22 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors',
-      'hover:bg-black/5 dark:hover:bg-white/8',
-      'focus:bg-black/5 dark:focus:bg-white/8',
+      "relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors",
+      "hover:bg-black/5 dark:hover:bg-white/8",
+      "focus:bg-black/5 dark:focus:bg-white/8",
       // Radix sets data-highlighted during keyboard arrow-navigation, which
       // does not always coincide with :hover or :focus - without this, a
       // keyboard user sees no indication of which item is selected.
-      'data-[highlighted]:bg-black/5 dark:data-[highlighted]:bg-white/8',
+      "data-[highlighted]:bg-black/5 dark:data-[highlighted]:bg-white/8",
       destructive &&
-        'text-destructive hover:bg-destructive/10 focus:bg-destructive/10 data-[highlighted]:bg-destructive/10',
-      inset && 'pl-8',
-      className
+        "text-destructive hover:bg-destructive/10 focus:bg-destructive/10 data-[highlighted]:bg-destructive/10",
+      inset && "pl-8",
+      className,
     )}
     {...props}
   />
 ));
-DropdownMenuItem.displayName = 'DropdownMenuItem';
+DropdownMenuItem.displayName = "DropdownMenuItem";
 
 const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
@@ -61,11 +67,11 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn('-mx-1 my-1 h-px bg-black/8 dark:bg-white/10', className)}
+    className={cn("-mx-1 my-1 h-px bg-black/8 dark:bg-white/10", className)}
     {...props}
   />
 ));
-DropdownMenuSeparator.displayName = 'DropdownMenuSeparator';
+DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
 
 const DropdownMenuLabel = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Label>,
@@ -74,13 +80,13 @@ const DropdownMenuLabel = React.forwardRef<
   <DropdownMenuPrimitive.Label
     ref={ref}
     className={cn(
-      'px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted',
-      className
+      "px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted",
+      className,
     )}
     {...props}
   />
 ));
-DropdownMenuLabel.displayName = 'DropdownMenuLabel';
+DropdownMenuLabel.displayName = "DropdownMenuLabel";
 
 export {
   DropdownMenu,

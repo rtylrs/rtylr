@@ -121,6 +121,7 @@ export const useUpdateBusiness = () => {
       }
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['hr'] });
       toast.success(
         i18next.t('common.toasts.businessInfoUpdated', 'Business information updated successfully')
       );

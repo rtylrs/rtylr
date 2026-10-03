@@ -1,3 +1,4 @@
+import { expectAppAction } from './support/app-appearance';
 import { test, expect, type Page, type Route } from './fixtures';
 
 /**
@@ -734,6 +735,10 @@ test.describe('ERP inventory flow', () => {
     await expect(page.getByText(/No products found/i)).toBeVisible({ timeout: 10_000 });
 
     // Open the Quick Add modal.
+    await page
+      .getByRole('dialog', { name: 'Cookie consent' })
+      .getByRole('button', { name: 'Decline' })
+      .click();
     await page.getByTestId('products-new-button').click();
     await expect(page.getByTestId('quick-add-product-modal')).toBeVisible();
 
@@ -744,6 +749,7 @@ test.describe('ERP inventory flow', () => {
     await page.getByLabel(/barcode/i).fill('BEV-001-BARCODE');
     await page.getByLabel(/description/i).fill('Arabica coffee beans');
 
+    await expectAppAction(page.getByTestId('qap-submit'), '#f59e0b');
     await page.getByTestId('qap-submit').click();
 
     // Row appears after refetch.
@@ -782,6 +788,10 @@ test.describe('ERP inventory flow', () => {
     });
 
     // Open edit modal, rename the product, save.
+    await page
+      .getByRole('dialog', { name: 'Cookie consent' })
+      .getByRole('button', { name: 'Decline' })
+      .click();
     await page.getByTestId('product-edit-button').click();
     await expect(page.getByTestId('quick-add-product-modal')).toBeVisible();
 

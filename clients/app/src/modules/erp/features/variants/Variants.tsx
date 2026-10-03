@@ -105,7 +105,7 @@ const Variants: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--dash-text)' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Variant
           </button>
@@ -300,7 +300,7 @@ const Variants: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newProductId.trim() || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--dash-text)' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

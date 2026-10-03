@@ -1,4 +1,3 @@
-import { canAccessPosPath } from '../../modules/pos/navigation';
 import { canAccessRecruitPath } from '../../modules/recruit/navigation';
 import { canAccessHrPath } from '../../modules/hr/navigation';
 import { canAccessFinancePath } from '../../modules/finance/navigation';
@@ -32,6 +31,8 @@ export function canAccessPortalPath(user: StoredUser | null, pathname: string): 
   if (!user?.effectiveAccess) return false;
   if (pathname === '/automations' || pathname === '/automations/new')
     return canAccessCrmPath(user, '/crm/automations');
+  if (pathname === '/pos' || pathname.startsWith('/pos/') || pathname === '/settings/pos')
+    return false;
   if (user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin) return true;
   if (
     pathname === '/recruit' ||
@@ -39,8 +40,6 @@ export function canAccessPortalPath(user: StoredUser | null, pathname: string): 
     pathname === '/settings/recruit'
   )
     return canAccessRecruitPath(user, pathname);
-  if (pathname === '/pos' || pathname.startsWith('/pos/') || pathname === '/settings/pos')
-    return canAccessPosPath(user, pathname);
   if (
     pathname === '/hr' ||
     pathname.startsWith('/hr/') ||

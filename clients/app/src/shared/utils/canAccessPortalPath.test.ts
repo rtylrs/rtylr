@@ -45,11 +45,17 @@ describe('remaining app member routes', () => {
     expect(canAccessPortalPath(user, '/recruit/careers')).toBe(false);
     expect(canAccessPortalPath(user, '/settings/recruit')).toBe(false);
   });
-  it('requires a licensed POS grant and terminal management for settings', () => {
+  it('keeps POS outside Portal even for licensed members and owners', () => {
     const user = {
       effectiveAccess: createEffectiveAccess('pos', { permissions: ['pos:orders:view'] }),
     };
-    expect(canAccessPortalPath(user, '/pos/orders')).toBe(true);
+    expect(canAccessPortalPath(user, '/pos/orders')).toBe(false);
+    expect(
+      canAccessPortalPath(
+        { effectiveAccess: createEffectiveAccess('pos', { isOwner: true }) },
+        '/pos/orders'
+      )
+    ).toBe(false);
     expect(canAccessPortalPath(user, '/settings/pos')).toBe(false);
     const unlicensed = { effectiveAccess: createEffectiveAccess('pos', { licensed: false }) };
     expect(canAccessPortalPath(unlicensed, '/pos')).toBe(false);

@@ -92,7 +92,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   onClose();
                 }}
                 className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold"
-                style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+                style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
               >
                 Apply
               </button>

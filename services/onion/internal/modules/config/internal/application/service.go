@@ -74,6 +74,7 @@ func (s *Service) UpdateConfig(ctx context.Context, ownerID string, input domain
 		return err
 	}
 	cacher.InvalidateScope(ctx, cacheKeys.BusinessPrefix(idN))
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix("hr_core", idN))
 	return nil
 }
 

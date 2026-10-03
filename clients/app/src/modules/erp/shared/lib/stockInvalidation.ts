@@ -10,6 +10,9 @@ export const STOCK_DERIVED_QUERY_KEYS = [
   ['product'],
   ['product-full'],
   ['erp-dashboard-stats'],
+  ['pos-menu-items'],
+  ['menus'],
+  ['menu'],
 ] as const;
 
 export function invalidateStockDerivedQueries(

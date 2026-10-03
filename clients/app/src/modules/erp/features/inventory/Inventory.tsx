@@ -105,7 +105,7 @@ const Inventory: React.FC = () => {
           data-testid="inventory-add-product-button"
           onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{ background: AMBER, color: 'var(--dash-text)' }}
+          style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.opacity = '0.9';
           }}

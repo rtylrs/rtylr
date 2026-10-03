@@ -5,6 +5,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { initTestI18nFrom } from '../../../test/i18nTestInstance';
 import { createEffectiveAccess } from '../../../test/effectiveAccess';
 import Home from './Home';
+import { resolveAppUrl } from '@voxire/config';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useCommandPalette } from '../../shared/stores/commandPaletteStore';
 
@@ -60,6 +61,14 @@ describe('Portal Home', () => {
       '/flow'
     );
     expect(screen.getByRole('link', { name: 'Flow', exact: true })).not.toHaveAttribute('target');
+  });
+  it('launches POS at its own origin while keeping other apps in Portal', () => {
+    useUserStore.setState({ user: { effectiveAccess: createEffectiveAccess('pos') } });
+    render(<Home />);
+    expect(screen.getByRole('link', { name: /Open Point of Sale/ })).toHaveAttribute(
+      'href',
+      resolveAppUrl('pos')
+    );
   });
   it('does not offer unlicensed apps or infer access from a stale role field', () => {
     useUserStore.setState({

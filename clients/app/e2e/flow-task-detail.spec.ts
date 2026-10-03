@@ -1,6 +1,11 @@
+import { expectAppAction } from './support/app-appearance';
+import arFlow from '../src/modules/flow/locales/ar/flow.json' with { type: 'json' };
+import arCommon from '../src/modules/flow/locales/ar/flowCommon.json' with { type: 'json' };
+import enFlow from '../src/modules/flow/locales/en/flow.json' with { type: 'json' };
+import enCommon from '../src/modules/flow/locales/en/flowCommon.json' with { type: 'json' };
 import { flowAuthFields } from './support/flow-auth';
 import { test, expect, type Route } from './fixtures';
-import { captureResponsivePair } from './support/screenshot';
+import { captureForPR, captureResponsivePair } from './support/screenshot';
 
 /**
  * Flow Task Detail E2E Specs
@@ -8,6 +13,8 @@ import { captureResponsivePair } from './support/screenshot';
 
 const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5197/flow';
 const API_HOST = 'http://localhost:9999';
+
+test.use({ timezoneId: 'America/Los_Angeles' });
 
 const FAKE_USER = {
   id: '1001',
@@ -271,4 +278,115 @@ test.describe('Flow - Task Detail', () => {
     await expect(page.getByText('Initial comment on SSO implementation.')).toBeVisible();
     await expect(page.getByText('Configure OAuth callback')).toBeVisible();
   });
+  for (const { theme, language } of [
+    { theme: 'light', language: 'en' },
+    { theme: 'dark', language: 'en' },
+    { theme: 'dark', language: 'ar' },
+  ] as const) {
+    test(`task drawer date picker fits, dismisses and saves in ${theme} ${language} mode`, async ({
+      page,
+      context,
+    }) => {
+      await context.addCookies([
+        { name: 'language', value: language, domain: 'localhost', path: '/' },
+      ]);
+      const flow = language === 'ar' ? arFlow : enFlow;
+      const common = language === 'ar' ? arCommon : enCommon;
+      const dateLabel = new Intl.DateTimeFormat(language, {
+        dateStyle: 'full',
+        timeZone: 'UTC',
+      }).format(new Date('2026-10-10T00:00:00Z'));
+      await page.clock.setFixedTime(new Date('2026-10-02T12:00:00'));
+      await page.addInitScript((mode) => {
+        localStorage.setItem(
+          'portal-theme',
+          JSON.stringify({ state: { theme: mode }, version: 0 })
+        );
+      }, theme);
+      await page.route(/localhost:9999\/flow\/task\/v2\/tasks(?:\?.*)?$/, (route) =>
+        route.fulfill({ json: { tasks: [] } })
+      );
+      let dueDate = '2026-10-09';
+      const updates: Record<string, unknown>[] = [];
+      await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101$/, async (route) => {
+        if (route.request().method() !== 'GET') {
+          const body = route.request().postDataJSON() as Record<string, unknown>;
+          updates.push(body);
+          if (typeof body.due_date === 'string') dueDate = body.due_date;
+          await route.fulfill({ json: { message: 'Updated' } });
+          return;
+        }
+        const detail = wireTaskDetail();
+        await route.fulfill({
+          json: {
+            ...detail,
+            task: { ...(detail.task as Record<string, unknown>), due_date: dueDate },
+          },
+        });
+      });
+      await page.goto(`${FLOW_URL}/my-issues?openTask=101`);
+      const drawer = page.getByRole('dialog', { name: flow.taskDetail.drawerLabel, exact: true });
+      await expect(drawer.getByLabel(flow.taskDetail.taskTitle)).toHaveValue(
+        FAKE_TASK_DETAIL.task.title
+      );
+      const trigger = drawer.locator('.flow-due-date-trigger');
+      if (language === 'en') await expect(trigger).toContainText('Oct 9');
+      await trigger.click();
+      const picker = page.getByRole('dialog', { name: flow.taskDetail.dueDate, exact: true });
+      await expect(picker).toBeVisible();
+      const assertBounds = async () => {
+        await expect
+          .poll(async () => {
+            const box = await picker.boundingBox();
+            const viewport = page.viewportSize()!;
+            return Boolean(
+              box &&
+              box.x >= 0 &&
+              box.y >= 0 &&
+              box.x + box.width <= viewport.width &&
+              box.y + box.height <= viewport.height
+            );
+          })
+          .toBe(true);
+        await expect(picker.getByRole('gridcell', { name: dateLabel, exact: true })).toBeVisible();
+      };
+      await assertBounds();
+      await expectAppAction(
+        picker.getByRole('gridcell').and(picker.locator('[aria-selected="true"]')),
+        '#64c5b9'
+      );
+      if (language === 'ar') {
+        const anchor = (await trigger.boundingBox())!;
+        const popup = (await picker.boundingBox())!;
+        if (anchor.x + anchor.width >= popup.width + 12) {
+          expect(Math.abs(popup.x + popup.width - anchor.x - anchor.width)).toBeLessThan(2);
+        }
+      }
+      await captureForPR(
+        page,
+        `flow-task-picker-${theme}-${language}-${page.viewportSize()!.width}`
+      );
+      await page.keyboard.press('Escape');
+      await expect(picker).not.toBeVisible();
+      await expect(drawer).toBeVisible();
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await picker.getByRole('gridcell', { name: dateLabel, exact: true }).click();
+      await expect.poll(() => updates.at(-1)?.due_date).toBe('2026-10-10');
+      await expect(picker).not.toBeVisible();
+      if (language === 'en') await expect(trigger).toContainText('Oct 10');
+      await trigger.click();
+      await picker.getByRole('button', { name: common.datePicker.tomorrow, exact: true }).click();
+      await expect.poll(() => updates.at(-1)?.due_date).toBe('2026-10-03');
+      await expect(picker).not.toBeVisible();
+      await drawer.getByRole('button', { name: common.datePicker.clearDate, exact: true }).click();
+      await expect.poll(() => updates.at(-1)?.due_date).toBe('');
+      await expect(trigger).toContainText(common.datePicker.setDate);
+      await trigger.click();
+      await page.setViewportSize({ width: 700, height: 460 });
+      await assertBounds();
+      await page.keyboard.press('Escape');
+      await expect(drawer).toBeVisible();
+    });
+  }
 });

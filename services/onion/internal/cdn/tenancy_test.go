@@ -246,6 +246,8 @@ func TestSignDeliveryRejectsCrossTenantFile(t *testing.T) {
 func TestPurgeRejectsCrossTenantFile(t *testing.T) {
 	db := testutil.OpenDB(t)
 	c := &CDN{db: db, baseURL: "https://cdn.voxire.com"}
+	router := chi.NewRouter()
+	router.Method("PURGE", "/files/{id}", http.HandlerFunc(c.purgeFileVariants))
 
 	other := seedFile(t, db, tenantB, false)
 	seedDerivative(t, db, other)
@@ -256,7 +258,7 @@ func TestPurgeRejectsCrossTenantFile(t *testing.T) {
 		req := httptest.NewRequest("PURGE", "/files/"+other, nil)
 		rec := httptest.NewRecorder()
 
-		c.purgeFileVariants(rec, asTenant(req, tenantA))
+		router.ServeHTTP(rec, asTenant(req, tenantA))
 
 		if rec.Code != http.StatusNotFound {
 			t.Fatalf("status = %d, want %d (body %q)", rec.Code, http.StatusNotFound, rec.Body.String())
@@ -270,7 +272,7 @@ func TestPurgeRejectsCrossTenantFile(t *testing.T) {
 		req := httptest.NewRequest("PURGE", "/files/"+mine, nil)
 		rec := httptest.NewRecorder()
 
-		c.purgeFileVariants(rec, asTenant(req, tenantA))
+		router.ServeHTTP(rec, asTenant(req, tenantA))
 
 		if rec.Code != http.StatusOK {
 			t.Fatalf("status = %d, want 200 (body %q)", rec.Code, rec.Body.String())
@@ -287,7 +289,7 @@ func TestPurgeRejectsCrossTenantFile(t *testing.T) {
 		req := httptest.NewRequest("PURGE", "/files/"+otherPublic, nil)
 		rec := httptest.NewRecorder()
 
-		c.purgeFileVariants(rec, asTenant(req, tenantA))
+		router.ServeHTTP(rec, asTenant(req, tenantA))
 
 		if rec.Code != http.StatusNotFound {
 			t.Fatalf("status = %d, want %d", rec.Code, http.StatusNotFound)

@@ -66,7 +66,11 @@ const WizardProgress = ({
                     : completed
                       ? 'rgba(34,197,94,0.15)'
                       : 'var(--hr-hover)',
-                  color: isCurrent ? '#fff' : completed ? '#22c55e' : 'var(--hr-text-muted)',
+                  color: isCurrent
+                    ? 'var(--hr-on-accent)'
+                    : completed
+                      ? '#22c55e'
+                      : 'var(--hr-text-muted)',
                   border: isCurrent ? '1px solid var(--accent)' : '1px solid var(--hr-border)',
                   cursor: isCurrent ? 'pointer' : 'not-allowed',
                   opacity: isCurrent || completed ? 1 : 0.5,

@@ -1,3 +1,4 @@
+import { expectAppAction } from './support/app-appearance';
 import { test, expect, type Page, type Route } from './fixtures';
 
 /**
@@ -329,6 +330,7 @@ test.describe('CRM customers flow', () => {
     await nameInput.click();
     await nameInput.pressSequentially('Jamie Doe', { delay: 10 });
     await expect(page.getByRole('button', { name: /^Next/i })).toBeEnabled();
+    await expectAppAction(page.getByRole('button', { name: /^Next/i }), '#3b82f6');
     await page.getByRole('button', { name: /^Next/i }).click();
 
     // Step 2: contact - email or phone required.

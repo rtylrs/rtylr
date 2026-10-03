@@ -12,11 +12,7 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-// TestUpsertHRConfigPartialCorePayloadKeepsOmittedFields drives the real
-// handler end to end: a configured hr_company_config must survive a PUT that
-// only carries company_name + directory_enabled. Before the merge fix every
-// column was written from the request struct, so the omitted currency,
-// timezone, fiscal-year month, work schedule and overtime settings were wiped.
+// Partial HR updates preserve HR-specific fields and read the shared company name.
 func TestUpsertHRConfigPartialCorePayloadKeepsOmittedFields(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
@@ -69,8 +65,8 @@ func TestUpsertHRConfigPartialCorePayloadKeepsOmittedFields(t *testing.T) {
 	if resp.Config == nil {
 		t.Fatal("Serve returned no config")
 	}
-	if resp.Config.CompanyName != "Acme Renamed" || !resp.Config.DirectoryEnabled {
-		t.Fatalf("provided fields not applied: %+v", resp.Config)
+	if resp.Config.CompanyName != "Test Site" || !resp.Config.DirectoryEnabled {
+		t.Fatalf("shared company name or directory flag incorrect: %+v", resp.Config)
 	}
 	if resp.Config.DefaultCurrency != "EUR" || resp.Config.DefaultTimezone != "Europe/Berlin" {
 		t.Fatalf("omitted currency/timezone were overwritten: %+v", resp.Config)

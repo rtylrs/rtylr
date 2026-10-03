@@ -37,8 +37,7 @@ if (
   fail('public Menu classification does not match the approved two-row set');
 }
 
-const onionRoot =
-  process.env.ONION_DIR ?? path.resolve(root, '..', '..', '..', 'services', 'onion');
+const onionRoot = process.env.ONION_DIR ?? path.resolve(root, '..', '..', 'services', 'onion');
 if (!fs.existsSync(onionRoot)) {
   console.error(`onion checkout not found at ${onionRoot}; set ONION_DIR to its path`);
   process.exit(1);

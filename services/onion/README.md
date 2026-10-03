@@ -1,5 +1,3 @@
-
-
 # Onion 🧅
 
 Onion is a full-featured backend framework that provides everything you need to build robust applications:
@@ -57,22 +55,24 @@ make setup
 make run
 ```
 
-### Optional AI fallback
+### AI providers
 
-Set `OPENCODE_API_KEY` to an [OpenCode Zen](https://opencode.ai/docs/zen/)
-API key and restart the API to enable the final AI fallback. The default order
-is DeepSeek → NVIDIA NIM → Gemini → OpenAI → OpenCode Zen; providers without
-keys are skipped. OpenCode can also run as the only configured AI provider.
+Gemini is the default provider. Set `GEMINI_API_KEY` and optionally
+`OPENCODE_API_KEY` for [OpenCode Go](https://opencode.ai/docs/go/) fallback.
+The default order is Gemini → OpenCode Go → DeepSeek → OpenAI; providers
+without keys are skipped. `AI_PRIMARY_PROVIDER` can select a configured provider.
 
-The integration uses Zen's hosted chat-completions API with `minimax-m2.7`, not
-the local OpenCode CLI or its saved credentials. It supports ordinary and JSON
-completions, streaming failover, token accounting, provider cooldowns, and the
-existing request timeout. Streaming switches providers only before response
-text has been emitted.
+OpenCode Go uses `deepseek-v4.1-flash` at `/zen/go/v1`, identifies Caret with
+its own user agent and sends a stable opaque `x-opencode-session` per chat.
+Calls without a conversation receive an isolated routing ID shared across
+retries and failover. DeepSeek thinking is disabled to reserve the output
+budget for the visible answer. Ordinary and JSON completions, streaming,
+usage accounting, cooldowns and request timeouts use the shared provider layer.
+Streaming switches providers only before visible response text is emitted.
 
-The provider stays disabled when the key is empty. Configure Zen billing and
-usage limits before enabling it; no deployment or secret provisioning is
-performed by this repository change.
+Go is designed primarily for coding-agent traffic; review the provider's
+current usage terms and limits before expanding its use. Hosted provider keys
+come from environment configuration, not local OpenCode CLI credentials.
 
 ## 🗄️ Database Management
 

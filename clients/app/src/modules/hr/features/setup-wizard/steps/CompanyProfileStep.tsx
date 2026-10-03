@@ -12,6 +12,8 @@ interface CompanyProfileStepProps {
   onBack?: () => void;
   isFirst?: boolean;
   isSubmitting?: boolean;
+  sharedName?: string;
+  initialValues?: Partial<CompanyProfileFormData>;
 }
 
 // The code is what gets stored; only the name is translated.
@@ -22,17 +24,19 @@ const CompanyProfileStep = ({
   onBack,
   isFirst,
   isSubmitting,
+  sharedName,
+  initialValues,
 }: CompanyProfileStepProps): React.JSX.Element => {
   const { t } = useTranslation('hrCommon');
   const [form, setForm] = useState<CompanyProfileFormData>({
-    name: '',
-    timezone: '',
-    currency: 'USD',
+    name: initialValues?.name ?? '',
+    timezone: initialValues?.timezone ?? '',
+    currency: initialValues?.currency ?? 'USD',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = (): void => {
-    const result = companyProfileSchema.safeParse(form);
+    const result = companyProfileSchema.safeParse({ ...form, name: sharedName || form.name });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       for (const issue of result.error.issues) {
@@ -70,26 +74,42 @@ const CompanyProfileStep = ({
     >
       <div className="flex flex-col gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+          <label
+            htmlFor="hr-company-name"
+            className="mb-1 block text-sm font-medium"
+            style={{ color: 'var(--hr-text)' }}
+          >
             {t('hrSetup.companyProfile.name')}
           </label>
           <input
             type="text"
-            value={form.name}
+            id="hr-company-name"
+            value={sharedName || form.name}
+            readOnly={Boolean(sharedName)}
             onChange={(e) => {
               setForm((f) => ({ ...f, name: e.target.value }));
               setErrors((prev) => ({ ...prev, name: '' }));
             }}
             style={inputStyle}
           />
+          {sharedName && (
+            <p className="mt-1 text-xs" style={{ color: 'var(--hr-text-muted)' }}>
+              {t('hrSetup.companyProfile.sharedName')}
+            </p>
+          )}
           {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+          <label
+            htmlFor="hr-company-timezone"
+            className="mb-1 block text-sm font-medium"
+            style={{ color: 'var(--hr-text)' }}
+          >
             {t('hrSetup.companyProfile.timezone')}
           </label>
           <select
+            id="hr-company-timezone"
             value={form.timezone}
             onChange={(e) => {
               setForm((f) => ({ ...f, timezone: e.target.value }));
@@ -108,10 +128,15 @@ const CompanyProfileStep = ({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+          <label
+            htmlFor="hr-company-currency"
+            className="mb-1 block text-sm font-medium"
+            style={{ color: 'var(--hr-text)' }}
+          >
             {t('hrSetup.companyProfile.currency')}
           </label>
           <select
+            id="hr-company-currency"
             value={form.currency}
             onChange={(e) => {
               setForm((f) => ({ ...f, currency: e.target.value }));

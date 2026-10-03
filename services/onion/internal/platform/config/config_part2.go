@@ -104,9 +104,8 @@ func LoadAndValidate() (*AppConfig, error) {
 		GeminiAPIKey:   os.Getenv("GEMINI_API_KEY"),
 		OpenCodeAPIKey: strings.TrimSpace(os.Getenv(OpenCodeAPIKeyEnvVar)),
 
-		// DeepSeek + NVIDIA NIM
+		// AI provider preferences
 		DeepSeekAPIKey:    os.Getenv(DeepSeekAPIKeyEnvVar),
-		NvidiaNIMAPIKey:   os.Getenv(NvidiaNIMAPIKeyEnvVar),
 		AIPrimaryProvider: os.Getenv(AIPrimaryProviderEnvVar),
 
 		// Caret document-to-form mapping specialist (optional)

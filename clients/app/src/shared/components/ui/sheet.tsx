@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { useThemeScope } from '@voxire/ui';
 import { cn } from '../../lib/utils';
 
 interface SheetContextValue {
@@ -49,6 +50,7 @@ interface SheetContentProps extends React.HTMLAttributes<HTMLDivElement> {
 const SheetContent: React.FC<SheetContentProps> = ({ children, className, side = 'right' }) => {
   const { t } = useTranslation();
   const { open, setOpen } = useContext(SheetContext);
+  const scope = useThemeScope();
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -61,7 +63,11 @@ const SheetContent: React.FC<SheetContentProps> = ({ children, className, side =
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex">
+    <div
+      className="fixed inset-0 z-50 flex"
+      style={scope}
+      data-theme-scope={scope ? '' : undefined}
+    >
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={() => setOpen(false)}

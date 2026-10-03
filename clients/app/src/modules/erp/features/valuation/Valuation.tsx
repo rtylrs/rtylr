@@ -176,7 +176,7 @@ const Valuation: React.FC = () => {
             type="button"
             onClick={() => void refetch()}
             className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-            style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
           >
             {t('erp.valuation.refresh')}
           </button>

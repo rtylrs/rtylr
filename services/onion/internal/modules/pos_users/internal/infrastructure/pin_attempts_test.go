@@ -55,8 +55,8 @@ func TestPINAttempts_CounterSurvivesANewStoreInstance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("PinRetryAt after restart: %v", err)
 	}
-	if time.Now().Before(retryAt) {
-		t.Errorf("retryAt = %s is still in the future after a restart: the lockout did not survive", retryAt)
+	if !time.Now().Before(retryAt) {
+		t.Errorf("retryAt = %s is not in the future after a restart: the lockout did not survive", retryAt)
 	}
 	if remaining := domain.PinLockoutDuration - time.Until(retryAt); remaining > time.Minute {
 		t.Errorf("retryAt is %s beyond now, want the %s lockout: the backoff schedule is not being applied",

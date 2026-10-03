@@ -269,10 +269,6 @@
   background: var(--dash-hover);
   color: var(--dash-text-dim);
 }
-.portal-flow-dialog {
-  --accent: var(--flow-action-bg);
-  --accent-foreground: var(--dash-text);
-}
 .portal-flow-dialog .flow-task-name {
   display: block;
   width: 100%;
@@ -296,7 +292,7 @@
   font-weight: 400;
 }
 .portal-flow-dialog .flow-task-name:focus {
-  border-color: var(--flow-text-muted);
+  border-color: var(--flow-border-focus);
   background: var(--flow-input-bg);
   outline: none !important;
 }
@@ -330,9 +326,9 @@
   inset-block: 8px;
   inset-inline: auto 8px;
   transform: none;
-  width: min(720px, calc(100vw - 16px));
+  width: min(960px, calc(100vw - 16px));
   height: calc(100dvh - 16px);
-  max-width: 720px;
+  max-width: 960px;
   padding: 0;
   border: 1px solid var(--dash-border);
   border-radius: 14px;
@@ -345,9 +341,9 @@
   color: var(--dash-text);
   border: 1px solid var(--dash-border);
 }
-.portal-flow :where(button.bg-accent, button.bg-accent\/10) {
-  background: var(--dash-active);
-  color: var(--dash-text);
+.portal-flow :where(button.bg-accent) {
+  background: var(--flow-action-bg);
+  color: var(--flow-on-accent);
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 13px;
@@ -368,4 +364,112 @@
   padding: 7px 12px;
   font-size: 13px;
   gap: 10px;
+}
+
+.flow-task-drawer-title {
+  border-bottom: 1px solid var(--flow-border);
+  padding: 16px 24px;
+  font-size: 14px;
+}
+.flow-task-detail-body {
+  width: 100%;
+  padding: 24px;
+}
+.flow-task-detail-body > section {
+  margin-bottom: 24px;
+}
+.flow-task-detail-body h3,
+.flow-task-detail-properties h3 {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+}
+.flow-task-detail-properties {
+  padding: 20px;
+}
+.flow-task-detail-field {
+  margin-bottom: 18px;
+  min-width: 0;
+}
+.flow-task-detail-label {
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.flow-task-detail-field > div:first-child {
+  color: var(--flow-text-muted);
+  margin-bottom: 6px;
+}
+.flow-task-detail-field :is(select, input, textarea) {
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.flow-task-detail-field :is(select, input, textarea):hover:not(:disabled) {
+  background: var(--flow-hover);
+}
+.flow-task-detail-field :is(select, input, textarea):focus-visible {
+  background: var(--flow-input-bg);
+}
+.flow-due-date-trigger {
+  min-height: 34px;
+  border-radius: 6px;
+}
+.flow-due-date-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 6px;
+}
+.flow-due-date-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  z-index: 100;
+  width: min(280px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 8px;
+  overflow-y: auto;
+  border: 1px solid var(--flow-border-control);
+  border-radius: 10px;
+  background: var(--flow-card);
+  color: var(--flow-text);
+  box-shadow: var(--flow-shadow);
+  --color-muted: var(--flow-text-muted);
+}
+.flow-due-date-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+}
+.flow-due-date-shortcuts button {
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+.flow-due-date-calendar {
+  width: 100%;
+  padding: 4px;
+}
+.flow-due-date-calendar [role='gridcell'] {
+  border-radius: 6px;
+}
+.flow-due-date-popover :focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: 1px;
+}
+@media (min-width: 1024px) {
+  .flow-task-detail-properties {
+    width: 280px;
+  }
+}
+@media (max-width: 600px) {
+  .flow-task-detail-body,
+  .flow-task-detail-properties {
+    padding: 20px 16px;
+  }
 }

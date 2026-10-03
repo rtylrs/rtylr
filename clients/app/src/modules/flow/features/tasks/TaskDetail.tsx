@@ -371,7 +371,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+    <div className="flow-task-detail flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       <HelmetContainer title={task.title} />
       {/* Main area. shrink-0 with an auto basis below lg: as flex-1 its basis is
           0%, so in this fixed-height scrolling column the taller rail claimed
@@ -379,7 +379,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           phone. It only shares the row with the rail from lg up. */}
       <div className="flex min-h-0 w-full min-w-0 shrink-0 flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
         <div
-          className="flex shrink-0 items-center justify-between gap-2 px-4 py-3 sm:px-6"
+          className="flow-task-detail-toolbar flex shrink-0 items-center justify-between gap-2 px-4 py-3 sm:px-6"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -472,7 +472,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           transition={{ duration: 0.18 }}
           className="min-h-0 flex-1 overflow-y-auto lg:min-h-0"
         >
-          <div className="max-w-3xl mx-auto px-4 py-6 sm:px-8 sm:py-8">
+          <div className="flow-task-detail-body max-w-3xl mx-auto px-4 py-6 sm:px-8 sm:py-8">
             {/* Title */}
             <TaskTextField
               aria-label={t('flow.taskDetail.taskTitle')}
@@ -495,7 +495,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               value={displayDescription(task.description)}
               onSave={(description) => updateTask(task.id, { description })}
               placeholder={t('flow.taskDetail.descriptionPlaceholder')}
-              rows={5}
+              rows={3}
               disabled={!canEdit}
               className="w-full bg-transparent text-flow-body leading-relaxed mb-6 resize-none disabled:opacity-70"
               style={{ color: 'var(--flow-text-muted)' }}
@@ -615,7 +615,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
       {/* Side panel, below main on small screens */}
       <aside
-        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-[256px] lg:border-s lg:border-t-0"
+        className="flow-task-detail-properties w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-[256px] lg:border-s lg:border-t-0"
         style={{
           background: 'var(--flow-surface)',
         }}
@@ -1194,14 +1194,11 @@ const DetailField: React.FC<{
   label: string;
   children: React.ReactNode;
 }> = ({ icon: Icon, label, children }) => (
-  <div className="mb-5">
+  <div className="flow-task-detail-field mb-5">
     <div className="flex items-center gap-1.5 mb-1.5">
       <Icon size={11} />
-      {/* muted, not dim: --flow-text-dim measures 2.24:1 and never carries
-       * text. TimePanel's own heading uses the same treatment, so leaving this
-       * dim would put two versions of one label style side by side. */}
       <span
-        className="text-flow-meta uppercase tracking-wider font-semibold"
+        className="flow-task-detail-label text-flow-meta font-medium"
         style={{ color: 'var(--flow-text-muted)' }}
       >
         {label}

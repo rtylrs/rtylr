@@ -1,4 +1,3 @@
-import { usePOSPortal } from '../components/PortalContext';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useShortcutStore } from '../stores/shortcutStore';
@@ -13,7 +12,6 @@ import { useCartStore } from '../stores/cartStore';
 //               interactive element, or while a modal is open)
 //   Escape      close modals / cancel
 export function useKeyboardShortcuts() {
-  const embedded = usePOSPortal();
   const navigate = useNavigate();
   const toggleCommand = useShortcutStore((s) => s.toggleCommand);
   const setHelp = useShortcutStore((s) => s.setHelp);
@@ -29,7 +27,6 @@ export function useKeyboardShortcuts() {
       if (e.defaultPrevented) return;
       // cmd/ctrl+k toggles command palette
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        if (embedded) return;
         e.preventDefault();
         toggleCommand();
         return;
@@ -79,5 +76,5 @@ export function useKeyboardShortcuts() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate, toggleCommand, setHelp, embedded]);
+  }, [navigate, toggleCommand, setHelp]);
 }

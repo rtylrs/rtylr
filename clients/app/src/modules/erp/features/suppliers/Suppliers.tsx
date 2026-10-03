@@ -233,7 +233,7 @@ const Suppliers: React.FC = () => {
               data-testid="suppliers-add-button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
-              style={{ background: AMBER, color: 'var(--dash-text)' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.opacity = '0.9';
               }}
@@ -449,7 +449,7 @@ const Suppliers: React.FC = () => {
                   !newCountry.trim()
                 }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--dash-text)' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

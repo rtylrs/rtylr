@@ -152,12 +152,6 @@ importers:
       react-qrcode-logo:
         specifier: ^4.0.0
         version: 4.1.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      react-router-dom:
-        specifier: 7.18.4
-        version: 7.18.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      rtylr-pos:
-        specifier: workspace:*
-        version: link:../pos
       shepherd.js:
         specifier: ^15.3.0
         version: 15.3.0

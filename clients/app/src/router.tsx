@@ -1,4 +1,3 @@
-import { createPosRoutes } from './modules/pos/routes';
 import { createRecruitRoutes } from './modules/recruit/routes';
 import React, { Suspense } from 'react';
 import { z } from 'zod';
@@ -19,7 +18,7 @@ import SettingsLayout from './features/settings/Settings/components/SettingsLayo
 import NoMatch from './features/extras/NoMatch';
 import { createFlowRoutes } from './modules/flow/routes';
 import { settingsSearchSchema } from './modules/flow/shared/schemas/settings';
-import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
+import { AppFlagGuard, FLAG_KEYS, resolveAppUrl } from '@voxire/config';
 import { createCrmRoutes } from './modules/crm/routes';
 import { createHrRoutes } from './modules/hr/routes';
 import { createHrSettingsRoutes } from './modules/hr/settingsRoutes';
@@ -42,7 +41,6 @@ const CaretWorkspace = React.lazy(() => import('./features/caret/CaretWorkspace'
 
 const SettingsOverview = React.lazy(() => import('./features/settings/SettingsOverview'));
 const FlowSettings = React.lazy(() => import('./modules/flow/features/settings/FlowSettings'));
-const PosSettings = React.lazy(() => import('./modules/pos/PosModule'));
 const RecruitSettings = React.lazy(
   () => import('./modules/recruit/features/admin/CustomizationAdmin')
 );
@@ -359,11 +357,6 @@ const settingsRecruitRoute = createRoute({
       </AppFlagGuard>
     ),
 });
-const settingsPosRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/pos',
-  component: () => wrap(<PosSettings settings />),
-});
 const settingsFinanceRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/finance',
@@ -505,6 +498,35 @@ const notFoundRoute = createRoute({
   component: NoMatch,
 });
 
+const standalonePosRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pos',
+  beforeLoad: ({ location }) => {
+    const target = new URL(resolveAppUrl('pos'));
+    target.search = location.searchStr;
+    target.hash = location.hash;
+    throw redirect({ href: target.href });
+  },
+});
+const standalonePosDeepLinkRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pos/$',
+  beforeLoad: ({ location }) => {
+    const target = new URL(resolveAppUrl('pos'));
+    target.pathname = location.pathname.slice('/pos'.length);
+    target.search = location.searchStr;
+    target.hash = location.hash;
+    throw redirect({ href: target.href });
+  },
+});
+const standalonePosSettingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings/pos',
+  beforeLoad: () => {
+    throw redirect({ href: new URL('/settings', resolveAppUrl('pos')).href });
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   businessRoute.addChildren([
     createInsightsRoutes(businessRoute),
@@ -513,7 +535,6 @@ const routeTree = rootRoute.addChildren([
     createErpRoutes(businessRoute),
     createFinanceRoutes(businessRoute),
     createHrRoutes(businessRoute),
-    createPosRoutes(businessRoute),
     createRecruitRoutes(businessRoute),
     dashboardRoute,
     automationsRoute,
@@ -554,7 +575,6 @@ const routeTree = rootRoute.addChildren([
       settingsCrmRoute,
       settingsErpRoute,
       settingsFinanceRoute,
-      settingsPosRoute,
       settingsRecruitRoute,
       createHrSettingsRoutes(settingsRoute),
       settingsInsightsRoute,
@@ -571,6 +591,9 @@ const routeTree = rootRoute.addChildren([
       settingsIntegrationsRoute,
     ]),
   ]),
+  standalonePosRoute,
+  standalonePosDeepLinkRoute,
+  standalonePosSettingsRoute,
   notFoundRoute,
 ]);
 

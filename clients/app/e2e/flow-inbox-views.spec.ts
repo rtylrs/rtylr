@@ -152,6 +152,13 @@ test.describe('Flow - Inbox & Features Sweep', () => {
     await page.waitForLoadState('networkidle');
 
     await expect(page.getByRole('heading', { name: 'Notifications', exact: true })).toBeVisible();
+    const navigation = page.getByRole('navigation', { name: 'Home navigation' });
+    if (!(await navigation.isVisible())) {
+      const toggle = page.getByRole('button', { name: 'Toggle navigation menu' });
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await toggle.click();
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    }
     await page
       .getByRole('navigation', { name: 'Home navigation' })
       .getByRole('link', { name: 'Sidebar', exact: true })
