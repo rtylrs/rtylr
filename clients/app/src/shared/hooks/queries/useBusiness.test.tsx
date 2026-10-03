@@ -125,6 +125,23 @@ describe('useUpdateBusiness', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockConfigClient.updateConfig).toHaveBeenCalledWith({ siteName: 'Company name' });
   });
+
+  it('invalidates cached HR setup after changing the shared company name', async () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    client.setQueryData(['hr', 'hr-setup-status'], { config: { companyName: 'Old name' } });
+    mockConfigClient.updateConfig.mockResolvedValue({ config: { site_name: 'New name' } });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useUpdateBusiness(), { wrapper });
+    await act(async () => {
+      await result.current.mutateAsync({ data: { companyName: 'New name' } });
+    });
+    expect(client.getQueryState(['hr', 'hr-setup-status'])?.isInvalidated).toBe(true);
+    expect(useConfigStore.getState().websiteData?.siteName).toBe('New name');
+  });
 });
 
 describe('useCustomDomain', () => {

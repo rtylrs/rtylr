@@ -24,7 +24,6 @@ import {
 import { cn } from '../../../../../shared/lib/utils';
 
 const INITIAL_FORM_DATA = {
-  storeName: '',
   contactEmail: '',
   senderEmail: '',
   companyName: '',
@@ -54,7 +53,6 @@ const General: React.FC = () => {
   const initialFormData = useMemo<BusinessFormData>(
     () => ({
       ...INITIAL_FORM_DATA,
-      storeName: (websiteData?.siteName as string | undefined) || user?.businessName || '',
       contactEmail:
         contactInfo?.contactEmail ||
         (websiteData?.contactEmail as string | undefined) ||
@@ -140,8 +138,13 @@ const General: React.FC = () => {
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
               <div className="space-y-1.5">
-                <Label>{t('settings.general.storeName')}</Label>
-                <Input name="storeName" value={formData.storeName} onChange={handleInputChange} />
+                <Label htmlFor="company-name">{t('settings.general.companyName')}</Label>
+                <Input
+                  id="company-name"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleInputChange}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>{t('settings.general.contactEmail')}</Label>
@@ -194,10 +197,6 @@ const General: React.FC = () => {
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
               {[
-                // Translation keys, not English. These labels sat in the data
-                // as literals, so they were invisible to a JSX-text sweep and
-                // rendered in English for every reader (rtylr#1266).
-                { labelKey: 'settings.general.companyName', name: 'companyName' },
                 { labelKey: 'settings.general.website', name: 'website' },
                 { labelKey: 'settings.general.telephone', name: 'telephone' },
                 { labelKey: 'settings.general.mapsUrl', name: 'mapsUrl' },

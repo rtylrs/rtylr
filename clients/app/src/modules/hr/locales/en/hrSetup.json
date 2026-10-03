@@ -22,7 +22,8 @@
     "industry": "Industry",
     "country": "Country",
     "timezone": "Timezone",
-    "currency": "Currency"
+    "currency": "Currency",
+    "sharedName": "Company name is managed in General settings."
   },
   "workSchedule": {
     "title": "Default Work Schedule",

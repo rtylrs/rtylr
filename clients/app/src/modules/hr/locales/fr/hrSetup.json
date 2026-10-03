@@ -22,7 +22,8 @@
     "industry": "Secteur",
     "country": "Pays",
     "timezone": "Fuseau horaire",
-    "currency": "Devise"
+    "currency": "Devise",
+    "sharedName": "Le nom de l’entreprise est géré dans les paramètres généraux."
   },
   "workSchedule": {
     "title": "Horaire de travail par défaut",

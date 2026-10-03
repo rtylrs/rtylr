@@ -1,5 +1,5 @@
 :root {
-  --finance-accent: var(--dash-text);
+  --finance-accent: #10b981;
   --finance-success: var(--finance-accent);
   --finance-danger: #ef4444;
   --finance-error: var(--finance-danger);
@@ -57,7 +57,6 @@
 .portal-page.is-finance {
   --hub-card: var(--dash-surface);
   --hub-input-bg: var(--dash-input-bg);
-  --finance-accent: var(--dash-text);
 }
 .portal-page.is-finance :is(input, textarea, select):focus-visible {
   outline: 2px solid var(--dash-text-dim);

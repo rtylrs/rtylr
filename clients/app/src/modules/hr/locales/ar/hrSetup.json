@@ -22,7 +22,8 @@
     "industry": "القطاع",
     "country": "الدولة",
     "timezone": "المنطقة الزمنية",
-    "currency": "العملة"
+    "currency": "العملة",
+    "sharedName": "يُدار اسم الشركة في الإعدادات العامة."
   },
   "workSchedule": {
     "title": "جدول العمل الافتراضي",

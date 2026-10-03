@@ -1,6 +1,6 @@
 :root {
-  --crm-accent: var(--dash-text);
-  --crm-on-accent: var(--dash-surface);
+  --crm-accent: #3b82f6;
+  --crm-on-accent: #0a0a0a;
   --crm-text: var(--dash-text);
   --crm-border: var(--dash-border);
 }
@@ -45,7 +45,7 @@
 }
 
 .portal-page.is-crm button.bg-accent {
-  background: var(--dash-active);
-  color: var(--dash-text);
+  background: var(--crm-accent);
+  color: var(--crm-on-accent);
   border-radius: 8px;
 }

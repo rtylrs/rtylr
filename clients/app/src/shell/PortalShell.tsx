@@ -3,11 +3,21 @@ import '../modules/recruit/recruit.css';
 import { getHrNavItems, hrNavItems } from '../modules/hr/navigation';
 import { useHRConfigStore } from '../modules/hr/shared/stores/hrConfigStore';
 import '../modules/hr/hr.css';
-import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  lazy,
+  Suspense,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { resolveApiBase, resolveAppUrl } from '@voxire/config';
-import { useMediaQuery } from '@voxire/utils';
+import { useMediaQuery, deriveAccentFgAcross, deriveOnAccent, compositeOver } from '@voxire/utils';
+import { useThemeStore } from '../shared/stores/themeStore';
 import { PanelLeft, Search, Bell, Settings, Workflow, Plus, X } from 'lucide-react';
 import {
   HomeIcon,
@@ -55,6 +65,14 @@ import '../modules/crm/crm.css';
 import '../modules/erp/erp.css';
 import '../modules/finance/finance.css';
 
+const APP_ACCENTS: Partial<Record<string, string>> = {
+  flow: '#64c5b9',
+  crm: '#3b82f6',
+  erp: '#4583c4',
+  hr: '#8b5cf6',
+  finance: '#10b981',
+};
+
 function initialCollapsed() {
   try {
     return localStorage.getItem('portal-sidebar-collapsed') === 'true';
@@ -71,6 +89,38 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 900px)');
+  const systemDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const theme = useThemeStore((state) => state.theme);
+  const appId = (
+    pathname.startsWith('/settings/') ? pathname.split('/')[2] : pathname.split('/')[1]
+  )?.split('-')[0];
+  const accent = APP_ACCENTS[appId];
+  const grounds =
+    theme === 'dark' || (theme === 'system' && systemDark)
+      ? ['#0a0a0a', '#111111', '#161616']
+      : ['#f8f8f8', '#ffffff'];
+  const appStyle: CSSProperties & Record<string, string> = accent
+    ? {
+        '--accent': accent,
+        '--accent-muted': `color-mix(in srgb, ${accent} 12%, transparent)`,
+        '--accent-border': `color-mix(in srgb, ${accent} 30%, transparent)`,
+        '--accent-focus': deriveAccentFgAcross(accent, grounds),
+        '--accent-fg': deriveAccentFgAcross(accent, grounds),
+        '--accent-on-muted': deriveAccentFgAcross(
+          accent,
+          grounds.map((ground) => compositeOver(accent, 0.12, ground))
+        ),
+        '--dash-on-accent': deriveOnAccent(accent),
+        ...(appId === 'hr'
+          ? {
+              '--hr-accent': accent,
+              '--hr-payroll-accent': accent,
+              '--hr-on-accent': deriveOnAccent(accent),
+            }
+          : {}),
+        ...(appId === 'crm' ? { '--crm-on-accent': deriveOnAccent(accent) } : {}),
+      }
+    : {};
   const [settingsQuery, setSettingsQuery] = useState('');
   const quickCreateOpen = useFlowStore((state) => state.quickCreateOpen);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -350,7 +400,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     </>
   );
   return (
-    <div className="portal-shell">
+    <div className="portal-shell" data-app={accent ? appId : undefined} style={appStyle}>
       <a className="portal-skip-link" href="#main-content">
         {t('common.skipToMainContent')}
       </a>

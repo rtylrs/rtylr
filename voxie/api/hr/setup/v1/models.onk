@@ -22,6 +22,12 @@ message HRCompanyConfigPayload {
   id: int64
   /// Tenant owner this config belongs to.
   owner_id: int64
+  /// Shared company display name from business settings.
+  company_name: string?
+  /// Default currency used for HR payroll and compensation.
+  default_currency: string?
+  /// Default timezone used for HR scheduling.
+  default_timezone: string?
   /// How time is tracked (time_logging | attendance | both).
   time_tracking_model: string
   /// Period for timesheet submission (weekly | biweekly | monthly).
