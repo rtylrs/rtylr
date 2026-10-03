@@ -68,7 +68,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       <div
         style={{
           display: "flex",
-          justifyContent: "flex-end",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 8,
+          minWidth: 0,
           margin: "12px 0",
         }}
       >
@@ -80,30 +83,33 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               alt={attachment.name || `Attached image ${index + 1}`}
               style={{
                 display: "block",
-                width: "min(320px, 100%)",
+                width: "auto",
+                height: "auto",
+                maxWidth: "min(320px, 82%)",
                 maxHeight: 280,
                 objectFit: "contain",
                 borderRadius: 10,
-                marginBottom: 8,
               }}
             />
           ) : null,
         )}
-        <div
-          style={{
-            maxWidth: "82%",
-            padding: "10px 14px",
-            borderRadius: "16px 16px 4px 16px",
-            background: caretTokens.accentSoft,
-            color: caretTokens.text,
-            fontSize: 13.5,
-            lineHeight: 1.55,
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-          }}
-        >
-          {text}
-        </div>
+        {text && (
+          <div
+            style={{
+              maxWidth: "82%",
+              padding: "10px 14px",
+              borderRadius: "16px 16px 4px 16px",
+              background: caretTokens.accentSoft,
+              color: caretTokens.text,
+              fontSize: 13.5,
+              lineHeight: 1.55,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}
+          >
+            {text}
+          </div>
+        )}
       </div>
     );
   }
