@@ -8,17 +8,15 @@ import { useCaretUIStore } from "../stores/uiStore";
 import { useChatsStore } from "../stores/chatsStore";
 import { useCaretStream } from "../hooks/useCaretStream";
 import { useCaretSessions } from "../hooks/useCaretSessions";
+import { useCaretProjects } from "../hooks/useCaretProjects";
 import { useLoadCaretChat } from "../hooks/useLoadCaretChat";
 import { usePanelResize } from "../hooks/usePanelResize";
 import { useShortcuts } from "../hooks/useShortcuts";
 import { authHeaders } from "../lib/auth";
 import { createMemoryClient } from "../lib/memoryClient";
 import { ApiError } from "@voxire/voxie/hub/memory/v1/client";
-import { buildCaretFollowUps } from "../lib/followUps";
-import { inferCaretModeForPrompt } from "../lib/modeIntent";
 import { buildCaretEmptyState, type CaretStarter } from "../lib/suggestions";
-import { getCaretSlashCommand } from "../lib/slashCommands";
-import type { CaretChatSummary } from "../types/chat";
+import type { CaretChatSummary, CaretProject } from "../types/chat";
 import type { CaretPageContext } from "../types/context";
 import type { CaretMessage, ToolCallBlock } from "../types/message";
 import HeaderBar from "./header/HeaderBar";
@@ -28,12 +26,14 @@ import { Composer } from "./composer";
 import WelcomeHero from "./WelcomeHero";
 import SettingsPanel from "./SettingsPanel";
 import { ChatList, type ChatListLabels } from "./sidebar";
+import ProjectSidebar, { type ProjectLabels } from "./sidebar/ProjectSidebar";
 
 export interface CaretWorkspaceOptions {
   header: React.ReactNode;
   sidebarHeader: React.ReactNode;
   welcome: React.ReactNode;
   historyLabels: ChatListLabels;
+  projectLabels?: Partial<ProjectLabels>;
   composerPlaceholder: string;
   sidebarOpen: boolean;
   onSelectChat: () => void;
@@ -140,8 +140,10 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const view = useCaretUIStore((s) => s.view);
   const setView = useCaretUIStore((s) => s.setView);
   const queryClient = useQueryClient();
-  const mode = useCaretSettingsStore((s) => s.mode);
-  const setMode = useCaretSettingsStore((s) => s.setMode);
+  const mode = "agent" as const;
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    activeTab?.projectId ?? null,
+  );
 
   const { sendMessage, stopStreaming } = useCaretStream({
     userId,
@@ -155,6 +157,12 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     error: sessionsError,
     refetch: refetchSessions,
   } = useCaretSessions({ userId, apiBaseUrl });
+  const {
+    projects,
+    isLoading: projectsLoading,
+    error: projectsError,
+    refetch: refetchProjects,
+  } = useCaretProjects({ userId, apiBaseUrl });
   const retrySessions = useCallback((): void => {
     void refetchSessions();
   }, [refetchSessions]);
@@ -166,20 +174,78 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     () => buildCaretEmptyState({ appId, pageContext }),
     [appId, pageContext],
   );
-  const followUps = useMemo(
-    () => buildCaretFollowUps({ appId, pageContext, messages }),
-    [appId, pageContext, messages],
-  );
 
   useEffect(() => {
     if (sessions.length > 0) setRecent(sessions);
   }, [sessions, setRecent]);
 
-  const newChat = useCallback((): void => {
-    caret.newTab();
-    setView("chat");
-    workspace?.onSelectChat();
-  }, [caret, setView, workspace]);
+  useEffect(() => {
+    setSelectedProjectId(activeTab?.projectId ?? null);
+  }, [activeTab?.projectId]);
+
+  const newChat = useCallback(
+    (projectId: string | null = selectedProjectId): void => {
+      caret.newTab({ projectId });
+      setView("chat");
+      workspace?.onSelectChat();
+    },
+    [caret, selectedProjectId, setView, workspace],
+  );
+
+  const selectProject = useCallback(
+    (projectId: string | null): void => {
+      setSelectedProjectId(projectId);
+      const current = useCaretStore
+        .getState()
+        .tabs.find((tab) => tab.id === useCaretStore.getState().activeTabId);
+      if (current?.projectId !== projectId) {
+        const existing = useCaretStore
+          .getState()
+          .tabs.find((tab) => tab.projectId === projectId);
+        if (existing) caret.setActiveTab(existing.id);
+        else newChat(projectId);
+      }
+      setView("chat");
+    },
+    [caret, newChat, setView],
+  );
+
+  const saveProject = useCallback(
+    async (
+      input: import("@voxire/voxie/hub/memory/v1/types").SaveProjectRequest,
+    ): Promise<CaretProject> => {
+      const response = await createMemoryClient(apiBaseUrl).saveProject(input);
+      await queryClient.invalidateQueries({
+        queryKey: ["caret", "projects", userId],
+      });
+      if (!response.project?.id || !response.project.name)
+        throw new Error("The server returned an invalid project.");
+      return {
+        id: response.project.id,
+        name: response.project.name,
+        icon: response.project.icon || "folder",
+        color: response.project.color || "neutral",
+        context: response.project.context || "",
+        updatedAt: response.project.updatedAt || new Date().toISOString(),
+      };
+    },
+    [apiBaseUrl, queryClient, userId],
+  );
+
+  const archiveProject = useCallback(
+    async (projectId: string): Promise<void> => {
+      await createMemoryClient(apiBaseUrl).archiveProject({ id: projectId });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["caret", "projects", userId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["caret", "sessions", userId],
+        }),
+      ]);
+    },
+    [apiBaseUrl, queryClient, userId],
+  );
 
   const selectChat = useCallback(
     (id: string): void => {
@@ -190,8 +256,15 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         caret.setActiveTab(existing.id);
       } else {
         const summary = sessions.find((chat) => chat.id === id);
-        caret.newTab({ sessionId: id, title: summary?.title });
+        caret.newTab({
+          sessionId: id,
+          title: summary?.title,
+          projectId: summary?.projectId,
+        });
       }
+      setSelectedProjectId(
+        sessions.find((chat) => chat.id === id)?.projectId ?? null,
+      );
       setView("chat");
       workspace?.onSelectChat();
     },
@@ -423,20 +496,15 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   );
 
   const sendPromptWithIntent = useCallback(
-    (prompt: string, explicitMode?: CaretStarter["mode"]): void => {
-      const nextMode =
-        explicitMode ??
-        getCaretSlashCommand(prompt)?.mode ??
-        inferCaretModeForPrompt(prompt, mode);
-      if (nextMode !== mode) setMode(nextMode);
-      void sendMessage(prompt, nextMode);
+    (prompt: string): void => {
+      void sendMessage(prompt, "agent");
     },
-    [mode, sendMessage, setMode],
+    [sendMessage],
   );
 
   const sendStarter = useCallback(
     (starter: CaretStarter): void => {
-      sendPromptWithIntent(starter.prompt, starter.mode);
+      sendPromptWithIntent(starter.prompt);
     },
     [sendPromptWithIntent],
   );
@@ -448,6 +516,10 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const isDetached = !isFullscreen && expanded;
   const isBig = isFullscreen || isDetached;
   const isEmpty = !isLoading && messages.length === 0;
+  const visibleSessions =
+    selectedProjectId === null
+      ? sessions
+      : sessions.filter((chat) => chat.projectId === selectedProjectId);
   const mainShowsChat = view === "chat" || (isBig && view === "history");
 
   const rootStyle: React.CSSProperties = isDetached
@@ -595,8 +667,6 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                   showThinking={showThinking}
                   onApproveTool={onApprove}
                   onDenyTool={onDeny}
-                  followUps={followUps}
-                  onFollowUp={sendStarter}
                 />
               )}
             </div>
@@ -612,7 +682,9 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                 autoFocus={isOpen || isFullscreen}
                 size={isBig ? "lg" : "md"}
                 isStreaming={isStreaming}
-                onSubmit={(t) => sendPromptWithIntent(t)}
+                onSubmit={(t, images) => {
+                  void sendMessage(t, "agent", images);
+                }}
                 onStop={() => stopStreaming(activeTabId)}
                 placeholder={
                   workspace?.composerPlaceholder ??
@@ -626,7 +698,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
       {!isBig && view === "history" && (
         <ChatList
-          chats={sessions}
+          chats={visibleSessions}
           isLoading={sessionsLoading}
           error={sessionsError}
           onRetry={retrySessions}
@@ -691,9 +763,19 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             }}
           >
             {workspace?.sidebarHeader}
+            <ProjectSidebar
+              projects={projects}
+              activeId={selectedProjectId}
+              labels={workspace?.projectLabels}
+              isLoading={projectsLoading}
+              loadError={projectsError !== null}
+              onSelect={selectProject}
+              onSave={saveProject}
+              onArchive={archiveProject}
+            />
             <ChatList
               labels={workspace?.historyLabels}
-              chats={sessions}
+              chats={visibleSessions}
               isLoading={sessionsLoading}
               error={sessionsError}
               onRetry={retrySessions}

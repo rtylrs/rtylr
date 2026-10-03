@@ -51,7 +51,6 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 
 		return
 	}
-
 	// Quota gate. Use the authenticated identity (never the client-supplied
 	// userId) so usage is metered against the real tenant.
 	device := authPkg.DeviceCtx(ctx)
@@ -70,6 +69,14 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		log.Warn("AI request rejected without an authenticated business identity")
 		http.Error(w, "Authentication is required", http.StatusUnauthorized)
 		return
+	}
+	if projects, ok := h.MemoryService.(interface {
+		ValidateProjectSelection(context.Context, string, string, int) error
+	}); ok {
+		if err := projects.ValidateProjectSelection(ctx, req.SessionID, req.ProjectID, int(authUserID)); err != nil {
+			http.Error(w, "Selected project is not available for this chat", http.StatusBadRequest)
+			return
+		}
 	}
 	// Trust the authenticated identity over the client-supplied user_id for the
 	// session/memory owner too — prevents one user reading another's history.
@@ -98,8 +105,9 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		SessionID:     req.SessionID,
 		UserID:        req.UserID,
 		SystemContext: req.SystemContext,
-		Mode:          req.Mode,
+		Mode:          "agent",
 		PageContext:   req.PageContext,
+		Images:        req.Images,
 	}, requestNow)
 	if setupErr != nil {
 		log.Error("Failed to setup session and store message", logger.Error(setupErr))
@@ -107,6 +115,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 
 		return
 	}
+	req.Mode = "agent"
 	req.Prompt = prepared.Request.Prompt
 	req.SessionID = prepared.Request.SessionID
 	req.UserID = prepared.Request.UserID
@@ -117,20 +126,35 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	// Do not spend a model call on connectivity checks. A content-free prompt
 	// gives a generative model room to invent a plausible business report even
 	// though no business evidence was requested.
-	if isCaretSmokeCheck(req.Prompt) {
+	if strings.EqualFold(strings.TrimSpace(req.Prompt), "ping") {
 		h.setupSSEHeaders(w)
 		h.streamDirectResponse(ctx, w, req, caretSmokeCheckReply)
 		return
 	}
 
-	mode := prepared.Mode
-	enhancedPrompt := prepared.EnhancedPrompt
+	mode := application.ModeAgent
+	savedContext := ""
+	if memory, ok := h.MemoryService.(application.AssistantContextService); ok {
+		savedContext, err = memory.AssistantContext(ctx, req.SessionID, int(authUserID), req.ProjectID)
+		if err != nil {
+			http.Error(w, "Failed to load chat context", http.StatusInternalServerError)
+			return
+		}
+	}
+	enhancedPrompt := application.BuildAssistantPrompt(req.Prompt, req.SystemContext, savedContext, req.PageContext, requestNow)
+	ctx = snips.WithImages(ctx, req.Images)
 
 	cachePlan := application.BuildCacheWritePlan(mode, application.TurnRequest{
 		Prompt:        req.Prompt,
 		SystemContext: req.SystemContext,
 		PageContext:   req.PageContext,
 	}, enhancedPrompt, businessID, authUserID, h.AiService.GetPrimaryProvider(), requestNow)
+
+	cachePlan = application.DisableExactCachePlan(cachePlan, "conversation and project context change between turns")
+	cachePlan.ProviderPlannerOnly = false
+	cachePlan.ToolBudget = 6
+	cachePlan.ContinuationBudget = 3
+	req.EnhancedPrompt = enhancedPrompt
 
 	h.setupSSEHeaders(w)
 	clientGone := h.monitorClientDisconnect(r)

@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { useCaretStore } from './caretStore';
-import type { CaretMessage } from '../types/message';
+import { beforeEach, describe, expect, it } from "vitest";
+import { useCaretStore } from "./caretStore";
+import type { CaretMessage } from "../types/message";
 
 function userMessage(content: string): CaretMessage {
   return {
     id: `user-${content}`,
-    role: 'user',
+    role: "user",
     blocks: [],
     content,
     createdAt: new Date().toISOString(),
@@ -20,29 +20,52 @@ beforeEach(() => {
   useCaretStore.getState().setActiveTab(activeTabId);
 });
 
-describe('useCaretStore tabs', () => {
-  it('keeps messages and streams isolated per tab', () => {
+describe("useCaretStore tabs", () => {
+  it("keeps messages and streams isolated per tab", () => {
     const firstTabId = useCaretStore.getState().activeTabId;
-    useCaretStore.getState().addMessage(userMessage('first chat'), firstTabId);
+    useCaretStore.getState().addMessage(userMessage("first chat"), firstTabId);
 
     const secondTabId = useCaretStore.getState().newTab();
-    useCaretStore.getState().addMessage(userMessage('second chat'), secondTabId);
+    useCaretStore
+      .getState()
+      .addMessage(userMessage("second chat"), secondTabId);
     useCaretStore.getState().setStreaming(true, secondTabId);
 
     const state = useCaretStore.getState();
     const firstTab = state.tabs.find((tab) => tab.id === firstTabId);
     const secondTab = state.tabs.find((tab) => tab.id === secondTabId);
 
-    expect(firstTab?.messages.map((message) => message.content)).toEqual(['first chat']);
+    expect(firstTab?.messages.map((message) => message.content)).toEqual([
+      "first chat",
+    ]);
     expect(firstTab?.isStreaming).toBe(false);
-    expect(secondTab?.messages.map((message) => message.content)).toEqual(['second chat']);
+    expect(secondTab?.messages.map((message) => message.content)).toEqual([
+      "second chat",
+    ]);
     expect(secondTab?.isStreaming).toBe(true);
   });
 
-  it('derives a readable tab title from the first user message', () => {
+  it("derives a readable tab title from the first user message", () => {
     const tabId = useCaretStore.getState().activeTabId;
-    useCaretStore.getState().addMessage(userMessage('Review overdue invoices'), tabId);
+    useCaretStore
+      .getState()
+      .addMessage(userMessage("Review overdue invoices"), tabId);
 
-    expect(useCaretStore.getState().tabs[0].title).toBe('Review overdue invoices');
+    expect(useCaretStore.getState().tabs[0].title).toBe(
+      "Review overdue invoices",
+    );
+  });
+
+  it("persists the selected project with its chat tab", () => {
+    const tabId = useCaretStore.getState().newTab({ projectId: "project-123" });
+    const persisted = JSON.parse(
+      localStorage.getItem("caret-session") ?? "{}",
+    ) as {
+      state?: { tabs?: Array<{ id: string; projectId?: string | null }> };
+    };
+
+    expect(
+      persisted.state?.tabs?.find((tab) => tab.id === tabId)?.projectId,
+    ).toBe("project-123");
   });
 });

@@ -14,9 +14,11 @@ import (
 
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	"github.com/voxire/onion/internal/modules/memory/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 const memoryTTL = 30 * time.Second
@@ -45,12 +47,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 func (s *Service) CreateSession(ctx context.Context, userID int, title string) (*domain.ChatSession, error) {
 	sessionID := uuid.New().String()
+	metadata := "{}"
+	if user, ok := auth.GetAuthUser(ctx); ok && user != nil {
+		data, _ := json.Marshal(map[string]int64{"business_id": user.BusinessID})
+		metadata = string(data)
+	}
 
 	session := &domain.ChatSession{
 		UserID:    userID,
 		SessionID: sessionID,
 		Title:     title,
-		Metadata:  "{}",
+		Metadata:  metadata,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -65,7 +72,7 @@ func (s *Service) ListUserSessions(ctx context.Context, userID, limit, offset in
 	if userID <= 0 {
 		return nil, errors.New("user id is required")
 	}
-	key := cacheKeys.Scoped("user", int64(userID), fmt.Sprintf("memory_sessions|l=%d|o=%d", limit, offset))
+	key := cacheKeys.Scoped("user", int64(userID), fmt.Sprintf("memory_sessions|l=%d|o=%d|b=%d", limit, offset, memoryBusinessID(ctx)))
 	return cacher.Of[[]domain.ChatSession]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.ChatSession, error) {
 			return s.repository.ListUserSessions(ctx, userID, limit, offset)
@@ -75,6 +82,21 @@ func (s *Service) ListUserSessions(ctx context.Context, userID, limit, offset in
 }
 
 func (s *Service) StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int) (*domain.ConversationMessage, error) {
+	return s.storeMessage(ctx, sessionID, userID, role, content, tokensUsed, "{}")
+}
+
+func (s *Service) StoreMessageWithImages(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int, images []snips.ImageInput) (*domain.ConversationMessage, error) {
+	if err := snips.ValidateImages(images); err != nil {
+		return nil, err
+	}
+	metadata, err := json.Marshal(map[string]any{"images": images})
+	if err != nil {
+		return nil, err
+	}
+	return s.storeMessage(ctx, sessionID, userID, role, content, tokensUsed, string(metadata))
+}
+
+func (s *Service) storeMessage(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int, metadata string) (*domain.ConversationMessage, error) {
 	if s == nil || s.repository == nil {
 		return nil, errors.New("memory repository not available")
 	}
@@ -106,6 +128,7 @@ func (s *Service) StoreMessage(ctx context.Context, sessionID string, userID int
 		Content:    content,
 		TokensUsed: tokensUsed,
 		CreatedAt:  time.Now(),
+		Metadata:   metadata,
 	}
 
 	return s.repository.CreateMessage(ctx, message)
@@ -126,6 +149,9 @@ func (s *Service) EnsureSessionOwnership(ctx context.Context, sessionID string, 
 }
 
 func (s *Service) GetConversationContext(ctx context.Context, sessionID string, userID int) (*domain.ConversationContext, error) {
+	if err := s.EnsureSessionOwnership(ctx, sessionID, userID); err != nil {
+		return nil, err
+	}
 	log := logger.Ctx(ctx)
 
 	log.Info("Getting conversation context",
@@ -467,4 +493,11 @@ type MemoryItem struct {
 	Key        string  `json:"key"`
 	Value      string  `json:"value"`
 	Confidence float64 `json:"confidence"`
+}
+
+func memoryBusinessID(ctx context.Context) int64 {
+	if user, ok := auth.GetAuthUser(ctx); ok && user != nil {
+		return user.BusinessID
+	}
+	return 0
 }

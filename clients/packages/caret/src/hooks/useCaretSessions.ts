@@ -37,6 +37,7 @@ export function useCaretSessions({
           updatedAt: chat.updatedAt || new Date().toISOString(),
           pinned: chat.pinned,
           archived: chat.archived,
+          projectId: chat.projectId || undefined,
         }));
     },
     enabled: userId > 0,

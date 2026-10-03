@@ -366,6 +366,27 @@
     "loadFailed": "Unable to load saved chats.",
     "deleteChat": "Delete chat",
     "pinChat": "Pin chat",
-    "unpinChat": "Unpin chat"
+    "unpinChat": "Unpin chat",
+    "projects": "Projects",
+    "allChats": "All chats",
+    "createProject": "Create project",
+    "editProject": "Edit project",
+    "projectName": "Project name",
+    "projectContext": "Shared project context",
+    "projectContextHint": "Notes Caret can use across chats in this project.",
+    "projectIcon": "Icon",
+    "projectColor": "Color",
+    "saveProject": "Save project",
+    "archiveProject": "Archive project",
+    "archiveProjectTitle": "Archive project?",
+    "archiveProjectMessage": "Its chats will remain in All chats and lose this shared project context.",
+    "confirmArchiveProject": "Archive",
+    "noProjects": "Create a project to keep related chats and context together.",
+    "projectsLoadFailed": "Unable to load projects.",
+    "projectNameRequired": "Enter a project name.",
+    "projectsLoading": "Loading…",
+    "projectSaving": "Saving…",
+    "projectSaveFailed": "Unable to save project.",
+    "projectArchiveFailed": "Unable to archive project."
   }
 }

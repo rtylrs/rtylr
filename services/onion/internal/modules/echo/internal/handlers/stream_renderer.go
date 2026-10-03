@@ -142,6 +142,15 @@ func (r *streamEventRenderer) ToolResultCount() int {
 	return len(r.toolResults)
 }
 
+func (r *streamEventRenderer) HasSuccessfulTool(name string) bool {
+	for _, result := range r.toolResults {
+		if result.Name == name && result.Status == "success" {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *streamEventRenderer) PendingApprovalCount() int {
 	return r.pendingApprovals
 }

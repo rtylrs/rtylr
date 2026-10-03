@@ -36,7 +36,7 @@ func NewGeminiProvider(ctx context.Context) (*GeminiProvider, error) {
 
 	return &GeminiProvider{
 		client: client,
-		models: []string{"gemini-3.5-flash-lite", "gemini-3.5-flash"},
+		models: []string{"gemini-3.8-flash", "gemini-3.7-flash"},
 	}, nil
 }
 
@@ -63,7 +63,7 @@ func (c *GeminiProvider) CompleteTextWithOptions(ctx context.Context, prompt str
 		model := c.client.GenerativeModel(modelName)
 		applyGeminiCompletionOptions(model, opts)
 
-		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
+		resp, err := model.GenerateContent(ctx, geminiParts(ctx, prompt)...)
 		if err != nil {
 			logger.Ctx(ctx).Error("Gemini model failed",
 				logger.String("model", modelName),
@@ -111,10 +111,6 @@ func applyGeminiCompletionOptions(model *genai.GenerativeModel, opts CompletionO
 	maxTokens := int32(config.AIMaxOutputTokens)
 	cfg := genai.GenerationConfig{
 		MaxOutputTokens: &maxTokens,
-	}
-	if opts.Temperature != nil {
-		temperature := float32(*opts.Temperature)
-		cfg.Temperature = &temperature
 	}
 	if opts.JSONResponse {
 		cfg.ResponseMIMEType = "application/json"
@@ -169,18 +165,11 @@ func (c *GeminiProvider) tryModelStream(ctx context.Context, prompt, modelName s
 	model := c.client.GenerativeModel(modelName)
 
 	maxTokens := int32(config.AIMaxOutputTokens)
-	temperature := float32(0.7)
-	topP := float32(0.8)
-	topK := int32(40)
-
 	model.GenerationConfig = genai.GenerationConfig{
 		MaxOutputTokens: &maxTokens,
-		Temperature:     &temperature,
-		TopP:            &topP,
-		TopK:            &topK,
 	}
 
-	iter := model.GenerateContentStream(ctx, genai.Text(prompt))
+	iter := model.GenerateContentStream(ctx, geminiParts(ctx, prompt)...)
 	if iter == nil {
 		logger.Ctx(ctx).Error("Gemini stream model returned nil iterator", logger.String("model", modelName))
 
@@ -246,9 +235,7 @@ func (c *GeminiProvider) processResponse(ctx context.Context, resp *genai.Genera
 			continue
 		}
 
-		logger.Global().Debug("Gemini returned text chunk",
-			logger.String("text_preview", text[:min(len(text), 50)]),
-			logger.Int("length", len(text)))
+		logger.Global().Debug("Gemini returned text chunk", logger.Int("length", len(text)))
 
 		select {
 		case tokenChan <- StreamToken{Text: text, Done: false}:
@@ -263,4 +250,15 @@ func (c *GeminiProvider) processResponse(ctx context.Context, resp *genai.Genera
 // Close implements the Provider interface.
 func (c *GeminiProvider) Close() error {
 	return c.client.Close()
+}
+
+func geminiParts(ctx context.Context, prompt string) []genai.Part {
+	parts := []genai.Part{genai.Text(prompt)}
+	for _, input := range imagesFromContext(ctx) {
+		mime, data, err := DecodeImage(input)
+		if err == nil {
+			parts = append(parts, genai.Blob{MIMEType: mime, Data: data})
+		}
+	}
+	return parts
 }

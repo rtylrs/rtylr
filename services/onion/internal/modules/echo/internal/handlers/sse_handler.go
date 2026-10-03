@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 // QuotaService reserves AI tokens against the tenant's monthly allowance and
@@ -80,12 +81,15 @@ type GenerateTextStreamHandler struct {
 }
 
 type GenerateTextStreamRequest struct {
-	Prompt        string         `json:"prompt"`
-	SessionID     string         `json:"session_id"`
-	UserID        int64          `json:"user_id"`
-	SystemContext string         `json:"system_context"` // optional — app context injected as system message
-	Mode          string         `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
-	PageContext   map[string]any `json:"page_context,omitempty"`
+	ProjectID      string             `json:"project_id,omitempty"`
+	Images         []snips.ImageInput `json:"images,omitempty"`
+	EnhancedPrompt string             `json:"-"`
+	Prompt         string             `json:"prompt"`
+	SessionID      string             `json:"session_id"`
+	UserID         int64              `json:"user_id"`
+	SystemContext  string             `json:"system_context"` // optional — app context injected as system message
+	Mode           string             `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
+	PageContext    map[string]any     `json:"page_context,omitempty"`
 }
 
 // UnmarshalJSON keeps older Caret clients working while maintaining a single
@@ -126,6 +130,12 @@ func (r *GenerateTextStreamRequest) UnmarshalJSON(data []byte) error {
 	if err := decode(&parsed.PageContext, "page_context", "pageContext"); err != nil {
 		return err
 	}
+	if err := decode(&parsed.ProjectID, "project_id"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Images, "images"); err != nil {
+		return err
+	}
 	*r = parsed
 	return nil
 }
@@ -148,6 +158,9 @@ func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *GenerateTex
 		return onekiterrors.New(http.StatusBadRequest, "User ID is required")
 	}
 
+	if err := snips.ValidateImages(req.Images); err != nil {
+		return onekiterrors.New(http.StatusBadRequest, "Invalid image attachment")
+	}
 	return nil
 }
 

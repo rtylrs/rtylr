@@ -24,6 +24,10 @@ type ToolDef struct {
 // CoreTools is the seed registry — the long-term plan is to source this
 // list from each module's MCP descriptor.
 var CoreTools = []ToolDef{
+	{Name: "web.search", Description: "Search the public web for current information and return an answer with sources. Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question"}`},
+	{Name: "account.profile", Description: "Read the authenticated person's name and current business identity.", Module: "account", Scope: "read", InputHint: `{}`},
+	{Name: "utilities.calculate", Description: "Evaluate arithmetic using numbers supplied by the user or verified results.", Module: "utilities", Scope: "read", InputHint: `{"expression":"(120 * 0.2) + 8"}`},
+	{Name: "utilities.time", Description: "Get the current date and time in an IANA timezone.", Module: "utilities", Scope: "read", InputHint: `{"timezone":"Asia/Beirut"}`},
 	{Name: "business.snapshot", Description: "Build a tenant-scoped owner snapshot across sales, finance, inventory, CRM, HR, and Flow.", Module: "business", Scope: "read"},
 	{Name: "business.get_kpis", Description: "Get headline business KPIs across revenue, orders, staff, customers, stock, and apps.", Module: "business", Scope: "read"},
 	{Name: "memory.remember", Description: "Remember a user-approved business fact, preference, reporting default, or operating rule for future Caret answers.", Module: "memory", Scope: "write", RequiresApproval: true},
@@ -182,6 +186,7 @@ var CoreTools = []ToolDef{
 }
 
 var promptExecutableTools = map[string]struct{}{
+	"web.search": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
 	"business.snapshot":                   {},
 	"business.get_kpis":                   {},
 	"memory.remember":                     {},

@@ -120,7 +120,7 @@ func (c *Client) CompleteTextWithOptions(ctx context.Context, prompt string, opt
 	// Try each healthy provider in order until one succeeds. A short circuit
 	// prevents a broken upstream from adding a full timeout to every request.
 	for _, provider := range c.providers {
-		if !c.providerReady(provider) {
+		if !c.providerReady(provider) || !providerSupportsInput(ctx, provider) {
 			continue
 		}
 
@@ -158,7 +158,7 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 	providers := c.streamingProviderOrder()
 	var lastErr error
 	for i, provider := range providers {
-		if !c.providerReady(provider) {
+		if !c.providerReady(provider) || !providerSupportsInput(ctx, provider) {
 			continue
 		}
 		tokenChan, err := provider.CompleteTextStream(ctx, prompt)
@@ -253,7 +253,7 @@ func (c *Client) superviseProviderStream(ctx context.Context, prompt string, pro
 func (c *Client) nextProviderStream(ctx context.Context, prompt string, providers []Provider) (Provider, <-chan StreamToken, error) {
 	var lastErr error
 	for _, provider := range providers {
-		if !c.providerReady(provider) {
+		if !c.providerReady(provider) || !providerSupportsInput(ctx, provider) {
 			continue
 		}
 		stream, err := provider.CompleteTextStream(ctx, prompt)

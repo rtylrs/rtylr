@@ -7,6 +7,7 @@ message ChatSummary {
   updated_at: string
   pinned: bool
   archived: bool
+  project_id: string
 }
 
 message ChatMessage {
@@ -15,6 +16,7 @@ message ChatMessage {
   content: string
   created_at: string
   tokens_used: int32
+  attachments_json: string
 }
 
 message ListChatsRequest {
@@ -59,3 +61,29 @@ message PinChatRequest {
 message PinChatResponse {
   updated: bool
 }
+
+message CaretProject {
+ id: string
+ name: string
+ icon: string
+ color: string
+ context: string
+ updated_at: string
+}
+message ListProjectsRequest {}
+message ListProjectsResponse { projects: CaretProject[] }
+message SaveProjectRequest {
+ id: string
+ name: string
+ icon: string
+ color: string
+ context: string
+}
+message SaveProjectResponse { project: CaretProject }
+message ArchiveProjectRequest { id: string }
+message ArchiveProjectResponse { archived: bool }
+message SetChatProjectRequest {
+ session_id: string
+ project_id: string
+}
+message SetChatProjectResponse { updated: bool }

@@ -1,8 +1,7 @@
-import React from 'react';
-import MessageBubble from './MessageBubble';
-import { useScrollToBottom } from '../hooks/useScrollToBottom';
-import type { CaretStarter } from '../lib/suggestions';
-import type { CaretMessage } from '../types/message';
+import React from "react";
+import MessageBubble from "./MessageBubble";
+import { useScrollToBottom } from "../hooks/useScrollToBottom";
+import type { CaretMessage } from "../types/message";
 
 export interface MessageListProps {
   messages: CaretMessage[];
@@ -11,8 +10,6 @@ export interface MessageListProps {
   showThinking?: boolean;
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
-  followUps?: CaretStarter[];
-  onFollowUp?: (item: CaretStarter) => void;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -22,10 +19,11 @@ export const MessageList: React.FC<MessageListProps> = ({
   showThinking,
   onApproveTool,
   onDenyTool,
-  followUps = [],
-  onFollowUp,
 }) => {
-  const scrollRef = useScrollToBottom<HTMLDivElement>([messages.length, isStreaming], scrollKey);
+  const scrollRef = useScrollToBottom<HTMLDivElement>(
+    [messages.length, isStreaming],
+    scrollKey,
+  );
 
   return (
     <div
@@ -33,14 +31,15 @@ export const MessageList: React.FC<MessageListProps> = ({
       ref={scrollRef}
       style={{
         flex: 1,
-        overflowY: 'auto',
-        padding: '16px',
+        overflowY: "auto",
+        padding: "16px",
       }}
       aria-live="polite"
       aria-atomic="false"
     >
       {messages.map((msg, i) => {
-        const isLastAssistant = i === messages.length - 1 && msg.role === 'assistant';
+        const isLastAssistant =
+          i === messages.length - 1 && msg.role === "assistant";
         return (
           <MessageBubble
             key={msg.id}
@@ -49,8 +48,6 @@ export const MessageList: React.FC<MessageListProps> = ({
             showThinking={showThinking}
             onApproveTool={onApproveTool}
             onDenyTool={onDenyTool}
-            followUps={isLastAssistant && !isStreaming ? followUps : []}
-            onFollowUp={onFollowUp}
           />
         );
       })}
