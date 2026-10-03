@@ -183,14 +183,17 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     setSelectedProjectId(activeTab?.projectId ?? null);
   }, [activeTab?.projectId]);
 
-  const newChat = useCallback(
-    (projectId: string | null = selectedProjectId): void => {
+  const createChat = useCallback(
+    (projectId: string | null): void => {
       caret.newTab({ projectId });
       setView("chat");
       workspace?.onSelectChat();
     },
-    [caret, selectedProjectId, setView, workspace],
+    [caret, setView, workspace],
   );
+  const newChat = useCallback((): void => {
+    createChat(selectedProjectId);
+  }, [createChat, selectedProjectId]);
 
   const selectProject = useCallback(
     (projectId: string | null): void => {
@@ -203,11 +206,11 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           .getState()
           .tabs.find((tab) => tab.projectId === projectId);
         if (existing) caret.setActiveTab(existing.id);
-        else newChat(projectId);
+        else createChat(projectId);
       }
       setView("chat");
     },
-    [caret, newChat, setView],
+    [caret, createChat, setView],
   );
 
   const saveProject = useCallback(

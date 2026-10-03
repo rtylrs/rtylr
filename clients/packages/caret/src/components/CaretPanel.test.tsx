@@ -6,7 +6,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CaretPanel from "./CaretPanel";
 import { useCaretStore } from "../stores/caretStore";
 import { useCaretSettingsStore } from "../stores/settingsStore";
@@ -15,6 +15,7 @@ import { useCaretUIStore } from "../stores/uiStore";
 const memoryClient = vi.hoisted(() => ({
   getChatMessages: vi.fn(),
   listChats: vi.fn(),
+  listProjects: vi.fn(),
   deleteChat: vi.fn(),
 }));
 
@@ -45,6 +46,7 @@ beforeEach(() => {
   useCaretUIStore.setState({ view: "chat" });
   useCaretSettingsStore.setState({ voiceEnabled: false, mode: "ask" });
   memoryClient.listChats.mockResolvedValue({ chats: [] });
+  memoryClient.listProjects.mockResolvedValue({ projects: [] });
   memoryClient.getChatMessages.mockImplementation(
     () =>
       new Promise((resolve) => {
@@ -63,6 +65,57 @@ beforeEach(() => {
   useCaretStore.getState().open();
 });
 
+afterEach(() => vi.unstubAllGlobals());
+
+describe("CaretPanel new chats", () => {
+  it.each([
+    { view: "chat" as const, projectId: null },
+    { view: "history" as const, projectId: "project-123" },
+  ])(
+    "creates a sendable chat from the $view button and preserves its project",
+    async ({ view, projectId }) => {
+      useCaretStore.getState().newTab({ projectId });
+      useCaretUIStore.getState().setView(view);
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            'data: {"type":"session","sessionId":"new-session"}\n\ndata: {"type":"text_delta","messageId":"reply","delta":"Hello there."}\n\ndata: {"type":"done"}\n\n',
+            { headers: { "Content-Type": "text/event-stream" } },
+          ),
+        );
+      vi.stubGlobal("fetch", fetchMock);
+      renderPanel();
+
+      fireEvent.click(
+        view === "chat"
+          ? screen.getByLabelText("New chat")
+          : screen.getByRole("button", { name: "New chat" }),
+      );
+      fireEvent.change(screen.getByLabelText("Message Caret"), {
+        target: { value: "Hello" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+
+      await waitFor(() =>
+        expect(screen.getByText("Hello there.")).not.toBeNull(),
+      );
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const request = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(request.project_id).toBe(projectId ?? "");
+      const persisted = JSON.parse(
+        localStorage.getItem("caret-session") ?? "{}",
+      );
+      expect(
+        persisted.state.tabs.find(
+          (tab: { sessionId: string | null }) =>
+            tab.sessionId === "new-session",
+        ).projectId,
+      ).toBe(projectId);
+    },
+  );
+});
+
 describe("CaretPanel history loading", () => {
   it("keeps a closed panel out of keyboard navigation and focuses the composer when opened", () => {
     useCaretStore.getState().close();
@@ -71,9 +124,13 @@ describe("CaretPanel history loading", () => {
     button.focus();
     renderPanel();
     expect(document.activeElement).toBe(button);
-    expect(screen.queryByRole("complementary", { name: "Caret AI assistant" })).toBeNull();
+    expect(
+      screen.queryByRole("complementary", { name: "Caret AI assistant" }),
+    ).toBeNull();
     act(() => useCaretStore.getState().open());
-    expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Message Caret" }));
+    expect(document.activeElement).toBe(
+      screen.getByRole("textbox", { name: "Message Caret" }),
+    );
   });
   it("keeps a prompt sent while the history request is in flight", async () => {
     renderPanel();
