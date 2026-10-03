@@ -9,9 +9,10 @@ import (
 // ownership-checked server adapter, never from client identity fields.
 func BuildAssistantPrompt(request, scope, context string, pageContext map[string]any, now time.Time) string {
 	var catalog strings.Builder
-	tools := PromptToolsForMode(ModeAgent)
+	plannerContext := BuildRequestSystemContext(scope, pageContext)
+	tools := PromptToolsForRequest(ModeAgent, request, plannerContext)
 	seen := map[string]bool{}
-	for _, name := range []string{"web.search", "account.profile", "utilities.calculate", "utilities.time"} {
+	for _, name := range []string{"account.profile", "utilities.calculate", "utilities.time"} {
 		if tool, ok := ToolByName(name); ok {
 			tools = append(tools, tool)
 		}
@@ -26,7 +27,7 @@ func BuildAssistantPrompt(request, scope, context string, pageContext map[string
 	return strings.TrimSpace(strings.NewReplacer(
 		"{{TODAY}}", now.Format(time.RFC3339),
 		"{{TOOLS}}", catalog.String(),
-		"{{SCOPE}}", escapeCaretPromptData(BuildRequestSystemContext(scope, pageContext)),
+		"{{SCOPE}}", escapeCaretPromptData(plannerContext),
 		"{{CONTEXT}}", escapeCaretPromptData(TruncateUTF8ToBytes(context, 32000)),
 		"{{REQUEST}}", escapeCaretPromptData(SanitizeUserInput(request, MaxUserPromptLen)),
 	).Replace(assistantPromptTemplate))

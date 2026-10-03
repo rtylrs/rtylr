@@ -401,6 +401,11 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		// builder shortlisted as executable.
 		return nil
 	}
+	if call.Name == "web.search" {
+		if answer, ok := output["answer"].(string); ok {
+			output["answer"] = removeCaretEmDashes(answer)
+		}
+	}
 
 	summary := summarizeToolResult(call.Name, call.Input, output, "success", "")
 	r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: "success", Summary: summary, Output: output})

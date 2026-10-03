@@ -33,6 +33,7 @@ var promptToolModuleKeywords = map[string][]string{
 	"pos":     {"pos", "order", "terminal", "register", "floor", "table", "menu", "modifier", "session", "cash", "branch", "refund", "sale"},
 	"store":   {"store", "storefront", "ecommerce", "online", "website", "catalog", "slug"},
 	"support": {"support", "ticket", "inbox", "canned", "article", "knowledge", "kb", "help", "unread"},
+	"web":     {"web", "internet", "search", "online", "research", "news", "source", "sources"},
 }
 
 var promptToolActionKeywords = map[string][]string{
@@ -124,7 +125,7 @@ func promptToolScoreForPlan(tool ToolDef, plan CaretRequestPlan) int {
 		}
 	}
 	module := map[string]string{
-		"booking": "booking", "customer": "crm", "finance": "finance", "flow": "flow", "hr": "hr", "inventory": "erp", "loyalty": "loyalty", "pos": "pos", "store": "store", "support": "support",
+		"booking": "booking", "customer": "crm", "finance": "finance", "flow": "flow", "hr": "hr", "inventory": "erp", "loyalty": "loyalty", "pos": "pos", "store": "store", "support": "support", "web": "web",
 	}[plan.Domain]
 	if module != "" && strings.EqualFold(module, tool.Module) {
 		score += 280
