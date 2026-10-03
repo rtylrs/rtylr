@@ -4,6 +4,7 @@ import { motion, type Variants } from 'motion/react';
 import { Clock, Receipt, ArrowLeftRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useCashFlow,
   useExpensesByCategory,
@@ -75,7 +76,7 @@ const Financial: React.FC = (): React.JSX.Element => {
               icon={Receipt}
               title={t('insights.financial.emptyExpenses.title')}
               description={t('insights.financial.emptyExpenses.description')}
-              action={{ label: t('common.refresh'), onClick: () => refetchExpenses() }}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchExpenses())}
               size="compact"
             />
           ) : (
@@ -120,7 +121,7 @@ const Financial: React.FC = (): React.JSX.Element => {
               icon={Clock}
               title={t('insights.financial.emptyAging.title')}
               description={t('insights.financial.emptyAging.description')}
-              action={{ label: t('common.refresh'), onClick: () => refetchAging() }}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchAging())}
               size="compact"
             />
           ) : (
@@ -171,7 +172,7 @@ const Financial: React.FC = (): React.JSX.Element => {
             icon={ArrowLeftRight}
             title={t('insights.financial.emptyCashFlow.title')}
             description={t('insights.financial.emptyCashFlow.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetch() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetch())}
           />
         ) : (
           <div className="space-y-1">

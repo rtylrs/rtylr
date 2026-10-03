@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Bar } from 'react-chartjs-2';
 import type { ChartOptions } from 'chart.js';
 import { EmptyState } from '@voxire/ui';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useCustomerKPIs,
   useTopCustomers,
@@ -200,7 +201,7 @@ const Customers: React.FC = (): React.JSX.Element => {
             icon={Users}
             title={t('insights.customers.emptyTop.title')}
             description={t('insights.customers.emptyTop.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchTop() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchTop())}
           />
         ) : (
           <div
@@ -231,7 +232,7 @@ const Customers: React.FC = (): React.JSX.Element => {
             icon={DollarSign}
             title={t('insights.customers.emptyLtv.title')}
             description={t('insights.customers.emptyLtv.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchLtv() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchLtv())}
           />
         ) : (
           <div className="space-y-1">
@@ -275,7 +276,7 @@ const Customers: React.FC = (): React.JSX.Element => {
             icon={UserMinus}
             title={t('insights.customers.emptyChurn.title')}
             description={t('insights.customers.emptyChurn.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchChurn() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchChurn())}
           />
         ) : (
           <div className="space-y-1">

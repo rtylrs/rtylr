@@ -4,6 +4,7 @@ import { motion, type Variants } from 'motion/react';
 import { Users, Calendar, Clock, Activity, Gauge } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useOperationsKPIs,
   useHeadcount,
@@ -143,7 +144,7 @@ const Operations: React.FC = (): React.JSX.Element => {
               icon={Users}
               title={t('insights.operations.emptyHeadcount.title')}
               description={t('insights.operations.emptyHeadcount.description')}
-              action={{ label: t('common.refresh'), onClick: () => refetchHeadcount() }}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchHeadcount())}
               size="compact"
             />
           ) : (
@@ -180,7 +181,7 @@ const Operations: React.FC = (): React.JSX.Element => {
               icon={Gauge}
               title={t('insights.operations.emptyUtilization.title')}
               description={t('insights.operations.emptyUtilization.description')}
-              action={{ label: t('common.refresh'), onClick: () => refetchUtilization() }}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchUtilization())}
               size="compact"
             />
           ) : (
@@ -211,7 +212,7 @@ const Operations: React.FC = (): React.JSX.Element => {
               icon={Calendar}
               title={t('insights.operations.emptyShifts.title')}
               description={t('insights.operations.emptyShifts.description')}
-              action={{ label: t('common.refresh'), onClick: () => refetchShifts() }}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchShifts())}
               size="compact"
             />
           ) : (
@@ -259,7 +260,7 @@ const Operations: React.FC = (): React.JSX.Element => {
               icon={Clock}
               title={t('insights.operations.emptyTimeOff.title')}
               description={t('insights.operations.emptyTimeOff.description')}
-              action={{ label: t('common.refresh'), onClick: () => refetchTimeOff() }}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchTimeOff())}
               size="compact"
             />
           ) : (

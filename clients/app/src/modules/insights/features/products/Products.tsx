@@ -4,6 +4,7 @@ import { motion, type Variants } from 'motion/react';
 import { Package, TrendingDown, BarChart3, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useProductKPIs,
   useBestSellers,
@@ -167,7 +168,7 @@ const Products: React.FC = (): React.JSX.Element => {
             icon={Package}
             title={t('insights.products.emptyBestSellers.title')}
             description={t('insights.products.emptyBestSellers.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchBest() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchBest())}
           />
         ) : (
           <div className="space-y-1">
@@ -225,7 +226,7 @@ const Products: React.FC = (): React.JSX.Element => {
             icon={BarChart3}
             title={t('insights.products.emptyMargins.title')}
             description={t('insights.products.emptyMargins.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchMargins() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchMargins())}
           />
         ) : (
           <div className="space-y-1">
@@ -269,7 +270,7 @@ const Products: React.FC = (): React.JSX.Element => {
             icon={TrendingDown}
             title={t('insights.products.emptySlowMovers.title')}
             description={t('insights.products.emptySlowMovers.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchSlow() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchSlow())}
           />
         ) : (
           <div className="space-y-1">
@@ -310,7 +311,7 @@ const Products: React.FC = (): React.JSX.Element => {
             icon={Layers}
             title={t('insights.products.emptyCategoryMix.title')}
             description={t('insights.products.emptyCategoryMix.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchCategories() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchCategories())}
           />
         ) : (
           <div className="space-y-1">

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Line, Bar } from 'react-chartjs-2';
 import type { ChartOptions } from 'chart.js';
 import { EmptyState } from '@voxire/ui';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useRevenueSeries,
   useRevenueByApp,
@@ -260,7 +261,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
             icon={TrendingUp}
             title={t('insights.revenue.emptyTrend.title')}
             description={t('insights.revenue.emptyTrend.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetch() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetch())}
           />
         ) : (
           <div style={{ height: 220 }} aria-label={t('insights.charts.revenueTrend')}>
@@ -284,7 +285,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
             icon={PieChart}
             title={t('insights.revenue.emptyByApp.title')}
             description={t('insights.revenue.emptyByApp.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetchByApp() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetchByApp())}
           />
         ) : (
           <div style={{ height: 180 }} aria-label={t('insights.charts.revenueByApp')}>
