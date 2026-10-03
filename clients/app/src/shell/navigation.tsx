@@ -27,7 +27,6 @@ import {
   ErpIcon,
   FinanceIcon,
   HrIcon,
-  PosIcon,
   RecruitIcon,
 } from '@voxire/ui';
 import type { ComponentType } from 'react';
@@ -64,7 +63,6 @@ export const settingsNavItems: PortalNavItem[] = [
   { key: 'billing', path: '/settings/billing', icon: CreditCard, section: 'business' },
   { key: 'apiKeys', path: '/api-keys', icon: KeyRound, section: 'business' },
   { key: 'webhooks', path: '/webhooks', icon: Webhook, section: 'business' },
-  { key: 'posSettings', path: '/settings/pos', icon: PosIcon, section: 'apps' },
   { key: 'recruitSettings', path: '/settings/recruit', icon: RecruitIcon, section: 'apps' },
   {
     key: 'hrPayrollSettings',
@@ -112,7 +110,6 @@ export function PortalNavLink({
     path === '/erp' ||
     path === '/finance' ||
     path === '/hr' ||
-    path === '/pos' ||
     path === '/crm/sales' ||
     path === '/settings' ||
     path === '/automations'

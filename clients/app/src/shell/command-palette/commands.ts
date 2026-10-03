@@ -1,6 +1,5 @@
 import { financeNavItems } from '../../modules/finance/navigation';
 import { hrNavItems } from '../../modules/hr/navigation';
-import { posNavItems } from '../../modules/pos/navigation';
 import { recruitNavItems } from '../../modules/recruit/navigation';
 import { Workflow } from 'lucide-react';
 import { CaretIcon } from '@voxire/caret';
@@ -27,7 +26,6 @@ export const COMMAND_GROUPS = [
   'erp',
   'finance',
   'hr',
-  'pos',
   'recruit',
   'projects',
   'tasks',
@@ -88,7 +86,7 @@ export function getPortalCommands(
               ? { path: '/crm' }
               : id === 'flow'
                 ? { path: '/flow' }
-                : ['finance', 'hr', 'pos', 'recruit'].includes(id)
+                : ['finance', 'hr', 'recruit'].includes(id)
                   ? { path: `/${id}` }
                   : { href: resolveAppUrl(id) },
     });
@@ -125,7 +123,6 @@ export function getPortalCommands(
   );
   addPages([...financeNavItems], 'finance', 'financeNav');
   addPages([...hrNavItems], 'hr', 'hrNav');
-  addPages([...posNavItems], 'pos', 'posNav');
   addPages([...recruitNavItems], 'recruit', 'recruitAdmin.nav');
   addPages([...erpNavItems], 'erp', 'erpNav');
   addPages([...crmNavItems], 'crm', 'crmNav');

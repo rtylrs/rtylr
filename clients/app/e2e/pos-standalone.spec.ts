@@ -1,8 +1,8 @@
 import { test, expect } from './fixtures';
-import { stubPortalSession, PORTAL_URL } from './portal-session';
+import { stubPortalSession } from './portal-session';
 
 for (const isOwner of [true, false]) {
-  test(`Portal POS ${isOwner ? 'owner' : 'member'} requires terminal and PIN, then preserves the cart on navigation`, async ({
+  test(`Standalone POS ${isOwner ? 'owner' : 'member'} requires terminal and PIN, then preserves the cart on navigation`, async ({
     page,
     context,
   }) => {
@@ -94,7 +94,7 @@ for (const isOwner of [true, false]) {
     await page.route('http://localhost:9999/pos/stock/v1/low-stock**', (r) =>
       r.fulfill({ json: { items: [] } })
     );
-    await page.goto(`${PORTAL_URL}/pos`);
+    await page.goto('http://localhost:5178');
     await page.getByRole('button', { name: /Register A/ }).click();
     await page.getByRole('button', { name: /Sam Cashier/ }).click();
     expect(authorized).toBe(false);
@@ -104,16 +104,14 @@ for (const isOwner of [true, false]) {
     expect(authorized).toBe(true);
     await page.getByRole('button', { name: /Migration Coffee/ }).click();
     await expect(page.getByRole('button', { name: /Charge/ })).toBeEnabled();
-    const apps = page.getByRole('navigation', { name: 'Apps', exact: true });
-    await apps.getByRole('link', { name: 'POS', exact: true }).click();
-    await expect(page.getByRole('button', { name: /Charge/ })).toBeEnabled();
+    await page.keyboard.press('Control+k');
+    await page.keyboard.press('Escape');
     await page.reload();
     await expect(page.getByRole('button', { name: /Charge/ })).toBeEnabled();
-    await expect(
-      page
-        .getByRole('navigation', { name: 'Home navigation' })
-        .getByRole('link', { name: 'Tables' })
-    ).toHaveCount(0);
+    await expect(page.locator('.portal-shell')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Tables', exact: true })).toHaveCount(0);
+    await page.goto('http://localhost:5178/settings');
+    await expect(page.getByRole('button', { name: 'Save Business Settings' })).toBeVisible();
   });
 }
 
@@ -122,6 +120,32 @@ test('direct POS settings load the saved configuration before saving', async ({
   context,
 }) => {
   await stubPortalSession(page, context, { isOwner: true, appIds: ['pos'] });
+  await page.route('http://localhost:9999/common/oauth/v1/me', (r) =>
+    r.fulfill({ json: { user_id: '1' } })
+  );
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'pos-terminal-context',
+      JSON.stringify({ state: { locationId: 10, terminalId: 20 }, version: 0 })
+    );
+    localStorage.setItem(
+      'employee-session',
+      JSON.stringify({
+        state: {
+          isActive: true,
+          employee: {
+            id: '1',
+            posUserId: '11',
+            locationId: 10,
+            name: 'Sam Cashier',
+            role: 'cashier',
+            capabilities: {},
+          },
+        },
+        version: 0,
+      })
+    );
+  });
   await page.route('http://localhost:9999/pos/settings/v1/settings', (route) => {
     if (route.request().method() === 'PUT') {
       expect(route.request().postDataJSON()).toMatchObject({
@@ -140,9 +164,11 @@ test('direct POS settings load the saved configuration before saving', async ({
       },
     });
   });
-  await page.goto(`${PORTAL_URL}/settings/pos`);
-  await expect(page.locator('textarea')).toHaveValue('Saved receipt');
-  await page.locator('textarea').fill('Updated receipt');
+  await page.goto('http://localhost:5178/settings');
+  await expect(page.locator('textarea:not([aria-label="Message Caret"])')).toHaveValue(
+    'Saved receipt'
+  );
+  await page.locator('textarea:not([aria-label="Message Caret"])').fill('Updated receipt');
   const save = page.waitForRequest(
     (r) => r.method() === 'PUT' && r.url().endsWith('/pos/settings/v1/settings')
   );
@@ -156,6 +182,32 @@ test('POS settings failures show an error and retry without exposing defaults', 
   context,
 }) => {
   await stubPortalSession(page, context, { isOwner: true, appIds: ['pos'] });
+  await page.route('http://localhost:9999/common/oauth/v1/me', (r) =>
+    r.fulfill({ json: { user_id: '1' } })
+  );
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'pos-terminal-context',
+      JSON.stringify({ state: { locationId: 10, terminalId: 20 }, version: 0 })
+    );
+    localStorage.setItem(
+      'employee-session',
+      JSON.stringify({
+        state: {
+          isActive: true,
+          employee: {
+            id: '1',
+            posUserId: '11',
+            locationId: 10,
+            name: 'Sam Cashier',
+            role: 'cashier',
+            capabilities: {},
+          },
+        },
+        version: 0,
+      })
+    );
+  });
   let fail = true;
   await page.route('http://localhost:9999/pos/settings/v1/settings', (r) =>
     fail
@@ -164,10 +216,12 @@ test('POS settings failures show an error and retry without exposing defaults', 
           json: { settings: { business_profile: 'retail', receipt_footer: 'Recovered receipt' } },
         })
   );
-  await page.goto(`${PORTAL_URL}/settings/pos`);
+  await page.goto('http://localhost:5178/settings');
   await expect(page.getByText('Something went wrong', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Save Business Settings' })).toHaveCount(0);
   fail = false;
   await page.getByRole('button', { name: 'Try again', exact: true }).click();
-  await expect(page.locator('textarea')).toHaveValue('Recovered receipt');
+  await expect(page.locator('textarea:not([aria-label="Message Caret"])')).toHaveValue(
+    'Recovered receipt'
+  );
 });

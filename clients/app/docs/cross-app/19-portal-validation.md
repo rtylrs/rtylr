@@ -69,3 +69,11 @@ The existing validator checks only the recorded operation set. Its success must
 not be reported as coverage of every canonical permission. Cross-app refresh
 checks must include warm caches, business switching, and separate sessions;
 sharing a database does not automatically keep every UI synchronized.
+
+## Standalone POS and Caret follow-up
+
+POS remains a separate web/native app at `clients/pos`, launched from Home or the command launcher at `pos.rtylr.com`. Portal no longer imports the POS runtime or exposes POS settings. Legacy `/pos` bookmarks redirect to POS. Menu and Recruit do not appear in the app rail; their Portal administration remains available.
+
+The local Portal preview proxy was targeting `api.rtylr.com` (Cloudflare 530); switching it to `api.voxire.com` restores its health request. This is a local process configuration correction, not a production deployment.
+
+AWS-configured provider tests use synthetic prompts and the local MySQL fixture database. The retired NVIDIA Llama 3.1 endpoint returns 410; Gemini fallback completed and its answer reloaded successfully. NVIDIA Nemotron 3.5 Lightning completed, persisted and reloaded without fallback after the provider change. Cached replies now persist before the completion event, with database regression coverage. These checks do not establish that the earlier production persistence error is resolved: no matching error was available in retained CloudWatch logs, and an authenticated production chat still needs verification after release.

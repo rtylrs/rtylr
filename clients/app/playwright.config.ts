@@ -79,6 +79,13 @@ export default defineConfig({
 
   webServer: [
     {
+      command: 'pnpm -C ../pos dev',
+      url: 'http://localhost:5178',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    {
       command: 'pnpm dev --port 5197',
       url: 'http://localhost:5197',
       env: { VITE_API_URL: 'http://localhost:9999/', VITE_API_BASE_URL: 'http://localhost:9999/' },

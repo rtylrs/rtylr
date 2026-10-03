@@ -115,6 +115,10 @@ func (c *OpenAIProvider) chatParams(prompt string, stream bool, opts CompletionO
 			openai.UserMessage(prompt),
 		},
 	}
+	if c.name == "nvidia" {
+		// Reserve the output budget for the visible answer, not model reasoning.
+		req.SetExtraFields(map[string]any{"chat_template_kwargs": map[string]any{"enable_thinking": false}})
+	}
 	if opts.Temperature != nil {
 		req.Temperature = openai.Float(*opts.Temperature)
 	}

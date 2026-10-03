@@ -37,11 +37,11 @@ rejected. The existing `.rtylr.com` auth cookie spans SSO and Portal.
 
 ## Business modules and public entrypoints
 
-All business modules now render inside Portal. Finance, HR, web POS and Recruit administration use `/finance`, `/hr`, `/pos` and `/recruit`. Home includes Menu management. Each module registers its page navigation and settings beneath `/settings`.
+The migrated business modules render inside Portal. Finance, HR and Recruit administration use `/finance`, `/hr` and `/recruit`. POS is a separate web and native app at `clients/pos`, launched at `pos.rtylr.com`. Home includes Menu management. Each module registers its page navigation and settings beneath `/settings`.
 
-`clients/app` is the single web package. `entrypoints/auth`, `entrypoints/menu` and `entrypoints/recruit` preserve SSO and public-site URLs as separate builds without separate workspace packages. Native POS remains at `clients/pos`, and MCP is at `clients/mcp`.
+`clients/app` owns the Portal and public web entrypoints. `entrypoints/auth`, `entrypoints/menu` and `entrypoints/recruit` preserve SSO and public-site URLs as separate builds without separate workspace packages. POS remains at `clients/pos`, and MCP is at `clients/mcp`.
 
-POS reuses the native React components through a route adapter. Its local cart, terminal, employee session and offline queues are partitioned by the selected business. Native storage is preserved. The adapter does not bypass location selection or employee PIN authentication. Finance browser preferences are also partitioned by business; they are local preferences rather than server-backed business configuration.
+POS owns its terminal shell, settings, location selection, employee PIN authentication, cart and offline queues. Portal Home and the command launcher link to the standalone POS origin. Old Portal `/pos` bookmarks redirect to that origin; POS settings remain in POS. Menu and Recruit have no app-rail icons. Finance browser preferences are also partitioned by business; they are local preferences rather than server-backed business configuration.
 
 Query keys are prefixed by app. Portal refreshes the account authorization snapshot before rendering, and business selection reloads the workspace to clear old query state. Backend handlers remain authoritative for permissions.
 
@@ -52,7 +52,7 @@ Query keys are prefixed by app. Portal refreshes the account authorization snaps
 3. Enable the Dash-to-Portal and Insights-to-Portal edge rules, then retire their
    standalone deployment manifests. Insights deep links map beneath `/insights`.
    Flow moves with the same order: deploy Portal first, redirect Flow links beneath
-   `/flow`, then retire its Pages project and deployment manifest. CRM, ERP, Finance, HR and web POS follow the same sequence with their route prefixes. Recruit keeps its public host; old `/admin` links redirect into Portal.
+   `/flow`, then retire its Pages project and deployment manifest. CRM, ERP, Finance and HR follow the same sequence with their route prefixes. POS keeps its own Pages project, host and deployment manifest. Recruit keeps its public host; old `/admin` links redirect into Portal.
 4. Promote Auth and shared-URL consumers, including Onion's generated email links.
 
 Do not activate the Dash redirect before Portal is deployed and reachable.

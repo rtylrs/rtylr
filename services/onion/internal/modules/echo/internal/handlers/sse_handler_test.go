@@ -72,18 +72,23 @@ func TestStreamDirectResponsePersistsBeforeDoneEvent(t *testing.T) {
 	}
 }
 
-func TestCachedReplayDoesNotPersistAssistantHistory(t *testing.T) {
+func TestCachedReplayPersistsBeforeCompletion(t *testing.T) {
 	memory := &detachedMemoryFake{}
 	handler := &GenerateTextStreamHandler{MemoryService: memory}
 	rec := httptest.NewRecorder()
+	memory.storeHook = func() {
+		if strings.Contains(rec.Body.String(), `"type":"done"`) {
+			t.Fatal("cache reply completed before persistence")
+		}
+	}
 	handler.streamCachedResponse(
 		context.Background(), rec, make(chan bool),
 		&GenerateTextStreamRequest{SessionID: "session-1", UserID: 7},
 		aicache.ExactResponse{Response: "cached answer", Provider: "test"},
 		cacheWritePlan{Key: "cache-key", Mode: string(ModeAsk)}, 1, 7,
 	)
-	if memory.storeCalls != 0 {
-		t.Fatalf("cache replay StoreMessage calls = %d, want 0", memory.storeCalls)
+	if memory.storeCalls != 1 || memory.storedContent != "cached answer" {
+		t.Fatalf("cache replay did not store its answer: calls=%d content=%q", memory.storeCalls, memory.storedContent)
 	}
 }
 
@@ -220,5 +225,19 @@ func TestDrainProviderStreamReportsPrematureClosure(t *testing.T) {
 	events := decodeSSEEvents(t, rec.Body.String())
 	if len(events) != 1 || events[0].Type != EventError || events[0].Error != unexpectedStreamClosureError {
 		t.Fatalf("unexpected SSE events: %#v", events)
+	}
+}
+
+type failingReplayMemory struct{ detachedMemoryFake }
+
+func (m *failingReplayMemory) StoreMessage(context.Context, string, int, string, string, int) (any, error) {
+	return nil, errors.New("fixture persistence failure")
+}
+func TestCachedReplayReportsPersistenceFailureWithoutCompletion(t *testing.T) {
+	h := &GenerateTextStreamHandler{MemoryService: &failingReplayMemory{}}
+	rec := httptest.NewRecorder()
+	h.streamCachedResponse(context.Background(), rec, make(chan bool), &GenerateTextStreamRequest{SessionID: "fixture", UserID: 7}, aicache.ExactResponse{Response: "saved reply"}, cacheWritePlan{}, 1, 7)
+	if !strings.Contains(rec.Body.String(), "Failed to persist response") || strings.Contains(rec.Body.String(), `"type":"done"`) {
+		t.Fatalf("invalid persistence acknowledgement: %s", rec.Body.String())
 	}
 }

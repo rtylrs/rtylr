@@ -137,8 +137,7 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 		}
 	}()
 
-	// Keep the logger scope (trace ids) but apply a fresh, time-bounded
-	// cancellation to the detached context.
+	// Bound storage while preserving request cancellation and trace context.
 	storeCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
@@ -155,7 +154,7 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 	}
 	defer h.releaseSessionSummary(sessionID)
 
-	// Keep the detached context and trace ids while bounding summarization.
+	// Bound summarization within the same request.
 	bg, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	if summarizeErr := h.MemoryService.SummarizeSession(bg, sessionID, userID); summarizeErr != nil {

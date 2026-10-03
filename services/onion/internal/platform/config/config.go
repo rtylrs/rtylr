@@ -53,7 +53,7 @@ const (
 	// #nosec G101 -- This is an environment variable name, not a secret value.
 	NvidiaNIMAPIKeyEnvVar = "NVIDIA_NIM_API_KEY"
 	NvidiaNIMBaseURL      = "https://integrate.api.nvidia.com/v1"
-	NvidiaNIMModel        = "meta/llama-3.1-8b-instruct"
+	NvidiaNIMModel        = "nvidia/nemotron-3.5-lightning-30b-a3b"
 
 	// AIPrimaryProviderEnvVar optionally forces which configured provider is
 	// primary ("deepseek" | "nvidia"). Empty = use the default priority order.
