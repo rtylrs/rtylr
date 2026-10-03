@@ -6,7 +6,7 @@ import '../modules/hr/hr.css';
 import { useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { resolveApiBase } from '@voxire/config';
+import { resolveApiBase, resolveAppUrl } from '@voxire/config';
 import { useMediaQuery } from '@voxire/utils';
 import { PanelLeft, Search, Bell, Settings, Workflow, Plus, X } from 'lucide-react';
 import {
@@ -17,6 +17,7 @@ import {
   ErpIcon,
   FinanceIcon,
   HrIcon,
+  PosIcon,
 } from '@voxire/ui';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
@@ -482,6 +483,22 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             >
               <HrIcon size={21} />
             </Link>
+          </Tooltip>
+        )}
+        {apps?.includes('pos') && (
+          <Tooltip
+            content={t('appNames.short.pos')}
+            side={i18n.dir() === 'rtl' ? 'left' : 'right'}
+            focusable={false}
+            contentClassName="portal-rail-tooltip"
+          >
+            <a
+              href={resolveAppUrl('pos')}
+              className="portal-rail-button"
+              aria-label={t('appNames.short.pos')}
+            >
+              <PosIcon size={21} />
+            </a>
           </Tooltip>
         )}
         {canAccessPortalPath(user, '/automations') && (

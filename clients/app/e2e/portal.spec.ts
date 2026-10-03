@@ -46,6 +46,7 @@ test.describe('Portal Home', () => {
       '/insights'
     );
     await expect(page.getByRole('link', { name: /Open Flow/ })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'POS', exact: true })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Team', exact: true })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Groups', exact: true })).toHaveCount(0);
     await page.goto(`${PORTAL_URL}/team`);
@@ -84,9 +85,13 @@ test('Home keeps POS separate and excludes Menu and Recruit from the app rail', 
   const homeApps = page.locator('.portal-home-app-grid');
   await expect(homeApps.locator('a[href="http://localhost:5178"]')).toBeVisible();
   const rail = page.getByRole('navigation', { name: 'Apps', exact: true });
-  for (const name of ['Menu', 'Recruit', 'POS']) {
+  for (const name of ['Menu', 'Recruit']) {
     await expect(rail.getByRole('link', { name, exact: true })).toHaveCount(0);
   }
+  await expect(rail.getByRole('link', { name: 'POS', exact: true })).toHaveAttribute(
+    'href',
+    'http://localhost:5178'
+  );
   for (const id of ['finance', 'hr', 'recruit']) {
     const link = homeApps.locator(`a[href="/${id}"]`);
     await expect(link).toBeVisible();
@@ -102,6 +107,8 @@ test('Home keeps POS separate and excludes Menu and Recruit from the app rail', 
   await expect(pos).toHaveURL('http://localhost:5178/');
   await expect(page).toHaveURL(`${PORTAL_URL}/`);
   await pos.close();
+  await rail.getByRole('link', { name: 'POS', exact: true }).click();
+  await expect(page).toHaveURL('http://localhost:5178/');
 });
 
 test('old Portal POS bookmarks redirect to the standalone app with query and fragment', async ({

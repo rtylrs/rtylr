@@ -41,7 +41,7 @@ The migrated business modules render inside Portal. Finance, HR and Recruit admi
 
 `clients/app` owns the Portal and public web entrypoints. `entrypoints/auth`, `entrypoints/menu` and `entrypoints/recruit` preserve SSO and public-site URLs as separate builds without separate workspace packages. POS remains at `clients/pos`, and MCP is at `clients/mcp`.
 
-POS owns its terminal shell, settings, location selection, employee PIN authentication, cart and offline queues. Portal Home and the command launcher link to the standalone POS origin. Old Portal `/pos` bookmarks redirect to that origin; POS settings remain in POS. Menu and Recruit have no app-rail icons. Finance browser preferences are also partitioned by business; they are local preferences rather than server-backed business configuration.
+POS owns its terminal shell, settings, location selection, employee PIN authentication, cart and offline queues. The POS app-rail icon, Portal Home and the command launcher link to the standalone POS origin when the member has licensed POS access. Old Portal `/pos` bookmarks redirect to that origin; POS settings remain in POS. Menu and Recruit have no app-rail icons. Finance browser preferences are also partitioned by business; they are local preferences rather than server-backed business configuration.
 
 Query keys are prefixed by app. Portal refreshes the account authorization snapshot before rendering, and business selection reloads the workspace to clear old query state. Backend handlers remain authoritative for permissions.
 
