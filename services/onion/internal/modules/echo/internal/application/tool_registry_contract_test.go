@@ -17,3 +17,11 @@ func TestToolLookupNormalizesWhitespace(t *testing.T) {
 		t.Fatalf("normalized lookup = %#v, %v", tool, ok)
 	}
 }
+
+func TestEveryWriteToolRequiresApproval(t *testing.T) {
+	for _, tool := range CoreTools {
+		if tool.Scope == "write" && !tool.RequiresApproval {
+			t.Errorf("write tool %q must require approval", tool.Name)
+		}
+	}
+}

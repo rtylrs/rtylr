@@ -19,3 +19,10 @@ message ListCaretToolsRequest {
 message ListCaretToolsResponse {
   tools: CaretTool[]
 }
+
+/// Image inputs accepted by the authenticated Caret SSE endpoint. At most four
+/// raster images, two MiB combined; SVG and remote URLs are not accepted.
+message CaretImageInput {
+ name: string
+ data_url: string
+}

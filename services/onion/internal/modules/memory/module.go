@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/snips"
 	hubmemoryv1 "github.com/voxire/voxie/gen/go/hub/memory/v1"
 )
 
@@ -99,4 +100,19 @@ func (m *Module) EnsureSessionOwnership(ctx context.Context, sessionID string, u
 
 func (m *Module) SummarizeSession(ctx context.Context, sessionID string, userID int) error {
 	return m.memoryService.SummarizeSession(ctx, sessionID, userID)
+}
+
+func (m *Module) AssistantContext(ctx context.Context, session string, userID int, projectID string) (string, error) {
+	return m.memoryService.AssistantContext(ctx, session, userID, projectID)
+}
+
+func (m *Module) GetAssistantProfile(ctx context.Context) (string, error) {
+	return m.memoryService.GetAssistantProfile(ctx)
+}
+
+func (m *Module) ValidateProjectSelection(ctx context.Context, session, project string, userID int) error {
+	return m.memoryService.ValidateProjectSelection(ctx, session, project, userID)
+}
+func (m *Module) StoreMessageWithImages(ctx context.Context, session string, userID int, role, content string, tokens int, images []snips.ImageInput) (any, error) {
+	return m.memoryService.StoreMessageWithImages(ctx, session, userID, role, content, tokens, images)
 }

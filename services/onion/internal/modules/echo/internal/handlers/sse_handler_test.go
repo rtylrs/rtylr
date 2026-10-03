@@ -92,6 +92,41 @@ func TestCachedReplayPersistsBeforeCompletion(t *testing.T) {
 	}
 }
 
+func TestGroundedSearchIsStreamedWithItsSuggestionsButNotStoredAsChatAnswer(t *testing.T) {
+	memory := &detachedMemoryFake{}
+	handler := &GenerateTextStreamHandler{
+		MemoryService: memory,
+		ToolExecutors: []ToolExecutor{fakeToolExecutor{
+			executed: true,
+			output: map[string]any{
+				"answer":                  "A grounded answer.",
+				"sources":                 []map[string]string{{"title": "Source", "url": "https://example.com/source"}},
+				"search_suggestions_html": `<div><a href="https://www.google.com/search?q=next">Related search</a></div>`,
+			},
+		}},
+	}
+	rec := httptest.NewRecorder()
+	tokens := make(chan snips.StreamToken, 2)
+	tokens <- snips.StreamToken{Text: `<tool>{"name":"web.search","input":{"query":"public query"}}</tool>`}
+	tokens <- snips.StreamToken{Done: true}
+	close(tokens)
+	handler.streamTokensToClient(
+		context.Background(), rec, tokens, make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "session-1", UserID: 7, EnhancedPrompt: "search the web"},
+		1, 7, cacheWritePlan{Mode: string(ModeAgent), ContinuationBudget: 2}, nil,
+	)
+
+	body := rec.Body.String()
+	if memory.storeCalls != 0 {
+		t.Fatalf("grounded web result should not be persisted without its associated search suggestions; stored %d responses", memory.storeCalls)
+	}
+	for _, want := range []string{"A grounded answer.", "Related search", `"type":"done"`} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("stream missing %q: %s", want, body)
+		}
+	}
+}
+
 func TestGenerateTextStreamParseRejectsTrailingJSON(t *testing.T) {
 	handler := &GenerateTextStreamHandler{}
 	req := httptest.NewRequest(
@@ -239,5 +274,28 @@ func TestCachedReplayReportsPersistenceFailureWithoutCompletion(t *testing.T) {
 	h.streamCachedResponse(context.Background(), rec, make(chan bool), &GenerateTextStreamRequest{SessionID: "fixture", UserID: 7}, aicache.ExactResponse{Response: "saved reply"}, cacheWritePlan{}, 1, 7)
 	if !strings.Contains(rec.Body.String(), "Failed to persist response") || strings.Contains(rec.Body.String(), `"type":"done"`) {
 		t.Fatalf("invalid persistence acknowledgement: %s", rec.Body.String())
+	}
+}
+
+func TestEmptyAssistantResponseIsRetryableAndNotPersisted(t *testing.T) {
+	memory := &detachedMemoryFake{}
+	h := &GenerateTextStreamHandler{MemoryService: memory}
+	tokens := make(chan snips.StreamToken, 1)
+	tokens <- snips.StreamToken{Done: true}
+	rec := httptest.NewRecorder()
+
+	h.streamTokensToClient(context.Background(), rec, tokens, make(chan bool), &GenerateTextStreamRequest{
+		SessionID: "session-1", UserID: 7,
+	}, 1, 7, cacheWritePlan{Mode: string(ModeAgent), StartedAt: time.Now()}, nil)
+
+	body := rec.Body.String()
+	if !strings.Contains(body, `"type":"error"`) || !strings.Contains(body, "Please try again") {
+		t.Fatalf("empty completion should produce a retryable stream error, got %q", body)
+	}
+	if strings.Contains(body, "reliable answer from the available business context") {
+		t.Fatalf("empty completion used the misleading business-context fallback: %q", body)
+	}
+	if memory.storeCalls != 0 {
+		t.Fatalf("empty completion persisted a fallback response: %#v", memory.storedContent)
 	}
 }

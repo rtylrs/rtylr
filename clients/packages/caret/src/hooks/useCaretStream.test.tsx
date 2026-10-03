@@ -1,12 +1,15 @@
-import { act, render, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useCaretStream } from './useCaretStream';
-import type { UseCaretStreamParams, UseCaretStreamResult } from './useCaretStream';
-import { useCaretStore } from '../stores/caretStore';
+import { act, render, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useCaretStream } from "./useCaretStream";
+import type {
+  UseCaretStreamParams,
+  UseCaretStreamResult,
+} from "./useCaretStream";
+import { useCaretStore } from "../stores/caretStore";
 
 const params: UseCaretStreamParams = {
   userId: 1,
-  apiBaseUrl: 'http://127.0.0.1:9',
+  apiBaseUrl: "http://127.0.0.1:9",
 };
 
 let api: UseCaretStreamResult | null = null;
@@ -45,22 +48,29 @@ beforeEach(() => {
         streamController = controller;
       },
     });
-    abortSignal?.addEventListener('abort', () => {
-      streamController?.error(new DOMException('The operation was aborted.', 'AbortError'));
+    abortSignal?.addEventListener("abort", () => {
+      streamController?.error(
+        new DOMException("The operation was aborted.", "AbortError"),
+      );
     });
-    return Promise.resolve({ ok: true, status: 200, statusText: 'OK', body } as Response);
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      body,
+    } as Response);
   });
   globalThis.fetch = fetchMock as unknown as typeof fetch;
   resetCaretStore();
 });
 
-describe('useCaretStream', () => {
-  it('stops a stream that was started before the hook remounted', async () => {
+describe("useCaretStream", () => {
+  it("stops a stream that was started before the hook remounted", async () => {
     const first = render(<Harness />);
     const tabId = useCaretStore.getState().activeTabId;
 
     await act(async () => {
-      void api!.sendMessage('Summarize the report');
+      void api!.sendMessage("Summarize the report");
     });
 
     pushSseEvent('{"type":"text_delta","messageId":"m","delta":"Hello"}');
@@ -68,8 +78,8 @@ describe('useCaretStream', () => {
       const assistant = useCaretStore
         .getState()
         .tabs.find((tab) => tab.id === tabId)
-        ?.messages.find((message) => message.role === 'assistant');
-      expect(assistant?.content).toBe('Hello');
+        ?.messages.find((message) => message.role === "assistant");
+      expect(assistant?.content).toBe("Hello");
     });
 
     expect(abortSignal?.aborted).toBe(false);
@@ -82,12 +92,50 @@ describe('useCaretStream', () => {
 
     expect(abortSignal?.aborted).toBe(true);
     await waitFor(() => {
-      const tab = useCaretStore.getState().tabs.find((candidate) => candidate.id === tabId);
+      const tab = useCaretStore
+        .getState()
+        .tabs.find((candidate) => candidate.id === tabId);
       expect(tab?.isStreaming).toBe(false);
     });
 
-    const tab = useCaretStore.getState().tabs.find((candidate) => candidate.id === tabId);
-    const lastAssistant = tab?.messages.find((message) => message.role === 'assistant');
-    expect(lastAssistant?.content).toBe('Hello');
+    const tab = useCaretStore
+      .getState()
+      .tabs.find((candidate) => candidate.id === tabId);
+    const lastAssistant = tab?.messages.find(
+      (message) => message.role === "assistant",
+    );
+    expect(lastAssistant?.content).toBe("Hello");
+  });
+
+  it("keeps an image-preparation error separate from the preceding assistant reply", async () => {
+    const tabId = useCaretStore.getState().activeTabId;
+    useCaretStore.getState().addMessage(
+      {
+        id: "previous-assistant",
+        role: "assistant",
+        blocks: [
+          { id: "previous-text", type: "text", content: "Previous answer." },
+        ],
+        content: "Previous answer.",
+        createdAt: new Date().toISOString(),
+      },
+      tabId,
+    );
+    render(<Harness />);
+
+    await act(async () => {
+      await api!.sendMessage("", undefined, [
+        new File(["markup"], "diagram.svg", { type: "image/svg+xml" }),
+      ]);
+    });
+
+    const messages =
+      useCaretStore.getState().tabs.find((tab) => tab.id === tabId)?.messages ??
+      [];
+    expect(messages[0]?.content).toBe("Previous answer.");
+    expect(messages[1]?.content).toContain(
+      "Caret accepts JPEG, PNG, and WebP images.",
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

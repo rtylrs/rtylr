@@ -1,4 +1,4 @@
-import type { CaretMessage } from './message';
+import type { CaretMessage } from "./message";
 
 export interface CaretChat {
   id: string;
@@ -9,6 +9,7 @@ export interface CaretChat {
   messages: CaretMessage[];
   pinned?: boolean;
   archived?: boolean;
+  projectId?: string;
 }
 
 export interface CaretChatSummary {
@@ -18,4 +19,14 @@ export interface CaretChatSummary {
   updatedAt: string;
   pinned?: boolean;
   archived?: boolean;
+  projectId?: string;
+}
+
+export interface CaretProject {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  context: string;
+  updatedAt: string;
 }

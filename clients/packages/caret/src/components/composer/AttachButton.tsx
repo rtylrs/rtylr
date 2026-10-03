@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
-import { Paperclip } from 'lucide-react';
-import IconButton from '../../ui/IconButton';
-import Tooltip from '../../ui/Tooltip';
+import React, { useRef } from "react";
+import { Paperclip } from "lucide-react";
+import IconButton from "../../ui/IconButton";
+import Tooltip from "../../ui/Tooltip";
 
 export interface AttachButtonProps {
   onFiles?: (files: File[]) => void;
@@ -9,7 +9,10 @@ export interface AttachButtonProps {
 }
 
 /** Attaches files to the composer. Uses a hidden file input. */
-export const AttachButton: React.FC<AttachButtonProps> = ({ onFiles, accept }) => {
+export const AttachButton: React.FC<AttachButtonProps> = ({
+  onFiles,
+  accept = "image/jpeg,image/png,image/webp",
+}) => {
   const ref = useRef<HTMLInputElement>(null);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -17,7 +20,7 @@ export const AttachButton: React.FC<AttachButtonProps> = ({ onFiles, accept }) =
     if (!list) return;
     const files = Array.from(list);
     onFiles?.(files);
-    e.target.value = '';
+    e.target.value = "";
   };
 
   return (
@@ -28,7 +31,7 @@ export const AttachButton: React.FC<AttachButtonProps> = ({ onFiles, accept }) =
         multiple
         accept={accept}
         onChange={onChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
       <Tooltip label="Attach files">
         <IconButton

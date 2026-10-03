@@ -369,6 +369,27 @@
     "loadFailed": "Impossible de charger les conversations enregistrées.",
     "deleteChat": "Supprimer la conversation",
     "pinChat": "Épingler la conversation",
-    "unpinChat": "Désépingler la conversation"
+    "unpinChat": "Désépingler la conversation",
+    "projects": "Projets",
+    "allChats": "Toutes les conversations",
+    "createProject": "Créer un projet",
+    "editProject": "Modifier le projet",
+    "projectName": "Nom du projet",
+    "projectContext": "Contexte partagé du projet",
+    "projectContextHint": "Des notes que Caret peut utiliser dans les conversations de ce projet.",
+    "projectIcon": "Icône",
+    "projectColor": "Couleur",
+    "saveProject": "Enregistrer le projet",
+    "archiveProject": "Archiver le projet",
+    "archiveProjectTitle": "Archiver le projet ?",
+    "archiveProjectMessage": "Ses conversations resteront dans Toutes les conversations et perdront le contexte partagé du projet.",
+    "confirmArchiveProject": "Archiver",
+    "noProjects": "Créez un projet pour regrouper les conversations et leur contexte.",
+    "projectsLoadFailed": "Impossible de charger les projets.",
+    "projectNameRequired": "Saisissez un nom de projet.",
+    "projectsLoading": "Chargement…",
+    "projectSaving": "Enregistrement…",
+    "projectSaveFailed": "Impossible d’enregistrer le projet.",
+    "projectArchiveFailed": "Impossible d’archiver le projet."
   }
 }

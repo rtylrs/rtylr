@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 // MemoryService is the application-facing conversation port. HTTP handlers
@@ -14,6 +16,14 @@ type MemoryService interface {
 	CreateSession(ctx context.Context, userID int, title string) (string, error)
 	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
 	SummarizeSession(ctx context.Context, sessionID string, userID int) error
+}
+
+type AssistantContextService interface {
+	AssistantContext(context.Context, string, int, string) (string, error)
+}
+
+type ImageMessageService interface {
+	StoreMessageWithImages(context.Context, string, int, string, string, int, []snips.ImageInput) (any, error)
 }
 
 type MemorySessionAuthorizer interface {
@@ -30,6 +40,7 @@ type TurnRequest struct {
 	SystemContext string
 	Mode          string
 	PageContext   map[string]any
+	Images        []snips.ImageInput
 }
 
 // PreparedTurn is the deterministic application result consumed by the
@@ -81,8 +92,18 @@ func PrepareTurn(ctx context.Context, memory MemoryService, request TurnRequest,
 		}
 	}
 
-	if _, err := memory.StoreMessage(ctx, request.SessionID, int(request.UserID), "user", storedPrompt, len(storedPrompt)/4); err != nil {
-		return PreparedTurn{}, fmt.Errorf("failed to store message: %w", err)
+	var storeErr error
+	if len(request.Images) > 0 {
+		if imageMemory, ok := memory.(ImageMessageService); ok {
+			_, storeErr = imageMemory.StoreMessageWithImages(ctx, request.SessionID, int(request.UserID), "user", storedPrompt, len(storedPrompt)/4, request.Images)
+		} else {
+			storeErr = fmt.Errorf("image attachments are not supported by the memory service")
+		}
+	} else {
+		_, storeErr = memory.StoreMessage(ctx, request.SessionID, int(request.UserID), "user", storedPrompt, len(storedPrompt)/4)
+	}
+	if storeErr != nil {
+		return PreparedTurn{}, fmt.Errorf("failed to store message: %w", storeErr)
 	}
 
 	mode := ParseMode(request.Mode)

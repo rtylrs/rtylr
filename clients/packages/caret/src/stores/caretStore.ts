@@ -1,16 +1,21 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { CaretMessage, ContentBlock, ToolCallBlock } from '../types/message';
-import { normalizeChatTitle, titleFromUserMessage } from '../lib/chatTitles';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type {
+  CaretMessage,
+  ContentBlock,
+  ToolCallBlock,
+} from "../types/message";
+import { normalizeChatTitle, titleFromUserMessage } from "../lib/chatTitles";
 
-export type { CaretMessage } from '../types/message';
+export type { CaretMessage } from "../types/message";
 
-const NEW_CHAT_TITLE = 'New chat';
+const NEW_CHAT_TITLE = "New chat";
 
 export interface CaretTab {
   id: string;
   sessionId: string | null;
   title: string;
+  projectId: string | null;
   messages: CaretMessage[];
   isStreaming: boolean;
   isLoading: boolean;
@@ -29,6 +34,7 @@ interface CaretState {
 export interface NewCaretTabInput {
   sessionId?: string | null;
   title?: string | null;
+  projectId?: string | null;
 }
 
 interface CaretActions {
@@ -52,14 +58,14 @@ interface CaretActions {
   updateBlockOnLastAssistant: (
     blockId: string,
     patch: (block: ContentBlock) => ContentBlock,
-    tabId?: string
+    tabId?: string,
   ) => void;
   setStreaming: (streaming: boolean, tabId?: string) => void;
   setToolStatus: (
     blockId: string,
-    status: ToolCallBlock['status'],
+    status: ToolCallBlock["status"],
     extras?: Partial<ToolCallBlock>,
-    tabId?: string
+    tabId?: string,
   ) => void;
   reset: (tabId?: string) => void;
 }
@@ -70,6 +76,7 @@ interface PersistedCaretTab {
   id: string;
   sessionId: string | null;
   title: string;
+  projectId?: string | null;
 }
 
 interface PersistedCaretState {
@@ -85,9 +92,10 @@ function createId(prefix: string): string {
 function createTab(input: NewCaretTabInput & { id?: string } = {}): CaretTab {
   const sessionId = input.sessionId ?? null;
   return {
-    id: input.id ?? createId('tab'),
+    id: input.id ?? createId("tab"),
     sessionId,
     title: normalizeChatTitle(input.title) || NEW_CHAT_TITLE,
+    projectId: input.projectId ?? null,
     messages: [],
     isStreaming: false,
     isLoading: false,
@@ -113,7 +121,7 @@ function activeTabId(state: CaretState, tabId?: string): string {
 function updateTab(
   state: CaretState,
   tabId: string | undefined,
-  updater: (tab: CaretTab) => CaretTab
+  updater: (tab: CaretTab) => CaretTab,
 ): Partial<CaretState> {
   const id = activeTabId(state, tabId);
   const index = state.tabs.findIndex((tab) => tab.id === id);
@@ -133,16 +141,30 @@ function updateTab(
 }
 
 function titleFromMessages(messages: CaretMessage[]): string | null {
-  const firstUserMessage = messages.find((message) => message.role === 'user' && message.content);
-  return firstUserMessage?.content ? titleFromUserMessage(firstUserMessage.content) : null;
+  const firstUserMessage = messages.find(
+    (message) => message.role === "user" && message.content,
+  );
+  return firstUserMessage?.content
+    ? titleFromUserMessage(firstUserMessage.content)
+    : null;
 }
 
-function mergePersistedState(persistedState: unknown, currentState: CaretStore): CaretStore {
+function mergePersistedState(
+  persistedState: unknown,
+  currentState: CaretStore,
+): CaretStore {
   const persisted = (persistedState ?? {}) as PersistedCaretState;
   const persistedTabs = Array.isArray(persisted.tabs)
     ? persisted.tabs
         .filter((tab): tab is PersistedCaretTab => Boolean(tab?.id))
-        .map((tab) => createTab({ id: tab.id, sessionId: tab.sessionId, title: tab.title }))
+        .map((tab) =>
+          createTab({
+            id: tab.id,
+            sessionId: tab.sessionId,
+            title: tab.title,
+            projectId: tab.projectId,
+          }),
+        )
     : [];
   const tabs = persistedTabs.length > 0 ? persistedTabs : currentState.tabs;
   const activeTabId = tabs.some((tab) => tab.id === persisted.activeTabId)
@@ -152,7 +174,10 @@ function mergePersistedState(persistedState: unknown, currentState: CaretStore):
 
   return {
     ...currentState,
-    isOpen: typeof persisted.isOpen === 'boolean' ? persisted.isOpen : currentState.isOpen,
+    isOpen:
+      typeof persisted.isOpen === "boolean"
+        ? persisted.isOpen
+        : currentState.isOpen,
     tabs,
     activeTabId,
     messages: activeTab.messages,
@@ -161,10 +186,10 @@ function mergePersistedState(persistedState: unknown, currentState: CaretStore):
 }
 
 const emptyAssistant = (): CaretMessage => ({
-  id: createId('assistant'),
-  role: 'assistant',
+  id: createId("assistant"),
+  role: "assistant",
   blocks: [],
-  content: '',
+  content: "",
   createdAt: new Date().toISOString(),
 });
 
@@ -192,7 +217,11 @@ export const useCaretStore = create<CaretStore>()(
         set((state) => {
           const tab = state.tabs.find((candidate) => candidate.id === id);
           return tab
-            ? { activeTabId: id, messages: tab.messages, isStreaming: tab.isStreaming }
+            ? {
+                activeTabId: id,
+                messages: tab.messages,
+                isStreaming: tab.isStreaming,
+              }
             : {};
         }),
 
@@ -229,17 +258,23 @@ export const useCaretStore = create<CaretStore>()(
           updateTab(state, tabId, (tab) => ({
             ...tab,
             title: normalizeChatTitle(title),
-          }))
+          })),
         ),
 
       setTabLoading: (isLoading, tabId) =>
-        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, isLoading }))),
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({ ...tab, isLoading })),
+        ),
 
       setTabLoaded: (isLoaded, tabId) =>
-        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, isLoaded }))),
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({ ...tab, isLoaded })),
+        ),
 
       setSessionId: (id, tabId) =>
-        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, sessionId: id }))),
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({ ...tab, sessionId: id })),
+        ),
 
       setMessages: (messages, tabId) =>
         set((state) =>
@@ -248,8 +283,10 @@ export const useCaretStore = create<CaretStore>()(
             messages,
             isLoaded: true,
             title:
-              tab.title === NEW_CHAT_TITLE ? (titleFromMessages(messages) ?? tab.title) : tab.title,
-          }))
+              tab.title === NEW_CHAT_TITLE
+                ? (titleFromMessages(messages) ?? tab.title)
+                : tab.title,
+          })),
         ),
 
       addMessage: (msg, tabId) =>
@@ -258,10 +295,10 @@ export const useCaretStore = create<CaretStore>()(
             ...tab,
             messages: [...tab.messages, msg],
             title:
-              tab.title === NEW_CHAT_TITLE && msg.role === 'user' && msg.content
+              tab.title === NEW_CHAT_TITLE && msg.role === "user" && msg.content
                 ? titleFromUserMessage(msg.content)
                 : tab.title,
-          }))
+          })),
         ),
 
       appendToLastAssistantMessage: (token, tabId) =>
@@ -269,27 +306,35 @@ export const useCaretStore = create<CaretStore>()(
           updateTab(state, tabId, (tab) => {
             const messages = [...tab.messages];
             const lastIndex = messages.length - 1;
-            if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return tab;
+            if (lastIndex < 0 || messages[lastIndex].role !== "assistant")
+              return tab;
 
             const last = messages[lastIndex];
             const blocks = last.blocks.length > 0 ? [...last.blocks] : [];
-            let firstText = blocks.findIndex((block) => block.type === 'text');
+            let firstText = blocks.findIndex((block) => block.type === "text");
             if (firstText === -1) {
-              blocks.push({ id: `${last.id}-text-0`, type: 'text', content: token });
+              blocks.push({
+                id: `${last.id}-text-0`,
+                type: "text",
+                content: token,
+              });
               firstText = blocks.length - 1;
             } else {
               const existing = blocks[firstText];
-              if (existing.type === 'text') {
-                blocks[firstText] = { ...existing, content: existing.content + token };
+              if (existing.type === "text") {
+                blocks[firstText] = {
+                  ...existing,
+                  content: existing.content + token,
+                };
               }
             }
             messages[lastIndex] = {
               ...last,
               blocks,
-              content: (last.content ?? '') + token,
+              content: (last.content ?? "") + token,
             };
             return { ...tab, messages };
-          })
+          }),
         ),
 
       startAssistantMessage: (tabId) =>
@@ -298,7 +343,7 @@ export const useCaretStore = create<CaretStore>()(
             ...tab,
             isStreaming: true,
             messages: [...tab.messages, emptyAssistant()],
-          }))
+          })),
         ),
 
       appendBlockToLastAssistant: (block, tabId) =>
@@ -306,7 +351,7 @@ export const useCaretStore = create<CaretStore>()(
           updateTab(state, tabId, (tab) => {
             const messages = [...tab.messages];
             let lastIndex = messages.length - 1;
-            if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') {
+            if (lastIndex < 0 || messages[lastIndex].role !== "assistant") {
               messages.push(emptyAssistant());
               lastIndex = messages.length - 1;
             }
@@ -315,12 +360,14 @@ export const useCaretStore = create<CaretStore>()(
               ...last,
               blocks: [...last.blocks, block],
               content:
-                block.type === 'text'
-                  ? [last.content ?? '', block.content].filter(Boolean).join('\n')
+                block.type === "text"
+                  ? [last.content ?? "", block.content]
+                      .filter(Boolean)
+                      .join("\n")
                   : last.content,
             };
             return { ...tab, messages };
-          })
+          }),
         ),
 
       updateBlockOnLastAssistant: (blockId, patch, tabId) =>
@@ -328,36 +375,41 @@ export const useCaretStore = create<CaretStore>()(
           updateTab(state, tabId, (tab) => {
             const messages = [...tab.messages];
             const lastIndex = messages.length - 1;
-            if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return tab;
+            if (lastIndex < 0 || messages[lastIndex].role !== "assistant")
+              return tab;
             const last = messages[lastIndex];
             messages[lastIndex] = {
               ...last,
-              blocks: last.blocks.map((block) => (block.id === blockId ? patch(block) : block)),
+              blocks: last.blocks.map((block) =>
+                block.id === blockId ? patch(block) : block,
+              ),
             };
             return { ...tab, messages };
-          })
+          }),
         ),
 
       setStreaming: (isStreaming, tabId) =>
-        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, isStreaming }))),
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({ ...tab, isStreaming })),
+        ),
 
       setToolStatus: (blockId, status, extras, tabId) =>
         set((state) =>
           updateTab(state, tabId, (tab) => ({
             ...tab,
             messages: tab.messages.map((message) =>
-              message.role !== 'assistant'
+              message.role !== "assistant"
                 ? message
                 : {
                     ...message,
                     blocks: message.blocks.map((block) =>
-                      block.id === blockId && block.type === 'tool_call'
+                      block.id === blockId && block.type === "tool_call"
                         ? { ...block, status, ...(extras ?? {}) }
-                        : block
+                        : block,
                     ),
-                  }
+                  },
             ),
-          }))
+          })),
         ),
 
       reset: (tabId) =>
@@ -365,19 +417,24 @@ export const useCaretStore = create<CaretStore>()(
           updateTab(state, tabId, (tab) => ({
             ...createTab({ id: tab.id }),
             title: NEW_CHAT_TITLE,
-          }))
+          })),
         ),
     }),
     {
-      name: 'caret-session',
+      name: "caret-session",
       version: 2,
       partialize: (state): PersistedCaretState => ({
         isOpen: state.isOpen,
         activeTabId: state.activeTabId,
-        tabs: state.tabs.map(({ id, sessionId, title }) => ({ id, sessionId, title })),
+        tabs: state.tabs.map(({ id, sessionId, title, projectId }) => ({
+          id,
+          sessionId,
+          title,
+          projectId,
+        })),
       }),
       migrate: (persistedState) => persistedState as PersistedCaretState,
       merge: mergePersistedState,
-    }
-  )
+    },
+  ),
 );

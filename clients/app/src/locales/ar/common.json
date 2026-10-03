@@ -373,6 +373,27 @@
     "loadFailed": "تعذّر تحميل المحادثات المحفوظة.",
     "deleteChat": "حذف المحادثة",
     "pinChat": "تثبيت المحادثة",
-    "unpinChat": "إلغاء تثبيت المحادثة"
+    "unpinChat": "إلغاء تثبيت المحادثة",
+    "projects": "المشاريع",
+    "allChats": "كل المحادثات",
+    "createProject": "إنشاء مشروع",
+    "editProject": "تعديل المشروع",
+    "projectName": "اسم المشروع",
+    "projectContext": "سياق المشروع المشترك",
+    "projectContextHint": "ملاحظات يمكن لـ Caret استخدامها في محادثات هذا المشروع.",
+    "projectIcon": "الأيقونة",
+    "projectColor": "اللون",
+    "saveProject": "حفظ المشروع",
+    "archiveProject": "أرشفة المشروع",
+    "archiveProjectTitle": "هل تريد أرشفة المشروع؟",
+    "archiveProjectMessage": "ستبقى محادثاته ضمن كل المحادثات وستفقد سياق المشروع المشترك.",
+    "confirmArchiveProject": "أرشفة",
+    "noProjects": "أنشئ مشروعاً لجمع المحادثات ذات الصلة وسياقها.",
+    "projectsLoadFailed": "تعذّر تحميل المشاريع.",
+    "projectNameRequired": "أدخل اسم المشروع.",
+    "projectsLoading": "جارٍ التحميل…",
+    "projectSaving": "جارٍ الحفظ…",
+    "projectSaveFailed": "تعذّر حفظ المشروع.",
+    "projectArchiveFailed": "تعذّرت أرشفة المشروع."
   }
 }

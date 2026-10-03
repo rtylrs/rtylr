@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
-import { useCaretStore } from '../stores/caretStore';
-import { useCaretSettingsStore } from '../stores/settingsStore';
-import { consumeSse } from '../protocol/sse';
-import type { CaretStreamEvent } from '../protocol/events';
-import { readAuthToken } from '../lib/auth';
-import type { CaretPageContext } from '../types/context';
-import type { CaretMode } from '../types/mode';
+import { useCallback } from "react";
+import { useCaretStore } from "../stores/caretStore";
+import { consumeSse } from "../protocol/sse";
+import type { CaretStreamEvent } from "../protocol/events";
+import { readAuthToken } from "../lib/auth";
+import { prepareCaretImages } from "../lib/imageAttachments";
+import type { CaretPageContext } from "../types/context";
+import type { CaretMode } from "../types/mode";
 
 export interface UseCaretStreamParams {
   userId: number;
@@ -15,7 +15,11 @@ export interface UseCaretStreamParams {
 }
 
 export interface UseCaretStreamResult {
-  sendMessage: (prompt: string, modeOverride?: CaretMode) => Promise<void>;
+  sendMessage: (
+    prompt: string,
+    modeOverride?: CaretMode,
+    images?: File[],
+  ) => Promise<void>;
   stopStreaming: (tabId?: string) => void;
 }
 
@@ -49,55 +53,77 @@ export function useCaretStream({
   }, []);
 
   const sendMessage = useCallback(
-    async (prompt: string, modeOverride?: CaretMode): Promise<void> => {
+    async (
+      prompt: string,
+      modeOverride?: CaretMode,
+      files: File[] = [],
+    ): Promise<void> => {
       const store = useCaretStore.getState();
-      const tab = store.tabs.find((candidate) => candidate.id === store.activeTabId);
-      if (!prompt.trim() || !tab || tab.isStreaming) return;
+      const tab = store.tabs.find(
+        (candidate) => candidate.id === store.activeTabId,
+      );
+      if ((!prompt.trim() && files.length === 0) || !tab || tab.isStreaming)
+        return;
 
       const tabId = tab.id;
 
-      const userMessageId = `user-${Date.now()}`;
-      store.addMessage(
-        {
-          id: userMessageId,
-          role: 'user',
-          blocks: [],
-          content: prompt.trim(),
-          createdAt: new Date().toISOString(),
-        },
-        tabId
-      );
-
-      store.startAssistantMessage(tabId);
       const assistantMessageId = `assistant-${Date.now()}`;
 
-      const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
+      const baseUrl = apiBaseUrl.endsWith("/") ? apiBaseUrl : `${apiBaseUrl}/`;
       const url = `${baseUrl}ai/generate-text-stream`;
       const controller = new AbortController();
       streamControllers.set(tabId, controller);
 
       const openThinking: Record<string, OpenThinking> = {};
+      let assistantStarted = false;
+      const requestPrompt =
+        prompt.trim() || "Please describe the attached image.";
 
       try {
+        const images = await prepareCaretImages(files);
+        store.addMessage(
+          {
+            id: `user-${Date.now()}`,
+            role: "user",
+            blocks: [],
+            content: requestPrompt,
+            attachments: images,
+            createdAt: new Date().toISOString(),
+          },
+          tabId,
+        );
+        store.startAssistantMessage(tabId);
+        assistantStarted = true;
         const token = readAuthToken();
-        const mode = modeOverride ?? useCaretSettingsStore.getState().mode;
+        const mode = modeOverride ?? "agent";
         const response = await fetch(url, {
-          method: 'POST',
-          credentials: 'include',
+          method: "POST",
+          credentials: "include",
           signal: controller.signal,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            prompt: prompt.trim(),
+            prompt: requestPrompt,
             session_id:
-              useCaretStore.getState().tabs.find((candidate) => candidate.id === tabId)
-                ?.sessionId ?? '',
+              useCaretStore
+                .getState()
+                .tabs.find((candidate) => candidate.id === tabId)?.sessionId ??
+              "",
+            project_id:
+              useCaretStore
+                .getState()
+                .tabs.find((candidate) => candidate.id === tabId)?.projectId ??
+              "",
             user_id: userId,
-            system_context: systemContext ?? '',
+            system_context: systemContext ?? "",
             page_context: pageContext,
             mode,
+            images: images.map(({ name, dataUrl }) => ({
+              name,
+              data_url: dataUrl,
+            })),
           }),
         });
 
@@ -111,20 +137,39 @@ export function useCaretStream({
 
         useCaretStore.getState().setStreaming(false, tabId);
       } catch (error) {
-        if ((error as Error).name === 'AbortError') return;
+        if ((error as Error).name === "AbortError") return;
         useCaretStore.getState().setStreaming(false, tabId);
         const message =
           error instanceof Error
             ? error.message
-            : 'An unexpected error occurred. Please try again.';
-        useCaretStore.getState().appendBlockToLastAssistant(
-          {
-            id: `error-${Date.now()}`,
-            type: 'text',
-            content: `\n\n_Error: ${message}_`,
-          },
-          tabId
-        );
+            : "An unexpected error occurred. Please try again.";
+        if (assistantStarted) {
+          useCaretStore.getState().appendBlockToLastAssistant(
+            {
+              id: `error-${Date.now()}`,
+              type: "text",
+              content: `\n\n_Error: ${message}_`,
+            },
+            tabId,
+          );
+        } else {
+          useCaretStore.getState().addMessage(
+            {
+              id: `assistant-image-error-${Date.now()}`,
+              role: "assistant",
+              blocks: [
+                {
+                  id: `image-error-${Date.now()}`,
+                  type: "text",
+                  content: message,
+                },
+              ],
+              content: message,
+              createdAt: new Date().toISOString(),
+            },
+            tabId,
+          );
+        }
       } finally {
         if (streamControllers.get(tabId) === controller) {
           streamControllers.delete(tabId);
@@ -132,76 +177,86 @@ export function useCaretStream({
         }
       }
     },
-    [apiBaseUrl, userId, systemContext, pageContext]
+    [apiBaseUrl, userId, systemContext, pageContext],
   );
 
   /** Translate one server event into store mutations. */
   function dispatch(
     event: CaretStreamEvent,
     openThinking: Record<string, OpenThinking>,
-    tabId: string
+    tabId: string,
   ): void {
     const store = useCaretStore.getState();
     switch (event.type) {
-      case 'session':
-        if (!store.tabs.find((candidate) => candidate.id === tabId)?.sessionId) {
+      case "session":
+        if (
+          !store.tabs.find((candidate) => candidate.id === tabId)?.sessionId
+        ) {
           store.setSessionId(event.sessionId, tabId);
         }
         break;
 
-      case 'text_delta':
+      case "text_delta":
         store.appendToLastAssistantMessage(event.delta, tabId);
         break;
 
-      case 'thinking_start':
-        openThinking[event.blockId] = { blockId: event.blockId, startedAt: Date.now() };
+      case "thinking_start":
+        openThinking[event.blockId] = {
+          blockId: event.blockId,
+          startedAt: Date.now(),
+        };
         store.appendBlockToLastAssistant(
           {
             id: event.blockId,
-            type: 'thinking',
-            content: '',
+            type: "thinking",
+            content: "",
           },
-          tabId
+          tabId,
         );
         break;
 
-      case 'thinking_delta':
+      case "thinking_delta":
         store.updateBlockOnLastAssistant(
           event.blockId,
-          (b) => (b.type === 'thinking' ? { ...b, content: b.content + event.delta } : b),
-          tabId
+          (b) =>
+            b.type === "thinking"
+              ? { ...b, content: b.content + event.delta }
+              : b,
+          tabId,
         );
         break;
 
-      case 'thinking_end': {
+      case "thinking_end": {
         const opened = openThinking[event.blockId];
-        const duration = event.durationMs ?? (opened ? Date.now() - opened.startedAt : undefined);
+        const duration =
+          event.durationMs ??
+          (opened ? Date.now() - opened.startedAt : undefined);
         store.updateBlockOnLastAssistant(
           event.blockId,
-          (b) => (b.type === 'thinking' ? { ...b, durationMs: duration } : b),
-          tabId
+          (b) => (b.type === "thinking" ? { ...b, durationMs: duration } : b),
+          tabId,
         );
         delete openThinking[event.blockId];
         break;
       }
 
-      case 'tool_call':
+      case "tool_call":
         store.appendBlockToLastAssistant(
           {
             id: event.blockId,
-            type: 'tool_call',
+            type: "tool_call",
             name: event.name,
             mode: event.mode,
             input: event.input,
-            status: event.requiresApproval ? 'pending' : 'running',
+            status: event.requiresApproval ? "pending" : "running",
             preview: event.preview,
             requiresApproval: event.requiresApproval,
           },
-          tabId
+          tabId,
         );
         break;
 
-      case 'tool_result':
+      case "tool_result":
         store.setToolStatus(
           event.blockId,
           event.status,
@@ -210,23 +265,23 @@ export function useCaretStream({
             summary: event.summary,
             error: event.error,
           },
-          tabId
+          tabId,
         );
         break;
 
-      case 'message_end':
-      case 'done':
+      case "message_end":
+      case "done":
         store.setStreaming(false, tabId);
         break;
 
-      case 'error':
+      case "error":
         store.appendBlockToLastAssistant(
           {
             id: `error-${Date.now()}`,
-            type: 'text',
+            type: "text",
             content: `\n\n_${event.error}_`,
           },
-          tabId
+          tabId,
         );
         if (!event.recoverable) store.setStreaming(false, tabId);
         break;

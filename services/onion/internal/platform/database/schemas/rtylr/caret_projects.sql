@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS caret_projects (
+ id VARCHAR(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL PRIMARY KEY,
+ user_id BIGINT NOT NULL,
+ business_id BIGINT NOT NULL,
+ name VARCHAR(120) NOT NULL,
+ icon VARCHAR(32) NOT NULL DEFAULT 'folder',
+ color VARCHAR(16) NOT NULL DEFAULT 'neutral',
+ context TEXT NOT NULL,
+ archived BOOLEAN NOT NULL DEFAULT FALSE,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ KEY idx_caret_projects_owner (business_id, user_id, archived)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -36,6 +36,7 @@ func (c *ChatSession) FromRows(session sqlc.ChatSession) error {
 }
 
 type ConversationMessage struct {
+	Metadata   string    `json:"metadata,omitempty"`
 	ID         int       `json:"id"`
 	SessionID  string    `json:"session_id"`
 	UserID     int       `json:"user_id"`
@@ -46,6 +47,7 @@ type ConversationMessage struct {
 }
 
 func (c *ConversationMessage) FromRows(message sqlc.ConversationMessage) error {
+	c.Metadata = string(message.Metadata)
 	c.ID = int(message.ID)
 	c.SessionID = message.SessionID
 	c.UserID = int(message.UserID)

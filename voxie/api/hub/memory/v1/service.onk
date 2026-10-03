@@ -1,6 +1,11 @@
 package hub.memory.v1
 
 service MemoryService {
+ listProjects(ListProjectsRequest) -> ListProjectsResponse @get("/chat-projects")
+ saveProject(SaveProjectRequest) -> SaveProjectResponse @post("/chat-projects")
+ archiveProject(ArchiveProjectRequest) -> ArchiveProjectResponse @delete("/chat-projects/{id}")
+ setChatProject(SetChatProjectRequest) -> SetChatProjectResponse @put("/chats/{session_id}/project")
+
   listChats(ListChatsRequest) -> ListChatsResponse @get("/chats")
 
   getChatMessages(GetChatMessagesRequest) -> GetChatMessagesResponse @get("/chats/{session_id}/messages")

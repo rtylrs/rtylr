@@ -10,12 +10,13 @@ import (
 
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	sqlc "github.com/voxire/onion/internal/modules/memory/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 var (
-	ErrChatSessionNotFound      = errors.New("chat session not found")
+	ErrChatSessionNotFound = errors.New("chat session not found")
 )
 
 const maxDerivedChatTitleRunes = 80
@@ -77,6 +78,22 @@ func (r *Repository) GetChatSession(ctx context.Context, sessionID string, userI
 		return nil, fromRowsErr
 	}
 
+	if user, ok := auth.GetAuthUser(ctx); ok && user != nil && user.BusinessID > 0 {
+		var metadata struct {
+			BusinessID int64 `json:"business_id"`
+		}
+		if err := json.Unmarshal([]byte(session.Metadata), &metadata); err != nil {
+			return nil, ErrChatSessionNotFound
+		}
+		if metadata.BusinessID == 0 {
+			var bid sql.NullInt64
+			if err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM users WHERE id=?", userID).Scan(&bid); err != nil || !bid.Valid || bid.Int64 != user.BusinessID {
+				return nil, ErrChatSessionNotFound
+			}
+		} else if metadata.BusinessID != user.BusinessID {
+			return nil, ErrChatSessionNotFound
+		}
+	}
 	return &session, nil
 }
 
@@ -162,7 +179,7 @@ func (r *Repository) CreateMessage(ctx context.Context, message *domain.Conversa
 		Role:       message.Role,
 		Content:    message.Content,
 		TokensUsed: sql.NullInt32{Int32: int32(message.TokensUsed), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		Metadata:   []byte("{}"),
+		Metadata:   []byte(defaultMessageMetadata(message.Metadata)),
 	}
 
 	result, err := r.queries.CreateMessage(ctx, arg)
@@ -190,6 +207,13 @@ func (r *Repository) CreateMessage(ctx context.Context, message *domain.Conversa
 	return &created, nil
 }
 
+func defaultMessageMetadata(metadata string) string {
+	if strings.TrimSpace(metadata) == "" {
+		return "{}"
+	}
+	return metadata
+}
+
 func (r *Repository) ListUserSessions(ctx context.Context, userID, limit, offset int) ([]domain.ChatSession, error) {
 	if limit <= 0 {
 		limit = 20
@@ -199,6 +223,36 @@ func (r *Repository) ListUserSessions(ctx context.Context, userID, limit, offset
 	}
 	if offset < 0 {
 		offset = 0
+	}
+	if user, ok := auth.GetAuthUser(ctx); ok && user != nil && user.BusinessID > 0 {
+		rows, err := r.pool.QueryContext(ctx, `SELECT id,user_id,session_id,title,summary,metadata,created_at,updated_at,last_activity
+			FROM chat_sessions WHERE user_id=? AND (
+			 CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata,'$.business_id')) AS UNSIGNED)=? OR
+			 ((metadata IS NULL OR JSON_EXTRACT(metadata,'$.business_id') IS NULL) AND EXISTS (
+			  SELECT 1 FROM users WHERE id=chat_sessions.user_id AND business_id=?)))
+			ORDER BY last_activity DESC LIMIT ? OFFSET ?`, userID, user.BusinessID, user.BusinessID, limit, offset)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list business chat sessions: %w", err)
+		}
+		defer rows.Close()
+		results := make([]domain.ChatSession, 0, limit)
+		for rows.Next() {
+			var item domain.ChatSession
+			var title, summary, metadata sql.NullString
+			var createdAt, updatedAt, lastActivity sql.NullTime
+			if err := rows.Scan(&item.ID, &item.UserID, &item.SessionID, &title, &summary, &metadata, &createdAt, &updatedAt, &lastActivity); err != nil {
+				return nil, err
+			}
+			item.Title, item.Summary, item.Metadata = title.String, summary.String, metadata.String
+			item.CreatedAt, item.UpdatedAt, item.LastActivity = createdAt.Time, updatedAt.Time, lastActivity.Time
+			if shouldDeriveChatTitle(item.Title) {
+				if derived, err := r.firstUserMessageTitle(ctx, item.SessionID, userID); err == nil && derived != "" {
+					item.Title = derived
+				}
+			}
+			results = append(results, item)
+		}
+		return results, rows.Err()
 	}
 
 	arg := sqlc.ListUserSessionsParams{
@@ -227,9 +281,14 @@ func (r *Repository) ListUserSessions(ctx context.Context, userID, limit, offset
 				item.Title = title
 			}
 		}
+		if _, err := r.GetChatSession(ctx, item.SessionID, userID); err != nil {
+			if errors.Is(err, ErrChatSessionNotFound) {
+				continue
+			}
+			return nil, err
+		}
 		results = append(results, item)
 	}
-
 	return results, nil
 }
 

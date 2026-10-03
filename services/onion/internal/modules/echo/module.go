@@ -39,6 +39,9 @@ func NewModule(ctx context.Context, memoryService application.MemoryService, quo
 			application.NewAnalyticsQueryToolExecutor(snipsService, analystService),
 		}, toolExecutors...)
 	}
+	if profile, ok := memoryService.(application.AssistantProfileReader); ok {
+		toolExecutors = append([]application.ToolExecutor{application.NewAssistantToolExecutor(profile, nil)}, toolExecutors...)
+	}
 
 	return &Module{
 		snipsService:   snipsService,

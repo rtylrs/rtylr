@@ -22,6 +22,11 @@ func NewMemoryAPI(service *application.Service) *MemoryAPI {
 	return &MemoryAPI{Service: service}
 }
 
+func hasBusinessIdentity(ctx context.Context) bool {
+	user, ok := authPkg.GetAuthUser(ctx)
+	return ok && user != nil && user.UserID > 0 && user.BusinessID > 0
+}
+
 func sessionToChatSummary(session domain.ChatSession) *hubmemoryv1.ChatSummary {
 	title := session.Title
 	if title == "" {
@@ -34,6 +39,7 @@ func sessionToChatSummary(session domain.ChatSession) *hubmemoryv1.ChatSummary {
 		UpdatedAt: session.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		Pinned:    sessionMetadataBool(session.Metadata, "pinned"),
 		Archived:  sessionMetadataBool(session.Metadata, "archived"),
+		ProjectId: sessionMetadataString(session.Metadata, "project_id"),
 	}
 }
 
@@ -51,11 +57,12 @@ func sessionMetadataBool(raw, key string) bool {
 
 func messageToProto(message domain.ConversationMessage) *hubmemoryv1.ChatMessage {
 	return &hubmemoryv1.ChatMessage{
-		Id:         strconv.Itoa(message.ID),
-		Role:       message.Role,
-		Content:    message.Content,
-		CreatedAt:  message.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		TokensUsed: int32(message.TokensUsed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Id:              strconv.Itoa(message.ID),
+		Role:            message.Role,
+		Content:         message.Content,
+		CreatedAt:       message.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		AttachmentsJson: sessionImagesJSON(message.Metadata),
+		TokensUsed:      int32(message.TokensUsed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 }
 
@@ -98,13 +105,13 @@ func (a *MemoryAPI) GetChatMessages(ctx context.Context, req *hubmemoryv1.GetCha
 		return nil, onekiterrors.New(http.StatusBadRequest, "Session ID is required")
 	}
 
-	conversationContext, err := a.Service.GetConversationContext(ctx, req.GetSessionId(), int(user.UserID))
+	chatMessages, err := a.Service.SessionMessages(ctx, req.GetSessionId(), int(user.UserID))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get chat messages")
 	}
 
-	messages := make([]*hubmemoryv1.ChatMessage, 0, len(conversationContext.Messages))
-	for _, message := range conversationContext.Messages {
+	messages := make([]*hubmemoryv1.ChatMessage, 0, len(chatMessages))
+	for _, message := range chatMessages {
 		messages = append(messages, messageToProto(message))
 	}
 	return &hubmemoryv1.GetChatMessagesResponse{Messages: messages}, nil
@@ -156,4 +163,78 @@ func (a *MemoryAPI) PinChat(ctx context.Context, req *hubmemoryv1.PinChatRequest
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update chat session")
 	}
 	return &hubmemoryv1.PinChatResponse{Updated: true}, nil
+}
+
+func (a *MemoryAPI) ListProjects(ctx context.Context, _ *hubmemoryv1.ListProjectsRequest) (*hubmemoryv1.ListProjectsResponse, error) {
+	if !hasBusinessIdentity(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	projects, err := a.Service.ListProjects(ctx)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list projects")
+	}
+	response := &hubmemoryv1.ListProjectsResponse{Projects: make([]*hubmemoryv1.CaretProject, 0, len(projects))}
+	for _, project := range projects {
+		response.Projects = append(response.Projects, projectToProto(project))
+	}
+	return response, nil
+}
+
+func (a *MemoryAPI) SaveProject(ctx context.Context, req *hubmemoryv1.SaveProjectRequest) (*hubmemoryv1.SaveProjectResponse, error) {
+	if !hasBusinessIdentity(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	project, err := a.Service.SaveProject(ctx, domain.Project{ID: req.GetId(), Name: req.GetName(), Icon: req.GetIcon(), Color: req.GetColor(), Context: req.GetContext()})
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid project")
+	}
+	return &hubmemoryv1.SaveProjectResponse{Project: projectToProto(*project)}, nil
+}
+
+func (a *MemoryAPI) ArchiveProject(ctx context.Context, req *hubmemoryv1.ArchiveProjectRequest) (*hubmemoryv1.ArchiveProjectResponse, error) {
+	if !hasBusinessIdentity(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := a.Service.ArchiveProject(ctx, req.GetId()); err != nil {
+		if errors.Is(err, application.ErrChatSessionNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Project not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to archive project")
+	}
+	return &hubmemoryv1.ArchiveProjectResponse{Archived: true}, nil
+}
+
+func (a *MemoryAPI) SetChatProject(ctx context.Context, req *hubmemoryv1.SetChatProjectRequest) (*hubmemoryv1.SetChatProjectResponse, error) {
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || user == nil || user.UserID <= 0 || user.BusinessID <= 0 {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := a.Service.SetChatProject(ctx, req.GetSessionId(), int(user.UserID), req.GetProjectId()); err != nil {
+		if errors.Is(err, application.ErrChatSessionNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Chat or project not found")
+		}
+		return nil, onekiterrors.New(http.StatusBadRequest, "Could not assign chat to project")
+	}
+	return &hubmemoryv1.SetChatProjectResponse{Updated: true}, nil
+}
+
+func projectToProto(project domain.Project) *hubmemoryv1.CaretProject {
+	return &hubmemoryv1.CaretProject{Id: project.ID, Name: project.Name, Icon: project.Icon, Color: project.Color, Context: project.Context, UpdatedAt: project.UpdatedAt.Format("2006-01-02T15:04:05Z07:00")}
+}
+
+func sessionMetadataString(raw, key string) string {
+	var metadata map[string]json.RawMessage
+	if json.Unmarshal([]byte(raw), &metadata) != nil {
+		return ""
+	}
+	var value string
+	_ = json.Unmarshal(metadata[key], &value)
+	return value
+}
+func sessionImagesJSON(raw string) string {
+	var metadata map[string]json.RawMessage
+	if json.Unmarshal([]byte(raw), &metadata) != nil {
+		return ""
+	}
+	return string(metadata["images"])
 }
