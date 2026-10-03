@@ -103,7 +103,7 @@ const GeneralTab: React.FC = () => {
             onClick={() => void refetch()}
             disabled={isFetching}
             className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
-            style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
           >
             {isFetching ? 'Retrying…' : 'Retry'}
           </button>
@@ -245,7 +245,7 @@ const GeneralTab: React.FC = () => {
             onClick={() => update.mutate(form)}
             disabled={update.isPending}
             className="rounded-lg px-4 py-2 text-xs font-semibold disabled:opacity-40"
-            style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
           >
             {update.isPending ? 'Saving…' : 'Save settings'}
           </button>

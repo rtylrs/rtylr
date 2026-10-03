@@ -608,3 +608,8 @@
   --flow-focus-ring: var(--accent-focus);
   --flow-border-focus: var(--accent-focus);
 }
+
+.portal-shell[data-app] .text-accent,
+[data-theme-scope] .text-accent {
+  color: var(--accent-fg, var(--accent));
+}

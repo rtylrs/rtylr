@@ -198,7 +198,7 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
                 type="button"
                 onClick={confirm}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+                style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
                 disabled={importing}
               >
                 {importing ? 'Importing…' : `Import ${preview.length} rows`}

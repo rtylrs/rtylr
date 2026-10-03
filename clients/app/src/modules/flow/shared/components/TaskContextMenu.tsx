@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useOpenTask } from '../lib/useOpenTask';
 import { createPortal } from 'react-dom';
 import { useClickOutside } from '@voxire/utils';
+import { useThemeScope } from '@voxire/ui';
 import { toast } from 'sonner';
 import { ExternalLink, Trash2, Copy } from 'lucide-react';
 import { useDeleteTask } from '../../features/tasks/useTasks';
@@ -24,6 +25,7 @@ export const TaskContextMenu: React.FC<{
   onClose: () => void;
 }> = ({ menu, onClose }) => {
   const { t } = useTranslation();
+  const scope = useThemeScope();
   const openTask = useOpenTask();
   const deleteTask = useDeleteTask();
   const canRemove = useCanDeleteResource(menu.projectId);
@@ -80,6 +82,7 @@ export const TaskContextMenu: React.FC<{
   }, [onClose]);
 
   const menuStyle: React.CSSProperties = {
+    ...scope,
     position: 'fixed',
     left: menu.x,
     top: menu.y,

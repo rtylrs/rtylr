@@ -717,8 +717,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             disabled={pending}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
             style={{
-              background: 'var(--dash-active)',
-              color: 'var(--dash-text)',
+              background: 'var(--erp-accent)',
+              color: 'var(--erp-accent-foreground)',
               opacity: pending ? 0.6 : 1,
             }}
           >

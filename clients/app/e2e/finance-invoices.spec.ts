@@ -1,3 +1,4 @@
+import { expectAppAction } from './support/app-appearance';
 import { stubPortalSession } from './portal-session';
 import { test, expect } from './fixtures';
 
@@ -282,6 +283,7 @@ test.describe('Finance invoices flow', () => {
     await page.goto(`${FINANCE_URL}/invoices/new`);
     await page.getByRole('button', { name: 'Select client', exact: true }).click();
     await page.getByRole('button', { name: /Acme Ltd/ }).click();
+    await expectAppAction(page.getByRole('button', { name: 'Next', exact: true }), '#10b981');
     await page.getByRole('button', { name: 'Next', exact: true }).click();
     const line = page.getByRole('row').filter({ has: page.getByPlaceholder('Description') });
     await line.getByPlaceholder('Description').fill('Migration work');

@@ -1,3 +1,4 @@
+import { expectAppAction } from './support/app-appearance';
 import { test, expect } from './fixtures';
 import { PORTAL_URL, stubPortalSession } from './portal-session';
 import {
@@ -73,6 +74,30 @@ for (const theme of ['light', 'dark'] as const) {
       const fg = hexToRgb(style.fg);
       expect(style.activeColor).toBe(`rgb(${fg.r}, ${fg.g}, ${fg.b})`);
     }
+    await page.goto(`${PORTAL_URL}/hr/setup`);
+    await expectAppAction(page.getByRole('button', { name: 'Next', exact: true }), apps.hr);
+
+    await page.goto(`${PORTAL_URL}/flow/my-issues`);
+    const newTask = page
+      .getByRole('button', { name: 'New task', exact: true })
+      .filter({ hasText: 'New task' });
+    await expectAppAction(newTask, apps.flow);
+    await newTask.click();
+    const dialog = page.getByRole('dialog', { name: 'New task', exact: true });
+    await expect(dialog).toBeVisible();
+    expect(await dialog.evaluate((el) => Boolean(el.closest('.portal-shell')))).toBe(false);
+    await dialog.getByRole('textbox', { name: 'Task name', exact: true }).fill('Review app colors');
+    await expectAppAction(
+      dialog.getByRole('button', { name: 'Create task', exact: true }),
+      apps.flow
+    );
+    await page.screenshot({
+      path: `/tmp/rtylr-flow-identity-${theme}-${page.viewportSize()!.width}.png`,
+    });
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(newTask).toBeFocused();
+
     await page
       .getByRole('navigation', { name: 'Apps', exact: true })
       .getByRole('link', { name: 'Home', exact: true })

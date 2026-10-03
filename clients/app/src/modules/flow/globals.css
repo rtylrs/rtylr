@@ -269,10 +269,6 @@
   background: var(--dash-hover);
   color: var(--dash-text-dim);
 }
-.portal-flow-dialog {
-  --accent: var(--flow-action-bg);
-  --accent-foreground: var(--dash-text);
-}
 .portal-flow-dialog .flow-task-name {
   display: block;
   width: 100%;
@@ -296,7 +292,7 @@
   font-weight: 400;
 }
 .portal-flow-dialog .flow-task-name:focus {
-  border-color: var(--flow-text-muted);
+  border-color: var(--flow-border-focus);
   background: var(--flow-input-bg);
   outline: none !important;
 }
@@ -345,9 +341,9 @@
   color: var(--dash-text);
   border: 1px solid var(--dash-border);
 }
-.portal-flow :where(button.bg-accent, button.bg-accent\/10) {
-  background: var(--dash-active);
-  color: var(--dash-text);
+.portal-flow :where(button.bg-accent) {
+  background: var(--flow-action-bg);
+  color: var(--flow-on-accent);
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 13px;
@@ -443,8 +439,6 @@
   background: var(--flow-card);
   color: var(--flow-text);
   box-shadow: var(--flow-shadow);
-  --accent: var(--flow-active);
-  --accent-foreground: var(--flow-text);
   --color-muted: var(--flow-text-muted);
 }
 .flow-due-date-shortcuts {

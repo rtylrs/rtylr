@@ -2,6 +2,7 @@ import React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../lib/cn";
+import { useThemeScope } from "./ThemeScope";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 select-none",
@@ -57,7 +58,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       className,
-      variant,
+      variant = "primary",
       size,
       fullWidth,
       asChild,
@@ -67,16 +68,27 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       disabled,
       type,
+      style,
       ...props
     },
     ref,
   ) => {
+    const scope = useThemeScope();
     const Comp = asChild ? Slot : "button";
     const buttonType = type ?? "button";
     return (
       <Comp
         ref={ref}
         className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+        style={{
+          ...(variant === "primary" && scope?.["--app-action-bg"]
+            ? {
+                backgroundColor: "var(--app-action-bg)",
+                color: "var(--app-on-action)",
+              }
+            : {}),
+          ...style,
+        }}
         disabled={disabled || loading}
         {...(!asChild
           ? { type: buttonType }

@@ -78,3 +78,6 @@ export type {
   AppearanceProviderProps,
   AppearanceInitOptions,
 } from "./components/AppearanceProvider";
+
+export { ThemeScopeProvider, useThemeScope } from "./components/ThemeScope";
+export type { ThemeScopeStyle } from "./components/ThemeScope";

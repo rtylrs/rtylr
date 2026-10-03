@@ -161,7 +161,6 @@ export const QuickCreate: React.FC = () => {
         >
           <div className="min-w-0">
             <DialogTitle
-              id="quick-create-title"
               className="text-flow-body font-semibold"
               style={{ color: 'var(--flow-text)' }}
             >

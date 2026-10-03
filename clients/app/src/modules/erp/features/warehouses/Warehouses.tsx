@@ -89,7 +89,7 @@ const Warehouses: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--dash-text)' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> {t('erp.warehouses.new')}
           </button>
@@ -115,7 +115,7 @@ const Warehouses: React.FC = () => {
             type="button"
             onClick={() => void refetch()}
             className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-            style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
           >
             {t('erp.valuation.refresh')}
           </button>
@@ -303,7 +303,7 @@ const Warehouses: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--dash-text)' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? t('erp.common.creating') : t('erpCommon.create')}
               </button>

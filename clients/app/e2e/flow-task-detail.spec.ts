@@ -1,3 +1,4 @@
+import { expectAppAction } from './support/app-appearance';
 import arFlow from '../src/modules/flow/locales/ar/flow.json' with { type: 'json' };
 import arCommon from '../src/modules/flow/locales/ar/flowCommon.json' with { type: 'json' };
 import enFlow from '../src/modules/flow/locales/en/flow.json' with { type: 'json' };
@@ -350,6 +351,10 @@ test.describe('Flow - Task Detail', () => {
         await expect(picker.getByRole('gridcell', { name: dateLabel, exact: true })).toBeVisible();
       };
       await assertBounds();
+      await expectAppAction(
+        picker.getByRole('gridcell').and(picker.locator('[aria-selected="true"]')),
+        '#64c5b9'
+      );
       if (language === 'ar') {
         const anchor = (await trigger.boundingBox())!;
         const popup = (await picker.boundingBox())!;

@@ -24,7 +24,7 @@
   filter: brightness(0.94);
 }
 .portal-page.is-crm :is(input, textarea, select):focus-visible {
-  outline: 2px solid var(--dash-text-dim) !important;
+  outline: 2px solid var(--app-focus, var(--dash-text-dim)) !important;
   outline-offset: 2px;
 }
 .portal-page.is-crm table {

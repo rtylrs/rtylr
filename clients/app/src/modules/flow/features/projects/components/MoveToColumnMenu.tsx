@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { CornerUpRight, Check } from 'lucide-react';
+import { useThemeScope } from '@voxire/ui';
 
 export interface MoveTarget {
   id: string;
@@ -35,6 +36,7 @@ const MoveToColumnMenu = ({
   disabled,
 }: MoveToColumnMenuProps): React.JSX.Element => {
   const { t } = useTranslation();
+  const scope = useThemeScope();
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const menuId = useId();
@@ -165,6 +167,7 @@ const MoveToColumnMenu = ({
             onKeyDown={handleMenuKeyDown}
             className="fixed z-[60] min-w-[10rem] rounded-lg py-1 shadow-lg"
             style={{
+              ...scope,
               background: 'var(--flow-card)',
               border: '1px solid var(--flow-border)',
               top: position?.top ?? 0,

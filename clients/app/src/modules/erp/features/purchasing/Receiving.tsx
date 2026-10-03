@@ -239,7 +239,7 @@ const Receiving: React.FC = () => {
             onClick={completeReceipt}
             disabled={lines.length === 0 || updateStatus.isPending}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: AMBER, color: 'var(--dash-text)' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Check size={14} /> {t('erp.receiving.markReceived')}
           </button>

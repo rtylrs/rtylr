@@ -159,7 +159,7 @@ const Products: React.FC = () => {
               data-testid="products-new-button"
               onClick={() => setShowAdd(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: 'var(--dash-text)' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               <Plus size={14} />
               {t('erp.products.new')}
@@ -274,7 +274,7 @@ const Products: React.FC = () => {
             type="button"
             onClick={() => void refetch()}
             className="px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--dash-active)', color: 'var(--dash-text)' }}
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
           >
             {t('erp.products.retry')}
           </button>

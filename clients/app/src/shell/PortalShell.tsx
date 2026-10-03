@@ -16,6 +16,7 @@ import {
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { resolveApiBase, resolveAppUrl } from '@voxire/config';
+import { ThemeScopeProvider } from '@voxire/ui';
 import { useMediaQuery, deriveAccentFgAcross, deriveOnAccent, compositeOver } from '@voxire/utils';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { PanelLeft, Search, Bell, Settings, Workflow, Plus, X } from 'lucide-react';
@@ -100,9 +101,21 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     theme === 'dark' || (theme === 'system' && systemDark)
       ? ['#0a0a0a', '#111111', '#161616']
       : ['#f8f8f8', '#ffffff'];
+  const actionAccent = appId === 'erp' ? '#f59e0b' : (accent ?? '#111111');
   const appStyle: CSSProperties & Record<string, string> = accent
     ? {
+        '--app-action-bg': actionAccent,
+        '--app-on-action': deriveOnAccent(actionAccent),
+        '--app-action-hover': `color-mix(in srgb, ${actionAccent} 90%, white)`,
+        '--app-selection-bg': `color-mix(in srgb, ${accent} 12%, transparent)`,
+        '--app-on-selection': deriveAccentFgAcross(
+          accent,
+          grounds.map((ground) => compositeOver(accent, 0.12, ground))
+        ),
+        '--app-focus': deriveAccentFgAcross(accent, grounds),
         '--accent': accent,
+        '--accent-foreground': deriveOnAccent(accent),
+        '--color-accent-foreground': deriveOnAccent(accent),
         '--color-accent': accent,
         '--color-ring': deriveAccentFgAcross(accent, grounds),
         '--accent-muted': `color-mix(in srgb, ${accent} 12%, transparent)`,
@@ -115,6 +128,15 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         ),
         '--dash-on-accent': deriveOnAccent(accent),
         '--hub-on-accent': deriveOnAccent(accent),
+        ...(appId === 'flow'
+          ? {
+              '--flow-action-bg': accent,
+              '--flow-on-accent': deriveOnAccent(accent),
+              '--flow-active': `color-mix(in srgb, ${accent} 12%, transparent)`,
+              '--flow-border-focus': deriveAccentFgAcross(accent, grounds),
+              '--flow-focus-ring': deriveAccentFgAcross(accent, grounds),
+            }
+          : {}),
         ...(appId === 'hr'
           ? {
               '--hr-accent': accent,
@@ -403,7 +425,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       </nav>
     </>
   );
-  return (
+  const shell = (
     <div className="portal-shell" data-app={accent ? appId : undefined} style={appStyle}>
       <a className="portal-skip-link" href="#main-content">
         {t('common.skipToMainContent')}
@@ -693,4 +715,5 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       )}
     </div>
   );
+  return <ThemeScopeProvider style={appStyle}>{shell}</ThemeScopeProvider>;
 }
