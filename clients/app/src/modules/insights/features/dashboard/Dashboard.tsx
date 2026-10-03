@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Bar } from 'react-chartjs-2';
 import type { ChartOptions } from 'chart.js';
 import { EmptyState } from '@voxire/ui';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import { useInsightsDashboard } from '../../shared/hooks/queries/useInsightsDashboard';
 import { useRevenueSeries } from '../../shared/hooks/queries/useRevenue';
 import { useInsightsSettings } from '../../shared/hooks/queries/useInsightsSettings';
@@ -224,7 +225,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
           icon={BarChart3}
           title={t('insights.dashboard.emptyTitle')}
           description={t('insights.dashboard.emptyDescription')}
-          action={{ label: t('common.refresh'), onClick: () => refetch() }}
+          action={refreshEmptyStateAction(t('common.refresh'), () => refetch())}
         />
       )}
     </motion.div>

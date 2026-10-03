@@ -5,6 +5,7 @@ import { FileText, Download, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@voxire/auth';
 import { EmptyState } from '@voxire/ui';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useReportTemplates,
   useGenerateRevenueReport,
@@ -108,7 +109,7 @@ const Reports: React.FC = (): React.JSX.Element => {
             icon={FileText}
             title={t('insights.reports.empty.title')}
             description={t('insights.reports.empty.description')}
-            action={{ label: t('common.refresh'), onClick: () => refetch() }}
+            action={refreshEmptyStateAction(t('common.refresh'), () => refetch())}
           />
         ) : (
           <div className="space-y-1">

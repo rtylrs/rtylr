@@ -4,6 +4,7 @@ import { motion, type Variants } from 'motion/react';
 import { Clock, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
+import { refreshEmptyStateAction } from '../../shared/lib/refreshAction';
 import {
   useInsightsSettings,
   useUpdateInsightsSettings,
@@ -214,7 +215,7 @@ const Settings: React.FC = (): React.JSX.Element => {
               icon={Clock}
               title={t('insights.settings.scheduledReports.empty.title')}
               description={t('insights.settings.scheduledReports.empty.description')}
-              action={{ label: t('common.refresh'), onClick: () => refetchScheduled() }}
+              action={refreshEmptyStateAction(t('common.refresh'), () => refetchScheduled())}
             />
           ) : (
             <div className="space-y-1">

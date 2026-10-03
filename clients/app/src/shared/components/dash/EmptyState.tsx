@@ -17,7 +17,21 @@ export function EmptyState({
       </div>
       <h3>{title}</h3>
       {description && <p>{description}</p>}
-      {action && <Button onClick={action.onClick}>{action.label}</Button>}
+      {action && (
+        <Button
+          variant={action.variant === 'outline' ? 'outline' : 'default'}
+          onClick={action.onClick}
+        >
+          {action.icon && (
+            <action.icon
+              size={14}
+              aria-hidden="true"
+              style={action.variant === 'outline' ? { color: 'var(--accent)' } : undefined}
+            />
+          )}
+          {action.label}
+        </Button>
+      )}
     </div>
   );
 }
