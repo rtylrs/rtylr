@@ -122,15 +122,18 @@ func (r *Repository) AssistantMemories(ctx context.Context, sessionID string) ([
 		return nil, errors.New("authenticated business identity is required")
 	}
 	rows, err := r.pool.QueryContext(ctx, `SELECT m.id,m.user_id,m.memory_type,m.key,m.value,m.confidence,m.source_session,m.created_at,m.updated_at
-		FROM user_memory m WHERE m.user_id=? AND m.confidence>0.7 AND (
-		 m.memory_type IN ('preference','interest') OR EXISTS (
-		  SELECT 1 FROM chat_sessions current_chat JOIN chat_sessions source_chat
-		   ON source_chat.session_id=m.source_session AND source_chat.user_id=m.user_id
-		  WHERE current_chat.session_id=? AND current_chat.user_id=? AND (
-		   CAST(JSON_UNQUOTE(JSON_EXTRACT(current_chat.metadata,'$.business_id')) AS UNSIGNED)=CAST(JSON_UNQUOTE(JSON_EXTRACT(source_chat.metadata,'$.business_id')) AS UNSIGNED)
-		   OR ((JSON_EXTRACT(current_chat.metadata,'$.business_id') IS NULL OR JSON_EXTRACT(source_chat.metadata,'$.business_id') IS NULL)
-		    AND EXISTS (SELECT 1 FROM users u WHERE u.id=m.user_id AND u.business_id=?))))
-		ORDER BY m.confidence DESC LIMIT 10`, user.UserID, sessionID, user.UserID, user.BusinessID)
+		FROM user_memory m
+		WHERE m.user_id=? AND m.confidence>0.7 AND (
+			m.memory_type IN ('preference','interest') OR EXISTS (
+				SELECT 1 FROM chat_sessions current_chat
+				JOIN chat_sessions source_chat ON source_chat.session_id=m.source_session AND source_chat.user_id=m.user_id
+				JOIN users u ON u.id=m.user_id
+				WHERE current_chat.session_id=? AND current_chat.user_id=?
+				AND COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(current_chat.metadata,'$.business_id')) AS UNSIGNED),u.business_id)=?
+				AND COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(source_chat.metadata,'$.business_id')) AS UNSIGNED),u.business_id)=?
+			)
+		)
+		ORDER BY m.confidence DESC LIMIT 10`, user.UserID, sessionID, user.UserID, user.BusinessID, user.BusinessID)
 	if err != nil {
 		return nil, err
 	}

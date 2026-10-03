@@ -137,6 +137,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	if memory, ok := h.MemoryService.(application.AssistantContextService); ok {
 		savedContext, err = memory.AssistantContext(ctx, req.SessionID, int(authUserID), req.ProjectID)
 		if err != nil {
+			log.Error("Failed to load chat context", logger.Error(err))
 			http.Error(w, "Failed to load chat context", http.StatusInternalServerError)
 			return
 		}
