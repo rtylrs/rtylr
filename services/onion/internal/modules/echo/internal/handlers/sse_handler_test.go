@@ -72,6 +72,20 @@ func TestStreamDirectResponsePersistsBeforeDoneEvent(t *testing.T) {
 	}
 }
 
+func TestStreamDirectResponseRemovesEmDashesBeforeDisplayAndPersistence(t *testing.T) {
+	memory := &detachedMemoryFake{}
+	handler := &GenerateTextStreamHandler{MemoryService: memory}
+	rec := httptest.NewRecorder()
+	handler.streamDirectResponse(context.Background(), rec, &GenerateTextStreamRequest{SessionID: "session-1", UserID: 7}, "I checked—your tasks are on track.")
+
+	if strings.ContainsRune(rec.Body.String(), '—') || strings.ContainsRune(memory.storedContent, '—') {
+		t.Fatalf("em dash crossed the reply boundary: body=%q stored=%q", rec.Body.String(), memory.storedContent)
+	}
+	if memory.storedContent != "I checked, your tasks are on track." || !strings.Contains(rec.Body.String(), "I checked, your tasks are on track.") {
+		t.Fatalf("displayed and persisted replies did not use the normalized text: body=%q stored=%q", rec.Body.String(), memory.storedContent)
+	}
+}
+
 func TestCachedReplayPersistsBeforeCompletion(t *testing.T) {
 	memory := &detachedMemoryFake{}
 	handler := &GenerateTextStreamHandler{MemoryService: memory}
@@ -99,7 +113,7 @@ func TestGroundedSearchIsStreamedWithItsSuggestionsButNotStoredAsChatAnswer(t *t
 		ToolExecutors: []ToolExecutor{fakeToolExecutor{
 			executed: true,
 			output: map[string]any{
-				"answer":                  "A grounded answer.",
+				"answer":                  "A grounded answer — with checked sources.",
 				"sources":                 []map[string]string{{"title": "Source", "url": "https://example.com/source"}},
 				"search_suggestions_html": `<div><a href="https://www.google.com/search?q=next">Related search</a></div>`,
 			},
@@ -120,10 +134,39 @@ func TestGroundedSearchIsStreamedWithItsSuggestionsButNotStoredAsChatAnswer(t *t
 	if memory.storeCalls != 0 {
 		t.Fatalf("grounded web result should not be persisted without its associated search suggestions; stored %d responses", memory.storeCalls)
 	}
-	for _, want := range []string{"A grounded answer.", "Related search", `"type":"done"`} {
+	for _, want := range []string{"A grounded answer, with checked sources.", "Related search", `"type":"done"`} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("stream missing %q: %s", want, body)
 		}
+	}
+	if strings.ContainsRune(body, '—') {
+		t.Fatalf("grounded web reply still contains an em dash: %s", body)
+	}
+}
+
+func TestFailedWebSearchReturnsQuotaExplanationWithoutAnotherModelCall(t *testing.T) {
+	memory := &detachedMemoryFake{}
+	handler := &GenerateTextStreamHandler{
+		MemoryService: memory,
+		ToolExecutors: []ToolExecutor{fakeToolExecutor{err: errors.New("web search returned status 429")}},
+	}
+	rec := httptest.NewRecorder()
+	tokens := make(chan snips.StreamToken, 2)
+	tokens <- snips.StreamToken{Text: `<tool>{"name":"web.search","input":{"query":"recent public news"}}</tool>`}
+	tokens <- snips.StreamToken{Done: true}
+	close(tokens)
+	handler.streamTokensToClient(
+		context.Background(), rec, tokens, make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "session-1", UserID: 7, EnhancedPrompt: "search the web"},
+		1, 7, cacheWritePlan{Mode: string(ModeAgent), ContinuationBudget: 3}, nil,
+	)
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "Web search hit Google's current request limit") || !strings.Contains(body, `"type":"done"`) {
+		t.Fatalf("failed web search did not get a clear completed response: %s", body)
+	}
+	if memory.storeCalls != 1 || !strings.Contains(memory.storedContent, "current request limit") {
+		t.Fatalf("quota explanation was not persisted as the assistant reply: calls=%d content=%q", memory.storeCalls, memory.storedContent)
 	}
 }
 

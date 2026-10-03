@@ -18,6 +18,16 @@ func TestPolishCaretAnswerTextRemovesInternalPhrases(t *testing.T) {
 	}
 }
 
+func TestPolishCaretAnswerTextRemovesEmDashes(t *testing.T) {
+	got := polishCaretAnswerText("I checked—your tasks are on track — and the list is current.")
+	if strings.ContainsRune(got, '—') {
+		t.Fatalf("reply still contains an em dash: %q", got)
+	}
+	if got != "I checked, your tasks are on track, and the list is current." {
+		t.Fatalf("unexpected em dash replacement: %q", got)
+	}
+}
+
 func TestPolishCaretAnswerTextSoftensProcessNarration(t *testing.T) {
 	got := polishCaretAnswerText("To answer your question, I ran a server-validated, read-only analytics query scoped to your tenant. The query results are:\n| Customers |\n| --- |\n| 2 |")
 

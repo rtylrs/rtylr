@@ -88,10 +88,16 @@ func polishCaretAnswerText(text string) string {
 	out = productToolNameRe.ReplaceAllString(out, "product data")
 	out = internalToolNameRe.ReplaceAllString(out, "business data")
 	out = internalToolReferenceRe.ReplaceAllString(out, "business check")
+	out = removeCaretEmDashes(out)
 
 	out = strings.ReplaceAll(out, "  ", " ")
 	out = strings.ReplaceAll(out, "\n \n", "\n\n")
 	return out
+}
+
+func removeCaretEmDashes(text string) string {
+	text = strings.ReplaceAll(text, " — ", ", ")
+	return strings.ReplaceAll(text, "—", ", ")
 }
 
 // safePublicAnswerPrefix prevents a streamed chunk from ending in an internal

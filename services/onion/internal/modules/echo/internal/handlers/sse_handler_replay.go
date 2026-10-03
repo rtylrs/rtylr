@@ -140,12 +140,21 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	totalTokens := streamUsageTokens(token, promptChars, fullResponse.Len())
 	// Reads return bounded, authorized reference data for a natural answer.
 	// The same renderer keeps the tool budget and duplicate-call guard across rounds.
-	if req.EnhancedPrompt != "" && h.AiService != nil && !renderer.HasSuccessfulTool("web.search") {
+	if req.EnhancedPrompt != "" && !renderer.HasSuccessfulTool("web.search") {
 		seenResults := 0
 		continuation := req.EnhancedPrompt
 		for round := 0; round < cachePlan.ContinuationBudget && renderer.PendingApprovalCount() == 0 && len(renderer.toolResults) > seenResults && !renderer.HasSuccessfulTool("web.search"); round++ {
 			results := renderer.toolResults[seenResults:]
 			seenResults = len(renderer.toolResults)
+			if len(results) == 1 && results[0].Name == "web.search" && results[0].Status == "error" {
+				if err := renderer.AppendServerText(webSearchFailureReply(results[0].Error)); err != nil {
+					return
+				}
+				break
+			}
+			if h.AiService == nil {
+				break
+			}
 			promptResults := make([]streamToolExecution, len(results))
 			for index, result := range results {
 				promptResults[index] = result
@@ -207,6 +216,13 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		return
 	}
 	h.writeExactCacheEntry(ctx, token, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
+}
+
+func webSearchFailureReply(detail string) string {
+	if strings.Contains(strings.ToLower(detail), "status 429") {
+		return "Web search hit Google's current request limit, so I couldn't verify the latest reports. I can still help from general knowledge, but I don't want to guess about recent events."
+	}
+	return "I couldn't complete the web search, so I can't verify recent information right now. I can still help from general knowledge if that's useful."
 }
 
 func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int) (snips.StreamToken, bool) {

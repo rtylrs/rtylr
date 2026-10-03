@@ -62,6 +62,7 @@ var requestDomainTerms = map[string][]string{
 	"pos":       {"pos", "order", "orders", "terminal", "register", "floor", "table", "menu", "modifier", "session", "cash", "refund", "sale", "sales"},
 	"store":     {"storefront", "ecommerce", "online store", "website", "catalog", "slug"},
 	"support":   {"support", "ticket", "tickets", "inbox", "canned", "article", "knowledge", "unread", "help"},
+	"web":       {"web", "internet", "online search", "search the web", "search online", "news", "research", "sources"},
 }
 
 var requestActionTerms = map[string][]string{
@@ -83,6 +84,8 @@ var smokeCheckRequests = map[string]struct{}{
 	"test": {}, "testing": {}, "ping": {}, "hello": {}, "hi": {}, "hey": {},
 	"are you working": {}, "is this working": {}, "does this work": {},
 }
+
+var socialGreetingPattern = regexp.MustCompile(`^(?:(?:hey|hi|hello|howdy)(?: there)?(?: how are you(?: doing)?| how is it going| what is up)?|how are you(?: doing)?|how is it going|what is up)(?: today)?(?: (?:lil man|my friend))?$`)
 
 // ClassifyCaretRequest turns the current request and current page context into
 // one deterministic execution plan. It intentionally favors live evidence for
@@ -108,6 +111,10 @@ func ClassifyCaretRequest(request, systemContext string) CaretRequestPlan {
 		plan.IsSmokeCheck = true
 		plan.Confidence = 100
 		plan.Action = "acknowledge"
+		return plan
+	}
+	if socialGreetingPattern.MatchString(text) {
+		plan.Confidence = 100
 		return plan
 	}
 
