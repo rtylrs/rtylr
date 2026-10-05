@@ -5,6 +5,11 @@ name: Onion images
 # real deploy path (ECR push + ECS update) is tryrtylr/deploy -> deploy-release.
 
 on:
+  pull_request:
+    paths:
+      - 'services/onion/**'
+      - 'voxie/**'
+      - '.github/workflows/onion-images.yml'
   push:
     paths:
       - 'services/onion/**'

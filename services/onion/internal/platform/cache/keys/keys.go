@@ -36,33 +36,10 @@ const (
 	InvalidateAll          InvalidationType = "all"
 )
 
-// IsKnownInvalidationType returns true when the value is one of the
-// supported scopes.
-func IsKnownInvalidationType(t string) bool {
-	switch InvalidationType(t) {
-	case InvalidateUser,
-		InvalidateBusiness,
-		InvalidateOrder,
-		InvalidateProduct,
-		InvalidateCustomer,
-		InvalidateMenu,
-		InvalidateTeam,
-		InvalidateConfig,
-		InvalidateSubscription,
-		InvalidateAll:
-		return true
-	}
-	return false
-}
-
 // ─── user-scoped keys ──────────────────────────────────────────────────────
 //
 // All keys that hold per-user data start with `cache:user:{id}:` so the
 // invalidate-user handler can wipe the entire bucket in one SCAN.
-
-func UserMe(userID int64) string {
-	return fmt.Sprintf("%suser:%d:me", Namespace, userID)
-}
 
 func UserMeForBusiness(userID, businessID int64) string {
 	return fmt.Sprintf("%suser:%d:business:%d:me", Namespace, userID, businessID)
@@ -73,14 +50,6 @@ func UserMeForBusiness(userID, businessID int64) string {
 // a business-wide change that alters effective access must use this instead.
 func BusinessUserMePrefix(businessID int64) string {
 	return fmt.Sprintf("%suser:*:business:%d:me", Namespace, businessID)
-}
-
-func UserPermissions(userID int64) string {
-	return fmt.Sprintf("%suser:%d:permissions", Namespace, userID)
-}
-
-func UserApps(userID int64) string {
-	return fmt.Sprintf("%suser:%d:apps:v2", Namespace, userID)
 }
 
 func UserBusinesses(userID int64) string {
@@ -119,10 +88,6 @@ func BusinessTheme(businessID int64) string {
 
 func BusinessKPIs(businessID int64) string {
 	return fmt.Sprintf("%sbusiness:%d:kpis", Namespace, businessID)
-}
-
-func BusinessDashboardStats(businessID int64) string {
-	return fmt.Sprintf("%sbusiness:%d:dashboard_stats", Namespace, businessID)
 }
 
 func BusinessEnabledAddons(businessID int64) string {

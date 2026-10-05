@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	insightsdashboardv1 "github.com/voxire/voxie/gen/go/insights/dashboard/v1"
@@ -91,9 +90,38 @@ func settingsPayloadFromProto(body *insightssettingv1.InsightsSettings) (applica
 // Narrow on purpose: insights should not learn the flow_* schema, and Flow keeps
 // ownership of what its own numbers mean.
 type FlowReader interface {
-	FlowInsights(ctx context.Context, businessID int64) (flowinsights.FlowDelivery, error)
-	FlowTeamWorkload(ctx context.Context, businessID int64) ([]flowinsights.FlowWorkloadMember, error)
-	FlowRoadmap(ctx context.Context, businessID int64) ([]flowinsights.FlowRoadmapProject, error)
+	FlowInsights(ctx context.Context, businessID int64) (FlowDelivery, error)
+	FlowTeamWorkload(ctx context.Context, businessID int64) ([]FlowWorkloadMember, error)
+	FlowRoadmap(ctx context.Context, businessID int64) ([]FlowRoadmapProject, error)
+}
+
+type FlowDelivery struct {
+	TotalTasks        int64
+	CompletedTasks    int64
+	InProgressTasks   int64
+	OverdueTasks      int64
+	AvgCompletionDays float64
+	VelocityThisWeek  int64
+	VelocityLastWeek  int64
+}
+
+type FlowWorkloadMember struct {
+	UserID          int64
+	TotalTasks      int64
+	CompletedTasks  int64
+	InProgressTasks int64
+	OverdueTasks    int64
+}
+
+type FlowRoadmapProject struct {
+	ID             int64
+	Name           string
+	Status         string
+	StartDate      string
+	DueDate        string
+	Progress       float64
+	TotalTasks     int64
+	CompletedTasks int64
 }
 
 type DashboardAPI struct {
@@ -204,7 +232,7 @@ func (a *DashboardAPI) GetWorkload(ctx context.Context, _ *insightsdashboardv1.G
 	return &insightsdashboardv1.GetWorkloadResponse{Workload: toWorkloadEntries(members)}, nil
 }
 
-func toInsightsResponse(stats flowinsights.FlowDelivery) *insightsdashboardv1.GetInsightsResponse {
+func toInsightsResponse(stats FlowDelivery) *insightsdashboardv1.GetInsightsResponse {
 	return &insightsdashboardv1.GetInsightsResponse{
 		TotalTasks:       stats.TotalTasks,
 		CompletedTasks:   stats.CompletedTasks,
@@ -216,7 +244,7 @@ func toInsightsResponse(stats flowinsights.FlowDelivery) *insightsdashboardv1.Ge
 	}
 }
 
-func toRoadmapProjects(in []flowinsights.FlowRoadmapProject) []*insightsdashboardv1.RoadmapProject {
+func toRoadmapProjects(in []FlowRoadmapProject) []*insightsdashboardv1.RoadmapProject {
 	out := make([]*insightsdashboardv1.RoadmapProject, 0, len(in))
 	for _, p := range in {
 		out = append(out, &insightsdashboardv1.RoadmapProject{
@@ -234,7 +262,7 @@ func toRoadmapProjects(in []flowinsights.FlowRoadmapProject) []*insightsdashboar
 	return out
 }
 
-func toWorkloadEntries(in []flowinsights.FlowWorkloadMember) []*insightsdashboardv1.WorkloadEntry {
+func toWorkloadEntries(in []FlowWorkloadMember) []*insightsdashboardv1.WorkloadEntry {
 	out := make([]*insightsdashboardv1.WorkloadEntry, 0, len(in))
 	for _, m := range in {
 		out = append(out, &insightsdashboardv1.WorkloadEntry{

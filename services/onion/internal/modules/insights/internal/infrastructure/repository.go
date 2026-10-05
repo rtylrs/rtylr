@@ -72,20 +72,6 @@ func decimalToMinorUnits(v interface{}) int64 {
 	return int64(f*100 + 0.5)
 }
 
-func deltaPct(current, prior int64) float64 {
-	if prior == 0 {
-		return 0
-	}
-	return (float64(current-prior) / float64(prior)) * 100
-}
-
-func deltaPctFloat(current, prior float64) float64 {
-	if prior == 0 {
-		return 0
-	}
-	return ((current - prior) / prior) * 100
-}
-
 func mtdRanges(now time.Time) (thisFrom, thisTo, priorFrom, priorTo time.Time) {
 	thisFrom = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	thisTo = now

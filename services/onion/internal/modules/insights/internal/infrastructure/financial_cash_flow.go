@@ -3,17 +3,14 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type CashFlowDayRow struct {
-	Date              string
-	InflowMinorUnits  int64
-	OutflowMinorUnits int64
-}
+type CashFlowDayRow = domain.CashFlowDayRow
 
 func (r *Repository) GetCashFlowSeries(ctx context.Context, businessID int64, from, to time.Time) ([]CashFlowDayRow, error) {
 	inflow, err := r.dailyPaidInvoices(ctx, businessID, from, to)

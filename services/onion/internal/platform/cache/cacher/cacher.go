@@ -7,9 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/utils/maputils"
 )
 
 const (
@@ -84,111 +81,6 @@ func setDecoded[M any](model *M, value any) error {
 	}
 	*model = decoded
 	return nil
-}
-
-// GetOrComputeLegacy retrieves values for the specified IDs from the cache.
-// If a value is not found in the cache, it invokes the provided fetch function to compute the missing values.
-//
-// Deprecated: use GetOrCompute instead, which supports error handling in fetch function.
-func (c Cache[M]) GetOrComputeLegacy(ctx context.Context, ids []string, fetch func(ctx context.Context, ids []string) map[string]M, options ...ClientOption) map[string]M {
-	// Wrapper function that satisfies the new 'fetch' signature.
-	// It calls the original 'fetch' and returns nil for the error.
-	wrappedFetch := func(ctx context.Context, ids []string) (map[string]M, error) {
-		result := fetch(ctx, ids)
-
-		return result, nil
-	}
-
-	// Delegate all the core work to the new function.
-	return c.GetOrCompute(ctx, ids, wrappedFetch, options...)
-}
-
-func (c Cache[M]) GetOrCompute(ctx context.Context, ids []string, fetch func(ctx context.Context, ids []string) (map[string]M, error), options ...ClientOption) map[string]M {
-	result, err := c.GetOrComputeWithError(ctx, ids, fetch, options...)
-	if err != nil {
-		logger.Ctx(ctx).Error("Error in GetOrCompute, returning partial results", logger.Error(err))
-	}
-
-	return result
-}
-
-// GetOrComputeKeys is a more flexible version that takes specific cache keys and returns values for those keys.
-func (c Cache[M]) GetOrComputeKeys(ctx context.Context, keys []string, fetch func(ctx context.Context, missingKeys []string) (map[string]M, error), options ...ClientOption) (map[string]M, error) {
-	configuration := getConfiguration(options...)
-	forceOriginFetch := shouldForceOriginFetch(configuration.evictionProbability)
-
-	var (
-		remaining    map[string]M
-		results      map[string]M
-		keysNotFound []string
-		err          error
-	)
-
-	keysNotFound = keys
-	if !forceOriginFetch {
-		// Transform keys to cache keys for lookup
-		cacheKeys := c.transformListKeys(keys)
-		cacheResults, cacheKeysNotFound := c.getMultiByTransformedKeys(ctx, cacheKeys, options...)
-		results = c.recoverMapKeys(cacheResults)
-		keysNotFound = c.recoverListKeys(cacheKeysNotFound)
-	}
-
-	if len(keysNotFound) > 0 {
-		ctxWithoutCancel := context.WithoutCancel(ctx)
-
-		remaining, err = fetch(ctxWithoutCancel, keysNotFound)
-		if err != nil {
-			// Don't log here — the cache can't tell an expected
-			// sentinel (sql.ErrNoRows, domain.ErrXNotFound) from a
-			// real failure. Callers already receive the error and
-			// decide whether to alert, swallow, or translate to a
-			// 4xx. Logging at ERROR here promoted normal "not found"
-			// hits into remote error metrics.
-			return results, err
-		}
-
-		c.PutMulti(ctxWithoutCancel, remaining, options...)
-		results = maputils.Merge(results, remaining)
-	}
-
-	return results, nil
-}
-
-func (c Cache[M]) GetOrComputeWithError(ctx context.Context, ids []string, fetch func(ctx context.Context, ids []string) (map[string]M, error), options ...ClientOption) (map[string]M, error) {
-	configuration := getConfiguration(options...)
-	forceOriginFetch := shouldForceOriginFetch(configuration.evictionProbability)
-
-	var (
-		remaining    map[string]M
-		results      map[string]M
-		keysNotFound []string
-		err          error
-	)
-
-	keysNotFound = ids
-	if !forceOriginFetch {
-		results, keysNotFound = c.GetMulti(ctx, ids, options...)
-	}
-
-	if len(keysNotFound) > 0 {
-		ctxWithoutCancel := context.WithoutCancel(ctx)
-
-		remaining, err = fetch(ctxWithoutCancel, keysNotFound)
-		if err != nil {
-			// Don't log here — the cache can't tell an expected
-			// sentinel (sql.ErrNoRows, domain.ErrXNotFound) from a
-			// real failure. Callers already receive the error and
-			// decide whether to alert, swallow, or translate to a
-			// 4xx. Logging at ERROR here promoted normal "not found"
-			// hits into remote error metrics.
-			return results, err
-		}
-
-		c.PutMulti(ctxWithoutCancel, remaining, options...)
-		results = maputils.Merge(results, remaining)
-	}
-
-	return results, nil
 }
 
 // GetOrComputeSingle is a convenience method for single key operations with error handling.

@@ -3,17 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type CategorySalesRow struct {
-	CategoryID        int64
-	CategoryName      string
-	UnitsSold         float64
-	RevenueMinorUnits int64
-}
+type CategorySalesRow = domain.CategorySalesRow
 
 func (r *Repository) GetSalesByCategory(ctx context.Context, businessID int64) ([]CategorySalesRow, error) {
 	thisFrom, thisTo, _, _ := mtdRanges(nowFn())

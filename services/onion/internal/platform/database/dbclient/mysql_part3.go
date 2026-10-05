@@ -1,9 +1,7 @@
 package dbclient
 
 import (
-	"context"
 	"database/sql"
-	"errors"
 	"net/url"
 	"os"
 	"strconv"
@@ -139,59 +137,6 @@ func getEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
-func WaitForDB(ctx context.Context, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-
-	for time.Now().Before(deadline) {
-		if isDBReady(ctx) {
-			return nil
-		}
-
-		time.Sleep(DefaultRetryInterval)
-	}
-
-	return ErrDatabaseNotReady
-}
-
-func isDBReady(ctx context.Context) bool {
-	if err := Connect(ctx); err != nil {
-		return false
-	}
-
-	client := getClient()
-	if client.mainDB == nil {
-		return false
-	}
-
-	return client.mainDB.PingContext(ctx) == nil
-}
-
-type DBManager struct {
-	MainDB    *sql.DB
-	LoggingDB *sql.DB
-}
-
-func VoxirePool() *sql.DB {
-	return Pool()
-}
-
-func ContentPool() *sql.DB {
-	return Pool()
-}
-
-func InternalPool() *sql.DB {
-	return Pool()
-}
-
-func LoggingPool() *sql.DB {
-	client := getClient()
-	if client.loggingDB != nil {
-		return client.loggingDB
-	}
-
-	return client.mainDB
-}
-
 func Pool() *sql.DB {
 	return getClient().mainDB
 }
@@ -204,10 +149,6 @@ func ReplicaPool() *sql.DB {
 		return client.replicaDB
 	}
 	return client.mainDB
-}
-
-func GetPoolByName(_ string) *sql.DB {
-	return Pool()
 }
 
 func Close() {
@@ -225,5 +166,3 @@ func Close() {
 		_ = client.replicaDB.Close()
 	}
 }
-
-var ErrDatabaseNotReady = errors.New("database not ready after timeout")

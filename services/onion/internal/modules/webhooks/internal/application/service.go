@@ -3,15 +3,14 @@ package application
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
-	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/eventbus"
 )
 
 const (
@@ -29,13 +28,12 @@ type repository interface {
 }
 
 type Service struct {
-	repo repository
+	repo   repository
+	events eventReader
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{
-		repo: infrastructure.NewRepository(db),
-	}
+func NewService(repo repository, events eventReader) *Service {
+	return &Service{repo: repo, events: events}
 }
 
 func invalidateWebhooksScope(ctx context.Context, businessID int64) {
@@ -44,7 +42,7 @@ func invalidateWebhooksScope(ctx context.Context, businessID int64) {
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Webhook, error) {
 	return cacher.Of[[]domain.Webhook]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(webhooksScope, businessID, "list"),
+		cacheKeys.Scoped(webhooksScope, businessID, "list")+"|domain=v2",
 		func(ctx context.Context) ([]domain.Webhook, error) {
 			return s.repo.List(ctx, businessID)
 		},
@@ -119,5 +117,19 @@ func generateSecret() (string, error) {
 // mutation with real effects on somebody's endpoint and is deliberately not
 // offered here.
 func (s *Service) ListDeliveries(ctx context.Context, businessID int64, filter domain.DeliveryFilter) ([]domain.DeliveryRecord, int64, error) {
-	return s.repo.ListDeliveriesForBusiness(ctx, businessID, filter)
+	records, total, err := s.repo.ListDeliveriesForBusiness(ctx, businessID, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	for i := range records {
+		event, err := s.events.GetEvent(ctx, records[i].EventID, businessID)
+		if err != nil {
+			if errors.Is(err, eventbus.ErrEventNotFound) {
+				continue
+			}
+			return nil, 0, err
+		}
+		records[i].EventType = event.Type
+	}
+	return records, total, nil
 }

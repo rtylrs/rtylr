@@ -25,7 +25,7 @@ func (s *Service) GetCashFlowSeries(ctx context.Context, businessID int64, from,
 	type result struct {
 		Points []CashFlowPointPayload
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		rows, rerr := s.repo.GetCashFlowSeries(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr

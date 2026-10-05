@@ -29,34 +29,6 @@ func (r *Repository) ResolveOwnerID(ctx context.Context, businessID, fallbackUse
 	return tenant.ResolveOwnerID(ctx, businessID, fallbackUserID)
 }
 
-func (r *Repository) GetEntitlement(ctx context.Context, ownerID int64) (domain.Entitlement, error) {
-	var ent domain.Entitlement
-	// cross-schema read from subscriptions + plans (owned by the subscriptions module)
-	row, err := r.queries.GetSubscriptionEntitlement(ctx, ownerID)
-	if err == nil {
-		ent.PlanSlug = row.Slug
-		ent.AICreditsPerMonth = int(row.AiCreditsPerMonth)
-		ent.SeatCount = int(row.SeatCount)
-		ent.Status = string(row.Status.SubscriptionsStatus)
-		if ent.SeatCount <= 0 {
-			ent.SeatCount = 1
-		}
-		return ent, nil
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("GetEntitlement failed", logger.Error(err))
-		return domain.Entitlement{}, err
-	}
-
-	// cross-schema read from plans — free tier fallback
-	credits, ferr := r.queries.GetFreePlanCredits(ctx)
-	if ferr != nil && !errors.Is(ferr, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("GetEntitlement free fallback failed", logger.Error(ferr))
-		return domain.Entitlement{}, ferr
-	}
-	return domain.Entitlement{PlanSlug: "free", AICreditsPerMonth: int(credits), SeatCount: 1, Status: "none"}, nil
-}
-
 func (r *Repository) GetMode(ctx context.Context, ownerID int64) (domain.Mode, error) {
 	mode, err := r.queries.GetQuotaMode(ctx, ownerID)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -72,7 +44,7 @@ func (r *Repository) GetMode(ctx context.Context, ownerID int64) (domain.Mode, e
 func (r *Repository) SetMode(ctx context.Context, ownerID int64, mode domain.Mode) error {
 	err := r.queries.UpsertQuotaMode(ctx, sqlc.UpsertQuotaModeParams{
 		OwnerID: ownerID,
-		Mode:    string(mode.Normalize()),
+		Mode:    sqlc.AiQuotaSettingsMode(mode.Normalize()),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("SetMode failed", logger.Error(err))
@@ -140,13 +112,4 @@ func (r *Repository) Adjust(ctx context.Context, ownerID, bucketUserID int64, mo
 		TokensUsed: delta,
 		OwnerID:    ownerID, UserID: bucketUserID, BillingMonth: month,
 	})
-}
-
-// GetFreePlanCredits reads the free plan's monthly AI credits (plans table).
-func (r *Repository) GetFreePlanCredits(ctx context.Context) (int64, error) {
-	credits, err := r.queries.GetFreePlanCredits(ctx)
-	if err != nil {
-		return 0, err
-	}
-	return int64(credits), nil
 }

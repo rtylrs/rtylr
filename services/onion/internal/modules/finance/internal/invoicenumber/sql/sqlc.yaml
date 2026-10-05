@@ -1,0 +1,12 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "migration_20261004_invoice_sequences.sql"
+      - "../../../sql/schema/finance/schema.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../persistence/sqlc"
+        sql_package: "database/sql"

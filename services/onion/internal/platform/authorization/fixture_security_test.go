@@ -9,7 +9,7 @@ import (
 )
 
 func TestConsoleAdminFixtureDoesNotContainUsableCredentials(t *testing.T) {
-	fixturePath := filepath.Join(findRepositoryRoot(t), "scripts", "fixtures", "99_console_admin.sql")
+	fixturePath := filepath.Join(findRepositoryRoot(t), "internal", "testutil", "fixtures", "99_console_admin.sql")
 	fixture, err := os.ReadFile(fixturePath)
 	if err != nil {
 		t.Fatalf("read console admin fixture: %v", err)

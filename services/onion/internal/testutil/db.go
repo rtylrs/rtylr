@@ -1,6 +1,10 @@
 package testutil
 
 import (
+	flowreferences "github.com/voxire/onion/internal/modules/flow/references"
+	posreferences "github.com/voxire/onion/internal/modules/pos/references"
+	"github.com/voxire/onion/internal/platform/authorization"
+
 	"context"
 	"database/sql"
 	"fmt"
@@ -9,7 +13,9 @@ import (
 
 	_ "github.com/go-sql-driver/mysql" // registers the mysql driver with database/sql
 
+	"github.com/voxire/onion/internal/modules/organization/scopes"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // OpenDB returns a *sql.DB connected to a MySQL instance for integration tests.
@@ -48,6 +54,16 @@ func OpenDB(tb testing.TB) *sql.DB {
 	// most notably) otherwise sees nil and fails closed, which surfaces as a
 	// 403 and is indistinguishable from a real permission error.
 	tb.Cleanup(dbclient.SetPoolForTesting(db))
+	tb.Cleanup(tenant.SetScopeResolver(scopes.NewReader(db)))
+	flowReferenceReader := flowreferences.NewReader(db)
+	posReferenceReader := posreferences.NewReader(db)
+	restoreScopeLookup := authorization.SetScopeLookup(func(ctx context.Context, businessID int64, scopeType string, id int64) (bool, error) {
+		if scopeType == "flow_project" {
+			return flowReferenceReader.ProjectExists(ctx, businessID, id)
+		}
+		return posReferenceReader.LocationExists(ctx, businessID, id)
+	})
+	tb.Cleanup(restoreScopeLookup)
 
 	tb.Cleanup(func() { _ = db.Close() })
 	return db

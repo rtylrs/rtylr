@@ -93,8 +93,8 @@ make generate
 # Check SQL identifier casing
 make sql-check
 
-# Optionally load tables from schema directories (dev tooling)
-make load-tables
+# Apply module-owned schemas and migrations using their recorded identities
+./scripts/migrate.sh
 
 # Seed synthetic POS/ERP volume and inspect EXPLAIN plans before launch
 make db-prelaunch-check

@@ -16,7 +16,7 @@ import (
 	"github.com/resend/resend-go/v2"
 
 	"github.com/voxire/onion/internal/platform/config"
-	sqlc "github.com/voxire/onion/internal/platform/email/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/emailqueue"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -69,6 +69,8 @@ func (e *RateLimitError) Error() string {
 }
 
 func (e *RateLimitError) Unwrap() error { return e.Cause }
+
+func (e *RateLimitError) RetryDelay() time.Duration { return e.RetryAfter }
 
 func Send(ctx context.Context, params SendParams) (string, error) {
 	if client == nil {
@@ -161,17 +163,6 @@ func WithReplyTo(replyTo string) Option { return func(p *SendParams) { p.ReplyTo
 // given priority (PriorityCritical/High/Normal) for the background worker to
 // deliver. Use it instead of SendTemplate when delivery can be deferred/retried.
 func EnqueueTemplate(ctx context.Context, db *sql.DB, priority int, to, subject string, tmpl Template, data any, opts ...Option) error {
-	return enqueueTemplate(ctx, db, priority, to, subject, tmpl, data, opts...)
-}
-
-type dbtx interface {
-	ExecContext(context.Context, string, ...any) (sql.Result, error)
-	PrepareContext(context.Context, string) (*sql.Stmt, error)
-	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
-	QueryRowContext(context.Context, string, ...any) *sql.Row
-}
-
-func enqueueTemplate(ctx context.Context, db dbtx, priority int, to, subject string, tmpl Template, data any, opts ...Option) error {
 	html, err := Render(tmpl, data)
 	if err != nil {
 		return err
@@ -180,45 +171,23 @@ func enqueueTemplate(ctx context.Context, db dbtx, priority int, to, subject str
 	for _, opt := range opts {
 		opt(&params)
 	}
-	return enqueue(ctx, db, enqueueParams{
-		priority: priority,
-		to:       to,
-		subject:  subject,
-		html:     html,
-		text:     htmlToText(html),
-		from:     params.From,
-		replyTo:  params.ReplyTo,
+	return emailqueue.Enqueue(ctx, db, emailqueue.Job{
+		Priority: priority,
+		To:       to,
+		Subject:  subject,
+		HTML:     html,
+		Text:     htmlToText(html),
+		From:     params.From,
+		ReplyTo:  params.ReplyTo,
 	})
 }
 
 // Email job priorities for EnqueueTemplate; higher is delivered first.
 const (
-	PriorityCritical = 10
-	PriorityHigh     = 5
-	PriorityNormal   = 1
+	PriorityCritical = emailqueue.PriorityCritical
+	PriorityHigh     = emailqueue.PriorityHigh
+	PriorityNormal   = emailqueue.PriorityNormal
 )
-
-type enqueueParams struct {
-	priority int
-	to       string
-	subject  string
-	html     string
-	text     string
-	from     string
-	replyTo  string
-}
-
-func enqueue(ctx context.Context, db dbtx, p enqueueParams) error {
-	return sqlc.New(db).EnqueueEmail(ctx, sqlc.EnqueueEmailParams{
-		Priority:  int8(p.priority), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		ToEmail:   p.to,
-		Subject:   p.subject,
-		Html:      SealHTML(p.html),
-		TextBody:  sql.NullString{String: SealHTML(p.text), Valid: p.text != ""},
-		FromEmail: sql.NullString{String: p.from, Valid: p.from != ""},
-		ReplyTo:   sql.NullString{String: p.replyTo, Valid: p.replyTo != ""},
-	})
-}
 
 var (
 	// Raw-text elements are not presentation markup: stripping only their tags

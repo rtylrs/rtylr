@@ -69,7 +69,7 @@ def parse_handler_routes(path: Path) -> dict[str, list[str]]:
 
 
 def parse_registered_hr_routes() -> set[tuple[str, str]]:
-    routes_path = ROOT / "internal/modules/hr_time/internal/api/routes.go"
+    routes_path = ROOT / "internal/modules/hr/hr_time/internal/api/routes.go"
     text = routes_path.read_text(encoding="utf-8")
     handlers = {}
     for handler_path in routes_path.parent.glob("*.go"):
@@ -98,7 +98,7 @@ def parse_registered_hr_routes() -> set[tuple[str, str]]:
 
 
 def parse_registered_flow_escape_hatches() -> set[tuple[str, str]]:
-    module_path = ROOT / "internal/modules/workspaces/module.go"
+    module_path = ROOT / "internal/modules/flow/workspaces/module.go"
     text = module_path.read_text(encoding="utf-8")
     pattern = re.compile(
         r"\brouter\.(?P<method>Get|Post|Put|Patch|Delete)\(\s*"

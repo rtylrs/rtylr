@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all build-media-engine generate contracts generate-module lint vet test test-db authorization-evidence route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
+.PHONY: onion setup build build-all build-media-engine generate contracts generate-module lint vet architecture-check test test-db authorization-evidence route-contract-check json-tags-check mutation-validation-check run run-api run-upload dev sql-check sql-case-check db-prelaunch-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -56,13 +56,16 @@ lint: generate contracts
 vet: generate contracts
 	go vet ./...
 
+architecture-check:
+	go test . -run '^TestArchitecture($$|Scanner$$)' -count=1
+
 test: generate contracts
 	./scripts/test.sh
 
 # Run the database-backed integration tests against the local-env MySQL
 # container. Resets a dedicated onion_test DB (drop → migrate → seed) each
 # run so the tests stay repeatable. Requires `make local-env-up` first.
-# Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos_users/...`
+# Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos/users/...`
 test-db: generate contracts
 	./scripts/test-db.sh $(PKG)
 
@@ -104,9 +107,6 @@ local-env-mindsdb-init:
 
 sql-check:
 	./scripts/check_sql_case.sh
-
-load-tables:
-	./scripts/load_tables.sh
 
 db-prelaunch-check:
 	./scripts/db-prelaunch-check.sh

@@ -5,94 +5,102 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 
-	sqlc "github.com/voxire/onion/internal/platform/eventbus/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/eventbus/internal/infrastructure/persistence/sqlc"
 )
 
-// Event types. These strings are the contract between a producer and whoever
-// subscribes, so they are values rather than an enum: a registration stores one
-// in hub_webhooks.events and an automation stores one in
-// crm_automations.trigger_type, both as text in the database.
-//
-// TypeOrderCreated must stay equal to the automations module's
-// TriggerOrderCreated. They cannot be a shared constant because that trigger
-// lives under internal/modules/automations/internal, which the Go toolchain
-// will not let a platform package import. If they ever drift the dispatcher
-// silently matches nothing, so the dispatcher test seeds a crm_automations row
-// using this constant rather than a literal.
-const (
-	TypeOrderCreated = "order_created"
-)
+const TypeOrderCreated = "order_created"
+const SubjectOrder = "order"
 
-// Subject types name what an event is about.
-const (
-	SubjectOrder = "order"
-)
-
-// Event is one thing that happened, recorded for anyone who wants to know.
+// Event is a tenant-scoped fact. Payload contains immutable reference data.
 type Event struct {
-	// BusinessID is the tenant the event belongs to. Required: an event with
-	// no tenant cannot be routed to anyone safely.
-	BusinessID int64
-	// Type is one of the type constants above.
-	Type string
-	// SubjectType and SubjectID identify the row the event is about.
+	ID          uint64
+	BusinessID  int64
+	Type        string
 	SubjectType string
 	SubjectID   int64
-	// Payload is marshalled to JSON. Keep it to what a subscriber needs in
-	// order to act without reading the database back, and out of it anything
-	// that would be stale by delivery time.
-	Payload any
-	// DedupeKey makes a retried producer idempotent. Left empty it defaults to
-	// type:subject_type:subject_id, which is right whenever one subject
-	// produces a given event once.
-	DedupeKey string
+	OccurredAt  time.Time
+	Payload     any
+	DedupeKey   string
 }
 
-// Publish records an event inside the caller's transaction.
-//
-// Taking a *sql.Tx rather than a *sql.DB is the whole point of the outbox: the
-// event and the domain write it describes commit or roll back together. A
-// producer that published after committing would lose events on a crash between
-// the two, and one that published before would announce changes that never
-// happened.
-//
-// Publishing does not deliver anything. The dispatcher expands the event into
-// per-target queues on its next pass.
-func Publish(ctx context.Context, tx *sql.Tx, event Event) error {
-	if tx == nil {
-		return fmt.Errorf("eventbus: publish %q: no transaction", event.Type)
-	}
-	if event.BusinessID <= 0 {
-		return fmt.Errorf("eventbus: publish %q: business id is required", event.Type)
-	}
-	if event.Type == "" {
-		return fmt.Errorf("eventbus: publish: event type is required")
-	}
-	if event.SubjectType == "" || event.SubjectID <= 0 {
-		return fmt.Errorf("eventbus: publish %q: subject is required", event.Type)
-	}
+type Reader interface {
+	GetEvent(context.Context, uint64, int64) (Event, error)
+}
 
-	payload := []byte("{}")
-	if event.Payload != nil {
-		encoded, err := json.Marshal(event.Payload)
+type EncodedEvent struct {
+	BusinessID  int64
+	Type        string
+	SubjectType string
+	SubjectID   int64
+	OccurredAt  time.Time
+	Payload     []byte
+	DedupeKey   string
+}
+
+// Encode validates the envelope without accessing persistence. The default key
+// permits one fact per subject and type; recurring facts require explicit keys.
+func Encode(event Event) (EncodedEvent, error) {
+	if event.BusinessID <= 0 || event.Type == "" || event.SubjectType == "" || event.SubjectID <= 0 {
+		return EncodedEvent{}, fmt.Errorf("eventbus: incomplete fact %q", event.Type)
+	}
+	payload, err := PayloadJSON(event.Payload)
+	if err != nil {
+		return EncodedEvent{}, fmt.Errorf("eventbus: encode %q: %w", event.Type, err)
+	}
+	key := event.DedupeKey
+	if key == "" {
+		key = fmt.Sprintf("%s:%s:%d", event.Type, event.SubjectType, event.SubjectID)
+	}
+	if len(key) > 191 {
+		return EncodedEvent{}, fmt.Errorf("eventbus: dedupe key exceeds 191 bytes")
+	}
+	occurred := event.OccurredAt
+	if occurred.IsZero() {
+		occurred = time.Now().UTC()
+	}
+	return EncodedEvent{BusinessID: event.BusinessID, Type: event.Type, SubjectType: event.SubjectType, SubjectID: event.SubjectID, Payload: payload, DedupeKey: key, OccurredAt: occurred}, nil
+}
+
+// Publisher owns the archive commit. Producer transactions never enter it.
+type Publisher struct{ queries *sqlc.Queries }
+
+func NewPublisher(db *sql.DB) *Publisher { return &Publisher{queries: sqlc.New(db)} }
+func (p *Publisher) Record(ctx context.Context, event Event) error {
+	record, err := Encode(event)
+	if err != nil {
+		return err
+	}
+	return p.queries.InsertEvent(ctx, sqlc.InsertEventParams{BusinessID: record.BusinessID, EventType: record.Type, SubjectType: record.SubjectType, SubjectID: record.SubjectID, Payload: record.Payload, DedupeKey: record.DedupeKey, OccurredAt: record.OccurredAt})
+}
+
+// PayloadJSON preserves encoded JSON from persistence and encodes typed producer facts.
+func PayloadJSON(value any) ([]byte, error) {
+	var raw []byte
+	switch value := value.(type) {
+	case nil:
+		raw = []byte("{}")
+	case []byte:
+		raw = value
+	case json.RawMessage:
+		raw = value
+	default:
+		encoded, err := json.Marshal(value)
 		if err != nil {
-			return fmt.Errorf("eventbus: publish %q: encoding payload: %w", event.Type, err)
+			return nil, err
 		}
-		payload = encoded
+		raw = encoded
 	}
-
-	dedupeKey := event.DedupeKey
-	if dedupeKey == "" {
-		dedupeKey = fmt.Sprintf("%s:%s:%d", event.Type, event.SubjectType, event.SubjectID)
+	if !json.Valid(raw) {
+		return nil, fmt.Errorf("invalid fact JSON")
 	}
-
-	return sqlc.New(tx).InsertEvent(ctx, sqlc.InsertEventParams{
-		BusinessID:  event.BusinessID,
-		EventType:   event.Type,
-		SubjectType: event.SubjectType,
-		SubjectID:   event.SubjectID,
-		Payload:     payload,
-		DedupeKey:   dedupeKey,
-	})
+	return raw, nil
+}
+func DecodePayload(value any, target any) error {
+	raw, err := PayloadJSON(value)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(raw, target)
 }

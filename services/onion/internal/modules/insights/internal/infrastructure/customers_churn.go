@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -9,12 +10,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type ChurnRateRow struct {
-	WindowDays   int32
-	ChurnedCount int64
-	ActiveCount  int64
-	ChurnPct     float64
-}
+type ChurnRateRow = domain.ChurnRateRow
 
 // GetChurnRates classifies customers against the requested period: customers
 // whose most recent paid order before the period ended are churned, while those

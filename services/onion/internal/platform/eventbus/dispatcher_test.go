@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/automations"
+	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/platform/eventbus"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -84,7 +86,13 @@ func TestDispatchBatchFansOutToSubscribedTargetsOnly(t *testing.T) {
 		t.Fatalf("precondition: %d runs before dispatch, want 0", got)
 	}
 
-	dispatcher := eventbus.NewDispatcher(db)
+	dispatcher := eventbus.NewDispatcher(
+		db,
+		automations.NewModule(ctx, db, func(context.Context, int64, int64) (automations.CustomerContact, bool, error) {
+			return automations.CustomerContact{}, false, nil
+		}),
+		webhooks.NewModule(ctx, db),
+	)
 
 	dispatched, err := dispatcher.DispatchBatch(ctx)
 	if err != nil {

@@ -19,8 +19,6 @@ import (
 // /flow/ws-ticket and pos_orders serves /pos/ws-ticket), so dashboard browsers
 // currently have no supported way to obtain a ticket and /dash/ws rejects
 // them. Add the exchange and migrate the dashboard client.
-func DashWSRoutes() []string { return []string{"/dash/ws"} }
-
 // ServeDashWS upgrades the HTTP request to a WebSocket and hands it off
 // to the global wsbus hub. Clients subscribe to user:{id} topics to
 // receive real-time notification invalidation hints.

@@ -102,15 +102,13 @@ jobs:
       - name: Confirm the schema set is present
         run: |
           set -euo pipefail
-          dir=internal/platform/database/schemas
-          if [ ! -f "$dir/migration_order.sh" ]; then
+          registry=internal/platform/database/schema_registry.tsv
+          if [ ! -f "$registry" ]; then
             echo "The schema set is missing from the checkout; there is nothing to apply." >&2
             exit 1
           fi
-          echo "Schema directories to be applied, in order:"
-          # shellcheck source=/dev/null
-          source "$dir/migration_order.sh"
-          printf '  %s\n' "${SCHEMA_MIGRATION_DIRS[@]}"
+          echo "Module-owned schema migrations to be applied, in order:"
+          cut -f1 "$registry" | sed '/^#/d; /^$/d'
 
       - name: Check the DSN parser still holds
         run: bash scripts/dsn_test.sh

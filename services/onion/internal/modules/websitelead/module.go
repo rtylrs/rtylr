@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	moduleinfra "github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure"
+
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/api"
@@ -20,7 +22,7 @@ type Module struct {
 
 func NewModule(ctx context.Context, db *sql.DB, notify Notify) *Module {
 	return &Module{
-		service: application.NewService(ctx, db, notify),
+		service: application.NewService(ctx, moduleinfra.NewRepository(db), notify),
 	}
 }
 

@@ -2,16 +2,14 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type TimeOffSummaryRow struct {
-	Pending  int64
-	Approved int64
-}
+type TimeOffSummaryRow = domain.TimeOffSummaryRow
 
 func (r *Repository) GetTimeOffSummary(ctx context.Context, businessID int64, from, to time.Time) (TimeOffSummaryRow, error) {
 	out := TimeOffSummaryRow{}

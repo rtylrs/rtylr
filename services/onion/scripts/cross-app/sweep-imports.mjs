@@ -25,7 +25,7 @@ const importRe =
   /"github\.com\/voxire\/onion\/(internal\/modules\/([\w]+)|internal\/platform\/([\w]+))(\/[\w/]*)?"/g;
 
 for (const m of moduleNames) {
-  for (const f of walk(join(paths.modules, m), ['.go'])) {
+  for (const f of walk(join(paths.modules, m), ['.go']).filter((path) => !path.endsWith('_test.go'))) {
     const t = readFileSync(f, 'utf8');
     // Only import blocks.
     const block = /import\s*\(([\s\S]*?)\)/.exec(t);
@@ -47,8 +47,7 @@ for (const m of moduleNames) {
 }
 
 // Platform-to-module imports are forbidden by policy; measure anyway.
-for (const f of walk(paths.platform, ['.go'])) {
-  if (f.includes('database/schemas')) continue;
+for (const f of walk(paths.platform, ['.go']).filter((path) => !path.endsWith('_test.go'))) {
   const rel = f.slice(paths.platform.length + 1);
   const pkg = `platform/${rel.split('/')[0]}`;
   const t = readFileSync(f, 'utf8');

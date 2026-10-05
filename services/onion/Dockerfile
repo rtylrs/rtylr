@@ -35,7 +35,7 @@ COPY services/onion/ ./services/onion/
 WORKDIR /src/services/onion
 RUN set -eux; \
     test -f /src/voxie/go.mod; \
-    test -f ./internal/platform/database/schemas/hr_core/schema.sql; \
+    test -f ./internal/modules/hr/sql/schema/hr_core/schema.sql; \
     test -d ./internal/platform/email/templates
 
 RUN go mod download && go mod verify

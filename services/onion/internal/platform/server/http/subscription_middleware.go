@@ -11,10 +11,11 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
+
+type SubscriptionAccessReader func(context.Context, int64) (string, bool, time.Time, error)
 
 const subscriptionAccessCacheTTL = time.Minute
 
@@ -29,7 +30,7 @@ type subscriptionAccess struct {
 // available so an owner can recover access, and console administrators are
 // never tenant-gated. The decision is cached briefly and invalidated whenever
 // subscription state changes.
-func SubscriptionEnforcementMiddleware(db *sql.DB, accessPolicy *RouteAccessPolicy) MiddlewareFunc {
+func SubscriptionEnforcementMiddleware(read SubscriptionAccessReader, accessPolicy *RouteAccessPolicy) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if accessPolicy != nil && accessPolicy.IsAllowedAnonymously(r.URL.Path) {
@@ -53,7 +54,7 @@ func SubscriptionEnforcementMiddleware(db *sql.DB, accessPolicy *RouteAccessPoli
 				return
 			}
 
-			access, err := cachedSubscriptionAccess(r.Context(), db, ownerID)
+			access, err := cachedSubscriptionAccess(r.Context(), read, ownerID)
 			if err != nil {
 				if errors.Is(err, sql.ErrNoRows) {
 					next.ServeHTTP(w, r)
@@ -72,33 +73,22 @@ func SubscriptionEnforcementMiddleware(db *sql.DB, accessPolicy *RouteAccessPoli
 	}
 }
 
-func cachedSubscriptionAccess(ctx context.Context, db *sql.DB, ownerID int64) (subscriptionAccess, error) {
-	if db == nil {
-		return subscriptionAccess{}, errors.New("subscription database is unavailable")
+func cachedSubscriptionAccess(ctx context.Context, read SubscriptionAccessReader, ownerID int64) (subscriptionAccess, error) {
+	if read == nil {
+		return subscriptionAccess{}, errors.New("subscription reader is unavailable")
 	}
 	return cacher.Of[subscriptionAccess]().GetOrComputeSingle(
 		ctx,
 		cacheKeys.SubscriptionAccess(ownerID),
 		func(ctx context.Context) (subscriptionAccess, error) {
 			var access subscriptionAccess
-			var trialEnd sql.NullTime
-			err := db.QueryRowContext(dbclient.WithTag(ctx, dbclient.TagMain), `
-SELECT s.status,
-       EXISTS (
-           SELECT 1 FROM manual_access_grants g
-           WHERE g.user_id = s.owner_id
-             AND g.plan_id = s.plan_id
-             AND g.revoked_at IS NULL
-             AND (g.expires_at IS NULL OR g.expires_at > CURRENT_TIMESTAMP)
-       ),
-       s.trial_ends_at
-FROM subscriptions s
-WHERE s.owner_id = ?`, ownerID).Scan(&access.Status, &access.Granted, &trialEnd)
+			status, granted, trialEnd, err := read(ctx, ownerID)
 			if err != nil {
 				return subscriptionAccess{}, err
 			}
-			if trialEnd.Valid {
-				access.TrialEnd = trialEnd.Time.UTC().Format(time.RFC3339Nano)
+			access.Status, access.Granted = status, granted
+			if !trialEnd.IsZero() {
+				access.TrialEnd = trialEnd.UTC().Format(time.RFC3339Nano)
 			}
 			return access, nil
 		},

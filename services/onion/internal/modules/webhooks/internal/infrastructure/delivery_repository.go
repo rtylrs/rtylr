@@ -13,9 +13,8 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// ErrDeliveryNotClaimed means another worker took the delivery first. Not a
-// failure: several workers reading one due list is the expected shape.
-var ErrDeliveryNotClaimed = errors.New("webhook delivery already claimed")
+// ErrDeliveryNotClaimed is retained as an adapter alias for existing callers.
+var ErrDeliveryNotClaimed = domain.ErrDeliveryNotClaimed
 
 // ListDueDeliveries returns deliveries ready to send, oldest due first.
 func (r *Repository) ListDueDeliveries(ctx context.Context, limit int32) ([]domain.Delivery, error) {
@@ -105,6 +104,9 @@ func (r *Repository) GetRegistrationForDelivery(ctx context.Context, webhookID, 
 		BusinessID: businessID,
 	})
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Registration{}, domain.ErrDeliveryRegistrationNotFound
+		}
 		return domain.Registration{}, err
 	}
 	return domain.Registration{
@@ -112,25 +114,6 @@ func (r *Repository) GetRegistrationForDelivery(ctx context.Context, webhookID, 
 		URL:      row.Url,
 		Secret:   row.Secret,
 		IsActive: row.IsActive,
-	}, nil
-}
-
-// GetEventForDelivery loads the event being delivered.
-func (r *Repository) GetEventForDelivery(ctx context.Context, eventID uint64, businessID int64) (domain.Event, error) {
-	row, err := r.queries.GetEventForDelivery(ctx, sqlc.GetEventForDeliveryParams{
-		ID:         eventID,
-		BusinessID: businessID,
-	})
-	if err != nil {
-		return domain.Event{}, err
-	}
-	return domain.Event{
-		ID:          row.ID,
-		Type:        row.EventType,
-		SubjectType: row.SubjectType,
-		SubjectID:   row.SubjectID,
-		Payload:     row.Payload,
-		OccurredAt:  row.OccurredAt,
 	}, nil
 }
 
@@ -202,7 +185,6 @@ func (r *Repository) ListDeliveriesForBusiness(ctx context.Context, businessID i
 			ID:          row.ID,
 			WebhookID:   row.WebhookID,
 			EventID:     row.EventID,
-			EventType:   row.EventType,
 			Status:      string(row.Status),
 			Attempts:    int(row.Attempts),
 			MaxAttempts: int(row.MaxAttempts),
@@ -234,7 +216,7 @@ func (r *Repository) ListDeliveriesForBusiness(ctx context.Context, businessID i
 //
 // notifiedOn excludes registrations already told on that UTC day, which is what
 // lets successive batches advance past the head of the failing set.
-func (r *Repository) ListFailingRegistrations(ctx context.Context, withinHours int64, limit int32, notifiedOn string) ([]domain.FailingRegistration, error) {
+func (r *Repository) ListFailingRegistrations(ctx context.Context, withinHours int64, limit int32, notifiedOn time.Time) ([]domain.FailingRegistration, error) {
 	rows, err := r.queries.ListRegistrationsWithRecentDeadDeliveries(ctx, sqlc.ListRegistrationsWithRecentDeadDeliveriesParams{
 		WithinHours: withinHours,
 		NotifiedOn:  notifiedOn,
@@ -258,24 +240,28 @@ func (r *Repository) ListFailingRegistrations(ctx context.Context, withinHours i
 	return out, nil
 }
 
-// GetNotificationRecipient resolves who to tell about a failing registration.
-//
-// sql.ErrNoRows means there is nobody to tell: the creator has left the
-// business, or their membership is no longer active. The caller logs that
-// rather than falling back to somebody who never asked for the message.
-func (r *Repository) GetNotificationRecipient(ctx context.Context, webhookID, businessID int64) (domain.NotificationRecipient, error) {
-	row, err := r.queries.GetWebhookNotificationRecipient(ctx, sqlc.GetWebhookNotificationRecipientParams{
+// GetNotificationOwner returns the user who registered the endpoint. The
+// organization module resolves their current membership and contact details.
+func (r *Repository) GetNotificationOwner(ctx context.Context, webhookID, businessID int64) (int64, error) {
+	ownerID, err := r.queries.GetWebhookNotificationOwner(ctx, sqlc.GetWebhookNotificationOwnerParams{
 		ID:         webhookID,
 		BusinessID: businessID,
 	})
 	if err != nil {
-		return domain.NotificationRecipient{}, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, domain.ErrNotificationRecipientNotFound
+		}
+		return 0, err
 	}
-	return domain.NotificationRecipient{
-		UserID: row.ID,
-		Email:  row.Email,
-		Name:   row.FullName,
-	}, nil
+	return ownerID, nil
+}
+
+func (r *Repository) RecordDeadDeliveryNotice(ctx context.Context, businessID, webhookID int64, notifiedOn time.Time) error {
+	return r.queries.RecordDeadDeliveryNotice(ctx, sqlc.RecordDeadDeliveryNoticeParams{
+		BusinessID: businessID,
+		WebhookID:  webhookID,
+		NoticeDate: notifiedOn,
+	})
 }
 
 // asTime narrows an aggregate column sqlc types as interface{}.

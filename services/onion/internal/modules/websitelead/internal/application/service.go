@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"html"
 	"net/url"
@@ -10,7 +9,6 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
-	"github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
@@ -43,9 +41,9 @@ func asyncLeadContext(ctx context.Context) (context.Context, context.CancelFunc)
 	return context.WithTimeout(context.WithoutCancel(ctx), asyncLeadTaskTimeout)
 }
 
-func NewService(_ context.Context, db *sql.DB, notify Notify) *Service {
+func NewService(_ context.Context, repo repository, notify Notify) *Service {
 	return &Service{
-		repo:   infrastructure.NewRepository(db),
+		repo:   repo,
 		notify: notify,
 	}
 }

@@ -2,16 +2,12 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type MarginBucketRow struct {
-	Label        string
-	LowerPct     float64
-	UpperPct     float64
-	ProductCount int64
-}
+type MarginBucketRow = domain.MarginBucketRow
 
 var marginBuckets = []struct {
 	Label string

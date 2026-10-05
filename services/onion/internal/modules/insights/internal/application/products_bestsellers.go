@@ -31,7 +31,7 @@ func (s *Service) GetBestSellers(ctx context.Context, businessID int64, limit in
 	type result struct {
 		Rows []BestSellerPayload
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		rows, rerr := s.repo.GetBestSellers(ctx, businessID, limit)
 		if rerr != nil {
 			return result{}, rerr

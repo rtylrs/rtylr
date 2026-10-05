@@ -11,7 +11,7 @@ import "testing"
 // asserts its rows are absent. These exist so that second tenant does not have to
 // be invented per package.
 //
-// Deliberately far outside the fixture id range (1001-3702 in scripts/fixtures)
+// Deliberately far outside the fixture id range (1001-3702 in internal/testutil/fixtures)
 // so a row seeded for the other tenant can never collide with a fixture row.
 const (
 	OtherOwnerID    int64 = 991001

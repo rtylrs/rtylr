@@ -2,16 +2,12 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type LTVBucketRow struct {
-	Label           string
-	LowerMinorUnits int64
-	UpperMinorUnits int64
-	CustomerCount   int64
-}
+type LTVBucketRow = domain.LTVBucketRow
 
 func (r *Repository) GetLTVDistribution(ctx context.Context, businessID int64) ([]LTVBucketRow, error) {
 	// SQL aggregates paid lifetime spend and returns the fixed six-bucket

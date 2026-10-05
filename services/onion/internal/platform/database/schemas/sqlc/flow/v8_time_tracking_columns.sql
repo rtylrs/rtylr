@@ -1,5 +1,0 @@
--- sqlc-only schema supplement for Flow's time-tracking columns.
---
--- These columns are now part of the hr_time_entries CREATE in
--- internal/platform/database/schemas/hr_time/schema.sql, so no ALTER is kept
--- here. The file remains because sqlc.yaml references it.

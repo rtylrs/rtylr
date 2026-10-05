@@ -2,9 +2,7 @@ version: "2"
 sql:
   - engine: "mysql"
     queries: "queries"
-    schema:
-      - "schema.sql"
-      - "../../../../internal/platform/database/schemas/shared/subscriptions.sql"
+    schema: "schema/shared/ai_usage.sql"
     gen:
       go:
         package: "sqlc"

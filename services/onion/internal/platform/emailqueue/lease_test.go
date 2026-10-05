@@ -67,7 +67,7 @@ func TestRecoveredClaimRejectsTheWorkerThatLostIt(t *testing.T) {
 		int64(claimLease/time.Second)+60, id); err != nil {
 		t.Fatalf("age the claim: %v", err)
 	}
-	NewPool(db).recoverStuck(ctx)
+	NewPool(db, func(context.Context, Job) error { return nil }).recoverStuck(ctx)
 
 	if status, jobID, attempts := state(); status != "pending" || jobID.Valid || attempts != 1 {
 		t.Fatalf("after recovery job %d is status=%s job_id=%+v attempts=%d, want pending/NULL/1",

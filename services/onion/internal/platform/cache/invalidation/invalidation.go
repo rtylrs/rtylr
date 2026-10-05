@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sort"
 	"sync"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -42,10 +41,6 @@ func Initialize() {
 	invalidationMap = map[string]InvalidateFunc{}
 }
 
-func RegisterInvalidation(invMap map[string]InvalidateFunc) {
-	RegisterGroups(invMap)
-}
-
 func RegisterGroups(invMap map[string]InvalidateFunc) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -59,25 +54,6 @@ func RegisterGroups(invMap map[string]InvalidateFunc) {
 		}
 		invalidationMap[route] = handler
 	}
-}
-
-func AvailableGroups() []string {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	groups := make([]string, 0, len(invalidationMap))
-	for group := range invalidationMap {
-		groups = append(groups, group)
-	}
-	sort.Strings(groups)
-	return groups
-}
-
-// InvalidateCacheGroup preserves the original boolean API for callers that
-// only need success/failure. New request handlers should use
-// InvalidateCacheGroupWithError so malformed registered groups are not hidden.
-func InvalidateCacheGroup(ctx context.Context, cacheType string, ids []string) bool {
-	return InvalidateCacheGroupWithError(ctx, cacheType, ids) == nil
 }
 
 // InvalidateCacheGroupWithError performs the local invalidation and publishes

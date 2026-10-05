@@ -15,7 +15,9 @@ echo -e "${BLUE}🔧 Generating sqlc files for all modules...${NC}"
 module_count=0
 for config_file in $(find internal/modules internal/platform -name "sqlc.yaml" -type f); do
     config_dir=$(dirname "$config_file")
-    module_name=$(basename "$(dirname "$(dirname "$config_dir")")")
+    module_name="${config_dir%/sql}"
+    module_name="${module_name#internal/modules/}"
+    module_name="${module_name#internal/platform/}"
     
     echo "  [$((++module_count))] Generating sqlc for module: $module_name ($config_dir)"
     

@@ -5,16 +5,28 @@ import (
 	"testing"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/crm/customers"
+	financereports "github.com/voxire/onion/internal/modules/finance/finance_reports"
+	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
+	posorders "github.com/voxire/onion/internal/modules/pos/orders"
 	"github.com/voxire/onion/internal/testutil"
 )
 
-func TestGetDashboard_NoError(t *testing.T) {
+func dashboardService(t *testing.T) *application.Service {
+	t.Helper()
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	return application.NewService(infrastructure.NewRepository(db), application.DashboardReaders{
+		Finance: financereports.NewModule(ctx, db),
+		POS:     posorders.NewModule(ctx, db),
+		CRM:     customers.NewModule(ctx, db),
+	})
+}
 
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: time.Now()})
+func TestGetDashboard_NoError(t *testing.T) {
+	ctx := context.Background()
+	snap, err := dashboardService(t).GetDashboard(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetDashboard: %v", err)
 	}
@@ -22,11 +34,8 @@ func TestGetDashboard_NoError(t *testing.T) {
 }
 
 func TestGetDashboard_RevenueNonNegative(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: time.Now()})
+	snap, err := dashboardService(t).GetDashboard(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetDashboard: %v", err)
 	}
@@ -36,11 +45,8 @@ func TestGetDashboard_RevenueNonNegative(t *testing.T) {
 }
 
 func TestGetDashboard_OrdersNonNegative(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: time.Now()})
+	snap, err := dashboardService(t).GetDashboard(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetDashboard: %v", err)
 	}
@@ -50,11 +56,8 @@ func TestGetDashboard_OrdersNonNegative(t *testing.T) {
 }
 
 func TestGetDashboard_CustomersNonNegative(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: time.Now()})
+	snap, err := dashboardService(t).GetDashboard(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetDashboard: %v", err)
 	}
@@ -64,11 +67,8 @@ func TestGetDashboard_CustomersNonNegative(t *testing.T) {
 }
 
 func TestGetDashboard_UnknownOwner_ReturnsZeros(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-
-	snap, err := repo.GetDashboard(ctx, 9999999, infrastructure.DashboardInput{Now: time.Now()})
+	snap, err := dashboardService(t).GetDashboard(ctx, 9999999)
 	if err != nil {
 		t.Fatalf("GetDashboard unknown owner: %v", err)
 	}
@@ -78,25 +78,9 @@ func TestGetDashboard_UnknownOwner_ReturnsZeros(t *testing.T) {
 	}
 }
 
-func TestGetDashboard_PastDate_NoError(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	past := time.Date(2024, 6, 15, 12, 0, 0, 0, time.UTC)
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: past})
-	if err != nil {
-		t.Fatalf("GetDashboard with past date: %v", err)
-	}
-	_ = snap
-}
-
 func TestGetDashboard_MarginBetweenMinusHundredAndHundred(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: time.Now()})
+	snap, err := dashboardService(t).GetDashboard(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetDashboard: %v", err)
 	}
@@ -106,11 +90,8 @@ func TestGetDashboard_MarginBetweenMinusHundredAndHundred(t *testing.T) {
 }
 
 func TestGetDashboard_ReturnsStructuredFields(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
-
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: time.Now()})
+	snap, err := dashboardService(t).GetDashboard(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetDashboard: %v", err)
 	}
@@ -119,33 +100,6 @@ func TestGetDashboard_ReturnsStructuredFields(t *testing.T) {
 	_ = snap.Customers
 	_ = snap.Orders
 	_ = snap.Margin
-}
-
-func TestGetDashboard_FirstOfMonth_NoError(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	// First day of month -- MTD window collapses to a single day.
-	firstOfMonth := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: firstOfMonth})
-	if err != nil {
-		t.Fatalf("GetDashboard on first of month: %v", err)
-	}
-	_ = snap
-}
-
-func TestGetDashboard_EndOfYear_NoError(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	endOfYear := time.Date(2024, 12, 31, 23, 59, 59, 0, time.UTC)
-	snap, err := repo.GetDashboard(ctx, testutil.OwnerID, infrastructure.DashboardInput{Now: endOfYear})
-	if err != nil {
-		t.Fatalf("GetDashboard at end of year: %v", err)
-	}
-	_ = snap
 }
 
 func TestGetTopCustomers_NoError(t *testing.T) {
@@ -327,13 +281,14 @@ func TestGetProductKPIs_NoError(t *testing.T) {
 
 func TestGetRevenueComparison_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
 	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2026, 12, 31, 23, 59, 59, 0, time.UTC)
 
-	row, err := repo.GetRevenueComparison(ctx, testutil.OwnerID, from, to)
+	row, err := application.NewService(infrastructure.NewRepository(db), application.DashboardReaders{
+		Finance: financereports.NewModule(ctx, db),
+	}).GetRevenueComparison(ctx, testutil.OwnerID, from, to)
 	if err != nil {
 		t.Fatalf("GetRevenueComparison: %v", err)
 	}

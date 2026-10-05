@@ -79,7 +79,7 @@ Three modules claim Flow insights. `workspaces` registers `flowinsightsv1.Regist
 - `hr_core` is injected into **11** modules, not 5: `hr_attendance`, `hr_leave`, `hr_overtime`, `hr_payroll`, `hr_time`, `hr_equipment`, `hr_shifts`, `benefits`, `payroll`, `staff`, `workspaces` (`cmd/api/main.go:446-451, 462, 516, 555, 563, 576, 608`). `internal/modules/CLAUDE.md` also says 5 and is also stale.
 - `echo` takes roughly 70 modules in one `NewModule` call (`cmd/api/main.go:542`).
 - `insights` carries roughly 40 annotated cross-schema reads spanning `hr_employees`, `hr_shift_assignments`, `hr_leave_requests`, `finance_invoices`, `pos_orders`, `crm_customers`, `erp_products`.
-- Two platform-port packages exist and are wired (`financejournal`, `customer_sync`).
+- The finance journal uses a platform port. CRM customer capture from other products now uses the transactional event outbox; the old `customer_sync` write helper has been removed.
 
 The answer to the question the contradiction poses: cross-module dependency is accepted, with a house style. The house style is what section 7 formalises.
 
@@ -116,7 +116,7 @@ Index coverage for the joins proposed below:
 
 Two sweeps, because the `// cross-schema read from` annotation is not a reliable index of the seams. The annotation sweep finds roughly 40, nearly all in `insights`. The `sqlc.yaml` sweep finds the ones the annotation missed.
 
-`internal/modules/workspaces/sql/sqlc.yaml` borrows three schema directories it does not own, each with a rationale comment:
+`internal/modules/flow/workspaces/sql/sqlc.yaml` borrows three schema directories it does not own, each with a rationale comment:
 
 ```yaml
 - "../../../../internal/platform/database/schemas/hr_time/schema.sql"
@@ -155,9 +155,9 @@ Five mechanisms exist in this repo. A sixth, events or projections, does not.
 | Provider interface in the owner's module | `addons/hub_addon_provider.go`, `api_keys/hub_api_keys_provider.go`, `webhooks/hub_webhooks_provider.go` | Owner ships an adapter; consumer calls `SetXProvider` (`cmd/api/main.go:726-727`). Consumer still imports the owner |
 | Aggregate read module | `insights`, `flow_insights` | A module that owns no tables and joins other domains' for reporting |
 | **Platform-level port** | `internal/platform/financejournal/contract.go` | DTO plus interface in `platform/`. Owner implements, consumer consumes, **neither imports the other**. Wired at `cmd/api/main.go:494` and `cmd/worker/main.go:129`, with `noopFinancePoster` as the default (`hr_payroll/.../service.go:78`) |
-| **Shared platform write helper** | `internal/platform/customer_sync` | Platform package with its own `sql/` and `persistence/`, takes a `DBTX` so it enlists in the caller's transaction. Called from 9 modules' repositories |
+| **Transactional outbox fact** | `internal/platform/eventbus` and `internal/contracts/crm` | A source module records `customer_contact_captured` in its own transaction. CRM consumes it in a CRM-owned transaction, deduplicates by event ID, then publishes `crm_customer_linked` for the source owner to update its own reference. |
 
-**Events and projections do not exist.** No `EventBus`, `Publisher`, `Subscriber` or `Outbox` type anywhere in `internal/`. `internal/platform/wsbus` has `Publish` and `Subscribe` but it is a WebSocket fanout hub with a Redis backplane for realtime UI delivery: no durability, no replay, no projection tables. Introducing events would be introducing a mechanism, and section 11's not-worth-building section treats it as such.
+**Durable events now exist for cross-module facts.** `internal/platform/eventbus` writes an outbox in the source transaction and dispatches it to subscribers. `internal/platform/wsbus` remains a WebSocket fanout hub for realtime UI delivery; it has no durability, replay, or projection tables.
 
 ### 4.4 Handler layer
 
@@ -195,7 +195,7 @@ Five mechanisms exist in this repo. A sixth, events or projections, does not.
 | Flow presence reads HR directory and approved leave | Constructor injection | `cmd/api/main.go:462`, `workspaces/presence.go:52-74` | Copy with care. Works, but couples `workspaces` to two HR packages and the endpoint has no contract |
 | Flow work types map onto HR payroll categories | Column plus contract field | `v8:76`, `worktime.sql:107`, `voxie/api/flow/time/v1/models.onk:21` | Copy. Note the id is never validated against an HR category |
 | HR payroll posts totals to the finance journal | **Platform-level port** | `platform/financejournal/contract.go`, `journal/module.go:27`, `cmd/api/main.go:494` | **Copy this above all others.** Cross-generation, no module-to-module import |
-| CRM customer upsert from 9 modules | Shared platform write helper | `platform/customer_sync/customer_sync.go:30` | Copy for shared writes only |
+| CRM customer capture from other products | Transactional outbox plus CRM-owned consumer | `internal/contracts/crm/contact_captured.go`, `crm/customers/module.go` | Use for facts that must cross product boundaries; each owner writes in its own transaction |
 
 ### Class B: data exists, nothing exposes it
 
@@ -301,7 +301,7 @@ Every id-carrying `int64` in a new contract crosses the wire as a **string**. A 
 
 The five-way menu collapses to three questions.
 
-1. **Is the consumer reading, or writing someone else's record?** Writing means the shared platform write helper (`customer_sync`) or nothing. Reading continues.
+1. **Is the consumer reading, or writing someone else's record?** Reads use an owner capability or an explicitly governed projection. Writes go through an owner capability for synchronous operations or a durable event fact for asynchronous propagation; a consumer must not write the owner's tables directly.
 2. **Does the consumer need business logic the owner enforces, or just columns?** Just columns, and the owner's schema is stable: cross-schema read. Logic, ownership rules, or a value the owner may change how it computes: a port.
 3. **Do owner and consumer sit in different generations?** If yes, a **platform-level port** is the only option that does not couple a legacy module to an onekit one or vice versa.
 
@@ -395,7 +395,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 **`flow_tasks` and `flow_projects`: neither, and this is where a row count misleads.**
 
-359 of 363 `flow_tasks` rows and 326 of 536 `flow_projects` rows sit at `business_id = 0`. But the `flow_tasks` INSERT names `business_id` (`workspaces.sql`, `CreateTask`), `domain.TaskInput` carries a `BusinessID` field (`domain/task.go:125`), and current tests populate it with `testutil.BusinessID`. `business_id` entered that INSERT in commit `6220c959` on **2026-06-19**, seven weeks before the polluted rows were created (a contiguous burst, 2026-08-08 13:09 to 19:48). No fixture file creates Flow rows: `scripts/fixtures/` contains users, businesses, chat sessions, POS, HR, ERP/CRM, config and console admin only.
+359 of 363 `flow_tasks` rows and 326 of 536 `flow_projects` rows sit at `business_id = 0`. But the `flow_tasks` INSERT names `business_id` (`workspaces.sql`, `CreateTask`), `domain.TaskInput` carries a `BusinessID` field (`domain/task.go:125`), and current tests populate it with `testutil.BusinessID`. `business_id` entered that INSERT in commit `6220c959` on **2026-06-19**, seven weeks before the polluted rows were created (a contiguous burst, 2026-08-08 13:09 to 19:48). No fixture file creates Flow rows: `internal/testutil/fixtures/` contains users, businesses, chat sessions, POS, HR, ERP/CRM, config and console admin only.
 
 So these rows were written by a caller that passed 0, after the column was being written, and not by the fixture set. Since `ResolveBusinessID` cannot yield 0, no handler produced them. The remaining explanation is direct repository-level access during a dev or integration session against `onion_dev`, which matches this database's known history as an integration-test target. **Labelled as an inference.** What would settle it: the same query against production. I did not run it and recommend someone with production read access does, because the severity difference between "dev residue" and "a live path I have not found" is the whole question.
 
@@ -607,12 +607,12 @@ Not present in their documents.
 | `owner_id` carries three incompatible meanings across the Flow-to-HR path, two of them in one table. The actual blocker on project cost | `worktime_service.go:62`, `hr_time/.../repository.go:90`, `workspaces/.../repository.go:1290` |
 | Two live Flow time stores | `workspaces.sql:139` versus `worktime.sql:70` |
 | The platform-port mechanism, a sixth option better than the five-way menu, already proven cross-generation | `platform/financejournal/contract.go` |
-| The shared platform write helper, used by 9 modules' repositories | `platform/customer_sync/customer_sync.go:30` |
+| CRM customer writes from other product repositories, previously routed through a shared cross-module `DBTX` helper | Replaced by `customer_contact_captured` outbox events and CRM-owned persistence |
 | `billable_invoice_id` holds `time.Now().UnixMilli()`, poisoning the Flow-to-Finance join key | `service.go:290`, `time_entries.sql:66` |
 | `ExportBillableEntries` has no transaction; billable hours are losable on a 200 | `service.go:293-297` |
 | `flow_views`: 55 of 55 rows in the zero bucket, `ViewInput` has no `BusinessID` | `features.sql:75`, `domain/features.go:105` |
 | rtylr#871's open question settled: the `flow_workspaces` path is handler-reachable on every registration **and every login** | `cmd/api/main.go:729-733` |
-| rtylr#871's row counts conflate three causes. `flow_tasks`' 359 zero rows are neither fixture residue nor handler-reachable | `6220c959` predates the rows by seven weeks; `scripts/fixtures/` creates no Flow rows |
+| rtylr#871's row counts conflate three causes. `flow_tasks`' 359 zero rows are neither fixture residue nor handler-reachable | `6220c959` predates the rows by seven weeks; `internal/testutil/fixtures/` creates no Flow rows |
 | `migrate.sh` records a failed migration as applied and reports success | `scripts/migrate.sh:76-78` |
 | `hr.work_schedule.v1` has zero implementors | `voxie/api/hr/work_schedule/v1/service.onk` |
 | `/flow/roadmap` and `/flow/team/workload` served twice, across two generations, with the paginated implementation shadowed | `flow_insights/.../insights_handlers.go:19-20` versus `workspaces/.../insights_service.go:89,137` |

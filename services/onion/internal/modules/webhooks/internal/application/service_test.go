@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
+	"github.com/voxire/onion/internal/platform/eventbus"
 )
 
 type mockRepo struct {
@@ -172,23 +173,29 @@ func (m *mockRepo) ListDeliveriesForBusiness(
 	return m.deliveriesResult, m.deliveriesTotal, m.deliveriesErr
 }
 
+type staticEventReader struct{ event eventbus.Event }
+
+func (r staticEventReader) GetEvent(context.Context, uint64, int64) (eventbus.Event, error) {
+	return r.event, nil
+}
+
 // The service is a pass-through here, and that is the point worth pinning: the
 // business scope and the caller's filter must both reach the repository, since
 // the repository is where the tenant scope is enforced.
 func TestListDeliveriesPassesTheScopeAndFilterThrough(t *testing.T) {
 	m := &mockRepo{
-		deliveriesResult: []domain.DeliveryRecord{{ID: 7, Status: "dead"}},
+		deliveriesResult: []domain.DeliveryRecord{{ID: 7, EventID: 9, Status: "dead"}},
 		deliveriesTotal:  1,
 	}
-	service := &Service{repo: m}
+	service := &Service{repo: m, events: staticEventReader{event: eventbus.Event{ID: 9, Type: "order_created"}}}
 
 	filter := domain.DeliveryFilter{WebhookID: 42, Status: "dead", Limit: 25, Offset: 50}
 	got, total, err := service.ListDeliveries(context.Background(), 9003, filter)
 	if err != nil {
 		t.Fatalf("ListDeliveries: %v", err)
 	}
-	if total != 1 || len(got) != 1 || got[0].ID != 7 {
-		t.Errorf("got %d rows (total %d), want the single record through unchanged", len(got), total)
+	if total != 1 || len(got) != 1 || got[0].ID != 7 || got[0].EventType != "order_created" {
+		t.Errorf("got %+v (total %d), want the single record with its event type", got, total)
 	}
 	if m.deliveriesGot.businessID != 9003 {
 		t.Errorf("business = %d, want 9003: the tenant scope did not reach the repository", m.deliveriesGot.businessID)

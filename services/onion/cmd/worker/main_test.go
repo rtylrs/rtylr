@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/voxire/onion/internal/modules/team"
+	"github.com/voxire/onion/internal/modules/organization/team"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 )
 

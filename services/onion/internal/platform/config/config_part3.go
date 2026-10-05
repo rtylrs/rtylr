@@ -4,7 +4,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // envOrDefault returns the env var value, or fallback when it's unset/empty.
@@ -45,18 +44,6 @@ func positiveEnvIntOrDefault(key string, fallback int) int {
 		return fallback
 	}
 	return n
-}
-
-func envDurationOrDefault(key string, fallback time.Duration) time.Duration {
-	v := os.Getenv(key)
-	if v == "" {
-		return fallback
-	}
-	d, err := time.ParseDuration(v)
-	if err != nil {
-		return fallback
-	}
-	return d
 }
 
 func GetOpenAIAPIKey() string {

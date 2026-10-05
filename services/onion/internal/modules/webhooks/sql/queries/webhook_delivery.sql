@@ -1,8 +1,5 @@
--- Delivery side of the event fan-out. The dispatcher
--- (internal/platform/eventbus) writes one webhook_deliveries row per
--- registration that subscribes to an event; these statements drain that queue.
+-- Delivery queue and report queries owned by the webhooks module.
 
--- cross-schema read from shared — webhook_deliveries is the platform fan-out queue.
 -- Ordered by due time so a delivery backed off to later does not overtake one
 -- ready now. 'failed' means retryable; 'dead' has spent its attempts and is
 -- deliberately never picked up again.
@@ -59,12 +56,6 @@ SELECT id, url, secret, is_active
 FROM hub_webhooks
 WHERE id = ? AND business_id = ?;
 
--- cross-schema read from shared — the event being delivered.
--- name: GetEventForDelivery :one
-SELECT id, event_type, subject_type, subject_id, payload, occurred_at
-FROM platform_events
-WHERE id = ? AND business_id = ?;
-
 -- last_triggered_at exists on hub_webhooks and nothing has ever written it.
 -- name: RecordWebhookTriggered :exec
 UPDATE hub_webhooks
@@ -94,18 +85,31 @@ SET status = IF(attempts >= max_attempts, 'dead', 'failed'),
 WHERE status = 'delivering'
   AND updated_at < DATE_SUB(NOW(), INTERVAL sqlc.arg('stale_after_seconds') SECOND);
 
--- The tenant-facing delivery listing. Scoped by business so a caller only ever
--- sees their own registrations' deliveries, and joined to platform_events for
--- the event type, which is what makes a row meaningful without a second call.
+-- Event fan-out is consumed here, so this module owns registration matching
+-- and its delivery queue.
+-- name: ListWebhooksForEvent :many
+SELECT id
+FROM hub_webhooks
+WHERE business_id = ?
+  AND is_active = TRUE
+  AND JSON_CONTAINS(events, JSON_QUOTE(sqlc.arg('event_type')));
+
+-- The unique target key makes retries after a partial fan-out harmless.
+-- name: EnqueueWebhookDelivery :exec
+INSERT INTO webhook_deliveries (business_id, webhook_id, event_id)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE id = id;
+
+-- The event type is resolved through the eventbus reader in the application
+-- layer. This query reads only the delivery module's owned queue.
 --
 -- The two filters are optional and expressed the sqlc way: a zero webhook_id
 -- and an empty status mean "no filter" rather than "match nothing".
 -- name: ListWebhookDeliveriesForBusiness :many
-SELECT d.id, d.webhook_id, d.event_id, e.event_type, d.status,
+SELECT d.id, d.webhook_id, d.event_id, d.status,
        d.attempts, d.max_attempts, d.response_status, d.last_error,
        d.next_attempt_at, d.delivered_at, d.created_at
 FROM webhook_deliveries d
-JOIN platform_events e ON e.id = d.event_id
 WHERE d.business_id = sqlc.arg('business_id')
   AND (sqlc.arg('webhook_id') = 0 OR d.webhook_id = sqlc.arg('webhook_id'))
   AND (sqlc.arg('status') = '' OR d.status = sqlc.arg('status'))
@@ -129,11 +133,8 @@ WHERE d.business_id = sqlc.arg('business_id')
 -- months ago and was never fixed does not generate a notification forever.
 -- updated_at is when the row reached its final state.
 --
--- cross-schema read from shared — email_jobs holds the notifier's own dedupe
--- keys. A registration already told today is excluded so a batch advances past
--- the head of the list: the query returns the same rows on every hourly pass,
--- and without the exclusion everything beyond one batch is never reached. The
--- key must match the notifier's dedupe key exactly (webhook_dead:<id>:<date>).
+-- A notice row lets each batch advance past registrations already contacted
+-- today without reading the email queue's private persistence table.
 -- name: ListRegistrationsWithRecentDeadDeliveries :many
 SELECT d.business_id, d.webhook_id, w.url,
        COUNT(*) AS dead_count,
@@ -144,26 +145,23 @@ WHERE d.status = 'dead'
   AND d.updated_at >= DATE_SUB(NOW(), INTERVAL sqlc.arg('within_hours') HOUR)
   AND NOT EXISTS (
         SELECT 1
-        FROM email_jobs e
-        WHERE e.dedupe_key = CONCAT('webhook_dead:', d.webhook_id, ':', sqlc.arg('notified_on'))
+        FROM webhook_dead_delivery_notices n
+        WHERE n.business_id = d.business_id
+          AND n.webhook_id = d.webhook_id
+          AND n.notice_date = sqlc.arg('notified_on')
       )
 GROUP BY d.business_id, d.webhook_id, w.url
 ORDER BY d.webhook_id ASC
 LIMIT ?;
 
--- cross-schema read from users and shared — who to tell about a failing
--- registration.
---
--- hub_webhooks.owner_id is the user who created the registration, so they are
--- the person who set it up and the one who should hear it broke. Gated on an
--- active authorization_business_members row for the registration's own
--- business, so somebody who has since left is not sent a current tenant's
--- failures.
--- name: GetWebhookNotificationRecipient :one
-SELECT u.id, COALESCE(u.email, '') AS email, COALESCE(u.full_name, '') AS full_name
-FROM hub_webhooks w
-JOIN users u ON u.id = w.owner_id
-JOIN authorization_business_members m
-  ON m.user_id = u.id AND m.business_id = w.business_id AND m.status = 'active'
-WHERE w.id = ? AND w.business_id = ?
-LIMIT 1;
+-- name: GetWebhookNotificationOwner :one
+SELECT owner_id
+FROM hub_webhooks
+WHERE id = ? AND business_id = ?;
+
+-- Enqueued email jobs have their own idempotency key, so recording a notice
+-- after enqueue is safe even if the notifier is interrupted between the two.
+-- name: RecordDeadDeliveryNotice :exec
+INSERT INTO webhook_dead_delivery_notices (business_id, webhook_id, notice_date)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE notice_date = VALUES(notice_date);

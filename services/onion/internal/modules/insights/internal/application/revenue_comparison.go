@@ -24,18 +24,28 @@ func (s *Service) GetRevenueComparison(ctx context.Context, businessID int64, fr
 	if err != nil {
 		return RevenueComparisonPayload{}, err
 	}
-	out, err := cacher.Of[RevenueComparisonPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (RevenueComparisonPayload, error) {
-		row, rerr := s.repo.GetRevenueComparison(ctx, businessID, from, to)
+	out, err := cacher.Of[RevenueComparisonPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (RevenueComparisonPayload, error) {
+		if s.dashboard.Finance == nil {
+			return RevenueComparisonPayload{}, errDashboardReadersUnavailable
+		}
+		windowDays := int(to.Sub(from).Hours() / 24)
+		priorTo := from.AddDate(0, 0, -1)
+		priorFrom := priorTo.AddDate(0, 0, -windowDays)
+		thisAmount, rerr := s.dashboard.Finance.InsightsPaidInvoiceTotal(ctx, businessID, from, to)
 		if rerr != nil {
-			return RevenueComparisonPayload{}, rerr
+			return RevenueComparisonPayload{}, fmt.Errorf("read current paid invoice total: %w", rerr)
+		}
+		lastAmount, rerr := s.dashboard.Finance.InsightsPaidInvoiceTotal(ctx, businessID, priorFrom, priorTo)
+		if rerr != nil {
+			return RevenueComparisonPayload{}, fmt.Errorf("read previous paid invoice total: %w", rerr)
 		}
 		var delta float64
-		if row.LastPeriodMinor > 0 {
-			delta = (float64(row.ThisPeriodMinor-row.LastPeriodMinor) / float64(row.LastPeriodMinor)) * 100
+		if lastAmount > 0 {
+			delta = (float64(thisAmount-lastAmount) / float64(lastAmount)) * 100
 		}
 		return RevenueComparisonPayload{
-			ThisPeriodMinorUnits: row.ThisPeriodMinor,
-			LastPeriodMinorUnits: row.LastPeriodMinor,
+			ThisPeriodMinorUnits: thisAmount,
+			LastPeriodMinorUnits: lastAmount,
 			DeltaPct:             delta,
 		}, nil
 	}, cacher.WithExpiry(ctx, 5*time.Minute))

@@ -10,7 +10,8 @@ import (
 )
 
 type Repository struct {
-	queries *sqlc.Queries
+	queries  *sqlc.Queries
+	userName func(context.Context, int64, int64) (string, error)
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -71,8 +72,12 @@ func (r *Repository) ListActivity(ctx context.Context, businessID int64, app str
 			a.UserID = row.UserID.Int64
 		}
 
-		if row.UserName.Valid {
-			a.UserName = row.UserName.String
+		if a.UserID > 0 && r.userName != nil {
+			name, err := r.userName(ctx, businessID, a.UserID)
+			if err != nil {
+				return nil, 0, err
+			}
+			a.UserName = name
 		}
 
 		if row.CreatedAt.Valid {
@@ -94,4 +99,9 @@ func (r *Repository) ListActivity(ctx context.Context, businessID int64, app str
 	}
 
 	return activities, total, nil
+}
+
+func (r *Repository) WithUserNameReader(reader func(context.Context, int64, int64) (string, error)) *Repository {
+	r.userName = reader
+	return r
 }

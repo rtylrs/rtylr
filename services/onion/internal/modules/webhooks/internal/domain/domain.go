@@ -5,17 +5,22 @@ import (
 	"time"
 )
 
-var ErrWebhookNotFound = errors.New("webhook not found")
+var (
+	ErrWebhookNotFound               = errors.New("webhook not found")
+	ErrDeliveryNotClaimed            = errors.New("webhook delivery already claimed")
+	ErrDeliveryRegistrationNotFound  = errors.New("webhook registration not found")
+	ErrNotificationRecipientNotFound = errors.New("webhook notification recipient not found")
+)
 
 type Webhook struct {
-	ID              int64      `json:"id"`
-	OwnerID         int64      `json:"owner_id"`
-	BusinessID      int64      `json:"business_id"`
-	URL             string     `json:"url"`
-	Events          []string   `json:"events"`
-	Secret          string     `json:"-"`
-	IsActive        bool       `json:"is_active"`
-	LastTriggeredAt *time.Time `json:"last_triggered_at"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
+	ID              int64
+	OwnerID         int64
+	BusinessID      int64
+	URL             string
+	Events          []string
+	Secret          string
+	IsActive        bool
+	LastTriggeredAt *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }

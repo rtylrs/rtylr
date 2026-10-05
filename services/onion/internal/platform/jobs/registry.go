@@ -39,24 +39,12 @@ func NewRegistry() *Registry {
 
 var defaultRegistry = NewRegistry()
 
-func Register(job Job) error {
-	return defaultRegistry.Register(job)
-}
-
 func Names() []string {
 	return defaultRegistry.Names()
 }
 
-func Jobs() []Job {
-	return defaultRegistry.Jobs()
-}
-
 func DefaultRegistry() *Registry {
 	return defaultRegistry
-}
-
-func Run(ctx context.Context, name string) (Result, error) {
-	return defaultRegistry.Run(ctx, name)
 }
 
 func (r *Registry) Register(job Job) error {

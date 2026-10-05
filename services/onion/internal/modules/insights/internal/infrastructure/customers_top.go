@@ -2,35 +2,17 @@ package infrastructure
 
 import (
 	"context"
-	"time"
 
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type TopCustomerRow struct {
-	CustomerID         int64
-	FirstName          string
-	LastName           string
-	Email              string
-	LifetimeSpendMinor int64
-	OrderCount         int64
-	LastOrderAt        time.Time
-}
+type TopCustomerRow = domain.TopCustomerRow
 
-type TopCustomerQuery struct {
-	From         time.Time
-	To           time.Time
-	Limit        int32
-	Offset       int32
-	ByOrderCount bool
-	Descending   bool
-}
+type TopCustomerQuery = domain.TopCustomerQuery
 
-type TopCustomerPage struct {
-	Rows  []TopCustomerRow
-	Total int64
-}
+type TopCustomerPage = domain.TopCustomerPage
 
 func (r *Repository) GetTopCustomers(ctx context.Context, businessID int64, query TopCustomerQuery) (TopCustomerPage, error) {
 	query.From = dateOnly(query.From)

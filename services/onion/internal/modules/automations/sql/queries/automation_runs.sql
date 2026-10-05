@@ -2,7 +2,6 @@
 -- (internal/platform/eventbus) writes one automation_runs row per automation
 -- that subscribes to an event; these statements drain that queue.
 
--- cross-schema read from shared — automation_runs is the platform fan-out queue.
 -- Ordered by due time so a run backed off to later does not overtake one that
 -- is ready now. 'failed' is included because it means retryable; 'dead' has
 -- exhausted its attempts and is deliberately never picked up again.
@@ -56,27 +55,24 @@ SELECT id, trigger_type, actions, is_active
 FROM crm_automations
 WHERE id = ? AND business_id = ?;
 
--- cross-schema read from shared — the event the run was created from.
--- name: GetEventForRun :one
-SELECT id, event_type, subject_type, subject_id, payload
-FROM platform_events
-WHERE id = ? AND business_id = ?;
-
 -- The counters #834 records as dead. Written once per successful execution.
 -- name: RecordAutomationExecution :exec
 UPDATE crm_automations
 SET run_count = run_count + 1, last_run_at = NOW()
 WHERE id = ? AND business_id = ?;
 
--- cross-schema read from crm — the recipient for a send_email action.
--- The customer id comes from the event payload, so it is checked against the
--- run's business rather than trusted.
--- name: GetCustomerContactForRun :one
-SELECT id,
-       COALESCE(email, '') AS email,
-       TRIM(CONCAT(first_name, ' ', COALESCE(last_name, ''))) AS full_name
-FROM crm_customers
-WHERE id = ? AND business_id = ?;
+-- Event fan-out is consumed here so the automation module owns both the
+-- subscription query and its execution queue.
+-- name: ListAutomationsForEvent :many
+SELECT id
+FROM crm_automations
+WHERE business_id = ? AND trigger_type = ? AND is_active = TRUE;
+
+-- The unique target key makes retries after a partial fan-out harmless.
+-- name: EnqueueAutomationRun :exec
+INSERT INTO automation_runs (business_id, automation_id, event_id)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE id = id;
 
 -- Ends a run abandoned mid-execution, which happens when the worker dies
 -- between claiming a row and recording its outcome. Without this the row sits

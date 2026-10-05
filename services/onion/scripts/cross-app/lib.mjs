@@ -3,24 +3,20 @@
 // directory holds round one's five CSVs plus these seven.
 import { readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
-import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-// ONION resolves wherever this checkout lives; this repo may be checked out
-// in a worktree rather than at ~/Development/onion.
-export const ONION = resolve(here, '..', '..');
-// The audit data always lands in the canonical rtylr clone so one directory
-// holds round one's CSVs plus these seven.
-export const RTYLR =
-  process.env.CROSS_APP_RTYLR || join(homedir(), 'Development', 'rtylr');
-export const OUT =
-  process.env.CROSS_APP_OUT || join(RTYLR, 'docs', 'cross-app', 'inventory');
+export const ONION = process.env.CROSS_APP_ONION || resolve(here, '..', '..');
+export const RTYLR = process.env.CROSS_APP_RTYLR || resolve(ONION, '..', '..');
+export const OUT = process.env.CROSS_APP_OUT || join(RTYLR, 'docs', 'cross-app', 'inventory');
 
 const CSV_PATHS = join(ONION, 'internal', 'modules');
 const PLATFORM_PATHS = join(ONION, 'internal', 'platform');
-const SCHEMA_PATHS = join(ONION, 'internal', 'platform', 'database', 'schemas');
+const SCHEMA_ROOTS = [
+  join(ONION, 'internal', 'modules'),
+  join(ONION, 'internal', 'platform'),
+];
 
 export function walk(dir, exts, out = []) {
   let entries;
@@ -54,21 +50,112 @@ export function moduleDirs() {
     .map((d) => ({ name: d, path: join(CSV_PATHS, d) }));
 }
 
+export function modulePackages() {
+  const packages = [];
+  for (const root of moduleDirs()) {
+    for (const file of walk(root.path, ['module.go'])) {
+      const path = dirname(file);
+      const relative = path.slice(root.path.length + 1);
+      packages.push({ name: root.name, path, packagePath: relative });
+    }
+  }
+  return packages;
+}
+
 export const paths = {
   modules: CSV_PATHS,
   platform: PLATFORM_PATHS,
-  schemas: SCHEMA_PATHS,
+  commands: join(ONION, 'cmd'),
+  schemaRoots: SCHEMA_ROOTS,
 };
 
-// Voxie lives as this repo's submodule when initialised, otherwise as the
-// sibling checkout. Contracts are read from whichever exists; CROSS_APP_VOXIE
-// overrides both when the checkout lives somewhere else.
-import { existsSync } from 'node:fs';
+export function schemaFiles() {
+  return SCHEMA_ROOTS.flatMap((root) => walk(root, ['.sql'])).filter((file) => {
+    const parts = file.split('/');
+    const sqlIndex = parts.lastIndexOf('sql');
+    const child = parts[sqlIndex + 1] || '';
+    return sqlIndex >= 0 && (
+      ['schema', 'schema.sql'].includes(child) ||
+      (parts.length === sqlIndex + 2 && /^migration_.*\.sql$/.test(child))
+    );
+  });
+}
+
+export function cteNames(sql) {
+  const source = sql.replace(/--[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const names = new Set();
+  const withStart = /^\s*with\s+(?:recursive\s+)?/i.exec(source);
+  if (!withStart) return names;
+
+  let i = withStart[0].length;
+  const whitespace = () => {
+    while (/\s/.test(source[i] || '')) i++;
+  };
+  const identifier = () => {
+    whitespace();
+    if (source[i] === '`') {
+      const end = source.indexOf('`', i + 1);
+      if (end < 0) return '';
+      const value = source.slice(i + 1, end);
+      i = end + 1;
+      return value;
+    }
+    const match = /^[a-zA-Z_]\w*/.exec(source.slice(i));
+    if (!match) return '';
+    i += match[0].length;
+    return match[0];
+  };
+  const parenthesized = () => {
+    if (source[i] !== '(') return false;
+    let depth = 0;
+    let quote = '';
+    while (i < source.length) {
+      const c = source[i++];
+      if (quote) {
+        if (c === '\\') i++;
+        else if (c === quote) {
+          if (source[i] === quote && quote !== "'") i++;
+          else quote = '';
+        }
+        continue;
+      }
+      if (c === "'" || c === '"' || c === '`') quote = c;
+      else if (c === '(') depth++;
+      else if (c === ')' && --depth === 0) return true;
+    }
+    return false;
+  };
+
+  while (i < source.length) {
+    const name = identifier();
+    if (!name) break;
+    whitespace();
+    if (source[i] === '(') {
+      if (!parenthesized()) break;
+      whitespace();
+    }
+    const as = /^as\b/i.exec(source.slice(i));
+    if (!as) break;
+    i += as[0].length;
+    whitespace();
+    if (!parenthesized()) break;
+    names.add(name.toLowerCase());
+    whitespace();
+    if (source[i] !== ',') break;
+    i++;
+  }
+  return names;
+}
+
+export function schemaDomain(file) {
+  const parts = relRepo(file).split('/');
+  if (parts[1] === 'modules') return parts[2];
+  if (parts[1] === 'platform') return `platform/${parts[2]}`;
+  return 'unknown';
+}
+
 export function voxieApiDir() {
-  if (process.env.CROSS_APP_VOXIE) return process.env.CROSS_APP_VOXIE;
-  const sub = join(ONION, 'voxie', 'api');
-  if (existsSync(sub)) return sub;
-  return join(homedir(), 'Development', 'voxie', 'api');
+ return process.env.CROSS_APP_VOXIE || join(RTYLR, 'voxie', 'api');
 }
 
 export function csvCell(v) {

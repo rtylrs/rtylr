@@ -21,7 +21,7 @@ func (s *Service) GetOperationsKPIs(ctx context.Context, businessID int64) (Oper
 	if err != nil {
 		return OperationsKPIPayload{}, err
 	}
-	out, err := cacher.Of[OperationsKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (OperationsKPIPayload, error) {
+	out, err := cacher.Of[OperationsKPIPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (OperationsKPIPayload, error) {
 		k, rerr := s.repo.GetOperationsKPIs(ctx, businessID)
 		if rerr != nil {
 			return OperationsKPIPayload{}, rerr
