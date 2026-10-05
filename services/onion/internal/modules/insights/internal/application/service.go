@@ -9,14 +9,33 @@ import (
 
 // Service coordinates read models and the small set of Insights-owned settings.
 type Service struct {
-	repo repository
+	repo      repository
+	dashboard DashboardReaders
+}
+
+type FinanceDashboardReader interface {
+	InsightsPaidInvoiceTotal(context.Context, int64, time.Time, time.Time) (int64, error)
+	InsightsExpenseTotal(context.Context, int64, time.Time, time.Time) (int64, error)
+}
+
+type POSDashboardReader interface {
+	CountOrdersCreatedBetween(context.Context, int64, time.Time, time.Time) (int64, error)
+}
+
+type CRMDashboardReader interface {
+	CountCustomersCreatedBetween(context.Context, int64, time.Time, time.Time) (int64, error)
+}
+
+type DashboardReaders struct {
+	Finance FinanceDashboardReader
+	POS     POSDashboardReader
+	CRM     CRMDashboardReader
 }
 
 type repository interface {
 	GetInsightsGeneration(context.Context, int64) (time.Time, error)
 	GetProductMarginRows(context.Context, int64) ([]domain.ProductMarginRow, error)
 	GetTopCustomers(context.Context, int64, domain.TopCustomerQuery) (domain.TopCustomerPage, error)
-	GetDashboard(context.Context, int64, domain.DashboardInput) (domain.DashboardSnapshot, error)
 	GetCustomerKPIs(context.Context, int64, time.Time, time.Time) (domain.CustomerKPIs, error)
 	GetChurnRates(context.Context, int64, time.Time, time.Time) ([]domain.ChurnRateRow, error)
 	GetLTVDistribution(context.Context, int64) ([]domain.LTVBucketRow, error)
@@ -35,7 +54,6 @@ type repository interface {
 	GetSlowMovers(context.Context, int64, int32) ([]domain.SlowMoverRow, error)
 	GetRevenueSeries(context.Context, int64, time.Time, time.Time) ([]domain.RevenuePoint, error)
 	GetRevenueByApp(context.Context, int64) ([]domain.RevenueByAppRow, error)
-	GetRevenueComparison(context.Context, int64, time.Time, time.Time) (domain.RevenueComparisonRow, error)
 	ListScheduledReports(context.Context, int64, string, string, int32, int32) ([]domain.ScheduledReportRow, int64, error)
 	CreateScheduledReport(context.Context, domain.ScheduledReportWrite) (int64, error)
 	UpdateScheduledReport(context.Context, domain.ScheduledReportWrite) error
@@ -45,8 +63,8 @@ type repository interface {
 	UpsertSettings(context.Context, domain.SettingsRow) error
 }
 
-func NewService(repo repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo repository, dashboard DashboardReaders) *Service {
+	return &Service{repo: repo, dashboard: dashboard}
 }
 
 // GetProductMarginRows returns per-product margin rows for margin reporting.

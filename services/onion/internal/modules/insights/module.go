@@ -37,12 +37,17 @@ type FlowDelivery = api.FlowDelivery
 type FlowWorkloadMember = api.FlowWorkloadMember
 type FlowRoadmapProject = api.FlowRoadmapProject
 
+type FinanceDashboardReader = application.FinanceDashboardReader
+type POSDashboardReader = application.POSDashboardReader
+type CRMDashboardReader = application.CRMDashboardReader
+type DashboardReaders = application.DashboardReaders
+
 // NewModule takes Flow's insights module because insights.dashboard.v1 declares
 // three projections of Flow's delivery data. Passing the module rather than a
 // database handle keeps the flow_* schema owned by Flow: this module asks Flow
 // for numbers and never queries its tables.
-func NewModule(ctx context.Context, db *sql.DB, flow api.FlowReader) *Module {
-	return &Module{service: application.NewService(infrastructure.NewRepository(db)), flow: flow}
+func NewModule(ctx context.Context, db *sql.DB, flow api.FlowReader, dashboard DashboardReaders) *Module {
+	return &Module{service: application.NewService(infrastructure.NewRepository(db), dashboard), flow: flow}
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

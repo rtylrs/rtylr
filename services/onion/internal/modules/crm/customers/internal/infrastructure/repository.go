@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -34,6 +35,14 @@ func NewRepository(db *sql.DB) *Repository {
 		campaigns: campaigns.NewModule(context.Background(), pool),
 		segments:  segments.NewModule(context.Background(), pool),
 	}
+}
+
+func (r *Repository) CountCustomersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	return r.queries.CountCustomersCreatedBetween(ctx, sqlc.CountCustomersCreatedBetweenParams{
+		BusinessID: businessID,
+		DateFrom:   sql.NullTime{Time: from, Valid: true},
+		DateTo:     sql.NullTime{Time: to, Valid: true},
+	})
 }
 
 // ─── Customers ───────────────────────────────────────────────────────────────

@@ -25,6 +25,30 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+func (r *Repository) InsightsPaidInvoiceTotal(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	total, err := r.queries.SumInsightsPaidInvoices(ctx, sqlc.SumInsightsPaidInvoicesParams{
+		BusinessID: businessID,
+		DateFrom:   sql.NullTime{Time: from, Valid: true},
+		DateTo:     sql.NullTime{Time: to, Valid: true},
+	})
+	if err != nil {
+		return 0, err
+	}
+	return int64(toFloat64FromInterface(total)*100 + 0.5), nil
+}
+
+func (r *Repository) InsightsExpenseTotal(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	total, err := r.queries.SumInsightsExpenses(ctx, sqlc.SumInsightsExpensesParams{
+		BusinessID: businessID,
+		DateFrom:   from,
+		DateTo:     to,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return int64(toFloat64FromInterface(total)*100 + 0.5), nil
+}
+
 func (r *Repository) SumAccountsByType(ctx context.Context, businessID int64, accountType string) (float64, error) {
 	currency, err := r.reportCurrency(ctx, businessID)
 	if errors.Is(err, sql.ErrNoRows) {

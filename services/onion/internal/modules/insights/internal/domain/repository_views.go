@@ -132,11 +132,6 @@ type SettingsRow struct {
 	FavoriteReports  []string
 }
 
-type RevenueComparisonRow struct {
-	ThisPeriodMinor int64
-	LastPeriodMinor int64
-}
-
 type MarginBucketRow struct {
 	Label        string
 	LowerPct     float64
@@ -155,10 +150,6 @@ type OperationsKPIs struct {
 	ShiftsThisWeek    int64
 	PendingTimeOff    int64
 	OpenLeaveRequests int64
-}
-
-type DashboardInput struct {
-	Now time.Time
 }
 
 type BestSellerRow struct {

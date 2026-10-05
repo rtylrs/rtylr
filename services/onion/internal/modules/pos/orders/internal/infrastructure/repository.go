@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"github.com/voxire/onion/internal/modules/pos/internal/outbox"
 	"strings"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
+	"github.com/voxire/onion/internal/modules/pos/internal/outbox"
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/eventbus"
@@ -31,6 +32,14 @@ func NewRepository(db *sql.DB) *Repository {
 		queries: sqlc.New(pool),
 		pool:    pool,
 	}
+}
+
+func (r *Repository) CountOrdersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	return r.queries.CountOrdersCreatedBetween(ctx, sqlc.CountOrdersCreatedBetweenParams{
+		BusinessID: businessID,
+		DateFrom:   sql.NullTime{Time: from, Valid: true},
+		DateTo:     sql.NullTime{Time: to, Valid: true},
+	})
 }
 
 func (r *Repository) WithSalesProductReader(read func(context.Context, int64, int64) (string, string, string, string, error)) *Repository {

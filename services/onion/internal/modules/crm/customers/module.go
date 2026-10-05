@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/crm/customers/internal/infrastructure"
 
@@ -120,4 +121,8 @@ func (m *Module) GetAnonymousRoutes() []string {
 func (m *Module) WithReportingTimezone(read func(context.Context, int64) (string, error)) *Module {
 	m.repository.WithReportingTimezone(read)
 	return m
+}
+
+func (m *Module) CountCustomersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	return m.repository.CountCustomersCreatedBetween(ctx, businessID, from, to)
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -44,6 +45,10 @@ func (m *Module) WithSalesProductReader(read func(context.Context, int64, int64)
 func (m *Module) WithOnlineOrderingReader(read func(context.Context, int64) (bool, error)) *Module {
 	m.repository.WithOnlineOrderingReader(read)
 	return m
+}
+
+func (m *Module) CountOrdersCreatedBetween(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	return m.repository.CountOrdersCreatedBetween(ctx, businessID, from, to)
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

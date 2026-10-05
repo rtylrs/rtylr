@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/finance/finance_reports/internal/infrastructure"
 
@@ -39,4 +40,12 @@ func (m *Module) GetAnonymousRoutes() []string {
 func (m *Module) WithReportingCurrency(read func(context.Context, int64) (string, error)) *Module {
 	m.repository.WithReportingCurrency(read)
 	return m
+}
+
+func (m *Module) InsightsPaidInvoiceTotal(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	return m.repository.InsightsPaidInvoiceTotal(ctx, businessID, from, to)
+}
+
+func (m *Module) InsightsExpenseTotal(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+	return m.repository.InsightsExpenseTotal(ctx, businessID, from, to)
 }

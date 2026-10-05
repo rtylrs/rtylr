@@ -194,7 +194,6 @@ func initializeModules(ctx context.Context) *apiModules {
 	// flowInsights is constructed first: insights.dashboard.v1's Flow-shaped
 	// projections delegate to it rather than querying flow_* directly.
 	flowInsightsModule := flow_insights.NewModule(ctx, dbclient.Pool())
-	insightsModule := insights.NewModule(ctx, dbclient.Pool(), insightsadapters.NewFlowReader(flowInsightsModule))
 	teamModule := team.NewModule(ctx, dbclient.Pool())
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool()).WithIdentityReaders(identityadapter.NewIdentityReader(scopes.NewReader(dbclient.Pool())), scopes.NewReader(dbclient.Pool()).AccountByEmail, scopes.NewReader(dbclient.Pool()).BusinessUserByUsername)
 	userModule := func() *user.Module {
@@ -244,6 +243,11 @@ func initializeModules(ctx context.Context) *apiModules {
 	financeBankFeedsModule := financebankfeeds.NewModule(ctx, dbclient.Pool())
 	financeReconciliationModule := financereconciliation.NewModule(ctx, dbclient.Pool())
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool()).WithReportingCurrency(businessModule.ReportingCurrency)
+	insightsModule := insights.NewModule(ctx, dbclient.Pool(), insightsadapters.NewFlowReader(flowInsightsModule), insights.DashboardReaders{
+		Finance: financeReportsModule,
+		POS:     posOrdersModule,
+		CRM:     customersModule,
+	})
 	accountsModule := accounts.NewModule(ctx, dbclient.Pool())
 	journalModule := journal.NewModule(ctx, dbclient.Pool())
 	journalModule.SetPayrollAccountProvider(accountsModule.PayrollAccountProvider())
