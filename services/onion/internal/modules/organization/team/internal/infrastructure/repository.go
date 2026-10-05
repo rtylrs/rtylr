@@ -180,7 +180,7 @@ func (r *Repository) UpsertNormalizedAuthorization(ctx context.Context, business
 		INSERT INTO authorization_audit_events
 			(business_id, actor_user_id, target_user_id, action, before_json, after_json, source_client)
 		VALUES (?, ?, ?, 'member.authorization.updated', NULL, ?, 'dash')`,
-		businessID, actorID, userID, auditAfter); err != nil {
+		businessID, actorID, userID, string(auditAfter)); err != nil {
 		return rollback(err)
 	}
 	return tx.Commit()

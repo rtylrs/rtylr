@@ -25,16 +25,14 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewInvitationsAPI(application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))).InviteUser(ctx, &hubteaminvitationsv1.InviteUserRequest{Email: "direct-invite@test.local", FullName: "Direct Invite"})
 			return response, err
 		}},
-		{Name: "hub team edit", App: authorization.AppHub, Permission: "hub:team:edit", Extra: []string{"hub:licenses:manage", "hub:roles:edit"}, Call: func(ctx context.Context) (any, error) {
+		{Name: "hub team edit clears permissions", App: authorization.AppHub, Permission: "hub:team:edit", Extra: []string{"hub:licenses:manage", "hub:roles:edit"}, Call: func(ctx context.Context) (any, error) {
 			fullName := "Direct Authorization Staff"
 			response, err := NewPermissionsAPI(application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))).UpdatePermissions(ctx, &hubteampermissionsv1.UpdatePermissionsRequest{
-				UserId:     1003,
-				MemberType: "member",
-				FullName:   &fullName,
-				PermissionProfileAssignments: []*hubuserv1.PermissionProfileAssignment{{
-					AppId: "dash", PermissionProfileIds: []string{"7308"},
-				}},
-				LicensedAppIds: []string{}, GroupIds: []int64{},
+				UserId:                       1003,
+				MemberType:                   "admin",
+				FullName:                     &fullName,
+				PermissionProfileAssignments: []*hubuserv1.PermissionProfileAssignment{},
+				LicensedAppIds:               []string{}, GroupIds: []int64{},
 				ReplaceLicensedAppIds: true, ReplacePermissionProfileAssignments: true, ReplaceGroupIds: true,
 			})
 			return response, err
