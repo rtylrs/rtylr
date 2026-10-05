@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/sqlutil"
+	"github.com/voxire/onion/internal/platform/tenant"
 	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
@@ -128,7 +129,7 @@ func (r *Repository) GetBanner(ctx context.Context, businessID, id int64) (domai
 }
 
 func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {
-	ownerID, err := r.queries.GetHubMenuBusinessOwnerID(ctx, businessID)
+	ownerID, err := tenant.ResolveOwnerID(ctx, businessID, 0)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to resolve hub menu business owner", logger.Error(err))
 		return 0, err

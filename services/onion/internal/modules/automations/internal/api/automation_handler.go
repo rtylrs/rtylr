@@ -165,7 +165,7 @@ func (h *CreateAutomationHandler) Validate(_ context.Context, req *CreateAutomat
 	if req.TriggerType == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Trigger type is required")
 	}
-	if err := domain.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
+	if err := application.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
 		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 
@@ -186,7 +186,7 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 		triggerConfig = []byte("{}")
 	}
 
-	actions, actionErr := domain.NormalizeAutomationActions(req.Actions)
+	actions, actionErr := application.NormalizeAutomationActions(req.Actions)
 	if actionErr != nil {
 		return CreateAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, actionErr.Error())
 	}
@@ -238,7 +238,7 @@ func (h *UpdateAutomationHandler) Validate(_ context.Context, req *UpdateAutomat
 	if req.TriggerType == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Trigger type is required")
 	}
-	if err := domain.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
+	if err := application.ValidateAutomationDefinition(req.TriggerType, req.Actions); err != nil {
 		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 
@@ -265,7 +265,7 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		triggerConfig = []byte("{}")
 	}
 
-	actions, actionErr := domain.NormalizeAutomationActions(req.Actions)
+	actions, actionErr := application.NormalizeAutomationActions(req.Actions)
 	if actionErr != nil {
 		return UpdateAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, actionErr.Error())
 	}

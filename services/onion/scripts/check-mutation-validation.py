@@ -15,19 +15,19 @@ MUTATION = re.compile(r"\b(?:Post|Put|Patch|Delete)\s*\(")
 # protocol-specific request or response. Ordinary JSON mutations must use a
 # Register*WithValidation helper instead.
 ALLOWED_RAW_MUTATIONS = {
-    "internal/modules/careers/internal/api/routes.go": ("ApplyHandler",),
-    "internal/modules/echo/module.go": ("streamHandler.ServeHTTP",),
-    "internal/modules/hr_reports/internal/api/routes.go": ("handler.ServeHTTP",),
-    "internal/modules/pos_orders/internal/api/routes.go": (
+    "internal/modules/recruit/careers/internal/api/routes.go": ("ApplyHandler",),
+    "internal/modules/caret/module.go": ("streamHandler.ServeHTTP",),
+    "internal/modules/hr/hr_reports/internal/api/routes.go": ("handler.ServeHTTP",),
+    "internal/modules/pos/orders/internal/api/routes.go": (
         "PaddlePOSWebhookHTTPHandler",
         "IssuePOSWebSocketTicket",
     ),
-    "internal/modules/subscriptions/module.go": ("PaddleWebhookHTTPHandler",),
-    "internal/modules/voxhire/internal/api/routes.go": (
+    "internal/modules/organization/subscriptions/module.go": ("PaddleWebhookHTTPHandler",),
+    "internal/modules/recruit/voxhire/internal/api/routes.go": (
         "ApplicationsHandler",
         "CareerApplyHandler",
     ),
-    "internal/modules/workspaces/module.go": ("realtime.IssueRealtimeTicket",),
+    "internal/modules/flow/workspaces/module.go": ("realtime.IssueRealtimeTicket",),
 }
 
 

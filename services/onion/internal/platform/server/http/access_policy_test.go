@@ -11,17 +11,6 @@ func (anonymousModule) GetAnonymousRoutes() []string {
 	return []string{"/public"}
 }
 
-type platformContainer struct{}
-
-func (platformContainer) ConfigureAccessPolicy(_ context.Context, policy *RouteAccessPolicy) {
-	policy.RegisterAgentRoutes("test-agent", "/status")
-}
-
-type rootModules struct {
-	Shared   *anonymousModule
-	Platform *platformContainer
-}
-
 func TestRouteAccessPolicy(t *testing.T) {
 	policy := NewRouteAccessPolicy()
 	policy.RegisterAnonymousRoutes("/public")
@@ -55,21 +44,12 @@ func TestRouteAccessPolicyMatchesParameterizedRoutes(t *testing.T) {
 	}
 }
 
-func TestModuleRegistryConfiguresAccessPolicy(t *testing.T) {
-	modules := &rootModules{
-		Shared:   &anonymousModule{},
-		Platform: &platformContainer{},
-	}
+func TestAutoRegisterAnonymousRoutes(t *testing.T) {
 	policy := NewRouteAccessPolicy()
 
-	AutoRegisterAnonymousRoutes(context.Background(), modules, policy)
-	AutoConfigureAccessPolicy(context.Background(), modules, policy)
+	AutoRegisterAnonymousRoutes(context.Background(), policy, anonymousModule{})
 
 	if !policy.IsAllowedAnonymously("/public") {
-		t.Fatal("expected anonymous route from module registry")
-	}
-
-	if !policy.IsAllowedForAgent("test-agent", "/status") {
-		t.Fatal("expected agent route from module registry")
+		t.Fatal("expected anonymous route from route provider")
 	}
 }

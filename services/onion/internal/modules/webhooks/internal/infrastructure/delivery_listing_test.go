@@ -4,8 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/webhooks/internal/application"
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
 	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/eventbus"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -22,6 +24,7 @@ func TestListDeliveriesForBusinessIsScopedAndFilterable(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	repo := infrastructure.NewRepository(db)
+	service := application.NewService(repo, eventbus.NewSQLReader(db))
 
 	exec := func(query string, args ...any) {
 		t.Helper()
@@ -64,7 +67,7 @@ func TestListDeliveriesForBusinessIsScopedAndFilterable(t *testing.T) {
 	      VALUES (884033, ?, ?, 884022, 'dead', 5)`, listOther, listHookFor)
 
 	// Unfiltered: our two, never the other tenant's.
-	got, total, err := repo.ListDeliveriesForBusiness(ctx, listTenant, domain.DeliveryFilter{Limit: 50})
+	got, total, err := service.ListDeliveries(ctx, listTenant, domain.DeliveryFilter{Limit: 50})
 	if err != nil {
 		t.Fatalf("ListDeliveriesForBusiness: %v", err)
 	}
@@ -84,7 +87,7 @@ func TestListDeliveriesForBusinessIsScopedAndFilterable(t *testing.T) {
 	}
 
 	// Status filter, which is the point of the surface.
-	dead, deadTotal, err := repo.ListDeliveriesForBusiness(ctx, listTenant, domain.DeliveryFilter{Status: "dead", Limit: 50})
+	dead, deadTotal, err := service.ListDeliveries(ctx, listTenant, domain.DeliveryFilter{Status: "dead", Limit: 50})
 	if err != nil {
 		t.Fatalf("filter by status: %v", err)
 	}
@@ -93,7 +96,7 @@ func TestListDeliveriesForBusinessIsScopedAndFilterable(t *testing.T) {
 	}
 
 	// Registration filter.
-	byHook, hookTotal, err := repo.ListDeliveriesForBusiness(ctx, listTenant, domain.DeliveryFilter{WebhookID: listHookA, Limit: 50})
+	byHook, hookTotal, err := service.ListDeliveries(ctx, listTenant, domain.DeliveryFilter{WebhookID: listHookA, Limit: 50})
 	if err != nil {
 		t.Fatalf("filter by webhook: %v", err)
 	}
@@ -104,7 +107,7 @@ func TestListDeliveriesForBusinessIsScopedAndFilterable(t *testing.T) {
 	// The filter is caller-supplied. Naming another tenant's registration must
 	// return nothing rather than reaching it, because the business scope sits
 	// underneath the filter rather than beside it.
-	foreign, foreignTotal, err := repo.ListDeliveriesForBusiness(ctx, listTenant, domain.DeliveryFilter{WebhookID: listHookFor, Limit: 50})
+	foreign, foreignTotal, err := service.ListDeliveries(ctx, listTenant, domain.DeliveryFilter{WebhookID: listHookFor, Limit: 50})
 	if err != nil {
 		t.Fatalf("filter by a foreign webhook: %v", err)
 	}
@@ -113,7 +116,7 @@ func TestListDeliveriesForBusinessIsScopedAndFilterable(t *testing.T) {
 	}
 
 	// An unrecognised status matches nothing rather than erroring.
-	unknown, unknownTotal, err := repo.ListDeliveriesForBusiness(ctx, listTenant, domain.DeliveryFilter{Status: "nonsense", Limit: 50})
+	unknown, unknownTotal, err := service.ListDeliveries(ctx, listTenant, domain.DeliveryFilter{Status: "nonsense", Limit: 50})
 	if err != nil {
 		t.Fatalf("filter by an unknown status: %v", err)
 	}
@@ -122,7 +125,7 @@ func TestListDeliveriesForBusinessIsScopedAndFilterable(t *testing.T) {
 	}
 
 	// Pagination reports the full match count, not the page size.
-	firstPage, pagedTotal, err := repo.ListDeliveriesForBusiness(ctx, listTenant, domain.DeliveryFilter{Limit: 1})
+	firstPage, pagedTotal, err := service.ListDeliveries(ctx, listTenant, domain.DeliveryFilter{Limit: 1})
 	if err != nil {
 		t.Fatalf("paged listing: %v", err)
 	}

@@ -1,16 +1,14 @@
 package emailqueue
 
-import platformEmail "github.com/voxire/onion/internal/platform/email"
+import "github.com/voxire/onion/internal/platform/emailcrypto"
 
 // Keep the queue package's small internal API stable while sharing the
 // encryption implementation with the legacy email enqueue path. Both paths
 // write to email_jobs and must apply the same at-rest seal.
-const encryptedPrefix = "enc:v1:"
+const encryptedPrefix = emailcrypto.EncryptedPrefix
 
-func sealHTML(html string) string { return platformEmail.SealHTML(html) }
+func sealHTML(html string) string { return emailcrypto.SealHTML(html) }
 
-func openHTML(stored string) string { return platformEmail.OpenHTML(stored) }
+func openHTML(stored string) string { return emailcrypto.OpenHTML(stored) }
 
-// hexDecode preserves the queue package's historical test/helper surface
-// while delegating the actual parsing to the shared email implementation.
-func hexDecode(s string) ([]byte, error) { return platformEmail.DecodeHex(s) }
+func hexDecode(s string) ([]byte, error) { return emailcrypto.DecodeHex(s) }

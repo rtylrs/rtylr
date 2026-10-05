@@ -9,15 +9,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/voxire/onion/internal/platform/email"
 	sqlc "github.com/voxire/onion/internal/platform/emailqueue/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
-	PriorityHigh   = 5
-	PriorityNormal = 1
-	maxWorkers     = 50
+	PriorityCritical = 10
+	PriorityHigh     = 5
+	PriorityNormal   = 1
+	maxWorkers       = 50
 
 	// claimLease is the visibility timeout of a claim: how long a job may sit
 	// in 'processing' before the sweeper hands it to another worker. A worker
@@ -47,6 +47,11 @@ type Job struct {
 	// retried does not send the recipient a second copy.
 	DedupeKey string
 }
+
+// Sender delivers one decrypted queue job through the configured provider.
+// The queue owns persistence and retries; provider configuration stays in the
+// composition root.
+type Sender func(context.Context, Job) error
 
 // nullStr wraps a string as a NULL-able column value (empty → NULL).
 func nullStr(s string) sql.NullString {
@@ -95,15 +100,17 @@ func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 type Pool struct {
 	db     *sql.DB
 	q      *sqlc.Queries
+	sender Sender
 	sem    chan struct{}
 	active atomic.Int32
 }
 
-func NewPool(db *sql.DB) *Pool {
+func NewPool(db *sql.DB, sender Sender) *Pool {
 	return &Pool{
-		db:  db,
-		q:   sqlc.New(db),
-		sem: make(chan struct{}, maxWorkers),
+		db:     db,
+		q:      sqlc.New(db),
+		sender: sender,
+		sem:    make(chan struct{}, maxWorkers),
 	}
 }
 
@@ -212,31 +219,32 @@ func (p *Pool) processOne(ctx context.Context) bool {
 		}
 		return true
 	}
-	params := email.SendParams{
-		To:      []string{job.ToEmail},
-		Subject: job.Subject,
-		HTML:    html,
-	}
+	message := Job{To: job.ToEmail, Subject: job.Subject, HTML: html}
 	if job.TextBody.Valid {
-		params.Text = openHTML(job.TextBody.String)
+		message.Text = openHTML(job.TextBody.String)
 	}
 	if job.FromEmail.Valid && job.FromEmail.String != "" {
-		params.From = job.FromEmail.String
+		message.From = job.FromEmail.String
 	}
 	if job.ReplyTo.Valid && job.ReplyTo.String != "" {
-		params.ReplyTo = job.ReplyTo.String
+		message.ReplyTo = job.ReplyTo.String
 	}
 
 	// Bounded so a hung provider cannot outlive the claim lease and get the job
 	// delivered twice underneath this worker.
 	sendCtx, cancelSend := context.WithTimeout(ctx, sendTimeout)
-	_, sendErr := email.Send(sendCtx, params)
+	var sendErr error
+	if p.sender == nil {
+		sendErr = errors.New("email queue sender is not configured")
+	} else {
+		sendErr = p.sender(sendCtx, message)
+	}
 	cancelSend()
 
 	if sendErr != nil {
-		var rateLimitErr *email.RateLimitError
+		var rateLimitErr interface{ RetryDelay() time.Duration }
 		if errors.As(sendErr, &rateLimitErr) {
-			delay := int(rateLimitErr.RetryAfter / time.Second)
+			delay := int(rateLimitErr.RetryDelay() / time.Second)
 			if delay < 1 {
 				delay = 1
 			}

@@ -2,8 +2,7 @@
 # scripts/clean_generated_test.sh - regression test for `make clean-generated`.
 #
 # Covers B22-R06: the cleanup must delete generated sqlc output but never the
-# hand-written, git-tracked schema supplement under
-# internal/platform/database/schemas/sqlc, and a deletion that cannot succeed
+# hand-written, git-tracked schema supplement under the Flow module, and a deletion that cannot succeed
 # must not be reported as success. Run locally: ./scripts/clean_generated_test.sh
 
 set -euo pipefail
@@ -19,15 +18,15 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1" >&2; }
 WORK="$(mktemp -d)"
 trap 'chmod -R u+w "$WORK" 2>/dev/null || true; rm -rf "$WORK"' EXIT
 
-SUPPLEMENT="internal/platform/database/schemas/sqlc/flow/v8_time_tracking_columns.sql"
+SUPPLEMENT="internal/modules/flow/sql/schema/compat/v8_time_tracking_columns.sql"
 
 # Fixture tree with the generated-output layouts the cleanup targets, plus the
 # tracked supplement that must survive.
-mkdir -p "$WORK/repo/internal/modules/user/internal/infrastructure/persistence/sqlc"
+mkdir -p "$WORK/repo/internal/modules/organization/user/internal/infrastructure/persistence/sqlc"
 mkdir -p "$WORK/repo/internal/platform/aicache/persistence/sqlc"
-mkdir -p "$WORK/repo/internal/platform/database/schemas/sqlc/flow"
-echo 'package sqlc' > "$WORK/repo/internal/modules/user/internal/infrastructure/persistence/sqlc/users.sql.go"
-echo 'package sqlc' > "$WORK/repo/internal/modules/user/internal/infrastructure/persistence/sqlc/db.go"
+mkdir -p "$WORK/repo/internal/modules/flow/sql/schema/compat"
+echo 'package sqlc' > "$WORK/repo/internal/modules/organization/user/internal/infrastructure/persistence/sqlc/users.sql.go"
+echo 'package sqlc' > "$WORK/repo/internal/modules/organization/user/internal/infrastructure/persistence/sqlc/db.go"
 echo 'package sqlc' > "$WORK/repo/internal/platform/aicache/persistence/sqlc/db.go"
 echo '-- hand-written sqlc schema supplement' > "$WORK/repo/$SUPPLEMENT"
 
@@ -43,7 +42,7 @@ else
     fail "git-tracked schema supplement is preserved"
 fi
 
-if [ ! -e "$WORK/repo/internal/modules/user/internal/infrastructure/persistence/sqlc" ]; then
+if [ ! -e "$WORK/repo/internal/modules/organization/user/internal/infrastructure/persistence/sqlc" ]; then
     ok "module sqlc output removed"
 else
     fail "module sqlc output removed"
@@ -58,7 +57,7 @@ fi
 # A deletion that cannot succeed must fail the script instead of printing
 # success. Root ignores the directory permissions, so skip this case there.
 if [ "$(id -u)" -ne 0 ]; then
-    readonly_parent="$WORK/readonly/internal/modules/user/internal/infrastructure/persistence"
+    readonly_parent="$WORK/readonly/internal/modules/organization/user/internal/infrastructure/persistence"
     mkdir -p "$readonly_parent/sqlc"
     echo 'package sqlc' > "$readonly_parent/sqlc/users.sql.go"
     chmod 500 "$readonly_parent"

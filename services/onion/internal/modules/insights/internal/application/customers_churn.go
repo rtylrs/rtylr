@@ -23,7 +23,7 @@ func (s *Service) GetChurnRates(ctx context.Context, businessID int64, from, to 
 	type result struct {
 		Windows []ChurnWindowPayload
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		rows, rerr := s.repo.GetChurnRates(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr

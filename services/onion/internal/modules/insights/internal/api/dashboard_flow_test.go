@@ -2,8 +2,6 @@ package api
 
 import (
 	"testing"
-
-	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
 )
 
 // insights.dashboard.v1's WorkloadEntry asks for open_tasks and total_active.
@@ -11,7 +9,7 @@ import (
 // arithmetic, because a dashboard reading "3 open" when the answer is 1 is the
 // kind of wrong that looks plausible.
 func TestToWorkloadEntries_DerivesOpenAndActive(t *testing.T) {
-	got := toWorkloadEntries([]flowinsights.FlowWorkloadMember{{
+	got := toWorkloadEntries([]FlowWorkloadMember{{
 		UserID:          7,
 		TotalTasks:      10,
 		CompletedTasks:  4,
@@ -43,7 +41,7 @@ func TestToWorkloadEntries_DerivesOpenAndActive(t *testing.T) {
 // and a negative task count would be read as a display bug rather than a data
 // one. Clamped, and the clamp is asserted rather than assumed.
 func TestToWorkloadEntries_ClampsNegativeDerivations(t *testing.T) {
-	got := toWorkloadEntries([]flowinsights.FlowWorkloadMember{{
+	got := toWorkloadEntries([]FlowWorkloadMember{{
 		UserID:          8,
 		TotalTasks:      1,
 		CompletedTasks:  5,
@@ -81,7 +79,7 @@ func TestToRoadmapProjects_EmptyInputIsEmptySlice(t *testing.T) {
 // velocity_change is the only computed field on this response: Flow reports both
 // weeks, the contract wants the delta.
 func TestToInsightsResponse_VelocityChangeIsTheWeekDelta(t *testing.T) {
-	got := toInsightsResponse(flowinsights.FlowDelivery{
+	got := toInsightsResponse(FlowDelivery{
 		TotalTasks:        20,
 		CompletedTasks:    12,
 		InProgressTasks:   5,
@@ -108,7 +106,7 @@ func TestToInsightsResponse_VelocityChangeIsTheWeekDelta(t *testing.T) {
 // A slowing week must report a negative delta, not a clamped zero. The clamp
 // belongs on task counts, not on a rate of change.
 func TestToInsightsResponse_VelocityChangeCanBeNegative(t *testing.T) {
-	got := toInsightsResponse(flowinsights.FlowDelivery{VelocityThisWeek: 2, VelocityLastWeek: 7})
+	got := toInsightsResponse(FlowDelivery{VelocityThisWeek: 2, VelocityLastWeek: 7})
 	if got.VelocityChange != -5 {
 		t.Errorf("VelocityChange = %d, want -5", got.VelocityChange)
 	}

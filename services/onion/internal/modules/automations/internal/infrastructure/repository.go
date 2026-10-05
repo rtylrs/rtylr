@@ -7,17 +7,47 @@ import (
 
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
 	"github.com/voxire/onion/internal/modules/automations/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/eventbus"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
 	queries *sqlc.Queries
+	db      *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		db:      db,
 	}
+}
+
+func (r *Repository) DispatchEvent(ctx context.Context, event eventbus.Event) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	queries := sqlc.New(tx)
+	automationIDs, err := queries.ListAutomationsForEvent(ctx, sqlc.ListAutomationsForEventParams{
+		BusinessID:  event.BusinessID,
+		TriggerType: event.Type,
+	})
+	if err != nil {
+		return err
+	}
+	for _, automationID := range automationIDs {
+		if err := queries.EnqueueAutomationRun(ctx, sqlc.EnqueueAutomationRunParams{
+			BusinessID:   event.BusinessID,
+			AutomationID: automationID,
+			EventID:      event.ID,
+		}); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Automation, error) {

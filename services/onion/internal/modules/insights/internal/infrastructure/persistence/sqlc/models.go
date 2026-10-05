@@ -2098,51 +2098,6 @@ func (ns NullUserProvisioningStatesState) Value() (driver.Value, error) {
 	return string(ns.UserProvisioningStatesState), nil
 }
 
-type WebhookDeliveriesStatus string
-
-const (
-	WebhookDeliveriesStatusPending    WebhookDeliveriesStatus = "pending"
-	WebhookDeliveriesStatusDelivering WebhookDeliveriesStatus = "delivering"
-	WebhookDeliveriesStatusDelivered  WebhookDeliveriesStatus = "delivered"
-	WebhookDeliveriesStatusFailed     WebhookDeliveriesStatus = "failed"
-	WebhookDeliveriesStatusDead       WebhookDeliveriesStatus = "dead"
-)
-
-func (e *WebhookDeliveriesStatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = WebhookDeliveriesStatus(s)
-	case string:
-		*e = WebhookDeliveriesStatus(s)
-	default:
-		return fmt.Errorf("unsupported scan type for WebhookDeliveriesStatus: %T", src)
-	}
-	return nil
-}
-
-type NullWebhookDeliveriesStatus struct {
-	WebhookDeliveriesStatus WebhookDeliveriesStatus `json:"webhook_deliveries_status"`
-	Valid                   bool                    `json:"valid"` // Valid is true if WebhookDeliveriesStatus is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullWebhookDeliveriesStatus) Scan(value interface{}) error {
-	if value == nil {
-		ns.WebhookDeliveriesStatus, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.WebhookDeliveriesStatus.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullWebhookDeliveriesStatus) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.WebhookDeliveriesStatus), nil
-}
-
 type AccessRequest struct {
 	ID         int64                    `db:"id" json:"id"`
 	BusinessID int64                    `db:"business_id" json:"business_id"`
@@ -2967,7 +2922,6 @@ type HrCompanyConfig struct {
 	ID                    int64         `db:"id" json:"id"`
 	OwnerID               int64         `db:"owner_id" json:"owner_id"`
 	BusinessID            int64         `db:"business_id" json:"business_id"`
-	CompanyName           string        `db:"company_name" json:"company_name"`
 	FiscalYearStartMonth  int32         `db:"fiscal_year_start_month" json:"fiscal_year_start_month"`
 	DefaultCurrency       string        `db:"default_currency" json:"default_currency"`
 	DefaultTimezone       string        `db:"default_timezone" json:"default_timezone"`
@@ -3818,20 +3772,4 @@ type Waitlist struct {
 	Email     string         `db:"email" json:"email"`
 	Source    sql.NullString `db:"source" json:"source"`
 	CreatedAt sql.NullTime   `db:"created_at" json:"created_at"`
-}
-
-type WebhookDelivery struct {
-	ID             uint64                  `db:"id" json:"id"`
-	BusinessID     int64                   `db:"business_id" json:"business_id"`
-	WebhookID      int64                   `db:"webhook_id" json:"webhook_id"`
-	EventID        uint64                  `db:"event_id" json:"event_id"`
-	Status         WebhookDeliveriesStatus `db:"status" json:"status"`
-	Attempts       uint8                   `db:"attempts" json:"attempts"`
-	MaxAttempts    uint8                   `db:"max_attempts" json:"max_attempts"`
-	NextAttemptAt  time.Time               `db:"next_attempt_at" json:"next_attempt_at"`
-	ResponseStatus sql.NullInt16           `db:"response_status" json:"response_status"`
-	LastError      sql.NullString          `db:"last_error" json:"last_error"`
-	DeliveredAt    sql.NullTime            `db:"delivered_at" json:"delivered_at"`
-	CreatedAt      time.Time               `db:"created_at" json:"created_at"`
-	UpdatedAt      time.Time               `db:"updated_at" json:"updated_at"`
 }

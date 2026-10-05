@@ -30,7 +30,7 @@ func (s *Service) GetSlowMovers(ctx context.Context, businessID int64, days int3
 	type result struct {
 		Rows []SlowMoverPayload
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		rows, rerr := s.repo.GetSlowMovers(ctx, businessID, days)
 		if rerr != nil {
 			return result{}, rerr

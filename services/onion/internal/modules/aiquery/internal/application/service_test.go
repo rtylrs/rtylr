@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/aiquery/internal/domain"
+	"github.com/voxire/onion/internal/modules/aiquery/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -26,7 +27,7 @@ func (e *recordingExecutor) Run(_ context.Context, query string, args []any) ([]
 }
 
 func newTestService(resolve businessScopeResolver, exec executor) *Service {
-	return &Service{exec: exec, resolveScope: resolve}
+	return &Service{exec: exec, resolveScope: resolve, compile: infrastructure.BuildSQL}
 }
 
 func fixedResolver(businessID int64) businessScopeResolver {

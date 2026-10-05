@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,8 +9,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
-	"github.com/voxire/onion/internal/modules/automations/internal/infrastructure"
-	"github.com/voxire/onion/internal/platform/emailqueue"
+	"github.com/voxire/onion/internal/platform/eventbus"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -48,21 +46,21 @@ func permanent(format string, args ...any) error {
 
 // Executor drains the automation run queue.
 //
-// It lives in this module rather than beside the dispatcher because the
-// automation definition and its run_count belong to crm_automations, which
-// this module owns. The queue itself is a platform table and is read here as
-// an annotated cross-schema read.
+// It owns the automation run lifecycle and execution policy.
 type Executor struct {
-	repo      *infrastructure.Repository
-	db        *sql.DB
+	repo      runRepository
+	queue     emailQueue
+	events    eventReader
+	contacts  func(context.Context, int64, int64) (domain.CustomerContact, bool, error)
 	batchSize int32
 }
 
-// NewExecutor builds an executor over the shared pool.
-func NewExecutor(db *sql.DB) *Executor {
+func NewExecutor(repo runRepository, queue emailQueue, events eventReader, contacts func(context.Context, int64, int64) (domain.CustomerContact, bool, error)) *Executor {
 	return &Executor{
-		repo:      infrastructure.NewRepository(db),
-		db:        db,
+		repo:      repo,
+		queue:     queue,
+		events:    events,
+		contacts:  contacts,
 		batchSize: defaultRunBatch,
 	}
 }
@@ -81,7 +79,7 @@ func (e *Executor) ProcessDue(ctx context.Context) error {
 
 	for _, run := range runs {
 		if claimErr := e.repo.ClaimRun(ctx, run.ID); claimErr != nil {
-			if errors.Is(claimErr, infrastructure.ErrRunNotClaimed) {
+			if errors.Is(claimErr, domain.ErrRunNotClaimed) {
 				continue
 			}
 			logger.Ctx(ctx).Error("automations: failed to claim run",
@@ -171,7 +169,7 @@ func retryDelaySeconds(attempts int) int64 {
 func (e *Executor) execute(ctx context.Context, run domain.Run) error {
 	automation, err := e.repo.GetAutomationForRun(ctx, run.AutomationID, run.BusinessID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, domain.ErrAutomationNotFound) {
 			return permanent("automation %d no longer exists in business %d", run.AutomationID, run.BusinessID)
 		}
 		return fmt.Errorf("loading automation: %w", err)
@@ -182,12 +180,19 @@ func (e *Executor) execute(ctx context.Context, run domain.Run) error {
 		return permanent("automation %d is not active", run.AutomationID)
 	}
 
-	event, err := e.repo.GetEventForRun(ctx, run.EventID, run.BusinessID)
+	fact, err := e.events.GetEvent(ctx, run.EventID, run.BusinessID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, eventbus.ErrEventNotFound) {
 			return permanent("event %d no longer exists in business %d", run.EventID, run.BusinessID)
 		}
 		return fmt.Errorf("loading event: %w", err)
+	}
+	event := domain.Event{
+		ID:          fact.ID,
+		Type:        fact.Type,
+		SubjectType: fact.SubjectType,
+		SubjectID:   fact.SubjectID,
+		Payload:     eventPayloadBytes(fact.Payload),
 	}
 
 	actions, err := planActions(automation.Actions)
@@ -218,6 +223,21 @@ func (e *Executor) execute(ctx context.Context, run domain.Run) error {
 	return nil
 }
 
+func eventPayloadBytes(payload any) []byte {
+	switch value := payload.(type) {
+	case []byte:
+		return value
+	case json.RawMessage:
+		return []byte(value)
+	default:
+		encoded, err := json.Marshal(value)
+		if err != nil {
+			return nil
+		}
+		return encoded
+	}
+}
+
 // plannedAction is one action from a stored definition.
 type plannedAction struct {
 	Type    string
@@ -237,7 +257,7 @@ func isExecutable(actionType string) bool {
 // executor understands. Reuses the module's own normalizer so the legacy
 // bare-string form is handled in one place.
 func planActions(raw []byte) ([]plannedAction, error) {
-	normalized, err := domain.NormalizeAutomationActions(raw)
+	normalized, err := NormalizeAutomationActions(raw)
 	if err != nil {
 		return nil, permanent("stored actions are invalid: %v", err)
 	}
@@ -301,12 +321,12 @@ func (e *Executor) sendEmail(ctx context.Context, run domain.Run, event domain.E
 		return permanent("send_email needs a customer and event %d has none", event.ID)
 	}
 
-	contact, err := e.repo.GetCustomerContact(ctx, customerID, run.BusinessID)
+	contact, found, err := e.contacts(ctx, customerID, run.BusinessID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return permanent("customer %d is not in business %d", customerID, run.BusinessID)
-		}
 		return fmt.Errorf("loading customer: %w", err)
+	}
+	if !found {
+		return permanent("customer %d is not in business %d", customerID, run.BusinessID)
 	}
 	if contact.Email == "" {
 		return permanent("customer %d has no email address", customerID)
@@ -329,7 +349,7 @@ func (e *Executor) sendEmail(ctx context.Context, run domain.Run, event domain.E
 	// abandoned run that had already queued this message enqueues nothing the
 	// second time. Without it a retry would send the customer a second copy,
 	// which is why abandoned runs used to be dead-lettered instead.
-	return emailqueue.Enqueue(ctx, e.db, emailqueue.Job{
+	return e.queue.Enqueue(ctx, EmailMessage{
 		To:        contact.Email,
 		Subject:   subject,
 		HTML:      fmt.Sprintf("<p>%s</p>", html.EscapeString(body)),

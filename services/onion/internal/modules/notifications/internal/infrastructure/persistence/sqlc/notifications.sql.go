@@ -10,6 +10,34 @@ import (
 	"database/sql"
 )
 
+const createNotification = `-- name: CreateNotification :exec
+INSERT INTO hub_notifications (owner_id, business_id, user_id, title, body, type, link)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+`
+
+type CreateNotificationParams struct {
+	OwnerID    int64          `db:"owner_id" json:"owner_id"`
+	BusinessID int64          `db:"business_id" json:"business_id"`
+	UserID     int64          `db:"user_id" json:"user_id"`
+	Title      string         `db:"title" json:"title"`
+	Body       sql.NullString `db:"body" json:"body"`
+	Type       string         `db:"type" json:"type"`
+	Link       sql.NullString `db:"link" json:"link"`
+}
+
+func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) error {
+	_, err := q.db.ExecContext(ctx, createNotification,
+		arg.OwnerID,
+		arg.BusinessID,
+		arg.UserID,
+		arg.Title,
+		arg.Body,
+		arg.Type,
+		arg.Link,
+	)
+	return err
+}
+
 const listNotifications = `-- name: ListNotifications :many
 SELECT id, owner_id, business_id, user_id, title, COALESCE(body,'') AS body, type, is_read, COALESCE(link,'') AS link, created_at
 FROM hub_notifications

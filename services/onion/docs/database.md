@@ -1,6 +1,6 @@
 # Database
 
-The rtylr backend uses MySQL. All schema files live in `onion/internal/platform/database/schemas/` organized by module.
+The rtylr backend uses MySQL. Each bounded context owns its schema and migration sources under its `internal/modules/<context>/sql/` tree. The platform migration registry maps those files to stable historical migration IDs.
 
 - **Production credentials (host, database, user, password):** stored as deployment environment variables only. Never commit them to this repository or any documentation. Operators retrieve them from the deployment platform's secret store.
 - **Engine:** MySQL (InnoDB)
@@ -26,11 +26,11 @@ export DB_NAME=<database>
 ./scripts/migrate.sh
 ```
 
-Migration order is defined once in
-`internal/platform/database/schemas/migration_order.sh` and consumed by both
-schema migration entry points. The Onion runner applies module-owned
-`internal/modules/*/sql/migration_*.sql` files after the shared schema
-directories, so those migrations are tracked and retried consistently.
+Migration order and stable historical IDs are recorded in
+`internal/platform/database/schema_registry.tsv`. The Onion runner applies
+those context-owned schema sources, then applies module migrations from
+`internal/modules/*/sql/` and records each migration so failed steps can be
+retried safely.
 
 ---
 
@@ -99,7 +99,7 @@ Stores full color palette: `primary_color`, `secondary_color`, `accent_color`, `
 
 ## ERP Tables
 
-Schema: `schemas/erp/schema.sql`
+Schema: `internal/modules/erp/sql/schema/erp/schema.sql`
 
 ### `erp_categories`
 | Column | Type |
@@ -170,7 +170,7 @@ Line items for each purchase order. Columns: `purchase_order_id`, `product_id`, 
 
 ## HR Tables
 
-Schema: `schemas/hr/schema.sql`
+Schema: `internal/modules/hr/sql/schema/hr/schema.sql`
 
 ### `hr_departments`
 | Column | Type |
@@ -225,7 +225,7 @@ Schema: `schemas/hr/schema.sql`
 
 ## CRM Tables
 
-Schema: `schemas/crm/schema.sql`
+Schema: `internal/modules/crm/sql/schema/crm/schema.sql`
 
 ### `crm_customers`
 | Column | Type | Notes |
@@ -281,7 +281,7 @@ Per-customer send tracking: `status` ENUM (`queued`, `sent`, `delivered`, `opene
 
 ## Finance Tables
 
-Schema: `schemas/finance/schema.sql`
+Schema: `internal/modules/finance/sql/schema/finance/schema.sql`
 
 ### `finance_invoices`
 | Column | Type | Notes |
@@ -328,7 +328,7 @@ Line items. Columns: `description`, `quantity`, `unit`, `unit_price`, `tax_rate`
 
 ## Flow Tables
 
-Schema: `schemas/flow/schema.sql`
+Schema: `internal/modules/flow/sql/schema/flow/schema.sql`
 
 ### `flow_workspaces`
 | Column | Notes |
@@ -371,7 +371,7 @@ Audit log. `action` VARCHAR(100), `old_value` / `new_value` TEXT.
 
 ## POS Tables
 
-Schema: `schemas/pos/schema.sql`
+Schema: `internal/modules/pos/sql/schema/pos/schema.sql`
 
 ### `pos_locations`
 Physical locations / branches. Columns: `name`, `address`, `phone`, `is_active`.

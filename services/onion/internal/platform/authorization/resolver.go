@@ -334,15 +334,6 @@ func appendUniqueSource(values []AssignmentSource, value AssignmentSource) []Ass
 	return append(values, value)
 }
 
-func appendUniqueInt64(values []int64, value int64) []int64 {
-	for _, existing := range values {
-		if existing == value {
-			return values
-		}
-	}
-	return append(values, value)
-}
-
 func appendUniqueString(values []string, value string) []string {
 	for _, existing := range values {
 		if existing == value {

@@ -5,24 +5,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type SettingsRow struct {
-	OwnerID          int64
-	BusinessID       int64
-	DefaultCurrency  string
-	FiscalYearStart  string
-	Timezone         string
-	DefaultPeriod    string
-	ComparePrevious  bool
-	DashboardWidgets []string
-	FavoriteReports  []string
-}
+type SettingsRow = domain.SettingsRow
 
-var ErrSettingsNotFound = errors.New("insights settings not found")
+var ErrSettingsNotFound = domain.ErrSettingsNotFound
 
 func decodeStringList(value json.RawMessage) ([]string, error) {
 	if len(value) == 0 || string(value) == "null" {

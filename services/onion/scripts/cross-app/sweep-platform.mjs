@@ -43,6 +43,22 @@ for (const f of walk(paths.platform, ['.go'])) {
     callers.get(target).add(`platform/${from}`);
   }
 }
+// Composition roots consume platform services too. They are not business
+// modules, but counting them keeps runtime-only platform packages from being
+// misreported as unused.
+for (const f of walk(paths.commands, ['.go'])) {
+  const rel = f.slice(paths.commands.length + 1);
+  const from = `cmd/${rel.split('/')[0]}`;
+  const t = readFileSync(f, 'utf8');
+  const block = /import\s*\(([\s\S]*?)\)/.exec(t);
+  const text = block ? block[1] : t;
+  for (const mm of text.matchAll(
+    /"github\.com\/voxire\/onion\/internal\/platform\/([\w]+)(?:\/[\w/]*)?"/g,
+  )) {
+    if (!callers.has(mm[1])) callers.set(mm[1], new Set());
+    callers.get(mm[1]).add(from);
+  }
+}
 
 const rows = [];
 for (const p of pkgs.sort()) {

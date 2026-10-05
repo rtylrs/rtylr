@@ -3,8 +3,8 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../platform/database/schemas/shared"
-      - "../../../platform/database/schemas/hub"
+      - "schema/hub/hub_menu_banners.sql"
+      - "schema/hub/hub_navigation_menus.sql"
     gen:
       go:
         package: "sqlc"

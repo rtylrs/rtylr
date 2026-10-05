@@ -38,7 +38,7 @@ func TestProcessDueRequeuesAndRedeliversAnAbandonedDelivery(t *testing.T) {
 		t.Fatalf("abandon delivery: %v", err)
 	}
 
-	sender := NewSender(db)
+	sender := newTestSender(db)
 	sender.client = server.Client()
 
 	// One pass: recovery requeues it, and the same pass reads it as due.
@@ -79,7 +79,7 @@ func TestProcessDueLeavesARecentlyClaimedDeliveryAlone(t *testing.T) {
 		t.Fatalf("claim delivery: %v", err)
 	}
 
-	sender := NewSender(db)
+	sender := newTestSender(db)
 	sender.client = server.Client()
 	if err := sender.ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
@@ -115,7 +115,7 @@ func TestProcessDueDeadLettersAnAbandonedDeliveryWithNoAttemptsLeft(t *testing.T
 		t.Fatalf("abandon delivery: %v", err)
 	}
 
-	sender := NewSender(db)
+	sender := newTestSender(db)
 	sender.client = server.Client()
 	if err := sender.ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)

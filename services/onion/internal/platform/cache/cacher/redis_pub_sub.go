@@ -56,10 +56,6 @@ func (r RedisPubSub[C]) Publish(channel string, message C) {
 	}
 }
 
-func (r RedisPubSub[C]) Subscribe(channel string) {
-	r.SubscribeContext(context.Background(), channel)
-}
-
 func (r RedisPubSub[C]) SubscribeContext(ctx context.Context, channel string) {
 	if r.redisCacheCluster == nil {
 		return

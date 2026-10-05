@@ -2,12 +2,7 @@ version: "2"
 sql:
   - engine: "mysql"
     queries: "queries"
-    schema:
-      - "../../../../internal/platform/database/schemas/shared/zz_platform_event_delivery.sql"
-      # Read to decide who an event fans out to. The dispatcher never writes
-      # either table.
-      - "../../../../internal/platform/database/schemas/hub/hub_webhooks.sql"
-      - "../../../../internal/platform/database/schemas/crm/crm_automations.sql"
+    schema: "schema/shared/zz_platform_event_delivery.sql"
     gen:
       go:
         package: "sqlc"

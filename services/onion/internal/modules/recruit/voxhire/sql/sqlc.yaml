@@ -1,0 +1,21 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../sql/schema/recruit/recruit_v1_base.sql"
+      - "../../sql/schema/recruit/recruit_v3_sections.sql"
+      - "../../sql/schema/recruit/recruit_v4_forms.sql"
+      - "../../sql/schema/recruit/recruit_v7_ats_lifecycle.sql"
+      - "../../sql/schema/recruit/recruit_v8_talent_pools.sql"
+      - "../../sql/schema/recruit/recruit_v9_submission_audit.sql"
+      - "../../sql/schema/shared/voxhire.sql"
+      - "../../sql/schema/voxire/career_applications.sql"
+      - "../../sql/schema/voxire/careers.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../internal/infrastructure/persistence/sqlc"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_db_tags: true

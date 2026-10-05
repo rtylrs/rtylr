@@ -1,0 +1,15 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../sql/schema/erp/schema.sql"
+      - "../../sql/schema/erp/product_extras.sql"
+      - "../../sql/schema/erp/online_orders.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../internal/infrastructure/persistence/sqlc"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_db_tags: true

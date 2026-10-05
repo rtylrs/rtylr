@@ -1,3 +1,0 @@
--- erp_purchase_orders.destination_location_id is now part of the
--- erp_purchase_orders CREATE in internal/platform/database/schemas/erp/schema.sql.
--- No ALTER is needed here; kept only because sqlc.yaml references this file.

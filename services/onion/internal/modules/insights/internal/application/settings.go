@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -29,7 +29,7 @@ func defaultSettings() SettingsPayload {
 func (s *Service) GetSettings(ctx context.Context, businessID int64) (SettingsPayload, error) {
 	row, err := s.repo.GetSettings(ctx, businessID)
 	if err != nil {
-		if errors.Is(err, infrastructure.ErrSettingsNotFound) {
+		if errors.Is(err, domain.ErrSettingsNotFound) {
 			logger.Ctx(ctx).Debug("insights: no settings row, returning defaults")
 			return defaultSettings(), nil
 		}
@@ -62,7 +62,7 @@ func (s *Service) UpdateSettings(ctx context.Context, businessID int64, in Setti
 	if in.Timezone == "" {
 		in.Timezone = defaults.Timezone
 	}
-	err := s.repo.UpsertSettings(ctx, infrastructure.SettingsRow{
+	err := s.repo.UpsertSettings(ctx, domain.SettingsRow{
 		OwnerID: businessID, BusinessID: businessID,
 		DefaultCurrency: in.DefaultCurrency, FiscalYearStart: in.FiscalYearStart, Timezone: in.Timezone,
 		DefaultPeriod: in.DefaultPeriod, ComparePrevious: in.ComparePrevious,

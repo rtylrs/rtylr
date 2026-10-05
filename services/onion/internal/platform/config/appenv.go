@@ -16,7 +16,7 @@ const AppEnvEnvVar = "APP_ENV"
 // An unset, misspelled or unexpected APP_ENV then resolves to production and
 // those surfaces stay off.
 //
-// Keep in step with cdnDevelopmentEnvironment in internal/cdn/auth.go, which
+// Keep in step with cdnDevelopmentEnvironment in internal/platform/cdn/auth.go, which
 // already gates on the same labels with the same fail-closed shape.
 var nonProductionEnvironments = map[string]struct{}{
 	"dev":         {},
@@ -73,15 +73,6 @@ func IsNonProduction() bool {
 // development", which is not a statement that the operator meant this.
 func IsDeclaredProduction() bool {
 	return isDeclaredProductionEnv(CurrentAppEnv())
-}
-
-// UnrecognizedAppEnv reports whether the resolved APP_ENV is neither an
-// allowlisted development label nor an allowlisted production label. It does
-// not imply anything unsafe — the value still resolves to production — it
-// means the operator wrote something this build does not recognise, and that
-// deserves to be said out loud at boot.
-func UnrecognizedAppEnv() bool {
-	return isUnrecognizedEnv(CurrentAppEnv())
 }
 
 // The three predicates take an already-normalized value rather than reading

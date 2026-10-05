@@ -1,18 +1,6 @@
-// Package domain defines the safe, structured query layer the AI uses to read
-// business data. The LLM never emits raw SQL — it emits a QuerySpec, which we
-// validate against an allowlist of read-only views/columns and compile to a
-// parameterized statement that ALWAYS binds business_id. This makes a missing
-// tenant filter (a cross-tenant data leak) impossible by construction.
 package domain
 
-import (
-	"errors"
-	"fmt"
-	"regexp"
-	"strings"
-
-	sq "github.com/Masterminds/squirrel"
-)
+import "errors"
 
 var (
 	ErrUnknownView   = errors.New("unknown or disallowed view")
@@ -39,7 +27,7 @@ const (
 // business_id are intentionally absent — neither is ever selectable, and
 // business_id is always injected as the tenant filter, so a spec cannot narrow
 // or widen its own scope. Keep this in lockstep with
-// schemas/ai/ai_views.sql and schemas/ai/zz_ai_views_business_scope.sql.
+// sql/ai_views.sql and sql/zz_ai_views_business_scope.sql.
 var allowedViews = map[string]map[string]struct{}{
 	"ai_products":   set("id", "name", "sku", "category_id", "brand_id", "supplier_id", "cost_price", "sale_price", "compare_at_price", "currency", "stock_quantity", "low_stock_threshold", "reorder_quantity", "is_active", "track_inventory", "lead_time_days", "created_at", "updated_at"),
 	"ai_customers":  set("id", "first_name", "last_name", "email", "phone", "city", "country", "loyalty_points", "total_spent", "visit_count", "last_visit_at", "loyalty_tier", "is_active", "created_at", "updated_at"),
@@ -50,43 +38,37 @@ var allowedViews = map[string]map[string]struct{}{
 	"ai_tasks":      set("id", "project_id", "workspace_id", "title", "status", "priority", "assignee_id", "due_date", "start_date", "completed_at", "estimated_hours", "actual_hours", "created_at", "updated_at"),
 }
 
-var (
-	allowedAggregates = set("sum", "count", "avg", "min", "max")
-	allowedOperators  = set("=", "!=", "<", "<=", ">", ">=", "like", "in")
-	aliasRe           = regexp.MustCompile(`[^a-zA-Z0-9_]`)
-)
-
 // Aggregation is e.g. {"func":"sum","col":"total","as":"revenue"}. For count,
 // col may be empty (COUNT(*)).
 type Aggregation struct {
-	Func string `json:"func"`
-	Col  string `json:"col,omitempty"`
-	As   string `json:"as,omitempty"`
+	Func string
+	Col  string
+	As   string
 }
 
 // Filter is a single WHERE condition. Value is a scalar, or a slice for "in".
 type Filter struct {
-	Col         string `json:"col"`
-	Op          string `json:"op"`
-	Value       any    `json:"value,omitempty"`
-	ValueColumn string `json:"value_col,omitempty"`
+	Col         string
+	Op          string
+	Value       any
+	ValueColumn string
 }
 
 // OrderBy references a selected column or an aggregation alias.
 type OrderBy struct {
-	Col string `json:"col"`
-	Dir string `json:"dir,omitempty"`
+	Col string
+	Dir string
 }
 
 // QuerySpec is the structured query the LLM produces.
 type QuerySpec struct {
-	View         string        `json:"view"`
-	Columns      []string      `json:"columns,omitempty"`
-	Aggregations []Aggregation `json:"aggregations,omitempty"`
-	Where        []Filter      `json:"where,omitempty"`
-	GroupBy      []string      `json:"group_by,omitempty"`
-	OrderBy      []OrderBy     `json:"order_by,omitempty"`
-	Limit        int           `json:"limit,omitempty"`
+	View         string
+	Columns      []string
+	Aggregations []Aggregation
+	Where        []Filter
+	GroupBy      []string
+	OrderBy      []OrderBy
+	Limit        int
 }
 
 // Schema returns the allowlisted views and their columns, for prompting the LLM.
@@ -102,191 +84,10 @@ func Schema() map[string][]string {
 	return out
 }
 
-// BuildSQL validates the spec against the allowlist and compiles it to a
-// parameterized SELECT that is always constrained to businessID.
-//
-// businessID must be the id resolved by tenant.ResolveBusinessID. owner_id is
-// deliberately not a substitute: it is shared by every business of an account,
-// so scoping by it returns rows from businesses the caller has no membership in.
-func BuildSQL(spec QuerySpec, businessID int64) (string, []any, error) {
-	if businessID <= 0 {
-		return "", nil, ErrNoBusinessScope
-	}
-
-	cols, ok := allowedViews[spec.View]
-	if !ok {
-		return "", nil, fmt.Errorf("%w: %q", ErrUnknownView, spec.View)
-	}
-
-	selects, err := buildSelects(spec, cols)
-	if err != nil {
-		return "", nil, err
-	}
-
-	// business_id is always bound — the core isolation guarantee.
-	b := sq.Select(selects...).From(spec.View).Where(sq.Eq{"business_id": businessID})
-
-	for _, f := range spec.Where {
-		pred, perr := filterPredicate(f, cols)
-		if perr != nil {
-			return "", nil, perr
-		}
-		b = b.Where(pred)
-	}
-
-	for _, g := range spec.GroupBy {
-		if !allowed(cols, g) {
-			return "", nil, fmt.Errorf("%w: group by %q", ErrUnknownColumn, g)
-		}
-		b = b.GroupBy(g)
-	}
-
-	aliases := aggregationAliases(spec)
-	for _, o := range spec.OrderBy {
-		if !allowed(cols, o.Col) && !aliases[o.Col] {
-			return "", nil, fmt.Errorf("%w: order by %q", ErrUnknownColumn, o.Col)
-		}
-		dir := "ASC"
-		if strings.EqualFold(o.Dir, "desc") {
-			dir = "DESC"
-		}
-		b = b.OrderBy(o.Col + " " + dir)
-	}
-
-	limit := spec.Limit
-	if limit <= 0 {
-		limit = DefaultLimit
-	}
-	if limit > MaxRows {
-		limit = MaxRows
-	}
-	b = b.Limit(uint64(limit))
-
-	return b.PlaceholderFormat(sq.Question).ToSql()
-}
-
-func buildSelects(spec QuerySpec, cols map[string]struct{}) ([]string, error) {
-	var selects []string
-
-	for _, c := range spec.Columns {
-		if !allowed(cols, c) {
-			return nil, fmt.Errorf("%w: %q", ErrUnknownColumn, c)
-		}
-		selects = append(selects, c)
-	}
-
-	for _, a := range spec.Aggregations {
-		fn := strings.ToLower(strings.TrimSpace(a.Func))
-		if !inSet(allowedAggregates, fn) {
-			return nil, fmt.Errorf("%w: %q", ErrBadAggregate, a.Func)
-		}
-		alias := sanitizeAlias(a.As)
-		if fn == "count" && a.Col == "" {
-			selects = append(selects, fmt.Sprintf("COUNT(*) AS %s", orDefault(alias, "count")))
-			continue
-		}
-		if !allowed(cols, a.Col) {
-			return nil, fmt.Errorf("%w: aggregate on %q", ErrUnknownColumn, a.Col)
-		}
-		selects = append(selects, fmt.Sprintf("%s AS %s", aggregateExpr(fn, a.Col), orDefault(alias, fn+"_"+a.Col)))
-	}
-
-	if len(selects) == 0 {
-		// Default to all allowed columns rather than erroring on a bare view.
-		for c := range cols {
-			selects = append(selects, c)
-		}
-		if len(selects) == 0 {
-			return nil, ErrEmptySelect
-		}
-	}
-
-	return selects, nil
-}
-
-func aggregateExpr(fn, col string) string {
-	switch fn {
-	case "sum":
-		return fmt.Sprintf("COALESCE(SUM(%s), 0)", col)
-	default:
-		return fmt.Sprintf("%s(%s)", strings.ToUpper(fn), col)
-	}
-}
-
-func filterPredicate(f Filter, cols map[string]struct{}) (sq.Sqlizer, error) {
-	if !allowed(cols, f.Col) {
-		return nil, fmt.Errorf("%w: filter on %q", ErrUnknownColumn, f.Col)
-	}
-	op := strings.ToLower(strings.TrimSpace(f.Op))
-	if !inSet(allowedOperators, op) {
-		return nil, fmt.Errorf("%w: %q", ErrBadOperator, f.Op)
-	}
-	if strings.TrimSpace(f.ValueColumn) != "" {
-		valueCol := strings.TrimSpace(f.ValueColumn)
-		if !allowed(cols, valueCol) {
-			return nil, fmt.Errorf("%w: value column %q", ErrUnknownColumn, valueCol)
-		}
-		if op == "in" || op == "like" {
-			return nil, fmt.Errorf("%w: column comparison with %q", ErrBadOperator, f.Op)
-		}
-		return sq.Expr(fmt.Sprintf("%s %s %s", strings.TrimSpace(f.Col), op, valueCol)), nil
-	}
-
-	switch op {
-	case "=":
-		return sq.Eq{f.Col: f.Value}, nil
-	case "!=":
-		return sq.NotEq{f.Col: f.Value}, nil
-	case "<":
-		return sq.Lt{f.Col: f.Value}, nil
-	case "<=":
-		return sq.LtOrEq{f.Col: f.Value}, nil
-	case ">":
-		return sq.Gt{f.Col: f.Value}, nil
-	case ">=":
-		return sq.GtOrEq{f.Col: f.Value}, nil
-	case "like":
-		return sq.Like{f.Col: f.Value}, nil
-	case "in":
-		return sq.Eq{f.Col: f.Value}, nil // squirrel renders a slice value as IN (...)
-	}
-	return nil, fmt.Errorf("%w: %q", ErrBadOperator, f.Op)
-}
-
-func aggregationAliases(spec QuerySpec) map[string]bool {
-	out := map[string]bool{}
-	for _, a := range spec.Aggregations {
-		alias := sanitizeAlias(a.As)
-		if alias == "" {
-			if strings.ToLower(a.Func) == "count" && a.Col == "" {
-				alias = "count"
-			} else {
-				alias = strings.ToLower(a.Func) + "_" + a.Col
-			}
-		}
-		out[alias] = true
-	}
-	return out
-}
-
 func set(items ...string) map[string]struct{} {
 	m := make(map[string]struct{}, len(items))
-	for _, i := range items {
-		m[i] = struct{}{}
+	for _, item := range items {
+		m[item] = struct{}{}
 	}
 	return m
-}
-
-func inSet(m map[string]struct{}, k string) bool { _, ok := m[k]; return ok }
-func allowed(cols map[string]struct{}, c string) bool {
-	_, ok := cols[strings.TrimSpace(c)]
-	return ok
-}
-
-func sanitizeAlias(s string) string { return aliasRe.ReplaceAllString(strings.TrimSpace(s), "") }
-func orDefault(s, def string) string {
-	if s == "" {
-		return def
-	}
-	return s
 }

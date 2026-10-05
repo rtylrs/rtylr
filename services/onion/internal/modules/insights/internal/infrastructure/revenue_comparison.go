@@ -2,16 +2,14 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"time"
 )
 
 // RevenueComparisonRow captures the "this period vs last period" pair for
 // the revenue comparison endpoint. The repository returns raw minor-unit
 // totals; the service layer computes the delta percentage.
-type RevenueComparisonRow struct {
-	ThisPeriodMinor int64
-	LastPeriodMinor int64
-}
+type RevenueComparisonRow = domain.RevenueComparisonRow
 
 // GetRevenueComparison sums paid invoice revenue for [from, to] and also
 // for the preceding window of the same length, so the frontend can render

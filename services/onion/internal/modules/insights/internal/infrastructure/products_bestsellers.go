@@ -3,17 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type BestSellerRow struct {
-	ProductID         int64
-	Name              string
-	UnitsSold         float64
-	RevenueMinorUnits int64
-}
+type BestSellerRow = domain.BestSellerRow
 
 func (r *Repository) GetBestSellers(ctx context.Context, businessID int64, limit int32) ([]BestSellerRow, error) {
 	if limit <= 0 {

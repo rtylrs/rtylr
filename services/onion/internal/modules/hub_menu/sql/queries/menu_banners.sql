@@ -70,6 +70,3 @@ WHERE business_id = ? AND id = ?;
 -- name: DeleteMenuBanner :exec
 DELETE FROM hub_menu_banners
 WHERE business_id = ? AND id = ?;
-
--- name: GetHubMenuBusinessOwnerID :one
-SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE;

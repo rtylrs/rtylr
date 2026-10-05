@@ -2,16 +2,12 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type OperationsKPIs struct {
-	ActiveStaff       int64
-	ShiftsThisWeek    int64
-	PendingTimeOff    int64
-	OpenLeaveRequests int64
-}
+type OperationsKPIs = domain.OperationsKPIs
 
 func (r *Repository) GetOperationsKPIs(ctx context.Context, businessID int64) (OperationsKPIs, error) {
 	out := OperationsKPIs{}

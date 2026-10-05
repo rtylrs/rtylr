@@ -19,7 +19,8 @@ mkdir -p \
   "$dir/internal/domain" \
   "$dir/internal/infrastructure" \
   "$dir/internal/routes" \
-  "$dir/sql/queries"
+  "$dir/sql/queries" \
+  "$dir/sql/schema"
 
 cat > "$dir/module.go" <<EOF
 package ${module}
@@ -108,11 +109,15 @@ version: "2"
 sql:
   - engine: "mysql"
     queries: "./queries"
-    schema: "../../platform/database/schemas"
+    schema: "./schema"
     gen:
       go:
         package: "sqlc"
         out: "../internal/infrastructure/persistence/sqlc"
+EOF
+
+cat > "$dir/sql/schema/schema.sql" <<EOF
+-- Add this bounded context's owned schema here.
 EOF
 
 echo "Generated $dir"

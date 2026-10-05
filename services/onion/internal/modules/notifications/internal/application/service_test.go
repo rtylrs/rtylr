@@ -9,15 +9,22 @@ import (
 )
 
 type mockRepo struct {
-	list  []domain.Notification
-	mrErr error
-	maErr error
+	list      []domain.Notification
+	createErr error
+	mrErr     error
+	maErr     error
+	created   domain.Notification
 
 	markReadBusinessID     int64
 	markReadUserID         int64
 	markReadNotificationID int64
 	markAllBusinessID      int64
 	markAllUserID          int64
+}
+
+func (m *mockRepo) Create(_ context.Context, notification domain.Notification) error {
+	m.created = notification
+	return m.createErr
 }
 
 func (m *mockRepo) List(_ context.Context, _, _ int64) ([]domain.Notification, error) {
@@ -42,6 +49,21 @@ func TestList_Delegates(t *testing.T) {
 	got, _ := s.List(context.Background(), 1, 1)
 	if len(got) != 1 {
 		t.Errorf("got %d", len(got))
+	}
+}
+
+func TestCreate_ForwardsTenantAndRecipient(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+	want := domain.Notification{
+		OwnerID: 10, BusinessID: 20, UserID: 30,
+		Title: "Access request", Body: "Review", Type: "info", Link: "/team",
+	}
+	if err := s.Create(context.Background(), want); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if repo.created != want {
+		t.Errorf("Create forwarded %+v, want %+v", repo.created, want)
 	}
 }
 

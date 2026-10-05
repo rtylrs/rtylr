@@ -1,6 +1,19 @@
 package main
 
 import (
+	"github.com/voxire/onion/internal/modules/activity"
+	"github.com/voxire/onion/internal/modules/booking"
+	"github.com/voxire/onion/internal/modules/crm"
+	"github.com/voxire/onion/internal/modules/erp"
+	"github.com/voxire/onion/internal/modules/finance"
+	flowreferences "github.com/voxire/onion/internal/modules/flow/references"
+	identityadapter "github.com/voxire/onion/internal/modules/flow/workspaces/adapters/identity"
+	"github.com/voxire/onion/internal/modules/pos"
+	posreferences "github.com/voxire/onion/internal/modules/pos/references"
+	"github.com/voxire/onion/internal/modules/store"
+	"github.com/voxire/onion/internal/modules/support"
+	"github.com/voxire/onion/internal/platform/authorization"
+
 	"context"
 	"fmt"
 	"os"
@@ -9,20 +22,27 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/voxire/onion/internal/modules/accounts"
 	"github.com/voxire/onion/internal/modules/automations"
-	hrcore "github.com/voxire/onion/internal/modules/hr_core"
-	hrleave "github.com/voxire/onion/internal/modules/hr_leave"
-	hrovertime "github.com/voxire/onion/internal/modules/hr_overtime"
-	hrpayroll "github.com/voxire/onion/internal/modules/hr_payroll"
-	hrtime "github.com/voxire/onion/internal/modules/hr_time"
-	"github.com/voxire/onion/internal/modules/journal"
-	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
-	"github.com/voxire/onion/internal/modules/subscriptions"
-	"github.com/voxire/onion/internal/modules/team"
-	"github.com/voxire/onion/internal/modules/voxhire"
+	crmsales "github.com/voxire/onion/internal/modules/crm/crm_sales"
+	"github.com/voxire/onion/internal/modules/crm/customers"
+	"github.com/voxire/onion/internal/modules/erp/inventory"
+	"github.com/voxire/onion/internal/modules/finance/accounts"
+	"github.com/voxire/onion/internal/modules/finance/journal"
+	recurringinvoices "github.com/voxire/onion/internal/modules/finance/recurring_invoices"
+	"github.com/voxire/onion/internal/modules/flow/workspaces"
+	"github.com/voxire/onion/internal/modules/hr/hr_core"
+	"github.com/voxire/onion/internal/modules/hr/hr_leave"
+	"github.com/voxire/onion/internal/modules/hr/hr_overtime"
+	"github.com/voxire/onion/internal/modules/hr/hr_payroll"
+	"github.com/voxire/onion/internal/modules/hr/hr_time"
+	"github.com/voxire/onion/internal/modules/organization/business"
+	"github.com/voxire/onion/internal/modules/organization/scopes"
+	"github.com/voxire/onion/internal/modules/organization/subscriptions"
+	"github.com/voxire/onion/internal/modules/organization/team"
+	"github.com/voxire/onion/internal/modules/pos/giftcards"
+	"github.com/voxire/onion/internal/modules/pos/locations"
+	"github.com/voxire/onion/internal/modules/recruit/voxhire"
 	"github.com/voxire/onion/internal/modules/webhooks"
-	"github.com/voxire/onion/internal/modules/workspaces"
 	platformcache "github.com/voxire/onion/internal/platform/cache"
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
@@ -36,6 +56,7 @@ import (
 	"github.com/voxire/onion/internal/platform/server/probe"
 	"github.com/voxire/onion/internal/platform/server/profiling"
 	"github.com/voxire/onion/internal/platform/slack"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func main() {
@@ -94,7 +115,9 @@ func main() {
 	modules := initializeJobModules(ctx)
 	platformjobs.AutoRegister(ctx, modules)
 	// Not a module, so it registers itself rather than through AutoRegister.
-	eventbus.RegisterJobs(platformjobs.DefaultRegistry(), eventbus.NewDispatcher(dbclient.Pool()))
+	eventbus.RegisterJobs(platformjobs.DefaultRegistry(), eventbus.NewDispatcher(
+		dbclient.Pool(), modules.Automations, modules.Webhooks, modules.Customers, modules.CRMSales, modules.PosGiftCards, modules.Inventory, activity.NewModule(ctx, dbclient.Pool()).WithUserNameReader(scopes.NewReader(dbclient.Pool()).BusinessUserName),
+	).WithSources(booking.Facts(dbclient.Pool()), crm.Facts(dbclient.Pool()), erp.Facts(dbclient.Pool()), finance.Facts(dbclient.Pool()), pos.Facts(dbclient.Pool()), store.Facts(dbclient.Pool()), support.Facts(dbclient.Pool())))
 	jobActivity := newWorkerJobActivity()
 	if err := trackWorkerJobs(platformjobs.DefaultRegistry(), jobActivity); err != nil {
 		logger.Ctx(ctx).Error("failed to instrument worker jobs", logger.Error(err))
@@ -131,7 +154,17 @@ func main() {
 
 	go cacheInvalidate.SubscribeAsyncInvalidations(ctx)
 	go invalidation.SubscribeCacheGroupInvalidations(ctx)
-	pool := emailqueue.NewPool(dbclient.Pool())
+	pool := emailqueue.NewPool(dbclient.Pool(), func(ctx context.Context, job emailqueue.Job) error {
+		_, err := emailPkg.Send(ctx, emailPkg.SendParams{
+			To:      []string{job.To},
+			Subject: job.Subject,
+			HTML:    job.HTML,
+			Text:    job.Text,
+			From:    job.From,
+			ReplyTo: job.ReplyTo,
+		})
+		return err
+	})
 	pool.Run(ctx)
 	stop()
 
@@ -237,13 +270,17 @@ func trackWorkerJobs(registry *platformjobs.Registry, activity *workerJobActivit
 
 type jobModules struct {
 	Automations       *automations.Module
+	Customers         *customers.Module
+	CRMSales          *crmsales.Module
+	PosGiftCards      *giftcards.Module
+	Inventory         *inventory.Module
 	Webhooks          *webhooks.Module
 	Accounts          *accounts.Module
-	HRCore            *hrcore.Module
-	HRLeave           *hrleave.Module
-	HROvertime        *hrovertime.Module
-	HRPayroll         *hrpayroll.Module
-	HRTime            *hrtime.Module
+	HRCore            *hr_core.Module
+	HRLeave           *hr_leave.Module
+	HROvertime        *hr_overtime.Module
+	HRPayroll         *hr_payroll.Module
+	HRTime            *hr_time.Module
 	Workspaces        *workspaces.Module
 	Voxhire           *voxhire.Module
 	RecurringInvoices *recurringinvoices.Module
@@ -252,29 +289,52 @@ type jobModules struct {
 }
 
 func initializeJobModules(ctx context.Context) *jobModules {
+	tenant.SetScopeResolver(scopes.NewReader(dbclient.Pool()))
+	flowReferenceReader := flowreferences.NewReader(dbclient.Pool())
+	posReferenceReader := posreferences.NewReader(dbclient.Pool())
+	_ = authorization.SetScopeLookup(func(ctx context.Context, businessID int64, scopeType string, id int64) (bool, error) {
+		if scopeType == "flow_project" {
+			return flowReferenceReader.ProjectExists(ctx, businessID, id)
+		}
+		return posReferenceReader.LocationExists(ctx, businessID, id)
+	})
+
 	db := dbclient.Pool()
 	accountsModule := accounts.NewModule(ctx, db)
-	hrCoreModule := hrcore.NewModule(ctx, db)
-	hrLeaveModule := hrleave.NewModule(ctx, db, hrCoreModule)
+	hrCoreModule := hr_core.NewModule(ctx, db).WithAccountEmailReader(scopes.NewReader(db).AccountEmail)
+	hrLeaveModule := hr_leave.NewModule(ctx, db, hrCoreModule)
 	journalModule := journal.NewModule(ctx, db)
 	journalModule.SetPayrollAccountProvider(accountsModule.PayrollAccountProvider())
-	hrPayrollModule := hrpayroll.NewModule(ctx, db, hrCoreModule)
+	hrPayrollModule := hr_payroll.NewModule(ctx, db, hrCoreModule)
 	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
-	workspacesModule := workspaces.NewModule(ctx, db, hrCoreModule, hrLeaveModule)
+	workspacesModule := workspaces.NewModule(ctx, db).WithIdentityReaders(identityadapter.NewIdentityReader(scopes.NewReader(db)), scopes.NewReader(db).AccountByEmail, scopes.NewReader(db).BusinessUserByUsername)
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
+	teamModule := team.NewModule(ctx, db)
+	businessModule := business.NewModule(ctx, db)
+	customersModule := customers.NewModule(ctx, db).WithReportingTimezone(businessModule.ReportingTimezone).WithBusinessOwnerResolver(businessModule.GetBusinessOwnerID)
+	automationContacts := func(ctx context.Context, customerID, businessID int64) (automations.CustomerContact, bool, error) {
+		recipient, found, err := customersModule.ResolveEmailRecipient(ctx, businessID, customerID)
+		return automations.CustomerContact{Email: recipient.Email, Name: recipient.Name}, found, err
+	}
+	webhooksModule := webhooks.NewModule(ctx, db)
+	webhooksModule.SetNotificationContactResolver(teamModule.GetActiveMemberContact)
 	return &jobModules{
-		Automations:       automations.NewModule(ctx, db),
-		Webhooks:          webhooks.NewModule(ctx, db),
+		Automations:       automations.NewModule(ctx, db, automationContacts),
+		Customers:         customersModule,
+		CRMSales:          crmsales.NewModule(ctx, db).WithMembershipReader(scopes.NewReader(db).IsBusinessUser),
+		PosGiftCards:      giftcards.NewModule(ctx, db),
+		Inventory:         inventory.NewModule(ctx, db).WithBusinessOwnerResolver(businessModule.GetBusinessOwnerID).WithPOSBranchOwnerReader(locations.NewModule(ctx, db).WithLocationLimitReader(scopes.NewReader(db).LocationLimit).StockBranchOwner),
+		Webhooks:          webhooksModule,
 		Accounts:          accountsModule,
 		HRCore:            hrCoreModule,
 		HRLeave:           hrLeaveModule,
-		HROvertime:        hrovertime.NewModule(ctx, db, hrCoreModule),
+		HROvertime:        hr_overtime.NewModule(ctx, db, hrCoreModule),
 		HRPayroll:         hrPayrollModule,
-		HRTime:            hrtime.NewModule(ctx, db, hrCoreModule),
+		HRTime:            hr_time.NewModule(ctx, db, hrCoreModule),
 		Workspaces:        workspacesModule,
 		Voxhire:           voxhire.NewModule(ctx, db),
 		RecurringInvoices: recurringinvoices.NewModule(ctx, db),
 		Subscriptions:     subscriptions.NewModule(ctx, db),
-		Team:              team.NewModule(ctx, db),
+		Team:              teamModule,
 	}
 }

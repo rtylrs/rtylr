@@ -19,11 +19,11 @@ set -eo pipefail
 CONTAINER="${ONION_DB_CONTAINER:-onion-env-db-1}"
 ROOT_PW="${ONION_DB_ROOT_PW:-onion_root_password}"
 TEST_DB="onion_test"
+TEST_DB_PORT="${ONION_TEST_DB_PORT:-3306}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
-FIXTURES_DIR="$PROJECT_ROOT/scripts/fixtures"
+FIXTURES_DIR="$PROJECT_ROOT/internal/testutil/fixtures"
 
 GREEN='\033[0;32m'; BLUE='\033[0;34m'; RED='\033[0;31m'; NC='\033[0m'
 info() { echo -e "${BLUE}[test-db]${NC} $1"; }
@@ -50,7 +50,7 @@ CREATE DATABASE ${TEST_DB} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 SQL
 
 info "applying schema"
-DB_HOST=127.0.0.1 DB_PORT=3306 DB_USER=root DB_PASSWORD="$ROOT_PW" DB_NAME="$TEST_DB" \
+DB_HOST=127.0.0.1 DB_PORT="$TEST_DB_PORT" DB_USER=root DB_PASSWORD="$ROOT_PW" DB_NAME="$TEST_DB" \
     MYSQL_PWD="$ROOT_PW" bash "$PROJECT_ROOT/scripts/migrate.sh"
 
 info "seeding fixtures"
@@ -92,7 +92,7 @@ else
 fi
 
 ok "database ready — running tests"
-export DB_HOST=127.0.0.1 DB_PORT=3306 DB_USER=root DB_PASSWORD="$ROOT_PW" DB_NAME="$TEST_DB"
+export DB_HOST=127.0.0.1 DB_PORT="$TEST_DB_PORT" DB_USER=root DB_PASSWORD="$ROOT_PW" DB_NAME="$TEST_DB"
 go clean -testcache
 if [ "${TEST_DB_SETUP_ONLY:-}" != "1" ]; then
     go test -p 1 "${@:-./...}"

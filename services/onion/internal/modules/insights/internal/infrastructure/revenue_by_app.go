@@ -3,15 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type RevenueByAppRow struct {
-	App              string
-	AmountMinorUnits int64
-}
+type RevenueByAppRow = domain.RevenueByAppRow
 
 func (r *Repository) GetRevenueByApp(ctx context.Context, businessID int64) ([]RevenueByAppRow, error) {
 	thisFrom, thisTo, _, _ := mtdRanges(nowFn())

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	moduleinfra "github.com/voxire/onion/internal/modules/aiquota/internal/infrastructure"
+
 	"github.com/voxire/onion/internal/modules/aiquota/internal/api"
 	"github.com/voxire/onion/internal/modules/aiquota/internal/application"
 	hubaiv1 "github.com/voxire/voxie/gen/go/hub/ai/v1"
@@ -15,8 +17,15 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context, db *sql.DB) *Module {
-	return &Module{service: application.NewService(ctx, db)}
+// EntitlementReader is the quota module's minimal subscription capability.
+// The subscription owner implements the reads; quota persistence stays local.
+type EntitlementReader interface {
+	GetAIQuotaEntitlement(ctx context.Context, ownerID int64) (planSlug string, creditsPerMonth, seatCount int, status string, err error)
+	GetFreePlanAICredits(ctx context.Context) (int64, error)
+}
+
+func NewModule(ctx context.Context, db *sql.DB, entitlements EntitlementReader) *Module {
+	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db), entitlements)}
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

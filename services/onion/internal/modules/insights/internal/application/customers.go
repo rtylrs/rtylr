@@ -20,7 +20,7 @@ func (s *Service) GetCustomerKPIs(ctx context.Context, businessID int64, from, t
 	if err != nil {
 		return CustomerKPIPayload{}, err
 	}
-	out, err := cacher.Of[CustomerKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (CustomerKPIPayload, error) {
+	out, err := cacher.Of[CustomerKPIPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (CustomerKPIPayload, error) {
 		k, rerr := s.repo.GetCustomerKPIs(ctx, businessID, from, to)
 		if rerr != nil {
 			return CustomerKPIPayload{}, rerr

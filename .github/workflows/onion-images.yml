@@ -5,6 +5,11 @@ name: Onion images
 # real deploy path (ECR push + ECS update) is tryrtylr/deploy -> deploy-release.
 
 on:
+  pull_request:
+    paths:
+      - 'services/onion/**'
+      - 'voxie/**'
+      - '.github/workflows/onion-images.yml'
   push:
     paths:
       - 'services/onion/**'
@@ -16,6 +21,26 @@ permissions:
   contents: read
 
 jobs:
+  architecture:
+    name: Onion architecture
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: services/onion/go.mod
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check module and persistence boundaries
+        run: make -C services/onion architecture-check
+
   build:
     name: Build ${{ matrix.name }}
     runs-on: blacksmith-2vcpu-ubuntu-2404

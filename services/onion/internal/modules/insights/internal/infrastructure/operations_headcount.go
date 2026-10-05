@@ -2,18 +2,14 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type HeadcountSnapshot struct {
-	ActiveHeadcount    int64
-	HeadcountAtStart   int64
-	HiredThisPeriod    int64
-	DepartedThisPeriod int64
-}
+type HeadcountSnapshot = domain.HeadcountSnapshot
 
 func (r *Repository) GetHeadcount(ctx context.Context, businessID int64, from, to time.Time) (HeadcountSnapshot, error) {
 	periodStart := dateParam(from)

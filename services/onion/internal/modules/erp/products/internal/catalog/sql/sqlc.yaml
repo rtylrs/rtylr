@@ -1,0 +1,23 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../../../sql/schema/erp/activity.sql"
+      - "../../../../sql/schema/erp/brands.sql"
+      - "../../../../sql/schema/erp/inventory_cost_layers.sql"
+      - "../../../../sql/schema/erp/price_lists.sql"
+      - "../../../../sql/schema/erp/product_extras.sql"
+      - "../../../../sql/schema/erp/schema.sql"
+      - "../../../../sql/schema/erp/stock_core.sql"
+      - "../../../../sql/schema/erp/stock_takes.sql"
+      - "../../../../sql/schema/erp/stock_transfers.sql"
+      - "../../../../sql/schema/erp/variants.sql"
+      - "../../../../sql/schema/erp/warehouses.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../internal/infrastructure/persistence/sqlc"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_db_tags: true

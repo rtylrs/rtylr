@@ -3,17 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type SlowMoverRow struct {
-	ProductID        int64
-	Name             string
-	StockQuantity    float64
-	LastSoldAtExists bool
-}
+type SlowMoverRow = domain.SlowMoverRow
 
 func (r *Repository) GetSlowMovers(ctx context.Context, businessID int64, days int32) ([]SlowMoverRow, error) {
 	if days <= 0 {

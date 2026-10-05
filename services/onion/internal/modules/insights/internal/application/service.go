@@ -2,22 +2,51 @@ package application
 
 import (
 	"context"
-	"database/sql"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 )
 
-// Service is the read-only business layer for /insights/*.
-//
-// It exists as a thin orchestrator: validate inputs, default date ranges,
-// call the repository, and route through the platform cache. No SQL here.
+// Service coordinates read models and the small set of Insights-owned settings.
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db)}
+type repository interface {
+	GetInsightsGeneration(context.Context, int64) (time.Time, error)
+	GetProductMarginRows(context.Context, int64) ([]domain.ProductMarginRow, error)
+	GetTopCustomers(context.Context, int64, domain.TopCustomerQuery) (domain.TopCustomerPage, error)
+	GetDashboard(context.Context, int64, domain.DashboardInput) (domain.DashboardSnapshot, error)
+	GetCustomerKPIs(context.Context, int64, time.Time, time.Time) (domain.CustomerKPIs, error)
+	GetChurnRates(context.Context, int64, time.Time, time.Time) ([]domain.ChurnRateRow, error)
+	GetLTVDistribution(context.Context, int64) ([]domain.LTVBucketRow, error)
+	GetCashFlowSeries(context.Context, int64, time.Time, time.Time) ([]domain.CashFlowDayRow, error)
+	GetExpensesByCategory(context.Context, int64, time.Time, time.Time) ([]domain.ExpenseByCategoryRow, error)
+	GetInvoiceAging(context.Context, int64) ([]domain.InvoiceAgingBucketRow, error)
+	GetOperationsKPIs(context.Context, int64) (domain.OperationsKPIs, error)
+	GetHeadcount(context.Context, int64, time.Time, time.Time) (domain.HeadcountSnapshot, error)
+	GetShiftMetrics(context.Context, int64, time.Time, time.Time) (domain.ShiftMetricsRow, error)
+	GetTimeOffSummary(context.Context, int64, time.Time, time.Time) (domain.TimeOffSummaryRow, error)
+	GetUtilization(context.Context, int64, time.Time, time.Time) (domain.UtilizationRow, error)
+	GetProductKPIs(context.Context, int64) (domain.ProductKPIs, error)
+	GetBestSellers(context.Context, int64, int32) ([]domain.BestSellerRow, error)
+	GetSalesByCategory(context.Context, int64) ([]domain.CategorySalesRow, error)
+	GetMarginDistribution(context.Context, int64) ([]domain.MarginBucketRow, error)
+	GetSlowMovers(context.Context, int64, int32) ([]domain.SlowMoverRow, error)
+	GetRevenueSeries(context.Context, int64, time.Time, time.Time) ([]domain.RevenuePoint, error)
+	GetRevenueByApp(context.Context, int64) ([]domain.RevenueByAppRow, error)
+	GetRevenueComparison(context.Context, int64, time.Time, time.Time) (domain.RevenueComparisonRow, error)
+	ListScheduledReports(context.Context, int64, string, string, int32, int32) ([]domain.ScheduledReportRow, int64, error)
+	CreateScheduledReport(context.Context, domain.ScheduledReportWrite) (int64, error)
+	UpdateScheduledReport(context.Context, domain.ScheduledReportWrite) error
+	DeleteScheduledReport(context.Context, int64, int64) error
+	GetScheduledReport(context.Context, int64, int64) (domain.ScheduledReportRow, error)
+	GetSettings(context.Context, int64) (domain.SettingsRow, error)
+	UpsertSettings(context.Context, domain.SettingsRow) error
+}
+
+func NewService(repo repository) *Service {
+	return &Service{repo: repo}
 }
 
 // GetProductMarginRows returns per-product margin rows for margin reporting.

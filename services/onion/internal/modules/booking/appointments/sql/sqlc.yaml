@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../sql/schema/book/schema.sql"
+      - "migration_20261004_schedule_lock.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../internal/infrastructure/persistence/sqlc"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_db_tags: true

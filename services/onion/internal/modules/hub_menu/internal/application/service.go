@@ -2,13 +2,11 @@ package application
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/domain"
-	"github.com/voxire/onion/internal/modules/hub_menu/internal/infrastructure"
 	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
@@ -35,8 +33,8 @@ type Service struct {
 	repo repository
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db)}
+func NewService(_ context.Context, repo repository) *Service {
+	return &Service{repo: repo}
 }
 
 func (s *Service) ListBanners(ctx context.Context, businessID int64) ([]domain.Banner, error) {

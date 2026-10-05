@@ -1,0 +1,15 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../sql/schema/shared/businesses.sql"
+      - "../../sql/schema/shared/users.sql"
+      - "../../sql/schema/shared/zz_authorization.sql"
+      - "../../sql/schema/shared/subscriptions.sql"
+      - "../../sql/schema/hub/hub_api_keys.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../internal/persistence/sqlc"
+        sql_package: "database/sql"

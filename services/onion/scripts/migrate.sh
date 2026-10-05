@@ -31,11 +31,11 @@ DB_NAME="${DB_NAME:?DB_NAME is required}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
-# The schemas repository owns the canonical dependency order used by both
-# migration entry points.
-# shellcheck source=../internal/platform/database/schemas/migration_order.sh
-source "$SCHEMAS_DIR/migration_order.sh"
+SCHEMA_REGISTRY="$PROJECT_ROOT/internal/platform/database/schema_registry.tsv"
+if [ ! -f "$SCHEMA_REGISTRY" ]; then
+    echo "Schema registry not found: $SCHEMA_REGISTRY" >&2
+    exit 1
+fi
 
 mysql_cmd() {
     # The CLI otherwise negotiates latin1, which cannot represent the emoji
@@ -75,10 +75,8 @@ APPLIED=0
 SKIPPED=0
 FAILED=0
 OUTPUT_FILE="$(mktemp)"
-trap 'rm -f "$OUTPUT_FILE"' EXIT
-
-deferred_migrations=(
-)
+MIGRATION_SQL_FILE="$(mktemp)"
+trap 'rm -f "$OUTPUT_FILE" "$MIGRATION_SQL_FILE"' EXIT
 
 # Files that cannot run against this database at all, as opposed to files that
 # merely have to run last. Deferring is not the same thing: a deferred file is
@@ -104,17 +102,6 @@ is_unsupported() {
     local entry
     for entry in "${unsupported_migrations[@]}"; do
         if [ "$filename" = "$entry" ]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
-is_deferred() {
-    local filename="$1"
-    local deferred
-    for deferred in "${deferred_migrations[@]}"; do
-        if [ "$filename" = "$deferred" ]; then
             return 0
         fi
     done
@@ -155,44 +142,33 @@ apply_migration() {
     APPLIED=$((APPLIED + 1))
 }
 
-for dir in "${SCHEMA_MIGRATION_DIRS[@]}"; do
-    schema_dir="$SCHEMAS_DIR/$dir"
-    if [ ! -d "$schema_dir" ]; then
+while IFS=$'\t' read -r filename source_paths; do
+    [[ -z "$filename" || "$filename" == \#* ]] && continue
+
+    if is_unsupported "$filename"; then
+        echo "  ~ $filename (skipped: unsupported by this database)"
         continue
     fi
 
-    for f in "$schema_dir"/*.sql; do
-        [ -f "$f" ] || continue
-        filename="$dir/$(basename "$f")"
-
-        if is_unsupported "$filename"; then
-            echo "  ~ $filename (skipped: unsupported by this database)"
-            continue
+    : > "$MIGRATION_SQL_FILE"
+    IFS='|' read -r -a sources <<< "$source_paths"
+    for source in "${sources[@]}"; do
+        file_path="$PROJECT_ROOT/$source"
+        if [ ! -f "$file_path" ]; then
+            echo "Schema source for $filename not found: $file_path" >&2
+            exit 1
         fi
-
-        if is_deferred "$filename"; then
-            continue
-        fi
-
-        apply_migration "$filename" "$f"
+        cat "$file_path" >> "$MIGRATION_SQL_FILE"
+        printf '\n\n' >> "$MIGRATION_SQL_FILE"
     done
-done
+    apply_migration "$filename" "$MIGRATION_SQL_FILE"
+done < "$SCHEMA_REGISTRY"
 
-# Module-owned migrations live beside their sqlc input. Apply them after the
-# canonical schema set so module changes can build on shared tables.
-shopt -s nullglob
-for f in "$PROJECT_ROOT"/internal/modules/*/sql/migration_*.sql; do
+# Module-owned migrations live beside their sqlc input, including capabilities
+# nested beneath bounded-context roots. Apply them after canonical schemas.
+while IFS= read -r f; do
     apply_migration "${f#"$PROJECT_ROOT/"}" "$f"
-done
-
-# Apply cross-schema migrations after all owning schemas exist. Their
-# application-level preflight checks still fail closed on invalid data.
-for filename in "${deferred_migrations[@]}"; do
-    file_path="$SCHEMAS_DIR/$filename"
-    if [ -f "$file_path" ]; then
-        apply_migration "$filename" "$file_path"
-    fi
-done
+done < <(find "$PROJECT_ROOT/internal/modules" -type f -path '*/sql/migration_*.sql' | sort)
 
 echo ""
 echo "✅ Migrations complete. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."

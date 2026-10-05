@@ -70,17 +70,6 @@ func (q *Queries) DeleteMenuBanner(ctx context.Context, arg DeleteMenuBannerPara
 	return err
 }
 
-const getHubMenuBusinessOwnerID = `-- name: GetHubMenuBusinessOwnerID :one
-SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE
-`
-
-func (q *Queries) GetHubMenuBusinessOwnerID(ctx context.Context, id int64) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getHubMenuBusinessOwnerID, id)
-	var owner_id int64
-	err := row.Scan(&owner_id)
-	return owner_id, err
-}
-
 const getMenuBanner = `-- name: GetMenuBanner :one
 SELECT
     id,

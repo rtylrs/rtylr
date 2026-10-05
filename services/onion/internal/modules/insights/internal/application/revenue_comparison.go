@@ -24,7 +24,7 @@ func (s *Service) GetRevenueComparison(ctx context.Context, businessID int64, fr
 	if err != nil {
 		return RevenueComparisonPayload{}, err
 	}
-	out, err := cacher.Of[RevenueComparisonPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (RevenueComparisonPayload, error) {
+	out, err := cacher.Of[RevenueComparisonPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (RevenueComparisonPayload, error) {
 		row, rerr := s.repo.GetRevenueComparison(ctx, businessID, from, to)
 		if rerr != nil {
 			return RevenueComparisonPayload{}, rerr

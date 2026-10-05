@@ -2,16 +2,13 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type InvoiceAgingBucketRow struct {
-	Bucket           string
-	InvoiceCount     int64
-	AmountMinorUnits int64
-}
+type InvoiceAgingBucketRow = domain.InvoiceAgingBucketRow
 
 // invoiceAgingBucketOrder is the bucket set declared by the
 // insights.financial.v1 InvoiceAgingBucket contract.

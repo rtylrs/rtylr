@@ -97,7 +97,7 @@ func TestProcessDueDeliversASignedEvent(t *testing.T) {
 
 	seedDelivery(t, db, server.URL, true, 0)
 
-	sender := NewSender(db)
+	sender := newTestSender(db)
 	// The real client refuses loopback by design, which is what
 	// TestTheDeliveryClientRefusesALoopbackDestination proves. Swapped here so
 	// the queue behaviour can be tested against a local server.
@@ -173,7 +173,7 @@ func TestProcessDueRetriesANonSuccessResponse(t *testing.T) {
 
 	seedDelivery(t, db, server.URL, true, 0)
 
-	sender := NewSender(db)
+	sender := newTestSender(db)
 	sender.client = server.Client()
 	if err := sender.ProcessDue(context.Background()); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
@@ -203,7 +203,7 @@ func TestProcessDueDeadLettersWhenAttemptsAreSpent(t *testing.T) {
 
 	seedDelivery(t, db, server.URL, true, 4)
 
-	sender := NewSender(db)
+	sender := newTestSender(db)
 	sender.client = server.Client()
 	if err := sender.ProcessDue(context.Background()); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
@@ -228,7 +228,7 @@ func TestProcessDueDeadLettersAnInactiveRegistration(t *testing.T) {
 
 	seedDelivery(t, db, server.URL, false, 0)
 
-	sender := NewSender(db)
+	sender := newTestSender(db)
 	sender.client = server.Client()
 	if err := sender.ProcessDue(context.Background()); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
@@ -259,7 +259,7 @@ func TestProcessDueDeadLettersAnInternalDestination(t *testing.T) {
 	seedDelivery(t, db, server.URL, true, 0)
 
 	// The real client, deliberately not substituted.
-	if err := NewSender(db).ProcessDue(context.Background()); err != nil {
+	if err := newTestSender(db).ProcessDue(context.Background()); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
 	}
 

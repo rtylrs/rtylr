@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "queries"
+    schema:
+      - "../../../../sql/schema/erp/schema.sql"
+      - "../../../../sql/schema/erp/stock_core.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "../infrastructure/persistence/sqlc"
+        sql_package: "database/sql"
+        emit_json_tags: true
+        emit_db_tags: true

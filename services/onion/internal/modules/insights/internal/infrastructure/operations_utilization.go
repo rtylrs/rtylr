@@ -2,16 +2,14 @@ package infrastructure
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type UtilizationRow struct {
-	ScheduledHours float64
-	AvailableHours float64
-}
+type UtilizationRow = domain.UtilizationRow
 
 func inclusiveWorkdays(from, to time.Time) int64 {
 	start := time.Date(from.Year(), from.Month(), from.Day(), 0, 0, 0, 0, time.UTC)

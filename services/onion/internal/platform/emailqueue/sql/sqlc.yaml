@@ -3,7 +3,7 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../internal/platform/database/schemas/shared/email_jobs.sql"
+      - "schema/shared/email_jobs.sql"
     gen:
       go:
         package: "sqlc"

@@ -3,7 +3,7 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../internal/platform/database/schemas/shared/ai_cache_events.sql"
+      - "schema/shared/ai_cache_events.sql"
     gen:
       go:
         package: "sqlc"

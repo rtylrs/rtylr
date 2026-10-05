@@ -10,9 +10,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-type DashboardInput struct {
-	Now time.Time
-}
+type DashboardInput = domain.DashboardInput
 
 func (r *Repository) GetDashboard(ctx context.Context, businessID int64, in DashboardInput) (domain.DashboardSnapshot, error) {
 	thisFrom, thisTo, priorFrom, priorTo := mtdRanges(in.Now)

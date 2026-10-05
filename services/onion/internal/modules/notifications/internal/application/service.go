@@ -2,13 +2,11 @@ package application
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/domain"
-	"github.com/voxire/onion/internal/modules/notifications/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/cursor"
@@ -19,6 +17,7 @@ import (
 const notificationsTTL = 30 * time.Second
 
 type repository interface {
+	Create(ctx context.Context, notification domain.Notification) error
 	List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error)
 	MarkRead(ctx context.Context, businessID, userID, notificationID int64) error
 	MarkAllRead(ctx context.Context, businessID, userID int64) error
@@ -42,9 +41,9 @@ type Service struct {
 	repo repository
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
+func NewService(_ context.Context, repo repository) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(db),
+		repo: repo,
 	}
 }
 
@@ -87,7 +86,7 @@ func (s *Service) ListPage(ctx context.Context, businessID, userID int64, limit 
 	}
 
 	return cacher.Of[NotificationPage]().GetOrComputeSingle(ctx,
-		notificationsKey(businessID, userID, limit, id),
+		notificationsKey(businessID, userID, limit, id)+"|domain=v2",
 		func(ctx context.Context) (NotificationPage, error) {
 			var rows []domain.Notification
 			var err error
@@ -122,5 +121,19 @@ func (s *Service) MarkAllRead(ctx context.Context, businessID, userID int64) err
 		return err
 	}
 	invalidateNotificationsScope(ctx, businessID, userID)
+	return nil
+}
+
+func (s *Service) Create(ctx context.Context, notification domain.Notification) error {
+	if notification.OwnerID <= 0 || notification.BusinessID <= 0 || notification.UserID <= 0 {
+		return fmt.Errorf("notification owner, business, and recipient are required")
+	}
+	if notification.Title == "" || notification.Type == "" {
+		return fmt.Errorf("notification title and type are required")
+	}
+	if err := s.repo.Create(ctx, notification); err != nil {
+		return err
+	}
+	invalidateNotificationsScope(ctx, notification.BusinessID, notification.UserID)
 	return nil
 }

@@ -4,16 +4,18 @@ import (
 	"context"
 	stdhttp "net/http"
 
+	"github.com/voxire/onion/internal/modules/organization/scopes"
+
 	"github.com/go-chi/chi/v5"
 
-	"github.com/voxire/onion/internal/cdn"
-	"github.com/voxire/onion/internal/modules/addons"
-	hrdashboardstats "github.com/voxire/onion/internal/modules/hr_dashboard/stats"
-	"github.com/voxire/onion/internal/modules/team"
-	"github.com/voxire/onion/internal/modules/user"
+	hrdashboardstats "github.com/voxire/onion/internal/modules/hr/hr_dashboard/stats"
+	"github.com/voxire/onion/internal/modules/organization/addons"
+	"github.com/voxire/onion/internal/modules/organization/team"
+	"github.com/voxire/onion/internal/modules/organization/user"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
+	"github.com/voxire/onion/internal/platform/cdn"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -137,7 +139,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 			PayrollDraft:   payrollDraft,
 		}, nil
 	})
-	modules.Business.WithUserService(modules.User.UserService)
+	modules.Business.WithUserService(modules.User.Onboarding())
 	modules.Apps.SetAddonProvider(addons.NewHubAddonProvider(modules.Addons.GetService()))
 	modules.APIKeys.SetWebhooksProvider(webhooks.NewHubWebhooksProvider(modules.Webhooks.GetService()))
 
@@ -148,8 +150,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	user.OnUserCreated = ensurePersonalWorkspace
 	user.OnUserLogin = ensurePersonalWorkspace
 
-	http.AutoRegisterAnonymousRoutes(ctx, modules, accessPolicy)
-	http.AutoConfigureAccessPolicy(ctx, modules, accessPolicy)
+	http.AutoRegisterAnonymousRoutes(ctx, accessPolicy, modules.anonymousRouteProviders()...)
 
 	tokenResolver := authPkg.NewStaticTokenValidatorResolver(
 		modules.User.GetTokenValidator(),
@@ -167,7 +168,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		authPkg.DeviceMiddleware(),
 		// Keep subscription state authoritative for every authenticated tenant
 		// request. The middleware leaves billing recovery and console routes open.
-		http.SubscriptionEnforcementMiddleware(dbclient.Pool(), accessPolicy),
+		http.SubscriptionEnforcementMiddleware(scopes.NewReader(dbclient.Pool()).SubscriptionAccess, accessPolicy),
 		// After auth so idempotency keys are scoped per authenticated user.
 		http.IdempotencyMiddleware,
 	}
@@ -189,7 +190,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		cfg.CDNMaxUploadBytes,
 		cfg.CDNMediaEnginePath,
 		cfg.CDNAPIKey,
-	)
+	).WithUploadKeyReader(scopes.NewReader(dbclient.Pool()).UploadKeyScope)
 	if err := cdnService.CheckMediaEngine(); err != nil {
 		logger.Ctx(ctx).Warn("media-engine unavailable; image transformations will fail", logger.Error(err))
 	}
@@ -207,10 +208,10 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	// Runs before RegisterRoutes so module escape hatches (rate-limited or
 	// special routes) can reference the mux captured in RegisterAPI.
 	oneKitMux := stdhttp.NewServeMux()
-	http.AutoRegisterAPIs(ctx, modules, oneKitMux)
+	http.AutoRegisterAPIs(ctx, oneKitMux, modules.apiRegistrars()...)
 	http.MountOneKit(r, oneKitMux)
 
-	http.AutoRegisterRoutes(ctx, modules, r)
+	http.AutoRegisterRoutes(ctx, r, modules.routeRegistrars()...)
 
 	return middlewares
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	moduleinfra "github.com/voxire/onion/internal/modules/hub_menu/internal/infrastructure"
+
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/api"
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/application"
 	hubmenuv1 "github.com/voxire/voxie/gen/go/hub/menu/v1"
@@ -16,7 +18,7 @@ type Module struct {
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
-	return &Module{service: application.NewService(ctx, db)}
+	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db))}
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

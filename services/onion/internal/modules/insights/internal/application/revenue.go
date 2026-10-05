@@ -53,7 +53,7 @@ func (s *Service) GetRevenueSeries(ctx context.Context, businessID int64, from, 
 	type result struct {
 		Points []domain.RevenuePoint
 	}
-	cached, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	cached, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		points, rerr := s.repo.GetRevenueSeries(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr

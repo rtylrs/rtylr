@@ -25,7 +25,7 @@ func (s *Service) GetExpensesByCategory(ctx context.Context, businessID int64, f
 	type result struct {
 		Rows []ExpenseByCategoryPayload
 	}
-	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (result, error) {
 		rows, rerr := s.repo.GetExpensesByCategory(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr

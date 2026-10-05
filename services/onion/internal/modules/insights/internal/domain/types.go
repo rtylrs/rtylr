@@ -8,32 +8,32 @@ package domain
 // MoneyCard is the shared envelope for a single headline metric card.
 // The frontend renders `{ value, delta_pct }` consistently across widgets.
 type MoneyCard struct {
-	Value    int64   `json:"value"`
-	DeltaPct float64 `json:"delta_pct"`
+	Value    int64
+	DeltaPct float64
 }
 
 // CountCard is the same envelope for count-based metrics.
 type CountCard struct {
-	Value    int64   `json:"value"`
-	DeltaPct float64 `json:"delta_pct"`
+	Value    int64
+	DeltaPct float64
 }
 
 // PctCard wraps a percentage metric (0..100).
 type PctCard struct {
-	Value    float64 `json:"value"`
-	DeltaPct float64 `json:"delta_pct"`
+	Value    float64
+	DeltaPct float64
 }
 
 // DashboardSnapshot bundles the four headline cards for /insights/dashboard.
 type DashboardSnapshot struct {
-	Revenue   MoneyCard `json:"revenue"`
-	Customers CountCard `json:"customers"`
-	Orders    CountCard `json:"orders"`
-	Margin    PctCard   `json:"margin"`
+	Revenue   MoneyCard
+	Customers CountCard
+	Orders    CountCard
+	Margin    PctCard
 }
 
 // RevenuePoint is a single daily revenue sample in minor units.
 type RevenuePoint struct {
-	Date             string `json:"date"`
-	AmountMinorUnits int64  `json:"amount_minor_units"`
+	Date             string
+	AmountMinorUnits int64
 }

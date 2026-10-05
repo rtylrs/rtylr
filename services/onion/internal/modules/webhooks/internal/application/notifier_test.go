@@ -66,6 +66,7 @@ func clearFailing(t *testing.T, db *sql.DB) {
 	t.Helper()
 	ctx := context.Background()
 	for _, stmt := range []string{
+		"DELETE FROM webhook_dead_delivery_notices WHERE business_id = ?",
 		"DELETE FROM webhook_deliveries WHERE business_id = ?",
 		"DELETE FROM platform_events WHERE business_id = ?",
 		"DELETE FROM hub_webhooks WHERE business_id = ?",
@@ -98,7 +99,7 @@ func TestNotifyFailingSendsOneMessagePerRegistration(t *testing.T) {
 
 	seedFailing(t, db, "active", 1, 3)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 
@@ -132,7 +133,7 @@ func TestNotifyFailingTellsTheOwnerOncePerDay(t *testing.T) {
 
 	seedFailing(t, db, "active", 1, 1)
 
-	notifier := NewNotifier(db)
+	notifier := newTestNotifier(db)
 	for pass := 1; pass <= 3; pass++ {
 		if err := notifier.NotifyFailing(ctx); err != nil {
 			t.Fatalf("pass %d: %v", pass, err)
@@ -174,7 +175,7 @@ func TestNotifyFailingAdvancesPastAlreadyNotifiedRegistrations(t *testing.T) {
 	      VALUES (?, ?, ?, ?, 'dead', 5, DATE_SUB(NOW(), INTERVAL 1 HOUR))`,
 		secondDead, notifyTenant, secondHook, secondEvent)
 
-	notifier := NewNotifier(db)
+	notifier := newTestNotifier(db)
 	notifier.batchSize = 1
 
 	for pass := 1; pass <= 2; pass++ {
@@ -196,7 +197,7 @@ func TestNotifyFailingIgnoresFailuresOutsideTheWindow(t *testing.T) {
 
 	seedFailing(t, db, "active", 72, 2)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 
@@ -215,7 +216,7 @@ func TestNotifyFailingTellsNobodyWhenTheCreatorHasLeft(t *testing.T) {
 
 	seedFailing(t, db, "", 1, 1)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 
@@ -231,7 +232,7 @@ func TestNotifyFailingSkipsARevokedMembership(t *testing.T) {
 
 	seedFailing(t, db, "revoked", 1, 1)
 
-	if err := NewNotifier(db).NotifyFailing(ctx); err != nil {
+	if err := newTestNotifier(db).NotifyFailing(ctx); err != nil {
 		t.Fatalf("NotifyFailing: %v", err)
 	}
 

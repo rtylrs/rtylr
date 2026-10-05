@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
@@ -22,7 +21,7 @@ func (s *Service) GetDashboard(ctx context.Context, businessID int64) (domain.Da
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
-	return cacher.Of[domain.DashboardSnapshot]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (domain.DashboardSnapshot, error) {
-		return s.repo.GetDashboard(ctx, businessID, infrastructure.DashboardInput{Now: time.Now()})
+	return cacher.Of[domain.DashboardSnapshot]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (domain.DashboardSnapshot, error) {
+		return s.repo.GetDashboard(ctx, businessID, domain.DashboardInput{Now: time.Now()})
 	}, cacher.WithExpiry(ctx, dashboardCacheTTL))
 }

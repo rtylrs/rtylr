@@ -1,0 +1,331 @@
+-- name: CountCycles :one
+SELECT COUNT(*) FROM flow_cycles WHERE workspace_id = ?;
+
+-- name: ListCycles :many
+SELECT
+    c.id, c.workspace_id, c.project_id, c.name, c.description, c.status,
+    c.start_date, c.end_date, c.created_by, c.created_at,
+    COUNT(ct.task_id) AS scope,
+    COUNT(CASE WHEN t.status = 'done' THEN 1 END) AS completed
+FROM flow_cycles c
+LEFT JOIN flow_cycle_tasks ct ON ct.cycle_id = c.id
+LEFT JOIN flow_tasks t ON t.id = ct.task_id
+WHERE c.workspace_id = ?
+GROUP BY c.id
+ORDER BY c.start_date DESC
+LIMIT ? OFFSET ?;
+
+-- name: CreateCycle :execresult
+INSERT INTO flow_cycles (owner_id, business_id, workspace_id, project_id, name, description, start_date, end_date, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: CountMilestonesByWorkspace :one
+SELECT COUNT(*) FROM flow_milestones WHERE workspace_id = ?;
+
+-- name: ListMilestonesByWorkspace :many
+SELECT
+    m.id, m.project_id, m.workspace_id, m.name, m.description, m.status,
+    m.due_date, m.completed_at, m.created_by, m.created_at,
+    p.name AS project_name, p.color AS project_color,
+    COUNT(mt.task_id) AS task_count,
+    COUNT(CASE WHEN t.status = 'done' THEN 1 END) AS done_count
+FROM flow_milestones m
+LEFT JOIN flow_projects p ON p.id = m.project_id
+LEFT JOIN flow_milestone_tasks mt ON mt.milestone_id = m.id
+LEFT JOIN flow_tasks t ON t.id = mt.task_id
+WHERE m.workspace_id = ?
+GROUP BY m.id
+ORDER BY m.due_date ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountMilestonesByProject :one
+SELECT COUNT(*) FROM flow_milestones WHERE workspace_id = ? AND project_id = ?;
+
+-- name: ListMilestonesByProject :many
+SELECT
+    m.id, m.project_id, m.workspace_id, m.name, m.description, m.status,
+    m.due_date, m.completed_at, m.created_by, m.created_at,
+    p.name AS project_name, p.color AS project_color,
+    COUNT(mt.task_id) AS task_count,
+    COUNT(CASE WHEN t.status = 'done' THEN 1 END) AS done_count
+FROM flow_milestones m
+LEFT JOIN flow_projects p ON p.id = m.project_id
+LEFT JOIN flow_milestone_tasks mt ON mt.milestone_id = m.id
+LEFT JOIN flow_tasks t ON t.id = mt.task_id
+WHERE m.workspace_id = ? AND m.project_id = ?
+GROUP BY m.id
+ORDER BY m.due_date ASC
+LIMIT ? OFFSET ?;
+
+-- name: CreateMilestone :execresult
+INSERT INTO flow_milestones (owner_id, business_id, project_id, workspace_id, name, description, due_date, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: CountViewsByWorkspace :one
+SELECT COUNT(*) FROM flow_views WHERE business_id = ? AND workspace_id = ?;
+
+-- name: ListViews :many
+-- A private view is visible only to whoever created it (S2). Everything else is
+-- shared business-wide, which is how every view behaved before the column
+-- existed, so an unset visibility keeps its old reach.
+--
+-- created_by is nullable, and a private view with a NULL creator would be
+-- reachable by nobody. That is the safe direction for a visibility filter: a
+-- view nobody can see is recoverable, a private view leaked to colleagues is
+-- not. CreateView always sets it.
+SELECT id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir,
+       COALESCE(visibility, 'shared') AS visibility, created_by, created_at
+FROM flow_views
+WHERE business_id = ? AND workspace_id = ?
+  AND (COALESCE(visibility, 'shared') <> 'private' OR created_by = ?)
+ORDER BY created_at ASC
+LIMIT ? OFFSET ?;
+
+-- name: CreateView :execresult
+INSERT INTO flow_views (owner_id, business_id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir, visibility, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdateView :execresult
+UPDATE flow_views
+SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ?, visibility = ?
+WHERE flow_views.id = ?
+  AND flow_views.business_id = ?
+  AND (
+    flow_views.created_by = ?
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_views.workspace_id AND wm.user_id = ?)
+  );
+
+-- name: DeleteView :execresult
+DELETE FROM flow_views
+WHERE flow_views.id = ?
+  AND flow_views.business_id = ?
+  AND (
+    flow_views.created_by = ?
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_views.workspace_id AND wm.user_id = ?)
+  );
+
+-- name: GetInsightsTaskCounts :one
+SELECT
+    COUNT(*) AS total_tasks,
+    COALESCE(SUM(status = 'done'), 0) AS done_tasks
+FROM flow_tasks
+WHERE workspace_id = ? AND parent_task_id IS NULL;
+
+-- name: GetInsightsCycleTime :one
+SELECT AVG(DATEDIFF(completed_at, created_at)) AS avg_days
+FROM flow_tasks
+WHERE workspace_id = ? AND status = 'done' AND completed_at IS NOT NULL;
+
+-- name: GetInsightsVelocity :many
+-- Every task event in the window is counted once: a creation and a completion
+-- each contribute. `total` is measured from the task history, so the
+-- completion rate reported alongside it is real; the previous code sent
+-- completed*1.3 as the total and a constant rate.
+SELECT
+    DATE_FORMAT(DATE_SUB(MIN(day), INTERVAL WEEKDAY(MIN(day)) DAY), '%Y-%m-%d') AS week_start,
+    COUNT(CASE WHEN kind = 2 THEN 1 END) AS completed,
+    COUNT(*) AS total
+FROM (
+    SELECT created_at AS day, 1 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.created_at >= DATE_SUB(NOW(), INTERVAL 8 WEEK)
+    UNION ALL
+    SELECT completed_at AS day, 2 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.status = 'done' AND flow_tasks.completed_at IS NOT NULL
+      AND completed_at >= DATE_SUB(NOW(), INTERVAL 8 WEEK)
+) events
+GROUP BY YEARWEEK(day, 1)
+ORDER BY week_start ASC;
+
+-- name: GetInsightsBurndownBase :one
+-- Work already in flight when the burndown window opened: created before the
+-- window and not completed before it.
+SELECT COUNT(*) AS open_tasks
+FROM flow_tasks
+WHERE workspace_id = ?
+  AND parent_task_id IS NULL
+  AND status != 'cancelled'
+  AND created_at < DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+  AND (completed_at IS NULL OR completed_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY));
+
+-- name: GetInsightsBurndownDaily :many
+-- Per-day creations and completions inside the burndown window. The repository
+-- accumulates them into the measured remaining-work curve; the previous actual
+-- line was an assumed burn rate.
+SELECT
+    DATE(day) AS day,
+    COUNT(CASE WHEN kind = 1 THEN 1 END) AS created,
+    COUNT(CASE WHEN kind = 2 THEN 1 END) AS completed
+FROM (
+    SELECT created_at AS day, 1 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.parent_task_id IS NULL AND flow_tasks.status != 'cancelled'
+      AND flow_tasks.created_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+    UNION ALL
+    SELECT completed_at AS day, 2 AS kind
+    FROM flow_tasks
+    WHERE flow_tasks.workspace_id = ? AND flow_tasks.parent_task_id IS NULL AND flow_tasks.status = 'done'
+      AND flow_tasks.completed_at IS NOT NULL
+      AND flow_tasks.completed_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+) events
+GROUP BY DATE(day)
+ORDER BY day ASC;
+
+-- Flow owns task time logs. HR workday time is added through the HR Time owner
+-- port by the application service.
+-- name: GetInsightsTimeByMember :many
+SELECT
+    tl.user_id AS member_id,
+    CAST(COALESCE(SUM(tl.duration_minutes), 0) AS SIGNED) AS minutes
+FROM flow_time_logs tl
+JOIN flow_tasks t ON t.id = tl.task_id
+WHERE t.workspace_id = ? AND tl.time_entry_id IS NULL
+GROUP BY tl.user_id;
+
+-- name: ListInsightsTaskIDsByWorkspace :many
+SELECT id FROM flow_tasks
+WHERE workspace_id = ? AND id > ?
+ORDER BY id ASC
+LIMIT ?;
+
+-- name: CountWorkspaceMembersForWorkload :one
+SELECT COUNT(*) FROM flow_workspace_members WHERE workspace_id = ?;
+
+-- name: GetTeamWorkload :many
+SELECT
+    wm.user_id AS member_id, w.business_id,
+    COUNT(t.id) AS task_count
+FROM flow_workspace_members wm
+JOIN flow_workspaces w ON w.id = wm.workspace_id
+LEFT JOIN flow_tasks t ON t.assignee_id = wm.user_id
+    AND t.workspace_id = ?
+    AND t.status NOT IN ('done', 'cancelled')
+    AND t.parent_task_id IS NULL
+WHERE wm.workspace_id = ?
+GROUP BY wm.user_id, w.business_id
+ORDER BY task_count DESC
+LIMIT ? OFFSET ?;
+
+-- Per-member fan-out from GetTeamWorkload, one call per member on the current
+-- page. Intentionally capped at 10 - a workload card shows a preview of a
+-- member's open work, not their full backlog. The outer member list is what's
+-- paginated; this inner cap is fixed regardless of page size.
+-- name: GetTeamWorkloadMemberTasks :many
+SELECT
+    id, project_id, workspace_id, owner_id, parent_task_id, section_id,
+    title, description, status, priority,
+    assignee_id, reporter_id, due_date, start_date, completed_at,
+    estimated_hours, actual_hours, sort_order, labels, archived,
+    created_at, updated_at
+FROM flow_tasks
+WHERE workspace_id = ? AND assignee_id = ? AND status NOT IN ('done', 'cancelled') AND parent_task_id IS NULL
+ORDER BY priority DESC, due_date ASC
+LIMIT 10;
+
+-- name: CountRoadmapProjects :one
+SELECT COUNT(*) FROM flow_projects WHERE workspace_id = ? AND status != 'archived';
+
+-- name: GetRoadmap :many
+SELECT
+    p.id, p.workspace_id, p.owner_id, p.name, p.description, p.icon, p.color,
+    p.status, p.start_date, p.due_date, p.created_by, p.created_at, p.updated_at
+FROM flow_projects p
+WHERE p.workspace_id = ? AND p.status != 'archived'
+ORDER BY p.start_date ASC, p.created_at ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountNotifications :one
+SELECT COUNT(*) FROM flow_notifications WHERE user_id = ?;
+
+-- name: ListNotifications :many
+SELECT
+    n.id, n.user_id, n.workspace_id, n.type, n.title, COALESCE(n.description, '') AS description,
+    n.task_id, COALESCE(n.task_title, '') AS task_title, n.actor_id,
+    COALESCE(w.business_id, t.business_id, 0) AS business_id, COALESCE(n.actor_initials, '') AS actor_initials,
+    COALESCE(n.project, '') AS project, COALESCE(n.project_color, '') AS project_color,
+    n.is_read, n.created_at
+FROM flow_notifications n
+LEFT JOIN flow_workspaces w ON w.id = n.workspace_id
+LEFT JOIN flow_tasks t ON t.id = n.task_id
+WHERE n.user_id = ?
+ORDER BY n.created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CreateNotification :exec
+INSERT INTO flow_notifications
+    (user_id, workspace_id, type, title, description, task_id, task_title, actor_id, actor_initials, project, project_color)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: MarkNotificationRead :exec
+UPDATE flow_notifications
+SET is_read = TRUE
+WHERE id = ? AND user_id = ?;
+
+-- name: MarkAllNotificationsRead :exec
+UPDATE flow_notifications
+SET is_read = TRUE
+WHERE user_id = ?;
+
+-- name: GetUserSettings :one
+SELECT task_assigned, task_comments, mentions, status_changes, weekly_digest, email_notifications, sidebar_preferences_json
+FROM flow_user_settings
+WHERE user_id = ?;
+
+-- name: UpsertUserSettings :exec
+INSERT INTO flow_user_settings (user_id, task_assigned, task_comments, mentions, status_changes, weekly_digest, email_notifications, sidebar_preferences_json)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    task_assigned = VALUES(task_assigned),
+    task_comments = VALUES(task_comments),
+    mentions = VALUES(mentions),
+    status_changes = VALUES(status_changes),
+    weekly_digest = VALUES(weekly_digest),
+    email_notifications = VALUES(email_notifications),
+    sidebar_preferences_json = VALUES(sidebar_preferences_json);
+
+-- name: GetProjectTaskCounts :one
+SELECT
+    COUNT(*) AS total,
+    COALESCE(SUM(status = 'done'), 0) AS done
+FROM flow_tasks
+WHERE project_id = ? AND parent_task_id IS NULL;
+
+-- name: GetProjectTaskCountsByProjectIDs :many
+SELECT
+    project_id,
+    COUNT(*) AS total,
+    COALESCE(SUM(status = 'done'), 0) AS done
+FROM flow_tasks
+WHERE project_id IN (sqlc.slice('project_ids'))
+  AND parent_task_id IS NULL
+GROUP BY project_id;
+
+-- ── v2: business/project-scoped replacements ─────────────────────────────
+
+-- name: ListCyclesV2 :many
+SELECT c.id, c.project_id, c.name, c.description, c.status,
+       c.start_date, c.end_date, c.created_by, c.created_at,
+       (SELECT COUNT(*) FROM flow_cycle_tasks ct WHERE ct.cycle_id = c.id) AS scope,
+       (SELECT COUNT(*) FROM flow_cycle_tasks ct JOIN flow_tasks t ON t.id = ct.task_id
+        WHERE ct.cycle_id = c.id AND t.status = 'done') AS completed
+FROM flow_cycles c
+WHERE c.project_id = ? AND c.business_id = ?
+  AND (? = 1 OR EXISTS (SELECT 1 FROM flow_projects p
+        WHERE p.id = c.project_id
+          AND (p.created_by = ? OR p.owner_id = ?
+               OR EXISTS (SELECT 1 FROM flow_project_members pm
+                          WHERE pm.project_id = p.id AND pm.user_id = ?))))
+ORDER BY c.start_date DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountCyclesV2 :one
+SELECT COUNT(*) FROM flow_cycles c
+WHERE c.project_id = ? AND c.business_id = ?
+  AND (? = 1 OR EXISTS (SELECT 1 FROM flow_projects p
+        WHERE p.id = c.project_id
+          AND (p.created_by = ? OR p.owner_id = ?
+               OR EXISTS (SELECT 1 FROM flow_project_members pm
+                          WHERE pm.project_id = p.id AND pm.user_id = ?))));

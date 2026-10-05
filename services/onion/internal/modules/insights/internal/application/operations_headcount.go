@@ -21,7 +21,7 @@ func (s *Service) GetHeadcount(ctx context.Context, businessID int64, from, to t
 	if err != nil {
 		return HeadcountPayload{}, err
 	}
-	out, err := cacher.Of[HeadcountPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (HeadcountPayload, error) {
+	out, err := cacher.Of[HeadcountPayload]().GetOrComputeSingle(ctx, key+"|domain=v2", func(ctx context.Context) (HeadcountPayload, error) {
 		snap, rerr := s.repo.GetHeadcount(ctx, businessID, from, to)
 		if rerr != nil {
 			return HeadcountPayload{}, rerr

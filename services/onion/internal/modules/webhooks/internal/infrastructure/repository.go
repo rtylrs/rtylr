@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
 	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/eventbus"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -20,6 +21,33 @@ func NewRepository(db *sql.DB) *Repository {
 		queries: sqlc.New(db),
 		db:      db,
 	}
+}
+
+func (r *Repository) DispatchEvent(ctx context.Context, event eventbus.Event) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	queries := sqlc.New(tx)
+	webhookIDs, err := queries.ListWebhooksForEvent(ctx, sqlc.ListWebhooksForEventParams{
+		BusinessID: event.BusinessID,
+		EventType:  event.Type,
+	})
+	if err != nil {
+		return err
+	}
+	for _, webhookID := range webhookIDs {
+		if err := queries.EnqueueWebhookDelivery(ctx, sqlc.EnqueueWebhookDeliveryParams{
+			BusinessID: event.BusinessID,
+			WebhookID:  webhookID,
+			EventID:    event.ID,
+		}); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 // WebhookExistsInBusiness reports whether the row exists within the business. The write queries

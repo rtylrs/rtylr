@@ -1,159 +1,191 @@
 package main
 
 import (
+	flowreferences "github.com/voxire/onion/internal/modules/flow/references"
+	identityadapter "github.com/voxire/onion/internal/modules/flow/workspaces/adapters/identity"
+	posreferences "github.com/voxire/onion/internal/modules/pos/references"
+	"github.com/voxire/onion/internal/platform/authorization"
+
 	"context"
 
-	"github.com/voxire/onion/internal/modules/accounts"
 	"github.com/voxire/onion/internal/modules/activity"
-	"github.com/voxire/onion/internal/modules/addons"
 	"github.com/voxire/onion/internal/modules/aiquery"
 	"github.com/voxire/onion/internal/modules/aiquota"
-	apikeys "github.com/voxire/onion/internal/modules/api_keys"
-	"github.com/voxire/onion/internal/modules/apps"
 	"github.com/voxire/onion/internal/modules/automations"
-	bankaccounts "github.com/voxire/onion/internal/modules/bank_accounts"
-	"github.com/voxire/onion/internal/modules/benefits"
-	"github.com/voxire/onion/internal/modules/billing"
-	"github.com/voxire/onion/internal/modules/bills"
-	bookingappointments "github.com/voxire/onion/internal/modules/booking_appointments"
-	bookingcalendar "github.com/voxire/onion/internal/modules/booking_calendar"
-	bookingdashboard "github.com/voxire/onion/internal/modules/booking_dashboard"
-	bookingreminders "github.com/voxire/onion/internal/modules/booking_reminders"
-	bookingresources "github.com/voxire/onion/internal/modules/booking_resources"
-	bookingservices "github.com/voxire/onion/internal/modules/booking_services"
-	bookingwaitlist "github.com/voxire/onion/internal/modules/booking_waitlist"
-	"github.com/voxire/onion/internal/modules/brands"
-	"github.com/voxire/onion/internal/modules/business"
+	booking_appointments "github.com/voxire/onion/internal/modules/booking/appointments"
+	booking_calendar "github.com/voxire/onion/internal/modules/booking/calendar"
+	booking_dashboard "github.com/voxire/onion/internal/modules/booking/dashboard"
+	booking_reminders "github.com/voxire/onion/internal/modules/booking/reminders"
+	booking_resources "github.com/voxire/onion/internal/modules/booking/resources"
+	booking_services "github.com/voxire/onion/internal/modules/booking/services"
+	booking_waitlist "github.com/voxire/onion/internal/modules/booking/waitlist"
 	"github.com/voxire/onion/internal/modules/cacheops"
-	"github.com/voxire/onion/internal/modules/campaigns"
-	"github.com/voxire/onion/internal/modules/careers"
-	"github.com/voxire/onion/internal/modules/categories"
-	"github.com/voxire/onion/internal/modules/config"
-	"github.com/voxire/onion/internal/modules/console"
-	crmsales "github.com/voxire/onion/internal/modules/crm_sales"
-	crmsettings "github.com/voxire/onion/internal/modules/crm_settings"
-	"github.com/voxire/onion/internal/modules/customers"
-	"github.com/voxire/onion/internal/modules/departments"
-	"github.com/voxire/onion/internal/modules/documents"
-	"github.com/voxire/onion/internal/modules/echo"
+	echo "github.com/voxire/onion/internal/modules/caret"
+	"github.com/voxire/onion/internal/modules/caret/memory"
+	"github.com/voxire/onion/internal/modules/crm/campaigns"
+	crmsales "github.com/voxire/onion/internal/modules/crm/crm_sales"
+	crmsettings "github.com/voxire/onion/internal/modules/crm/crm_settings"
+	"github.com/voxire/onion/internal/modules/crm/customers"
+	"github.com/voxire/onion/internal/modules/crm/feedback"
+	"github.com/voxire/onion/internal/modules/crm/loyalty"
+	"github.com/voxire/onion/internal/modules/crm/segments"
+	"github.com/voxire/onion/internal/modules/crm/templates"
 	"github.com/voxire/onion/internal/modules/emailtest"
-	erpsettings "github.com/voxire/onion/internal/modules/erp_settings"
-	"github.com/voxire/onion/internal/modules/expenses"
-	"github.com/voxire/onion/internal/modules/featuresupport"
-	"github.com/voxire/onion/internal/modules/feedback"
-	financebankfeeds "github.com/voxire/onion/internal/modules/finance_bank_feeds"
-	financereconciliation "github.com/voxire/onion/internal/modules/finance_reconciliation"
-	financereports "github.com/voxire/onion/internal/modules/finance_reports"
-	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
-	hrattendance "github.com/voxire/onion/internal/modules/hr_attendance"
-	hrcore "github.com/voxire/onion/internal/modules/hr_core"
-	hrdashboard "github.com/voxire/onion/internal/modules/hr_dashboard"
-	hrdocuments "github.com/voxire/onion/internal/modules/hr_documents"
-	hrequipment "github.com/voxire/onion/internal/modules/hr_equipment"
-	hrleave "github.com/voxire/onion/internal/modules/hr_leave"
-	hronboarding "github.com/voxire/onion/internal/modules/hr_onboarding"
-	hrovertime "github.com/voxire/onion/internal/modules/hr_overtime"
-	hrpayroll "github.com/voxire/onion/internal/modules/hr_payroll"
-	hrperformance "github.com/voxire/onion/internal/modules/hr_performance"
-	hrreports "github.com/voxire/onion/internal/modules/hr_reports"
-	hrsetup "github.com/voxire/onion/internal/modules/hr_setup"
-	hrshifts "github.com/voxire/onion/internal/modules/hr_shifts"
-	hrtime "github.com/voxire/onion/internal/modules/hr_time"
+	"github.com/voxire/onion/internal/modules/erp/brands"
+	"github.com/voxire/onion/internal/modules/erp/categories"
+	erpsettings "github.com/voxire/onion/internal/modules/erp/erp_settings"
+	"github.com/voxire/onion/internal/modules/erp/inventory"
+	"github.com/voxire/onion/internal/modules/erp/onlineorders"
+	"github.com/voxire/onion/internal/modules/erp/price_lists"
+	"github.com/voxire/onion/internal/modules/erp/products"
+	"github.com/voxire/onion/internal/modules/erp/purchase_orders"
+	stocktakes "github.com/voxire/onion/internal/modules/erp/stock_takes"
+	stocktransfers "github.com/voxire/onion/internal/modules/erp/stock_transfers"
+	"github.com/voxire/onion/internal/modules/erp/store_categories"
+	"github.com/voxire/onion/internal/modules/erp/store_products"
+	"github.com/voxire/onion/internal/modules/erp/suppliers"
+	"github.com/voxire/onion/internal/modules/erp/variants"
+	"github.com/voxire/onion/internal/modules/erp/warehouses"
+	"github.com/voxire/onion/internal/modules/finance/accounts"
+	bankaccounts "github.com/voxire/onion/internal/modules/finance/bank_accounts"
+	"github.com/voxire/onion/internal/modules/finance/bills"
+	"github.com/voxire/onion/internal/modules/finance/expenses"
+	financebankfeeds "github.com/voxire/onion/internal/modules/finance/finance_bank_feeds"
+	financereconciliation "github.com/voxire/onion/internal/modules/finance/finance_reconciliation"
+	financereports "github.com/voxire/onion/internal/modules/finance/finance_reports"
+	"github.com/voxire/onion/internal/modules/finance/invoices"
+	invoiceadapters "github.com/voxire/onion/internal/modules/finance/invoices/adapters"
+	"github.com/voxire/onion/internal/modules/finance/journal"
+	"github.com/voxire/onion/internal/modules/finance/quotes"
+	recurringinvoices "github.com/voxire/onion/internal/modules/finance/recurring_invoices"
+	"github.com/voxire/onion/internal/modules/finance/tax"
+	flow_insights "github.com/voxire/onion/internal/modules/flow/insights"
+	"github.com/voxire/onion/internal/modules/flow/workspaces"
+	workspaceadapters "github.com/voxire/onion/internal/modules/flow/workspaces/adapters"
+	"github.com/voxire/onion/internal/modules/hr/benefits"
+	"github.com/voxire/onion/internal/modules/hr/departments"
+	"github.com/voxire/onion/internal/modules/hr/documents"
+	"github.com/voxire/onion/internal/modules/hr/hr_attendance"
+	"github.com/voxire/onion/internal/modules/hr/hr_core"
+	"github.com/voxire/onion/internal/modules/hr/hr_dashboard"
+	"github.com/voxire/onion/internal/modules/hr/hr_documents"
+	"github.com/voxire/onion/internal/modules/hr/hr_equipment"
+	"github.com/voxire/onion/internal/modules/hr/hr_leave"
+	"github.com/voxire/onion/internal/modules/hr/hr_onboarding"
+	"github.com/voxire/onion/internal/modules/hr/hr_overtime"
+	"github.com/voxire/onion/internal/modules/hr/hr_payroll"
+	"github.com/voxire/onion/internal/modules/hr/hr_performance"
+	"github.com/voxire/onion/internal/modules/hr/hr_reports"
+	"github.com/voxire/onion/internal/modules/hr/hr_setup"
+	"github.com/voxire/onion/internal/modules/hr/hr_shifts"
+	"github.com/voxire/onion/internal/modules/hr/hr_time"
+	oneonones "github.com/voxire/onion/internal/modules/hr/one_on_ones"
+	"github.com/voxire/onion/internal/modules/hr/payroll"
+	"github.com/voxire/onion/internal/modules/hr/reviews"
+	"github.com/voxire/onion/internal/modules/hr/staff"
+	"github.com/voxire/onion/internal/modules/hr/time_off"
+	"github.com/voxire/onion/internal/modules/hr/timesheets"
+	"github.com/voxire/onion/internal/modules/hr/training"
 	hubmenu "github.com/voxire/onion/internal/modules/hub_menu"
 	"github.com/voxire/onion/internal/modules/insights"
+	insightsadapters "github.com/voxire/onion/internal/modules/insights/adapters"
+	"github.com/voxire/onion/internal/modules/insights/kpis"
 	"github.com/voxire/onion/internal/modules/integrations"
-	"github.com/voxire/onion/internal/modules/inventory"
-	"github.com/voxire/onion/internal/modules/invoices"
-	"github.com/voxire/onion/internal/modules/journal"
-	"github.com/voxire/onion/internal/modules/kpis"
-	"github.com/voxire/onion/internal/modules/loyalty"
-	"github.com/voxire/onion/internal/modules/memory"
 	"github.com/voxire/onion/internal/modules/notifications"
-	"github.com/voxire/onion/internal/modules/oauth"
-	oneonones "github.com/voxire/onion/internal/modules/one_on_ones"
-	"github.com/voxire/onion/internal/modules/payroll"
-	posaudit "github.com/voxire/onion/internal/modules/pos_audit"
-	poscashmovements "github.com/voxire/onion/internal/modules/pos_cash_movements"
-	poscombos "github.com/voxire/onion/internal/modules/pos_combos"
-	poscustomers "github.com/voxire/onion/internal/modules/pos_customers"
-	posdaysummary "github.com/voxire/onion/internal/modules/pos_day_summary"
-	posfloors "github.com/voxire/onion/internal/modules/pos_floors"
-	posgiftcards "github.com/voxire/onion/internal/modules/pos_gift_cards"
-	poskds "github.com/voxire/onion/internal/modules/pos_kds"
-	poslocations "github.com/voxire/onion/internal/modules/pos_locations"
-	posloyalty "github.com/voxire/onion/internal/modules/pos_loyalty"
-	posmanager "github.com/voxire/onion/internal/modules/pos_manager"
-	posmemberlocations "github.com/voxire/onion/internal/modules/pos_member_locations"
-	posmenu "github.com/voxire/onion/internal/modules/pos_menu"
-	posmodifiers "github.com/voxire/onion/internal/modules/pos_modifiers"
-	posorders "github.com/voxire/onion/internal/modules/pos_orders"
-	posreceipts "github.com/voxire/onion/internal/modules/pos_receipts"
-	possessions "github.com/voxire/onion/internal/modules/pos_sessions"
-	possettings "github.com/voxire/onion/internal/modules/pos_settings"
-	posstockmovements "github.com/voxire/onion/internal/modules/pos_stock_movements"
-	postables "github.com/voxire/onion/internal/modules/pos_tables"
-	posterminals "github.com/voxire/onion/internal/modules/pos_terminals"
-	posusers "github.com/voxire/onion/internal/modules/pos_users"
-	pricelists "github.com/voxire/onion/internal/modules/price_lists"
-	"github.com/voxire/onion/internal/modules/products"
-	purchaseorders "github.com/voxire/onion/internal/modules/purchase_orders"
-	"github.com/voxire/onion/internal/modules/quotes"
-	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
-	"github.com/voxire/onion/internal/modules/reviews"
-	"github.com/voxire/onion/internal/modules/roles"
-	"github.com/voxire/onion/internal/modules/security"
-	"github.com/voxire/onion/internal/modules/segments"
-	"github.com/voxire/onion/internal/modules/staff"
-	stocktakes "github.com/voxire/onion/internal/modules/stock_takes"
-	stocktransfers "github.com/voxire/onion/internal/modules/stock_transfers"
-	storecategories "github.com/voxire/onion/internal/modules/store_categories"
-	storecheckout "github.com/voxire/onion/internal/modules/store_checkout"
-	storeorders "github.com/voxire/onion/internal/modules/store_orders"
-	storepayments "github.com/voxire/onion/internal/modules/store_payments"
-	storeproducts "github.com/voxire/onion/internal/modules/store_products"
-	storeshipping "github.com/voxire/onion/internal/modules/store_shipping"
-	storethemes "github.com/voxire/onion/internal/modules/store_themes"
-	"github.com/voxire/onion/internal/modules/storefronts"
-	"github.com/voxire/onion/internal/modules/subscriptions"
-	"github.com/voxire/onion/internal/modules/suppliers"
-	supportcanned "github.com/voxire/onion/internal/modules/support_canned"
-	supportcustomers "github.com/voxire/onion/internal/modules/support_customers"
-	supportinbox "github.com/voxire/onion/internal/modules/support_inbox"
-	supportknowledge "github.com/voxire/onion/internal/modules/support_knowledge"
-	supportsettings "github.com/voxire/onion/internal/modules/support_settings"
-	supporttickets "github.com/voxire/onion/internal/modules/support_tickets"
-	"github.com/voxire/onion/internal/modules/tax"
-	"github.com/voxire/onion/internal/modules/team"
-	"github.com/voxire/onion/internal/modules/templates"
-	timeoff "github.com/voxire/onion/internal/modules/time_off"
-	"github.com/voxire/onion/internal/modules/timesheets"
-	"github.com/voxire/onion/internal/modules/training"
-	"github.com/voxire/onion/internal/modules/user"
-	"github.com/voxire/onion/internal/modules/variants"
-	"github.com/voxire/onion/internal/modules/voxhire"
-	"github.com/voxire/onion/internal/modules/warehouses"
+	"github.com/voxire/onion/internal/modules/organization/addons"
+	apikeys "github.com/voxire/onion/internal/modules/organization/api_keys"
+	"github.com/voxire/onion/internal/modules/organization/apps"
+	"github.com/voxire/onion/internal/modules/organization/billing"
+	"github.com/voxire/onion/internal/modules/organization/business"
+	businessadapters "github.com/voxire/onion/internal/modules/organization/business/adapters"
+	"github.com/voxire/onion/internal/modules/organization/config"
+	"github.com/voxire/onion/internal/modules/organization/console"
+	"github.com/voxire/onion/internal/modules/organization/featuresupport"
+	"github.com/voxire/onion/internal/modules/organization/oauth"
+	"github.com/voxire/onion/internal/modules/organization/roles"
+	"github.com/voxire/onion/internal/modules/organization/scopes"
+	"github.com/voxire/onion/internal/modules/organization/security"
+	"github.com/voxire/onion/internal/modules/organization/subscriptions"
+	"github.com/voxire/onion/internal/modules/organization/team"
+	teamadapters "github.com/voxire/onion/internal/modules/organization/team/adapters"
+	"github.com/voxire/onion/internal/modules/organization/user"
+	"github.com/voxire/onion/internal/modules/pos/audit"
+	"github.com/voxire/onion/internal/modules/pos/cashmovements"
+	"github.com/voxire/onion/internal/modules/pos/combos"
+	"github.com/voxire/onion/internal/modules/pos/daysummary"
+	"github.com/voxire/onion/internal/modules/pos/floors"
+	"github.com/voxire/onion/internal/modules/pos/giftcards"
+	"github.com/voxire/onion/internal/modules/pos/kds"
+	"github.com/voxire/onion/internal/modules/pos/locations"
+	posloyalty "github.com/voxire/onion/internal/modules/pos/loyalty"
+	"github.com/voxire/onion/internal/modules/pos/manager"
+	"github.com/voxire/onion/internal/modules/pos/memberlocations"
+	"github.com/voxire/onion/internal/modules/pos/modifiers"
+	"github.com/voxire/onion/internal/modules/pos/orders"
+	"github.com/voxire/onion/internal/modules/pos/receipts"
+	"github.com/voxire/onion/internal/modules/pos/sessions"
+	"github.com/voxire/onion/internal/modules/pos/settings"
+	"github.com/voxire/onion/internal/modules/pos/tables"
+	"github.com/voxire/onion/internal/modules/pos/terminals"
+	"github.com/voxire/onion/internal/modules/pos/users"
+	"github.com/voxire/onion/internal/modules/recruit/careers"
+	"github.com/voxire/onion/internal/modules/recruit/voxhire"
+	store_checkout "github.com/voxire/onion/internal/modules/store/checkout"
+	store_payments "github.com/voxire/onion/internal/modules/store/payments"
+	store_shipping "github.com/voxire/onion/internal/modules/store/shipping"
+	"github.com/voxire/onion/internal/modules/store/storefronts"
+	store_themes "github.com/voxire/onion/internal/modules/store/themes"
+	supportcanned "github.com/voxire/onion/internal/modules/support/canned"
+	supportcustomers "github.com/voxire/onion/internal/modules/support/customers"
+	supportinbox "github.com/voxire/onion/internal/modules/support/inbox"
+	supportknowledge "github.com/voxire/onion/internal/modules/support/knowledge"
+	supportsettings "github.com/voxire/onion/internal/modules/support/settings"
+	supporttickets "github.com/voxire/onion/internal/modules/support/tickets"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/websitelead"
-	"github.com/voxire/onion/internal/modules/workspaces"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func initializeModules(ctx context.Context) *apiModules {
-	memoryModule := memory.NewModule(ctx, dbclient.Pool())
-	aiQuotaModule := aiquota.NewModule(ctx, dbclient.Pool())
+	tenant.SetScopeResolver(scopes.NewReader(dbclient.Pool()))
+	flowReferenceReader := flowreferences.NewReader(dbclient.Pool())
+	posReferenceReader := posreferences.NewReader(dbclient.Pool())
+	_ = authorization.SetScopeLookup(func(ctx context.Context, businessID int64, scopeType string, id int64) (bool, error) {
+		if scopeType == "flow_project" {
+			return flowReferenceReader.ProjectExists(ctx, businessID, id)
+		}
+		return posReferenceReader.LocationExists(ctx, businessID, id)
+	})
+
+	memoryModule := memory.NewModule(ctx, dbclient.Pool()).WithIdentityReaders(scopes.NewReader(dbclient.Pool()).DefaultBusiness, scopes.NewReader(dbclient.Pool()).AssistantIdentity)
+	subscriptionsModule := subscriptions.NewModule(ctx, dbclient.Pool())
+	aiQuotaModule := aiquota.NewModule(ctx, dbclient.Pool(), subscriptionsModule)
 	aiQueryModule := aiquery.NewModule(ctx)
-	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
-	hrAttendanceModule := hrattendance.NewModule(ctx, dbclient.Pool(), hrCoreModule)
-	hrLeaveModule := hrleave.NewModule(ctx, dbclient.Pool(), hrCoreModule)
-	hrOvertimeModule := hrovertime.NewModule(ctx, dbclient.Pool(), hrCoreModule)
-	hrPayrollModule := hrpayroll.NewModule(ctx, dbclient.Pool(), hrCoreModule)
-	hrTimeModule := hrtime.NewModule(ctx, dbclient.Pool(), hrCoreModule)
-	customersModule := customers.NewModule(ctx, dbclient.Pool())
+	businessModule := business.NewModule(ctx, dbclient.Pool())
+	addonsModule := addons.NewModule(ctx, dbclient.Pool())
+	hrCoreModule := hr_core.NewModule(ctx, dbclient.Pool()).
+		WithAccountEmailReader(scopes.NewReader(dbclient.Pool()).AccountEmail).
+		WithBusinessOwnerResolver(businessModule).
+		WithBusinessIdentityResolver(businessModule)
+	businessModule.WithPublicLocationReader(businessadapters.NewHRPublicLocationReader(hrCoreModule))
+	hrStaffModule := staff.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrAttendanceModule := hr_attendance.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrLeaveModule := hr_leave.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrOvertimeModule := hr_overtime.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrPayrollModule := hr_payroll.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrTimeModule := hr_time.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	customersModule := customers.NewModule(ctx, dbclient.Pool()).WithReportingTimezone(businessModule.ReportingTimezone)
+	automationContacts := func(ctx context.Context, customerID, businessID int64) (automations.CustomerContact, bool, error) {
+		recipient, found, err := customersModule.ResolveEmailRecipient(ctx, businessID, customerID)
+		return automations.CustomerContact{Email: recipient.Email, Name: recipient.Name}, found, err
+	}
 	campaignsModule := campaigns.NewModule(ctx, dbclient.Pool())
 	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
 	productsModule := products.NewModule(ctx, dbclient.Pool())
+	productsModule.SetCatalogBusinessContext(businessModule.GetBusinessOwnerID, addonsModule.OnlineOrderingEnabled)
 	categoriesModule := categories.NewModule(ctx, dbclient.Pool())
 	brandsModule := brands.NewModule(ctx, dbclient.Pool())
 	loyaltyModule := loyalty.NewModule(ctx, dbclient.Pool())
@@ -161,60 +193,82 @@ func initializeModules(ctx context.Context) *apiModules {
 	segmentsModule := segments.NewModule(ctx, dbclient.Pool())
 	// flowInsights is constructed first: insights.dashboard.v1's Flow-shaped
 	// projections delegate to it rather than querying flow_* directly.
-	flowInsightsModule := flowinsights.NewModule(ctx, dbclient.Pool())
-	insightsModule := insights.NewModule(ctx, dbclient.Pool(), flowInsightsModule)
-	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool(), hrCoreModule, hrLeaveModule)
+	flowInsightsModule := flow_insights.NewModule(ctx, dbclient.Pool())
+	insightsModule := insights.NewModule(ctx, dbclient.Pool(), insightsadapters.NewFlowReader(flowInsightsModule))
+	teamModule := team.NewModule(ctx, dbclient.Pool())
+	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool()).WithIdentityReaders(identityadapter.NewIdentityReader(scopes.NewReader(dbclient.Pool())), scopes.NewReader(dbclient.Pool()).AccountByEmail, scopes.NewReader(dbclient.Pool()).BusinessUserByUsername)
+	userModule := func() *user.Module {
+		cfg := platformConfig.GlobalConfig
+		m := user.NewModule(ctx, dbclient.Pool(), cfg.GoogleOAuthClientID)
+		m.WithBusinessProvisioner(hrCoreModule)
+		m.SetEmployeeProvisioner(hrCoreModule)
+		m.WithGoogleOAuth(cfg.GoogleOAuthClientID, cfg.GoogleOAuthClientSecret, cfg.GoogleOAuthRedirectURI)
+		return m
+	}()
+	workspacesModule.SetWorkDayLineStore(workspaceadapters.NewHRTimeWorkDayLineStore(hrTimeModule, hrCoreModule))
+	workspacesModule.SetWorkdayRosterSource(workspaceadapters.NewWorkdayRosterSource(hrCoreModule, teamModule))
+	workspacesModule.SetInsightsMemberProfileSource(workspaceadapters.NewInsightsMemberProfileSource(userModule))
+	workspacesModule.SetPresenceSource(workspaceadapters.NewPresenceSource(hrCoreModule, hrLeaveModule))
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
+	notificationsModule := notifications.NewModule(ctx, dbclient.Pool())
+	teamModule.SetNotificationPublisher(teamadapters.NewNotificationPublisher(notificationsModule))
+	teamModule.SetMemberProvisioner(teamadapters.NewHRMemberProvisioner(hrCoreModule, hrStaffModule))
+	teamModule.SetTerminatedEmployeeSource(teamadapters.NewTerminatedEmployeeSource(hrCoreModule, hrStaffModule))
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
-	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
-	posLocationsModule := poslocations.NewModule(ctx, dbclient.Pool())
-	posTerminalsModule := posterminals.NewModule(ctx, dbclient.Pool())
-	posUsersModule := posusers.NewModule(ctx, dbclient.Pool())
-	posFloorsModule := posfloors.NewModule(ctx, dbclient.Pool())
-	posTablesModule := postables.NewModule(ctx, dbclient.Pool())
-	posMenuModule := posmenu.NewModule(ctx, dbclient.Pool())
-	posModifiersModule := posmodifiers.NewModule(ctx, dbclient.Pool())
-	posSessionsModule := possessions.NewModule(ctx, dbclient.Pool())
-	posCashMovementsModule := poscashmovements.NewModule(ctx, dbclient.Pool())
-	posStockMovementsModule := posstockmovements.NewModule(ctx, dbclient.Pool())
+	posOrdersModule := orders.NewModule(ctx, dbclient.Pool()).
+		WithSalesProductReader(productsModule.SalesProduct).
+		WithOnlineOrderingReader(addonsModule.OnlineOrderingEnabled)
+	posLocationsModule := locations.NewModule(ctx, dbclient.Pool()).WithLocationLimitReader(scopes.NewReader(dbclient.Pool()).LocationLimit)
+	inventoryModule.WithBusinessOwnerResolver(businessModule.GetBusinessOwnerID).WithPOSBranchOwnerReader(posLocationsModule.StockBranchOwner)
+	posTerminalsModule := terminals.NewModule(ctx, dbclient.Pool())
+	posUsersModule := users.NewModule(ctx, dbclient.Pool()).WithAuthorizationVersionReader(scopes.NewReader(dbclient.Pool()).AuthorizationVersion)
+	posFloorsModule := floors.NewModule(ctx, dbclient.Pool())
+	posTablesModule := tables.NewModule(ctx, dbclient.Pool())
+	posModifiersModule := modifiers.NewModule(ctx, dbclient.Pool())
+	posSessionsModule := sessions.NewModule(ctx, dbclient.Pool())
+	posCashMovementsModule := cashmovements.NewModule(ctx, dbclient.Pool())
 	suppliersModule := suppliers.NewModule(ctx, dbclient.Pool())
 	warehousesModule := warehouses.NewModule(ctx, dbclient.Pool())
-	purchaseOrdersModule := purchaseorders.NewModule(ctx, dbclient.Pool())
+	purchaseOrdersModule := purchase_orders.NewModule(ctx, dbclient.Pool())
 	stockTransfersModule := stocktransfers.NewModule(ctx, dbclient.Pool())
-	bankAccountsModule := bankaccounts.NewModule(ctx, dbclient.Pool())
-	billsModule := bills.NewModule(ctx, dbclient.Pool())
+	bankAccountsModule := bankaccounts.NewModule(ctx, dbclient.Pool()).WithReportingCurrency(businessModule.ReportingCurrency)
+	billsModule := bills.NewModule(ctx, dbclient.Pool()).WithPurchaseOrderReader(purchaseOrdersModule.Exists)
 	quotesModule := quotes.NewModule(ctx, dbclient.Pool())
-	bookingDashboardModule := bookingdashboard.NewModule(ctx, dbclient.Pool())
-	bookingAppointmentsModule := bookingappointments.NewModule(ctx, dbclient.Pool())
-	bookingCalendarModule := bookingcalendar.NewModule(ctx, dbclient.Pool())
-	bookingRemindersModule := bookingreminders.NewModule(ctx, dbclient.Pool())
-	bookingResourcesModule := bookingresources.NewModule(ctx, dbclient.Pool())
-	bookingServicesModule := bookingservices.NewModule(ctx, dbclient.Pool())
-	bookingWaitlistModule := bookingwaitlist.NewModule(ctx, dbclient.Pool())
+	bookingDashboardModule := booking_dashboard.NewModule(ctx, dbclient.Pool())
+	bookingAppointmentsModule := booking_appointments.NewModule(ctx, dbclient.Pool())
+	bookingCalendarModule := booking_calendar.NewModule(ctx, dbclient.Pool())
+	bookingRemindersModule := booking_reminders.NewModule(ctx, dbclient.Pool())
+	bookingResourcesModule := booking_resources.NewModule(ctx, dbclient.Pool())
+	bookingServicesModule := booking_services.NewModule(ctx, dbclient.Pool())
+	bookingWaitlistModule := booking_waitlist.NewModule(ctx, dbclient.Pool())
 	financeBankFeedsModule := financebankfeeds.NewModule(ctx, dbclient.Pool())
 	financeReconciliationModule := financereconciliation.NewModule(ctx, dbclient.Pool())
-	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool())
+	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool()).WithReportingCurrency(businessModule.ReportingCurrency)
 	accountsModule := accounts.NewModule(ctx, dbclient.Pool())
 	journalModule := journal.NewModule(ctx, dbclient.Pool())
 	journalModule.SetPayrollAccountProvider(accountsModule.PayrollAccountProvider())
 	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
-	posDaySummaryModule := posdaysummary.NewModule(ctx, dbclient.Pool())
+	posDaySummaryModule := daysummary.NewModule(ctx, dbclient.Pool())
 	invoicesModule := invoices.NewModule(ctx, dbclient.Pool())
+	invoicesModule.SetBillableTimeReader(invoiceadapters.NewBillableTimeReader(hrTimeModule))
+	hrTimeModule.SetInvoiceExistenceProvider(invoicesModule)
 	// CRM->FIN-02 (#840): invoices verify a supplied customer_id against the
 	// customers module and snapshot its name/email/address onto the invoice.
 	// Port lives in invoices; customers implements it; no package imports.
 	invoicesModule.SetCustomerSnapshotProvider(customersModule.SnapshotProvider())
 
-	storeCategoriesModule := storecategories.NewModule(ctx, dbclient.Pool())
-	storeOrdersModule := storeorders.NewModule(ctx, dbclient.Pool())
-	storeProductsModule := storeproducts.NewModule(ctx, dbclient.Pool())
+	storeCategoriesModule := store_categories.NewModule(ctx, dbclient.Pool())
+	storeOrdersModule := onlineorders.NewModule(ctx, dbclient.Pool())
+	storeProductsModule := store_products.NewModule(ctx, dbclient.Pool())
 	supportCannedModule := supportcanned.NewModule(ctx, dbclient.Pool())
 	supportCustomersModule := supportcustomers.NewModule(ctx, dbclient.Pool())
 	supportInboxModule := supportinbox.NewModule(ctx, dbclient.Pool())
 	supportKnowledgeModule := supportknowledge.NewModule(ctx, dbclient.Pool())
 	supportTicketsModule := supporttickets.NewModule(ctx, dbclient.Pool())
 	taxModule := tax.NewModule(ctx, dbclient.Pool())
+	consoleModule := console.NewModule(ctx, dbclient.Pool())
+	consoleModule.SetEmployeeProvisioner(hrCoreModule)
 
 	s1FormsExecutor, s1FormsErr := echo.NewFormMappingToolExecutor(platformConfig.GlobalConfig.FormMappingCheckpointPath)
 	if s1FormsErr != nil {
@@ -223,15 +277,15 @@ func initializeModules(ctx context.Context) *apiModules {
 
 	return &apiModules{
 		Accounts:              accountsModule,
-		Activity:              activity.NewModule(ctx, dbclient.Pool()),
-		Addons:                addons.NewModule(ctx, dbclient.Pool()),
+		Activity:              activity.NewModule(ctx, dbclient.Pool()).WithUserNameReader(scopes.NewReader(dbclient.Pool()).BusinessUserName),
+		Addons:                addonsModule,
 		APIKeys:               apikeys.NewModule(ctx, dbclient.Pool()),
 		Apps:                  apps.NewModule(ctx, dbclient.Pool()),
-		Automations:           automations.NewModule(ctx, dbclient.Pool()),
+		Automations:           automations.NewModule(ctx, dbclient.Pool(), automationContacts),
 		BankAccounts:          bankAccountsModule,
 		Benefits:              benefits.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		Billing:               billing.NewModule(ctx, dbclient.Pool()),
-		Subscriptions:         subscriptions.NewModule(ctx, dbclient.Pool()),
+		Subscriptions:         subscriptionsModule,
 		Bills:                 billsModule,
 		BookingAppointments:   bookingAppointmentsModule,
 		BookingCalendar:       bookingCalendarModule,
@@ -241,21 +295,21 @@ func initializeModules(ctx context.Context) *apiModules {
 		BookingServices:       bookingServicesModule,
 		BookingWaitlist:       bookingWaitlistModule,
 		Brands:                brandsModule,
-		Business:              business.NewModule(ctx, dbclient.Pool()),
+		Business:              businessModule,
 		Campaigns:             campaignsModule,
 		Careers:               careers.NewModule(ctx, dbclient.Pool()),
 		Categories:            categoriesModule,
-		Console:               console.NewModule(ctx, dbclient.Pool()),
+		Console:               consoleModule,
 		Config:                config.NewModule(ctx, dbclient.Pool()),
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
-		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()),
+		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithBusinessOwnerResolver(businessModule),
 		Customers:             customersModule,
 		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, memoryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule, s1FormsExecutor),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, memoryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posModifiersModule, posSessionsModule, posCashMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule, s1FormsExecutor),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		ERPSettings:           erpsettings.NewModule(ctx, dbclient.Pool()),
@@ -266,18 +320,18 @@ func initializeModules(ctx context.Context) *apiModules {
 		FlowInsights:          flowInsightsModule,
 		HRAttendance:          hrAttendanceModule,
 		HRCore:                hrCoreModule,
-		HRDashboard:           hrdashboard.NewModule(ctx, dbclient.Pool()),
-		HRDocuments:           hrdocuments.NewModule(ctx, dbclient.Pool()),
+		HRDashboard:           hr_dashboard.NewModule(ctx, dbclient.Pool()),
+		HRDocuments:           hr_documents.NewModule(ctx, dbclient.Pool()),
 		HubMenu:               hubmenu.NewModule(ctx, dbclient.Pool()),
-		HREquipment:           hrequipment.NewModule(ctx, dbclient.Pool(), hrCoreModule),
+		HREquipment:           hr_equipment.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRLeave:               hrLeaveModule,
-		HROnboarding:          hronboarding.NewModule(ctx, dbclient.Pool()),
+		HROnboarding:          hr_onboarding.NewModule(ctx, dbclient.Pool()),
 		HROvertime:            hrOvertimeModule,
 		HRPayroll:             hrPayrollModule,
-		HRPerformance:         hrperformance.NewModule(ctx, dbclient.Pool()),
-		HRReports:             hrreports.NewModule(ctx, dbclient.Pool()),
-		HRSetup:               hrsetup.NewModule(ctx, dbclient.Pool(), hrCoreModule),
-		HRShifts:              hrshifts.NewModule(ctx, dbclient.Pool(), hrCoreModule),
+		HRPerformance:         hr_performance.NewModule(ctx, dbclient.Pool()),
+		HRReports:             hr_reports.NewModule(ctx, dbclient.Pool()),
+		HRSetup:               hr_setup.NewModule(ctx, dbclient.Pool(), hrCoreModule),
+		HRShifts:              hr_shifts.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRTime:                hrTimeModule,
 		Insights:              insightsModule,
 		Integrations:          integrations.NewModule(ctx, dbclient.Pool()),
@@ -287,33 +341,30 @@ func initializeModules(ctx context.Context) *apiModules {
 		KPIs:                  kpisModule,
 		Loyalty:               loyaltyModule,
 		Memory:                memoryModule,
-		Notifications:         notifications.NewModule(ctx, dbclient.Pool()),
+		Notifications:         notificationsModule,
 		OAuth:                 oauth.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.AuthAppURL),
 		OneOnOnes:             oneonones.NewModule(ctx, dbclient.Pool()),
 		Payroll:               payroll.NewModule(ctx, dbclient.Pool(), hrCoreModule),
-		PosAudit:              posaudit.NewModule(ctx, dbclient.Pool()),
+		PosAudit:              audit.NewModule(ctx, dbclient.Pool()),
 		PosCashMovements:      posCashMovementsModule,
-		PosCombos:             poscombos.NewModule(ctx, dbclient.Pool()),
-		PosCustomers:          poscustomers.NewModule(ctx, dbclient.Pool()),
+		PosCombos:             combos.NewModule(ctx, dbclient.Pool()),
 		PosDaySummary:         posDaySummaryModule,
 		PosFloors:             posFloorsModule,
-		PosGiftCards:          posgiftcards.NewModule(ctx, dbclient.Pool()),
-		PosKDS:                poskds.NewModule(ctx, dbclient.Pool()),
+		PosGiftCards:          giftcards.NewModule(ctx, dbclient.Pool()),
+		PosKDS:                kds.NewModule(ctx, dbclient.Pool()),
 		PosLocations:          posLocationsModule,
 		PosLoyalty:            posloyalty.NewModule(ctx, dbclient.Pool()),
-		PosManager:            posmanager.NewModule(ctx, dbclient.Pool()),
-		PosMemberLocations:    posmemberlocations.NewModule(ctx, dbclient.Pool()),
-		PosMenu:               posMenuModule,
+		PosManager:            manager.NewModule(ctx, dbclient.Pool()).WithPasswordVerifier(scopes.NewReader(dbclient.Pool()).VerifyAccountPassword),
+		PosMemberLocations:    memberlocations.NewModule(ctx, dbclient.Pool()).WithIdentityReaders(scopes.NewReader(dbclient.Pool()).BusinessUserName, scopes.NewReader(dbclient.Pool()).IsBusinessUser),
 		PosModifiers:          posModifiersModule,
 		PosOrders:             posOrdersModule,
-		PosReceipts:           posreceipts.NewModule(ctx, dbclient.Pool()),
+		PosReceipts:           receipts.NewModule(ctx, dbclient.Pool()),
 		PosSessions:           posSessionsModule,
-		PosSettings:           possettings.NewModule(ctx, dbclient.Pool()),
-		PosStockMovements:     posStockMovementsModule,
+		PosSettings:           settings.NewModule(ctx, dbclient.Pool()),
 		PosTables:             posTablesModule,
 		PosTerminals:          posTerminalsModule,
 		PosUsers:              posUsersModule,
-		PriceLists:            pricelists.NewModule(ctx, dbclient.Pool()),
+		PriceLists:            price_lists.NewModule(ctx, dbclient.Pool()),
 		Products:              productsModule,
 		PurchaseOrders:        purchaseOrdersModule,
 		Quotes:                quotesModule,
@@ -322,17 +373,17 @@ func initializeModules(ctx context.Context) *apiModules {
 		Roles:                 roles.NewModule(ctx, dbclient.Pool()),
 		Security:              security.NewModule(ctx, dbclient.Pool()),
 		Segments:              segmentsModule,
-		Staff:                 staff.NewModule(ctx, dbclient.Pool(), hrCoreModule),
+		Staff:                 hrStaffModule,
 		StockTakes:            stocktakes.NewModule(ctx, dbclient.Pool()),
 		StockTransfers:        stockTransfersModule,
 		StoreCategories:       storeCategoriesModule,
-		StoreCheckout:         storecheckout.NewModule(ctx, dbclient.Pool()),
+		StoreCheckout:         store_checkout.NewModule(ctx, dbclient.Pool()).WithSalesProductReader(productsModule.SalesProduct),
 		Storefronts:           storefronts.NewModule(ctx, dbclient.Pool()),
 		StoreOrders:           storeOrdersModule,
-		StorePayments:         storepayments.NewModule(ctx, dbclient.Pool()),
+		StorePayments:         store_payments.NewModule(ctx, dbclient.Pool()),
 		StoreProducts:         storeProductsModule,
-		StoreShipping:         storeshipping.NewModule(ctx, dbclient.Pool()),
-		StoreThemes:           storethemes.NewModule(ctx, dbclient.Pool()),
+		StoreShipping:         store_shipping.NewModule(ctx, dbclient.Pool()),
+		StoreThemes:           store_themes.NewModule(ctx, dbclient.Pool()),
 		SupportCanned:         supportCannedModule,
 		SupportCustomers:      supportCustomersModule,
 		SupportInbox:          supportInboxModule,
@@ -341,22 +392,16 @@ func initializeModules(ctx context.Context) *apiModules {
 		SupportTickets:        supportTicketsModule,
 		Suppliers:             suppliersModule,
 		Tax:                   taxModule,
-		Team:                  team.NewModule(ctx, dbclient.Pool()),
+		Team:                  teamModule,
 		Templates:             templates.NewModule(ctx, dbclient.Pool()),
-		TimeOff:               timeoff.NewModule(ctx, dbclient.Pool()),
+		TimeOff:               time_off.NewModule(ctx, dbclient.Pool()),
 		Timesheets:            timesheets.NewModule(ctx, dbclient.Pool()),
 		Training:              training.NewModule(ctx, dbclient.Pool()),
-		User: func() *user.Module {
-			cfg := platformConfig.GlobalConfig
-			m := user.NewModule(ctx, dbclient.Pool(), cfg.GoogleOAuthClientID)
-			m.WithBusinessProvisioner(hrCoreModule)
-			m.WithGoogleOAuth(cfg.GoogleOAuthClientID, cfg.GoogleOAuthClientSecret, cfg.GoogleOAuthRedirectURI)
-			return m
-		}(),
-		Variants:   variants.NewModule(ctx, dbclient.Pool()),
-		Voxhire:    voxhire.NewModule(ctx, dbclient.Pool()),
-		Warehouses: warehousesModule,
-		Webhooks:   webhooks.NewModule(ctx, dbclient.Pool()),
+		User:                  userModule,
+		Variants:              variants.NewModule(ctx, dbclient.Pool()),
+		Voxhire:               voxhire.NewModule(ctx, dbclient.Pool()),
+		Warehouses:            warehousesModule,
+		Webhooks:              webhooks.NewModule(ctx, dbclient.Pool()),
 		WebsiteLead: websitelead.NewModule(ctx, dbclient.Pool(), websitelead.Notify{
 			LeadEmails:       platformConfig.GlobalConfig.LeadNotifyEmails,
 			NewsletterEmails: platformConfig.GlobalConfig.NewsletterNotifyEmails,

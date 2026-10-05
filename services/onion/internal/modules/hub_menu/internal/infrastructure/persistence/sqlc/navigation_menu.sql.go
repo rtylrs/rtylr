@@ -25,17 +25,6 @@ func (q *Queries) GetHubNavigationMenu(ctx context.Context, businessID int64) (j
 	return items, err
 }
 
-const getHubNavigationMenuBusinessOwnerID = `-- name: GetHubNavigationMenuBusinessOwnerID :one
-SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE
-`
-
-func (q *Queries) GetHubNavigationMenuBusinessOwnerID(ctx context.Context, id int64) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getHubNavigationMenuBusinessOwnerID, id)
-	var owner_id int64
-	err := row.Scan(&owner_id)
-	return owner_id, err
-}
-
 const upsertHubNavigationMenu = `-- name: UpsertHubNavigationMenu :exec
 INSERT INTO hub_navigation_menus (
     owner_id,

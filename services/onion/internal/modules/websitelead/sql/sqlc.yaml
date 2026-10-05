@@ -3,7 +3,9 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "schema.sql"
+      - "schema/voxire/faq.sql"
+      - "schema/voxire/newsletter_subscribers.sql"
+      - "schema/voxire/website_leads.sql"
     gen:
       go:
         package: "sqlc"

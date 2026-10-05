@@ -8,8 +8,6 @@ import (
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/aiquery/internal/domain"
-	"github.com/voxire/onion/internal/modules/aiquery/internal/infrastructure"
-	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type executor interface {
@@ -23,13 +21,15 @@ type businessScopeResolver func(ctx context.Context, businessID, userID int64) (
 
 type Service struct {
 	exec         executor
+	compile      func(domain.QuerySpec, int64) (string, []any, error)
 	resolveScope businessScopeResolver
 }
 
-func NewService() *Service {
+func NewService(exec executor, resolveScope businessScopeResolver, compile func(domain.QuerySpec, int64) (string, []any, error)) *Service {
 	return &Service{
-		exec:         infrastructure.NewExecutor(),
-		resolveScope: tenant.ResolveBusinessID,
+		exec:         exec,
+		compile:      compile,
+		resolveScope: resolveScope,
 	}
 }
 
@@ -45,7 +45,7 @@ type Result struct {
 // log (no raw user input — identifiers come from the allowlist, values are
 // bound).
 func (s *Service) RunSpec(ctx context.Context, businessID int64, spec domain.QuerySpec) (Result, error) {
-	query, args, err := domain.BuildSQL(spec, businessID)
+	query, args, err := s.compile(spec, businessID)
 	if err != nil {
 		return Result{}, err
 	}
@@ -72,15 +72,15 @@ func (s *Service) Schema() map[string][]string {
 // business and fails closed with tenant.ErrNoBusinessScope when it cannot, so
 // an unverifiable request never reaches the database.
 func (s *Service) RunJSON(ctx context.Context, businessID, userID int64, specJSON string) ([]map[string]any, string, error) {
-	var spec domain.QuerySpec
-	if err := json.Unmarshal([]byte(specJSON), &spec); err != nil {
+	var input queryInput
+	if err := json.Unmarshal([]byte(specJSON), &input); err != nil {
 		return nil, "", fmt.Errorf("invalid query spec JSON: %w", err)
 	}
 	scopedBusinessID, err := s.resolveScope(ctx, businessID, userID)
 	if err != nil {
 		return nil, "", err
 	}
-	res, err := s.RunSpec(ctx, scopedBusinessID, spec)
+	res, err := s.RunSpec(ctx, scopedBusinessID, input.spec())
 	if err != nil {
 		return nil, "", err
 	}

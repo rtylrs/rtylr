@@ -21,14 +21,8 @@ count_files() {
     echo $count
 }
 
-# Generated sqlc output lives in directories named "sqlc". The schemas tree has
-# one too, but it is not output: internal/platform/database/schemas/sqlc holds
-# the hand-written, git-tracked sqlc-only schema supplement
-# flow/v8_time_tracking_columns.sql, which internal/modules/workspaces/sql/sqlc.yaml
-# feeds to sqlc as a schema input. Deleting it left `make generate` failing until
-# git restored the file, so it is excluded here.
 list_sqlc_output_dirs() {
-    find . -name "sqlc" -type d -not -path "*/database/schemas/sqlc" -print
+    find . -name "sqlc" -type d -print
 }
 
 # Count files before deletion

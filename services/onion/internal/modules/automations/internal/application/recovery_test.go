@@ -26,7 +26,7 @@ func TestProcessDueRequeuesAndRerunsAnAbandonedRun(t *testing.T) {
 	}
 
 	// One pass: recovery requeues it and the same pass reads it as due.
-	if err := NewExecutor(db).ProcessDue(ctx); err != nil {
+	if err := newTestExecutor(db).ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
 	}
 
@@ -52,7 +52,7 @@ func TestAnAbandonedRunThatAlreadySentDoesNotSendAgain(t *testing.T) {
 
 	seedRun(t, db, `[{"type":"send_email"}]`, true, `{"customer_id":882010}`)
 
-	executor := NewExecutor(db)
+	executor := newTestExecutor(db)
 
 	// First pass sends and completes.
 	if err := executor.ProcessDue(ctx); err != nil {
@@ -96,7 +96,7 @@ func TestProcessDueLeavesARecentlyClaimedRunAlone(t *testing.T) {
 		t.Fatalf("claim run: %v", err)
 	}
 
-	if err := NewExecutor(db).ProcessDue(ctx); err != nil {
+	if err := newTestExecutor(db).ProcessDue(ctx); err != nil {
 		t.Fatalf("ProcessDue: %v", err)
 	}
 
