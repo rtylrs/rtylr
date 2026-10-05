@@ -23,6 +23,7 @@ import type { ApiNotification } from '../../shared/services/flowApi';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
+import { useOpenTask } from '../../shared/lib/useOpenTask';
 
 type FilterType = 'all' | 'unread' | 'assigned';
 
@@ -49,19 +50,20 @@ function formatTimestamp(ts: string, t: TFunction, lang: string): string {
 
 const NotificationRow: React.FC<{
   notification: ApiNotification;
-  onMarkRead: (id: string) => void;
-}> = ({ notification, onMarkRead }) => {
+  onOpen: (notification: ApiNotification) => void;
+}> = ({ notification, onOpen }) => {
   const { t, i18n } = useTranslation();
   return (
-    <motion.div
+    <motion.button
+      type="button"
       layout
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -12 }}
       transition={{ duration: 0.18 }}
-      onClick={() => onMarkRead(notification.id)}
-      className="flex items-start gap-3.5 px-5 py-4 cursor-pointer group hover:bg-[var(--flow-hover)] transition-colors relative"
-      style={{ borderBottom: '1px solid var(--flow-border)' }}
+      onClick={() => onOpen(notification)}
+      className="flex w-full items-start gap-3.5 px-5 py-4 text-left cursor-pointer group hover:bg-[var(--flow-hover)] transition-colors relative"
+      style={{ borderBottom: '1px solid var(--flow-border)', background: 'transparent' }}
     >
       {!notification.read && (
         <span
@@ -130,7 +132,7 @@ const NotificationRow: React.FC<{
           )}
         </div>
       </div>
-    </motion.div>
+    </motion.button>
   );
 };
 
@@ -139,9 +141,11 @@ const Inbox: React.FC = () => {
   const notificationsQuery = useNotifications();
   const { data: notifications = [], isLoading, isPending, refetch } = notificationsQuery;
   const initialLoading = isPending || isLoading;
-  const loadFailed = hasQueryFailed(notificationsQuery);
+  const queryFailed = hasQueryFailed(notificationsQuery);
+  const loadFailed = queryFailed && notifications.length === 0;
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
+  const openTask = useOpenTask();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
   const filtered = notifications.filter((n) => {
@@ -230,36 +234,57 @@ const Inbox: React.FC = () => {
             <Loader2 size={20} className="animate-spin" style={{ color: 'var(--flow-text-dim)' }} />
           </div>
         ) : (
-          <AnimatePresence>
-            {filtered.length === 0 ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-10">
-                <EmptyState
-                  icon={Bell}
-                  title={t('flowInbox.emptyTitle')}
-                  description={t('flowInbox.emptyDescription')}
-                  action={
-                    activeFilter !== 'all'
-                      ? {
-                          label: t('flowInbox.filters.all'),
-                          onClick: () => setActiveFilter('all'),
-                        }
-                      : {
-                          label: t('flowInbox.refreshCta'),
-                          onClick: () => void refetch(),
-                        }
-                  }
-                />
-              </motion.div>
-            ) : (
-              filtered.map((n) => (
-                <NotificationRow
-                  key={n.id}
-                  notification={n}
-                  onMarkRead={(id) => markRead.mutate(id)}
-                />
-              ))
+          <>
+            {queryFailed && notifications.length > 0 && (
+              <div
+                className="mx-5 my-3 flex items-center justify-between gap-4 rounded-lg border px-4 py-3 text-flow-meta"
+                role="status"
+                style={{ borderColor: 'var(--flow-border)', color: 'var(--flow-text-muted)' }}
+              >
+                <span>{t('flow.loadFailed.description')}</span>
+                <button
+                  type="button"
+                  className="shrink-0 font-semibold hover:underline"
+                  onClick={() => void refetch()}
+                >
+                  {t('flow.loadFailed.retry')}
+                </button>
+              </div>
             )}
-          </AnimatePresence>
+            <AnimatePresence>
+              {filtered.length === 0 ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-10">
+                  <EmptyState
+                    icon={Bell}
+                    title={t('flowInbox.emptyTitle')}
+                    description={t('flowInbox.emptyDescription')}
+                    action={
+                      activeFilter !== 'all'
+                        ? {
+                            label: t('flowInbox.filters.all'),
+                            onClick: () => setActiveFilter('all'),
+                          }
+                        : {
+                            label: t('flowInbox.refreshCta'),
+                            onClick: () => void refetch(),
+                          }
+                    }
+                  />
+                </motion.div>
+              ) : (
+                filtered.map((n) => (
+                  <NotificationRow
+                    key={n.id}
+                    notification={n}
+                    onOpen={(notification) => {
+                      markRead.mutate(notification.id);
+                      if (notification.taskId) openTask(notification.taskId);
+                    }}
+                  />
+                ))
+              )}
+            </AnimatePresence>
+          </>
         )}
       </div>
     </div>

@@ -1,13 +1,12 @@
-name: Migrate the database
+name: Migrate Onion database
 
 # Applies the schema set from a promoted release to a deployed database.
 #
 # Why this exists: nothing in the deploy path migrates. deploy-release.yml hands
 # off to tryrtylr/pipelines/deploy-ecs-release.yml, which registers a task
 # definition and updates a service and touches no SQL, and Dockerfile.migrate is
-# the self-host bootstrap image. So production had to be migrated by hand from
-# inside the VPC, which is why three schema commits sat unapplied while the API
-# they belong to could not ship.
+# the self-host bootstrap image. This explicit operator-triggered workflow is
+# the supported way to apply migrations after a release is promoted.
 #
 # A GitHub runner cannot reach the database directly: it lives on a private VPC
 # address with 3306 closed to the world. This works the same way the ECS deploy
@@ -95,14 +94,14 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --depth 1 origin "$TOOLING_SHA"
-          git checkout "$TOOLING_SHA" -- scripts Dockerfile.migrate
+          git checkout "$TOOLING_SHA" -- services/onion/scripts services/onion/Dockerfile.migrate
           echo "Migration tooling taken from $TOOLING_SHA"
           echo "Schema set remains at ${{ inputs.release_tag }}"
 
       - name: Confirm the schema set is present
         run: |
           set -euo pipefail
-          registry=internal/platform/database/schema_registry.tsv
+          registry=services/onion/internal/platform/database/schema_registry.tsv
           if [ ! -f "$registry" ]; then
             echo "The schema set is missing from the checkout; there is nothing to apply." >&2
             exit 1
@@ -111,7 +110,7 @@ jobs:
           cut -f1 "$registry" | sed '/^#/d; /^$/d'
 
       - name: Check the DSN parser still holds
-        run: bash scripts/dsn_test.sh
+        run: bash services/onion/scripts/dsn_test.sh
 
       - name: Require AWS credentials
         env:
@@ -147,7 +146,7 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE_URI="$ECR_REGISTRY/$IMAGE_REPOSITORY:$RELEASE_TAG"
-          docker build -f Dockerfile.migrate -t "$IMAGE_URI" .
+          docker build -f services/onion/Dockerfile.migrate -t "$IMAGE_URI" services/onion
           docker push "$IMAGE_URI"
           echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
 
