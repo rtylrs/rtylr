@@ -195,14 +195,13 @@ jobs:
       - name: Render the migration task definition
         run: |
           set -euo pipefail
-          # The deploy identity can run the existing api task family only.
+          # Keep migration execution within its narrowly authorized task family.
           jq --arg image "$IMAGE_URI" \
              --arg container "${{ inputs.container }}" \
-             --arg family "api" '
+             --arg family "onion-migrate" '
             (.containerDefinitions[] | select(.name == $container)) as $src
             | {
                 family: $family,
-                taskRoleArn: .taskRoleArn,
                 executionRoleArn: .executionRoleArn,
                 networkMode: .networkMode,
                 requiresCompatibilities: .requiresCompatibilities,
