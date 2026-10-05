@@ -32,6 +32,10 @@ those context-owned schema sources, then applies module migrations from
 `internal/modules/*/sql/` and records each migration so failed steps can be
 retried safely.
 
+Production deployments do not run SQL automatically. After promoting a release,
+use the repository-root `Migrate Onion database` workflow with `dry_run` disabled
+to apply that release's schemas from inside the private VPC.
+
 ---
 
 ## Shared Tables

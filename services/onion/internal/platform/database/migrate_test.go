@@ -96,6 +96,30 @@ func TestMigrationRegistryPreservesIdentityAcrossRelocation(t *testing.T) {
 	}
 }
 
+func TestMigrationRunnerDiscoversNestedModuleMigrations(t *testing.T) {
+	const migration = "internal/modules/crm/internal/outbox/sql/migration_20261004_outbox.sql"
+	root, run := migrationFixture(t, "", map[string]string{
+		migration: "CREATE TABLE crm_outbox (id BIGINT PRIMARY KEY);",
+	})
+	if output, err := run(); err != nil {
+		t.Fatalf("migration run: %v\n%s", err, output)
+	}
+	applied, err := os.ReadFile(filepath.Join(root, "applied"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(applied) != migration+"\n" {
+		t.Fatalf("nested module migration was not recorded: %s", applied)
+	}
+	sql, err := os.ReadFile(filepath.Join(root, "sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(sql), "CREATE TABLE crm_outbox") {
+		t.Fatalf("nested module migration was not applied: %s", sql)
+	}
+}
+
 func TestMigrationFailureDoesNotRecordOrContinue(t *testing.T) {
 	const failed = "internal/modules/sample/sql/schema/failed.sql"
 	const later = "internal/modules/another/sql/schema/later.sql"

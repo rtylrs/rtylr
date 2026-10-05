@@ -21,6 +21,9 @@ const notificationsState = vi.hoisted(() => ({
 }));
 const markReadMutate = vi.hoisted(() => vi.fn());
 const markAllMutate = vi.hoisted(() => vi.fn());
+const openTaskMock = vi.hoisted(() => vi.fn());
+
+vi.mock('../../shared/lib/useOpenTask', () => ({ useOpenTask: () => openTaskMock }));
 
 vi.mock('./useNotifications', () => ({
   useNotifications: () => notificationsState,
@@ -78,6 +81,16 @@ describe('Inbox empty state', () => {
     const allButtons = screen.getAllByRole('button', { name: 'flowInbox.filters.all' });
     expect(allButtons.length).toBeGreaterThan(0);
   });
+
+  it('opens an assigned task from its inbox notification and marks it read', () => {
+    notificationsState.data = [makeNotification({ id: '42', taskId: '42' })];
+    render(<Inbox />);
+
+    fireEvent.click(screen.getByRole('button', { name: /You were assigned a task/ }));
+
+    expect(markReadMutate).toHaveBeenCalledWith('42');
+    expect(openTaskMock).toHaveBeenCalledWith('42');
+  });
 });
 
 describe('Inbox: a failed load is not an empty inbox', () => {
@@ -107,5 +120,15 @@ describe('Inbox: a failed load is not an empty inbox', () => {
     render(<Inbox />);
     expect(screen.getByText('flowInbox.emptyTitle')).toBeInTheDocument();
     expect(screen.queryByText('flow.loadFailed.title')).not.toBeInTheDocument();
+  });
+
+  it('keeps cached notifications visible when a focus refetch fails', () => {
+    notificationsState.data = [makeNotification()];
+    notificationsState.isError = true;
+    render(<Inbox />);
+
+    expect(screen.getByText('You were assigned a task')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('flow.loadFailed.description');
+    expect(screen.queryByText('flowInbox.emptyTitle')).not.toBeInTheDocument();
   });
 });
