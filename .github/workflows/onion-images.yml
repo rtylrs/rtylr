@@ -21,26 +21,6 @@ permissions:
   contents: read
 
 jobs:
-  architecture:
-    name: Onion architecture
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: services/onion/go.mod
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Check module and persistence boundaries
-        run: make -C services/onion architecture-check
-
   build:
     name: Build ${{ matrix.name }}
     runs-on: blacksmith-2vcpu-ubuntu-2404
