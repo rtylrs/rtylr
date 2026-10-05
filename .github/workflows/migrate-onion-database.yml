@@ -195,9 +195,10 @@ jobs:
       - name: Render the migration task definition
         run: |
           set -euo pipefail
+          # The deploy identity can run the existing api task family only.
           jq --arg image "$IMAGE_URI" \
              --arg container "${{ inputs.container }}" \
-             --arg family "onion-migrate" '
+             --arg family "api" '
             (.containerDefinitions[] | select(.name == $container)) as $src
             | {
                 family: $family,
