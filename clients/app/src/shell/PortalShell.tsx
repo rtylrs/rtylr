@@ -50,6 +50,7 @@ import ProfileMenu from './ProfileMenu';
 import { Tooltip } from '../shared/components/ui/tooltip';
 import SettingsNavigation from './SettingsNavigation';
 import { PortalHeaderActionsProvider } from './PortalHeaderActions';
+import { SidebarCollapseProvider } from './SidebarCollapseContext';
 import {
   rawNavItems,
   rawMenuSubItems,
@@ -658,7 +659,11 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             tabIndex={-1}
             className={`portal-page${isRecruit ? ' is-recruit' : ''}${isHr ? ' is-hr' : ''}${isFinance ? ' is-finance' : ''}${isErp ? ' is-erp' : ''}${isCrm ? ' is-crm' : ''}${isFlow ? ' is-flow' : ''}${isCaret ? ' is-caret' : ''}`}
           >
-            <PortalHeaderActionsProvider value={actions}>{children}</PortalHeaderActionsProvider>
+            <PortalHeaderActionsProvider value={actions}>
+              <SidebarCollapseProvider value={{ collapsed, setCollapsed }}>
+                {children}
+              </SidebarCollapseProvider>
+            </PortalHeaderActionsProvider>
           </main>
         </div>
         <div
