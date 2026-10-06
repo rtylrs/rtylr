@@ -312,10 +312,9 @@ const ProjectBoard: React.FC = () => {
   // the board was mouse-only; pointer events cover mouse, touch and pen in one
   // path.
   //
-  // The gesture lives on a handle rather than the whole card. That keeps the
-  // card's own click free for opening the task, and it lets `touch-action: none`
-  // apply to the handle alone, so dragging anywhere else still scrolls the
-  // column on a touch screen.
+  // Mouse and pen can start a drag anywhere on a card; the card suppresses its
+  // open click only after the movement threshold is crossed. Touch starts on
+  // the grip so the board remains scrollable elsewhere.
   const measureColumns = (): ColumnRect[] => {
     const out: ColumnRect[] = [];
     for (const [id, el] of columnRefs.current) {
@@ -352,20 +351,22 @@ const ProjectBoard: React.FC = () => {
       drag.active = true;
       setDraggingTaskId(drag.taskId);
     }
+    if (e.cancelable) e.preventDefault();
     setDragOver(columnIdAtPoint(drag.rects, e.clientX, e.clientY));
   };
 
-  const endDrag = (e: React.PointerEvent): void => {
+  const endDrag = (e: React.PointerEvent): boolean => {
     const drag = dragRef.current;
     dragRef.current = null;
     setDraggingTaskId(null);
     setDragOver(null);
-    if (!drag?.active) return;
+    if (!drag?.active) return false;
     const target = resolveDropTarget(
       columnIdAtPoint(drag.rects, e.clientX, e.clientY),
       drag.sourceColumnId
     );
     if (target !== null) moveTask.mutate({ taskId: drag.taskId, columnId: target });
+    return true;
   };
 
   const handleAddColumn = () => {
@@ -593,7 +594,7 @@ const KanbanColumn: React.FC<{
   onMoveTask: (taskId: string, columnId: string) => void;
   onDragPointerDown: (e: React.PointerEvent, taskId: string, sourceColumnId: string) => void;
   onDragPointerMove: (e: React.PointerEvent) => void;
-  onDragPointerEnd: (e: React.PointerEvent) => void;
+  onDragPointerEnd: (e: React.PointerEvent) => boolean;
   onSelect: (id: string) => void;
   onAddTask: () => void;
   onRename: (name: string) => void;
@@ -643,12 +644,9 @@ const KanbanColumn: React.FC<{
           type="button"
           aria-hidden
           tabIndex={-1}
-          onPointerDown={(e) => onDragPointerDown(e, taskId, String(col.id))}
-          onPointerMove={onDragPointerMove}
-          onPointerUp={onDragPointerEnd}
-          onPointerCancel={onDragPointerEnd}
+          data-flow-drag-handle
           onClick={(e) => e.stopPropagation()}
-          className="flex h-6 w-6 cursor-grab items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] active:cursor-grabbing"
+          className="flex h-8 w-8 cursor-grab items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] active:cursor-grabbing"
           style={{ color: 'var(--flow-text-dim)', touchAction: 'none' }}
         >
           <GripVertical size={12} />
@@ -773,6 +771,11 @@ const KanbanColumn: React.FC<{
                 dimmed={draggingTaskId === task.id}
                 selected={selectedTaskIds.includes(task.id)}
                 onSelect={() => onSelect(task.id)}
+                onDragPointerDown={
+                  canEdit ? (e, id) => onDragPointerDown(e, id, String(col.id)) : undefined
+                }
+                onDragPointerMove={onDragPointerMove}
+                onDragPointerEnd={onDragPointerEnd}
               />
             ))}
             {colTaskCount === 0 && (
@@ -813,6 +816,11 @@ const KanbanColumn: React.FC<{
                     dimmed={draggingTaskId === task.id}
                     selected={selectedTaskIds.includes(task.id)}
                     onSelect={() => onSelect(task.id)}
+                    onDragPointerDown={
+                      canEdit ? (e, id) => onDragPointerDown(e, id, String(col.id)) : undefined
+                    }
+                    onDragPointerMove={onDragPointerMove}
+                    onDragPointerEnd={onDragPointerEnd}
                   />
                 ))}
                 {lane.tasks.length === 0 && (
