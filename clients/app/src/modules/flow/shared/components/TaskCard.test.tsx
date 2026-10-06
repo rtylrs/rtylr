@@ -5,7 +5,7 @@
 // so the tint and the foreground derived from it are simply absent from the DOM
 // there and no assertion can see them (rtylr#1249). jsdom keeps both.
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { TaskCard } from './TaskCard';
 import type { Task } from '../stores/flowStore';
@@ -21,6 +21,9 @@ vi.mock('react-i18next', async (importOriginal) => {
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
 }));
+
+const openTask = vi.hoisted(() => vi.fn());
+vi.mock('../lib/useOpenTask', () => ({ useOpenTask: () => openTask }));
 
 // The label catalogue comes from the query now, not the store: `setLabels` has
 // no call site in the app, so the store's array is permanently empty in
@@ -148,5 +151,35 @@ describe('TaskCard persisted activity', () => {
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('1/4')).toBeInTheDocument();
+  });
+});
+
+describe('TaskCard board dragging', () => {
+  it('starts a drag from the card surface and does not open the task after a drag', () => {
+    const onDragPointerDown = vi.fn();
+    const onDragPointerEnd = vi.fn().mockReturnValueOnce(false).mockReturnValueOnce(true);
+    render(
+      <TaskCard
+        task={baseTask}
+        onDragPointerDown={onDragPointerDown}
+        onDragPointerEnd={onDragPointerEnd}
+      />
+    );
+
+    const card = screen.getByRole('button', { name: 'flowCommon.taskRow.openTask' });
+    fireEvent.pointerDown(card, { button: 0 });
+    fireEvent.pointerUp(card);
+    fireEvent.click(card);
+    expect(openTask).toHaveBeenCalledWith(baseTask.id);
+
+    openTask.mockClear();
+    fireEvent.pointerDown(card, { button: 0 });
+    fireEvent.pointerUp(card);
+    fireEvent.click(card);
+
+    expect(onDragPointerDown).toHaveBeenCalledTimes(2);
+    expect(onDragPointerDown).toHaveBeenLastCalledWith(expect.anything(), baseTask.id);
+    expect(onDragPointerEnd).toHaveBeenCalledTimes(2);
+    expect(openTask).not.toHaveBeenCalled();
   });
 });

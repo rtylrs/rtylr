@@ -21,16 +21,16 @@ interface TaskCardProps {
   selected?: boolean;
   onSelect?: () => void;
   /**
-   * Board-only controls (drag handle, move menu) rendered in the header.
-   *
-   * The card used to carry `draggable` and an `onDragStart` that had to be cast
-   * through `unknown` to satisfy motion.div's own drag props. HTML5 drag never
-   * fired on touch anyway, so the board owns the gesture now and passes its
-   * affordances in here.
+   * Board-only controls rendered in the header. The board also handles mouse
+   * and pen drags from the card surface; the grip is kept for touch, where it
+   * avoids fighting the board's horizontal and vertical scrolling.
    */
   controls?: React.ReactNode;
   /** True while this card is the one being dragged, so it reads as lifted. */
   dimmed?: boolean;
+  onDragPointerDown?: (e: React.PointerEvent, taskId: string) => void;
+  onDragPointerMove?: (e: React.PointerEvent) => void;
+  onDragPointerEnd?: (e: React.PointerEvent) => boolean;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -41,6 +41,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onSelect,
   controls,
   dimmed,
+  onDragPointerDown,
+  onDragPointerMove,
+  onDragPointerEnd,
 }) => {
   const { t } = useTranslation();
   const openTask = useOpenTask();
@@ -51,6 +54,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const commentCount = task.commentCount ?? 0;
   const attachmentCount = task.attachmentCount ?? 0;
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const draggedRef = React.useRef(false);
 
   const due = dueState(task.dueDate);
 
@@ -75,7 +79,34 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         animate={{ opacity: dimmed ? 0.5 : 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.18 }}
+        onPointerDown={(e) => {
+          if (!onDragPointerDown || e.button !== 0) return;
+          const target = e.target;
+          const dragHandle = target instanceof Element && target.closest('[data-flow-drag-handle]');
+          if (e.pointerType === 'touch' && !dragHandle) return;
+          if (
+            target instanceof Element &&
+            target.closest('button, a, input, select, textarea, [role="menuitem"]') &&
+            !dragHandle
+          ) {
+            return;
+          }
+          draggedRef.current = false;
+          onDragPointerDown(e, String(task.id));
+        }}
+        onPointerMove={onDragPointerMove}
+        onPointerUp={(e) => {
+          draggedRef.current = onDragPointerEnd?.(e) ?? false;
+        }}
+        onPointerCancel={(e) => {
+          draggedRef.current = onDragPointerEnd?.(e) ?? false;
+        }}
         onClick={(e) => {
+          if (draggedRef.current) {
+            draggedRef.current = false;
+            e.preventDefault();
+            return;
+          }
           if (e.metaKey || e.ctrlKey) {
             onSelect?.();
           } else {
@@ -96,10 +127,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         }}
         onContextMenu={handleContextMenu}
         className={cn(
-          'flow-focus rounded-lg cursor-pointer group relative',
+          'flow-focus select-none rounded-lg group relative',
+          onDragPointerDown ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
           compact ? 'p-2.5' : 'p-3'
         )}
         style={{
+          touchAction: 'auto',
           background: 'var(--flow-card)',
           border: selected ? '1px solid var(--accent)' : '1px solid var(--flow-border)',
           boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : 'var(--flow-shadow-card)',
