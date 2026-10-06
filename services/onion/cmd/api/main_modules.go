@@ -212,7 +212,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	notificationsModule := notifications.NewModule(ctx, dbclient.Pool())
 	teamModule.SetNotificationPublisher(teamadapters.NewNotificationPublisher(notificationsModule))
 	teamModule.SetMemberProvisioner(teamadapters.NewHRMemberProvisioner(hrCoreModule, hrStaffModule))
-	teamModule.SetTerminatedEmployeeSource(teamadapters.NewTerminatedEmployeeSource(hrCoreModule, hrStaffModule))
+	teamModule.SetTerminatedEmployeeSource(teamadapters.NewTerminatedEmployeeSource(hrCoreModule))
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := orders.NewModule(ctx, dbclient.Pool()).
 		WithSalesProductReader(productsModule.SalesProduct).

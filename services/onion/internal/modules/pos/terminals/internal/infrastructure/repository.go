@@ -3,7 +3,6 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"github.com/voxire/onion/internal/modules/pos/terminals/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos/terminals/internal/infrastructure/persistence/sqlc"
@@ -96,7 +95,7 @@ func (r *Repository) Heartbeat(ctx context.Context, terminalID, businessID int64
 		return err
 	}
 	if rows == 0 {
-		return errors.New("terminal not found")
+		return domain.ErrTerminalNotFound
 	}
 	return nil
 }

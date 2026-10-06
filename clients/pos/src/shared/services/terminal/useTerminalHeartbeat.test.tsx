@@ -49,4 +49,18 @@ describe('useTerminalHeartbeat', () => {
       expect(terminalClient.heartbeatTerminal).toHaveBeenCalledWith({ terminalId: '9' });
     });
   });
+
+  it('clears a terminal context that the server no longer recognizes', async () => {
+    useTerminalContextStore.getState().setTerminalContext(1, 9);
+    terminalClient.heartbeatTerminal.mockRejectedValueOnce(
+      Object.assign(new Error('Terminal not found'), { statusCode: 404 })
+    );
+
+    renderHook(() => useTerminalHeartbeat(true));
+
+    await waitFor(() => {
+      expect(useTerminalContextStore.getState().terminalId).toBeNull();
+      expect(useTerminalContextStore.getState().locationId).toBeNull();
+    });
+  });
 });

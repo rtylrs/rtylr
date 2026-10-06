@@ -39,6 +39,7 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/scopes"
 	"github.com/voxire/onion/internal/modules/organization/subscriptions"
 	"github.com/voxire/onion/internal/modules/organization/team"
+	teamadapters "github.com/voxire/onion/internal/modules/organization/team/adapters"
 	"github.com/voxire/onion/internal/modules/pos/giftcards"
 	"github.com/voxire/onion/internal/modules/pos/locations"
 	"github.com/voxire/onion/internal/modules/recruit/voxhire"
@@ -310,6 +311,7 @@ func initializeJobModules(ctx context.Context) *jobModules {
 	workspacesModule := workspaces.NewModule(ctx, db).WithIdentityReaders(identityadapter.NewIdentityReader(scopes.NewReader(db)), scopes.NewReader(db).AccountByEmail, scopes.NewReader(db).BusinessUserByUsername)
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
 	teamModule := team.NewModule(ctx, db)
+	teamModule.SetTerminatedEmployeeSource(teamadapters.NewTerminatedEmployeeSource(hrCoreModule))
 	businessModule := business.NewModule(ctx, db)
 	customersModule := customers.NewModule(ctx, db).WithReportingTimezone(businessModule.ReportingTimezone).WithBusinessOwnerResolver(businessModule.GetBusinessOwnerID)
 	automationContacts := func(ctx context.Context, customerID, businessID int64) (automations.CustomerContact, bool, error) {
