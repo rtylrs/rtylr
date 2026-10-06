@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Menu, Plus, UserCircle, X } from 'lucide-react';
+import { Menu, PanelLeft, Plus, UserCircle, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
 import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
 import { toast } from 'sonner';
 import { useUserStore } from '../../../shared/stores/userStore';
 import { Button } from '../../../shared/components/ui/button';
 import { usePortalHeaderActions } from '../../../shell/PortalHeaderActions';
+import { useSidebarCollapse } from '../../../shell/SidebarCollapseContext';
 import { canAccessPortalPath } from '../../../shared/utils/canAccessPortalPath';
 import { useFlowStore, type Member } from '../shared/stores/flowStore';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
@@ -38,6 +39,7 @@ import TaskDrawer from '../shared/components/TaskDrawer';
 export default function FlowLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const headerActions = usePortalHeaderActions();
+  const { collapsed, setCollapsed } = useSidebarCollapse();
   const user = useUserStore((state) => state.user);
   const location = useLocation();
   const { projectId } = useParams({ strict: false });
@@ -144,6 +146,19 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
           <img className="portal-logo-dark" src="/logo.png" alt="RTYLR" />
         </Link>
         <div className="flex items-center gap-1">
+          {!mobile && (
+            <button
+              type="button"
+              className="portal-icon-button"
+              onClick={() => setCollapsed(true)}
+              aria-label={t('common.portal.collapseSidebar')}
+              aria-expanded={!collapsed}
+              aria-controls="portal-flow-sidebar"
+              title={t('common.portal.collapseSidebar')}
+            >
+              <PanelLeft size={18} />
+            </button>
+          )}
           {canCreateTask && (
             <button
               type="button"
@@ -210,10 +225,27 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
   };
   return (
     <div className="portal-flow">
-      <aside className="portal-flow-sidebar">{navigation()}</aside>
+      {!collapsed && (
+        <aside className="portal-flow-sidebar" id="portal-flow-sidebar">
+          {navigation()}
+        </aside>
+      )}
       <div className="portal-flow-content">
         <header className="portal-topbar portal-flow-header">
           <div className="portal-topbar-start">
+            {collapsed && (
+              <button
+                type="button"
+                className="portal-icon-button portal-flow-show-sidebar"
+                onClick={() => setCollapsed(false)}
+                aria-label={t('common.toggleNavigation')}
+                aria-expanded={!collapsed}
+                aria-controls="portal-flow-sidebar"
+                title={t('common.toggleNavigation')}
+              >
+                <PanelLeft size={19} />
+              </button>
+            )}
             <span>{t('appNames.short.flow')}</span>
           </div>
           {headerActions}

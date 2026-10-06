@@ -235,6 +235,9 @@
 .portal-flow-header {
   border-bottom: 1px solid var(--dash-border);
 }
+.portal-flow-show-sidebar {
+  flex-shrink: 0;
+}
 .portal-flow-sidebar .portal-app-navigation {
   padding: 12px;
 }
@@ -297,6 +300,9 @@
   outline: none !important;
 }
 @media (max-width: 900px) {
+  .portal-flow-show-sidebar {
+    display: none;
+  }
   .portal-flow-sidebar {
     display: none;
   }
