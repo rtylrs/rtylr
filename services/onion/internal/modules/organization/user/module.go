@@ -194,6 +194,8 @@ func (m *Module) GetAnonymousRoutes() []string {
 			"/common/auth/v1/register",
 			"/common/auth/v1/login",
 			"/common/auth/v1/register/google",
+			"/common/auth/v1/refresh",
+			"/common/auth/v1/revoke",
 			"/common/auth/v1/password-reset/request",
 			"/common/auth/v1/password-reset/confirm",
 			"/common/auth/v1/verify-email",

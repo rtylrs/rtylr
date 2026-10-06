@@ -76,13 +76,19 @@ func (a *AuthAPI) Register(ctx context.Context, req *commonauthv1.RegisterReques
 	if err != nil {
 		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to generate authentication token")
 	}
+	device := authPkg.DeviceCtx(ctx)
+	refreshToken, err := a.UserService.CreateSession(ctx, userID, "email", device.IP, device.UserAgent)
+	if err != nil {
+		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to create authentication session")
+	}
 
 	return &commonauthv1.RegisterResponse{
-		Token:   token,
-		Message: "Registration successful",
-		UserId:  userID,
-		Email:   registerData.Email,
-		Name:    registerData.FullName,
+		Token:        token,
+		Message:      "Registration successful",
+		UserId:       userID,
+		Email:        registerData.Email,
+		Name:         registerData.FullName,
+		RefreshToken: refreshToken,
 	}, nil
 }
 
@@ -99,6 +105,11 @@ func (a *AuthAPI) Login(ctx context.Context, req *commonauthv1.LoginRequest) (*c
 		logger.Ctx(ctx).Error("login: Authenticate failed", logger.Error(err))
 		return nil, onekithttp.NewError(http.StatusInternalServerError, "Authentication failed")
 	}
+	device := authPkg.DeviceCtx(ctx)
+	refreshToken, err := a.UserService.CreateSession(ctx, userID, "email", device.IP, device.UserAgent)
+	if err != nil {
+		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to create authentication session")
+	}
 
 	platformClaims := a.resolvePlatformClaims(ctx, userID)
 	token, err := a.UserService.GenerateTokenWithPlatform(ctx, userID, platformClaims)
@@ -113,7 +124,6 @@ func (a *AuthAPI) Login(ctx context.Context, req *commonauthv1.LoginRequest) (*c
 		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to retrieve user information")
 	}
 
-	device := authPkg.DeviceCtx(ctx)
 	runAsyncLoginTasks(ctx, a.UserService, userID, req.GetEmail(), device.IP, device.UserAgent, a.OnUserLogin)
 
 	return &commonauthv1.LoginResponse{
@@ -123,6 +133,7 @@ func (a *AuthAPI) Login(ctx context.Context, req *commonauthv1.LoginRequest) (*c
 		Email:          user.Email,
 		Name:           user.FullName,
 		IsConsoleAdmin: user.IsConsoleAdmin,
+		RefreshToken:   refreshToken,
 	}, nil
 }
 
@@ -170,11 +181,31 @@ func (a *AuthAPI) GoogleAuth(ctx context.Context, req *commonauthv1.GoogleAuthRe
 	if !result.IsNew && a.OnUserLogin != nil {
 		runAsyncUserHook(ctx, result.UserID, a.OnUserLogin)
 	}
+	refreshToken, err := a.UserService.CreateSession(ctx, result.UserID, "google", device.IP, device.UserAgent)
+	if err != nil {
+		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to create authentication session")
+	}
 
 	return &commonauthv1.GoogleAuthResponse{
-		Token: result.Token,
-		IsNew: result.IsNew,
+		Token:        result.Token,
+		IsNew:        result.IsNew,
+		RefreshToken: refreshToken,
 	}, nil
+}
+
+func (a *AuthAPI) Refresh(ctx context.Context, req *commonauthv1.RefreshRequest) (*commonauthv1.RefreshResponse, error) {
+	token, err := a.UserService.RefreshSession(ctx, req.GetRefreshToken(), a.resolvePlatformClaims)
+	if err != nil {
+		return nil, onekithttp.NewError(http.StatusUnauthorized, "Unauthorized")
+	}
+	return &commonauthv1.RefreshResponse{Token: token}, nil
+}
+
+func (a *AuthAPI) Revoke(ctx context.Context, req *commonauthv1.RevokeSessionRequest) (*commonauthv1.RevokeSessionResponse, error) {
+	if err := a.UserService.RevokeSession(ctx, req.GetRefreshToken()); err != nil {
+		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to revoke session")
+	}
+	return &commonauthv1.RevokeSessionResponse{Revoked: true}, nil
 }
 
 func (a *AuthAPI) ResetPassword(ctx context.Context, req *commonauthv1.ResetPasswordRequest) (*commonauthv1.ResetPasswordResponse, error) {

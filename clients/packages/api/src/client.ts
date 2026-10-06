@@ -5,7 +5,7 @@ import {
   resolveAuthUrl,
 } from '@voxire/config';
 import { safeFetch } from './result';
-import { markCredential, sentCredential, shouldEndSharedSession } from './session';
+import { markCredential, sentCredential, shouldEndSharedSession, setSessionRefresh } from './session';
 
 const getBaseUrl = (): string => {
   return resolveApiBase();
@@ -26,6 +26,14 @@ const getToken = (): string | null => {
   return token;
 };
 
+const safelyGetToken = (): string | null => {
+  try {
+    return getToken();
+  } catch {
+    return null;
+  }
+};
+
 const isLocalDevHost = (hostname: string): boolean => {
   const host = hostname.toLowerCase();
   return host === 'localhost' || host === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(host);
@@ -42,9 +50,50 @@ const clearTokenCookie = (): void => {
   const domain = getCookieDomain();
   if (domain) {
     document.cookie = `token=; Max-Age=0; path=/; Domain=${domain};`;
+    document.cookie = `refresh_token=; Max-Age=0; path=/; Domain=${domain};`;
   }
   document.cookie = 'token=; Max-Age=0; path=/;';
+  document.cookie = 'refresh_token=; Max-Age=0; path=/;';
 };
+
+const getRefreshToken = (): string | null => {
+  const match = document.cookie.match(/(?:^|;\s*)refresh_token=([^;]+)/);
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+};
+
+const setAccessToken = (token: string): void => {
+  const domain = getCookieDomain();
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  const domainPart = domain ? `; Domain=${domain}` : '';
+  document.cookie = `token=${encodeURIComponent(token)}; Max-Age=2592000; path=/${domainPart}; SameSite=Lax${secure}`;
+};
+
+setSessionRefresh(async () => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return false;
+  const response = await fetch(`${getBaseUrl().replace(/\/+$/, '')}/common/auth/v1/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+  if (!response.ok) return false;
+  const data: unknown = await response.json();
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    !('token' in data) ||
+    typeof data.token !== 'string' ||
+    !data.token
+  ) return false;
+  setAccessToken(data.token);
+  return true;
+});
 
 const getAuthBaseUrl = (): string => {
   return isLocalDevHost(window.location.hostname) ? 'http://localhost:5176' : resolveAuthUrl();
@@ -283,6 +332,7 @@ export function createApiClient(appId: string): AxiosInstance {
   );
 
   // Response: convert snake_case keys to camelCase + handle 401
+  const retriedConfigs = new WeakSet<object>();
   client.interceptors.response.use(
     (response) => {
       if (response.data && typeof response.data === 'object') {
@@ -290,7 +340,7 @@ export function createApiClient(appId: string): AxiosInstance {
       }
       return response;
     },
-    (error) => {
+    async (error) => {
       if (error.response?.data && typeof error.response.data === 'object') {
         error.response.data = convertKeys(error.response.data);
       }
@@ -300,14 +350,28 @@ export function createApiClient(appId: string): AxiosInstance {
         if (isMFARequiredResponse(error.response.data)) {
           redirectToSecuritySettings();
         } else {
-          // Never awaited: the caller's rejection must not wait on the sign-out
-          // decision, and the decision handles its own failures.
-          void shouldEndSharedSession(
-            sentCredential(error.config),
+          const config = error.config as (typeof error.config & { headers?: Record<string, unknown> }) | undefined;
+          const sentToken = sentCredential(config);
+          const canRetry =
+            config &&
+            sentToken &&
+            isSessionRejection(error.response.data) &&
+            !retriedConfigs.has(config) &&
+            safelyGetToken() === sentToken;
+          const ended = await shouldEndSharedSession(
+            sentToken,
             isSessionRejection(error.response.data),
             getToken,
             () => endSharedSession(appId)
           );
+          const refreshedToken = safelyGetToken();
+          if (canRetry && !ended && refreshedToken && refreshedToken !== sentToken) {
+            retriedConfigs.add(config);
+            config.headers = config.headers ?? {};
+            config.headers.Authorization = `Bearer ${refreshedToken}`;
+            markCredential(config, refreshedToken);
+            return client.request(config);
+          }
         }
       }
       return Promise.reject(error);
@@ -353,7 +417,7 @@ async function readUnauthorizedBody(response: Response): Promise<unknown> {
 }
 
 export function createOneKitFetch(appId: string): typeof fetch {
-  return async (input, init) => {
+  const send = async (input: RequestInfo | URL, init: RequestInit | undefined, retry = false): Promise<Response> => {
     const headers = new Headers(init?.headers);
     const token = getToken();
     if (token) {
@@ -372,17 +436,22 @@ export function createOneKitFetch(appId: string): typeof fetch {
       if (isMFARequiredResponse(unauthorizedBody)) {
         redirectToSecuritySettings();
       } else {
-        await shouldEndSharedSession(
+        const ended = await shouldEndSharedSession(
           token,
           isSessionRejection(unauthorizedBody),
           getToken,
           () => endSharedSession(appId)
         );
+        const refreshedToken = getToken();
+        if (!retry && !ended && token && refreshedToken && refreshedToken !== token) {
+          return send(input, init, true);
+        }
       }
     }
 
     return response;
   };
+  return (input, init) => send(input, init);
 }
 
 export function createOneKitClientOptions<TOptions extends OneKitClientOptions>(

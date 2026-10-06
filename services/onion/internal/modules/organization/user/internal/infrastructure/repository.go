@@ -303,19 +303,42 @@ func (r *Repository) UpdateUser(ctx context.Context, user *domain.User) error {
 }
 
 func (r *Repository) UpdateUserPassword(ctx context.Context, id int64, passwordHash string) error {
-	arg := sqlc.UpdateUserPasswordParams{
-		ID:           id,
-		PasswordHash: passwordHash,
-	}
-
-	err := r.queries.UpdateUserPassword(ctx, arg)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to update user password", logger.Error(err))
-
 		return err
 	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE users SET password_hash = ?, token_epoch = token_epoch + 1, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?`, passwordHash, id); err != nil {
+		logger.Ctx(ctx).Error("Failed to update user password", logger.Error(err))
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ? AND revoked_at IS NULL`, id); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
 
-	return nil
+func (r *Repository) CreateSession(ctx context.Context, userID int64, tokenHash, ip, userAgent, method string, expiresAt time.Time) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO user_sessions (user_id, token_hash, ip_address, user_agent, method, expires_at)
+		VALUES (?, ?, NULLIF(?, ''), NULLIF(?, ''), ?, ?)`, userID, tokenHash, ip, userAgent, method, expiresAt)
+	return err
+}
+
+func (r *Repository) GetSessionUserID(ctx context.Context, tokenHash string) (int64, error) {
+	var userID int64
+	err := r.db.QueryRowContext(ctx, `
+		SELECT user_id FROM user_sessions
+		WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP
+		ORDER BY id DESC LIMIT 1`, tokenHash).Scan(&userID)
+	return userID, err
+}
+
+func (r *Repository) RevokeSession(ctx context.Context, tokenHash string) error {
+	_, err := r.db.ExecContext(ctx, `UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE token_hash = ? AND revoked_at IS NULL`, tokenHash)
+	return err
 }
 
 func (r *Repository) DeleteUser(ctx context.Context, id int64) error {
