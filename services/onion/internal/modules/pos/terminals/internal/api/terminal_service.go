@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -116,6 +117,9 @@ func (a *TerminalAPI) HeartbeatTerminal(ctx context.Context, req *posterminalv1.
 		return nil, onekiterrors.PermissionDenied()
 	}
 	if heartbeatErr := a.Service.Heartbeat(ctx, req.GetTerminalId(), businessID); heartbeatErr != nil {
+		if errors.Is(heartbeatErr, domain.ErrTerminalNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Terminal not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update heartbeat")
 	}
 	return &posterminalv1.HeartbeatTerminalResponse{Message: "Heartbeat updated successfully"}, nil

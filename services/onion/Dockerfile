@@ -57,18 +57,52 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
       -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
     -o /app/api ./cmd/api
 
-# Final stage — minimal image
-FROM alpine:3.22
+# Build the image/video transformation executable used by the API's upload
+# routes. Keep it in the same Debian family as the runtime shared libraries.
+FROM debian:bookworm-slim AS media-builder
 
-RUN apk add --no-cache ca-certificates tzdata
-RUN addgroup -S app && adduser -S -G app app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    build-essential \
+    pkg-config \
+    libvips-dev \
+    ffmpeg \
+    libavcodec-dev \
+    libavformat-dev \
+    libavutil-dev \
+    libswscale-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+COPY services/onion/media-engine/CMakeLists.txt ./
+COPY services/onion/media-engine/src/ ./src/
+COPY services/onion/media-engine/include/ ./include/
+RUN cmake -B build -DCMAKE_BUILD_TYPE=Release \
+        -DMEDIA_ENGINE_BENCH=OFF \
+        -DMEDIA_ENGINE_TESTS=OFF && \
+    cmake --build build --target media-engine --parallel "$(nproc)"
+
+# Final stage includes the media runtime libraries used by the API.
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    tzdata \
+    wget \
+    libvips42 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system app \
+    && useradd --system --gid app --no-create-home app
 
 WORKDIR /app
 
 COPY --from=builder /app/api /app/api
+COPY --from=media-builder --chown=app:app /build/build/media-engine /app/media-engine/build/media-engine
 COPY --chown=app:app services/onion/internal/ai/classifier/models/cua-s1-forms /app/models/cua-s1-forms
 
 ENV FORM_MAPPING_CHECKPOINT_PATH=/app/models/cua-s1-forms
+ENV MEDIA_ENGINE_PATH=/app/media-engine/build/media-engine
 
 EXPOSE 9999
 

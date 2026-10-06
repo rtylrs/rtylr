@@ -44,6 +44,6 @@ func NewHRMemberProvisioner(core *hrcore.Module, staffModule *staff.Module) team
 	return teamHRProvisionerAdapter{core: core, staff: staffModule}
 }
 
-func NewTerminatedEmployeeSource(core *hrcore.Module, staffModule *staff.Module) team.TerminatedEmployeeSource {
-	return teamHRProvisionerAdapter{core: core, staff: staffModule}
+func NewTerminatedEmployeeSource(core *hrcore.Module) team.TerminatedEmployeeSource {
+	return teamHRProvisionerAdapter{core: core}
 }
