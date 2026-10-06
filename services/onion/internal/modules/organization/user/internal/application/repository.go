@@ -2,8 +2,8 @@ package application
 
 import (
 	"context"
-
 	"github.com/voxire/onion/internal/modules/organization/user/internal/domain"
+	"time"
 )
 
 type repository interface {
@@ -22,6 +22,9 @@ type repository interface {
 	GetUserByID(ctx context.Context, id int64) (*domain.User, error)
 	GetUserByIdentifier(ctx context.Context, identifier string) (*domain.User, error)
 	RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error
+	CreateSession(ctx context.Context, userID int64, tokenHash, ip, userAgent, method string, expiresAt time.Time) error
+	GetSessionUserID(ctx context.Context, tokenHash string) (int64, error)
+	RevokeSession(ctx context.Context, tokenHash string) error
 	SetUserBusinessID(ctx context.Context, userID, businessID int64) error
 	UpdateUser(ctx context.Context, user *domain.User) error
 	UpdateUserPassword(ctx context.Context, id int64, passwordHash string) error

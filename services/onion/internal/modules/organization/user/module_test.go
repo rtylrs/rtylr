@@ -8,6 +8,8 @@ func TestAnonymousRoutesMatchGeneratedAuthRoutes(t *testing.T) {
 		"/common/auth/v1/register":               true,
 		"/common/auth/v1/login":                  true,
 		"/common/auth/v1/register/google":        true,
+		"/common/auth/v1/refresh":                true,
+		"/common/auth/v1/revoke":                 true,
 		"/common/auth/v1/password-reset/request": true,
 		"/common/auth/v1/password-reset/confirm": true,
 		"/common/auth/v1/verify-email":           true,

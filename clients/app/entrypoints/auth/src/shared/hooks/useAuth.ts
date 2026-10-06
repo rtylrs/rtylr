@@ -31,9 +31,18 @@ function assertContractPayload(messageName: string, payload: Record<string, unkn
  * back as the string "undefined" and leave the user signed in to nothing, so
  * the absence is returned and each caller surfaces its own error instead.
  */
-function persistSession(login: () => void, token: string | undefined): boolean {
-  if (token === undefined || token === '') return false;
+function persistSession(
+  login: () => void,
+  token: string | undefined,
+  refreshToken: string | undefined
+): boolean {
+  if (!token || !refreshToken) return false;
   setCookie('token', token, {
+    days: 30,
+    sameSite: 'lax',
+    domain: getDefaultCookieDomain(),
+  });
+  setCookie('refresh_token', refreshToken, {
     days: 30,
     sameSite: 'lax',
     domain: getDefaultCookieDomain(),
@@ -57,7 +66,7 @@ export const useLogin = () => {
       setError(null);
     },
     onSuccess: (data) => {
-      if (!persistSession(login, data.token)) setError('Login failed');
+      if (!persistSession(login, data.token, data.refreshToken)) setError('Login failed');
     },
     onError: (error) => {
       setError(getOneKitErrorMessage(error, 'Login failed'));
@@ -92,7 +101,7 @@ export const useRegisterRestaurant = () => {
       // common.auth.v1.RegisterRequest, the generated encoder maps it, and the
       // register call already carries it. Keeping a second copy in storage
       // only suggested the request did not.
-      if (!persistSession(login, data.token)) setError('Registration failed');
+      if (!persistSession(login, data.token, data.refreshToken)) setError('Registration failed');
     },
     onError: (error) => {
       setError(getOneKitErrorMessage(error, 'Registration failed'));
@@ -117,7 +126,7 @@ export const useGoogleAuth = () => {
       setError(null);
     },
     onSuccess: (data) => {
-      if (!persistSession(login, data.token)) setError('Google login failed');
+      if (!persistSession(login, data.token, data.refreshToken)) setError('Google login failed');
     },
     onError: (error) => {
       setError(getOneKitErrorMessage(error, 'Google login failed'));

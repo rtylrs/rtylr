@@ -277,6 +277,8 @@ var authRouteLimiters = map[string]func(http.Handler) http.Handler{
 	"/common/auth/v1/login":                  PerRouteRateLimit(5, time.Minute),
 	"/common/auth/v1/register":               PerRouteRateLimit(3, time.Minute),
 	"/common/auth/v1/register/google":        PerRouteRateLimit(3, time.Minute),
+	"/common/auth/v1/refresh":                PerRouteRateLimit(30, time.Minute),
+	"/common/auth/v1/revoke":                 PerRouteRateLimit(30, time.Minute),
 	"/common/auth/v1/password-reset/request": PerRouteRateLimit(5, time.Minute),
 	"/common/auth/v1/password-reset/confirm": PerRouteRateLimit(5, time.Minute),
 	"/common/auth/v1/invite/accept":          PerRouteRateLimit(5, time.Minute),

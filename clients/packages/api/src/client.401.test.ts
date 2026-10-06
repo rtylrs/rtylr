@@ -191,6 +191,27 @@ describe('401 handling: 401s that are not about the session', () => {
 });
 
 describe('401 handling: a genuine session rejection', () => {
+  it('refreshes an expired access token and retries a OneKit request once', async () => {
+    setTokenCookie(TOKEN_A);
+    setSessionRefresh(async () => {
+      setTokenCookie(TOKEN_B);
+      return true;
+    });
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({ message: 'Unauthorized' }), { status: 401 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    const response = await createOneKitFetch('dash')('https://api.test.com/hub/user/v1/users/me');
+
+    expect(response.status).toBe(200);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    const retryHeaders = new Headers(fetchSpy.mock.calls[1]?.[1]?.headers);
+    expect(retryHeaders.get('Authorization')).toBe(`Bearer ${TOKEN_B}`);
+    expect(readTokenCookie()).toBe(TOKEN_B);
+    expect(cookieTracker.count()).toBe(0);
+  });
+
   it('signs out once and redirects to auth', async () => {
     setTokenCookie(TOKEN_A);
     const client = createApiClient('erp');
@@ -264,7 +285,7 @@ describe('401 handling: stale responses and refresh races', () => {
       runRequestInterceptor(client)
     );
 
-    await Promise.all(
+    const pending = Promise.all(
       configs.map((config) => runResponseRejection(client, rejected401(config)).catch(() => undefined))
     );
     // Give the in-flight checks a chance to run before they resolve.
@@ -276,7 +297,7 @@ describe('401 handling: stale responses and refresh races', () => {
     // The refresh replaced the cookie; the 401s belonged to the old token.
     setTokenCookie(TOKEN_B);
     release(true);
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await pending;
 
     expect(readTokenCookie()).toBe(TOKEN_B);
     expect(cookieTracker.count()).toBe(0);
