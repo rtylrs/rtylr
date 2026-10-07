@@ -19,12 +19,16 @@ var (
 	ErrGeminiAllModelsFailed = errors.New("all gemini models failed")
 )
 
-const geminiRequestTimeout = 35 * time.Second
+const (
+	geminiRequestTimeout = 35 * time.Second
+	geminiModelTimeout   = 12 * time.Second
+)
 
 type GeminiProvider struct {
-	client     *genai.Client
-	httpClient *http.Client
-	models     []string
+	client       *genai.Client
+	httpClient   *http.Client
+	models       []string
+	modelTimeout time.Duration
 }
 
 func NewGeminiProvider(ctx context.Context) (*GeminiProvider, error) {
@@ -43,9 +47,10 @@ func NewGeminiProvider(ctx context.Context) (*GeminiProvider, error) {
 	}
 
 	return &GeminiProvider{
-		client:     client,
-		httpClient: httpClient,
-		models:     []string{"gemini-3.8-flash", "gemini-3.7-flash"},
+		client:       client,
+		httpClient:   httpClient,
+		models:       []string{"gemini-3.8-flash", "gemini-3.7-flash"},
+		modelTimeout: geminiModelTimeout,
 	}, nil
 }
 
@@ -75,8 +80,10 @@ func (c *GeminiProvider) CompleteTextWithOptions(ctx context.Context, prompt str
 			lastErr = requestCtx.Err()
 			break
 		}
-		logger.Ctx(requestCtx).Info("Trying Gemini model", logger.String("model", modelName))
-		resp, err := c.client.Models.GenerateContent(requestCtx, modelName, contents, geminiGenerationConfig(opts))
+		modelCtx, cancelModel := context.WithTimeout(requestCtx, c.timeoutPerModel())
+		logger.Ctx(modelCtx).Info("Trying Gemini model", logger.String("model", modelName))
+		resp, err := c.client.Models.GenerateContent(modelCtx, modelName, contents, geminiGenerationConfig(opts))
+		cancelModel()
 		if err != nil {
 			logger.Ctx(requestCtx).Error("Gemini model failed",
 				logger.String("model", modelName),
@@ -174,10 +181,21 @@ func (c *GeminiProvider) processGeminiStream(ctx context.Context, prompt string,
 		if ctx.Err() != nil {
 			break
 		}
-		logger.Ctx(ctx).Info("Trying Gemini stream model", logger.String("model", modelName))
-		if c.tryModelStream(ctx, contents, modelName, tokenChan) {
+		modelCtx, cancelModel := context.WithTimeout(ctx, c.timeoutPerModel())
+		logger.Ctx(modelCtx).Info("Trying Gemini stream model", logger.String("model", modelName))
+		completed := c.tryModelStream(modelCtx, contents, modelName, tokenChan)
+		modelErr := modelCtx.Err()
+		cancelModel()
+		if completed {
 			logger.Ctx(ctx).Info("Gemini stream model succeeded", logger.String("model", modelName))
 			return
+		}
+		if ctx.Err() != nil {
+			break
+		}
+		if modelErr != nil {
+			logger.Ctx(ctx).Warn("Gemini stream model timed out; trying fallback",
+				logger.String("model", modelName), logger.Error(modelErr))
 		}
 		logger.Ctx(ctx).Error("Gemini stream model failed", logger.String("model", modelName))
 	}
@@ -188,6 +206,13 @@ func (c *GeminiProvider) processGeminiStream(ctx context.Context, prompt string,
 		return
 	}
 	_ = sendGeminiToken(ctx, tokenChan, StreamToken{Error: "all models failed", Done: true})
+}
+
+func (c *GeminiProvider) timeoutPerModel() time.Duration {
+	if c.modelTimeout > 0 {
+		return c.modelTimeout
+	}
+	return geminiModelTimeout
 }
 
 func (c *GeminiProvider) tryModelStream(ctx context.Context, contents []*genai.Content, modelName string, tokenChan chan<- StreamToken) bool {

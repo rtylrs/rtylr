@@ -380,8 +380,10 @@
   },
   "dashboard": {
     "atRiskEmptyTitle": "Aucun client à risque pour le moment",
-    "campaignPerformanceUnavailableTitle": "Les performances des campagnes ne sont pas disponibles",
-    "campaignPerformanceUnavailableDescription": "Ces données n'ont pas pu être chargées depuis l'API du tableau de bord CRM.",
+    "campaignPerformanceUnavailableTitle": "Les performances des campagnes ne sont pas encore disponibles",
+    "campaignPerformanceUnavailableDescription": "L’API du tableau de bord CRM ne fournit pas encore la portée ni les résultats récents des campagnes.",
+    "loadFailedTitle": "Impossible de charger les données du tableau de bord",
+    "loadFailedDescription": "Actualisez le tableau de bord pour réessayer.",
     "pageTitle": "Tableau de bord",
     "noTrendData": "Aucune donnée de tendance",
     "totalCustomers": "Total clients",

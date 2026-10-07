@@ -148,6 +148,7 @@ const Dashboard: React.FC = () => {
   const {
     data: dashboardData,
     isLoading: dashLoading,
+    isError: dashboardError,
     refetch: refetchDashboard,
   } = useCrmDashboard();
   // Backend caps page size at 100 — aggregates cover the first page.
@@ -723,16 +724,28 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
               ))}
-              {campaigns.length === 0 && (
+              {campaigns.length === 0 && !dashLoading && (
                 <EmptyState
                   size="compact"
                   icon={Megaphone}
-                  title={t('crm.dashboard.campaignPerformanceUnavailableTitle')}
-                  description={t('crm.dashboard.campaignPerformanceUnavailableDescription')}
-                  action={{
-                    label: t('crm.actions.refresh'),
-                    onClick: () => refetchDashboard(),
-                  }}
+                  title={t(
+                    dashboardError && !dashboardData
+                      ? 'crm.dashboard.loadFailedTitle'
+                      : 'crm.dashboard.campaignPerformanceUnavailableTitle'
+                  )}
+                  description={t(
+                    dashboardError && !dashboardData
+                      ? 'crm.dashboard.loadFailedDescription'
+                      : 'crm.dashboard.campaignPerformanceUnavailableDescription'
+                  )}
+                  action={
+                    dashboardError && !dashboardData
+                      ? {
+                          label: t('crm.actions.refresh'),
+                          onClick: () => refetchDashboard(),
+                        }
+                      : undefined
+                  }
                 />
               )}
             </div>

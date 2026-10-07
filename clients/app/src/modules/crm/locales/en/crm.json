@@ -374,8 +374,10 @@
   },
   "dashboard": {
     "atRiskEmptyTitle": "No at-risk customers right now",
-    "campaignPerformanceUnavailableTitle": "Campaign performance is unavailable",
-    "campaignPerformanceUnavailableDescription": "This data couldn't be loaded from the CRM dashboard API.",
+    "campaignPerformanceUnavailableTitle": "Campaign performance isn't available yet",
+    "campaignPerformanceUnavailableDescription": "The CRM dashboard API doesn't currently provide campaign reach or recent campaign results.",
+    "loadFailedTitle": "Dashboard data couldn't be loaded",
+    "loadFailedDescription": "Refresh the dashboard to try again.",
     "pageTitle": "Dashboard",
     "noTrendData": "No trend data",
     "totalCustomers": "Total customers",
