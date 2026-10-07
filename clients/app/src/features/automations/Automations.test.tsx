@@ -63,12 +63,10 @@ describe('Automations list states', () => {
 
     expect(screen.getByText('No automations yet')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Choose an event, add an action, and turn a repeat task into a workflow that keeps moving even when you step away.'
-      )
+      screen.getByText('Create a workflow to run automatically when an order is placed.')
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start building' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create one' }));
 
     expect(mocks.navigate).toHaveBeenCalledWith({ to: '/automations/new' });
   });
