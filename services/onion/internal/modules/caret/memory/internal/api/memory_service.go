@@ -107,6 +107,9 @@ func (a *MemoryAPI) GetChatMessages(ctx context.Context, req *hubmemoryv1.GetCha
 
 	chatMessages, err := a.Service.SessionMessages(ctx, req.GetSessionId(), int(user.UserID))
 	if err != nil {
+		if errors.Is(err, application.ErrChatSessionNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Chat session not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get chat messages")
 	}
 
