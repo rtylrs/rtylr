@@ -43,7 +43,7 @@ func WithWebSearchBudget(ctx context.Context) context.Context {
 
 func NewAssistantToolExecutor(profile AssistantProfileReader, web PublicWebSearcher) *AssistantToolExecutor {
 	if web == nil {
-		web = GeminiWebSearch{Client: &http.Client{Timeout: 12 * time.Second}}
+		web = SearXNGWebSearch{Client: &http.Client{Timeout: 12 * time.Second}}
 	}
 	return &AssistantToolExecutor{Profile: profile, Web: web}
 }
@@ -186,30 +186,33 @@ func evalArithmetic(node ast.Expr) (float64, error) {
 	}
 }
 
-type GeminiWebSearch struct {
-	Client *http.Client
+type SearXNGWebSearch struct {
+	Client  *http.Client
+	BaseURL string
 }
 
-func (g GeminiWebSearch) Search(ctx context.Context, query string) (map[string]any, error) {
-	apiKey := config.GetGeminiAPIKey()
-	if apiKey == "" {
-		return nil, errors.New("web search needs Gemini to be configured")
+func (s SearXNGWebSearch) Search(ctx context.Context, query string) (map[string]any, error) {
+	baseURL := strings.TrimSpace(s.BaseURL)
+	if baseURL == "" {
+		baseURL = config.GetSearXNGURL()
 	}
-	body, err := json.Marshal(map[string]any{
-		"model": "gemini-3.8-flash",
-		"input": query,
-		"tools": []map[string]string{{"type": "google_search"}},
-	})
+	if baseURL == "" {
+		return nil, errors.New("web search is not configured")
+	}
+	endpoint, err := url.Parse(baseURL)
+	if err != nil || (endpoint.Scheme != "http" && endpoint.Scheme != "https") || endpoint.Host == "" || endpoint.User != nil || endpoint.RawQuery != "" || endpoint.Fragment != "" {
+		return nil, errors.New("web search endpoint is invalid")
+	}
+	endpoint.Path = strings.TrimRight(endpoint.Path, "/") + "/search"
+	params := endpoint.Query()
+	params.Set("q", query)
+	params.Set("format", "json")
+	endpoint.RawQuery = params.Encode()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("web search request failed")
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://generativelanguage.googleapis.com/v1beta/interactions", strings.NewReader(string(body)))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-goog-api-key", apiKey)
-	client := g.Client
+	client := s.Client
 	if client == nil {
 		client = &http.Client{Timeout: 12 * time.Second}
 	}
@@ -219,85 +222,65 @@ func (g GeminiWebSearch) Search(ctx context.Context, query string) (map[string]a
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("web search returned status %d", resp.StatusCode)
+		return nil, fmt.Errorf("web search service returned status %d", resp.StatusCode)
 	}
 	payload, err := io.ReadAll(io.LimitReader(resp.Body, (1<<20)+1))
 	if err != nil || len(payload) > 1<<20 {
 		return nil, errors.New("web search response exceeded the size limit")
 	}
-	return parseGeminiGroundedSearch(payload, query)
+	return parseSearXNGResults(payload, query)
 }
 
-type geminiGroundedSearchResponse struct {
-	Steps []struct {
-		Type   string `json:"type"`
-		Result []struct {
-			SearchSuggestions string `json:"search_suggestions"`
-		} `json:"result"`
-		Content []struct {
-			Type        string `json:"type"`
-			Text        string `json:"text"`
-			Annotations []struct {
-				Type  string `json:"type"`
-				URL   string `json:"url"`
-				Title string `json:"title"`
-			} `json:"annotations"`
-		} `json:"content"`
-	} `json:"steps"`
-}
-
-func parseGeminiGroundedSearch(payload []byte, query string) (map[string]any, error) {
-	var response geminiGroundedSearchResponse
+func parseSearXNGResults(payload []byte, query string) (map[string]any, error) {
+	var response struct {
+		Results []struct {
+			Title      string `json:"title"`
+			URL        string `json:"url"`
+			Content    string `json:"content"`
+			Suggestion string `json:"suggestion"`
+		} `json:"results"`
+	}
 	if err := json.Unmarshal(payload, &response); err != nil {
 		return nil, errors.New("web search returned an invalid response")
 	}
-	answer := strings.Builder{}
 	sources := make([]map[string]string, 0, 8)
-	searchSuggestions := ""
 	seen := make(map[string]bool)
-	for _, step := range response.Steps {
-		if step.Type == "google_search_result" {
-			for _, result := range step.Result {
-				if len(result.SearchSuggestions) > 0 && len(result.SearchSuggestions) <= 16000 {
-					searchSuggestions = result.SearchSuggestions
-					break
-				}
-			}
+	for _, result := range response.Results {
+		if len(sources) == 8 {
+			break
+		}
+		if len(result.URL) > 2048 {
 			continue
 		}
-		if step.Type != "model_output" {
+		parsedURL, err := url.ParseRequestURI(result.URL)
+		if err != nil || parsedURL.Scheme != "https" || parsedURL.Host == "" || parsedURL.User != nil || seen[parsedURL.String()] {
 			continue
 		}
-		for _, part := range step.Content {
-			if part.Type == "text" {
-				answer.WriteString(part.Text)
-			}
-			if len(sources) >= 8 {
-				continue
-			}
-			for _, annotation := range part.Annotations {
-				parsedURL, err := url.ParseRequestURI(annotation.URL)
-				if annotation.Type != "url_citation" || len(annotation.URL) > 2048 || err != nil || parsedURL.Scheme != "https" || parsedURL.Host == "" || parsedURL.User != nil || seen[annotation.URL] {
-					continue
-				}
-				seen[annotation.URL] = true
-				title := strings.TrimSpace(annotation.Title)
-				titleRunes := []rune(title)
-				if len(titleRunes) > 300 {
-					title = string(titleRunes[:300])
-				}
-				if title == "" {
-					title = parsedURL.Host
-				}
-				sources = append(sources, map[string]string{"title": title, "url": parsedURL.String()})
-				if len(sources) == 8 {
-					break
-				}
-			}
+		title := truncateSearchText(strings.TrimSpace(result.Title), 300)
+		if title == "" {
+			title = parsedURL.Host
 		}
+		snippet := strings.TrimSpace(result.Content)
+		if snippet == "" {
+			snippet = strings.TrimSpace(result.Suggestion)
+		}
+		sources = append(sources, map[string]string{
+			"title":   title,
+			"url":     parsedURL.String(),
+			"snippet": truncateSearchText(snippet, 1200),
+		})
+		seen[parsedURL.String()] = true
 	}
-	if strings.TrimSpace(answer.String()) == "" || len(answer.String()) > 32000 || len(sources) == 0 || searchSuggestions == "" {
-		return nil, errors.New("web search did not return an answer with grounded sources")
+	if len(sources) == 0 {
+		return nil, errors.New("web search returned no usable results")
 	}
-	return map[string]any{"answer": answer.String(), "sources": sources, "search_query": query, "search_suggestions_html": searchSuggestions}, nil
+	return map[string]any{"sources": sources, "search_query": query}, nil
+}
+
+func truncateSearchText(value string, maxRunes int) string {
+	runes := []rune(value)
+	if len(runes) > maxRunes {
+		return string(runes[:maxRunes])
+	}
+	return value
 }

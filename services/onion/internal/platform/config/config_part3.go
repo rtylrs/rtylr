@@ -129,6 +129,13 @@ func GetAIPrimaryProvider() string {
 	return os.Getenv(AIPrimaryProviderEnvVar)
 }
 
+func GetSearXNGURL() string {
+	if GlobalConfig != nil {
+		return strings.TrimSpace(GlobalConfig.SearXNGURL)
+	}
+	return strings.TrimSpace(os.Getenv(SearXNGURLEnvVar))
+}
+
 func IsAnyAIConfigured() bool {
 	return IsDeepSeekConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
 }

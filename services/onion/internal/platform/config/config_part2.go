@@ -107,6 +107,7 @@ func LoadAndValidate() (*AppConfig, error) {
 		// AI provider preferences
 		DeepSeekAPIKey:    os.Getenv(DeepSeekAPIKeyEnvVar),
 		AIPrimaryProvider: os.Getenv(AIPrimaryProviderEnvVar),
+		SearXNGURL:        strings.TrimSpace(os.Getenv(SearXNGURLEnvVar)),
 
 		// Caret document-to-form mapping specialist (optional)
 		FormMappingCheckpointPath: strings.TrimSpace(os.Getenv("FORM_MAPPING_CHECKPOINT_PATH")),

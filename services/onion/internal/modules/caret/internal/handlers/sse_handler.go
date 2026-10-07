@@ -71,13 +71,19 @@ func GenerateTextStreamRoutes() []string {
 }
 
 type GenerateTextStreamHandler struct {
-	AiService      *application.Service
+	AiService      AIStreamService
 	MemoryService  application.MemoryService
 	QuotaService   QuotaService
 	AnalystService AnalystService
 	ToolExecutors  []ToolExecutor
 	summaryMu      sync.Mutex
 	summaryRunning map[string]struct{}
+}
+
+type AIStreamService interface {
+	IsAvailable() bool
+	GetPrimaryProvider() string
+	GenerateTextStream(context.Context, string) (<-chan snips.StreamToken, error)
 }
 
 type GenerateTextStreamRequest struct {

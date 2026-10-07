@@ -212,6 +212,38 @@ func TestCompleteTextStreamDoesNotSpliceAfterVisibleProviderFailure(t *testing.T
 	}
 }
 
+func TestCompleteTextStreamContinuesAfterSelectedFallbackWithoutRetryingIt(t *testing.T) {
+	primary := &streamingTestProvider{name: "primary", tokens: []StreamToken{{Error: "primary stream failed"}}}
+	coolingDown := &streamingTestProvider{name: "cooling-down", tokens: []StreamToken{{Text: "should not run"}, {Done: true}}}
+	selected := &streamingTestProvider{name: "selected", tokens: []StreamToken{{Error: "selected stream failed"}}}
+	last := &streamingTestProvider{name: "last", tokens: []StreamToken{{Text: "last provider"}, {Done: true}}}
+	client := &Client{
+		providers:       []Provider{primary, coolingDown, selected, last},
+		primaryProvider: primary,
+		cooldownUntil:   map[string]time.Time{"cooling-down": time.Now().Add(time.Minute)},
+	}
+
+	primaryStream, err := primary.CompleteTextStream(context.Background(), "prompt")
+	if err != nil {
+		t.Fatalf("start primary stream: %v", err)
+	}
+	stream := client.superviseProviderStream(context.Background(), "prompt", primary, primaryStream, []Provider{coolingDown, selected, last})
+	var text string
+	for token := range stream {
+		if token.Error != "" {
+			t.Fatalf("failover surfaced an error: %#v", token)
+		}
+		text += token.Text
+	}
+
+	if text != "last provider" {
+		t.Fatalf("stream text = %q, want last provider", text)
+	}
+	if primary.streamCalls != 1 || coolingDown.streamCalls != 0 || selected.streamCalls != 1 || last.streamCalls != 1 {
+		t.Fatalf("stream calls: primary=%d cooling-down=%d selected=%d last=%d; want 1, 0, 1, 1", primary.streamCalls, coolingDown.streamCalls, selected.streamCalls, last.streamCalls)
+	}
+}
+
 type plainCompletionProvider struct {
 	result     string
 	err        error
@@ -244,12 +276,18 @@ type recordingCompletionProvider struct {
 
 type streamingTestProvider struct {
 	plainCompletionProvider
+	name        string
 	tokens      []StreamToken
 	streamErr   error
 	streamCalls int
 }
 
-func (p *streamingTestProvider) Name() string { return "stream-test" }
+func (p *streamingTestProvider) Name() string {
+	if p.name != "" {
+		return p.name
+	}
+	return "stream-test"
+}
 
 func (p *streamingTestProvider) CompleteTextStream(_ context.Context, _ string) (<-chan StreamToken, error) {
 	p.streamCalls++

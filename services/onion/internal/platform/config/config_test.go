@@ -53,6 +53,24 @@ func TestOpenCodeConfiguration(t *testing.T) {
 	}
 }
 
+func TestSearXNGURLConfiguration(t *testing.T) {
+	setConfigEnv(t)
+	GlobalConfig = nil
+	t.Setenv(SearXNGURLEnvVar, " http://search.internal:8080 ")
+
+	cfg, err := LoadAndValidate()
+	if err != nil {
+		t.Fatalf("LoadAndValidate: %v", err)
+	}
+	if cfg.SearXNGURL != "http://search.internal:8080" {
+		t.Fatalf("SearXNGURL = %q, want trimmed internal endpoint", cfg.SearXNGURL)
+	}
+	GlobalConfig = cfg
+	if GetSearXNGURL() != cfg.SearXNGURL {
+		t.Fatalf("GetSearXNGURL() = %q, want %q", GetSearXNGURL(), cfg.SearXNGURL)
+	}
+}
+
 func TestLoadAndValidate_TrimsAndFiltersRedisHosts(t *testing.T) {
 	setConfigEnv(t)
 	t.Setenv("REDIS_HOSTS", " redis-a:6379, , redis-b:6380, ")

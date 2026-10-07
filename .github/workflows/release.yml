@@ -65,6 +65,7 @@ jobs:
               clients/packages|clients/packages/*) echo packages ;;
               clients|clients/*) echo clients ;;
               services/onion|services/onion/*) echo onion ;;
+              services/searxng|services/searxng/*) echo searxng ;;
               voxie|voxie/*) echo contracts ;;
               .github|.github/*) echo ci ;;
               *) echo repo ;;
@@ -104,6 +105,7 @@ jobs:
               packages) echo clients/packages ;;
               clients) echo clients ;;
               onion) echo services/onion ;;
+              searxng) echo services/searxng ;;
               contracts) echo voxie ;;
               *) echo "" ;;
             esac
