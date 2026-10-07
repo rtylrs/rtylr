@@ -244,4 +244,25 @@ describe('Team member filters', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
     expect(screen.getByRole('button', { name: 'Jordan Member' })).toBeInTheDocument();
   });
+
+  it('renders the member actions menu outside the clipped member table', () => {
+    teamData.data = {
+      members: [member('1', 'Taylor Owner', 'admin', 'active')],
+      hasMore: false,
+    };
+    render(<Team />);
+
+    const memberTable = screen
+      .getByRole('button', { name: 'Taylor Owner' })
+      .closest('.rounded-xl.overflow-hidden');
+    fireEvent.pointerDown(
+      screen.getByRole('button', { name: i18next.t('team.list.memberActions') })
+    );
+
+    const menu = screen.getByRole('menu');
+    expect(memberTable).not.toContainElement(menu);
+    expect(
+      screen.getByRole('menuitem', { name: i18next.t('team.list.editMember') })
+    ).toBeInTheDocument();
+  });
 });

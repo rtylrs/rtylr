@@ -2,6 +2,13 @@ import { PageHeader } from '../../shared/components/dash/PageHeader';
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
 import {
   Search,
@@ -501,87 +508,72 @@ const Team: React.FC = (): React.JSX.Element => {
                         </div>
 
                         {/* Actions */}
-                        <div className="col-span-1 flex justify-end relative">
-                          <button
-                            type="button"
-                            aria-label={t('team.list.memberActions')}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMenuOpen(menuOpen === m.id ? null : m.id);
-                            }}
-                            className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
-                            style={{ color: 'var(--dash-text-muted)' }}
+                        <div className="col-span-1 flex justify-end">
+                          <DropdownMenu
+                            open={menuOpen === m.id}
+                            onOpenChange={(open) => setMenuOpen(open ? m.id : null)}
                           >
-                            <MoreHorizontal size={14} />
-                          </button>
-
-                          {menuOpen === m.id && (
-                            <div
-                              className="absolute right-0 top-8 z-50 rounded-lg py-1 w-48 shadow-lg"
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                aria-label={t('team.list.memberActions')}
+                                onClick={(event) => event.stopPropagation()}
+                                className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
+                                style={{ color: 'var(--dash-text-muted)' }}
+                              >
+                                <MoreHorizontal size={14} />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              side="bottom"
+                              sideOffset={4}
+                              collisionPadding={8}
+                              className="w-48"
                               style={{
                                 background: 'var(--dash-surface)',
                                 border: '1px solid var(--dash-border)',
+                                color: 'var(--dash-text-muted)',
                               }}
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(event) => event.stopPropagation()}
                             >
-                              <button
-                                type="button"
-                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-start hover:bg-[var(--dash-hover)]"
-                                style={{ color: 'var(--dash-text-muted)' }}
-                                onClick={() => {
-                                  navigate({ to: `/team/${m.id}` });
-                                  setMenuOpen(null);
-                                }}
+                              <DropdownMenuItem
+                                className="text-xs"
+                                onSelect={() => navigate({ to: `/team/${m.id}` })}
                               >
                                 <Pencil size={12} /> {t('team.list.editMember')}
-                              </button>
+                              </DropdownMenuItem>
                               {emailHref ? (
-                                <a
-                                  href={emailHref}
-                                  className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-start hover:bg-[var(--dash-hover)]"
-                                  style={{ color: 'var(--dash-text-muted)' }}
-                                  onClick={() => setMenuOpen(null)}
-                                >
-                                  <Mail size={12} /> Send email
-                                </a>
+                                <DropdownMenuItem asChild className="text-xs">
+                                  <a href={emailHref}>
+                                    <Mail size={12} /> Send email
+                                  </a>
+                                </DropdownMenuItem>
                               ) : (
-                                <span
-                                  className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-start"
-                                  style={{ color: 'var(--dash-text-dim)' }}
-                                >
+                                <DropdownMenuItem disabled className="text-xs">
                                   <Mail size={12} /> Send email
-                                </span>
+                                </DropdownMenuItem>
                               )}
-                              <button
-                                type="button"
-                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-start hover:bg-[var(--dash-hover)]"
-                                style={{ color: 'var(--dash-text-muted)' }}
-                                onClick={() => {
-                                  navigate({ to: `/team/${m.id}` });
-                                  setMenuOpen(null);
-                                }}
+                              <DropdownMenuItem
+                                className="text-xs"
+                                onSelect={() => navigate({ to: `/team/${m.id}` })}
                               >
                                 <Shield size={12} /> Change role
-                              </button>
-                              <div
-                                className="my-1"
-                                style={{ borderTop: '1px solid var(--dash-border)' }}
-                              />
+                              </DropdownMenuItem>
                               {!m.isOwner && (
-                                <button
-                                  type="button"
-                                  className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-start hover:bg-[var(--dash-hover)]"
-                                  style={{ color: '#ef4444' }}
-                                  onClick={() => {
-                                    setConfirm(m);
-                                    setMenuOpen(null);
-                                  }}
-                                >
-                                  <UserX size={12} /> {t('team.list.deactivateConfirm')}
-                                </button>
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    destructive
+                                    className="text-xs"
+                                    onSelect={() => setConfirm(m)}
+                                  >
+                                    <UserX size={12} /> {t('team.list.deactivateConfirm')}
+                                  </DropdownMenuItem>
+                                </>
                               )}
-                            </div>
-                          )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     );
@@ -627,9 +619,6 @@ const Team: React.FC = (): React.JSX.Element => {
             </>
           )}
         </div>
-
-        {/* Close menu on outside click */}
-        {menuOpen && <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(null)} />}
 
         {/* Floating bulk action bar */}
         {selected.size > 0 && (
