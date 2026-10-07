@@ -203,7 +203,13 @@ func (p *Pool) processOne(ctx context.Context) bool {
 	// An encrypted body that cannot be decrypted must not loop forever: mark
 	// the job failed instead of releasing the claim back to pending.
 	html := openHTML(job.Html)
-	if job.Html != "" && html == "" {
+	text := ""
+	textUndecryptable := false
+	if job.TextBody.Valid {
+		text = openHTML(job.TextBody.String)
+		textUndecryptable = job.TextBody.String != "" && text == ""
+	}
+	if (job.Html != "" && html == "") || textUndecryptable {
 		if n, failErr := p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
 			Status:    sqlc.EmailJobsStatusFailed,
 			Attempts:  job.MaxAttempts,
@@ -221,7 +227,7 @@ func (p *Pool) processOne(ctx context.Context) bool {
 	}
 	message := Job{To: job.ToEmail, Subject: job.Subject, HTML: html}
 	if job.TextBody.Valid {
-		message.Text = openHTML(job.TextBody.String)
+		message.Text = text
 	}
 	if job.FromEmail.Valid && job.FromEmail.String != "" {
 		message.From = job.FromEmail.String
