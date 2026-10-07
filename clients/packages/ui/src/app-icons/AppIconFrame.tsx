@@ -1,28 +1,20 @@
-import type { PropsWithChildren, SVGProps } from "react";
+import type { LucideIcon, LucideProps } from "lucide-react";
 
-export type AppIconProps = SVGProps<SVGSVGElement> & { size?: number | string };
+export type AppIconProps = LucideProps;
 
 export function AppIconFrame({
+  icon: Icon,
   size = 24,
-  children,
+  strokeWidth = 1.8,
   ...props
-}: PropsWithChildren<AppIconProps>) {
+}: AppIconProps & { icon: LucideIcon }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.65"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <Icon
+      size={size}
+      strokeWidth={strokeWidth}
       aria-hidden="true"
       focusable="false"
       {...props}
-    >
-      {children}
-    </svg>
+    />
   );
 }
