@@ -99,7 +99,7 @@ func (c *CDN) purgeUploadURL(w http.ResponseWriter, r *http.Request) {
 	}
 	deleted, err := c.purgeUploadURLFamily(r, scope, raw)
 	if err != nil {
-		writePurgeUploadURLError(w, r, raw, err)
+		writePurgeUploadURLError(w, r, err)
 		return
 	}
 	writePurgeResponse(w, purgeResponse{
@@ -143,7 +143,7 @@ func (c *CDN) purgeControl(w http.ResponseWriter, r *http.Request) {
 	case req.URL != "":
 		deleted, err := c.purgeUploadURLFamily(r, scope, req.URL)
 		if err != nil {
-			writePurgeUploadURLError(w, r, req.URL, err)
+			writePurgeUploadURLError(w, r, err)
 			return
 		}
 		writePurgeResponse(w, purgeResponse{
@@ -242,14 +242,14 @@ func (c *CDN) purgeUploadURLFamily(r *http.Request, scope mutationScope, raw str
 // input the caller can fix, and a generic 500 otherwise. Driver and storage
 // errors are logged, never echoed — they carry backend details the caller must
 // not see.
-func writePurgeUploadURLError(w http.ResponseWriter, r *http.Request, raw string, err error) {
+func writePurgeUploadURLError(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		http.Error(w, "file not found", http.StatusNotFound)
 	case errors.Is(err, errBadPurgeInput):
 		http.Error(w, "invalid purge request", http.StatusBadRequest)
 	default:
-		logger.Ctx(r.Context()).Error("cdn: upload-url purge failed", logger.String("url", raw), logger.Error(err))
+		logger.Ctx(r.Context()).Error("cdn: upload-url purge failed", logger.Error(err))
 		http.Error(w, "purge failed", http.StatusInternalServerError)
 	}
 }

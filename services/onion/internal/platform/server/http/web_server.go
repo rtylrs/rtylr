@@ -169,6 +169,11 @@ func composeHandler(r *chi.Mux, middlewares []MiddlewareFunc) http.Handler {
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		protected = middlewares[i](protected)
 	}
+	next := protected
+	protected = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.WithValue(req.Context(), observability.RouteLookupContextKey{}, r)
+		next.ServeHTTP(w, req.WithContext(ctx))
+	})
 
 	if partialsAPIKey() == "" {
 		return protected

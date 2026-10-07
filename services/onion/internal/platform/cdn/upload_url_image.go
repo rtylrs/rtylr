@@ -193,7 +193,7 @@ func (c *CDN) proxyRemoteImage(w http.ResponseWriter, r *http.Request, target *u
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Ctx(r.Context()).Warn("cdn: remote image fetch failed",
-			logger.String("url", target.Redacted()), logger.Error(err))
+			logger.String("host", target.Hostname()), logger.String("error_type", fmt.Sprintf("%T", err)))
 		http.Error(w, "remote image unavailable", http.StatusBadGateway)
 		return
 	}

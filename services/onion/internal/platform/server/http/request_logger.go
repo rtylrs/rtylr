@@ -75,7 +75,7 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 				(responseWriter.statusCode != http.StatusUnauthorized || r.Header.Get("Authorization") != "") &&
 				rateLimiter.CanSend("request-logs") {
 				slack.Post(slack.Requests, fmt.Sprintf("`%d` %s %s · %s · %s",
-					responseWriter.statusCode, r.Method, r.URL.Path, getRemoteIP(r), duration.Round(time.Millisecond)))
+					responseWriter.statusCode, r.Method, requestRouteTemplate(r), getRemoteIP(r), duration.Round(time.Millisecond)))
 			}
 
 			go func() {
