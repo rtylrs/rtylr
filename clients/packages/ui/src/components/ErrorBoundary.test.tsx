@@ -45,7 +45,8 @@ afterEach(() => {
 describe("dynamic import recovery", () => {
   it("keeps the reload guard while a lazy page is pending and after it fails", async () => {
     const key = `${window.location.origin}${window.location.pathname}${window.location.search}`;
-    window.sessionStorage.setItem("rtylr:dynamic-import-reload", key);
+    const marker = JSON.stringify({ route: key, attemptedAt: Date.now() });
+    window.sessionStorage.setItem("rtylr:dynamic-import-reload", marker);
     let rejectPage: (error: Error) => void = () => {
       throw new Error("Page was not initialized");
     };
@@ -66,7 +67,7 @@ describe("dynamic import recovery", () => {
     );
     expect(screen.getByText("Loading page")).toBeVisible();
     expect(window.sessionStorage.getItem("rtylr:dynamic-import-reload")).toBe(
-      key,
+      marker,
     );
     const error = new Error(
       "Failed to fetch dynamically imported module: /assets/page.js",
@@ -78,8 +79,44 @@ describe("dynamic import recovery", () => {
     expect(screen.getByRole("alert")).toBeVisible();
     expect(recoverFromDynamicImportError(error)).toBe(false);
     expect(window.sessionStorage.getItem("rtylr:dynamic-import-reload")).toBe(
-      key,
+      marker,
     );
     consoleError.mockRestore();
+  });
+
+  it("re-enables recovery after the reload cooldown expires", () => {
+    const error = new Error(
+      "Failed to fetch dynamically imported module: /assets/page.js",
+    );
+    const reload = vi
+      .spyOn(window.location, "reload")
+      .mockImplementation(() => {});
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+
+    expect(recoverFromDynamicImportError(error)).toBe(true);
+    expect(recoverFromDynamicImportError(error)).toBe(false);
+
+    now.mockReturnValue(1_060_000);
+    expect(recoverFromDynamicImportError(error)).toBe(true);
+    expect(reload).toHaveBeenCalledTimes(2);
+  });
+
+  it("re-arms recovery for route-only markers left by older app versions", () => {
+    const key = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    const error = new Error(
+      "Failed to fetch dynamically imported module: /assets/page.js",
+    );
+    const reload = vi
+      .spyOn(window.location, "reload")
+      .mockImplementation(() => {});
+    window.sessionStorage.setItem("rtylr:dynamic-import-reload", key);
+
+    expect(recoverFromDynamicImportError(error)).toBe(true);
+    const marker = JSON.parse(
+      window.sessionStorage.getItem("rtylr:dynamic-import-reload") ?? "{}",
+    ) as { route: string; attemptedAt: number };
+    expect(marker.route).toBe(key);
+    expect(marker.attemptedAt).toEqual(expect.any(Number));
+    expect(reload).toHaveBeenCalledOnce();
   });
 });

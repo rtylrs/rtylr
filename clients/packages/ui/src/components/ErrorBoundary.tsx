@@ -21,6 +21,7 @@ interface ErrorBoundaryState {
 }
 
 const DYNAMIC_IMPORT_RELOAD_KEY = "rtylr:dynamic-import-reload";
+const DYNAMIC_IMPORT_RELOAD_COOLDOWN_MS = 60_000;
 
 function dynamicImportReloadKey(): string {
   return `${window.location.origin}${window.location.pathname}${window.location.search}`;
@@ -39,11 +40,33 @@ export function recoverFromDynamicImportError(error: unknown): boolean {
     return false;
 
   const reloadKey = dynamicImportReloadKey();
+  const attemptedAt = Date.now();
 
   try {
-    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === reloadKey)
-      return false;
-    window.sessionStorage.setItem(DYNAMIC_IMPORT_RELOAD_KEY, reloadKey);
+    const previous = window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY);
+    if (previous) {
+      try {
+        const marker: unknown = JSON.parse(previous);
+        if (
+          marker &&
+          typeof marker === "object" &&
+          "route" in marker &&
+          marker.route === reloadKey &&
+          "attemptedAt" in marker &&
+          typeof marker.attemptedAt === "number" &&
+          attemptedAt >= marker.attemptedAt &&
+          attemptedAt - marker.attemptedAt < DYNAMIC_IMPORT_RELOAD_COOLDOWN_MS
+        ) {
+          return false;
+        }
+      } catch {
+        // Old markers have no timestamp, so they must not disable recovery forever.
+      }
+    }
+    window.sessionStorage.setItem(
+      DYNAMIC_IMPORT_RELOAD_KEY,
+      JSON.stringify({ route: reloadKey, attemptedAt }),
+    );
   } catch {
     return false;
   }
