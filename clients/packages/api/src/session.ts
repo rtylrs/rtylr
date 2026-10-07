@@ -50,7 +50,9 @@ export function sentCredential(config: unknown): string | null {
 export type SessionRefreshResult = 'refreshed' | 'rejected' | 'unavailable';
 
 /** The session check a 401 is allowed to run before any sign-out. */
-export type SessionRefresh = () => Promise<SessionRefreshResult>;
+export type SessionRefresh = (signal: AbortSignal) => Promise<SessionRefreshResult>;
+
+const sessionRefreshTimeoutMs = 5_000;
 
 let sessionRefresh: SessionRefresh | null = null;
 let refreshInFlight: Promise<SessionRefreshResult> | null = null;
@@ -84,14 +86,25 @@ function refreshSession(): Promise<SessionRefreshResult> {
   if (!sessionRefresh) return Promise.resolve('rejected');
   if (refreshInFlight) return refreshInFlight;
 
+  const controller = new AbortController();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<SessionRefreshResult>((resolve) => {
+    timeout = setTimeout(() => {
+      controller.abort();
+      resolve('unavailable');
+    }, sessionRefreshTimeoutMs);
+  });
+
   const attempt = (async (): Promise<SessionRefreshResult> => {
     try {
-      return await sessionRefresh!();
+      return await Promise.race([sessionRefresh!(controller.signal), timedOut]);
     } catch {
       return 'unavailable';
     } finally {
       // Cleared in `finally` so a throw cannot wedge every later 401 behind a
       // settled promise nobody awaits.
+      if (timeout !== undefined) clearTimeout(timeout);
+      controller.abort();
       refreshInFlight = null;
     }
   })();
