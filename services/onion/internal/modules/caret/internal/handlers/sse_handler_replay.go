@@ -140,16 +140,24 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	totalTokens := streamUsageTokens(token, promptChars, fullResponse.Len())
 	// Reads return bounded, authorized reference data for a natural answer.
 	// The same renderer keeps the tool budget and duplicate-call guard across rounds.
-	if req.EnhancedPrompt != "" && !renderer.HasSuccessfulTool("web.search") {
+	if req.EnhancedPrompt != "" {
 		seenResults := 0
 		continuation := req.EnhancedPrompt
-		for round := 0; round < cachePlan.ContinuationBudget && renderer.PendingApprovalCount() == 0 && len(renderer.toolResults) > seenResults && !renderer.HasSuccessfulTool("web.search"); round++ {
+		for round := 0; round < cachePlan.ContinuationBudget && renderer.PendingApprovalCount() == 0 && len(renderer.toolResults) > seenResults; round++ {
 			results := renderer.toolResults[seenResults:]
 			seenResults = len(renderer.toolResults)
-			if len(results) == 1 && results[0].Name == "web.search" && results[0].Status == "error" {
-				if err := renderer.AppendServerText(webSearchFailureReply(results[0].Error)); err != nil {
+			searchFailed := false
+			for _, result := range results {
+				if result.Name != "web.search" || result.Status != "error" {
+					continue
+				}
+				if err := renderer.AppendServerText(webSearchFailureReply(result.Error)); err != nil {
 					return
 				}
+				searchFailed = true
+				break
+			}
+			if searchFailed {
 				break
 			}
 			if h.AiService == nil {
@@ -161,9 +169,6 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 				if result.Output != nil {
 					promptResults[index].Output = make(map[string]any, len(result.Output))
 					for key, value := range result.Output {
-						if result.Name == "web.search" && key == "search_suggestions_html" {
-							continue
-						}
 						promptResults[index].Output[key] = value
 					}
 				}
@@ -188,19 +193,17 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			}
 		}
 	}
-	groundedWebSearch := renderer.HasSuccessfulTool("web.search")
-
 	if renderer.ToolResultCount() > 0 {
 		// A live read can change independently of the request/page context, so
 		// never replay an answer that was informed by a tool result.
 		cachePlan = application.DisableExactCachePlan(cachePlan, "live tool result informed the response")
 	}
-	if strings.TrimSpace(fullResponse.String()) == "" && renderer.PendingApprovalCount() == 0 && !groundedWebSearch {
+	if strings.TrimSpace(fullResponse.String()) == "" && renderer.PendingApprovalCount() == 0 {
 		h.writeErrorResponse(w, "The assistant returned an empty response. Please try again.")
 		settleUsage(int64(totalTokens))
 		return
 	}
-	if fullResponse.Len() > 0 && !groundedWebSearch {
+	if fullResponse.Len() > 0 {
 		if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
 			h.writeErrorResponse(w, "Failed to persist response")
 			settleUsage(int64(totalTokens))
@@ -220,7 +223,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 
 func webSearchFailureReply(detail string) string {
 	if strings.Contains(strings.ToLower(detail), "status 429") {
-		return "Web search hit Google's current request limit, so I couldn't verify the latest reports. I can still help from general knowledge, but I don't want to guess about recent events."
+		return "Web search is temporarily rate limited, so I couldn't verify the latest information. I can still help from general knowledge, but I don't want to guess about recent events."
 	}
 	return "I couldn't complete the web search, so I can't verify recent information right now. I can still help from general knowledge if that's useful."
 }
