@@ -1,7 +1,8 @@
 /**
  * Finance list endpoints return `{ <key>: [...] }` envelopes from the Go backend.
- * This helper accepts either a raw array or an enveloped response so the
- * schema parse never sees undefined (which would throw).
+ * This helper accepts either a raw array or an enveloped response. A malformed
+ * success response is an error, not an empty list, so the query can show its
+ * error state instead of hiding missing data.
  *
  * Pass one or more candidate keys - the first matching array wins.
  */
@@ -13,5 +14,6 @@ export function unwrapList<T>(res: unknown, ...keys: string[]): T[] {
       if (Array.isArray(value)) return value as T[];
     }
   }
-  return [];
+  const expected = keys.length > 0 ? keys.map((key) => `"${key}"`).join(' or ') : 'an array';
+  throw new TypeError(`Expected a list response with ${expected}`);
 }

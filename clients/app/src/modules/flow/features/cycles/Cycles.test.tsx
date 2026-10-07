@@ -37,9 +37,15 @@ const cyclesState = vi.hoisted(() => ({
 // The screen asks which project's cycles to show, so it reads the project list.
 const projectsState = vi.hoisted(() => ({
   data: [{ id: 'p-1', name: 'Website Redesign' }] as Array<{ id: string; name: string }>,
+  isLoading: false,
+  isPending: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
 }));
 vi.mock('../projects/useProjects', () => ({
-  useProjects: () => ({ data: projectsState.data, isLoading: false }),
+  useProjects: () => projectsState,
 }));
 
 vi.mock('./useCycles', () => ({
@@ -74,6 +80,12 @@ function cycle(over: Partial<ApiCycle> = {}): ApiCycle {
  */
 beforeEach(() => {
   projectsState.data = [{ id: 'p-1', name: 'Website Redesign' }];
+  projectsState.isLoading = false;
+  projectsState.isPending = false;
+  projectsState.isError = false;
+  projectsState.isPaused = false;
+  projectsState.failureCount = 0;
+  projectsState.refetch.mockClear();
 });
 
 describe('Cycles', () => {
@@ -89,6 +101,17 @@ describe('Cycles', () => {
     expect(screen.getByText('flow.cycles.emptyTitle')).toBeInTheDocument();
     expect(screen.getByText('flow.cycles.emptyDescription')).toBeInTheDocument();
     expect(screen.getByText('flow.cycles.createFirst')).toBeInTheDocument();
+  });
+
+  it('shows retry when the project list fails instead of pretending there are no cycles', () => {
+    projectsState.isError = true;
+    projectsState.data = [];
+    render(<Cycles />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('flow.loadFailed.description');
+    expect(screen.queryByText('flow.cycles.emptyTitle')).not.toBeInTheDocument();
+    screen.getByRole('button', { name: 'flow.loadFailed.retry' }).click();
+    expect(projectsState.refetch).toHaveBeenCalledOnce();
   });
 
   it('renders the active, upcoming and completed cycles instead of the empty state when cycles exist', () => {
@@ -201,6 +224,7 @@ describe('Cycles: the disabled primary explains itself (#1090)', () => {
 
     expect(screen.getByText('flow.cycles.newCycleGate')).toBeInTheDocument();
     expect(screen.getByText('flow.cycles.newCycle').closest('button')).toBeDisabled();
+    expect(screen.queryByText('flow.cycles.createFirst')).not.toBeInTheDocument();
   });
 
   it('points the button at the reason for a screen reader', () => {

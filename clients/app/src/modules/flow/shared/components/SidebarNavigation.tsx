@@ -59,8 +59,8 @@ interface SidebarNavigationProps {
   update: (mutator: (draft: SidebarPreferences) => SidebarPreferences) => void;
   showPreviewRoutes: boolean;
   unreadNotifications: number;
-  myIssuesCount: number;
-  todayFocusCount: number;
+  myIssuesCount?: number;
+  todayFocusCount?: number;
   projects: ApiProject[];
   projectId?: string;
   myTasksProjectId?: string;
@@ -633,7 +633,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
     .filter((item): item is SidebarItemPreference =>
       Boolean(item && item.visible && isAvailable(item, showPreviewRoutes))
     );
-  const badges: Record<string, number> = {
+  const badges: Record<string, number | undefined> = {
     'builtin:inbox': unreadNotifications,
     'builtin:my-issues': myIssuesCount,
     'builtin:today': todayFocusCount,

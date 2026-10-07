@@ -42,7 +42,9 @@ const ProjectOverview: React.FC = () => {
   useProjectRealtime(projectId);
 
   const overviewQuery = useProjectOverview(projectId);
-  const { data, isLoading } = overviewQuery;
+  const { data } = overviewQuery;
+  const overviewFailed = hasQueryFailed(overviewQuery);
+  const isLoading = overviewQuery.isPending && !overviewFailed;
   const { projects, members } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
 
@@ -55,7 +57,7 @@ const ProjectOverview: React.FC = () => {
 
   // A failed overview leaves `data` undefined exactly as a missing project
   // does, so a 500 used to report the project as gone.
-  if (hasQueryFailed(overviewQuery)) {
+  if (overviewFailed) {
     return <ListLoadFailed onRetry={() => void overviewQuery.refetch()} />;
   }
 

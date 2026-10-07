@@ -9,7 +9,12 @@ vi.mock('react-i18next', () => ({
 const profileState = vi.hoisted(() => ({
   data: undefined as Record<string, unknown> | undefined,
   isLoading: false,
+  isPending: false,
+  isSuccess: false,
   isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
 }));
 
 vi.mock('@tanstack/react-query', () => ({
@@ -28,7 +33,11 @@ beforeEach(() => {
     publicProjects: [],
   };
   profileState.isLoading = false;
+  profileState.isPending = false;
+  profileState.isSuccess = true;
   profileState.isError = false;
+  profileState.isPaused = false;
+  profileState.failureCount = 0;
 });
 
 describe('Profile identity header (#1095)', () => {
@@ -48,6 +57,16 @@ describe('Profile identity header (#1095)', () => {
     render(<Profile userId="9" />);
     const role = screen.getByText('Site foreman');
     expect(role.className).toContain('text-flow-body');
+  });
+
+  it('shows retry rather than calling a failed profile request not found', () => {
+    profileState.data = undefined;
+    profileState.isError = true;
+    profileState.isSuccess = false;
+    render(<Profile userId="9" />);
+
+    expect(screen.getByText('flow.loadFailed.title')).toBeInTheDocument();
+    expect(screen.queryByText('flow.profile.notFound')).not.toBeInTheDocument();
   });
 });
 

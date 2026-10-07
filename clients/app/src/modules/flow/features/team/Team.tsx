@@ -17,7 +17,9 @@ const Team: React.FC = () => {
   const { t } = useTranslation();
   const openTask = useOpenTask();
   const teamQuery = useTeamWorkload();
-  const { data: members = [], isLoading } = teamQuery;
+  const { data: members = [] } = teamQuery;
+  const loadFailed = hasQueryFailed(teamQuery);
+  const isLoading = teamQuery.isPending && !loadFailed;
   const navigate = useNavigate();
 
   if (isLoading)
@@ -43,7 +45,7 @@ const Team: React.FC = () => {
       </div>
       <div className="p-6 max-w-4xl space-y-4">
         {/* A failed request and an empty team both left this region blank. */}
-        {hasQueryFailed(teamQuery) ? (
+        {loadFailed ? (
           <ListLoadFailed onRetry={() => void teamQuery.refetch()} />
         ) : members.length === 0 ? (
           <EmptyState

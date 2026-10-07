@@ -35,7 +35,9 @@ const BinSection = (): React.JSX.Element => {
   const purge = usePurgeProject();
 
   const archivedQuery = useArchivedProjects(1, PAGE_SIZE);
-  const { data, isLoading, refetch } = archivedQuery;
+  const { data, refetch } = archivedQuery;
+  const loadFailed = hasQueryFailed(archivedQuery);
+  const isLoading = archivedQuery.isPending && !loadFailed;
   const projects: Project[] = data?.projects ?? [];
   const total = data?.total ?? 0;
 
@@ -103,7 +105,7 @@ const BinSection = (): React.JSX.Element => {
             />
           ))}
         </div>
-      ) : hasQueryFailed(archivedQuery) ? (
+      ) : loadFailed ? (
         // A failed request emptied the bin exactly as an empty bin does, so a
         // 500 told the user nothing was archived when something might be.
         <ListLoadFailed onRetry={() => void refetch()} />

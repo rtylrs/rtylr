@@ -301,7 +301,11 @@ const ProjectList: React.FC = () => {
     return blocks;
   }, [projectSections, projectTasks, t]);
 
-  if ((projectLoading && !project) || tasksQuery.isLoading || columnsQuery.isLoading) {
+  if (
+    (projectLoading && !project) ||
+    (tasksQuery.isPending && !hasQueryFailed(tasksQuery)) ||
+    (columnsQuery.isPending && !hasQueryFailed(columnsQuery))
+  ) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
         {t('flow.project.loading')}

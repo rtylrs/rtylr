@@ -8,11 +8,13 @@ vi.mock('@voxire/components', () => ({
 
 const refetchFeedback = vi.fn();
 const feedbackList: unknown[] = [];
+const feedbackState = { isError: false };
 
 vi.mock('../../shared/hooks/queries/useFeedback', () => ({
   useListFeedback: () => ({
     data: feedbackList,
     isLoading: false,
+    isError: feedbackState.isError,
     refetch: refetchFeedback,
   }),
 }));
@@ -25,6 +27,7 @@ function renderFeedback(): void {
 
 beforeEach(() => {
   refetchFeedback.mockClear();
+  feedbackState.isError = false;
 });
 
 describe('Feedback empty state', () => {
@@ -36,6 +39,17 @@ describe('Feedback empty state', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
 
+    expect(refetchFeedback).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a load error instead of treating a failed request as an empty list', () => {
+    feedbackState.isError = true;
+
+    renderFeedback();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    expect(screen.queryByText('crm.feedback.empty')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
     expect(refetchFeedback).toHaveBeenCalledTimes(1);
   });
 });

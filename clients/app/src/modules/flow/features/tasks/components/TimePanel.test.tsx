@@ -15,6 +15,7 @@ const timeLogsState = vi.hoisted(() => ({
   value: {
     data: undefined as { timeLogs: ApiTimeLog[] } | undefined,
     isLoading: false,
+    isPending: false,
     isError: false,
     refetch,
   },
@@ -73,14 +74,26 @@ function renderPanel(props: Partial<React.ComponentProps<typeof TimePanel>> = {}
 
 beforeEach(() => {
   vi.clearAllMocks();
-  timeLogsState.value = { data: undefined, isLoading: false, isError: false, refetch };
+  timeLogsState.value = {
+    data: undefined,
+    isLoading: false,
+    isPending: false,
+    isError: false,
+    refetch,
+  };
   logTimeState.value = { mutate: logTimeMutate, isPending: false, variables: undefined };
   useTimeSettingsStore.setState({ ...DEFAULT_TIME_SETTINGS });
 });
 
 describe('TimePanel: loading', () => {
   it('holds the panel height with shimmer rows rather than a spinner that collapses it', () => {
-    timeLogsState.value = { data: undefined, isLoading: true, isError: false, refetch };
+    timeLogsState.value = {
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isError: false,
+      refetch,
+    };
 
     const { container } = renderPanel();
 

@@ -4,15 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiMilestone } from '../../shared/services/flowApi';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 export function useMilestones(projectId?: string) {
   return useQuery<ApiMilestone[]>({
     queryKey: projectId === undefined ? ['milestones'] : ['milestones', projectId],
     queryFn: async () => {
       const res = await unwrap(flowApi.getMilestones(projectId));
-      if (Array.isArray(res)) return res;
-      const wrapped = res as { milestones?: ApiMilestone[] };
-      return wrapped.milestones ?? [];
+      return unwrapListResponse<ApiMilestone>(res, 'milestones');
     },
     enabled: projectId !== '',
   });

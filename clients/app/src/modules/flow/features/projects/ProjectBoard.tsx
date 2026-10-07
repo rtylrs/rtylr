@@ -208,7 +208,7 @@ const ProjectBoard: React.FC = () => {
     void tasksQuery.refetch();
   };
   const columnsQuery = useProjectColumns(projectId);
-  const { data: columns = [], isLoading: columnsLoading } = columnsQuery;
+  const { data: columns = [] } = columnsQuery;
   const createColumn = useCreateColumn(projectId);
   const updateColumn = useUpdateColumn(projectId);
   const deleteColumn = useDeleteColumn(projectId);
@@ -384,7 +384,10 @@ const ProjectBoard: React.FC = () => {
     setAddingColumn(false);
   };
 
-  if (columnsLoading || tasksQuery.isLoading) {
+  if (
+    (columnsQuery.isPending && !hasQueryFailed(columnsQuery)) ||
+    (tasksQuery.isPending && !hasQueryFailed(tasksQuery))
+  ) {
     return (
       <div className="flex flex-col h-full">
         <ProjectViewTabs

@@ -20,8 +20,9 @@ const Archive: React.FC = () => {
   const openTask = useOpenTask();
   const navigate = useNavigate();
   const tasksQuery = useTasks({ activeOnly: false });
-  const { data: apiTasks = [], isLoading } = tasksQuery;
+  const { data: apiTasks = [] } = tasksQuery;
   const loadFailed = hasQueryFailed(tasksQuery);
+  const isLoading = tasksQuery.isPending && !loadFailed;
   // The count and the empty state both assert a fact. apiTasks is [] until the
   // query resolves, so before this the screen said "0 archived tasks" and
   // "Nothing archived" while archived tasks existed.

@@ -18,6 +18,7 @@ import { segmentSchema } from '../../schemas/segments';
 import type { Segment } from '../../schemas/segments';
 import { customerSchema } from '../../schemas/customers';
 import type { Customer } from '../../schemas/customers';
+import { unwrapList } from '../../lib/unwrapList';
 
 const segmentClient = createOneKitClient(SegmentServiceClient, 'crm');
 
@@ -61,7 +62,9 @@ export function parseSegmentCustomersPage(
   },
   requestedPage: number
 ): SegmentCustomersPage {
-  const customers = (response.customers ?? []).map(fromApiSegmentCustomer);
+  const customers = unwrapList<ApiSegmentCustomer>(response, 'customers').map(
+    fromApiSegmentCustomer
+  );
   const page = positiveNumber(response.page, requestedPage);
   const pageSize = positiveNumber(response.pageSize, SEGMENT_CUSTOMERS_PAGE_SIZE);
   const total = positiveNumber(response.total, customers.length);
@@ -107,7 +110,7 @@ export const useListSegments = (): UseQueryResult<Segment[]> =>
     queryFn: async (): Promise<Segment[]> => {
       const res = await segmentClient.listSegments({});
       return z.array(segmentSchema).parse(
-        (res.segments ?? []).map((s) => {
+        unwrapList<ApiSegment>(res, 'segments').map((s) => {
           const segment = fromApiSegment(s);
           return { ...segment, rules: filtersToRules(segment.filters) };
         })

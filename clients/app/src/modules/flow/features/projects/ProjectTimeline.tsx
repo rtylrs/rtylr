@@ -12,6 +12,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 
 /**
  * ProjectTimeline - a lightweight Gantt-style view. Each task is drawn as
@@ -34,7 +35,10 @@ const ProjectTimeline: React.FC = () => {
     loadFailed: projectLoadFailed,
     refetch: refetchProjects,
   } = useCurrentProject(projectId);
-  const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
+  const tasksQuery = useTasks({ projectId, activeOnly: true, compact: true });
+  const { data: apiTasks = [] } = tasksQuery;
+  const tasksLoadFailed = hasQueryFailed(tasksQuery);
+  const tasksLoading = tasksQuery.isPending && !tasksLoadFailed;
 
   // Derive a 30-day horizon anchored on the earliest task start (or today)
   // so the bars render at reasonable zoom.
@@ -66,8 +70,23 @@ const ProjectTimeline: React.FC = () => {
   // A failed request is not a missing project, and the sentence has to differ:
   // this branch used to render the hardcoded English "Project not found." for
   // both, so a 500 told the user their project had gone.
-  if (projectLoadFailed) {
-    return <ListLoadFailed onRetry={() => void refetchProjects()} />;
+  if (projectLoadFailed || tasksLoadFailed) {
+    return (
+      <ListLoadFailed
+        onRetry={() => {
+          void refetchProjects();
+          void tasksQuery.refetch();
+        }}
+      />
+    );
+  }
+
+  if (tasksLoading) {
+    return (
+      <div role="status" className="p-6 text-sm" style={{ color: 'var(--flow-text-muted)' }}>
+        {t('flowCommon.loading')}
+      </div>
+    );
   }
 
   if (!project) {

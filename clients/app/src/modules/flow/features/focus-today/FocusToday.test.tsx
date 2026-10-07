@@ -22,6 +22,7 @@ vi.mock('@tanstack/react-router', () => ({
 const myIssuesState = vi.hoisted(() => ({
   data: [] as ApiTask[],
   isLoading: false,
+  isPending: false,
   isError: false,
   isPaused: false,
   failureCount: 0,
@@ -52,6 +53,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   myIssuesState.data = [];
   myIssuesState.isLoading = false;
+  myIssuesState.isPending = false;
   myIssuesState.isError = false;
   myIssuesState.isPaused = false;
   myIssuesState.failureCount = 0;
@@ -81,6 +83,7 @@ describe('FocusToday when My Tasks cannot load', () => {
 
   it('does not claim an empty day while the first load is in flight', () => {
     myIssuesState.isLoading = true;
+    myIssuesState.isPending = true;
 
     render(<FocusToday />);
 

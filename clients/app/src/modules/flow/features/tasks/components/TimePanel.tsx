@@ -4,6 +4,7 @@ import { Timer, Trash2, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@voxire/ui';
 import { useTimeLogs, useLogTime, useDeleteTimeLog } from '../useTimeLogs';
+import { hasQueryFailed } from '../../../shared/lib/queryFailureUtils';
 import { useFlowTeam } from '../../../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../../../shared/lib/memberUtils';
 import { formatEntryTimestamp, todayIso } from '../../../shared/lib/dateUtils';
@@ -46,7 +47,10 @@ const TimePanel = ({
   currentUserId,
 }: TimePanelProps): React.JSX.Element => {
   const { t, i18n } = useTranslation();
-  const { data, isLoading, isError, refetch } = useTimeLogs(taskId);
+  const timeLogsQuery = useTimeLogs(taskId);
+  const { data, refetch } = timeLogsQuery;
+  const isError = hasQueryFailed(timeLogsQuery);
+  const isLoading = timeLogsQuery.isPending && !isError;
   const logTime = useLogTime();
   const deleteTimeLog = useDeleteTimeLog();
   const { data: team } = useFlowTeam();

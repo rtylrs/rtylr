@@ -8,6 +8,7 @@ import { EmptyState } from '@voxire/ui';
 import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, Button, SkeletonList } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 interface RewardForm {
   name: string;
@@ -177,7 +178,10 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 const LoyaltyRewards: React.FC = () => {
   const { t } = useTranslation();
   const canConfigureLoyalty = canCrmPermission('crm:loyalty:manage');
-  const { data: fetched, isLoading, refetch } = useLoyaltyRewards();
+  const rewardsQuery = useLoyaltyRewards();
+  const { data: fetched, refetch } = rewardsQuery;
+  const isError = hasQueryFailed(rewardsQuery);
+  const isLoading = rewardsQuery.isPending && !isError;
   const rewards = fetched ?? [];
   const [showAdd, setShowAdd] = useState(false);
 
@@ -207,6 +211,17 @@ const LoyaltyRewards: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError ? (
+          <Card>
+            <div role="alert">
+              <EmptyState
+                icon={Gift}
+                title={t('crmErrors.generic')}
+                description={t('crmErrors.refreshAndTryAgain')}
+                action={{ label: t('crm.actions.refresh'), onClick: () => void refetch() }}
+              />
+            </div>
           </Card>
         ) : rewards.length === 0 ? (
           <Card>

@@ -5,10 +5,14 @@ import { MessageSquare, Star } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useListFeedback } from '../../shared/hooks/queries/useFeedback';
 import { PageHeader, Card, SkeletonList } from '../../shared/components/ui';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const Feedback: React.FC = () => {
   const { t } = useTranslation();
-  const { data: fetched, isLoading, refetch } = useListFeedback();
+  const feedbackQuery = useListFeedback();
+  const { data: fetched, refetch } = feedbackQuery;
+  const isError = hasQueryFailed(feedbackQuery);
+  const isLoading = feedbackQuery.isPending && !isError;
   const feedback = fetched ?? [];
 
   const npsResponses = feedback.filter((f) => f.type === 'nps');
@@ -25,97 +29,112 @@ const Feedback: React.FC = () => {
     <>
       <HelmetContainer title={`${t('crm.feedback.pageTitle')} · rtylr`} />
       <div style={{ maxWidth: '1100px' }}>
-        <PageHeader title={t('crm.feedback.title')} subtitle={`${feedback.length} responses`} />
+        <PageHeader
+          title={t('crm.feedback.title')}
+          subtitle={
+            isError
+              ? t('crmErrors.refreshAndTryAgain')
+              : isLoading
+                ? t('crmCommon.loading')
+                : `${feedback.length} responses`
+          }
+        />
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '12px',
-            marginBottom: '20px',
-          }}
-        >
-          <Card>
-            <div
-              style={{
-                fontSize: '10px',
-                color: 'var(--hub-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 700,
-              }}
-            >
-              {t('crm.feedback.npsScore')}
-            </div>
-            <div
-              style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                color: nps >= 50 ? '#10b981' : nps >= 0 ? '#f59e0b' : '#ef4444',
-                marginTop: '4px',
-              }}
-            >
-              {nps}
-            </div>
-          </Card>
-          <Card>
-            <div
-              style={{
-                fontSize: '10px',
-                color: 'var(--hub-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 700,
-              }}
-            >
-              {t('crm.feedback.avgRating')}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-              <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--hub-text)' }}>
-                {avgRating.toFixed(1)}
-              </span>
-              <Star size={18} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-            </div>
-          </Card>
-          <Card>
-            <div
-              style={{
-                fontSize: '10px',
-                color: 'var(--hub-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 700,
-              }}
-            >
-              {t('crm.feedback.promoters')}
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 700, color: '#10b981', marginTop: '4px' }}>
-              {promoters}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {Math.round((promoters / npsTotal) * 100)}% of nps responses
-            </div>
-          </Card>
-          <Card>
-            <div
-              style={{
-                fontSize: '10px',
-                color: 'var(--hub-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 700,
-              }}
-            >
-              {t('crm.feedback.detractors')}
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 700, color: '#ef4444', marginTop: '4px' }}>
-              {detractors}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {Math.round((detractors / npsTotal) * 100)}% of nps responses
-            </div>
-          </Card>
-        </div>
+        {!isError && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '12px',
+              marginBottom: '20px',
+            }}
+          >
+            <Card>
+              <div
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 700,
+                }}
+              >
+                {t('crm.feedback.npsScore')}
+              </div>
+              <div
+                style={{
+                  fontSize: '28px',
+                  fontWeight: 700,
+                  color: nps >= 50 ? '#10b981' : nps >= 0 ? '#f59e0b' : '#ef4444',
+                  marginTop: '4px',
+                }}
+              >
+                {nps}
+              </div>
+            </Card>
+            <Card>
+              <div
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 700,
+                }}
+              >
+                {t('crm.feedback.avgRating')}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--hub-text)' }}>
+                  {avgRating.toFixed(1)}
+                </span>
+                <Star size={18} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
+              </div>
+            </Card>
+            <Card>
+              <div
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 700,
+                }}
+              >
+                {t('crm.feedback.promoters')}
+              </div>
+              <div
+                style={{ fontSize: '28px', fontWeight: 700, color: '#10b981', marginTop: '4px' }}
+              >
+                {promoters}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                {Math.round((promoters / npsTotal) * 100)}% of nps responses
+              </div>
+            </Card>
+            <Card>
+              <div
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 700,
+                }}
+              >
+                {t('crm.feedback.detractors')}
+              </div>
+              <div
+                style={{ fontSize: '28px', fontWeight: 700, color: '#ef4444', marginTop: '4px' }}
+              >
+                {detractors}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                {Math.round((detractors / npsTotal) * 100)}% of nps responses
+              </div>
+            </Card>
+          </div>
+        )}
 
         <Card padded={false}>
           <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--hub-border)' }}>
@@ -132,7 +151,16 @@ const Feedback: React.FC = () => {
               {t('crm.feedback.recentReviews')}
             </h4>
           </div>
-          {isLoading ? (
+          {isError ? (
+            <div role="alert">
+              <EmptyState
+                icon={MessageSquare}
+                title={t('crmErrors.generic')}
+                description={t('crmErrors.refreshAndTryAgain')}
+                action={{ label: t('crm.actions.refresh'), onClick: () => void refetch() }}
+              />
+            </div>
+          ) : isLoading ? (
             <div style={{ padding: '16px' }}>
               <SkeletonList count={5} />
             </div>

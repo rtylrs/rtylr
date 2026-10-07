@@ -31,6 +31,7 @@ import {
 import { ConfirmModal } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
 import { canEditCampaign, hasVerifiedCampaignAudience } from './campaignActions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const ACCENT = 'var(--crm-accent)';
 
@@ -435,14 +436,13 @@ const Campaigns: React.FC = () => {
   // Set once a "Load more" page comes back empty.
   const [exhausted, setExhausted] = useState(false);
   const [loadedCampaigns, setLoadedCampaigns] = useState<CampaignPayload[]>([]);
-  const {
-    data: fetchedCampaigns,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-  } = useListCampaigns(pageSize, offset);
-  const { data: fetchedSegments, error: segmentsError } = useListSegments();
+  const campaignsQuery = useListCampaigns(pageSize, offset);
+  const { data: fetchedCampaigns, isFetching, refetch } = campaignsQuery;
+  const isError = hasQueryFailed(campaignsQuery);
+  const campaignsLoading = campaignsQuery.isPending && !isError;
+  const segmentsQuery = useListSegments();
+  const { data: fetchedSegments } = segmentsQuery;
+  const segmentsError = hasQueryFailed(segmentsQuery);
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
   const resetPagination = (): void => {
@@ -663,7 +663,7 @@ const Campaigns: React.FC = () => {
               </button>
             </div>
           )}
-          {isLoading && campaigns.length === 0 && (
+          {campaignsLoading && campaigns.length === 0 && (
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
               Loading campaigns…
             </div>
@@ -686,7 +686,7 @@ const Campaigns: React.FC = () => {
               />
             ))}
           </AnimatePresence>
-          {filtered.length === 0 && !isLoading && !isError && (
+          {filtered.length === 0 && !campaignsLoading && !isError && (
             <EmptyState
               icon={Megaphone}
               title={

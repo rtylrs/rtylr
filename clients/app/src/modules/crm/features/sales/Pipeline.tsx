@@ -9,6 +9,7 @@ import { usePipeline, useLeads } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
 import CreateLeadModal from './components/CreateLeadModal';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 // Ids only: evaluated at module load, before i18next has a language. Labels
 // come from crm.leadStages.<id>, shared with LeadDetail and CreateLeadModal.
@@ -155,22 +156,17 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
 const Pipeline: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const {
-    data: pipelineCols,
-    isLoading: pipelineLoading,
-    isError: pipelineError,
-    refetch: refetchPipeline,
-  } = usePipeline();
+  const pipelineQuery = usePipeline();
+  const { data: pipelineCols, refetch: refetchPipeline } = pipelineQuery;
+  const pipelineError = hasQueryFailed(pipelineQuery);
+  const pipelineLoading = pipelineQuery.isPending && !pipelineError;
   const [leadOffset, setLeadOffset] = useState(0);
   const [exhausted, setExhausted] = useState(false);
   const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
-  const {
-    data: fetchedLeads,
-    isLoading: leadsLoading,
-    isFetching: leadsFetching,
-    isError: leadsError,
-    refetch: refetchLeads,
-  } = useLeads(LEADS_PAGE_SIZE, leadOffset);
+  const leadsQuery = useLeads(LEADS_PAGE_SIZE, leadOffset);
+  const { data: fetchedLeads, isFetching: leadsFetching, refetch: refetchLeads } = leadsQuery;
+  const leadsError = hasQueryFailed(leadsQuery);
+  const leadsLoading = leadsQuery.isPending && !leadsError;
   const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {

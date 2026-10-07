@@ -12,6 +12,7 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { startOfWeek, endOfWeek } from '../../shared/lib/dateUtils';
 import { todayLocalDate, useTeamWorkDays } from './useWorkDay';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 
 interface PersonTotals {
   clockedMinutes: number;
@@ -35,10 +36,14 @@ const TimeReports = (): React.JSX.Element => {
   }, [today, weekStart]);
 
   const membersQuery = useFlowTeam();
-  const { data: allMembers = [], isLoading: membersLoading } = membersQuery;
+  const { data: allMembers = [] } = membersQuery;
+  const membersFailed = hasQueryFailed(membersQuery);
+  const membersLoading = membersQuery.isPending && !membersFailed;
   const members = useMemo(() => allMembers.filter((m) => m.hasFlowAccess), [allMembers]);
   const daysQuery = useTeamWorkDays(from, to);
-  const { data, isLoading, isError, error } = daysQuery;
+  const { data, error } = daysQuery;
+  const daysFailed = hasQueryFailed(daysQuery);
+  const isLoading = daysQuery.isPending && !daysFailed;
   const accessDenied =
     typeof error === 'object' &&
     error !== null &&
@@ -112,7 +117,7 @@ const TimeReports = (): React.JSX.Element => {
           </p>
         </header>
 
-        {isError || membersQuery.isError ? (
+        {daysFailed || membersFailed ? (
           accessDenied ? (
             <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-flow-body" />
           ) : (

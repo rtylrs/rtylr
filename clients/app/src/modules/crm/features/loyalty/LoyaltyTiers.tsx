@@ -4,10 +4,12 @@ import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { Award, Check, Pencil, X } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useLoyaltyTiers, useUpsertTier } from '../../shared/hooks/queries/useLoyalty';
 import { type LoyaltyTier } from '../../shared/schemas/loyalty';
 import { PageHeader, Card, SkeletonList } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 interface TierEditFormProps {
   tier: LoyaltyTier;
@@ -162,7 +164,10 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
 const LoyaltyTiers: React.FC = () => {
   const { t } = useTranslation();
   const canConfigureLoyalty = canCrmPermission('crm:loyalty:manage');
-  const { data: fetched, isLoading } = useLoyaltyTiers();
+  const tiersQuery = useLoyaltyTiers();
+  const { data: fetched, refetch } = tiersQuery;
+  const isError = hasQueryFailed(tiersQuery);
+  const isLoading = tiersQuery.isPending && !isError;
   const tiers = (fetched ?? []).sort((a, b) => a.threshold - b.threshold);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -178,6 +183,17 @@ const LoyaltyTiers: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError ? (
+          <Card>
+            <div role="alert">
+              <EmptyState
+                icon={Award}
+                title={t('crmErrors.generic')}
+                description={t('crmErrors.refreshAndTryAgain')}
+                action={{ label: t('crm.actions.refresh'), onClick: () => void refetch() }}
+              />
+            </div>
           </Card>
         ) : (
           <div

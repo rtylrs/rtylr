@@ -16,6 +16,7 @@ import { useTemplates } from '../../shared/hooks/queries/useTemplates';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { EmailEditor } from '../../shared/components/crm';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
@@ -35,8 +36,12 @@ const EmailCampaign: React.FC = () => {
   const update = useUpdateCampaign();
   const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
-  const { data: fetchedSegments } = useListSegments();
-  const { data: fetchedTemplates } = useTemplates();
+  const segmentsQuery = useListSegments();
+  const templatesQuery = useTemplates();
+  const segmentsFailed = hasQueryFailed(segmentsQuery);
+  const templatesFailed = hasQueryFailed(templatesQuery);
+  const { data: fetchedSegments } = segmentsQuery;
+  const { data: fetchedTemplates } = templatesQuery;
   const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const templates = (fetchedTemplates ?? []).filter((template) => template.channel === 'email');
 
@@ -166,7 +171,15 @@ const EmailCampaign: React.FC = () => {
                 <Button
                   variant="primary"
                   onClick={() => handleSave(true)}
-                  disabled={pending || !name.trim() || !subject.trim()}
+                  disabled={
+                    pending ||
+                    !name.trim() ||
+                    !subject.trim() ||
+                    segmentsFailed ||
+                    segmentsQuery.isPending ||
+                    !fetchedSegments ||
+                    !segmentId
+                  }
                 >
                   <Send size={13} />
                   {pending ? 'Activating…' : 'Save & activate'}
@@ -213,6 +226,16 @@ const EmailCampaign: React.FC = () => {
                     </option>
                   ))}
                 </Select>
+                {templatesFailed && (
+                  <div role="alert" style={{ marginTop: '8px', fontSize: '12px' }}>
+                    <span style={{ color: 'var(--hub-text-muted)' }}>
+                      {t('crmErrors.generic')}{' '}
+                    </span>
+                    <Button variant="outline" onClick={() => void templatesQuery.refetch()}>
+                      {t('crm.actions.refresh')}
+                    </Button>
+                  </div>
+                )}
               </div>
               <EmailEditor
                 subject={subject}
@@ -246,6 +269,14 @@ const EmailCampaign: React.FC = () => {
                   </option>
                 ))}
               </Select>
+              {segmentsFailed && (
+                <div role="alert" style={{ marginTop: '8px', fontSize: '12px' }}>
+                  <span style={{ color: 'var(--hub-text-muted)' }}>{t('crmErrors.generic')} </span>
+                  <Button variant="outline" onClick={() => void segmentsQuery.refetch()}>
+                    {t('crm.actions.refresh')}
+                  </Button>
+                </div>
+              )}
               {segment && (
                 <div
                   style={{

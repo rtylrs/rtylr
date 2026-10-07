@@ -25,6 +25,7 @@ vi.mock('../../shared/components/TaskRow', () => ({
 const tasksState = vi.hoisted(() => ({
   data: undefined as unknown[] | undefined,
   isLoading: false,
+  isPending: false,
   isError: false,
   isPaused: false,
   failureCount: 0,
@@ -51,6 +52,7 @@ function apiTask(over: Record<string, unknown> = {}): Record<string, unknown> {
 beforeEach(() => {
   tasksState.data = undefined;
   tasksState.isLoading = false;
+  tasksState.isPending = false;
   tasksState.isError = false;
   tasksState.isPaused = false;
   tasksState.failureCount = 0;
@@ -63,6 +65,7 @@ describe('Triage does not claim inbox zero before the query ran (#1084)', () => 
     // needsTriage was empty and the screen said "Inbox zero" and "0 tasks
     // need attention" with three untriaged tasks in the project.
     tasksState.isLoading = true;
+    tasksState.isPending = true;
     render(<Triage />);
 
     expect(screen.queryByText('flow.triage.emptyTitle')).not.toBeInTheDocument();
@@ -110,6 +113,7 @@ describe('Triage does not claim inbox zero before the query ran (#1084)', () => 
 
   it('explains what triage means whatever the state', () => {
     tasksState.isLoading = true;
+    tasksState.isPending = true;
     render(<Triage />);
     expect(screen.getByText('flow.triage.explanation')).toBeInTheDocument();
   });

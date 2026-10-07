@@ -23,19 +23,27 @@ const Cycles: React.FC = () => {
   // Cycles belong to a project on v2, and this screen is business-level, so it
   // asks which project to show. Defaults to the first rather than rendering an
   // empty board with no explanation.
-  const { data: projects = [] } = useProjects();
+  const projectsQuery = useProjects();
+  const { data: projects = [] } = projectsQuery;
+  const projectsLoadFailed = hasQueryFailed(projectsQuery);
   const [projectId, setProjectId] = useState('');
   const selectedProjectId = projectId || projects[0]?.id || '';
   const cyclesQuery = useCycles(selectedProjectId || undefined);
   const { data: cycles = [] } = cyclesQuery;
   const loadFailed = hasQueryFailed(cyclesQuery);
   const isLoading =
-    cyclesQuery.isLoading || (Boolean(selectedProjectId) && cyclesQuery.isPending && !loadFailed);
+    projectsQuery.isPending ||
+    cyclesQuery.isLoading ||
+    (Boolean(selectedProjectId) && cyclesQuery.isPending && !loadFailed);
   const createCycle = useCreateCycle();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newStart, setNewStart] = useState('');
   const [newEnd, setNewEnd] = useState('');
+
+  if (projectsLoadFailed) {
+    return <ListLoadFailed onRetry={() => void projectsQuery.refetch()} />;
+  }
 
   if (isLoading)
     return (
@@ -226,10 +234,14 @@ const Cycles: React.FC = () => {
             icon={Timer}
             title={t('flow.cycles.emptyTitle')}
             description={t('flow.cycles.emptyDescription')}
-            action={{
-              label: t('flow.cycles.createFirst'),
-              onClick: () => setShowCreate(true),
-            }}
+            action={
+              selectedProjectId
+                ? {
+                    label: t('flow.cycles.createFirst'),
+                    onClick: () => setShowCreate(true),
+                  }
+                : undefined
+            }
           />
         </div>
       ) : (

@@ -20,14 +20,15 @@ const DIR = __dirname;
 describe('a failed project load is not a missing project', () => {
   it('useCurrentProject reports the failure separately from the data', () => {
     const source = fs.readFileSync(path.join(DIR, 'useCurrentProject.ts'), 'utf8');
-    expect(source).toContain('loadFailed: hasQueryFailed(projectsQuery)');
+    expect(source).toContain('const loadFailed = hasQueryFailed(projectsQuery)');
+    expect(source).toContain('loadFailed,');
     expect(source).toContain('refetch: projectsQuery.refetch');
   });
 
   it.each(SCREENS)('%s renders the failure notice rather than a not-found line', (screen) => {
     const source = fs.readFileSync(path.join(DIR, screen), 'utf8');
-    expect(source).toContain('if (projectLoadFailed)');
-    expect(source).toContain('<ListLoadFailed onRetry=');
+    expect(source).toContain('if (projectLoadFailed || tasksLoadFailed)');
+    expect(source).toContain('<ListLoadFailed');
   });
 
   it.each(SCREENS)('%s no longer hardcodes the English sentence', (screen) => {
@@ -47,6 +48,8 @@ describe('a failed project load is not a missing project', () => {
     // Order matters: with `!project` first, a failure would still take the
     // not-found path, because a failed request also leaves project undefined.
     const source = fs.readFileSync(path.join(DIR, screen), 'utf8');
-    expect(source.indexOf('if (projectLoadFailed)')).toBeLessThan(source.indexOf('if (!project)'));
+    expect(source.indexOf('if (projectLoadFailed || tasksLoadFailed)')).toBeLessThan(
+      source.indexOf('if (!project)')
+    );
   });
 });

@@ -24,6 +24,7 @@ import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
 import { customersToCsv } from './customerExport';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const ACCENT = 'var(--crm-accent)';
 
@@ -116,17 +117,14 @@ const Customers: React.FC = () => {
 
   // NOTE: search is intentionally synchronous (no debounce) — the empty-state
   // UX reflects the query term immediately and is covered by tests.
-  const {
-    data: fetchedCustomers,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-  } = useListCustomers({
+  const customersQuery = useListCustomers({
     limit: pageSize,
     offset,
     search: search.trim() || undefined,
   });
+  const { data: fetchedCustomers, isFetching, refetch } = customersQuery;
+  const customersLoadFailed = hasQueryFailed(customersQuery);
+  const customersLoading = customersQuery.isPending && !customersLoadFailed;
   const update = useUpdateCustomer();
   const { data: loyaltyConfig } = useLoyaltyConfig();
   const thresholds = thresholdsFromConfig(loyaltyConfig);
@@ -149,7 +147,7 @@ const Customers: React.FC = () => {
   const customers = loadedCustomers;
   const hasMore = !exhausted && fetchedCustomers?.length === pageSize;
 
-  if (isError && customers.length === 0) {
+  if (customersLoadFailed && customers.length === 0) {
     return (
       <div role="alert" className="space-y-4 py-10">
         <p>{t('crm.customers.loadFailed')}</p>
@@ -402,7 +400,7 @@ const Customers: React.FC = () => {
             overflow: 'hidden',
           }}
         >
-          {isLoading && customers.length === 0 ? (
+          {customersLoading && customers.length === 0 ? (
             <div style={{ padding: '16px' }}>
               <SkeletonList count={6} />
             </div>

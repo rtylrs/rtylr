@@ -43,6 +43,7 @@ import {
 import { useSupportEngagement } from '../../shared/hooks/queries/useSupportEngagement';
 import { useCustomerOutstandingBalance } from '../../shared/hooks/queries/useCustomerOutstandingBalance';
 import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -55,9 +56,13 @@ const CustomerProfile: React.FC = () => {
   const canDeleteCustomer = canCrmPermission('crm:customers:delete');
   const customerId = Number(id);
 
-  const { data: fetched, isLoading, isError } = useGetCustomerFull(customerId);
+  const customerQuery = useGetCustomerFull(customerId);
+  const { data: fetched } = customerQuery;
+  const customerLoadFailed = hasQueryFailed(customerQuery);
+  const customerLoading = customerQuery.isPending && !customerLoadFailed;
   const [timelineCursor, setTimelineCursor] = useState<string>();
-  const { data: fetchedTimeline } = useCustomerTimeline(customerId, timelineCursor);
+  const timelineQuery = useCustomerTimeline(customerId, timelineCursor);
+  const { data: fetchedTimeline } = timelineQuery;
   const [timelineEntries, setTimelineEntries] = useState<
     NonNullable<typeof fetchedTimeline>['entries']
   >([]);
@@ -96,7 +101,7 @@ const CustomerProfile: React.FC = () => {
   }, [customerId]);
   const timeline = timelineEntries;
 
-  if (isLoading) {
+  if (customerLoading) {
     return (
       <div style={{ maxWidth: '1100px' }}>
         <SkeletonList count={6} />
@@ -104,12 +109,23 @@ const CustomerProfile: React.FC = () => {
     );
   }
 
-  if (isError) {
+  if (customerLoadFailed) {
     return (
-      <div style={{ maxWidth: '1100px', textAlign: 'center', padding: '60px 20px' }}>
+      <div
+        role="alert"
+        style={{
+          maxWidth: '1100px',
+          textAlign: 'center',
+          padding: '60px 20px',
+          color: 'var(--hub-text-muted)',
+        }}
+      >
         <p style={{ fontSize: '14px', color: 'var(--hub-text-muted)' }}>
           {t('crm.customerProfile.loadFailed')}
         </p>
+        <Button variant="outline" onClick={() => void customerQuery.refetch()}>
+          {t('crm.actions.retry')}
+        </Button>
       </div>
     );
   }
@@ -496,6 +512,17 @@ const CustomerProfile: React.FC = () => {
               >
                 {t('crm.customerProfile.timeline')}
               </h4>
+              {hasQueryFailed(timelineQuery) && (
+                <div
+                  role="alert"
+                  style={{ marginBottom: '12px', fontSize: '13px', color: 'var(--hub-text-muted)' }}
+                >
+                  <span>{t('crmErrors.generic')} </span>
+                  <Button variant="outline" onClick={() => void timelineQuery.refetch()}>
+                    {t('crm.actions.refresh')}
+                  </Button>
+                </div>
+              )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {timeline.map((entry) => (
                   <TimelineEntryRow key={entry.id} entry={entry} />

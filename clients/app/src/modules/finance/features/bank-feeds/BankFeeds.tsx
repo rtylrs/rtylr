@@ -38,7 +38,13 @@ const iconFor: Record<
 
 const BankFeeds: React.FC = () => {
   const { t } = useTranslation('financeCommon');
-  const { data: accounts = [], isLoading } = useBankAccounts();
+  const accountsQuery = useBankAccounts();
+  const {
+    data: accounts = [],
+    isLoading,
+    isError: accountsError,
+    refetch: refetchAccounts,
+  } = accountsQuery;
   const createAccount = useCreateBankAccount();
   const [selected, setSelected] = useState<string | undefined>();
   const [showConnect, setShowConnect] = useState(false);
@@ -99,10 +105,14 @@ const BankFeeds: React.FC = () => {
       <PageHeader
         title={t('financeBankAccounts.title')}
         subtitle={
-          <>
-            {accounts.length} connected accounts <>&middot;</> <MoneyDisplay amount={total} /> total
-            balance
-          </>
+          accountsError ? (
+            t('financeErrors.generic')
+          ) : (
+            <>
+              {accounts.length} connected accounts <>&middot;</> <MoneyDisplay amount={total} />{' '}
+              total balance
+            </>
+          )
         }
         actions={
           canManageAccounts ? (
@@ -116,6 +126,13 @@ const BankFeeds: React.FC = () => {
       {isLoading ? (
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
+        </div>
+      ) : accountsError ? (
+        <div role="alert" style={{ ...cardStyle, padding: 20, color: 'var(--hub-text-muted)' }}>
+          <p style={{ margin: '0 0 12px' }}>{t('financeErrors.generic')}</p>
+          <button type="button" style={ghostBtn} onClick={() => void refetchAccounts()}>
+            {t('financeCommon.refresh')}
+          </button>
         </div>
       ) : (
         <>

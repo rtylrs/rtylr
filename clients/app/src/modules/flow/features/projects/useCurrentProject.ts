@@ -9,7 +9,8 @@ export function useCurrentProject(projectId: string | undefined) {
     projectId ? s.projects.find((p) => p.id === projectId) : undefined
   );
   const projectsQuery = useProjects();
-  const { data: apiProjects = [], isLoading } = projectsQuery;
+  const { data: apiProjects = [] } = projectsQuery;
+  const loadFailed = hasQueryFailed(projectsQuery);
 
   const apiProject = useMemo(() => {
     if (!projectId) return undefined;
@@ -18,11 +19,11 @@ export function useCurrentProject(projectId: string | undefined) {
 
   return {
     project: storeProject ?? (apiProject ? apiProjectToProject(apiProject) : undefined),
-    isLoading,
+    isLoading: projectsQuery.isPending && !loadFailed,
     // Callers need to tell "no such project" from "the list never arrived".
     // Without this a failed request left `project` undefined once isLoading
     // cleared, and every consumer said "Project not found." for a 500.
-    loadFailed: hasQueryFailed(projectsQuery),
+    loadFailed,
     refetch: projectsQuery.refetch,
   };
 }

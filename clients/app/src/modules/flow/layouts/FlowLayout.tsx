@@ -59,9 +59,8 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
   const { data: personalProject } = useMyTasksProject({
     enabled: canFlowPermission('flow:tasks:view', user?.effectiveAccess),
   });
-  const { data: myTasks = [] } = useMyIssues(
-    canFlowPermission('flow:tasks:view', user?.effectiveAccess)
-  );
+  const myIssuesQuery = useMyIssues(canFlowPermission('flow:tasks:view', user?.effectiveAccess));
+  const { data: myTasks = [] } = myIssuesQuery;
   const { data: members } = useFlowTeam();
   const { data: capacity } = useMemberCapacityHours();
   const { data: notifications = [] } = useNotifications();
@@ -192,9 +191,11 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
         update={update}
         showPreviewRoutes={showPreviewRoutes}
         unreadNotifications={notifications.filter((notification) => !notification.read).length}
-        myIssuesCount={activeTasks.length}
+        myIssuesCount={myIssuesQuery.isError ? undefined : activeTasks.length}
         todayFocusCount={
-          activeTasks.filter((task) => task.focusPin || isDueToday(task.dueDate)).length
+          myIssuesQuery.isError
+            ? undefined
+            : activeTasks.filter((task) => task.focusPin || isDueToday(task.dueDate)).length
         }
         projects={projects ?? []}
         projectId={projectId}

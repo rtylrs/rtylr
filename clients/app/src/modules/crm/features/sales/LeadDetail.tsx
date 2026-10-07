@@ -38,6 +38,7 @@ import type {
   TouchpointOutcome,
   ContractPlan,
 } from '../../shared/hooks/queries/useSales';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 import {
   Button,
   Card,
@@ -80,6 +81,28 @@ const OUTCOME_ICONS: Record<TouchpointOutcome, React.ReactNode> = {
   no_answer: <MinusCircle size={12} />,
 };
 
+const InlineLoadError: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="alert"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '8px',
+        color: 'var(--hub-text-muted)',
+        fontSize: '12px',
+      }}
+    >
+      <span>{t('crmErrors.generic')}</span>
+      <Button variant="outline" onClick={onRetry}>
+        {t('crm.actions.retry')}
+      </Button>
+    </div>
+  );
+};
+
 function formatDate(iso: string): string {
   if (!iso) return '-';
   return new Date(iso).toLocaleDateString('en-US', {
@@ -95,10 +118,18 @@ const LeadDetail: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const { data: lead, isLoading: leadLoading } = useLead(leadId);
-  const { data: touchpoints } = useLeadTouchpoints(leadId);
-  const { data: contacts } = useContacts(leadId);
-  const { data: allContracts } = useContracts();
+  const leadQuery = useLead(leadId);
+  const touchpointsQuery = useLeadTouchpoints(leadId);
+  const contactsQuery = useContacts(leadId);
+  const contractsQuery = useContracts();
+  const { data: lead, isLoading: leadLoading } = leadQuery;
+  const { data: touchpoints } = touchpointsQuery;
+  const { data: contacts } = contactsQuery;
+  const { data: allContracts } = contractsQuery;
+  const leadFailed = hasQueryFailed(leadQuery);
+  const touchpointsFailed = hasQueryFailed(touchpointsQuery);
+  const contactsFailed = hasQueryFailed(contactsQuery);
+  const contractsFailed = hasQueryFailed(contractsQuery);
   const updateLead = useUpdateLead();
   const deleteLead = useDeleteLead();
   const createTouchpoint = useCreateTouchpoint();
@@ -239,6 +270,14 @@ const LeadDetail: React.FC = () => {
     return (
       <div style={{ padding: '24px' }}>
         <SkeletonList count={6} />
+      </div>
+    );
+  }
+
+  if (leadFailed) {
+    return (
+      <div style={{ padding: '24px', maxWidth: '520px' }}>
+        <InlineLoadError onRetry={() => void leadQuery.refetch()} />
       </div>
     );
   }
@@ -403,7 +442,10 @@ const LeadDetail: React.FC = () => {
 
             {/* Timeline */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {sortedTouchpoints.length === 0 && (
+              {touchpointsFailed && (
+                <InlineLoadError onRetry={() => void touchpointsQuery.refetch()} />
+              )}
+              {!touchpointsFailed && sortedTouchpoints.length === 0 && (
                 <div
                   style={{
                     background: 'var(--hub-card)',
@@ -688,7 +730,8 @@ const LeadDetail: React.FC = () => {
                 )}
               </AnimatePresence>
 
-              {(contacts ?? []).length === 0 && !contactOpen && (
+              {contactsFailed && <InlineLoadError onRetry={() => void contactsQuery.refetch()} />}
+              {!contactsFailed && (contacts ?? []).length === 0 && !contactOpen && (
                 <EmptyState
                   size="compact"
                   icon={UserPlus}
@@ -807,7 +850,7 @@ const LeadDetail: React.FC = () => {
                 >
                   {t('crm.leadDetail.contractTitle')}
                 </p>
-                {!contract && (
+                {!contract && contractsQuery.isSuccess && !contractsQuery.isFetching && (
                   <button
                     type="button"
                     aria-label={t('crm.leadDetail.addContractAria')}
@@ -831,7 +874,13 @@ const LeadDetail: React.FC = () => {
                 )}
               </div>
 
-              {contract ? (
+              {!contract && contractsFailed ? (
+                <InlineLoadError onRetry={() => void contractsQuery.refetch()} />
+              ) : !contract && contractsQuery.isLoading ? (
+                <p role="status" style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+                  {t('crmCommon.loading')}
+                </p>
+              ) : contract ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span

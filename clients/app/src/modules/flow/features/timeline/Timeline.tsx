@@ -7,6 +7,7 @@ import { useMilestones } from '../milestones/useMilestones';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import { apiProjectToProject } from '../../shared/lib/projectMapper';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 
 function parseDate(d: string): number {
   return new Date(d).getTime();
@@ -17,8 +18,11 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const Timeline: React.FC = () => {
   const { t, i18n } = useTranslation();
   const storeProjects = useFlowStore((s) => s.projects);
-  const { data: apiProjects } = useProjects();
-  const { data: apiMilestones } = useMilestones();
+  const projectsQuery = useProjects();
+  const { data: apiProjects } = projectsQuery;
+  const projectsLoadFailed = hasQueryFailed(projectsQuery);
+  const milestonesQuery = useMilestones();
+  const { data: apiMilestones } = milestonesQuery;
   // API rows carry dueDate and no progress, so they need the same mapping the
   // rest of Flow uses before their bar geometry and label can be read.
   const projects: Project[] = apiProjects ? apiProjects.map(apiProjectToProject) : storeProjects;
@@ -54,6 +58,40 @@ const Timeline: React.FC = () => {
           {t('flow.shell.timeline')}
         </h1>
       </div>
+      {projectsLoadFailed && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 px-6 py-3 text-flow-meta"
+          style={{ color: 'var(--flow-text-muted)', borderBottom: '1px solid var(--flow-border)' }}
+        >
+          <span>{t('flow.loadFailed.description')}</span>
+          <button
+            type="button"
+            onClick={() => void projectsQuery.refetch()}
+            className="flow-focus rounded-md px-3 py-1.5"
+            style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
+          >
+            {t('flow.loadFailed.retry')}
+          </button>
+        </div>
+      )}
+      {hasQueryFailed(milestonesQuery) && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 px-6 py-3 text-flow-meta"
+          style={{ color: 'var(--flow-text-muted)', borderBottom: '1px solid var(--flow-border)' }}
+        >
+          <span>{t('flow.loadFailed.description')}</span>
+          <button
+            type="button"
+            onClick={() => void milestonesQuery.refetch()}
+            className="flow-focus rounded-md px-3 py-1.5"
+            style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
+          >
+            {t('flow.loadFailed.retry')}
+          </button>
+        </div>
+      )}
       <div className="flex-1 overflow-auto">
         <div className="min-w-[1200px]">
           {/* Header row with dates */}

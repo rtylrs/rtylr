@@ -63,12 +63,12 @@ describe('useMilestones (remote mode)', () => {
     expect(result.current.data).toEqual(milestones);
   });
 
-  it('falls back to an empty array when the envelope has no milestones key', async () => {
+  it('fails when the envelope has no milestones key', async () => {
     (flowApi.getMilestones as unknown as Mock).mockResolvedValue({ unrelated: true });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useMilestones(), { wrapper });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual([]);
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toBeUndefined();
   });
 });
 

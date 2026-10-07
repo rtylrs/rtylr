@@ -10,6 +10,7 @@ import { useLeads, useDeleteLead } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList, ConfirmModal } from '../../shared/components/ui';
 import CreateLeadModal from './components/CreateLeadModal';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const STAGE_LABELS: Record<LeadStage, string> = {
   cold: 'Cold',
@@ -69,17 +70,15 @@ const Leads: React.FC = () => {
   // Set once a "Load more" page comes back empty.
   const [exhausted, setExhausted] = useState(false);
   const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
-  const {
-    data: fetchedLeads,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-  } = useLeads(pageSize, offset);
+  const leadsQuery = useLeads(pageSize, offset);
+  const { data: fetchedLeads, isFetching, refetch } = leadsQuery;
+  const isError = hasQueryFailed(leadsQuery);
+  const isLoading = leadsQuery.isPending && !isError;
   // Keep the first page mounted as a write sentinel. The create modal lives in
   // a child component, so this is how the list notices its cache invalidation
   // and rebuilds from page zero instead of merging a stale later page.
   const firstPageQuery = useLeads(pageSize, 0);
+  const firstPageFailed = hasQueryFailed(firstPageQuery);
   const firstPageRevisionRef = useRef<number | string | null>(null);
   const deleteLead = useDeleteLead();
 
@@ -108,14 +107,14 @@ const Leads: React.FC = () => {
   const firstPageSignature = firstPageLeads?.map((lead) => lead.id).join(',') ?? null;
   const firstPageRevision = firstPageQuery.dataUpdatedAt ?? firstPageSignature;
   useEffect(() => {
-    if (!firstPageLeads || firstPageRevision === null) return;
+    if (!firstPageLeads || firstPageRevision === null || firstPageFailed) return;
     const previousRevision = firstPageRevisionRef.current;
     firstPageRevisionRef.current = firstPageRevision;
     if (offset > 0 && previousRevision !== null && previousRevision !== firstPageRevision) {
       resetPagination();
       setLoadedLeads(firstPageLeads);
     }
-  }, [firstPageLeads, firstPageRevision, offset]);
+  }, [firstPageFailed, firstPageLeads, firstPageRevision, offset]);
 
   const leads = loadedLeads;
   const hasMore = !exhausted && !isError && fetchedLeads?.length === pageSize;
