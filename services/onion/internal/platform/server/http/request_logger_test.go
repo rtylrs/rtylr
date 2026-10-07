@@ -94,8 +94,17 @@ func TestSanitizeJSONRedactsSensitiveFieldVariants(t *testing.T) {
 	if profile["api_key"] != "[REDACTED]" {
 		t.Fatalf("nested api_key was not redacted: %s", got)
 	}
-	if profile["name"] != "Voxire" {
-		t.Fatalf("sanitizeJSON removed non-sensitive value: %s", got)
+	if profile["name"] != "[REDACTED]" {
+		t.Fatalf("name was not redacted: %s", got)
+	}
+}
+
+func TestSanitizeJSONRedactsPersonalData(t *testing.T) {
+	got := sanitizeJSON(`{"email":"person@example.com","phone_number":"+15555550123","business_name":"Example Shop"}`)
+	for _, value := range []string{"person@example.com", "+15555550123", "Example Shop"} {
+		if strings.Contains(got, value) {
+			t.Fatalf("personal value %q leaked into request log: %s", value, got)
+		}
 	}
 }
 
