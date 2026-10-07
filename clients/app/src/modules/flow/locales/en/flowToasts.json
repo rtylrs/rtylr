@@ -72,7 +72,8 @@
     "removed": "Member removed",
     "transferred": "Ownership transferred",
     "selectNewOwner": "Select a member",
-    "enterEmail": "Enter an email address"
+    "enterEmail": "Enter an email address",
+    "selectWorkspaceMember": "Choose an active workspace member"
   },
   "project": {
     "createFailed": "Failed to create project",
