@@ -46,11 +46,14 @@ export function sentCredential(config: unknown): string | null {
   return credentials.get(config) ?? null;
 }
 
+/** The result of checking whether a refresh token can renew the session. */
+export type SessionRefreshResult = 'refreshed' | 'rejected' | 'unavailable';
+
 /** The session check a 401 is allowed to run before any sign-out. */
-export type SessionRefresh = () => Promise<boolean>;
+export type SessionRefresh = () => Promise<SessionRefreshResult>;
 
 let sessionRefresh: SessionRefresh | null = null;
-let refreshInFlight: Promise<boolean> | null = null;
+let refreshInFlight: Promise<SessionRefreshResult> | null = null;
 
 /**
  * Token whose 401 already ended the shared session. Keyed on the token rather
@@ -77,15 +80,15 @@ export function resetSessionInvalidationForTests(): void {
  * because a failed check is not evidence that the session died, and the 401
  * itself stays the caller's to handle.
  */
-function refreshSession(): Promise<boolean> {
-  if (!sessionRefresh) return Promise.resolve(false);
+function refreshSession(): Promise<SessionRefreshResult> {
+  if (!sessionRefresh) return Promise.resolve('rejected');
   if (refreshInFlight) return refreshInFlight;
 
-  const attempt = (async (): Promise<boolean> => {
+  const attempt = (async (): Promise<SessionRefreshResult> => {
     try {
       return await sessionRefresh!();
     } catch {
-      return false;
+      return 'unavailable';
     } finally {
       // Cleared in `finally` so a throw cannot wedge every later 401 behind a
       // settled promise nobody awaits.
@@ -130,10 +133,10 @@ export async function shouldEndSharedSession(
     if (safeRead(readToken) !== token) return false;
 
     if (sessionRefresh) {
-      const refreshed = await refreshSession();
+      const refreshResult = await refreshSession();
       // A successful refresh replaced the cookie, so this 401 belonged to the
       // previous token and there is nothing left to end.
-      if (refreshed) return false;
+      if (refreshResult !== 'rejected') return false;
       if (safeRead(readToken) !== token) return false;
     }
 

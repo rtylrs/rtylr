@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createApiClient, createOneKitFetch } from './client';
-import { resetSessionInvalidationForTests, setSessionRefresh } from './session';
+import {
+  resetSessionInvalidationForTests,
+  setSessionRefresh,
+  type SessionRefreshResult,
+} from './session';
 
 vi.stubGlobal('import', {
   meta: { env: { VITE_API_URL: 'https://api.test.com/' } },
@@ -195,7 +199,7 @@ describe('401 handling: a genuine session rejection', () => {
     setTokenCookie(TOKEN_A);
     setSessionRefresh(async () => {
       setTokenCookie(TOKEN_B);
-      return true;
+      return 'refreshed';
     });
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
@@ -277,8 +281,8 @@ describe('401 handling: stale responses and refresh races', () => {
 
   it('does not sign out on 401s while a session refresh is in flight', async () => {
     setTokenCookie(TOKEN_A);
-    let release: (ok: boolean) => void = () => {};
-    setSessionRefresh(() => new Promise<boolean>((resolve) => (release = resolve)));
+    let release: (result: SessionRefreshResult) => void = () => {};
+    setSessionRefresh(() => new Promise<SessionRefreshResult>((resolve) => (release = resolve)));
 
     const client = createApiClient('dash');
     const configs = Array.from({ length: 3 }, () =>
@@ -296,7 +300,7 @@ describe('401 handling: stale responses and refresh races', () => {
 
     // The refresh replaced the cookie; the 401s belonged to the old token.
     setTokenCookie(TOKEN_B);
-    release(true);
+    release('refreshed');
     await pending;
 
     expect(readTokenCookie()).toBe(TOKEN_B);
@@ -308,7 +312,7 @@ describe('401 handling: stale responses and refresh races', () => {
     let calls = 0;
     setSessionRefresh(() => {
       calls++;
-      return Promise.resolve(false);
+      return Promise.resolve('rejected');
     });
 
     const client = createApiClient('dash');
@@ -327,26 +331,32 @@ describe('401 handling: stale responses and refresh races', () => {
     expect(cookieTracker.count()).toBe(1);
   });
 
-  it('a throwing refresh does not wedge later 401s', async () => {
+  it('keeps the session through a temporary refresh failure and retries refresh later', async () => {
     setTokenCookie(TOKEN_A);
-    setSessionRefresh(() => Promise.reject(new Error('network down')));
+    let calls = 0;
+    setSessionRefresh(() => {
+      calls++;
+      if (calls === 1) return Promise.reject(new Error('network down'));
+      setTokenCookie(TOKEN_B);
+      return Promise.resolve('refreshed');
+    });
 
     const client = createApiClient('dash');
     await runResponseRejection(
       client,
       rejected401(runRequestInterceptor(client))
     ).catch(() => undefined);
-    await vi.waitFor(() => expect(readTokenCookie()).toBeNull());
+    expect(readTokenCookie()).toBe(TOKEN_A);
+    expect(cookieTracker.count()).toBe(0);
 
-    setTokenCookie(TOKEN_B);
     await runResponseRejection(
       client,
       rejected401(runRequestInterceptor(client))
     ).catch(() => undefined);
-    await vi.waitFor(() => expect(readTokenCookie()).toBeNull());
+    expect(readTokenCookie()).toBe(TOKEN_B);
 
-    // The throwing refresh neither wedged the client nor skipped a sign-out.
-    expect(cookieTracker.count()).toBe(2);
+    expect(calls).toBe(2);
+    expect(cookieTracker.count()).toBe(0);
   });
 
   it('a failed sign-out does not reject the caller 401', async () => {

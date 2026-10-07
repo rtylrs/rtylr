@@ -74,15 +74,16 @@ const setAccessToken = (token: string): void => {
 };
 
 setSessionRefresh(async () => {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+  if (typeof window === 'undefined' || typeof document === 'undefined') return 'unavailable';
   const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
+  if (!refreshToken) return 'rejected';
   const response = await fetch(`${getBaseUrl().replace(/\/+$/, '')}/common/auth/v1/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token: refreshToken }),
   });
-  if (!response.ok) return false;
+  if (response.status === 401) return 'rejected';
+  if (!response.ok) return 'unavailable';
   const data: unknown = await response.json();
   if (
     !data ||
@@ -90,9 +91,9 @@ setSessionRefresh(async () => {
     !('token' in data) ||
     typeof data.token !== 'string' ||
     !data.token
-  ) return false;
+  ) return 'unavailable';
   setAccessToken(data.token);
-  return true;
+  return 'refreshed';
 });
 
 const getAuthBaseUrl = (): string => {
