@@ -16,8 +16,7 @@
  * It accepts either a raw array (legacy) or the enveloped object so the
  * switch is gradual.
  *
- * For a stronger guarantee see `listEndpoint()` below - it bakes the key
- * into the endpoint declaration so TS catches a wrong key at compile time.
+ * A successful response with the wrong shape is an error, not an empty list.
  */
 export function unwrapListResponse<T>(res: unknown, key: string): T[] {
   if (Array.isArray(res)) return res as T[];
@@ -25,5 +24,5 @@ export function unwrapListResponse<T>(res: unknown, key: string): T[] {
     const value = (res as Record<string, unknown>)[key];
     if (Array.isArray(value)) return value as T[];
   }
-  return [];
+  throw new TypeError(`Expected a list response with "${key}"`);
 }

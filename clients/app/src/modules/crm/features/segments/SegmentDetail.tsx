@@ -12,6 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
@@ -54,28 +55,28 @@ const SegmentDetail: React.FC = () => {
   const { id } = useParams({ from: '/business/crm/segments/$id' });
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const {
-    data: fetched,
-    isLoading: segmentLoading,
-    error: segmentError,
-    refetch: refetchSegment,
-  } = useGetSegment(id);
+  const segmentQuery = useGetSegment(id);
+  const customersQuery = useSegmentCustomers(id);
+  const { data: fetched, error: segmentError, refetch: refetchSegment } = segmentQuery;
   const {
     data: fetchedCustomerPages,
-    isLoading,
     isFetchingNextPage,
-    isError: customersError,
     isFetchNextPageError: customersNextPageError,
     hasNextPage,
     fetchNextPage,
     refetch: refetchCustomers,
-  } = useSegmentCustomers(id);
+  } = customersQuery;
   const segment = fetched;
   const customers = fetchedCustomerPages?.pages.flatMap((page) => page.customers) ?? [];
   const customerTotal = fetchedCustomerPages?.pages[0]?.total;
-  const customersQueryFailed = customersError || customersNextPageError;
+  const segmentQueryFailed = hasQueryFailed(segmentQuery);
+  const segmentLoading = segmentQuery.isPending && !segmentQueryFailed;
+  const customersQueryFailed = hasQueryFailed(customersQuery) || customersNextPageError;
+  const customersLoading = customersQuery.isPending && !customersQueryFailed;
   const notFoundTitle = t('crm.segmentDetail.notFoundTitle');
-  const segmentIsMissing = segmentError ? isNotFoundError(segmentError, notFoundTitle) : !segment;
+  const segmentIsMissing = segmentQueryFailed
+    ? isNotFoundError(segmentError, notFoundTitle)
+    : segmentQuery.isSuccess && !segment;
   const retryCustomers = (): void => {
     void (customersNextPageError ? fetchNextPage() : refetchCustomers());
   };
@@ -88,7 +89,7 @@ const SegmentDetail: React.FC = () => {
     );
   }
 
-  if (segmentError && !segmentIsMissing) {
+  if (segmentQueryFailed && !segmentIsMissing) {
     return (
       <div style={{ maxWidth: '1100px' }}>
         <LoadErrorState onRetry={() => void refetchSegment()} />
@@ -264,7 +265,7 @@ const SegmentDetail: React.FC = () => {
               {t('crm.segmentDetail.customersIn')}
             </h4>
           </div>
-          {isLoading && !fetchedCustomerPages ? (
+          {customersLoading && !fetchedCustomerPages ? (
             <div style={{ padding: '16px' }}>
               <SkeletonList count={5} />
             </div>

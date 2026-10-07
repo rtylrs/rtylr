@@ -24,10 +24,18 @@ vi.mock('./ProjectViewTabs', () => ({
 }));
 
 vi.mock('./useProjects', () => ({
-  useProjects: () => ({ data: [], isLoading: false }),
+  useProjects: () => ({ data: [], isLoading: false, refetch: vi.fn() }),
 }));
 
-const tasksState = vi.hoisted(() => ({ data: [] as ApiTask[] }));
+const tasksState = vi.hoisted(() => ({
+  data: [] as ApiTask[],
+  isPending: false,
+  isLoading: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
+}));
 vi.mock('../../shared/hooks/queries/useProjectLabourCost', () => ({
   useProjectLabourCost: vi.fn(() => ({ data: null })),
 }));
@@ -41,6 +49,12 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 
 beforeEach(() => {
   tasksState.data = [];
+  tasksState.isPending = false;
+  tasksState.isLoading = false;
+  tasksState.isError = false;
+  tasksState.isPaused = false;
+  tasksState.failureCount = 0;
+  tasksState.refetch.mockClear();
   useFlowStore.setState({
     projects: [
       {
@@ -68,6 +82,16 @@ describe('ProjectDashboard: no tasks yet', () => {
     });
     fireEvent.click(firstCta);
     expect(useFlowStore.getState().quickCreateOpen).toBe(true);
+  });
+
+  it('shows retry instead of zero task totals when loading tasks fails', () => {
+    tasksState.isError = true;
+    render(<ProjectDashboard />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('flow.loadFailed.description');
+    expect(screen.queryByText('flow.projectDashboard.noTasksYet')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.loadFailed.retry' }));
+    expect(tasksState.refetch).toHaveBeenCalledOnce();
   });
 
   it('shows the same empty title in the by-assignee card', () => {

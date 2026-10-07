@@ -5,6 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   dashboardError: false,
+  customersError: false,
+  segmentsError: false,
+  refetchCustomers: vi.fn(),
+  refetchSegments: vi.fn(),
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -45,11 +49,19 @@ vi.mock('../../shared/hooks/queries/useCrmDashboard', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useCustomers', () => ({
-  useListCustomers: () => ({ data: customersList }),
+  useListCustomers: () => ({
+    data: mocks.customersError ? undefined : customersList,
+    isError: mocks.customersError,
+    refetch: mocks.refetchCustomers,
+  }),
 }));
 
 vi.mock('../../shared/hooks/queries/useSegments', () => ({
-  useListSegments: () => ({ data: segmentsList }),
+  useListSegments: () => ({
+    data: mocks.segmentsError ? undefined : segmentsList,
+    isError: mocks.segmentsError,
+    refetch: mocks.refetchSegments,
+  }),
 }));
 
 import Dashboard from './Dashboard';
@@ -61,7 +73,11 @@ function renderDashboard(): void {
 beforeEach(() => {
   mocks.navigate.mockClear();
   mocks.dashboardError = false;
+  mocks.customersError = false;
+  mocks.segmentsError = false;
   refetchDashboard.mockClear();
+  mocks.refetchCustomers.mockClear();
+  mocks.refetchSegments.mockClear();
   customersList.length = 0;
   segmentsList.length = 0;
   dashboardData.recentCampaigns = [];
@@ -123,5 +139,16 @@ describe('Dashboard read-only empty states', () => {
     fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
 
     expect(refetchDashboard).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show zero-valued customer KPIs when the customer list fails', () => {
+    mocks.customersError = true;
+
+    renderDashboard();
+
+    expect(screen.getAllByText('—')).toHaveLength(2);
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
+    expect(mocks.refetchCustomers).toHaveBeenCalledOnce();
   });
 });

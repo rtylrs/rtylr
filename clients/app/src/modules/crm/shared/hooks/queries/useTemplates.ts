@@ -13,6 +13,7 @@ import { TemplateServiceClient } from '@voxire/voxie/crm/template/v1/client';
 import type { Template as ApiTemplate } from '@voxire/voxie/crm/template/v1/types';
 import { templateSchema } from '../../schemas/templates';
 import type { Template } from '../../schemas/templates';
+import { unwrapList } from '../../lib/unwrapList';
 
 const templateClient = createOneKitClient(TemplateServiceClient, 'crm');
 
@@ -34,7 +35,9 @@ export const useTemplates = (): UseQueryResult<Template[]> =>
     queryKey: ['crm-templates'],
     queryFn: async (): Promise<Template[]> => {
       const res = await templateClient.listTemplates({});
-      return z.array(templateSchema).parse((res.templates ?? []).map(fromApiTemplate));
+      return z
+        .array(templateSchema)
+        .parse(unwrapList<ApiTemplate>(res, 'templates').map(fromApiTemplate));
     },
   });
 

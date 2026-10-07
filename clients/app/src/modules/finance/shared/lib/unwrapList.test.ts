@@ -25,26 +25,25 @@ describe('unwrapList', () => {
     expect(result).toEqual(input.invoices);
   });
 
-  it('returns an empty array when no key matches and input is an object', () => {
-    const result = unwrapList({ other: 'value' }, 'bills');
-    expect(result).toEqual([]);
+  it('rejects a success response when no key matches', () => {
+    expect(() => unwrapList({ other: 'value' }, 'bills')).toThrow(
+      'Expected a list response with "bills"'
+    );
   });
 
-  it('returns an empty array for null', () => {
-    expect(unwrapList(null, 'items')).toEqual([]);
+  it('rejects null, missing, and primitive responses', () => {
+    for (const response of [null, undefined, 42, 'hello']) {
+      expect(() => unwrapList(response, 'items')).toThrow('Expected a list response with "items"');
+    }
   });
 
-  it('returns an empty array for undefined', () => {
-    expect(unwrapList(undefined, 'items')).toEqual([]);
-  });
-
-  it('returns an empty array for a primitive value', () => {
-    expect(unwrapList(42, 'items')).toEqual([]);
-    expect(unwrapList('hello', 'items')).toEqual([]);
-  });
-
-  it('returns an empty array when no keys are passed and input is an object', () => {
-    expect(unwrapList({ invoices: [1, 2] })).toEqual([]);
+  it('rejects missing keys and keys whose value is not an array', () => {
+    expect(() => unwrapList({ invoices: [1, 2] })).toThrow(
+      'Expected a list response with an array'
+    );
+    expect(() => unwrapList({ invoices: 'bad' }, 'invoices')).toThrow(
+      'Expected a list response with "invoices"'
+    );
   });
 
   it('passes through an empty array envelope correctly', () => {

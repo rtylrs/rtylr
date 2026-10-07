@@ -16,6 +16,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 const tasksState = vi.hoisted(() => ({
   data: [] as unknown[],
   isLoading: false,
+  isPending: false,
   isError: false,
   isPaused: false,
   failureCount: 0,
@@ -46,6 +47,7 @@ function archivedTask(over: Record<string, unknown> = {}): Record<string, unknow
 beforeEach(() => {
   tasksState.data = [];
   tasksState.isLoading = false;
+  tasksState.isPending = false;
   tasksState.isError = false;
   tasksState.isPaused = false;
   tasksState.failureCount = 0;
@@ -62,6 +64,7 @@ describe('Archive screen (#1089)', () => {
     // apiTasks defaults to [] until the query resolves, so the screen said
     // "0 archived tasks" and "Nothing archived" before it had fetched.
     tasksState.isLoading = true;
+    tasksState.isPending = true;
     render(<Archive />);
 
     expect(screen.queryByText('flowArchive.count:0')).not.toBeInTheDocument();

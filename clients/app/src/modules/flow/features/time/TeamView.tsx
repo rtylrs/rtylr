@@ -9,6 +9,7 @@ import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { todayLocalDate, useTeamWorkDays, type WorkDay } from './useWorkDay';
 
 const labelClass = 'mb-1 block text-flow-meta font-semibold uppercase tracking-wider';
@@ -19,10 +20,14 @@ const TeamView = (): React.JSX.Element => {
   const [date, setDate] = useState(todayLocalDate());
 
   const membersQuery = useFlowTeam();
-  const { data: allMembers = [], isLoading: membersLoading } = membersQuery;
+  const { data: allMembers = [] } = membersQuery;
+  const membersFailed = hasQueryFailed(membersQuery);
+  const membersLoading = membersQuery.isPending && !membersFailed;
   const members = useMemo(() => allMembers.filter((m) => m.hasFlowAccess), [allMembers]);
   const daysQuery = useTeamWorkDays(date, date);
-  const { data, isLoading, isError, error } = daysQuery;
+  const { data, error } = daysQuery;
+  const daysFailed = hasQueryFailed(daysQuery);
+  const isLoading = daysQuery.isPending && !daysFailed;
   const accessDenied =
     typeof error === 'object' &&
     error !== null &&
@@ -62,7 +67,7 @@ const TeamView = (): React.JSX.Element => {
           />
         </header>
 
-        {isError || membersQuery.isError ? (
+        {daysFailed || membersFailed ? (
           accessDenied ? (
             <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-flow-body" />
           ) : (

@@ -8,6 +8,7 @@ import { useListCustomers, useMergeCustomers } from '../../shared/hooks/queries/
 import { Breadcrumbs, Button, Card, PageHeader } from '../../shared/components/ui';
 import { SearchableCustomerSelect, CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const MergeCustomers: React.FC = () => {
   const { t } = useTranslation();
@@ -15,7 +16,9 @@ const MergeCustomers: React.FC = () => {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const merge = useMergeCustomers();
   // Backend caps page size at 100 — the picker covers the first page.
-  const { data: fetched } = useListCustomers({ limit: 100, offset: 0 });
+  const customersQuery = useListCustomers({ limit: 100, offset: 0 });
+  const customersLoadFailed = hasQueryFailed(customersQuery);
+  const { data: fetched } = customersQuery;
   const customers = fetched ?? [];
 
   const [primaryId, setPrimaryId] = useState<number | null>(
@@ -128,6 +131,21 @@ const MergeCustomers: React.FC = () => {
         />
 
         <Card>
+          {customersLoadFailed && (
+            <div
+              role="alert"
+              style={{
+                marginBottom: '16px',
+                color: 'var(--hub-text-muted)',
+                fontSize: '13px',
+              }}
+            >
+              <span>{t('crmErrors.generic')} </span>
+              <Button variant="outline" onClick={() => void customersQuery.refetch()}>
+                {t('crm.actions.refresh')}
+              </Button>
+            </div>
+          )}
           <div
             style={{
               display: 'grid',
@@ -218,7 +236,7 @@ const MergeCustomers: React.FC = () => {
           </Button>
           <Button
             variant="primary"
-            disabled={!primaryId || !secondaryId || merge.isPending}
+            disabled={customersLoadFailed || !primaryId || !secondaryId || merge.isPending}
             onClick={handleMerge}
           >
             <Users size={13} /> {merge.isPending ? 'Merging…' : 'Merge customers'}

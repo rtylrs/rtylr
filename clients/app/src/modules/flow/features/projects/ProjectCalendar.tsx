@@ -50,7 +50,9 @@ const ProjectCalendar: React.FC = () => {
   } = useCurrentProject(projectId);
   const tasksQuery = useTasks({ projectId, activeOnly: true, compact: true });
   const { data: apiTasks = [] } = tasksQuery;
-  const projectLoadFailed = projectMetadataFailed || hasQueryFailed(tasksQuery);
+  const tasksLoadFailed = hasQueryFailed(tasksQuery);
+  const tasksLoading = tasksQuery.isPending && !tasksLoadFailed;
+  const projectLoadFailed = projectMetadataFailed || tasksLoadFailed;
   const refetchProjects = () => {
     void refetchProjectMetadata();
     void tasksQuery.refetch();
@@ -96,6 +98,14 @@ const ProjectCalendar: React.FC = () => {
   if (projectLoading && !project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        {t('flow.project.loading')}
+      </div>
+    );
+  }
+
+  if (tasksLoading) {
+    return (
+      <div className="p-6" role="status" style={{ color: 'var(--flow-text-muted)' }}>
         {t('flow.project.loading')}
       </div>
     );

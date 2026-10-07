@@ -16,6 +16,7 @@ import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { CustomerAvatar, SMSComposer } from '../../shared/components/crm';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const DEFAULT_SMS_BODY = 'Flash sale today! {{first_name}}, enjoy 20% off. Reply STOP to opt out.';
 
@@ -37,8 +38,12 @@ const SMSCampaign: React.FC = () => {
   const update = useUpdateCampaign();
   const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
-  const { data: fetchedSegments } = useListSegments();
-  const { data: fetchedCustomers } = useListCustomers({ limit: 100, offset: 0 });
+  const segmentsQuery = useListSegments();
+  const customersQuery = useListCustomers({ limit: 100, offset: 0 });
+  const segmentsFailed = hasQueryFailed(segmentsQuery);
+  const customersFailed = hasQueryFailed(customersQuery);
+  const { data: fetchedSegments } = segmentsQuery;
+  const { data: fetchedCustomers } = customersQuery;
   const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const customers = fetchedCustomers ?? [];
 
@@ -150,7 +155,15 @@ const SMSCampaign: React.FC = () => {
                 <Button
                   variant="primary"
                   onClick={() => handleSave(true)}
-                  disabled={pending || !name.trim() || !body.trim()}
+                  disabled={
+                    pending ||
+                    !name.trim() ||
+                    !body.trim() ||
+                    segmentsFailed ||
+                    segmentsQuery.isPending ||
+                    !fetchedSegments ||
+                    !segmentId
+                  }
                 >
                   <Send size={13} />
                   {pending ? 'Activating…' : 'Save & activate'}
@@ -196,38 +209,49 @@ const SMSCampaign: React.FC = () => {
                 {t('crm.campaignEditor.recipientPreview')}
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {previewRecipients.map((customer) => (
-                  <div
-                    key={customer.id}
-                    style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-                  >
-                    <CustomerAvatar
-                      initials={customer.initials}
-                      points={customer.loyaltyPoints}
-                      size={28}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}>
-                        {customer.name}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {customer.phone}
-                      </div>
-                    </div>
-                    <span
-                      style={{
-                        padding: '2px 8px',
-                        borderRadius: '9999px',
-                        fontSize: '10px',
-                        background: 'rgba(16,185,129,0.12)',
-                        color: '#10b981',
-                        fontWeight: 600,
-                      }}
-                    >
-                      opted in
-                    </span>
+                {customersFailed ? (
+                  <div role="alert" style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+                    <span>{t('crmErrors.generic')} </span>
+                    <Button variant="outline" onClick={() => void customersQuery.refetch()}>
+                      {t('crm.actions.refresh')}
+                    </Button>
                   </div>
-                ))}
+                ) : (
+                  previewRecipients.map((customer) => (
+                    <div
+                      key={customer.id}
+                      style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                    >
+                      <CustomerAvatar
+                        initials={customer.initials}
+                        points={customer.loyaltyPoints}
+                        size={28}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}
+                        >
+                          {customer.name}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                          {customer.phone}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          fontSize: '10px',
+                          background: 'rgba(16,185,129,0.12)',
+                          color: '#10b981',
+                          fontWeight: 600,
+                        }}
+                      >
+                        opted in
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </Card>
           </div>
@@ -253,6 +277,14 @@ const SMSCampaign: React.FC = () => {
                   </option>
                 ))}
               </Select>
+              {segmentsFailed && (
+                <div role="alert" style={{ marginTop: '8px', fontSize: '12px' }}>
+                  <span style={{ color: 'var(--hub-text-muted)' }}>{t('crmErrors.generic')} </span>
+                  <Button variant="outline" onClick={() => void segmentsQuery.refetch()}>
+                    {t('crm.actions.refresh')}
+                  </Button>
+                </div>
+              )}
               {segment && (
                 <div
                   style={{

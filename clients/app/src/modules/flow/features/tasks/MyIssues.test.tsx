@@ -16,6 +16,7 @@ const myIssuesData = vi.hoisted(() => ({
   data: [] as unknown[],
   isLoading: false,
   isError: false,
+  isPending: false,
   isPaused: false,
   failureCount: 0,
   refetch: vi.fn(),
@@ -48,11 +49,22 @@ beforeEach(() => {
   // could run a failure test before an empty-state test and the empty state
   // rendered the failed state instead (#1194).
   myIssuesData.isError = false;
+  myIssuesData.isPending = false;
   myIssuesData.isPaused = false;
   myIssuesData.failureCount = 0;
 });
 
 describe('MyIssues empty state', () => {
+  it('does not claim the task list is empty before a paused first request resolves', () => {
+    myIssuesData.data = [];
+    myIssuesData.isPending = true;
+    myIssuesData.isPaused = true;
+    render(<MyIssues />);
+
+    expect(screen.getByText('flow.myIssues.loading')).toBeInTheDocument();
+    expect(screen.queryByText('flow.myIssues.emptyTitle')).not.toBeInTheDocument();
+  });
+
   it('shows the board-level CTA and no status columns when there are no tasks', () => {
     myIssuesData.data = [];
     render(<MyIssues />);

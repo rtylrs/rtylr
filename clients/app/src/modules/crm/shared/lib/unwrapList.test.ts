@@ -41,35 +41,28 @@ describe('unwrapList', () => {
 
   // ── edge cases / missing keys ─────────────────────────────────────────────
 
-  it('returns an empty array when no candidate key matches', () => {
+  it('rejects a success response when no candidate key matches', () => {
     const payload = { other: [{ id: 1 }] };
-    expect(unwrapList(payload, 'campaigns', 'items')).toStrictEqual([]);
+    expect(() => unwrapList(payload, 'campaigns', 'items')).toThrow(
+      'Expected a list response with "campaigns" or "items"'
+    );
   });
 
-  it('returns an empty array for null input', () => {
-    expect(unwrapList(null, 'customers')).toStrictEqual([]);
+  it('rejects null, missing, and primitive list responses', () => {
+    for (const payload of [null, undefined, 'not-an-object', 42]) {
+      expect(() => unwrapList(payload, 'customers')).toThrow(
+        'Expected a list response with "customers"'
+      );
+    }
   });
 
-  it('returns an empty array for undefined input', () => {
-    expect(unwrapList(undefined, 'customers')).toStrictEqual([]);
-  });
-
-  it('returns an empty array for a primitive string input', () => {
-    expect(unwrapList('not-an-object', 'customers')).toStrictEqual([]);
-  });
-
-  it('returns an empty array for a number input', () => {
-    expect(unwrapList(42, 'customers')).toStrictEqual([]);
-  });
-
-  it('ignores keys whose value is not an array', () => {
-    const payload = { customers: 'not-an-array' };
-    expect(unwrapList(payload, 'customers')).toStrictEqual([]);
-  });
-
-  it('ignores keys whose value is null', () => {
-    const payload = { customers: null };
-    expect(unwrapList(payload, 'customers')).toStrictEqual([]);
+  it('rejects a candidate key whose value is not an array', () => {
+    expect(() => unwrapList({ customers: 'not-an-array' }, 'customers')).toThrow(
+      'Expected a list response with "customers"'
+    );
+    expect(() => unwrapList({ customers: null }, 'customers')).toThrow(
+      'Expected a list response with "customers"'
+    );
   });
 
   // ── typed generic ─────────────────────────────────────────────────────────

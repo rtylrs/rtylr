@@ -2,33 +2,46 @@ import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Mail, FileQuestion } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Mail, FileQuestion } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
-import { Breadcrumbs, Card, SkeletonList } from '../../shared/components/ui';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import { Breadcrumbs, Button, Card, SkeletonList } from '../../shared/components/ui';
 import { CampaignStatsCard } from '../../shared/components/crm';
+
+function isNotFoundError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const candidate = error as {
+    statusCode?: unknown;
+    status?: unknown;
+    response?: { status?: unknown };
+    message?: unknown;
+  };
+  const status = candidate.statusCode ?? candidate.status ?? candidate.response?.status;
+  if (typeof status === 'number') return status === 404;
+  return typeof candidate.message === 'string' && /not found/i.test(candidate.message);
+}
 
 const CampaignDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const { t } = useTranslation();
   const campaignId = Number(id);
-  const {
-    data: fetched,
-    isLoading: campaignLoading,
-    error: campaignError,
-  } = useGetCampaign(campaignId);
-  const {
-    data: fetchedStats,
-    isLoading: statsLoading,
-    isError: statsError,
-  } = useCampaignStats(campaignId);
+  const campaignQuery = useGetCampaign(campaignId);
+  const statsQuery = useCampaignStats(campaignId);
+  const { data: fetched, error: campaignError, refetch: refetchCampaign } = campaignQuery;
+  const { data: fetchedStats, refetch: refetchStats } = statsQuery;
   const campaign = fetched;
   const stats = fetchedStats;
+  const campaignFailed = hasQueryFailed(campaignQuery);
+  const campaignLoading = campaignQuery.isPending && !campaignFailed;
+  const statsFailed = hasQueryFailed(statsQuery);
+  const statsLoading = statsQuery.isPending && !statsFailed;
+  const invalidCampaignId = !Number.isInteger(campaignId) || campaignId <= 0;
 
   const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
 
-  if (campaignLoading) {
+  if (campaignLoading && !invalidCampaignId) {
     return (
       <div style={{ maxWidth: '1200px' }}>
         <SkeletonList count={6} />
@@ -36,7 +49,25 @@ const CampaignDetail: React.FC = () => {
     );
   }
 
-  if (campaignError || !campaign) {
+  const campaignMissing =
+    invalidCampaignId ||
+    (campaignFailed && isNotFoundError(campaignError)) ||
+    (campaignQuery.isSuccess && !campaign);
+
+  if (campaignFailed && !campaignMissing) {
+    return (
+      <div style={{ maxWidth: '1200px' }}>
+        <EmptyState
+          icon={AlertCircle}
+          title={t('crmErrors.generic')}
+          description={t('crmErrors.refreshAndTryAgain')}
+          action={{ label: t('crm.actions.retry'), onClick: () => void refetchCampaign() }}
+        />
+      </div>
+    );
+  }
+
+  if (campaignMissing || !campaign) {
     return (
       <div style={{ maxWidth: '1200px' }}>
         <EmptyState
@@ -279,12 +310,37 @@ const CampaignDetail: React.FC = () => {
             </Card>
           </>
         )}
-        {!stats && !statsLoading && (
+        {statsFailed && (
+          <Card>
+            <div
+              role="alert"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                color: 'var(--hub-text-muted)',
+                fontSize: '13px',
+              }}
+            >
+              <span>{t('crmErrors.refreshAndTryAgain')}</span>
+              <Button variant="outline" onClick={() => void refetchStats()}>
+                {t('crm.actions.retry')}
+              </Button>
+            </div>
+          </Card>
+        )}
+        {!stats && statsLoading && (
+          <Card>
+            <div role="status" style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>
+              {t('crmCommon.loading')}
+            </div>
+          </Card>
+        )}
+        {!stats && !statsLoading && !statsFailed && (
           <Card>
             <div style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>
-              {statsError
-                ? 'Campaign statistics could not be loaded from the CRM service.'
-                : 'No campaign statistics are available yet.'}
+              No campaign statistics are available yet.
             </div>
           </Card>
         )}

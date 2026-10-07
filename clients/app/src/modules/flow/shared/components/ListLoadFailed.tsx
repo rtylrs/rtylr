@@ -21,11 +21,13 @@ import { useTranslation } from 'react-i18next';
 export const ListLoadFailed: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
   const { t } = useTranslation();
   return (
-    <EmptyState
-      icon={AlertCircle}
-      title={t('flow.loadFailed.title')}
-      description={t('flow.loadFailed.description')}
-      action={{ label: t('flow.loadFailed.retry'), onClick: onRetry }}
-    />
+    <div role="alert" aria-live="assertive">
+      <EmptyState
+        icon={AlertCircle}
+        title={t('flow.loadFailed.title')}
+        description={t('flow.loadFailed.description')}
+        action={{ label: t('flow.loadFailed.retry'), onClick: onRetry }}
+      />
+    </div>
   );
 };

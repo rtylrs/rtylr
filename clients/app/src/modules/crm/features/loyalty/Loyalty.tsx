@@ -12,6 +12,7 @@ import { motion } from 'motion/react';
 import { Gift, Star, Trophy, Crown, Award, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
 import { type LoyaltyTransaction, type LoyaltyTier } from '../../shared/schemas/loyalty';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const ACCENT = 'var(--crm-accent)';
 
@@ -38,9 +39,15 @@ const activityColor: Record<string, string> = {
 const Loyalty: React.FC = () => {
   const { t } = useTranslation();
   const canConfigureLoyalty = canCrmPermission('crm:loyalty:manage');
-  const { data: config, isError: configError } = useLoyaltyConfig();
-  const { data: transactions } = useLoyaltyTransactions();
-  const { data: tiersData } = useLoyaltyTiers();
+  const configQuery = useLoyaltyConfig();
+  const { data: config } = configQuery;
+  const configError = hasQueryFailed(configQuery);
+  const transactionsQuery = useLoyaltyTransactions();
+  const tiersQuery = useLoyaltyTiers();
+  const transactionsFailed = hasQueryFailed(transactionsQuery);
+  const tiersFailed = hasQueryFailed(tiersQuery);
+  const { data: transactions } = transactionsQuery;
+  const { data: tiersData } = tiersQuery;
   const updateConfig = useUpdateLoyaltyConfig();
 
   const tiers: LoyaltyTier[] = tiersData ?? [];
@@ -295,98 +302,115 @@ const Loyalty: React.FC = () => {
           >
             {t('crmNav.loyaltyTiers')}
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            {tiers.map((tier, i) => {
-              const Icon = TIER_ICON_MAP[tier.name] ?? Award;
-              return (
-                <motion.div
-                  key={tier.name}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06, duration: 0.2 }}
-                  style={{
-                    background: 'var(--hub-card)',
-                    border: `1px solid ${tier.color}30`,
-                    borderRadius: '12px',
-                    padding: '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                  }}
-                >
-                  <div
+          {tiersFailed ? (
+            <div role="alert" style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>
+              <span>{t('crmErrors.generic')} </span>
+              <button
+                type="button"
+                onClick={() => void tiersQuery.refetch()}
+                style={{ background: 'none', border: 'none', color: ACCENT, cursor: 'pointer' }}
+              >
+                {t('crm.actions.refresh')}
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+              {tiers.map((tier, i) => {
+                const Icon = TIER_ICON_MAP[tier.name] ?? Award;
+                return (
+                  <motion.div
+                    key={tier.name}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06, duration: 0.2 }}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '10px',
-                        background: `${tier.color}18`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Icon size={18} style={{ color: tier.color }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>
-                      {tier.name}
-                    </div>
-                    <div
-                      style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginTop: '2px' }}
-                    >
-                      {tier.threshold === 0
-                        ? 'Starting tier'
-                        : `From ${tier.threshold.toLocaleString()} pts`}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      background: `${tier.color}10`,
-                      border: `1px solid ${tier.color}25`,
-                    }}
-                  >
-                    <span style={{ fontSize: '22px', fontWeight: 700, color: tier.color }}>
-                      {tier.multiplier}%
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        color: 'var(--hub-text-muted)',
-                        marginLeft: '4px',
-                      }}
-                    >
-                      discount
-                    </span>
-                  </div>
-                  <ul
-                    style={{
-                      margin: 0,
-                      padding: '0 0 0 16px',
+                      background: 'var(--hub-card)',
+                      border: `1px solid ${tier.color}30`,
+                      borderRadius: '12px',
+                      padding: '20px',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '4px',
+                      gap: '12px',
                     }}
                   >
-                    {tier.perks.map((perk) => (
-                      <li key={perk} style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {perk}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              );
-            })}
-          </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '10px',
+                          background: `${tier.color}18`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Icon size={18} style={{ color: tier.color }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>
+                        {tier.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          color: 'var(--hub-text-muted)',
+                          marginTop: '2px',
+                        }}
+                      >
+                        {tier.threshold === 0
+                          ? 'Starting tier'
+                          : `From ${tier.threshold.toLocaleString()} pts`}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        background: `${tier.color}10`,
+                        border: `1px solid ${tier.color}25`,
+                      }}
+                    >
+                      <span style={{ fontSize: '22px', fontWeight: 700, color: tier.color }}>
+                        {tier.multiplier}%
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          color: 'var(--hub-text-muted)',
+                          marginLeft: '4px',
+                        }}
+                      >
+                        discount
+                      </span>
+                    </div>
+                    <ul
+                      style={{
+                        margin: 0,
+                        padding: '0 0 0 16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px',
+                      }}
+                    >
+                      {tier.perks.map((perk) => (
+                        <li key={perk} style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                          {perk}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Activity log */}
@@ -415,37 +439,50 @@ const Loyalty: React.FC = () => {
               {t('crm.loyalty.pointsActivityLog')}
             </span>
           </div>
-          {activityLog.map((entry, i) => (
-            <div
-              key={entry.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 20px',
-                borderBottom: i < activityLog.length - 1 ? '1px solid var(--hub-border)' : 'none',
-              }}
-            >
-              <div
-                style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: activityColor[entry.type] ?? 'var(--hub-border)',
-                  flexShrink: 0,
-                }}
-              />
-              <div style={{ flex: 1 }}>
-                <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
-                  {entry.customer}
-                </span>
-                <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>
-                  : {entry.action}
-                </span>
-              </div>
-              <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>{entry.time}</span>
+          {transactionsFailed ? (
+            <div role="alert" style={{ padding: '16px 20px', color: 'var(--hub-text-muted)' }}>
+              <span>{t('crmErrors.generic')} </span>
+              <button
+                type="button"
+                onClick={() => void transactionsQuery.refetch()}
+                style={{ background: 'none', border: 'none', color: ACCENT, cursor: 'pointer' }}
+              >
+                {t('crm.actions.refresh')}
+              </button>
             </div>
-          ))}
+          ) : (
+            activityLog.map((entry, i) => (
+              <div
+                key={entry.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 20px',
+                  borderBottom: i < activityLog.length - 1 ? '1px solid var(--hub-border)' : 'none',
+                }}
+              >
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: activityColor[entry.type] ?? 'var(--hub-border)',
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
+                    {entry.customer}
+                  </span>
+                  <span style={{ fontSize: '13px', color: 'var(--hub-text-muted)' }}>
+                    : {entry.action}
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>{entry.time}</span>
+              </div>
+            ))
+          )}
         </motion.div>
       </div>
     </>

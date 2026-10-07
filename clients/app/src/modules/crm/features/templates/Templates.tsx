@@ -7,11 +7,15 @@ import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useTemplates, useCreateTemplate } from '../../shared/hooks/queries/useTemplates';
 import { PageHeader, Card, Button, SkeletonList } from '../../shared/components/ui';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { data: fetched, isLoading, isError, refetch } = useTemplates();
+  const templatesQuery = useTemplates();
+  const { data: fetched, refetch } = templatesQuery;
+  const isError = hasQueryFailed(templatesQuery);
+  const isLoading = templatesQuery.isPending && !isError;
   const createMut = useCreateTemplate();
   const templates = fetched ?? [];
 

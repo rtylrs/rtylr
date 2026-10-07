@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiTask } from '../../shared/services/flowApi';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 const MY_TASKS_PAGE_SIZE = 500;
 
@@ -16,7 +17,7 @@ export async function fetchAllMyTasks(): Promise<ApiTask[]> {
 
   for (;;) {
     const res = await unwrap(flowApi.getMyTasks({ page, limit: MY_TASKS_PAGE_SIZE }));
-    const rows = Array.isArray(res) ? res : (res.tasks ?? []);
+    const rows = unwrapListResponse<ApiTask>(res, 'tasks');
     all.push(...rows);
 
     const pagination = Array.isArray(res) ? undefined : res.pagination;

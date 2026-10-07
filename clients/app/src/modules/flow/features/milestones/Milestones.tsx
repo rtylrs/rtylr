@@ -43,8 +43,14 @@ const Milestones: React.FC = () => {
   // Business-wide list; v2 takes project_id only as an optional narrowing
   // filter, which this screen does not use.
   const milestonesQuery = useMilestones();
-  const { data: milestones = [], isLoading } = milestonesQuery;
-  const { data: projects = [] } = useProjects();
+  const { data: milestones = [] } = milestonesQuery;
+  const milestonesFailed = hasQueryFailed(milestonesQuery);
+  const isLoading = milestonesQuery.isPending && !milestonesFailed;
+  const projectsQuery = useProjects();
+  const { data: projects = [] } = projectsQuery;
+  const projectsFailed = hasQueryFailed(projectsQuery);
+  const projectsLoading = projectsQuery.isPending && !projectsFailed;
+  const projectsUnavailable = projectsLoading || projectsFailed;
   const createMilestone = useCreateMilestone();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -74,7 +80,7 @@ const Milestones: React.FC = () => {
 
   const submitNewProject = (): void => {
     const name = newProjectName.trim();
-    if (!name || createProject.isPending) return;
+    if (!name || createProject.isPending || projectsUnavailable) return;
     createProject.mutate(
       { name, color: ACCENT_DEFAULT },
       {
@@ -110,7 +116,7 @@ const Milestones: React.FC = () => {
 
   // Without this a 500 fell through to the empty state, which reads as "no
   // milestones yet" and invites creating ones that already exist.
-  if (hasQueryFailed(milestonesQuery) && !showCreate) {
+  if (milestonesFailed && !showCreate) {
     return <ListLoadFailed onRetry={() => void milestonesQuery.refetch()} />;
   }
 
@@ -227,7 +233,9 @@ const Milestones: React.FC = () => {
                   <button
                     type="button"
                     onClick={submitNewProject}
-                    disabled={!newProjectName.trim() || createProject.isPending}
+                    disabled={
+                      !newProjectName.trim() || createProject.isPending || projectsUnavailable
+                    }
                     className="min-h-11 rounded-sm px-3 py-1.5 text-flow-meta font-semibold disabled:opacity-50"
                     style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
                   >
@@ -251,8 +259,11 @@ const Milestones: React.FC = () => {
             ) : (
               <select
                 value={selectedProjectId}
+                disabled={projectsUnavailable}
                 aria-describedby={
-                  projects.length === 0 && !canCreateProject ? NO_PROJECTS_GATE_ID : undefined
+                  !projectsUnavailable && projects.length === 0 && !canCreateProject
+                    ? NO_PROJECTS_GATE_ID
+                    : undefined
                 }
                 onChange={(e) => {
                   if (e.target.value === NEW_PROJECT_OPTION) {
@@ -268,7 +279,11 @@ const Milestones: React.FC = () => {
                   color: 'var(--flow-text)',
                 }}
               >
-                {projects.length === 0 ? (
+                {projectsLoading ? (
+                  <option value="">{t('flowCommon.loading')}</option>
+                ) : projectsFailed ? (
+                  <option value="">{t('flow.loadFailed.description')}</option>
+                ) : projects.length === 0 ? (
                   <option value="">{t('flow.milestones.noProjects')}</option>
                 ) : (
                   projects.map((p) => (
@@ -280,7 +295,7 @@ const Milestones: React.FC = () => {
                 {justCreated && !projects.some((p) => String(p.id) === justCreated.id) && (
                   <option value={justCreated.id}>{justCreated.name}</option>
                 )}
-                {canCreateProject && (
+                {canCreateProject && !projectsUnavailable && (
                   <option value={NEW_PROJECT_OPTION}>
                     {t('flow.milestones.newProjectOption')}
                   </option>
@@ -292,7 +307,7 @@ const Milestones: React.FC = () => {
                 value="", so Create stays disabled with nothing saying why.
                 Root CLAUDE.md rule 12, and the same GateNotice the settings
                 screen uses for its eleven gated controls. */}
-            {projects.length === 0 && !canCreateProject && !justCreated && (
+            {!projectsUnavailable && projects.length === 0 && !canCreateProject && !justCreated && (
               <GateNotice
                 id={NO_PROJECTS_GATE_ID}
                 className="mt-2"
@@ -300,6 +315,23 @@ const Milestones: React.FC = () => {
               />
             )}
           </label>
+          {projectsFailed && (
+            <div
+              role="alert"
+              className="mt-2 flex items-center justify-between gap-3 text-flow-meta"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              <span>{t('flow.loadFailed.description')}</span>
+              <button
+                type="button"
+                onClick={() => void projectsQuery.refetch()}
+                className="flow-focus rounded-md px-3 py-1.5"
+                style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
+              >
+                {t('flow.loadFailed.retry')}
+              </button>
+            </div>
+          )}
           <DatePicker
             value={newDate}
             onChange={setNewDate}
@@ -338,7 +370,11 @@ const Milestones: React.FC = () => {
                 );
               }}
               disabled={
-                createMilestone.isPending || !newName.trim() || !newDate || !selectedProjectId
+                createMilestone.isPending ||
+                projectsUnavailable ||
+                !newName.trim() ||
+                !newDate ||
+                !selectedProjectId
               }
               className="px-3 py-1.5 rounded-sm text-flow-meta font-semibold disabled:opacity-50"
               style={{ background: 'var(--flow-action-bg)', color: 'var(--flow-on-accent)' }}
