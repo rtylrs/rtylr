@@ -398,8 +398,10 @@
   },
   "dashboard": {
     "atRiskEmptyTitle": "لا يوجد عملاء معرضون للخطر حاليًا",
-    "campaignPerformanceUnavailableTitle": "أداء الحملات غير متاح",
-    "campaignPerformanceUnavailableDescription": "تعذّر تحميل هذه البيانات من واجهة برمجة تطبيقات لوحة تحكم إدارة العلاقات مع العملاء.",
+    "campaignPerformanceUnavailableTitle": "أداء الحملات غير متاح بعد",
+    "campaignPerformanceUnavailableDescription": "لا توفر واجهة برمجة تطبيقات لوحة تحكم إدارة العلاقات مع العملاء بيانات وصول الحملات أو نتائجها الأخيرة حاليًا.",
+    "loadFailedTitle": "تعذّر تحميل بيانات لوحة المعلومات",
+    "loadFailedDescription": "حدّث لوحة المعلومات وحاول مرة أخرى.",
     "pageTitle": "لوحة المعلومات",
     "noTrendData": "لا توجد بيانات اتجاه",
     "totalCustomers": "إجمالي العملاء",
