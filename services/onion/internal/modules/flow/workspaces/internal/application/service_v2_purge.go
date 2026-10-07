@@ -15,17 +15,14 @@ func binPurgeDeadline(now time.Time) time.Time {
 	return now.AddDate(0, 0, DefaultBinRetentionDays)
 }
 
-// IsProjectMemberOrBypass is the v2 read gate for project-scoped subresources:
-// hub bypass, creator, owner, or explicit membership.
+// IsProjectMemberOrBypass applies the same project visibility rule to the
+// project roster as to the project itself, including reporting-line access.
 func (s *Service) IsProjectMemberOrBypass(ctx context.Context, userID, businessID, projectID int64) bool {
 	p, err := s.repo.GetProjectV2ByID(ctx, projectID, businessID)
 	if err != nil {
 		return false
 	}
-	if p.CreatedBy == userID || p.OwnerID == userID {
-		return true
-	}
-	return s.repo.IsProjectMember(ctx, userID, p.ID)
+	return s.canSeeProject(ctx, p, userID, businessID)
 }
 
 // ListTasksV2 lists tasks across the caller's visible projects, optionally

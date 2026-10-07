@@ -114,6 +114,23 @@ func TestManagesSomeoneOnDeniesAnUnrelatedProject(t *testing.T) {
 	}
 }
 
+func TestProjectRosterUsesProjectVisibility(t *testing.T) {
+	svc, ctx, _ := v2Svc(t)
+	managedProject := createV2Project(ctx, t, svc, "manager-visible", "", v2UserB)
+	unrelatedProject := createV2Project(ctx, t, svc, "manager-hidden", "", v2UserB+1)
+	svc.orgchart = &stubOrgchart{reports: []int64{v2UserB}}
+
+	if _, err := svc.GetProjectV2(ctx, managedProject.ID, v2UserA, v2Business); err != nil {
+		t.Fatalf("manager should be able to open a report's project: %v", err)
+	}
+	if !svc.IsProjectMemberOrBypass(ctx, v2UserA, v2Business, managedProject.ID) {
+		t.Fatal("manager who can open the project should be able to load its member roster")
+	}
+	if svc.IsProjectMemberOrBypass(ctx, v2UserA, v2Business, unrelatedProject.ID) {
+		t.Fatal("manager must not load an unrelated project's member roster")
+	}
+}
+
 // No unit tests for markVisibleViaReport, deliberately.
 //
 // Service.repo is a concrete *infrastructure.Repository, so the membership
