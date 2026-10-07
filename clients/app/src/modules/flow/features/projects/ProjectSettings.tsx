@@ -281,6 +281,8 @@ const ProjectSettings: React.FC = () => {
                 open={showAddMember}
                 onOpenChange={setShowAddMember}
                 projectId={projectId}
+                availableMembers={orgMembers}
+                projectMembers={members}
               />
             )}
 

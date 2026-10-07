@@ -74,7 +74,8 @@
     "removed": "Membre supprimé",
     "transferred": "Propriété transférée",
     "selectNewOwner": "Sélectionnez un membre",
-    "enterEmail": "Saisissez une adresse e-mail"
+    "enterEmail": "Saisissez une adresse e-mail",
+    "selectWorkspaceMember": "Choisissez un membre actif de l’espace de travail"
   },
   "project": {
     "createFailed": "Échec de la création du projet",

@@ -22,7 +22,33 @@ import { toast } from 'sonner';
 function renderDialog(props: Partial<React.ComponentProps<typeof AddProjectMemberDialog>> = {}) {
   const onOpenChange = vi.fn();
   const utils = render(
-    <AddProjectMemberDialog open onOpenChange={onOpenChange} projectId="p1" {...props} />
+    <AddProjectMemberDialog
+      open
+      onOpenChange={onOpenChange}
+      projectId="p1"
+      availableMembers={[
+        {
+          id: 'u1',
+          name: 'Grace Hopper',
+          email: 'grace@example.com',
+          memberType: 'member',
+          isOwner: false,
+          hasFlowAccess: true,
+          isActive: true,
+        },
+        {
+          id: 'u2',
+          name: 'Inactive Member',
+          email: 'inactive@example.com',
+          memberType: 'member',
+          isOwner: false,
+          hasFlowAccess: true,
+          isActive: false,
+        },
+      ]}
+      projectMembers={[]}
+      {...props}
+    />
   );
   return { onOpenChange, ...utils };
 }
@@ -53,19 +79,20 @@ describe('AddProjectMemberDialog', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('invites by email and role, and closes the dialog on success', () => {
+  it('finds workspace members by name and invites the selected member', () => {
     const { onOpenChange } = renderDialog();
 
     fireEvent.change(screen.getByPlaceholderText('flow.projectSettings.emailPlaceholder'), {
-      target: { value: 'new.hire@example.com' },
+      target: { value: 'Grace' },
     });
+    fireEvent.click(screen.getByRole('option', { name: /Grace Hopper grace@example.com/ }));
     fireEvent.change(screen.getByLabelText('flow.projectSettings.roleLabel'), {
       target: { value: 'admin' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.invite' }));
 
     expect(inviteMemberMutate).toHaveBeenCalledWith(
-      { email: 'new.hire@example.com', role: 'admin' },
+      { email: 'grace@example.com', role: 'admin' },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
 
@@ -75,13 +102,51 @@ describe('AddProjectMemberDialog', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it('shows an error toast and does not submit when the email is blank', () => {
-    renderDialog();
+  it('does not offer inactive or already-added members', () => {
+    renderDialog({
+      projectMembers: [
+        {
+          id: 'pm1',
+          projectId: 'p1',
+          userId: 'u1',
+          name: 'Grace Hopper',
+          email: 'grace@example.com',
+          role: 'member',
+          addedAt: '2026-01-01T00:00:00Z',
+        },
+      ],
+    });
+    const emailInput = screen.getByPlaceholderText('flow.projectSettings.emailPlaceholder');
 
-    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.invite' }));
+    fireEvent.change(emailInput, { target: { value: 'grace' } });
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('flow.projectSettings.noMemberMatches');
+    expect(screen.getByRole('button', { name: 'flow.projectSettings.invite' })).toBeDisabled();
+
+    fireEvent.change(emailInput, { target: { value: 'inactive' } });
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('requires an exact active workspace member email before enabling invite', () => {
+    renderDialog();
+    const emailInput = screen.getByPlaceholderText('flow.projectSettings.emailPlaceholder');
+    const inviteButton = screen.getByRole('button', { name: 'flow.projectSettings.invite' });
+
+    expect(inviteButton).toBeDisabled();
+    fireEvent.change(emailInput, { target: { value: 'grace@' } });
+    expect(inviteButton).toBeDisabled();
+    fireEvent.change(emailInput, { target: { value: 'grace@example.com' } });
+    expect(inviteButton).toBeEnabled();
+  });
+
+  it('rejects an address that does not belong to an active workspace member', () => {
+    renderDialog();
+    const emailInput = screen.getByPlaceholderText('flow.projectSettings.emailPlaceholder');
+    fireEvent.change(emailInput, { target: { value: 'unknown@example.com' } });
+    fireEvent.keyDown(emailInput, { key: 'Enter' });
 
     expect(inviteMemberMutate).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('flowToasts.projectMember.enterEmail');
+    expect(toast.error).toHaveBeenCalledWith('flowToasts.projectMember.selectWorkspaceMember');
   });
 
   it('labels the email input for screen readers', () => {
