@@ -69,7 +69,7 @@ func RequestTimeoutMiddleware(next http.Handler) http.Handler {
 		if elapsed >= SlowQueryThreshold {
 			fields := []logger.Field{
 				logger.Bool("slow_query", true),
-				logger.String("path", r.URL.Path),
+				logger.String("path", requestRouteTemplate(r)),
 				logger.String("method", r.Method),
 				logger.String("duration", elapsed.String()),
 				logger.Int("status", rw.status),

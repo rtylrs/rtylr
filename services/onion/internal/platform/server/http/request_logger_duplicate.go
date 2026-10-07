@@ -114,6 +114,8 @@ var sensitiveFieldParts = []string{
 	"password",
 	"token",
 	"authorization",
+	"referer",
+	"referrer",
 	"secret",
 	"api_key",
 	"apikey",

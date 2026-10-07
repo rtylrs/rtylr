@@ -10,10 +10,11 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/observability"
 )
 
 func logRequest(ctx context.Context, r *http.Request, statusCode int, duration time.Duration, bodyContent string, headers, query map[string][]string, serviceName string, count int) {
-	routeParams := routeParamsFromRequest(r)
+	routeParams := routeParamNamesFromRequest(r)
 
 	queryParams := make([]string, 0, len(query))
 	for key, values := range query {
@@ -50,7 +51,7 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	fields := []logger.Field{
 		logger.String("service", serviceName),
 		logger.String("method", r.Method),
-		logger.String("url", requestURLWithoutQuery(r)),
+		logger.String("url", requestRouteTemplate(r)),
 		logger.Int("status", statusCode),
 		logger.String("duration", duration.String()),
 		logger.String("user_agent", truncateString(r.UserAgent(), 100)),
@@ -71,31 +72,47 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	logger.Ctx(ctx).Warn(message, fields...)
 }
 
-func requestURLWithoutQuery(r *http.Request) string {
-	if r == nil || r.URL == nil {
-		return ""
-	}
-	u := *r.URL
-	u.RawQuery = ""
-	u.ForceQuery = false
-	return u.String()
+func requestRouteTemplate(r *http.Request) string {
+	return observability.RequestRouteTemplate(r)
 }
 
-func routeParamsFromRequest(r *http.Request) []string {
+func routeContextForRequest(r *http.Request) *chi.Context {
 	if r == nil {
 		return nil
 	}
 
 	routeCtx := chi.RouteContext(r.Context())
+	if routeCtx != nil && routeCtx.RoutePattern() != "" {
+		return routeCtx
+	}
+	if r.URL == nil {
+		return routeCtx
+	}
+
+	router, ok := r.Context().Value(observability.RouteLookupContextKey{}).(*chi.Mux)
+	if ok && router != nil {
+		resolved := chi.NewRouteContext()
+		if router.Find(resolved, r.Method, r.URL.Path) != "" {
+			return resolved
+		}
+	}
+
+	return routeCtx
+}
+
+func routeParamNamesFromRequest(r *http.Request) []string {
+	if r == nil {
+		return nil
+	}
+
+	routeCtx := routeContextForRequest(r)
 	if routeCtx == nil {
 		return nil
 	}
 
 	routeParams := make([]string, 0, len(routeCtx.URLParams.Keys))
-	for i, key := range routeCtx.URLParams.Keys {
-		if i < len(routeCtx.URLParams.Values) {
-			routeParams = append(routeParams, fmt.Sprintf("%s: %s", key, routeCtx.URLParams.Values[i]))
-		}
+	for _, key := range routeCtx.URLParams.Keys {
+		routeParams = append(routeParams, key)
 	}
 
 	return routeParams

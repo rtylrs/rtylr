@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func TestRequestLoggerPreservesJSONBodyWithCharset(t *testing.T) {
@@ -169,9 +171,12 @@ func TestResponseWriterPreservesFlusher(t *testing.T) {
 	}
 }
 
-func TestRequestURLWithoutQuery(t *testing.T) {
+func TestRequestRouteTemplateDoesNotExposeValuesOrQuery(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/login?token=secret", nil)
-	if got := requestURLWithoutQuery(req); got != "/login" {
-		t.Fatalf("requestURLWithoutQuery = %q, want /login", got)
+	routeCtx := chi.NewRouteContext()
+	routeCtx.RoutePatterns = []string{"/login"}
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeCtx))
+	if got := requestRouteTemplate(req); got != "/login" {
+		t.Fatalf("requestRouteTemplate = %q, want /login", got)
 	}
 }

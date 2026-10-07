@@ -10,6 +10,7 @@ import (
 	"github.com/getsentry/sentry-go"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http/httpmetrics"
 )
 
@@ -39,7 +40,7 @@ func SecureErrorMiddleware() func(http.Handler) http.Handler {
 					logger.Ctx(ctx).Error("Panic recovered",
 						logger.Any("error", err),
 						logger.String("stack", string(debug.Stack())),
-						logger.String("path", r.URL.Path),
+						logger.String("path", requestRouteTemplate(r)),
 						logger.String("method", r.Method),
 						logger.String("ip", r.RemoteAddr),
 					)
@@ -76,7 +77,7 @@ func reportRecoveredPanic(ctx context.Context, r *http.Request, recovered any) {
 	if hub == nil || hub.Scope() == nil {
 		return
 	}
-	hub.Scope().SetRequest(r)
+	hub.Scope().SetRequest(observability.RequestForTelemetry(r))
 	hub.RecoverWithContext(ctx, recovered)
 	hub.Flush(500 * time.Millisecond)
 }

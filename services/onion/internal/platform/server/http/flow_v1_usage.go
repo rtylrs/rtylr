@@ -50,7 +50,7 @@ func FlowV1UsageMiddleware(next http.Handler) http.Handler {
 			logger.Ctx(r.Context()).Warn("deprecated flow v1 route called",
 				logger.String("route_prefix", route),
 				logger.String("method", r.Method),
-				logger.String("path", r.URL.Path),
+				logger.String("path", requestRouteTemplate(r)),
 				logger.String("remote_ip", getRemoteIP(r)),
 				logger.String("user_agent", r.UserAgent()),
 			)
