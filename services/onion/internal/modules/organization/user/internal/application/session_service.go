@@ -5,8 +5,11 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"strings"
 	"time"
+
+	"github.com/voxire/onion/internal/modules/organization/user/internal/domain"
 )
 
 const refreshSessionTTL = 30 * 24 * time.Hour
@@ -33,11 +36,27 @@ func (s *Service) RefreshSession(ctx context.Context, token string, resolve func
 		return "", ErrInvalidCredentials
 	}
 	userID, err := s.repo.GetSessionUserID(ctx, sessionTokenHash(token))
-	if err != nil || userID <= 0 {
+	if errors.Is(err, domain.ErrSessionNotFound) {
+		return "", ErrInvalidCredentials
+	}
+	if err != nil {
+		return "", err
+	}
+	if userID <= 0 {
 		return "", ErrInvalidCredentials
 	}
 	user, err := s.repo.GetUserByID(ctx, userID)
-	if err != nil || !s.hasActiveAccountAccess(ctx, user) {
+	if errors.Is(err, domain.ErrUserNotFound) {
+		return "", ErrInvalidCredentials
+	}
+	if err != nil {
+		return "", err
+	}
+	active, err := s.accountHasActiveAccess(ctx, user)
+	if err != nil {
+		return "", err
+	}
+	if !active {
 		return "", ErrInvalidCredentials
 	}
 	var pc *PlatformClaims

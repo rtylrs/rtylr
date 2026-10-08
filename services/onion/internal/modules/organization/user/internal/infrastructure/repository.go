@@ -333,6 +333,9 @@ func (r *Repository) GetSessionUserID(ctx context.Context, tokenHash string) (in
 		SELECT user_id FROM user_sessions
 		WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP
 		ORDER BY id DESC LIMIT 1`, tokenHash).Scan(&userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, domain.ErrSessionNotFound
+	}
 	return userID, err
 }
 
