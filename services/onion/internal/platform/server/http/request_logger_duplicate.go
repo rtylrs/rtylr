@@ -140,6 +140,13 @@ var sensitiveFieldParts = []string{
 	"pwd",
 	"x-api-key",
 	"sessionid",
+	"key",
+	"auth",
+	"url",
+	"uri",
+	"code",
+	"ticket",
+	"sig",
 }
 
 func sanitizeMap(data map[string][]string) map[string][]string {

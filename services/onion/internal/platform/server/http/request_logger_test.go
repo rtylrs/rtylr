@@ -61,7 +61,7 @@ func TestRequestLoggerPreservesLargeJSONBody(t *testing.T) {
 }
 
 func TestSanitizeMapRedactsCredentialFieldVariants(t *testing.T) {
-	for _, key := range []string{"pin", "pin_code", "cvv", "cvc", "ssn", "tax_id", "national_id", "otp", "card_number", "expiry", "passwd", "pwd", "x-api-key", "sessionid"} {
+	for _, key := range []string{"pin", "pin_code", "cvv", "cvc", "ssn", "tax_id", "national_id", "otp", "card_number", "expiry", "passwd", "pwd", "x-api-key", "sessionid", "url", "source_uri", "code", "ticket", "sig"} {
 		t.Run(key, func(t *testing.T) {
 			got := sanitizeMap(map[string][]string{key: {"secret"}})
 			if got[key][0] != "[REDACTED]" {

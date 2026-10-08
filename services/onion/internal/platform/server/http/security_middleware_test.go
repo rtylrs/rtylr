@@ -179,6 +179,7 @@ func TestSanitizeHeaders_StripsAuth(t *testing.T) {
 		"Authorization": {"Bearer secret-token"},
 		"Cookie":        {"session=abc"},
 		"X-Internal":    {"value"},
+		"X-Image-URL":   {"https://cdn.example/asset?sig=bearer"},
 	}
 	out := sanitizeHeaders(in)
 	for _, banned := range []string{"Authorization", "Cookie"} {
@@ -193,12 +194,16 @@ func TestSanitizeHeaders_StripsAuth(t *testing.T) {
 	if _, ok := out["X-Internal"]; !ok {
 		t.Error("non-sensitive headers should pass through")
 	}
+	if vals := out["X-Image-URL"]; len(vals) != 1 || vals[0] != "[REDACTED]" {
+		t.Errorf("URL header should be redacted, got %#v", vals)
+	}
 }
 
 func TestSanitizeQueryParams_StripsSensitiveValues(t *testing.T) {
 	in := map[string][]string{
 		"token":    {"sk-abc123"},
 		"password": {"hunter2"},
+		"url":      {"https://cdn.example/asset?sig=bearer"},
 		"q":        {"search-term"},
 	}
 	out := sanitizeQueryParams(in)
@@ -207,6 +212,9 @@ func TestSanitizeQueryParams_StripsSensitiveValues(t *testing.T) {
 	}
 	if vals := out["password"]; len(vals) > 0 && vals[0] == "hunter2" {
 		t.Error("password value should be redacted in sanitized output")
+	}
+	if vals := out["url"]; len(vals) != 1 || vals[0] != "[REDACTED]" {
+		t.Errorf("URL value should be redacted in sanitized output, got %#v", vals)
 	}
 	if vals := out["q"]; len(vals) == 0 || vals[0] != "search-term" {
 		t.Error("non-sensitive query params should pass through unchanged")
