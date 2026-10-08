@@ -4,33 +4,9 @@ import (
 	"log"
 	stdhttp "net/http"
 	"os"
-	"strings"
 
 	"github.com/go-chi/chi/v5/middleware"
 )
-
-var sensitiveQueryKeys = map[string]struct{}{
-	"api_key":       {},
-	"code":          {},
-	"key":           {},
-	"profile_token": {},
-	"refresh_token": {},
-	"secret":        {},
-	"signature":     {},
-	"sig":           {},
-	"ticket":        {},
-	"token":         {},
-	"access_token":  {},
-}
-
-// The request/error logger uses the shared substring redactor in
-// request_logger.go. Extend that list here so the two logging paths cannot
-// drift again when a credential is added to the access-log map.
-//
-//nolint:gochecknoinits // The shared package-level redactor is initialized before handlers run.
-func init() {
-	sensitiveFieldParts = append(sensitiveFieldParts, "ticket", "sig")
-}
 
 type sanitizedLogFormatter struct {
 	base middleware.DefaultLogFormatter
@@ -65,7 +41,7 @@ func sanitizeRequestForLogging(r *stdhttp.Request) *stdhttp.Request {
 	urlCopy.RawPath = ""
 	query := urlCopy.Query()
 	for key := range query {
-		if _, ok := sensitiveQueryKeys[strings.ToLower(key)]; ok {
+		if isSensitiveField(key) {
 			query.Set(key, "[REDACTED]")
 		}
 	}

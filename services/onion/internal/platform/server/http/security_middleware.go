@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -94,21 +93,9 @@ func (b *securityBatcher) flush() {
 
 func sanitizeHeaders(headers map[string][]string) map[string][]string {
 	sanitized := make(map[string][]string)
-	sensitiveHeaders := []string{"authorization", "cookie", "x-api-key", "token", "password"}
 
 	for key, values := range headers {
-		keyLower := strings.ToLower(key)
-		isSensitive := false
-
-		for _, sensitive := range sensitiveHeaders {
-			if strings.Contains(keyLower, sensitive) {
-				isSensitive = true
-
-				break
-			}
-		}
-
-		if isSensitive {
+		if isSensitiveField(key) {
 			sanitized[key] = []string{"[REDACTED]"}
 		} else {
 			sanitized[key] = values
@@ -120,21 +107,9 @@ func sanitizeHeaders(headers map[string][]string) map[string][]string {
 
 func sanitizeQueryParams(params map[string][]string) map[string][]string {
 	sanitized := make(map[string][]string)
-	sensitiveParams := []string{"token", "key", "password", "secret", "auth"}
 
 	for key, values := range params {
-		keyLower := strings.ToLower(key)
-		isSensitive := false
-
-		for _, sensitive := range sensitiveParams {
-			if strings.Contains(keyLower, sensitive) {
-				isSensitive = true
-
-				break
-			}
-		}
-
-		if isSensitive {
+		if isSensitiveField(key) {
 			sanitized[key] = []string{"[REDACTED]"}
 		} else {
 			sanitized[key] = values
