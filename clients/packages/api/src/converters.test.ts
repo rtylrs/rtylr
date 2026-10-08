@@ -52,8 +52,8 @@ describe('key conversion preserves opaque values (rtylr#952 #1)', () => {
 
   it('still leaves a Date alone', () => {
     const d = new Date('2026-01-01T00:00:00Z');
-    const out = toOneKitJson({ createdAt: d }) as { created_at: unknown };
-    expect(out.created_at).toBeInstanceOf(Date);
+    const out = toOneKitJson({ createdAt: d });
+    expect(out).toEqual({ created_at: d });
   });
 });
 

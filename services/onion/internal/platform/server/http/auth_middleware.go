@@ -121,7 +121,7 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 				tokenValidator = tokenValidatorResolver.ResolveTokenValidator(ctx, authPkg.ProductPlatformCtx(ctx))
 			}
 
-			authUser, err := processTokenAuthentication(ctx, token, path, r.RemoteAddr, tokenValidator)
+			authUser, err := processTokenAuthentication(ctx, token, requestRouteTemplate(r), r.RemoteAddr, tokenValidator)
 			if err != nil {
 				writeUnauthorizedResponse(ctx, w, "Unauthorized")
 
@@ -130,7 +130,7 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 			if accessResolver != nil {
 				effectiveAccess, accessErr := accessResolver.GetEffectiveAccess(ctx, authUser.BusinessID, authUser.UserID)
 				if accessErr != nil {
-					logger.Ctx(ctx).Warn("Effective authorization resolution failed", logger.Error(accessErr), logger.String("path", path))
+					logger.Ctx(ctx).Warn("Effective authorization resolution failed", logger.Error(accessErr), logger.String("path", requestRouteTemplate(r)))
 					writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
 					return
 				}
@@ -152,7 +152,7 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 						status, statusErr = statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
 					}
 					if statusErr != nil {
-						logger.Ctx(ctx).Warn("Provisioning status resolution failed", logger.Error(statusErr), logger.String("path", path))
+						logger.Ctx(ctx).Warn("Provisioning status resolution failed", logger.Error(statusErr), logger.String("path", requestRouteTemplate(r)))
 						writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
 						return
 					}

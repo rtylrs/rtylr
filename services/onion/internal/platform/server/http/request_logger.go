@@ -2,11 +2,8 @@ package http
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"mime"
 	"net"
 	"net/http"
 	"strings"
@@ -18,10 +15,6 @@ import (
 )
 
 const (
-	// maxLoggedRequestBodyBytes is how much of a JSON body we read for logging
-	// previews. The handler still receives the full body via replay.
-	maxLoggedRequestBodyBytes        = 8 << 10
-	maxLoggedBodyPreviewBytes        = 1024
 	maxLoggedHeaderValueBytes        = 200
 	duplicateDetectorCleanupInterval = time.Minute
 )
@@ -44,13 +37,6 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 
-			var bodyContent string
-
-			if r.Body != nil && isJSONContentType(r.Header.Get("Content-Type")) {
-				bodyContent = captureRequestBodyPreview(r)
-			}
-
-			sanitizedBody := sanitizeJSON(bodyContent)
 			sanitizedQuery := sanitizeMap(r.URL.Query())
 			sanitizedHeaders := sanitizeMap(r.Header)
 
@@ -71,11 +57,12 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			// 2xx/3xx are left to Better Stack to keep the channel signal-dense. Malicious
 			// requests are blocked upstream by SecurityMiddleware and never reach here.
 			// Anonymous 401s (no token) are expected bot/scanner noise — skip them.
+			// Request bodies are never logged because they may contain customer content.
 			if slack.Enabled() && responseWriter.statusCode >= 400 &&
 				(responseWriter.statusCode != http.StatusUnauthorized || r.Header.Get("Authorization") != "") &&
 				rateLimiter.CanSend("request-logs") {
 				slack.Post(slack.Requests, fmt.Sprintf("`%d` %s %s · %s · %s",
-					responseWriter.statusCode, r.Method, r.URL.Path, getRemoteIP(r), duration.Round(time.Millisecond)))
+					responseWriter.statusCode, r.Method, requestRouteTemplate(r), getRemoteIP(r), duration.Round(time.Millisecond)))
 			}
 
 			go func() {
@@ -102,47 +89,11 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 				}
 
 				go func() {
-					logRequest(ctx, r, responseWriter.statusCode, duration, sanitizedBody, sanitizedHeaders, sanitizedQuery, serviceName, count)
+					logRequest(ctx, r, responseWriter.statusCode, duration, sanitizedHeaders, sanitizedQuery, serviceName, count)
 				}()
 			}()
 		})
 	}
-}
-
-type replayReadCloser struct {
-	io.Reader
-	closer io.Closer
-}
-
-func (r *replayReadCloser) Close() error {
-	return r.closer.Close()
-}
-
-func isJSONContentType(contentType string) bool {
-	mediaType, _, err := mime.ParseMediaType(contentType)
-	if err != nil {
-		return strings.Contains(strings.ToLower(contentType), "application/json")
-	}
-	mediaType = strings.ToLower(mediaType)
-	return mediaType == "application/json" || strings.HasSuffix(mediaType, "+json")
-}
-
-func captureRequestBodyPreview(r *http.Request) string {
-	originalBody := r.Body
-	bodyBytes, err := io.ReadAll(io.LimitReader(originalBody, maxLoggedRequestBodyBytes+1))
-	if len(bodyBytes) > 0 {
-		r.Body = &replayReadCloser{
-			Reader: io.MultiReader(bytes.NewReader(bodyBytes), originalBody),
-			closer: originalBody,
-		}
-	}
-	if err != nil {
-		return ""
-	}
-	if len(bodyBytes) > maxLoggedRequestBodyBytes {
-		return string(bodyBytes[:maxLoggedRequestBodyBytes])
-	}
-	return string(bodyBytes)
 }
 
 type ResponseWriter struct {

@@ -5,6 +5,7 @@ import { FeedbackServiceClient } from '@voxire/voxie/crm/feedback/v1/client';
 import type { Feedback } from '@voxire/voxie/crm/feedback/v1/types';
 import { feedbackItemSchema, type FeedbackType } from '../../schemas/feedback';
 import type { FeedbackItem } from '../../schemas/feedback';
+import { unwrapList } from '../../lib/unwrapList';
 
 const feedbackClient = createOneKitClient(FeedbackServiceClient, 'crm');
 
@@ -44,7 +45,7 @@ export const useListFeedback = (params?: ListFeedbackParams): UseQueryResult<Fee
           page,
           pageSize: 100,
         });
-        const pageItems = (res.feedback ?? []).map(fromApiFeedback);
+        const pageItems = unwrapList<Feedback>(res, 'feedback').map(fromApiFeedback);
         feedback.push(...pageItems);
         total = res.total ?? feedback.length;
         page += 1;

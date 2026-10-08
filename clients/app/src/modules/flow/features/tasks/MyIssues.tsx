@@ -26,8 +26,9 @@ const MyIssues: React.FC = () => {
   const access = useUserStore((state) => state.user?.effectiveAccess);
   const canCreate = canFlowPermission('flow:tasks:create', access);
   const myIssuesQuery = useMyIssues();
-  const { data: rawTasks = [], isLoading } = myIssuesQuery;
+  const { data: rawTasks = [] } = myIssuesQuery;
   const loadFailed = hasQueryFailed(myIssuesQuery);
+  const isLoading = myIssuesQuery.isPending && !loadFailed;
   // GetMyTasks doesn't filter archived server-side, so exclude client-side
   // to match Triage/FocusToday/FlowLayout.
   const tasks = useMemo(() => rawTasks.map(apiTaskToTask).filter((t) => !t.archived), [rawTasks]);

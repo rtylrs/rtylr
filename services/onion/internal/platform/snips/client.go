@@ -209,12 +209,11 @@ func (c *Client) superviseProviderStream(ctx context.Context, prompt string, pro
 				if !ok {
 					c.markProviderFailure(ctx, current, errors.New("stream closed before completion"))
 					if !visible && len(remaining) > 0 {
-						next, nextSource, err := c.nextProviderStream(ctx, prompt, remaining)
+						next, nextSource, nextRemaining, err := c.nextProviderStream(ctx, prompt, remaining)
 						if err == nil {
-							current, currentSource, remaining = next, nextSource, remaining[1:]
+							current, currentSource, remaining = next, nextSource, nextRemaining
 							continue
 						}
-						c.markProviderFailure(ctx, remaining[0], err)
 					}
 					sendStreamToken(ctx, out, StreamToken{Done: true, Error: "provider stream ended before completion"})
 					return
@@ -222,12 +221,11 @@ func (c *Client) superviseProviderStream(ctx context.Context, prompt string, pro
 				if token.Error != "" {
 					c.markProviderFailure(ctx, current, errors.New(token.Error))
 					if !visible && len(remaining) > 0 {
-						next, nextSource, err := c.nextProviderStream(ctx, prompt, remaining)
+						next, nextSource, nextRemaining, err := c.nextProviderStream(ctx, prompt, remaining)
 						if err == nil {
-							current, currentSource, remaining = next, nextSource, remaining[1:]
+							current, currentSource, remaining = next, nextSource, nextRemaining
 							continue
 						}
-						c.markProviderFailure(ctx, remaining[0], err)
 					}
 					token.Provider = current.Name()
 					sendStreamToken(ctx, out, token)
@@ -250,16 +248,16 @@ func (c *Client) superviseProviderStream(ctx context.Context, prompt string, pro
 	return out
 }
 
-func (c *Client) nextProviderStream(ctx context.Context, prompt string, providers []Provider) (Provider, <-chan StreamToken, error) {
+func (c *Client) nextProviderStream(ctx context.Context, prompt string, providers []Provider) (Provider, <-chan StreamToken, []Provider, error) {
 	var lastErr error
-	for _, provider := range providers {
+	for index, provider := range providers {
 		if !c.providerReady(provider) || !providerSupportsInput(ctx, provider) {
 			continue
 		}
 		stream, err := provider.CompleteTextStream(ctx, prompt)
 		if err == nil {
 			c.markProviderSuccess(provider)
-			return provider, stream, nil
+			return provider, stream, providers[index+1:], nil
 		}
 		lastErr = err
 		c.markProviderFailure(ctx, provider, err)
@@ -267,7 +265,7 @@ func (c *Client) nextProviderStream(ctx context.Context, prompt string, provider
 	if lastErr == nil {
 		lastErr = ErrAllProvidersFailed
 	}
-	return nil, nil, lastErr
+	return nil, nil, nil, lastErr
 }
 
 func sendStreamToken(ctx context.Context, out chan<- StreamToken, token StreamToken) bool {

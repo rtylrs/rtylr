@@ -16,6 +16,7 @@ import {
   Select,
   Textarea,
 } from '../../shared/components/ui';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
   free: { bg: 'rgba(107,114,128,0.12)', color: '#6b7280' },
@@ -91,22 +92,21 @@ const Contracts: React.FC = () => {
   // Set once a "Load more" page comes back empty.
   const [exhausted, setExhausted] = useState(false);
   const [loadedContracts, setLoadedContracts] = useState<Contract[]>([]);
-  const {
-    data: fetchedContracts,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-  } = useContracts(pageSize, offset);
+  const contractsQuery = useContracts(pageSize, offset);
+  const { data: fetchedContracts, isFetching, refetch } = contractsQuery;
+  const isError = hasQueryFailed(contractsQuery);
+  const isLoading = contractsQuery.isPending && !isError;
   const [leadOffset, setLeadOffset] = useState(0);
   const [leadExhausted, setLeadExhausted] = useState(false);
   const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
+  const leadOptionsQuery = useLeads(pageSize, leadOffset);
   const {
     data: fetchedLeadOptions,
     isFetching: isFetchingLeadOptions,
-    isError: leadOptionsError,
     refetch: refetchLeadOptions,
-  } = useLeads(pageSize, leadOffset);
+  } = leadOptionsQuery;
+  const leadOptionsError = hasQueryFailed(leadOptionsQuery);
+  const leadOptionsLoading = leadOptionsQuery.isPending && !leadOptionsError;
   const createContract = useCreateContract();
 
   useEffect(() => {
@@ -523,6 +523,7 @@ const Contracts: React.FC = () => {
               <select
                 value={form.leadId}
                 onChange={(e) => setForm((f) => ({ ...f, leadId: e.target.value }))}
+                disabled={leadOptionsLoading}
                 style={{
                   width: '100%',
                   height: '36px',
@@ -536,7 +537,9 @@ const Contracts: React.FC = () => {
                   cursor: 'pointer',
                 }}
               >
-                <option value="">{t('crm.contracts.selectLead')}</option>
+                <option value="">
+                  {leadOptionsLoading ? t('crmCommon.loading') : t('crm.contracts.selectLead')}
+                </option>
                 {loadedLeads.map((l) => (
                   <option key={l.id} value={String(l.id)}>
                     {leadDisplayName(l)}

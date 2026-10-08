@@ -93,11 +93,11 @@ describe('useCashFlow', () => {
     expect(result.current.data).toEqual([]);
   });
 
-  it('returns an empty array when analytics is absent entirely', async () => {
+  it('fails when the response omits the required analytics envelope', async () => {
     vi.mocked(insightsFinancialClient.getCashFlowAnalytics).mockResolvedValue({});
     const { result } = renderHook(() => useCashFlow(), { wrapper: createWrapper() });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual([]);
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error).toBeInstanceOf(TypeError);
   });
 
   it('starts in loading state', () => {

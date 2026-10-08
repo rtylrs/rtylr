@@ -1,0 +1,27 @@
+use_default_settings:
+  engines:
+    remove:
+      - google
+      - google images
+      - google news
+      - google videos
+      - google cse
+      - google cse images
+      - google scholar
+      - google play apps
+      - google play movies
+
+general:
+  debug: false
+  instance_name: Caret Search
+
+search:
+  autocomplete: ""
+  formats:
+    - json
+
+server:
+  secret_key: "replaced-by-SEARXNG_SECRET"
+  limiter: false
+  public_instance: false
+  image_proxy: false

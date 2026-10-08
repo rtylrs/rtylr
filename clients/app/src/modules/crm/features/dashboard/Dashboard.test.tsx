@@ -4,6 +4,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
+  dashboardError: false,
+  customersError: false,
+  segmentsError: false,
+  refetchCustomers: vi.fn(),
+  refetchSegments: vi.fn(),
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -36,18 +41,27 @@ const segmentsList: unknown[] = [];
 
 vi.mock('../../shared/hooks/queries/useCrmDashboard', () => ({
   useCrmDashboard: () => ({
-    data: dashboardData,
+    data: mocks.dashboardError ? undefined : dashboardData,
     isLoading: false,
+    isError: mocks.dashboardError,
     refetch: refetchDashboard,
   }),
 }));
 
 vi.mock('../../shared/hooks/queries/useCustomers', () => ({
-  useListCustomers: () => ({ data: customersList }),
+  useListCustomers: () => ({
+    data: mocks.customersError ? undefined : customersList,
+    isError: mocks.customersError,
+    refetch: mocks.refetchCustomers,
+  }),
 }));
 
 vi.mock('../../shared/hooks/queries/useSegments', () => ({
-  useListSegments: () => ({ data: segmentsList }),
+  useListSegments: () => ({
+    data: mocks.segmentsError ? undefined : segmentsList,
+    isError: mocks.segmentsError,
+    refetch: mocks.refetchSegments,
+  }),
 }));
 
 import Dashboard from './Dashboard';
@@ -58,7 +72,12 @@ function renderDashboard(): void {
 
 beforeEach(() => {
   mocks.navigate.mockClear();
+  mocks.dashboardError = false;
+  mocks.customersError = false;
+  mocks.segmentsError = false;
   refetchDashboard.mockClear();
+  mocks.refetchCustomers.mockClear();
+  mocks.refetchSegments.mockClear();
   customersList.length = 0;
   segmentsList.length = 0;
   dashboardData.recentCampaigns = [];
@@ -98,7 +117,7 @@ describe('Dashboard read-only empty states', () => {
     expect(mocks.navigate).toHaveBeenCalledWith({ to: '/crm/customers' });
   });
 
-  it('shows a "refresh" call-to-action when campaign performance is unavailable', () => {
+  it('explains campaign performance is unavailable without offering a false retry', () => {
     renderDashboard();
 
     expect(
@@ -108,8 +127,28 @@ describe('Dashboard read-only empty states', () => {
       screen.getByText('crm.dashboard.campaignPerformanceUnavailableDescription')
     ).toBeInTheDocument();
 
+    expect(screen.queryByRole('button', { name: 'crm.actions.refresh' })).not.toBeInTheDocument();
+    expect(refetchDashboard).not.toHaveBeenCalled();
+  });
+
+  it('offers a retry when loading the dashboard actually fails', () => {
+    mocks.dashboardError = true;
+
+    renderDashboard();
+
     fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
 
     expect(refetchDashboard).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show zero-valued customer KPIs when the customer list fails', () => {
+    mocks.customersError = true;
+
+    renderDashboard();
+
+    expect(screen.getAllByText('—')).toHaveLength(2);
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
+    expect(mocks.refetchCustomers).toHaveBeenCalledOnce();
   });
 });

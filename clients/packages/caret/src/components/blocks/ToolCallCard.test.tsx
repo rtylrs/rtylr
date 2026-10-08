@@ -51,7 +51,7 @@ describe("ToolCallCard", () => {
     expect(screen.getByRole("img", { name: "Searching…" })).not.toBeNull();
   });
 
-  it("shows the exact grounded web answer, safe sources, and associated Google suggestions", () => {
+  it("shows safe web search results with source links and snippets", () => {
     const call: ToolCallBlock = {
       id: "web-search-1",
       type: "tool_call",
@@ -59,32 +59,23 @@ describe("ToolCallCard", () => {
       input: { query: "public question" },
       status: "success",
       output: {
-        answer: "A sourced answer from Google.",
         sources: [
           {
-            title: "Google AI docs",
-            url: "https://ai.google.dev/gemini-api/docs/google-search",
+            title: "Search result",
+            url: "https://example.com/source",
+            snippet: "A short public snippet.",
           },
-          { title: "Unsafe source", url: "javascript:alert(1)" },
+          { title: "Unsafe source", url: "javascript:alert(1)", snippet: "" },
         ],
-        search_suggestions_html:
-          '<div><a href="https://www.google.com/search?q=gemini">Gemini</a><a href="javascript:alert(1)">Unsafe</a><a href="https://user@google.com/search?q=bad">Credential URL</a><a href="https://evil.google.com/search?q=bad">Lookalike host</a></div>',
       },
     };
 
     render(<ToolCallCard call={call} />);
 
-    expect(screen.getByText("A sourced answer from Google.")).not.toBeNull();
     expect(
-      screen.getByRole("link", { name: "Google AI docs" }).getAttribute("href"),
-    ).toBe("https://ai.google.dev/gemini-api/docs/google-search");
-    expect(
-      screen.getByRole("link", { name: "Gemini" }).getAttribute("href"),
-    ).toBe("https://www.google.com/search?q=gemini");
+      screen.getByRole("link", { name: "Search result" }).getAttribute("href"),
+    ).toBe("https://example.com/source");
+    expect(screen.getByText("A short public snippet.")).not.toBeNull();
     expect(screen.queryByRole("link", { name: "Unsafe source" })).toBeNull();
-    expect(screen.queryByRole("link", { name: "Unsafe" })).toBeNull();
-    expect(screen.queryByRole("link", { name: "Credential URL" })).toBeNull();
-    expect(screen.queryByRole("link", { name: "Lookalike host" })).toBeNull();
-    expect(screen.queryByTitle("Google Search suggestions")).toBeNull();
   });
 });

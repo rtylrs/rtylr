@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { AxiosError } from 'axios';
 import { createApiClient, createOneKitFetch } from './client';
-import { resetSessionInvalidationForTests, setSessionRefresh } from './session';
+import {
+  resetSessionInvalidationForTests,
+  setSessionRefresh,
+  type SessionRefreshResult,
+} from './session';
 
 vi.stubGlobal('import', {
   meta: { env: { VITE_API_URL: 'https://api.test.com/' } },
@@ -8,6 +13,7 @@ vi.stubGlobal('import', {
 
 const TOKEN_A = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.sig_a';
 const TOKEN_B = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.sig_b';
+const TOKEN_C = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.sig_c';
 
 function setTokenCookie(token: string): void {
   document.cookie = `token=${token}; path=/`;
@@ -195,7 +201,7 @@ describe('401 handling: a genuine session rejection', () => {
     setTokenCookie(TOKEN_A);
     setSessionRefresh(async () => {
       setTokenCookie(TOKEN_B);
-      return true;
+      return 'refreshed';
     });
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
@@ -277,8 +283,8 @@ describe('401 handling: stale responses and refresh races', () => {
 
   it('does not sign out on 401s while a session refresh is in flight', async () => {
     setTokenCookie(TOKEN_A);
-    let release: (ok: boolean) => void = () => {};
-    setSessionRefresh(() => new Promise<boolean>((resolve) => (release = resolve)));
+    let release: (result: SessionRefreshResult) => void = () => {};
+    setSessionRefresh(() => new Promise<SessionRefreshResult>((resolve) => (release = resolve)));
 
     const client = createApiClient('dash');
     const configs = Array.from({ length: 3 }, () =>
@@ -296,7 +302,7 @@ describe('401 handling: stale responses and refresh races', () => {
 
     // The refresh replaced the cookie; the 401s belonged to the old token.
     setTokenCookie(TOKEN_B);
-    release(true);
+    release('refreshed');
     await pending;
 
     expect(readTokenCookie()).toBe(TOKEN_B);
@@ -308,7 +314,7 @@ describe('401 handling: stale responses and refresh races', () => {
     let calls = 0;
     setSessionRefresh(() => {
       calls++;
-      return Promise.resolve(false);
+      return Promise.resolve('rejected');
     });
 
     const client = createApiClient('dash');
@@ -327,26 +333,87 @@ describe('401 handling: stale responses and refresh races', () => {
     expect(cookieTracker.count()).toBe(1);
   });
 
-  it('a throwing refresh does not wedge later 401s', async () => {
+  it('keeps the session through a temporary refresh failure and retries refresh later', async () => {
     setTokenCookie(TOKEN_A);
-    setSessionRefresh(() => Promise.reject(new Error('network down')));
+    let calls = 0;
+    setSessionRefresh(() => {
+      calls++;
+      if (calls === 1) return Promise.reject(new Error('network down'));
+      setTokenCookie(TOKEN_B);
+      return Promise.resolve('refreshed');
+    });
 
     const client = createApiClient('dash');
     await runResponseRejection(
       client,
       rejected401(runRequestInterceptor(client))
     ).catch(() => undefined);
-    await vi.waitFor(() => expect(readTokenCookie()).toBeNull());
+    expect(readTokenCookie()).toBe(TOKEN_A);
+    expect(cookieTracker.count()).toBe(0);
 
-    setTokenCookie(TOKEN_B);
     await runResponseRejection(
       client,
       rejected401(runRequestInterceptor(client))
     ).catch(() => undefined);
-    await vi.waitFor(() => expect(readTokenCookie()).toBeNull());
+    expect(readTokenCookie()).toBe(TOKEN_B);
 
-    // The throwing refresh neither wedged the client nor skipped a sign-out.
-    expect(cookieTracker.count()).toBe(2);
+    expect(calls).toBe(2);
+    expect(cookieTracker.count()).toBe(0);
+  });
+
+  it('bounds a refresh request that never settles without ending the session', async () => {
+    vi.useFakeTimers();
+    setTokenCookie(TOKEN_A);
+    let aborted = false;
+    setSessionRefresh((signal) => new Promise<SessionRefreshResult>((_resolve, reject) => {
+      signal.addEventListener('abort', () => {
+        aborted = true;
+        reject(new DOMException('The operation was aborted', 'AbortError'));
+      }, { once: true });
+    }));
+
+    const client = createApiClient('dash');
+    const error = rejected401(runRequestInterceptor(client));
+    const pending = runResponseRejection(client, error).catch((result) => result);
+
+    await vi.advanceTimersByTimeAsync(5_000);
+    await expect(pending).resolves.toBe(error);
+
+    expect(aborted).toBe(true);
+    expect(readTokenCookie()).toBe(TOKEN_A);
+    expect(cookieTracker.count()).toBe(0);
+    vi.useRealTimers();
+  });
+
+  it('replays an Axios request at most once after its access token is refreshed', async () => {
+    setTokenCookie(TOKEN_A);
+    let refreshCount = 0;
+    setSessionRefresh(async () => {
+      refreshCount++;
+      if (refreshCount > 2) return 'rejected';
+      setTokenCookie(refreshCount === 1 ? TOKEN_B : TOKEN_C);
+      return 'refreshed';
+    });
+
+    const client = createApiClient('dash');
+    let requestCount = 0;
+    client.defaults.adapter = async (config) => {
+      requestCount++;
+      const response = {
+        data: { message: 'Unauthorized' },
+        status: 401,
+        statusText: 'Unauthorized',
+        headers: {},
+        config,
+      };
+      throw new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response);
+    };
+
+    await client.get('/still-unauthorized').catch(() => undefined);
+
+    expect(requestCount).toBe(2);
+    expect(refreshCount).toBe(2);
+    expect(readTokenCookie()).toBe(TOKEN_C);
   });
 
   it('a failed sign-out does not reject the caller 401', async () => {

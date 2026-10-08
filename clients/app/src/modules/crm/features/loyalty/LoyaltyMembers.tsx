@@ -10,6 +10,7 @@ import { Button, PageHeader, Card, SkeletonList } from '../../shared/components/
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
 import { Users } from 'lucide-react';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const LoyaltyMembers: React.FC = () => {
   const navigate = useNavigate();
@@ -19,13 +20,10 @@ const LoyaltyMembers: React.FC = () => {
   // Set once a "Load more" page comes back empty.
   const [exhausted, setExhausted] = useState(false);
   const [loadedMembers, setLoadedMembers] = useState<LoyaltyMember[]>([]);
-  const {
-    data: fetched,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-  } = useLoyaltyMembers(pageSize, offset);
+  const membersQuery = useLoyaltyMembers(pageSize, offset);
+  const { data: fetched, isFetching, refetch } = membersQuery;
+  const isError = hasQueryFailed(membersQuery);
+  const isLoading = membersQuery.isPending && !isError;
   const [search, setSearch] = useState('');
   useEffect(() => {
     if (!fetched) return;

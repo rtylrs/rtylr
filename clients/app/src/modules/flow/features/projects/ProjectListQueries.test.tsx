@@ -56,6 +56,7 @@ vi.mock('../tasks/useTasks', () => ({
   useTasks: () => ({
     data: remote.tasks,
     isLoading: remote.taskLoading,
+    isPending: remote.taskLoading,
     isError: false,
     refetch: remote.retryTasks,
   }),

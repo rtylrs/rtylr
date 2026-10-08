@@ -4,6 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import {
   Users,
@@ -24,6 +25,7 @@ import {
 } from '../../shared/hooks/queries/useSegments';
 import { ConfirmModal } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 import {
   getSegmentRuleOperators,
   SEGMENT_RULE_FIELDS,
@@ -511,7 +513,10 @@ const Segments: React.FC = () => {
   // resource that already covers this asset, consistent with customer deletion being
   // gated at operator-tier (`crm:customers:manage`) rather than walled off to admin.
   const canDeleteSegment = canCrmPermission('crm:segments:manage');
-  const { data: fetchedSegments } = useListSegments();
+  const segmentsQuery = useListSegments();
+  const segmentsLoadFailed = hasQueryFailed(segmentsQuery);
+  const segmentsLoading = segmentsQuery.isPending && !segmentsLoadFailed;
+  const { data: fetchedSegments } = segmentsQuery;
   const removeSegment = useDeleteSegment();
   const createSegment = useCreateSegment();
   const [builderOpen, setBuilderOpen] = useState(false);
@@ -566,10 +571,14 @@ const Segments: React.FC = () => {
               {t('crm.segments.pageTitle')}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-              {t('crm.segments.activeCount', { count: segments.length })} ·{' '}
-              {t('crm.segments.customersTotal', {
-                count: segments.reduce((sum, s) => sum + s.customerCount, 0),
-              })}
+              {segmentsLoadFailed
+                ? t('crmErrors.refreshAndTryAgain')
+                : segmentsLoading
+                  ? t('crmCommon.loading')
+                  : `${t('crm.segments.activeCount', { count: segments.length })} · ${t(
+                      'crm.segments.customersTotal',
+                      { count: segments.reduce((sum, s) => sum + s.customerCount, 0) }
+                    )}`}
             </p>
           </div>
           <button
@@ -595,19 +604,37 @@ const Segments: React.FC = () => {
         </div>
 
         {/* Segment grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          {segments.map((segment, i) => (
-            <SegmentCard
-              key={segment.id}
-              segment={segment}
-              index={i}
-              onClick={() => navigate({ to: `/crm/segments/${segment.id}` })}
-              onDelete={() => setConfirmDeleteId(segment.id)}
-              deletePending={removeSegment.isPending}
-              canDelete={canDeleteSegment}
+        {segmentsLoading ? (
+          <p role="status" style={{ color: 'var(--hub-text-muted)' }}>
+            {t('crmCommon.loading')}
+          </p>
+        ) : segmentsLoadFailed ? (
+          <div role="alert">
+            <EmptyState
+              icon={AlertTriangle}
+              title={t('crmErrors.generic')}
+              description={t('crmErrors.refreshAndTryAgain')}
+              action={{
+                label: t('crm.actions.refresh'),
+                onClick: () => void segmentsQuery.refetch(),
+              }}
             />
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            {segments.map((segment, i) => (
+              <SegmentCard
+                key={segment.id}
+                segment={segment}
+                index={i}
+                onClick={() => navigate({ to: `/crm/segments/${segment.id}` })}
+                onDelete={() => setConfirmDeleteId(segment.id)}
+                deletePending={removeSegment.isPending}
+                canDelete={canDeleteSegment}
+              />
+            ))}
+          </div>
+        )}
 
         <ConfirmModal
           open={confirmDeleteId !== null}

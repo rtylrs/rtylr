@@ -59,69 +59,73 @@ func TestAssistantWebSearchRejectsPersonalDataAndLimitsCalls(t *testing.T) {
 	}
 }
 
-func TestParseGeminiGroundedSearchRequiresSafeSourcesAndSuggestions(t *testing.T) {
-	payload, err := json.Marshal(map[string]any{"steps": []any{
-		map[string]any{"type": "google_search_result", "result": []any{map[string]any{"search_suggestions": `<div><a href="https://www.google.com/search?q=gemini">Gemini</a></div>`}}},
-		map[string]any{"type": "model_output", "content": []any{map[string]any{"type": "text", "text": "Gemini supports grounded search.", "annotations": []any{
-			map[string]any{"type": "url_citation", "url": "https://ai.google.dev/gemini-api/docs/google-search", "title": "Gemini Search docs"},
-			map[string]any{"type": "url_citation", "url": "javascript:alert(1)", "title": "Unsafe"},
-			map[string]any{"type": "url_citation", "url": "https://user:pass@example.com/private", "title": "Credentials"},
-		}}}},
+func TestParseSearXNGResultsKeepsOnlySafeHTTPSResults(t *testing.T) {
+	payload := []byte(`{"results":[{"title":"Search result","url":"https://example.com/source","content":"A public snippet."},{"title":"Unsafe scheme","url":"javascript:alert(1)"},{"title":"Credentials","url":"https://user:pass@example.com/private"},{"title":"Insecure","url":"http://example.com/source"}]}`)
+	output, err := parseSearXNGResults(payload, "public query")
+	if err != nil {
+		t.Fatalf("parse results: %v", err)
+	}
+	if output["search_query"] != "public query" {
+		t.Fatalf("search_query = %#v", output["search_query"])
+	}
+	sources, ok := output["sources"].([]map[string]string)
+	if !ok || len(sources) != 1 || sources[0]["url"] != "https://example.com/source" || sources[0]["snippet"] != "A public snippet." {
+		t.Fatalf("unsafe or missing search results: %#v", output["sources"])
+	}
+}
+
+func TestParseSearXNGResultsSkipsOversizedURLAndKeepsLaterResults(t *testing.T) {
+	longURL := "https://example.com/" + strings.Repeat("x", 2050)
+	payload, err := json.Marshal(map[string]any{"results": []map[string]string{
+		{"title": "Too long", "url": longURL, "content": "not usable"},
+		{"title": "Valid result", "url": "https://example.com/valid", "content": "usable"},
 	}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	output, err := parseGeminiGroundedSearch(payload, "public query")
+	output, err := parseSearXNGResults(payload, "query")
 	if err != nil {
-		t.Fatalf("parse grounded result: %v", err)
-	}
-	if output["answer"] != "Gemini supports grounded search." || output["search_query"] != "public query" || output["search_suggestions_html"] == "" {
-		t.Fatalf("unexpected result: %#v", output)
+		t.Fatalf("parse results: %v", err)
 	}
 	sources, ok := output["sources"].([]map[string]string)
-	if !ok || len(sources) != 1 || sources[0]["url"] != "https://ai.google.dev/gemini-api/docs/google-search" {
-		t.Fatalf("unsafe or missing citation sources: %#v", output["sources"])
-	}
-
-	withoutSuggestions := []byte(`{"steps":[{"type":"google_search_result","result":[{"search_suggestions":""}]},{"type":"model_output","content":[{"type":"text","text":"Answer","annotations":[{"type":"url_citation","url":"https://example.com","title":"Example"}]}]}]}`)
-	if _, err := parseGeminiGroundedSearch(withoutSuggestions, "public query"); err == nil {
-		t.Fatal("expected a grounded answer without associated search suggestions to fail")
+	if !ok || len(sources) != 1 || sources[0]["url"] != "https://example.com/valid" {
+		t.Fatalf("valid result after oversized URL was lost: %#v", output["sources"])
 	}
 }
 
-func TestGeminiWebSearchUsesInteractionsGoogleSearchAndReturnsGrounding(t *testing.T) {
+func TestSearXNGWebSearchUsesConfiguredJSONEndpoint(t *testing.T) {
 	previousConfig := config.GlobalConfig
-	config.GlobalConfig = &config.AppConfig{GeminiAPIKey: "test-key"}
+	config.GlobalConfig = &config.AppConfig{SearXNGURL: "https://search.example/base/"}
 	t.Cleanup(func() { config.GlobalConfig = previousConfig })
 	client := &http.Client{Transport: roundTripFunc(func(request *http.Request) (*http.Response, error) {
-		if request.Method != http.MethodPost || request.URL.Host != "generativelanguage.googleapis.com" || request.URL.Path != "/v1beta/interactions" {
+		if request.Method != http.MethodGet || request.URL.Host != "search.example" || request.URL.Path != "/base/search" {
 			t.Fatalf("unexpected request target: %s %s", request.Method, request.URL.String())
 		}
-		if request.Header.Get("x-goog-api-key") != "test-key" {
-			t.Fatal("Gemini API key header was not set")
+		if request.URL.Query().Get("q") != "public query" || request.URL.Query().Get("format") != "json" {
+			t.Fatalf("unexpected search query: %s", request.URL.RawQuery)
 		}
-		var body struct {
-			Model string `json:"model"`
-			Input string `json:"input"`
-			Tools []struct {
-				Type string `json:"type"`
-			} `json:"tools"`
+		if request.Header.Get("Authorization") != "" {
+			t.Fatal("unexpected authorization header on a public search request")
 		}
-		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
-			t.Fatalf("decode search request: %v", err)
-		}
-		if body.Model != "gemini-3.8-flash" || body.Input != "public query" || len(body.Tools) != 1 || body.Tools[0].Type != "google_search" {
-			t.Fatalf("unexpected search request body: %#v", body)
-		}
-		payload := `{"steps":[{"type":"google_search_result","result":[{"search_suggestions":"<a href=\"https://www.google.com/search?q=related\">Related</a>"}]},{"type":"model_output","content":[{"type":"text","text":"Grounded answer.","annotations":[{"type":"url_citation","url":"https://example.com/source","title":"Source"}]}]}]}`
+		payload := `{"results":[{"title":"Source","url":"https://example.com/source","content":"Search snippet."}]}`
 		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(payload))}, nil
 	})}
-	result, err := (GeminiWebSearch{Client: client}).Search(context.Background(), "public query")
+	result, err := (SearXNGWebSearch{Client: client}).Search(context.Background(), "public query")
 	if err != nil {
-		t.Fatalf("Gemini search: %v", err)
+		t.Fatalf("SearXNG search: %v", err)
 	}
-	if result["answer"] != "Grounded answer." || result["search_suggestions_html"] == "" {
-		t.Fatalf("grounded result is incomplete: %#v", result)
+	sources, ok := result["sources"].([]map[string]string)
+	if !ok || len(sources) != 1 || sources[0]["snippet"] != "Search snippet." {
+		t.Fatalf("search result is incomplete: %#v", result)
+	}
+}
+
+func TestSearXNGWebSearchRequiresConfiguredEndpoint(t *testing.T) {
+	previousConfig := config.GlobalConfig
+	config.GlobalConfig = &config.AppConfig{}
+	t.Cleanup(func() { config.GlobalConfig = previousConfig })
+	if _, err := (SearXNGWebSearch{}).Search(context.Background(), "public query"); err == nil {
+		t.Fatal("expected an unconfigured SearXNG endpoint to fail")
 	}
 }
 

@@ -6,15 +6,20 @@ package observability
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+// RouteLookupContextKey stores the chi router for outer middleware to resolve route templates.
+type RouteLookupContextKey struct{}
 
 // InitSentry boots sentry-go. A missing SENTRY_DSN is not a fatal
 // condition — local development and preview builds run without it.
@@ -103,6 +108,11 @@ func scrubRequestData(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 	event.Request.Data = ""
 	event.Request.QueryString = ""
 	event.Request.Cookies = ""
+	for key := range event.Request.Headers {
+		if strings.EqualFold(key, "referer") || strings.EqualFold(key, "referrer") {
+			delete(event.Request.Headers, key)
+		}
+	}
 	if queryStart := strings.IndexByte(event.Request.URL, '?'); queryStart >= 0 {
 		event.Request.URL = event.Request.URL[:queryStart]
 	}
@@ -120,7 +130,7 @@ func scrubRequestData(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 func RecoverMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hub := sentry.CurrentHub().Clone()
-		hub.Scope().SetRequest(r)
+		hub.Scope().SetRequest(RequestForTelemetry(r))
 
 		defer func() {
 			if rec := recover(); rec != nil {
@@ -133,4 +143,35 @@ func RecoverMiddleware(next http.Handler) http.Handler {
 		}()
 		next.ServeHTTP(w, r)
 	})
+}
+
+// RequestRouteTemplate returns the matched route without request-specific path or query values.
+func RequestRouteTemplate(r *http.Request) string {
+	if r == nil {
+		return "[unmatched route]"
+	}
+
+	routeCtx := chi.RouteContext(r.Context())
+	if routeCtx != nil && routeCtx.RoutePattern() != "" {
+		return routeCtx.RoutePattern()
+	}
+	if router, ok := r.Context().Value(RouteLookupContextKey{}).(*chi.Mux); ok && router != nil && r.URL != nil {
+		resolved := chi.NewRouteContext()
+		if pattern := router.Find(resolved, r.Method, r.URL.Path); pattern != "" {
+			return pattern
+		}
+	}
+	return "[unmatched route]"
+}
+
+// RequestForTelemetry clones a request with its route template and no query string.
+func RequestForTelemetry(r *http.Request) *http.Request {
+	if r == nil {
+		return nil
+	}
+	path := RequestRouteTemplate(r)
+	clone := r.Clone(r.Context())
+	clone.URL = &url.URL{Path: path}
+	clone.RequestURI = path
+	return clone
 }

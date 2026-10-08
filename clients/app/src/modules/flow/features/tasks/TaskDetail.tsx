@@ -191,7 +191,9 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   };
   useTaskRealtime(id);
   const taskQuery = useTask(id);
-  const { data: taskData, isLoading } = taskQuery;
+  const { data: taskData } = taskQuery;
+  const taskLoadFailed = hasQueryFailed(taskQuery);
+  const isLoading = taskQuery.isPending && !taskLoadFailed;
   const user = useUserStore((s) => s.user);
   // Read up here rather than below the isLoading early return: these gates are
   // hooks, so they have to run on every render, and they need the task's project.
@@ -231,7 +233,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const tasksQuery = useTasks({});
   const allTasks = (tasksQuery.data ?? []).map(apiTaskToTask).filter((task) => !task.archived);
   const { data: cycles = [] } = useCycles(taskProjectId);
-  const { data: milestones = [] } = useMilestones(taskProjectId ?? '');
+  const milestonesQuery = useMilestones(taskProjectId ?? '');
+  const { data: milestones = [] } = milestonesQuery;
   const { data: projectSections = [] } = useProjectColumns(taskProjectId ?? '');
   const { members, projects } = useFlowStore();
 
@@ -303,7 +306,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
   // A failed request leaves `task` undefined exactly as a deleted one does,
   // so a 500 used to report the task as gone.
-  if (hasQueryFailed(taskQuery)) {
+  if (taskLoadFailed) {
     return <ListLoadFailed onRetry={() => void taskQuery.refetch()} />;
   }
 
@@ -887,12 +890,26 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
           </DetailField>
         )}
 
-        {milestone && (
-          <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
-            <span className="text-flow-meta" style={{ color: 'var(--flow-text)' }}>
-              {milestone.name}
-            </span>
-          </DetailField>
+        {hasQueryFailed(milestonesQuery) ? (
+          <div role="alert" className="text-flow-meta" style={{ color: 'var(--flow-text-muted)' }}>
+            <span>{t('flow.loadFailed.description')} </span>
+            <button
+              type="button"
+              onClick={() => void milestonesQuery.refetch()}
+              className="flow-focus underline"
+              style={{ color: 'var(--flow-text)' }}
+            >
+              {t('flow.loadFailed.retry')}
+            </button>
+          </div>
+        ) : (
+          milestone && (
+            <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
+              <span className="text-flow-meta" style={{ color: 'var(--flow-text)' }}>
+                {milestone.name}
+              </span>
+            </DetailField>
+          )
         )}
 
         {projectSections.length > 0 && (

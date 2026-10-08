@@ -140,7 +140,7 @@ func RateLimitMiddleware(limit int, window time.Duration) func(http.Handler) htt
 			if !limiter.isAllowed(key) {
 				logger.Ctx(r.Context()).Warn("Rate limit exceeded",
 					logger.String("ip", r.RemoteAddr),
-					logger.String("path", r.URL.Path),
+					logger.String("path", requestRouteTemplate(r)),
 				)
 
 				w.Header().Set("Content-Type", "application/json")
@@ -230,7 +230,7 @@ func perRouteRateLimitWithKeyFn(limit int, window time.Duration, keyFn func(*htt
 			if !limiter.isAllowed(key) {
 				logger.Ctx(r.Context()).Warn("Per-route rate limit exceeded",
 					logger.String("ip", r.RemoteAddr),
-					logger.String("path", r.URL.Path),
+					logger.String("path", requestRouteTemplate(r)),
 				)
 				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("Retry-After", "60")

@@ -13,27 +13,28 @@ describe('unwrapListResponse', () => {
     expect(unwrapListResponse(envelope, 'tasks')).toEqual(['a', 'b']);
   });
 
-  it('returns empty array for a missing key in the envelope', () => {
+  it('rejects an envelope with a missing key', () => {
     const envelope = { items: ['x'] };
-    expect(unwrapListResponse(envelope, 'tasks')).toEqual([]);
+    expect(() => unwrapListResponse(envelope, 'tasks')).toThrow(
+      'Expected a list response with "tasks"'
+    );
   });
 
-  it('returns empty array for null', () => {
-    expect(unwrapListResponse(null, 'tasks')).toEqual([]);
+  it('rejects null, missing, and primitive responses', () => {
+    for (const response of [null, undefined, 42, 'hello']) {
+      expect(() => unwrapListResponse(response, 'tasks')).toThrow(
+        'Expected a list response with "tasks"'
+      );
+    }
   });
 
-  it('returns empty array for undefined', () => {
-    expect(unwrapListResponse(undefined, 'tasks')).toEqual([]);
-  });
-
-  it('returns empty array for a non-object primitive', () => {
-    expect(unwrapListResponse(42, 'tasks')).toEqual([]);
-    expect(unwrapListResponse('hello', 'tasks')).toEqual([]);
-  });
-
-  it('returns empty array when the keyed value is not an array', () => {
-    expect(unwrapListResponse({ tasks: 'not-an-array' }, 'tasks')).toEqual([]);
-    expect(unwrapListResponse({ tasks: null }, 'tasks')).toEqual([]);
+  it('rejects a candidate key whose value is not an array', () => {
+    expect(() => unwrapListResponse({ tasks: 'not-an-array' }, 'tasks')).toThrow(
+      'Expected a list response with "tasks"'
+    );
+    expect(() => unwrapListResponse({ tasks: null }, 'tasks')).toThrow(
+      'Expected a list response with "tasks"'
+    );
   });
 
   it('uses the correct key - sibling keys do not bleed through', () => {

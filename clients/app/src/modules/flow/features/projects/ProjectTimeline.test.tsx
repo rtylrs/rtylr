@@ -26,10 +26,18 @@ vi.mock('./ProjectViewTabs', () => ({
 }));
 
 vi.mock('./useProjects', () => ({
-  useProjects: () => ({ data: [], isLoading: false }),
+  useProjects: () => ({ data: [], isLoading: false, refetch: vi.fn() }),
 }));
 
-const tasksState = vi.hoisted(() => ({ data: [] as ApiTask[] }));
+const tasksState = vi.hoisted(() => ({
+  data: [] as ApiTask[],
+  isPending: false,
+  isLoading: false,
+  isError: false,
+  isPaused: false,
+  failureCount: 0,
+  refetch: vi.fn(),
+}));
 vi.mock('../tasks/useTasks', () => ({
   useTasks: () => tasksState,
 }));
@@ -40,6 +48,11 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 beforeEach(() => {
   vi.clearAllMocks();
   tasksState.data = [];
+  tasksState.isPending = false;
+  tasksState.isLoading = false;
+  tasksState.isError = false;
+  tasksState.isPaused = false;
+  tasksState.failureCount = 0;
   useFlowStore.setState({
     projects: [
       {
@@ -66,5 +79,15 @@ describe('ProjectTimeline: no scheduled tasks', () => {
       to: '/flow/p/$projectId/board',
       params: { projectId: 'p1' },
     });
+  });
+
+  it('shows retry instead of the empty timeline when loading tasks fails', () => {
+    tasksState.isError = true;
+    render(<ProjectTimeline />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('flow.loadFailed.description');
+    expect(screen.queryByText('flow.projectTimeline.emptyTitle')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.loadFailed.retry' }));
+    expect(tasksState.refetch).toHaveBeenCalledOnce();
   });
 });

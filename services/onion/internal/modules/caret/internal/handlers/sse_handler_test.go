@@ -106,16 +106,44 @@ func TestCachedReplayPersistsBeforeCompletion(t *testing.T) {
 	}
 }
 
-func TestGroundedSearchIsStreamedWithItsSuggestionsButNotStoredAsChatAnswer(t *testing.T) {
+type fakeAIStreamService struct {
+	tokens  []snips.StreamToken
+	prompts []string
+}
+
+type fakeNamedToolExecutorFunc func(context.Context, string, map[string]any) (map[string]any, bool, error)
+
+func (f fakeNamedToolExecutorFunc) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	return f(ctx, name, input)
+}
+
+func (s *fakeAIStreamService) IsAvailable() bool { return true }
+
+func (s *fakeAIStreamService) GetPrimaryProvider() string { return "test-provider" }
+
+func (s *fakeAIStreamService) GenerateTextStream(_ context.Context, prompt string) (<-chan snips.StreamToken, error) {
+	s.prompts = append(s.prompts, prompt)
+	tokens := make(chan snips.StreamToken, len(s.tokens))
+	for _, token := range s.tokens {
+		tokens <- token
+	}
+	close(tokens)
+	return tokens, nil
+}
+
+func TestWebSearchPassesResultsToAssistantAndPersistsReply(t *testing.T) {
 	memory := &detachedMemoryFake{}
+	ai := &fakeAIStreamService{tokens: []snips.StreamToken{{Text: "I found a recent report — here are the details."}, {Done: true}}}
 	handler := &GenerateTextStreamHandler{
+		AiService:     ai,
 		MemoryService: memory,
 		ToolExecutors: []ToolExecutor{fakeToolExecutor{
 			executed: true,
 			output: map[string]any{
-				"answer":                  "A grounded answer — with checked sources.",
-				"sources":                 []map[string]string{{"title": "Source", "url": "https://example.com/source"}},
-				"search_suggestions_html": `<div><a href="https://www.google.com/search?q=next">Related search</a></div>`,
+				"search_query": "recent public news",
+				"sources": []map[string]string{{
+					"title": "Source", "url": "https://example.com/source", "snippet": "A verified public excerpt.",
+				}},
 			},
 		}},
 	}
@@ -131,16 +159,19 @@ func TestGroundedSearchIsStreamedWithItsSuggestionsButNotStoredAsChatAnswer(t *t
 	)
 
 	body := rec.Body.String()
-	if memory.storeCalls != 0 {
-		t.Fatalf("grounded web result should not be persisted without its associated search suggestions; stored %d responses", memory.storeCalls)
+	if memory.storeCalls != 1 || memory.storedContent != "I found a recent report, here are the details." {
+		t.Fatalf("assistant reply was not normalized and persisted: calls=%d content=%q", memory.storeCalls, memory.storedContent)
 	}
-	for _, want := range []string{"A grounded answer, with checked sources.", "Related search", `"type":"done"`} {
+	for _, want := range []string{"I found a recent report, here are the details.", "A verified public excerpt.", `"type":"done"`} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("stream missing %q: %s", want, body)
 		}
 	}
+	if len(ai.prompts) != 1 || !strings.Contains(ai.prompts[0], "https://example.com/source") || !strings.Contains(ai.prompts[0], "A verified public excerpt.") {
+		t.Fatalf("search results were not supplied to the assistant continuation: %#v", ai.prompts)
+	}
 	if strings.ContainsRune(body, '—') {
-		t.Fatalf("grounded web reply still contains an em dash: %s", body)
+		t.Fatalf("web search reply still contains an em dash: %s", body)
 	}
 }
 
@@ -162,11 +193,46 @@ func TestFailedWebSearchReturnsQuotaExplanationWithoutAnotherModelCall(t *testin
 	)
 
 	body := rec.Body.String()
-	if !strings.Contains(body, "Web search hit Google's current request limit") || !strings.Contains(body, `"type":"done"`) {
+	if !strings.Contains(body, "Web search is temporarily rate limited") || !strings.Contains(body, `"type":"done"`) {
 		t.Fatalf("failed web search did not get a clear completed response: %s", body)
 	}
-	if memory.storeCalls != 1 || !strings.Contains(memory.storedContent, "current request limit") {
+	if memory.storeCalls != 1 || !strings.Contains(memory.storedContent, "rate limited") {
 		t.Fatalf("quota explanation was not persisted as the assistant reply: calls=%d content=%q", memory.storeCalls, memory.storedContent)
+	}
+}
+
+func TestFailedWebSearchIsNotIgnoredWhenOtherToolsAlsoReturn(t *testing.T) {
+	memory := &detachedMemoryFake{}
+	ai := &fakeAIStreamService{tokens: []snips.StreamToken{{Text: "I would guess what happened."}, {Done: true}}}
+	handler := &GenerateTextStreamHandler{
+		AiService:     ai,
+		MemoryService: memory,
+		ToolExecutors: []ToolExecutor{fakeNamedToolExecutorFunc(func(_ context.Context, name string, _ map[string]any) (map[string]any, bool, error) {
+			if name == "web.search" {
+				return nil, true, errors.New("web search returned status 429")
+			}
+			return map[string]any{"value": "read result"}, true, nil
+		})},
+	}
+	rec := httptest.NewRecorder()
+	tokens := make(chan snips.StreamToken, 2)
+	tokens <- snips.StreamToken{Text: `<tool>{"name":"web.search","input":{"query":"recent public news"}}</tool><tool>{"name":"utilities.time","input":{"timezone":"UTC"}}</tool>`}
+	tokens <- snips.StreamToken{Done: true}
+	close(tokens)
+	handler.streamTokensToClient(
+		context.Background(), rec, tokens, make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "session-1", UserID: 7, EnhancedPrompt: "search the web"},
+		1, 7, cacheWritePlan{Mode: string(ModeAgent), ContinuationBudget: 3}, nil,
+	)
+
+	if len(ai.prompts) != 0 {
+		t.Fatalf("assistant was asked to continue after a failed search: %#v", ai.prompts)
+	}
+	if !strings.Contains(rec.Body.String(), "temporarily rate limited") || strings.Contains(rec.Body.String(), "I would guess") {
+		t.Fatalf("failed search did not return the safe explanation: %s", rec.Body.String())
+	}
+	if memory.storeCalls != 1 || !strings.Contains(memory.storedContent, "temporarily rate limited") {
+		t.Fatalf("safe failure explanation was not persisted: calls=%d content=%q", memory.storeCalls, memory.storedContent)
 	}
 }
 

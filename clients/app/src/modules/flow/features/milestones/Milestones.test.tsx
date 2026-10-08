@@ -26,6 +26,9 @@ const createProjectSpy = vi.fn(createProjectSucceeds);
 
 const projectsState = vi.hoisted(() => ({
   data: [{ id: 'p-1', name: 'Website Redesign' }] as Array<{ id: string; name: string }>,
+  isLoading: false,
+  isError: false,
+  refetch: vi.fn(),
 }));
 const createProjectState = vi.hoisted(() => ({ isPending: false }));
 const accessState = vi.hoisted(() => ({ canCreate: true }));
@@ -33,7 +36,12 @@ const accessState = vi.hoisted(() => ({ canCreate: true }));
 // The create form asks which project the milestone belongs to, so the screen
 // reads the project list, and can create one inline when none will do.
 vi.mock('../projects/useProjects', () => ({
-  useProjects: () => ({ data: projectsState.data, isLoading: false }),
+  useProjects: () => ({
+    data: projectsState.data,
+    isLoading: projectsState.isLoading,
+    isError: projectsState.isError,
+    refetch: projectsState.refetch,
+  }),
   useCreateProject: () => ({ mutate: createProjectSpy, isPending: createProjectState.isPending }),
 }));
 
@@ -186,6 +194,9 @@ describe('Milestones inline project creation', () => {
     createProjectSpy.mockImplementation(createProjectSucceeds);
     createProjectState.isPending = false;
     projectsState.data = [{ id: 'p-1', name: 'Website Redesign' }];
+    projectsState.isLoading = false;
+    projectsState.isError = false;
+    projectsState.refetch.mockClear();
     accessState.canCreate = true;
     mutateSpy.mockClear();
   });
@@ -210,6 +221,20 @@ describe('Milestones inline project creation', () => {
     const select = screen.getByLabelText('flow.milestones.project', { selector: 'select' });
     expect(select).toHaveValue('p-1');
     expect(screen.getByText('flow.milestones.newProjectOption')).toBeInTheDocument();
+  });
+
+  it('does not invite duplicate project creation when project lookup fails', () => {
+    projectsState.data = [];
+    projectsState.isError = true;
+    render(<Milestones />);
+    openForm();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('flow.loadFailed.description');
+    expect(screen.queryByText('flow.milestones.newProjectOption')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.milestones.noProjectsGate')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'flow.loadFailed.retry' })).toBeEnabled();
+    screen.getByRole('button', { name: 'flow.loadFailed.retry' }).click();
+    expect(projectsState.refetch).toHaveBeenCalledTimes(1);
   });
 
   it('reveals a name input instead of submitting a milestone', () => {

@@ -2,6 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { UserX } from 'lucide-react';
 import { profileClient } from '../../shared/lib/clients';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
+import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+
+function isNotFoundError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const candidate = error as {
+    statusCode?: unknown;
+    status?: unknown;
+    response?: { status?: unknown };
+  };
+  return (
+    candidate.statusCode === 404 || candidate.status === 404 || candidate.response?.status === 404
+  );
+}
 
 interface ProfileProject {
   id?: string;
@@ -17,7 +31,7 @@ interface ProfileProject {
 export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
   const { t } = useTranslation();
 
-  const { data, isLoading, isError } = useQuery({
+  const profileQuery = useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
       const res = await profileClient.getProfile({ userId });
@@ -25,6 +39,11 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
     },
     enabled: !!userId,
   });
+  const { data, error } = profileQuery;
+  const loadFailed = hasQueryFailed(profileQuery);
+  const isLoading = Boolean(userId) && profileQuery.isPending && !loadFailed;
+  const isNotFound =
+    !userId || (loadFailed && isNotFoundError(error)) || (profileQuery.isSuccess && !data);
 
   if (isLoading) {
     return (
@@ -48,7 +67,11 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
     );
   }
 
-  if (isError || !data) {
+  if (loadFailed && !isNotFound) {
+    return <ListLoadFailed onRetry={() => void profileQuery.refetch()} />;
+  }
+
+  if (isNotFound || !data) {
     return (
       // The S-24 shell rather than a bare sentence: a 44px glyph, a heading
       // and one line, sized to its content.

@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   access: {} as unknown,
   failed: false,
+  pending: false,
   retry: vi.fn(),
 }));
 
@@ -52,6 +53,9 @@ vi.mock('../../shared/hooks/queries/useCustomers', () => ({
   useListCustomers: (params: { search?: string }) => ({
     data: params.search ? emptyList : customersList,
     isLoading: false,
+    isPending: mocks.pending,
+    isPaused: mocks.pending,
+    failureCount: 0,
     isFetching: false,
     isError: mocks.failed,
     refetch: mocks.retry,
@@ -73,6 +77,7 @@ beforeEach(async () => {
   await initTestI18nFrom(path.resolve(__dirname, '../../locales'));
   mocks.access = createEffectiveAccess('crm', { isOwner: true });
   mocks.failed = false;
+  mocks.pending = false;
   mocks.retry.mockClear();
   mocks.navigate.mockClear();
   customersList.length = 0;
@@ -128,5 +133,12 @@ describe('Restricted member customer list', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Unable to load customers');
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     expect(mocks.retry).toHaveBeenCalledOnce();
+  });
+
+  it('keeps the list in a loading state when the first request is paused offline', () => {
+    mocks.pending = true;
+    renderCustomers();
+
+    expect(screen.queryByText('No customers found')).not.toBeInTheDocument();
   });
 });

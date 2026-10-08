@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 const segments = vi.hoisted(() => [
   { id: 'segment-1', name: 'All customers', customerCount: 12, description: 'Everyone' },
 ]);
+const segmentQuery = vi.hoisted(() => ({ isError: false, isLoading: false, refetch: vi.fn() }));
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => mocks.navigate,
@@ -46,11 +47,11 @@ vi.mock('../../shared/hooks/queries/useCampaigns', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useSegments', () => ({
-  useListSegments: () => ({ data: segments }),
+  useListSegments: () => ({ data: segmentQuery.isError ? undefined : segments, ...segmentQuery }),
 }));
 
 vi.mock('../../shared/hooks/queries/useTemplates', () => ({
-  useTemplates: () => ({ data: [] }),
+  useTemplates: () => ({ data: [], isError: false, refetch: vi.fn() }),
 }));
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -88,9 +89,20 @@ function clickSaveAndActivate(): void {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
+  segmentQuery.isError = false;
+  segmentQuery.isLoading = false;
 });
 
 describe('EmailCampaign activation retry (B56-R05)', () => {
+  it('prevents campaign activation when the audience list failed to load', () => {
+    segmentQuery.isError = true;
+    renderEditor();
+    fillRequiredFields();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    expect(screen.getByRole('button', { name: /Save & activate/ })).toBeDisabled();
+  });
+
   it('activates the campaign created by a failed attempt instead of creating a duplicate', () => {
     mocks.createCampaign.mockImplementation((_payload: unknown, callbacks: SaveCallbacks) => {
       callbacks.onSuccess({ campaignId: 42 });

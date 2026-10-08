@@ -25,6 +25,7 @@ import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import type { DashboardStats } from '../../shared/schemas/dashboard';
 import { CustomerAvatar } from '../../shared/components/crm';
 import { isAtRisk } from '../../shared/lib/customerUtils';
+import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const ACCENT = 'var(--crm-accent)';
 const AT_RISK_DAYS = 60;
@@ -145,25 +146,36 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const {
-    data: dashboardData,
-    isLoading: dashLoading,
-    refetch: refetchDashboard,
-  } = useCrmDashboard();
+  const dashboardQuery = useCrmDashboard();
+  const { data: dashboardData, refetch: refetchDashboard } = dashboardQuery;
+  const dashboardError = hasQueryFailed(dashboardQuery);
+  const dashLoading = dashboardQuery.isPending && !dashboardError;
   // Backend caps page size at 100 — aggregates cover the first page.
-  const { data: fetchedCustomers } = useListCustomers({ limit: 100, offset: 0 });
-  const { data: fetchedSegments } = useListSegments();
+  const customersQuery = useListCustomers({ limit: 100, offset: 0 });
+  const segmentsQuery = useListSegments();
+  const customersError = hasQueryFailed(customersQuery);
+  const segmentsError = hasQueryFailed(segmentsQuery);
+  const customersLoading = customersQuery.isPending && !customersError;
+  const segmentsLoading = segmentsQuery.isPending && !segmentsError;
+  const { data: fetchedCustomers } = customersQuery;
+  const { data: fetchedSegments } = segmentsQuery;
   const customersPool = fetchedCustomers ?? [];
   const segmentsPool = fetchedSegments ?? [];
   const winBackSegmentId = atRiskSegmentId(segmentsPool);
 
   const ltv =
-    customersPool.length > 0
-      ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
-      : 0;
+    customersError || customersLoading
+      ? null
+      : customersPool.length > 0
+        ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
+        : 0;
   const atRiskAll = customersPool.filter((c) => isAtRisk(c, AT_RISK_DAYS));
   const churnRate =
-    customersPool.length > 0 ? Math.round((atRiskAll.length / customersPool.length) * 100) : 0;
+    customersError || customersLoading
+      ? null
+      : customersPool.length > 0
+        ? Math.round((atRiskAll.length / customersPool.length) * 100)
+        : 0;
   // Display list is capped; the rate above uses the full pool.
   const atRisk = atRiskAll.slice(0, 4);
   const topSegment =
@@ -290,7 +302,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              ${ltv.toLocaleString()}
+              {ltv === null ? '—' : `$${ltv.toLocaleString()}`}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
               per customer
@@ -398,7 +410,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              {churnRate}%
+              {churnRate === null ? '—' : `${churnRate}%`}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
               customers at risk
@@ -460,12 +472,33 @@ const Dashboard: React.FC = () => {
                 marginTop: '2px',
               }}
             >
-              {topSegment?.name ?? '-'}
+              {segmentsError
+                ? t('crmErrors.generic')
+                : segmentsLoading
+                  ? t('crmCommon.loading')
+                  : (topSegment?.name ?? '-')}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {topSegment
-                ? `${topSegment.customerCount.toLocaleString()} members`
-                : 'No segments yet'}
+              {segmentsError ? (
+                <button
+                  type="button"
+                  onClick={() => void segmentsQuery.refetch()}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--crm-accent)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('crm.actions.refresh')}
+                </button>
+              ) : segmentsLoading ? (
+                t('crmCommon.loading')
+              ) : topSegment ? (
+                `${topSegment.customerCount.toLocaleString()} members`
+              ) : (
+                'No segments yet'
+              )}
             </div>
           </motion.div>
         </div>
@@ -531,41 +564,62 @@ const Dashboard: React.FC = () => {
               padding: '14px 20px',
             }}
           >
-            {atRisk.slice(0, 4).map((c) => (
-              <div
-                key={c.id}
-                onClick={() => navigate({ to: `/crm/customers/${c.id}` })}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '8px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  background: 'var(--hub-hover)',
-                }}
-              >
-                <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={30} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                    {c.name}
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
-                    Last: {c.lastVisit}
-                  </div>
-                </div>
+            {customersLoading ? (
+              <p role="status" style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>
+                {t('crmCommon.loading')}
+              </p>
+            ) : customersError ? (
+              <div role="alert">
+                <EmptyState
+                  size="compact"
+                  icon={AlertTriangle}
+                  title={t('crmErrors.generic')}
+                  description={t('crmErrors.refreshAndTryAgain')}
+                  action={{
+                    label: t('crm.actions.refresh'),
+                    onClick: () => void customersQuery.refetch(),
+                  }}
+                />
               </div>
-            ))}
-            {atRisk.length === 0 && (
-              <EmptyState
-                size="compact"
-                icon={AlertTriangle}
-                title={t('crm.dashboard.atRiskEmptyTitle')}
-                action={{
-                  label: t('crm.actions.viewCustomers'),
-                  onClick: () => navigate({ to: '/crm/customers' }),
-                }}
-              />
+            ) : (
+              <>
+                {atRisk.slice(0, 4).map((c) => (
+                  <div
+                    key={c.id}
+                    onClick={() => navigate({ to: `/crm/customers/${c.id}` })}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '8px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      background: 'var(--hub-hover)',
+                    }}
+                  >
+                    <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={30} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                        {c.name}
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
+                        Last: {c.lastVisit}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {atRisk.length === 0 && (
+                  <EmptyState
+                    size="compact"
+                    icon={AlertTriangle}
+                    title={t('crm.dashboard.atRiskEmptyTitle')}
+                    action={{
+                      label: t('crm.actions.viewCustomers'),
+                      onClick: () => navigate({ to: '/crm/customers' }),
+                    }}
+                  />
+                )}
+              </>
             )}
           </div>
         </motion.div>
@@ -723,16 +777,28 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
               ))}
-              {campaigns.length === 0 && (
+              {campaigns.length === 0 && !dashLoading && (
                 <EmptyState
                   size="compact"
                   icon={Megaphone}
-                  title={t('crm.dashboard.campaignPerformanceUnavailableTitle')}
-                  description={t('crm.dashboard.campaignPerformanceUnavailableDescription')}
-                  action={{
-                    label: t('crm.actions.refresh'),
-                    onClick: () => refetchDashboard(),
-                  }}
+                  title={t(
+                    dashboardError && !dashboardData
+                      ? 'crm.dashboard.loadFailedTitle'
+                      : 'crm.dashboard.campaignPerformanceUnavailableTitle'
+                  )}
+                  description={t(
+                    dashboardError && !dashboardData
+                      ? 'crm.dashboard.loadFailedDescription'
+                      : 'crm.dashboard.campaignPerformanceUnavailableDescription'
+                  )}
+                  action={
+                    dashboardError && !dashboardData
+                      ? {
+                          label: t('crm.actions.refresh'),
+                          onClick: () => refetchDashboard(),
+                        }
+                      : undefined
+                  }
                 />
               )}
             </div>

@@ -73,16 +73,18 @@ const setAccessToken = (token: string): void => {
   document.cookie = `token=${encodeURIComponent(token)}; Max-Age=2592000; path=/${domainPart}; SameSite=Lax${secure}`;
 };
 
-setSessionRefresh(async () => {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+setSessionRefresh(async (signal) => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return 'unavailable';
   const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
+  if (!refreshToken) return 'rejected';
   const response = await fetch(`${getBaseUrl().replace(/\/+$/, '')}/common/auth/v1/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token: refreshToken }),
+    signal,
   });
-  if (!response.ok) return false;
+  if (response.status === 401) return 'rejected';
+  if (!response.ok) return 'unavailable';
   const data: unknown = await response.json();
   if (
     !data ||
@@ -90,9 +92,9 @@ setSessionRefresh(async () => {
     !('token' in data) ||
     typeof data.token !== 'string' ||
     !data.token
-  ) return false;
+  ) return 'unavailable';
   setAccessToken(data.token);
-  return true;
+  return 'refreshed';
 });
 
 const getAuthBaseUrl = (): string => {
@@ -332,7 +334,6 @@ export function createApiClient(appId: string): AxiosInstance {
   );
 
   // Response: convert snake_case keys to camelCase + handle 401
-  const retriedConfigs = new WeakSet<object>();
   client.interceptors.response.use(
     (response) => {
       if (response.data && typeof response.data === 'object') {
@@ -350,13 +351,18 @@ export function createApiClient(appId: string): AxiosInstance {
         if (isMFARequiredResponse(error.response.data)) {
           redirectToSecuritySettings();
         } else {
-          const config = error.config as (typeof error.config & { headers?: Record<string, unknown> }) | undefined;
+          const config = error.config as (
+            typeof error.config & {
+              headers?: Record<string, unknown>;
+              __voxireSessionRetried?: boolean;
+            }
+          ) | undefined;
           const sentToken = sentCredential(config);
           const canRetry =
             config &&
             sentToken &&
             isSessionRejection(error.response.data) &&
-            !retriedConfigs.has(config) &&
+            !config.__voxireSessionRetried &&
             safelyGetToken() === sentToken;
           const ended = await shouldEndSharedSession(
             sentToken,
@@ -366,7 +372,9 @@ export function createApiClient(appId: string): AxiosInstance {
           );
           const refreshedToken = safelyGetToken();
           if (canRetry && !ended && refreshedToken && refreshedToken !== sentToken) {
-            retriedConfigs.add(config);
+            // Axios creates a new config when replaying; carry the guard on
+            // the config so mergeConfig preserves it across that copy.
+            config.__voxireSessionRetried = true;
             config.headers = config.headers ?? {};
             config.headers.Authorization = `Bearer ${refreshedToken}`;
             markCredential(config, refreshedToken);

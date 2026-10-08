@@ -31,7 +31,9 @@ function inputStyle(): React.CSSProperties {
 const WorkTypesSection = (): React.JSX.Element => {
   const { t } = useTranslation();
   const workTypesQuery = useWorkTypes();
-  const { data, isLoading } = workTypesQuery;
+  const { data } = workTypesQuery;
+  const loadFailed = hasQueryFailed(workTypesQuery);
+  const isLoading = workTypesQuery.isPending && !loadFailed;
   const createWorkType = useCreateWorkType();
   const updateWorkType = useUpdateWorkType();
   const deleteWorkType = useDeleteWorkType();
@@ -88,7 +90,7 @@ const WorkTypesSection = (): React.JSX.Element => {
         <p className="text-flow-body" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.workTypes.loading')}
         </p>
-      ) : hasQueryFailed(workTypesQuery) ? (
+      ) : loadFailed ? (
         // A failed request emptied the list exactly as a first run does, so a
         // 500 invited the user to recreate work types they already had.
         <ListLoadFailed onRetry={() => void workTypesQuery.refetch()} />

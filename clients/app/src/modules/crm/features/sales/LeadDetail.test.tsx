@@ -30,18 +30,43 @@ const lead = {
 const touchpointsList: unknown[] = [];
 const contactsList: unknown[] = [];
 const contractsList: unknown[] = [];
+const queryErrors = { lead: false, touchpoints: false, contacts: false, contracts: false };
 
 vi.mock('../../shared/hooks/queries/useSales', () => ({
-  useLead: () => ({ data: lead, isLoading: false }),
+  useLead: () => ({
+    data: queryErrors.lead ? undefined : lead,
+    isLoading: false,
+    isError: queryErrors.lead,
+    refetch: vi.fn(),
+  }),
   useUpdateLead: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteLead: () => ({ mutate: vi.fn(), isPending: false }),
-  useLeadTouchpoints: () => ({ data: touchpointsList }),
+  useLeadTouchpoints: () => ({
+    data: touchpointsList,
+    isError: queryErrors.touchpoints,
+    isLoading: false,
+    isFetching: false,
+    refetch: vi.fn(),
+  }),
   useCreateTouchpoint: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteTouchpoint: () => ({ mutate: vi.fn(), isPending: false }),
-  useContacts: () => ({ data: contactsList }),
+  useContacts: () => ({
+    data: contactsList,
+    isError: queryErrors.contacts,
+    isLoading: false,
+    isFetching: false,
+    refetch: vi.fn(),
+  }),
   useCreateContact: () => ({ mutate: vi.fn(), isPending: false }),
   useDeleteContact: () => ({ mutate: vi.fn(), isPending: false }),
-  useContracts: () => ({ data: contractsList }),
+  useContracts: () => ({
+    data: contractsList,
+    isError: queryErrors.contracts,
+    isLoading: false,
+    isFetching: false,
+    isSuccess: !queryErrors.contracts,
+    refetch: vi.fn(),
+  }),
   useCreateContract: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
@@ -55,6 +80,10 @@ beforeEach(() => {
   touchpointsList.length = 0;
   contactsList.length = 0;
   contractsList.length = 0;
+  queryErrors.lead = false;
+  queryErrors.touchpoints = false;
+  queryErrors.contacts = false;
+  queryErrors.contracts = false;
 });
 
 describe('LeadDetail touchpoints empty state', () => {
@@ -83,5 +112,42 @@ describe('LeadDetail contacts empty state', () => {
     // Opens the inline contact form (and the empty state itself disappears).
     expect(screen.getByPlaceholderText('crm.leadDetail.namePlaceholder')).toBeInTheDocument();
     expect(screen.queryByText('crm.leadDetail.noContactsTitle')).not.toBeInTheDocument();
+  });
+});
+
+describe('LeadDetail list errors', () => {
+  it('does not report an empty timeline when touchpoints fail to load', () => {
+    queryErrors.touchpoints = true;
+    renderLeadDetail();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    expect(screen.queryByText('crm.leadDetail.noTouchpointsTitle')).not.toBeInTheDocument();
+  });
+
+  it('does not report no contacts when the contact list fails to load', () => {
+    queryErrors.contacts = true;
+    renderLeadDetail();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    expect(screen.queryByText('crm.leadDetail.noContactsTitle')).not.toBeInTheDocument();
+  });
+
+  it('hides contract creation until the contract list is available', () => {
+    queryErrors.contracts = true;
+    renderLeadDetail();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    expect(screen.queryByText('crm.leadDetail.noContract')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'crm.leadDetail.addContractAria' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not label a failed lead lookup as a missing lead', () => {
+    queryErrors.lead = true;
+    renderLeadDetail();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    expect(screen.queryByText('crm.leadDetail.notFound')).not.toBeInTheDocument();
   });
 });

@@ -80,7 +80,8 @@
     "removed": "تمت إزالة العضو",
     "transferred": "تم نقل الملكية",
     "selectNewOwner": "اختر عضوًا",
-    "enterEmail": "أدخل عنوان بريد إلكتروني"
+    "enterEmail": "أدخل عنوان بريد إلكتروني",
+    "selectWorkspaceMember": "اختر عضوًا نشطًا في مساحة العمل"
   },
   "project": {
     "createFailed": "فشل إنشاء المشروع",

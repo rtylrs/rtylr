@@ -105,8 +105,9 @@ export const AllProjects: React.FC = () => {
     visibility: visibility || undefined,
     limit: 100,
   });
-  const { data, isLoading } = allProjectsQuery;
+  const { data } = allProjectsQuery;
   const loadFailed = hasQueryFailed(allProjectsQuery);
+  const isLoading = allProjectsQuery.isPending && !loadFailed;
 
   const projects = data?.projects ?? [];
   const total = data?.total ?? 0;

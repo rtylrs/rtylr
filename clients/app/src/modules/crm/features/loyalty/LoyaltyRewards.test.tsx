@@ -26,11 +26,13 @@ vi.mock('../../../../shared/stores/userStore', () => {
 
 const refetchRewards = vi.fn();
 const rewardsList: unknown[] = [];
+const rewardsState = { isError: false };
 
 vi.mock('../../shared/hooks/queries/useLoyalty', () => ({
   useLoyaltyRewards: () => ({
     data: rewardsList,
     isLoading: false,
+    isError: rewardsState.isError,
     refetch: refetchRewards,
   }),
   useUpsertReward: () => ({ mutate: vi.fn(), isPending: false }),
@@ -44,6 +46,7 @@ function renderRewards(): void {
 
 beforeEach(() => {
   refetchRewards.mockClear();
+  rewardsState.isError = false;
   mocks.effectiveAccess = createEffectiveAccess('crm', { permissions: [] });
 });
 
@@ -73,6 +76,16 @@ describe('LoyaltyRewards empty state', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
 
+    expect(refetchRewards).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a load error instead of the empty-rewards state on request failure', () => {
+    rewardsState.isError = true;
+    renderRewards();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
+    expect(screen.queryByText('crm.rewards.empty')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'crm.actions.refresh' }));
     expect(refetchRewards).toHaveBeenCalledTimes(1);
   });
 });

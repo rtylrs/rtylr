@@ -169,7 +169,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
           )}
 
           {call.name === "web.search" && (
-            <GroundedSearchDetails output={call.output} />
+            <SearchResultsDetails output={call.output} />
           )}
 
           {showFormMappingPlan && <FormMappingPlan output={call.output} />}
@@ -253,28 +253,15 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
   );
 };
 
-function GroundedSearchDetails({ output }: { output: unknown }) {
+function SearchResultsDetails({ output }: { output: unknown }) {
   if (!output || typeof output !== "object") return null;
   const value = output as Record<string, unknown>;
   const sources = Array.isArray(value.sources) ? value.sources : [];
-  const html =
-    typeof value.search_suggestions_html === "string"
-      ? value.search_suggestions_html
-      : "";
-  const answer = typeof value.answer === "string" ? value.answer : "";
-  const suggestions = parseGoogleSearchSuggestions(html);
   return (
     <div style={{ marginBottom: 8 }}>
-      {answer && (
-        <div
-          style={{ ...summaryStyle, whiteSpace: "pre-wrap", marginBottom: 8 }}
-        >
-          {answer}
-        </div>
-      )}
       {sources.length > 0 && (
-        <div style={{ marginBottom: html ? 8 : 0 }}>
-          <div style={detailLabelStyle}>sources</div>
+        <div>
+          <div style={detailLabelStyle}>search results</div>
           <ul
             style={{ ...summaryStyle, margin: 0, padding: "7px 9px 7px 26px" }}
           >
@@ -310,76 +297,19 @@ function GroundedSearchDetails({ output }: { output: unknown }) {
                   >
                     {item.title}
                   </a>
+                  {typeof item.snippet === "string" && item.snippet.trim() && (
+                    <div style={{ color: caretTokens.textMuted, marginTop: 2 }}>
+                      {item.snippet}
+                    </div>
+                  )}
                 </li>
               );
             })}
           </ul>
         </div>
       )}
-      {suggestions.length > 0 && (
-        <div
-          aria-label="Google Search suggestions"
-          style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}
-        >
-          {suggestions.map(({ label, url }) => (
-            <a
-              key={url}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                ...summaryStyle,
-                color: caretTokens.accent,
-                textDecoration: "none",
-              }}
-            >
-              {label}
-            </a>
-          ))}
-        </div>
-      )}
     </div>
   );
-}
-
-function parseGoogleSearchSuggestions(
-  html: string,
-): Array<{ label: string; url: string }> {
-  if (!html || typeof DOMParser === "undefined") return [];
-  const document = new DOMParser().parseFromString(html, "text/html");
-  const seen = new Set<string>();
-  const suggestions: Array<{ label: string; url: string }> = [];
-  for (const anchor of document.querySelectorAll<HTMLAnchorElement>(
-    "a[href]",
-  )) {
-    const label = anchor.textContent?.trim() ?? "";
-    let url: URL;
-    try {
-      url = new URL(
-        anchor.getAttribute("href") ?? "",
-        "https://www.google.com",
-      );
-    } catch {
-      continue;
-    }
-    const googleSearchHost =
-      url.hostname === "www.google.com" || url.hostname === "google.com";
-    if (
-      !label ||
-      label.length > 250 ||
-      url.protocol !== "https:" ||
-      !googleSearchHost ||
-      url.username ||
-      url.password ||
-      url.pathname !== "/search" ||
-      seen.has(url.href)
-    )
-      continue;
-    seen.add(url.href);
-    suggestions.push({ label, url: url.href });
-    if (suggestions.length === 5) break;
-  }
-  return suggestions;
 }
 
 export default ToolCallCard;

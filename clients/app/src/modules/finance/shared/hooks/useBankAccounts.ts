@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { financeApi } from '../services/financeApi';
 import { BankAccountServiceClient } from '@voxire/voxie/finance/bank_account/v1/client';
 import { bankAccountSchema, bankTransactionSchema } from '../schemas/accounts';
+import { unwrapList } from '../lib/unwrapList';
 
 const bankAccountClient = createOneKitClient(BankAccountServiceClient, 'finance');
 
@@ -20,7 +21,7 @@ export function useBankAccounts() {
         sortDir: '',
       });
       return z.array(bankAccountSchema).parse(
-        (res.accounts ?? []).map((a) => ({
+        unwrapList<NonNullable<typeof res.accounts>[number]>(res, 'accounts').map((a) => ({
           id: a.id,
           name: a.name,
           type: a.accountType,

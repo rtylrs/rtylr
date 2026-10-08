@@ -5,7 +5,11 @@ import { render, screen } from '@testing-library/react';
 
 const apiState = vi.hoisted(() => ({
   projects: undefined as Record<string, unknown>[] | undefined,
+  projectsError: false,
+  refetchProjects: vi.fn(),
   milestones: undefined as Record<string, unknown>[] | undefined,
+  milestonesError: false,
+  refetchMilestones: vi.fn(),
 }));
 const storeState = vi.hoisted(() => ({
   projects: [] as Record<string, unknown>[],
@@ -13,10 +17,20 @@ const storeState = vi.hoisted(() => ({
 }));
 
 vi.mock('../projects/useProjects', () => ({
-  useProjects: () => ({ data: apiState.projects }),
+  useProjects: () => ({
+    data: apiState.projects,
+    isError: apiState.projectsError,
+    isPaused: false,
+    failureCount: 0,
+    refetch: apiState.refetchProjects,
+  }),
 }));
 vi.mock('../milestones/useMilestones', () => ({
-  useMilestones: () => ({ data: apiState.milestones }),
+  useMilestones: () => ({
+    data: apiState.milestones,
+    isError: apiState.milestonesError,
+    refetch: apiState.refetchMilestones,
+  }),
 }));
 vi.mock('../../shared/stores/flowStore', () => ({
   useFlowStore: (selector: (state: typeof storeState) => unknown) => selector(storeState),
@@ -40,7 +54,11 @@ function daysFromToday(days: number): string {
 describe('Timeline project bars (#1258)', () => {
   afterEach(() => {
     apiState.projects = undefined;
+    apiState.projectsError = false;
+    apiState.refetchProjects.mockClear();
     apiState.milestones = undefined;
+    apiState.milestonesError = false;
+    apiState.refetchMilestones.mockClear();
     storeState.projects = [];
     storeState.milestones = [];
   });
@@ -86,5 +104,25 @@ describe('Timeline project bars (#1258)', () => {
     render(<Timeline />);
 
     expect(screen.getByText('40%')).toBeInTheDocument();
+  });
+
+  it('shows a retry when milestone loading fails instead of hiding those markers', () => {
+    apiState.milestonesError = true;
+
+    render(<Timeline />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('flow.loadFailed.description');
+    screen.getByRole('button', { name: 'flow.loadFailed.retry' }).click();
+    expect(apiState.refetchMilestones).toHaveBeenCalledOnce();
+  });
+
+  it('shows a retry when the project list fails instead of rendering a blank timeline', () => {
+    apiState.projectsError = true;
+
+    render(<Timeline />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('flow.loadFailed.description');
+    screen.getByRole('button', { name: 'flow.loadFailed.retry' }).click();
+    expect(apiState.refetchProjects).toHaveBeenCalledOnce();
   });
 });

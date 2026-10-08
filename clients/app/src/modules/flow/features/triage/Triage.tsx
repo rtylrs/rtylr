@@ -18,8 +18,9 @@ const Triage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const tasksQuery = useTasks({});
-  const { data: apiTasks, isLoading } = tasksQuery;
+  const { data: apiTasks } = tasksQuery;
   const loadFailed = hasQueryFailed(tasksQuery);
+  const isLoading = tasksQuery.isPending && !loadFailed;
   // `apiTasks` is undefined until the query resolves, which made `needsTriage`
   // empty and the screen say "Inbox zero" and "0 tasks need attention" before
   // anything had been fetched. A confident sentence should only come from a

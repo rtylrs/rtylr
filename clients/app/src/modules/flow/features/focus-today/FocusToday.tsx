@@ -64,10 +64,11 @@ const FocusToday: React.FC = () => {
   const navigate = useNavigate();
   const { projects } = useFlowStore();
   const myIssuesQuery = useMyIssues();
-  const { data: myTasks, isLoading } = myIssuesQuery;
+  const { data: myTasks } = myIssuesQuery;
   // A failed load must not render as "nothing due today": that tells the user
   // their day is clear when we simply could not read it.
   const loadFailed = hasQueryFailed(myIssuesQuery);
+  const isLoading = myIssuesQuery.isPending && !loadFailed;
   const tasks: Task[] = (myTasks ?? []).map(apiTaskToTask);
 
   const focusTasks = useMemo(() => {

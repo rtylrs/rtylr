@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"google.golang.org/genai"
 )
@@ -169,5 +170,46 @@ func TestCompleteTextStreamSuppressesThoughtPartsAndCompletes(t *testing.T) {
 	}
 	if !done {
 		t.Fatal("stream did not send a completion token")
+	}
+}
+
+func TestCompleteTextStreamFallsBackAfterPerModelTimeout(t *testing.T) {
+	var fallbackCalls int32
+	client := geminiTestClient(t, func(request *http.Request) (*http.Response, error) {
+		if strings.Contains(request.URL.Path, "first-model") {
+			<-request.Context().Done()
+			return nil, request.Context().Err()
+		}
+		atomic.AddInt32(&fallbackCalls, 1)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
+			Body: io.NopCloser(strings.NewReader(
+				`data: {"candidates":[{"content":{"role":"model","parts":[{"text":"fallback"}]}}]}` + "\n\n",
+			)),
+		}, nil
+	})
+	provider := &GeminiProvider{
+		client:       client,
+		models:       []string{"first-model", "second-model"},
+		modelTimeout: 20 * time.Millisecond,
+	}
+
+	stream, err := provider.CompleteTextStream(context.Background(), "say hello")
+	if err != nil {
+		t.Fatalf("CompleteTextStream: %v", err)
+	}
+	var got strings.Builder
+	for token := range stream {
+		if token.Error != "" {
+			t.Fatalf("stream error: %s", token.Error)
+		}
+		got.WriteString(token.Text)
+	}
+	if got.String() != "fallback" {
+		t.Fatalf("stream text = %q, want fallback model text", got.String())
+	}
+	if fallbackCalls != 1 {
+		t.Fatalf("fallback calls = %d, want 1", fallbackCalls)
 	}
 }
