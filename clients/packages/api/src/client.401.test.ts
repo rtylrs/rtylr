@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { AxiosError } from 'axios';
 import { createApiClient, createOneKitFetch } from './client';
 import {
   resetSessionInvalidationForTests,
@@ -12,6 +13,7 @@ vi.stubGlobal('import', {
 
 const TOKEN_A = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.sig_a';
 const TOKEN_B = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.sig_b';
+const TOKEN_C = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.sig_c';
 
 function setTokenCookie(token: string): void {
   document.cookie = `token=${token}; path=/`;
@@ -357,6 +359,61 @@ describe('401 handling: stale responses and refresh races', () => {
 
     expect(calls).toBe(2);
     expect(cookieTracker.count()).toBe(0);
+  });
+
+  it('bounds a refresh request that never settles without ending the session', async () => {
+    vi.useFakeTimers();
+    setTokenCookie(TOKEN_A);
+    let aborted = false;
+    setSessionRefresh((signal) => new Promise<SessionRefreshResult>((_resolve, reject) => {
+      signal.addEventListener('abort', () => {
+        aborted = true;
+        reject(new DOMException('The operation was aborted', 'AbortError'));
+      }, { once: true });
+    }));
+
+    const client = createApiClient('dash');
+    const error = rejected401(runRequestInterceptor(client));
+    const pending = runResponseRejection(client, error).catch((result) => result);
+
+    await vi.advanceTimersByTimeAsync(5_000);
+    await expect(pending).resolves.toBe(error);
+
+    expect(aborted).toBe(true);
+    expect(readTokenCookie()).toBe(TOKEN_A);
+    expect(cookieTracker.count()).toBe(0);
+    vi.useRealTimers();
+  });
+
+  it('replays an Axios request at most once after its access token is refreshed', async () => {
+    setTokenCookie(TOKEN_A);
+    let refreshCount = 0;
+    setSessionRefresh(async () => {
+      refreshCount++;
+      if (refreshCount > 2) return 'rejected';
+      setTokenCookie(refreshCount === 1 ? TOKEN_B : TOKEN_C);
+      return 'refreshed';
+    });
+
+    const client = createApiClient('dash');
+    let requestCount = 0;
+    client.defaults.adapter = async (config) => {
+      requestCount++;
+      const response = {
+        data: { message: 'Unauthorized' },
+        status: 401,
+        statusText: 'Unauthorized',
+        headers: {},
+        config,
+      };
+      throw new AxiosError('Unauthorized', AxiosError.ERR_BAD_REQUEST, config, undefined, response);
+    };
+
+    await client.get('/still-unauthorized').catch(() => undefined);
+
+    expect(requestCount).toBe(2);
+    expect(refreshCount).toBe(2);
+    expect(readTokenCookie()).toBe(TOKEN_C);
   });
 
   it('a failed sign-out does not reject the caller 401', async () => {
