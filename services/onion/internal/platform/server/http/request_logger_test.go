@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -37,8 +36,8 @@ func TestRequestLoggerPreservesJSONBodyWithCharset(t *testing.T) {
 	}
 }
 
-func TestRequestLoggerPreservesLargeJSONBodyAfterPreviewLimit(t *testing.T) {
-	body := `{"payload":"` + strings.Repeat("x", maxLoggedRequestBodyBytes*2) + `"}`
+func TestRequestLoggerPreservesLargeJSONBody(t *testing.T) {
+	body := `{"payload":"` + strings.Repeat("x", 16<<10) + `"}`
 	var seenBytes int
 
 	handler := RequestLoggerMiddleware(context.Background())(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -58,62 +57,6 @@ func TestRequestLoggerPreservesLargeJSONBodyAfterPreviewLimit(t *testing.T) {
 
 	if seenBytes != len(body) {
 		t.Fatalf("handler saw %d bytes, want %d", seenBytes, len(body))
-	}
-}
-
-func TestSanitizeJSONTruncatesLargePayloads(t *testing.T) {
-	large := `{"items":[` + strings.Repeat(`"x",`, 500) + `"end"]}`
-	got := sanitizeJSON(large)
-	if len(got) > maxLoggedBodyPreviewBytes {
-		t.Fatalf("sanitized body length %d exceeds preview cap %d", len(got), maxLoggedBodyPreviewBytes)
-	}
-	if !strings.HasSuffix(got, "...") {
-		t.Fatalf("expected truncated preview suffix, got %q", got)
-	}
-}
-
-func TestSanitizeJSONRedactsSensitiveFieldVariants(t *testing.T) {
-	got := sanitizeJSON(`{
-		"password_hash":"hash",
-		"access_token":"token",
-		"profile":{"api_key":"key","name":"Voxire"}
-	}`)
-
-	var decoded map[string]any
-	if err := json.Unmarshal([]byte(got), &decoded); err != nil {
-		t.Fatalf("sanitized body should still be JSON: %v", err)
-	}
-	if decoded["password_hash"] != "[REDACTED]" {
-		t.Fatalf("password_hash was not redacted: %s", got)
-	}
-	if decoded["access_token"] != "[REDACTED]" {
-		t.Fatalf("access_token was not redacted: %s", got)
-	}
-	profile, ok := decoded["profile"].(map[string]any)
-	if !ok {
-		t.Fatalf("profile is missing or invalid: %s", got)
-	}
-	if profile["api_key"] != "[REDACTED]" {
-		t.Fatalf("nested api_key was not redacted: %s", got)
-	}
-	if profile["name"] != "[REDACTED]" {
-		t.Fatalf("name was not redacted: %s", got)
-	}
-}
-
-func TestSanitizeJSONRedactsPersonalData(t *testing.T) {
-	got := sanitizeJSON(`{"email":"person@example.com","phone_number":"+15555550123","business_name":"Example Shop"}`)
-	for _, value := range []string{"person@example.com", "+15555550123", "Example Shop"} {
-		if strings.Contains(got, value) {
-			t.Fatalf("personal value %q leaked into request log: %s", value, got)
-		}
-	}
-}
-
-func TestSanitizeJSONDoesNotEchoMalformedSensitiveBody(t *testing.T) {
-	got := sanitizeJSON(`{"password":"secret"`)
-	if strings.Contains(got, "secret") || strings.Contains(got, "password") {
-		t.Fatalf("malformed body leaked sensitive content: %q", got)
 	}
 }
 

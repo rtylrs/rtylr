@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -158,51 +157,6 @@ func sanitizeMap(data map[string][]string) map[string][]string {
 	}
 
 	return sanitized
-}
-
-func sanitizeJSON(body string) string {
-	if body == "" {
-		return body
-	}
-
-	var data json.RawMessage
-	if err := json.Unmarshal([]byte(body), &data); err != nil {
-		return "[UNPARSEABLE JSON BODY REDACTED]"
-	}
-
-	data = sanitizeJSONValue(data)
-
-	return truncateString(string(data), maxLoggedBodyPreviewBytes)
-}
-
-func sanitizeJSONValue(raw json.RawMessage) json.RawMessage {
-	var object map[string]json.RawMessage
-	if err := json.Unmarshal(raw, &object); err == nil && object != nil {
-		for key, value := range object {
-			if isSensitiveField(key) {
-				object[key] = json.RawMessage(`"[REDACTED]"`)
-				continue
-			}
-			object[key] = sanitizeJSONValue(value)
-		}
-		result, err := json.Marshal(object)
-		if err == nil {
-			return result
-		}
-	}
-
-	var array []json.RawMessage
-	if err := json.Unmarshal(raw, &array); err == nil && array != nil {
-		for index, value := range array {
-			array[index] = sanitizeJSONValue(value)
-		}
-		result, err := json.Marshal(array)
-		if err == nil {
-			return result
-		}
-	}
-
-	return raw
 }
 
 func isSensitiveField(key string) bool {

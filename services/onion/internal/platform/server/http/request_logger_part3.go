@@ -13,7 +13,7 @@ import (
 	"github.com/voxire/onion/internal/platform/observability"
 )
 
-func logRequest(ctx context.Context, r *http.Request, statusCode int, duration time.Duration, bodyContent string, headers, query map[string][]string, serviceName string, count int) {
+func logRequest(ctx context.Context, r *http.Request, statusCode int, duration time.Duration, headers, query map[string][]string, serviceName string, count int) {
 	routeParams := routeParamNamesFromRequest(r)
 
 	queryParams := make([]string, 0, len(query))
@@ -24,13 +24,6 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	headerParams := make([]string, 0, len(headers))
 	for key, values := range headers {
 		headerParams = append(headerParams, fmt.Sprintf("%s: %s", key, strings.Join(values, ",")))
-	}
-
-	var bodyPreview string
-	if bodyContent != "" {
-		bodyPreview = bodyContent
-	} else {
-		bodyPreview = "[No body]"
 	}
 
 	var statusIcon string
@@ -59,7 +52,6 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 		logger.String("route_params", formatList(routeParams, "• ")),
 		logger.String("query_params", formatList(queryParams, "• ")),
 		logger.String("headers", formatList(headerParams, "• ")),
-		logger.String("body_preview", bodyPreview),
 		logger.String("timestamp", time.Now().Format("2006-01-02 15:04:05 UTC")),
 	}
 
