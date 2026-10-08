@@ -10,6 +10,7 @@ var (
 	ErrUserAlreadyExists                = errors.New("user already exists")
 	ErrWeakPassword                     = errors.New("password does not meet security requirements")
 	ErrUserNotFound                     = errors.New("user not found")
+	ErrSessionNotFound                  = errors.New("session not found")
 	ErrInvalidEmailVerificationCode     = errors.New("invalid or expired email verification code")
 	ErrSupersededEmailVerificationCode  = errors.New("email verification code was issued in an older format; request a new one")
 	ErrTooManyEmailVerificationAttempts = errors.New("too many email verification attempts")

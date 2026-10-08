@@ -196,22 +196,28 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Acces
 }
 
 func (s *Service) hasActiveAccountAccess(ctx context.Context, user *domain.User) bool {
+	// Access-token validation stays fail-closed. RefreshSession uses the
+	// error-returning helper so storage failures are not reported as bad credentials.
+	active, _ := s.accountHasActiveAccess(ctx, user)
+	return active
+}
+
+func (s *Service) accountHasActiveAccess(ctx context.Context, user *domain.User) (bool, error) {
 	if user == nil || user.IsBanned {
-		return false
+		return false, nil
 	}
 	if user.IsConsoleAdmin {
-		return true
+		return true, nil
 	}
 
 	state, err := s.repo.GetUserAccessState(ctx, user.ID)
 	if err != nil {
-		// Fail closed when the database cannot confirm current access.
-		return false
+		return false, err
 	}
 	// Users without a permission row are allowed through onboarding. Once an
 	// account has been provisioned into a business, at least one active access
 	// path must remain before it can authenticate.
-	return !state.HasPermissions || state.HasActiveAccess
+	return !state.HasPermissions || state.HasActiveAccess, nil
 }
 
 func (s *Service) RefreshToken(ctx context.Context, userID int64) (string, error) {

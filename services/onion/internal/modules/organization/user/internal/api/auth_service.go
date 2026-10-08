@@ -196,7 +196,11 @@ func (a *AuthAPI) GoogleAuth(ctx context.Context, req *commonauthv1.GoogleAuthRe
 func (a *AuthAPI) Refresh(ctx context.Context, req *commonauthv1.RefreshRequest) (*commonauthv1.RefreshResponse, error) {
 	token, err := a.UserService.RefreshSession(ctx, req.GetRefreshToken(), a.resolvePlatformClaims)
 	if err != nil {
-		return nil, onekithttp.NewError(http.StatusUnauthorized, "Unauthorized")
+		if errors.Is(err, application.ErrInvalidCredentials) {
+			return nil, onekithttp.NewError(http.StatusUnauthorized, "Unauthorized")
+		}
+		logger.Ctx(ctx).Error("session refresh failed", logger.Error(err))
+		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to refresh session")
 	}
 	return &commonauthv1.RefreshResponse{Token: token}, nil
 }
