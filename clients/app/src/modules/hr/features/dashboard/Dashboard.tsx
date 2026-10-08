@@ -298,8 +298,14 @@ const Dashboard: React.FC = () => {
     pendingApprovals: 0,
   };
   const recentHires = staff.slice(-3);
-  const avgTenure =
-    staff.length > 0 ? (Math.round(staff.length * 0.8) / staff.length).toFixed(1) : '-';
+  // Average tenure needs each employee's start date, and the list projection
+  // (`staffMemberSchema`) deliberately drops `start_date` - only the
+  // single-record `staffDetailSchema` carries it. This used to compute
+  // `round(staff.length * 0.8) / staff.length`, which is always ~0.8 for any
+  // headcount and never changed as the workforce changed. Rendering a number
+  // nobody can reproduce from the data is worse than showing the gap, so the
+  // metric reports unavailable until a start date reaches this screen.
+  const avgTenure = '-';
 
   const stats = [
     {
@@ -823,7 +829,7 @@ const Dashboard: React.FC = () => {
           />
           <StatCard
             label={t('hrDashboard.metrics.avgTenure')}
-            value={avgTenure !== '-' ? `${avgTenure} ${t('hrDashboard.metrics.years')}` : '-'}
+            value={avgTenure}
             sub={t('hrDashboard.metrics.allStaff')}
             icon={<Clock size={14} />}
             color="var(--hr-status-approved)"

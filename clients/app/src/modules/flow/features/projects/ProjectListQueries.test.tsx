@@ -44,7 +44,9 @@ vi.mock('./useCurrentProject', () => ({
 }));
 vi.mock('./useColumns', () => ({
   useProjectColumns: () => ({
-    data: [{ id: '9', name: 'Release review', sortOrder: 0 }],
+    // A numeric id, exactly as the int64 contract arrives. This mock used to
+    // carry a string, which is the one shape the bug could not bite.
+    data: [{ id: 9, name: 'Release review', sortOrder: 0 }],
     isLoading: false,
     isError: remote.columnsFailed,
     refetch: remote.retryColumns,
@@ -93,6 +95,9 @@ describe('Project list server data', () => {
     expect(screen.getByText('Release review')).toBeInTheDocument();
     expect(screen.getByText('Persisted task')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'In Progress' })).not.toBeInTheDocument();
+    // The last "New task" is the one in the section, not the header's, and its
+    // column id must be the section's - stringified, because quick-create and
+    // the board's grouping both key columns by string id.
     fireEvent.click(screen.getAllByRole('button', { name: 'New task' }).at(-1)!);
     expect(useFlowStore.getState().quickCreateColumnId).toBe('9');
   });

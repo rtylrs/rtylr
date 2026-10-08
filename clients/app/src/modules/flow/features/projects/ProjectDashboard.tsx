@@ -8,6 +8,7 @@ import { HelmetContainer } from '@voxire/components';
 import { STATUS_COLORS, useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
+import { isOverdue } from '../../shared/lib/dateUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
@@ -40,14 +41,15 @@ const ProjectDashboard: React.FC = () => {
   const { data: apiTasks = [] } = useTasks({ projectId, compact: true });
 
   const stats = useMemo(() => {
-    const now = new Date();
     const total = apiTasks.length;
     const done = apiTasks.filter((t) => t.status === 'done').length;
     const inProgress = apiTasks.filter((t) => t.status === 'in_progress').length;
-    const overdue = apiTasks.filter(
-      (t) =>
-        t.dueDate && new Date(t.dueDate) < now && t.status !== 'done' && t.status !== 'cancelled'
-    ).length;
+    // A due date is a calendar day, not an instant. `new Date(dueDate) < now`
+    // parses a bare "YYYY-MM-DD" as UTC midnight, so every task due today
+    // counted as overdue from 00:00 UTC onward (rtylr#1077) and contradicted
+    // the task row, My tasks and the project calendar. `isOverdue` is the one
+    // shared definition of "finished means done or cancelled".
+    const overdue = apiTasks.filter((t) => isOverdue(t.dueDate, t.status)).length;
 
     const statusCounts: Record<string, number> = {
       todo: 0,

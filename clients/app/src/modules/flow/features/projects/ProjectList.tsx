@@ -289,12 +289,17 @@ const ProjectList: React.FC = () => {
 
   const sectionBlocks = useMemo(() => {
     if (projectSections.length === 0) return null;
+    // `Task.sectionId` is a stringified column id (see apiTaskToTask), so both
+    // sides of these comparisons must be coerced. Comparing the raw number
+    // matched `"5"` against `5` - always false - so every task fell into
+    // "Other" while its own column rendered empty. The block id is
+    // stringified too, because quick-create takes the section id as a string.
     const blocks: { id: string; title: string; tasks: Task[] }[] = projectSections.map((sec) => ({
-      id: sec.id,
+      id: String(sec.id),
       title: sec.name,
-      tasks: projectTasks.filter((task) => task.sectionId === sec.id),
+      tasks: projectTasks.filter((task) => task.sectionId === String(sec.id)),
     }));
-    const inSection = new Set(projectSections.map((s) => s.id));
+    const inSection = new Set(projectSections.map((s) => String(s.id)));
     const loose = projectTasks.filter((task) => !task.sectionId || !inSection.has(task.sectionId));
     if (loose.length)
       blocks.push({ id: '_unsectioned', title: t('flow.projectList.otherSection'), tasks: loose });

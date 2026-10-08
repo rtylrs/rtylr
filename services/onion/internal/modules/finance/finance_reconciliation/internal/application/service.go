@@ -144,12 +144,18 @@ func (s *Service) Match(ctx context.Context, businessID int64, input domain.Matc
 	return id, err
 }
 
+// A caller with no bearer principal is unauthenticated, not "allowed". The
+// previous `if !ok { return nil }` opened this gate for any future caller that
+// resolves the business id but not the user - a scheduled job, an internal
+// service call, or a route added to the anonymous allowlist - and this is the
+// only permission check on the reconciliation path. Every sibling module
+// fails closed here; see subscription_service.go and feature_service.go.
 func requireReconciliationPermission(ctx context.Context) error {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil
+	if !ok || authUser == nil {
+		return onekiterrors.PermissionDenied()
 	}
-	if authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:reconciliation:manage") {
+	if !authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:reconciliation:manage") {
 		return onekiterrors.PermissionDenied()
 	}
 	return nil

@@ -16,6 +16,7 @@ import {
   useMoveTaskToColumn,
 } from './useColumns';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import { addDays, todayIso } from '../../shared/lib/dateUtils';
 import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
@@ -105,18 +106,26 @@ function buildLanes(
   }));
 }
 
-function laneKeyFor(t: Task, groupBy: GroupKey): string {
+// Exported for the lane-key regression test: the due-date lanes are the only
+// place a board swimlane can silently mislabel a task, and the comparison is
+// not visible from the rendered output alone.
+export function laneKeyFor(t: Task, groupBy: GroupKey): string {
   if (groupBy === 'assignee') return t.assignee || 'Unassigned';
   if (groupBy === 'priority') return t.priority;
   if (groupBy === 'due') {
     if (!t.dueDate) return 'No due date';
-    const d = new Date(t.dueDate);
-    const now = new Date();
-    const days = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    if (days < 0) return 'Overdue';
-    if (days === 0) return 'Today';
-    if (days <= 7) return 'This week';
-    if (days <= 30) return 'This month';
+    // A due date is a calendar day, not an instant. The previous
+    // `Math.round((new Date(due) - new Date()) / msPerDay)` parsed the bare
+    // date as UTC midnight and rounded against a local `now`, so a task due
+    // today slid into "Overdue" for the last third of the working day
+    // (rtylr#1077). Compare the day strings instead, as bucketForMyTask does.
+    const due = t.dueDate.split('T')[0] ?? '';
+    if (due === '') return 'No due date';
+    const today = todayIso();
+    if (due < today) return 'Overdue';
+    if (due === today) return 'Today';
+    if (due <= addDays(today, 7)) return 'This week';
+    if (due <= addDays(today, 30)) return 'This month';
     return 'Later';
   }
   return '_all';
@@ -295,10 +304,9 @@ const ProjectBoard: React.FC = () => {
 
   // Bucket tasks by column. Tasks with no sectionId go into first column.
   function tasksForColumn(col: ApiProjectColumn, colIndex: number): Task[] {
-    // ApiProjectColumn's TypeScript annotation claims `id: string`, but
-    // the wire sends a JSON number. Coerce on both sides so
-    // `"5" === 5` (which would be false) doesn't make moved tasks
-    // vanish from the board.
+    // `Task.sectionId` is a stringified column id (see apiTaskToTask), so the
+    // board keys buckets on `String(col.id)`. Comparing against the raw number
+    // matched `"5"` against `5` - always false - and made moved tasks vanish.
     const colKey = String(col.id);
     return tasks.filter((t) => {
       if (t.sectionId && String(t.sectionId) === colKey) return true;

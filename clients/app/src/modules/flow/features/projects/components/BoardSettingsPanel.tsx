@@ -57,7 +57,7 @@ const BoardSettingsPanel = ({
   const deleteColumn = useDeleteColumn(projectId);
 
   const [newColumnName, setNewColumnName] = useState('');
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
 
   const ordered = useMemo(() => [...columns].sort((a, b) => a.sortOrder - b.sortOrder), [columns]);
@@ -72,7 +72,7 @@ const BoardSettingsPanel = ({
       return;
     }
     if (name === col.name) return;
-    updateColumn.mutate({ id: col.id, name, color: col.color, sortOrder: col.sortOrder });
+    updateColumn.mutate({ id: String(col.id), name, color: col.color, sortOrder: col.sortOrder });
   };
 
   /**
@@ -89,8 +89,8 @@ const BoardSettingsPanel = ({
     const b = ordered[target];
     const aName = nameOverride === undefined ? a.name : nameOverride.trim();
     if (!aName) return;
-    updateColumn.mutate({ id: a.id, name: aName, color: a.color, sortOrder: b.sortOrder });
-    updateColumn.mutate({ id: b.id, name: b.name, color: b.color, sortOrder: a.sortOrder });
+    updateColumn.mutate({ id: String(a.id), name: aName, color: a.color, sortOrder: b.sortOrder });
+    updateColumn.mutate({ id: String(b.id), name: b.name, color: b.color, sortOrder: a.sortOrder });
     setAnnouncement(
       t('flow.board.movedAnnouncement', {
         name: aName,
@@ -177,7 +177,7 @@ const BoardSettingsPanel = ({
                 onRequestDelete={() => setPendingDelete(col.id)}
                 onCancelDelete={() => setPendingDelete(null)}
                 onConfirmDelete={() => {
-                  deleteColumn.mutate(col.id);
+                  deleteColumn.mutate(String(col.id));
                   setPendingDelete(null);
                 }}
               />

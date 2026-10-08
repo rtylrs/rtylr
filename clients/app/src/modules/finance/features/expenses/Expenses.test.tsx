@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Expenses from './Expenses';
 
 const { refetchMock, useExpenseCategoriesMock, useExpensesMock } = vi.hoisted(() => ({
@@ -38,7 +38,10 @@ const allExpenses = Array.from({ length: 30 }, (_, index) => ({
   currency: 'USD' as const,
   vendor: '',
   receiptUrl: '',
-  expenseDate: '2026-09-01',
+  // Five of the office rows sit in a previous month. They are the only rows a
+  // month-scoped total must exclude, and they are what makes the assertion
+  // below a regression test rather than a restatement of the fixture.
+  expenseDate: index >= 20 && index < 25 ? '2026-08-15' : '2026-09-01',
   status: 'approved',
   createdAt: '',
   updatedAt: '',
@@ -51,6 +54,17 @@ const resolvedQuery = {
 };
 
 describe('Expenses aggregates and load states', () => {
+  // The total is scoped to the month the reader is standing in, so the system
+  // clock decides which rows count. Pin it inside the fixture's month.
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-15T10:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     useExpenseCategoriesMock.mockReturnValue({
@@ -81,16 +95,20 @@ describe('Expenses aggregates and load states', () => {
     );
   });
 
-  it('keeps the monthly total and category breakdown global while paging rows', () => {
+  it('scopes the monthly total to the current month while paging rows', () => {
     render(<Expenses />);
 
-    expect(screen.getAllByText(/\$35/).length).toBeGreaterThan(0);
+    // 20 office rows in September ($20) plus 5 travel rows ($10). The five
+    // August rows add $5 to the ledger but must not reach a figure labelled
+    // "Monthly total" in all three locales.
+    expect(screen.getByText('$30')).toBeInTheDocument();
+    expect(screen.queryByText('$35')).not.toBeInTheDocument();
     expect(screen.getByTitle('Travel: $10')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'financeCommon.next' }));
 
     expect(screen.getByText('Expense 26')).toBeInTheDocument();
-    expect(screen.getAllByText(/\$35/).length).toBeGreaterThan(0);
+    expect(screen.getByText('$30')).toBeInTheDocument();
   });
 
   it('shows a retryable failure instead of asserting a zero monthly total', () => {

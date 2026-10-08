@@ -118,6 +118,12 @@ const CategoryBar: React.FC<{ expenses: Expense[]; categoryName: CategoryNameLoo
   );
 };
 
+/** `YYYY-MM` for the month the reader is standing in, local rather than UTC. */
+function currentMonthIso(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
 const Expenses: React.FC = () => {
   const { t } = useTranslation('financeCommon');
   const navigate = useNavigate();
@@ -143,7 +149,15 @@ const Expenses: React.FC = () => {
       categoryId != null ? (byId.get(categoryId) ?? 'Uncategorized') : 'Uncategorized';
   }, [categories]);
 
-  const grandTotal = allExpenses.reduce((s, e) => s + e.amount, 0);
+  // Scope the total to the month the reader is standing in. `useExpenses` walks
+  // every page of `listExpenses`, and the contract carries no date filter, so
+  // `allExpenses` is the entire ledger - summing it presented every prior
+  // year's rent and payroll under the label "Monthly Total" in all three
+  // locales, disagreeing with the P&L screen that does scope by month.
+  const monthlyTotal = allExpenses.reduce(
+    (sum, e) => (e.expenseDate.slice(0, 7) === currentMonthIso() ? sum + e.amount : sum),
+    0
+  );
 
   return (
     <motion.div
@@ -161,7 +175,8 @@ const Expenses: React.FC = () => {
           </h2>
           {!loading && !isError && (
             <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
-              Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
+              Monthly total:{' '}
+              <strong style={{ color: 'var(--hub-text)' }}>{fmt(monthlyTotal)}</strong>
             </p>
           )}
         </div>
@@ -371,7 +386,7 @@ const Expenses: React.FC = () => {
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
-                    -{fmt(grandTotal)}
+                    -{fmt(monthlyTotal)}
                   </td>
                   <td />
                 </tr>

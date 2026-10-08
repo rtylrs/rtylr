@@ -190,7 +190,16 @@ export interface ApiCycle {
 }
 
 export interface ApiProjectColumn {
-  id: string;
+  /**
+   * An int64 on the wire (flow/project/v2 `id: int64`), so a JSON number.
+   *
+   * This was annotated `string`, which the contract and the Go handler's
+   * `Id int64` both contradict, and which hid a real defect: comparing it to a
+   * task's stringified `sectionId` matched `"5"` against `5` - always false -
+   * so every task fell out of its column. Callers that need a string key for
+   * the board's grouping or for the request payload coerce explicitly.
+   */
+  id: number;
   projectId: string;
   name: string;
   color: string;
