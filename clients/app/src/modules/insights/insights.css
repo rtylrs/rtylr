@@ -25,9 +25,8 @@
   font-size: 13px;
   white-space: nowrap;
 }
-.insights-brand img {
+.insights-brand .rtylr-logo {
   height: 28px;
-  width: auto;
 }
 .insights-page-picker {
   gap: 6px;

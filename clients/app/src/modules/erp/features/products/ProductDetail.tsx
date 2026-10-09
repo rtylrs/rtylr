@@ -31,7 +31,7 @@ import { useBrands } from '../brands/useBrands';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { pageTitle } from '../../shared/lib/pageTitle';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 // Placeholder chart data - will be replaced with real API data
 const stockHistory: number[] = [];
@@ -238,7 +238,7 @@ const ProductDetail: React.FC = () => {
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{
                         background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
-                        color: AMBER,
+                        color: ACCENT,
                       }}
                     >
                       {brandNameById.get(product.brandId ?? '') || `Brand #${product.brandId}`}
@@ -274,7 +274,7 @@ const ProductDetail: React.FC = () => {
                 >
                   {t('erp.products.salePrice')}
                 </p>
-                <p className="text-lg font-bold mt-0.5" style={{ color: AMBER }}>
+                <p className="text-lg font-bold mt-0.5" style={{ color: ACCENT }}>
                   {formatCurrency(product.salePrice ?? 0)}
                 </p>
               </div>
@@ -327,12 +327,12 @@ const ProductDetail: React.FC = () => {
                 className="text-sm font-semibold flex items-center gap-2"
                 style={{ color: 'var(--hub-text)' }}
               >
-                <TrendingUp size={14} style={{ color: AMBER }} />
+                <TrendingUp size={14} style={{ color: ACCENT }} />
                 Stock History (12 weeks)
               </h3>
             </div>
             {stockHistory.length > 0 ? (
-              <MiniLineChart data={stockHistory} color={AMBER} height={80} />
+              <MiniLineChart data={stockHistory} color={ACCENT} height={80} />
             ) : (
               <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>
                 {t('erp.products.noStockHistory')}

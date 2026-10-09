@@ -12,7 +12,7 @@ import {
   type Variant,
 } from '../useVariants';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '6px 10px',
@@ -165,7 +165,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
             disabled={updateMut.isPending}
             aria-label={t('erp.products.variants.save')}
             className="h-7 px-2 rounded-lg text-[11px] font-semibold disabled:opacity-40 flex items-center gap-1"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           >
             <Check size={12} /> {t('erp.products.variants.save')}
           </button>
@@ -338,7 +338,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
           className="text-sm font-semibold flex items-center gap-2"
           style={{ color: 'var(--hub-text)' }}
         >
-          <Tag size={14} style={{ color: AMBER }} /> {t('erp.products.variants.title')}
+          <Tag size={14} style={{ color: ACCENT }} /> {t('erp.products.variants.title')}
         </h3>
         <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
           {t('erp.products.variants.subtitle')}
@@ -448,7 +448,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
               type="button"
               onClick={generate}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               <Wand2 size={13} />{' '}
               {t('erp.products.variants.generateBtn', { count: newCombos.length })}
@@ -520,7 +520,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
             onClick={createAll}
             disabled={createMut.isPending}
             className="px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           >
             {createMut.isPending
               ? t('erp.products.variants.creating')

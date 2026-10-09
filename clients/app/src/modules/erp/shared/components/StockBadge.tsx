@@ -7,8 +7,6 @@ interface StockBadgeProps {
   showLabel?: boolean;
 }
 
-const AMBER = 'var(--erp-accent)';
-
 export function getStockLevel(
   stock: number,
   lowStock = 10,
@@ -34,8 +32,8 @@ const StockBadge: React.FC<StockBadgeProps> = ({
       label: 'Out of Stock',
     },
     low: {
-      color: AMBER,
-      bg: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+      color: 'var(--erp-warning)',
+      bg: 'color-mix(in srgb, var(--erp-warning) 12%, transparent)',
       label: 'Low Stock',
     },
     good: {

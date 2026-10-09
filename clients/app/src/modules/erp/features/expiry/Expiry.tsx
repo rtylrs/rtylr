@@ -10,7 +10,6 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate, daysUntil } from '../../shared/lib/format';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
-const AMBER = 'var(--erp-accent)';
 
 const Expiry: React.FC = () => {
   const { t } = useTranslation('erp');
@@ -65,7 +64,11 @@ const Expiry: React.FC = () => {
             const days = daysUntil(item.expiryDate ?? '');
             const isExpired = days < 0;
             const isUrgent = days <= 7 && days >= 0;
-            const color = isExpired ? 'var(--erp-danger)' : isUrgent ? AMBER : 'var(--erp-success)';
+            const color = isExpired
+              ? 'var(--erp-danger)'
+              : isUrgent
+                ? 'var(--erp-warning)'
+                : 'var(--erp-success)';
             return (
               <div
                 key={`${item.productId}-${item.batchId}`}

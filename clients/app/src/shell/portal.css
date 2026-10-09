@@ -111,19 +111,10 @@
   color: var(--dash-text);
   text-decoration: none;
 }
-.portal-wordmark img {
+.rtylr-logo {
   height: 30px;
   width: auto;
-  object-fit: contain;
-}
-.portal-logo-light {
-  display: none;
-}
-:root[data-theme='light'] .portal-logo-light {
-  display: block;
-}
-:root[data-theme='light'] .portal-logo-dark {
-  display: none;
+  color: var(--dash-text);
 }
 .portal-app-navigation {
   padding: 12px 10px;

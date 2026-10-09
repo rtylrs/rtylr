@@ -33,7 +33,7 @@ import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 const PRODUCT_PAGE_SIZE = 100;
 
 const inputStyle: React.CSSProperties = {
@@ -59,7 +59,7 @@ function statusConfig(status: string): { color: string; bg: string } {
     };
   if (status === 'in_transit')
     return {
-      color: AMBER,
+      color: ACCENT,
       bg: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
     };
   if (status === 'cancelled')
@@ -198,7 +198,7 @@ const StockTransfers: React.FC = () => {
               type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               <Plus size={14} /> New Transfer
             </button>
@@ -249,7 +249,7 @@ const StockTransfers: React.FC = () => {
                 type="button"
                 onClick={() => void refetchTransfers()}
                 className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {t('erp.stockTransfers.refresh')}
               </button>
@@ -527,7 +527,7 @@ const StockTransfers: React.FC = () => {
                   validItems.length === 0
                 }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create Draft'}
               </button>

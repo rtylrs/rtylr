@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const Categories: React.FC = () => {
   const { t } = useTranslation('erp');
@@ -80,7 +80,7 @@ const Categories: React.FC = () => {
           onClick={handleCreate}
           disabled={createMut.isPending}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-          style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+          style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
         >
           <Plus size={14} /> Add
         </button>
@@ -119,7 +119,7 @@ const Categories: React.FC = () => {
                 className="flex items-center justify-center h-8 w-8 rounded-lg"
                 style={{ background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)' }}
               >
-                <Folder size={14} style={{ color: AMBER }} />
+                <Folder size={14} style={{ color: ACCENT }} />
               </div>
               <div className="flex-1">
                 {editingId === cat.id ? (

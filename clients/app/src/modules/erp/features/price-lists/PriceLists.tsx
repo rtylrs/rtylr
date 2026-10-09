@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -74,7 +74,7 @@ const PriceLists: React.FC = () => {
               type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               <Plus size={14} /> New Price List
             </button>
@@ -113,7 +113,7 @@ const PriceLists: React.FC = () => {
                     className="h-10 w-10 rounded-lg flex items-center justify-center"
                     style={{ background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)' }}
                   >
-                    <Tags size={16} style={{ color: AMBER }} />
+                    <Tags size={16} style={{ color: ACCENT }} />
                   </div>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -124,7 +124,7 @@ const PriceLists: React.FC = () => {
                         className="text-[10px] font-medium px-1.5 py-0.5 rounded"
                         style={{
                           background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
-                          color: AMBER,
+                          color: ACCENT,
                         }}
                       >
                         {l.currency}
@@ -201,7 +201,7 @@ const PriceLists: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

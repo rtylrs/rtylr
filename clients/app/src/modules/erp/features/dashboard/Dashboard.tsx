@@ -24,7 +24,7 @@ import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 import { useTranslation } from 'react-i18next';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 const CARD_STYLE: React.CSSProperties = {
   background: 'var(--hub-card)',
   border: '1px solid var(--hub-border)',
@@ -42,7 +42,7 @@ const today = new Date().toLocaleDateString('en-US', {
 function getStatusColor(status: string): string {
   const normalized = status.toLowerCase();
   if (normalized === 'received') return 'var(--erp-success)';
-  if (normalized === 'sent' || normalized === 'approved' || normalized === 'partial') return AMBER;
+  if (normalized === 'sent' || normalized === 'approved' || normalized === 'partial') return ACCENT;
   if (normalized === 'pending_approval') return 'var(--erp-purple)';
   return 'var(--hub-text-dim)';
 }
@@ -166,7 +166,7 @@ const Dashboard: React.FC = () => {
             type="button"
             onClick={() => void refetchStats()}
             className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           >
             {t('erp.reorder.refresh')}
           </button>
@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
           onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
           style={{
-            background: AMBER,
+            background: ACCENT,
             color: 'var(--dash-text)',
             textDecoration: 'none',
           }}
@@ -239,7 +239,7 @@ const Dashboard: React.FC = () => {
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
                     style={{ background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)' }}
                   >
-                    <Icon size={14} style={{ color: AMBER }} />
+                    <Icon size={14} style={{ color: ACCENT }} />
                   </span>
                 </div>
                 <div>
@@ -281,7 +281,7 @@ const Dashboard: React.FC = () => {
 
         <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
-            <Package size={14} style={{ color: AMBER }} />
+            <Package size={14} style={{ color: ACCENT }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               {t('erp.dashboard.topItems')}
             </h3>
@@ -310,7 +310,7 @@ const Dashboard: React.FC = () => {
 
         <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
-            <Tags size={14} style={{ color: AMBER }} />
+            <Tags size={14} style={{ color: ACCENT }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               {t('erp.dashboard.topCategories')}
             </h3>
@@ -419,7 +419,7 @@ const Dashboard: React.FC = () => {
                     <p
                       className="text-sm font-bold text-center"
                       style={{
-                        color: (item.currentStock ?? 0) <= 5 ? 'var(--erp-danger)' : AMBER,
+                        color: (item.currentStock ?? 0) <= 5 ? 'var(--erp-danger)' : ACCENT,
                       }}
                     >
                       {item.currentStock}
@@ -439,7 +439,7 @@ const Dashboard: React.FC = () => {
 
         <motion.div variants={itemVariants} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
-            <Clock size={15} style={{ color: AMBER }} />
+            <Clock size={15} style={{ color: ACCENT }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               {t('erp.dashboard.recentPurchaseOrders')}
             </h3>

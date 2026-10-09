@@ -12,6 +12,7 @@ import { useUserStore } from '../../shared/stores/userStore';
 import { canAccessPortalPath } from '../../shared/utils/canAccessPortalPath';
 import { insightsNavItems } from './navigation';
 import './insights.css';
+import RtylrLogo from '../../shared/components/RtylrLogo';
 
 export default function InsightsHeader({ actions }: { actions: ReactNode }) {
   const { t } = useTranslation();
@@ -27,8 +28,7 @@ export default function InsightsHeader({ actions }: { actions: ReactNode }) {
           className="insights-brand"
           aria-label={t('appNames.short.insights')}
         >
-          <img className="portal-logo-light" src="/logo-dark.png" alt="RTYLR" />
-          <img className="portal-logo-dark" src="/logo.png" alt="RTYLR" />
+          <RtylrLogo />
           <span> / {t(`insightsNav.${currentPage?.key || 'overview'}`)}</span>
         </Link>
         <DropdownMenu>

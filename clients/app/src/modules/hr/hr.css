@@ -20,8 +20,8 @@
   --hr-onboarding-complete: #10b981;
   --hr-onboarding-in-progress: #8b5cf6;
   --hr-onboarding-not-started: #6b7280;
-  --hr-accent: #8b5cf6;
-  --hr-payroll-accent: #8b5cf6;
+  --hr-accent: #10b981;
+  --hr-payroll-accent: #10b981;
   --hr-on-accent: #0a0a0a;
   --hr-bg: var(--dash-bg);
   --hr-surface: var(--dash-surface);

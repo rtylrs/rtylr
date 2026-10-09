@@ -16,14 +16,7 @@ import {
   useSetRecurringStatus,
   useCreateRecurringInvoice,
 } from './useRecurringInvoices';
-import {
-  cardStyle,
-  ghostBtn,
-  primaryBtn,
-  ACCENT,
-  inputStyle,
-  labelStyle,
-} from '../../shared/lib/tokens';
+import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 // The stored value is the frequency; only its label is translated. A second
@@ -338,9 +331,9 @@ const RecurringInvoices: React.FC = () => {
                         padding: '3px 10px',
                         borderRadius: 20,
                         background: r.isActive
-                          ? 'var(--finance-accent-soft)'
+                          ? 'var(--finance-success-soft)'
                           : 'var(--finance-warning-soft)',
-                        color: r.isActive ? ACCENT : 'var(--finance-warning)',
+                        color: r.isActive ? 'var(--finance-success)' : 'var(--finance-warning)',
                       }}
                     >
                       {r.isActive ? 'Active' : 'Paused'}

@@ -178,9 +178,9 @@ const TaxReport: React.FC = () => {
                           borderRadius: 20,
                           fontWeight: 600,
                           background: filed
-                            ? 'color-mix(in srgb, var(--finance-accent) 12%, transparent)'
+                            ? 'var(--finance-success-soft)'
                             : 'color-mix(in srgb, var(--finance-warning) 12%, transparent)',
-                          color: filed ? ACCENT : 'var(--finance-warning)',
+                          color: filed ? 'var(--finance-success)' : 'var(--finance-warning)',
                         }}
                       >
                         {p.status}

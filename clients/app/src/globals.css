@@ -51,13 +51,13 @@
  * referenced from BusinessRoute / StaffView so launcher colors stay
  * consistent across light/dark themes. */
 :root {
-  --app-pos: #4583c4;
-  --app-erp: #10b981;
-  --app-hr: #f59e0b;
+  --app-pos: #3b82f6;
+  --app-erp: #64c5b9;
+  --app-hr: #10b981;
   --app-crm: #8b5cf6;
-  --app-finance: #ef4444;
-  --app-flow: #64c5b9;
-  --app-insights: #6366f1;
+  --app-finance: #f59e0b;
+  --app-flow: #ef4444;
+  --app-insights: #6fa3db;
   --app-menu: #f97316;
   --app-recruit: #06b6d4;
 }

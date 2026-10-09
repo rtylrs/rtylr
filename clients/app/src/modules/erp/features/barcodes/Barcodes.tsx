@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const Barcodes: React.FC = () => {
   const { t } = useTranslation('erp');
@@ -76,7 +76,7 @@ const Barcodes: React.FC = () => {
               type="button"
               onClick={handlePrint}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               <Printer size={14} /> Print {selected.size > 0 ? `(${selected.size * copies})` : ''}
             </button>
@@ -107,7 +107,7 @@ const Barcodes: React.FC = () => {
                   <div
                     className="h-4 w-4 rounded flex items-center justify-center"
                     style={{
-                      background: selected.has(p.id ?? '') ? AMBER : 'var(--hub-hover)',
+                      background: selected.has(p.id ?? '') ? ACCENT : 'var(--hub-hover)',
                       border: '1px solid var(--hub-border)',
                     }}
                   >

@@ -298,7 +298,8 @@ const BankFeeds: React.FC = () => {
                           fontSize: 13,
                           fontWeight: 600,
                           textAlign: 'end',
-                          color: (t.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
+                          color:
+                            (t.amount ?? 0) >= 0 ? 'var(--finance-success)' : 'var(--hub-text)',
                         }}
                       >
                         <MoneyDisplay amount={t.amount ?? 0} signed />
@@ -309,9 +310,9 @@ const BankFeeds: React.FC = () => {
                             padding: '2px 8px',
                             borderRadius: 20,
                             background: t.matched
-                              ? 'var(--finance-accent-soft)'
+                              ? 'var(--finance-success-soft)'
                               : 'var(--finance-warning-soft)',
-                            color: t.matched ? ACCENT : 'var(--finance-warning)',
+                            color: t.matched ? 'var(--finance-success)' : 'var(--finance-warning)',
                             fontWeight: 600,
                           }}
                         >

@@ -454,7 +454,7 @@ const Journal: React.FC = () => {
                   fontSize: 12,
                   fontWeight: 600,
                   borderTop: '1px solid var(--hub-border)',
-                  color: isBalanced ? 'var(--finance-accent)' : 'var(--finance-danger)',
+                  color: isBalanced ? 'var(--finance-success)' : 'var(--finance-danger)',
                 }}
               >
                 <span>

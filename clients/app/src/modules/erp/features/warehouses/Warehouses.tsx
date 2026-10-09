@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -89,7 +89,7 @@ const Warehouses: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> {t('erp.warehouses.new')}
           </button>
@@ -145,7 +145,7 @@ const Warehouses: React.FC = () => {
                         background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
                       }}
                     >
-                      <WarehouseIcon size={16} style={{ color: AMBER }} />
+                      <WarehouseIcon size={16} style={{ color: ACCENT }} />
                     </div>
                     <div className="flex items-center gap-1.5">
                       <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -303,7 +303,7 @@ const Warehouses: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? t('erp.common.creating') : t('erpCommon.create')}
               </button>

@@ -3,7 +3,7 @@ import React from 'react';
 export type PaymentStatus = 'paid' | 'partial' | 'unpaid' | 'overdue' | 'refunded';
 
 const STYLE: Record<PaymentStatus, React.CSSProperties> = {
-  paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  paid: { background: 'var(--finance-success-soft)', color: 'var(--finance-success)' },
   partial: { background: 'var(--finance-warning-soft)', color: 'var(--finance-warning)' },
   unpaid: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
   overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },

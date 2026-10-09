@@ -70,7 +70,7 @@ const PLRow: React.FC<RowProps> = ({
   currency = 'USD',
 }) => {
   const color = positive
-    ? 'var(--finance-accent)'
+    ? 'var(--finance-success)'
     : negative
       ? 'var(--finance-danger)'
       : 'var(--hub-text)';
@@ -184,7 +184,7 @@ const ProfitLoss: React.FC = () => {
 
       label: t('finance.profitLoss.netProfit'),
       value: netProfit,
-      color: netProfit >= 0 ? 'var(--finance-accent)' : 'var(--finance-danger)',
+      color: netProfit >= 0 ? 'var(--finance-success)' : 'var(--finance-danger)',
       Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
     },
     {

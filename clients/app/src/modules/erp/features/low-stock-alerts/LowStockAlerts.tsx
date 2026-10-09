@@ -11,8 +11,6 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
-
 const LowStockAlerts: React.FC = () => {
   const { t } = useTranslation('erp');
   const navigate = useNavigate();
@@ -66,12 +64,12 @@ const LowStockAlerts: React.FC = () => {
                   style={{
                     background: critical
                       ? 'color-mix(in srgb, var(--erp-danger) 12%, transparent)'
-                      : 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+                      : 'color-mix(in srgb, var(--erp-warning) 12%, transparent)',
                   }}
                 >
                   <AlertTriangle
                     size={14}
-                    style={{ color: critical ? 'var(--erp-danger)' : AMBER }}
+                    style={{ color: critical ? 'var(--erp-danger)' : 'var(--erp-warning)' }}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -85,7 +83,7 @@ const LowStockAlerts: React.FC = () => {
                 <div className="text-right pr-3">
                   <p
                     className="text-sm font-bold"
-                    style={{ color: critical ? 'var(--erp-danger)' : AMBER }}
+                    style={{ color: critical ? 'var(--erp-danger)' : 'var(--erp-warning)' }}
                   >
                     {item.stockQuantity} {item.unit}
                   </p>

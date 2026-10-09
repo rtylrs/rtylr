@@ -1,6 +1,7 @@
 :root {
-  --erp-accent: #f59e0b;
+  --erp-accent: #64c5b9;
   --erp-accent-foreground: #0a0a0a;
+  --erp-warning: #f59e0b;
   --erp-success: #10b981;
   --erp-danger: #f87171;
   --erp-danger-strong: #ef4444;

@@ -16,7 +16,7 @@ import { useSettings } from '../../shared/lib/settingsStore';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 const inventoryClient = createOneKitClient(InventoryServiceClient, 'erp');
 const settingsClient = createOneKitClient(SettingsServiceClient, 'erp');
 const VALUATION_PAGE_LIMIT = 500;
@@ -190,7 +190,7 @@ const Valuation: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <DollarSign size={14} style={{ color: AMBER }} />
+              <DollarSign size={14} style={{ color: ACCENT }} />
               <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
                 Stock Value
               </span>
@@ -263,7 +263,7 @@ const Valuation: React.FC = () => {
                       className="h-full rounded-full"
                       style={{
                         width: `${safeRatio(cat.value, maxCat) * 100}%`,
-                        background: AMBER,
+                        background: ACCENT,
                       }}
                     />
                   </div>

@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -71,7 +71,7 @@ const Brands: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Brand
           </button>
@@ -111,7 +111,7 @@ const Brands: React.FC = () => {
                   className="h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm"
                   style={{
                     background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
-                    color: AMBER,
+                    color: ACCENT,
                   }}
                 >
                   {(b.name ?? '')
@@ -220,7 +220,7 @@ const Brands: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

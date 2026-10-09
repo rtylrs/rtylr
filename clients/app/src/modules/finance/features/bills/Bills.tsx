@@ -28,7 +28,7 @@ import { todayIso } from '../../shared/lib/date';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   pending: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
-  paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  paid: { background: 'var(--finance-success-soft)', color: 'var(--finance-success)' },
   overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
   scheduled: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
 };

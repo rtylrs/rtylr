@@ -34,7 +34,7 @@ import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
 import { pageTitle } from '../../shared/lib/pageTitle';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 const NO_PRODUCTS: Product[] = [];
 
 const Products: React.FC = () => {
@@ -159,7 +159,7 @@ const Products: React.FC = () => {
               data-testid="products-new-button"
               onClick={() => setShowAdd(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               <Plus size={14} />
               {t('erp.products.new')}
@@ -205,7 +205,7 @@ const Products: React.FC = () => {
           <SlidersHorizontal size={12} />
           Filters
           {(filters.categoryId !== undefined || filters.status) && (
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: AMBER }} />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: ACCENT }} />
           )}
         </button>
         <button
@@ -387,7 +387,7 @@ const Products: React.FC = () => {
                         p.stockQuantity === 0
                           ? 'var(--erp-danger)'
                           : (p.stockQuantity ?? 0) < (p.lowStockThreshold ?? 0)
-                            ? AMBER
+                            ? ACCENT
                             : 'var(--hub-text)',
                     }}
                   >

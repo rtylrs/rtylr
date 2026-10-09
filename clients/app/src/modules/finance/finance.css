@@ -1,7 +1,8 @@
 :root {
-  --finance-accent: #10b981;
+  --finance-accent: #f59e0b;
   --finance-on-accent: #0a0a0a;
-  --finance-success: var(--finance-accent);
+  --finance-success: #10b981;
+  --finance-success-soft: rgba(16, 185, 129, 0.12);
   --finance-danger: #ef4444;
   --finance-error: var(--finance-danger);
   --finance-warning: #f59e0b;
@@ -15,11 +16,11 @@
   --finance-warning-text: #92400e;
   --finance-white: #fff;
 
-  --finance-accent-soft: rgba(16, 185, 129, 0.12);
-  --finance-accent-subtle: rgba(16, 185, 129, 0.08);
-  --finance-accent-faint: rgba(16, 185, 129, 0.1);
-  --finance-accent-border: rgba(16, 185, 129, 0.3);
-  --finance-accent-strong-border: rgba(16, 185, 129, 0.25);
+  --finance-accent-soft: rgba(245, 158, 11, 0.12);
+  --finance-accent-subtle: rgba(245, 158, 11, 0.08);
+  --finance-accent-faint: rgba(245, 158, 11, 0.1);
+  --finance-accent-border: rgba(245, 158, 11, 0.3);
+  --finance-accent-strong-border: rgba(245, 158, 11, 0.25);
   --finance-danger-soft: rgba(239, 68, 68, 0.12);
   --finance-danger-subtle: rgba(239, 68, 68, 0.08);
   --finance-danger-border: rgba(239, 68, 68, 0.3);
