@@ -67,18 +67,21 @@ test('General has one company name and HR inherits edits across navigation and r
     .getByRole('navigation', { name: 'Apps', exact: true })
     .getByRole('link', { name: 'Settings', exact: true })
     .click();
-  if (page.viewportSize()!.width < 900)
-    await page.getByRole('button', { name: 'Toggle navigation menu', exact: true }).click();
-  await page
-    .locator('.portal-app-navigation:visible')
+  // Settings opens as a modal with its own section menu.
+  const settings = page.getByRole('dialog', { name: 'Settings' });
+  await settings
+    .getByRole('navigation', { name: 'Settings' })
     .getByRole('link', { name: 'General', exact: true })
     .click();
-  const name = page.getByLabel('Company name', { exact: true });
+  // The HR page stays behind the modal, so look only inside settings.
+  const name = settings.getByLabel('Company name', { exact: true });
   await expect(name).toHaveCount(1);
-  await expect(page.getByLabel('Store name', { exact: true })).toHaveCount(0);
+  await expect(settings.getByLabel('Store name', { exact: true })).toHaveCount(0);
   await name.fill('Northwind Renamed');
-  await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await settings.getByRole('button', { name: 'Save changes', exact: true }).click();
   await expect.poll(() => companyName).toBe('Northwind Renamed');
+  await page.keyboard.press('Escape');
+  await expect(settings).not.toBeVisible();
   await page
     .getByRole('navigation', { name: 'Apps', exact: true })
     .getByRole('link', { name: 'HR', exact: true })
