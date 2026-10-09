@@ -30,7 +30,7 @@
   },
   "reportingLines": {
     "title": "Lignes hiérarchiques",
-    "flowNotice": "Définir un responsable ici lui permet aussi de voir les projets de ses équipes dans Flow.",
+    "flowNotice": "Définir un responsable ici lui permet aussi de voir les projets de ses équipes dans Work.",
     "empty": "Aucun membre pour le moment.",
     "none": "Aucun responsable",
     "change": "Modifier",

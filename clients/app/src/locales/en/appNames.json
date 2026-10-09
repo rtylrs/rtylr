@@ -1,11 +1,11 @@
 {
   "short": {
     "pos": "POS",
-    "erp": "ERP",
+    "erp": "Operations",
     "hr": "HR",
     "crm": "CRM",
     "finance": "Finance",
-    "flow": "Flow",
+    "flow": "Work",
     "insights": "Insights",
     "menu": "Menu",
     "recruit": "Recruit",
@@ -16,7 +16,7 @@
   },
   "full": {
     "pos": "Point of Sale",
-    "erp": "Inventory",
+    "erp": "Operations",
     "hr": "Human Resources",
     "crm": "Customers"
   },
@@ -85,7 +85,7 @@
       "revenue": "Revenue",
       "customers": "Customers",
       "products": "Products",
-      "operations": "Operations"
+      "operations": "Workforce"
     }
   }
 }

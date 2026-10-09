@@ -16,9 +16,9 @@
     }
   },
   "search": "Search settings…",
-  "flowCommand": "Flow settings",
+  "flowCommand": "Work settings",
   "insightsCommand": "Insights settings",
   "noResults": "No settings found.",
   "crmCommand": "CRM settings",
-  "erpCommand": "ERP settings"
+  "erpCommand": "Operations settings"
 }

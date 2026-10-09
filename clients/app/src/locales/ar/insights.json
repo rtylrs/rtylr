@@ -138,7 +138,7 @@
     "metaTitle": "المالية · rtylr"
   },
   "operations": {
-    "title": "Operations",
+    "title": "القوى العاملة",
     "kpis": {
       "activeStaff": "Active Staff",
       "shiftsThisWeek": "Shifts This Week",
@@ -172,7 +172,7 @@
     "completion": "نسبة الإتمام",
     "pending": "قيد الانتظار",
     "approved": "معتمد",
-    "metaTitle": "العمليات · rtylr"
+    "metaTitle": "القوى العاملة · rtylr"
   },
   "reports": {
     "title": "Reports",

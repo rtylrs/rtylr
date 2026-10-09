@@ -142,9 +142,9 @@
     "addFailed": "Failed to add member"
   },
   "flowTeam": {
-    "accessGranted": "Flow access granted",
-    "grantAccessFailed": "Failed to grant Flow access",
-    "memberRemoved": "Member removed from Flow",
+    "accessGranted": "Work access granted",
+    "grantAccessFailed": "Failed to grant Work access",
+    "memberRemoved": "Member removed from Work",
     "removeMemberFailed": "Failed to remove member"
   },
   "status": {

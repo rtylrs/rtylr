@@ -16,7 +16,7 @@
     "welcome": "Bienvenue sur rtylr ! Laissez-moi vous faire découvrir votre centre de commande.",
     "dashboard": "Voici votre accueil. Recherchez ce que vous voulez, lancez vos applications et reprenez où vous en étiez.",
     "team": "Gérez votre équipe ici. Ajoutez des membres, attribuez des rôles et contrôlez les applications auxquelles ils accèdent.",
-    "apps": "Toutes vos applications sont ici : POS, ERP, RH, CRM, Finance et Flow. Cliquez sur une application pour la lancer.",
+    "apps": "Toutes vos applications sont ici : POS, Opérations, RH, CRM, Finance et Work. Cliquez sur une application pour la lancer.",
     "caret": "Découvrez Caret, votre assistant IA. Posez-lui toutes vos questions sur les données de votre entreprise.",
     "settings": "Les paramètres du compte, la facturation et les intégrations sont tous ici."
   }

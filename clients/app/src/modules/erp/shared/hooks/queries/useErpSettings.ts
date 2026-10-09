@@ -67,7 +67,7 @@ export const useUpdateErpSettings = (): UseMutationResult<
       toast.success('ERP settings saved');
     },
     onError: (error): void => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to save ERP settings'));
+      toast.error(getOneKitErrorMessage(error, 'Failed to save Operations settings'));
     },
   });
 };

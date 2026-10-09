@@ -146,9 +146,9 @@
     "addFailed": "Échec de l'ajout du membre"
   },
   "flowTeam": {
-    "accessGranted": "Accès à Flow accordé",
-    "grantAccessFailed": "Échec de l'octroi de l'accès à Flow",
-    "memberRemoved": "Membre retiré de Flow",
+    "accessGranted": "Accès à Work accordé",
+    "grantAccessFailed": "Échec de l'octroi de l'accès à Work",
+    "memberRemoved": "Membre retiré de Work",
     "removeMemberFailed": "Échec de la suppression du membre"
   },
   "status": {

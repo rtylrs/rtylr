@@ -47,12 +47,12 @@
     "outflow": "الصادر"
   },
   "bills": {
-    "receivedFromErp": "واردة من ERP بانتظار الفواتير",
+    "receivedFromErp": "واردة من العمليات بانتظار الفواتير",
     "receivedFromErpHint": "تم استلام البضاعة مقابل أوامر الشراء هذه. أنشئ الفواتير ليعكسها حساب الدفعات.",
     "balanceSheet": {
       "inventory": "المخزون",
-      "inventoryHint": "قيمة المخزون الحية من نظام ERP؛ تظهر فقط عند تفعيل ERP لهذا النشاط.",
-      "inventoryUnavailable": "ERP غير متصل"
+      "inventoryHint": "قيمة المخزون الحية من نظام العمليات؛ تظهر فقط عند تفعيل العمليات لهذا النشاط.",
+      "inventoryUnavailable": "العمليات غير متصل"
     }
   },
   "fallbackClient": "",
