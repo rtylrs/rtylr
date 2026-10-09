@@ -89,6 +89,8 @@ async function primeAuthCookie(context: import('@playwright/test').BrowserContex
       sameSite: 'Lax',
       secure: false,
     },
+    // Without a recorded choice the consent banner covers the save button on phones.
+    { name: 'rtylr-consent', value: 'denied', domain: 'localhost', path: '/', sameSite: 'Lax' },
   ]);
 }
 

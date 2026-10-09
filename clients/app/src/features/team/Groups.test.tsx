@@ -17,8 +17,10 @@ vi.mock('motion/react', () => ({
 }));
 
 const navigateMock = vi.hoisted(() => vi.fn());
+const searchState = vi.hoisted(() => ({ create: undefined as 1 | undefined }));
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateMock,
+  useSearch: () => searchState,
 }));
 
 type Group = {
@@ -40,6 +42,7 @@ const groupsData = vi.hoisted(() => ({
 vi.mock('../../shared/hooks/queries/useGroups', () => ({
   useGroups: () => groupsData,
   useDeleteGroup: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useCreateGroup: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 import Groups from './Groups';
@@ -71,7 +74,7 @@ describe('Groups list empty state', () => {
     expect(screen.getByText(i18next.t('team.groups.noGroupsDescription'))).toBeInTheDocument();
   });
 
-  it('navigates to the new-group screen when the true-empty call-to-action is clicked', () => {
+  it('opens the new-group dialog when the true-empty call-to-action is clicked', () => {
     render(<Groups />);
 
     const emptyStateButtons = screen.getAllByRole('button', {
@@ -80,7 +83,11 @@ describe('Groups list empty state', () => {
     // The page header also has a "New group" button; click the one inside the empty state card.
     fireEvent.click(emptyStateButtons[emptyStateButtons.length - 1]);
 
-    expect(navigateMock).toHaveBeenCalledWith({ to: '/team/groups/new' });
+    expect(navigateMock).toHaveBeenCalledWith({
+      to: '/team/groups',
+      search: { create: 1 },
+      replace: false,
+    });
   });
 
   it('shows the search-empty title when a search matches no groups', () => {

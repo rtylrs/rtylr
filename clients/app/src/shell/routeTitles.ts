@@ -20,7 +20,7 @@ export const routeKeys: Record<string, string> = {
   '/store': 'extensions',
   '/extensions': 'extensions',
   '/api-keys': 'apiKeys',
-  '/webhooks': 'webhooks',
+  '/automations/webhooks': 'webhooks',
   '/security': 'security',
   '/theme': 'theme',
   '/help': 'helpCenter',

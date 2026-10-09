@@ -1,7 +1,7 @@
 import { financeNavItems } from '../../modules/finance/navigation';
 import { hrNavItems } from '../../modules/hr/navigation';
 import { recruitNavItems } from '../../modules/recruit/navigation';
-import { Workflow } from 'lucide-react';
+import { Webhook, Workflow } from 'lucide-react';
 import { CaretIcon } from '@voxire/caret';
 import type { ComponentType } from 'react';
 import { Bell, UserPlus, Plus } from 'lucide-react';
@@ -65,6 +65,15 @@ export function getPortalCommands(
       group: 'actions',
       icon: Workflow,
       destination: { path: '/automations' },
+    });
+  }
+  if (canAccessPortalPath(user, '/automations/webhooks')) {
+    commands.push({
+      id: 'tool-webhooks',
+      label: t('common.nav.webhooks'),
+      group: 'actions',
+      icon: Webhook,
+      destination: { path: '/automations/webhooks' },
     });
   }
   const insightsPages = insightsNavItems.filter((page) => canAccessPortalPath(user, page.path));

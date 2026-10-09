@@ -3,7 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const FLOW_URL = 'http://localhost:5197/flow';
-const EVIDENCE_DIR = '/Users/abedamouneh/Development/vault/rtylr/audit/flow-qa-2026-08-v2/evidence';
+// A manual QA capture, not a regression test: it writes evidence to a local
+// folder, so it only runs when one is given.
+const EVIDENCE_DIR = process.env.QA_EVIDENCE_DIR ?? '';
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
   const fakeJwt = 'e2e-test-token';
@@ -21,6 +23,7 @@ async function primeAuthCookie(context: import('@playwright/test').BrowserContex
 }
 
 test('QA Driver - Task Detail Live Interrogation', async ({ page, context }) => {
+  test.skip(!EVIDENCE_DIR, 'Set QA_EVIDENCE_DIR to capture task-detail QA evidence');
   await primeAuthCookie(context);
 
   if (!fs.existsSync(EVIDENCE_DIR)) {

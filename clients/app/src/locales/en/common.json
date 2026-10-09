@@ -29,6 +29,8 @@
     "name": "Name",
     "namePlaceholder": "e.g. Shift Manager",
     "optionalDescription": "Optional description",
+    "searchPermissions": "Search permissions",
+    "noPermissionMatches": "No permissions match \"{{query}}\"",
     "members": "Members",
     "actions": "Actions",
     "empty": "No permissions configured yet.",

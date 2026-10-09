@@ -1,7 +1,7 @@
 import { PageHeader } from '../../shared/components/dash/PageHeader';
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Users, Plus, Search, Trash2, ChevronRight } from 'lucide-react';
 import { EmptyState } from '../../shared/components/dash/EmptyState';
@@ -9,6 +9,7 @@ import { Button, Input } from '../../shared/components/ui';
 import { ConfirmDialog, SkeletonList } from '../../shared/components/dash';
 import { useGroups, useDeleteGroup, type Group } from '../../shared/hooks/queries/useGroups';
 import { APP_NAMES } from '../../shared/config/appNames';
+import { NewGroupDialog } from './NewGroupDialog';
 
 const appLabelKey = (appId: string): string =>
   APP_NAMES[appId as keyof typeof APP_NAMES]?.short ?? appId.toUpperCase();
@@ -16,6 +17,11 @@ const appLabelKey = (appId: string): string =>
 const Groups = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const search = useSearch({ from: '/business/team/groups' });
+  const creating = search.create === 1;
+  const setCreating = (open: boolean): void => {
+    void navigate({ to: '/team/groups', search: open ? { create: 1 } : {}, replace: !open });
+  };
   const { data: groups = [], isLoading, isError, refetch } = useGroups();
   const deleteGroup = useDeleteGroup();
   const [query, setQuery] = useState('');
@@ -28,12 +34,13 @@ const Groups = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer title={`${t('team.groups.title')} · rtylr`} />
+      <NewGroupDialog open={creating} onOpenChange={setCreating} />
       <div className="portal-management-page space-y-6">
         <PageHeader
           title={t('team.groups.title')}
           description={t('team.groups.subtitle')}
           actions={
-            <Button onClick={() => navigate({ to: '/team/groups/new' })}>
+            <Button onClick={() => setCreating(true)}>
               <Plus /> {t('team.groups.newGroup')}
             </Button>
           }
@@ -79,7 +86,7 @@ const Groups = (): React.JSX.Element => {
                 description={t('team.groups.noGroupsDescription')}
                 action={{
                   label: t('team.groups.newGroup'),
-                  onClick: () => navigate({ to: '/team/groups/new' }),
+                  onClick: () => setCreating(true),
                 }}
               />
             </div>
