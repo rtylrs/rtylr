@@ -69,3 +69,29 @@ describe("useCaretStore tabs", () => {
     ).toBe("project-123");
   });
 });
+
+describe("useCaretStore reply timing", () => {
+  it("records the reply time on the latest assistant message only", () => {
+    const tabId = useCaretStore.getState().activeTabId;
+    useCaretStore.getState().addMessage(userMessage("hi"), tabId);
+    useCaretStore.getState().startAssistantMessage(tabId);
+    useCaretStore.getState().setLastAssistantResponseTime(4200, tabId);
+
+    const messages = useCaretStore
+      .getState()
+      .tabs.find((tab) => tab.id === tabId)!.messages;
+    expect(messages[messages.length - 1]?.responseMs).toBe(4200);
+    expect(messages[0].responseMs).toBeUndefined();
+  });
+
+  it("ignores a reply time when the last message is not from the assistant", () => {
+    const tabId = useCaretStore.getState().activeTabId;
+    useCaretStore.getState().addMessage(userMessage("hi"), tabId);
+    useCaretStore.getState().setLastAssistantResponseTime(4200, tabId);
+
+    const messages = useCaretStore
+      .getState()
+      .tabs.find((tab) => tab.id === tabId)!.messages;
+    expect(messages[messages.length - 1]?.responseMs).toBeUndefined();
+  });
+});

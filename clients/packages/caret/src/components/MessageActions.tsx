@@ -9,12 +9,24 @@ export interface MessageActionsProps {
   /** Plain-text representation of the message for copy. */
   text: string;
   onRetry?: () => void;
+  /** How long the reply took; shown only for replies timed in this session. */
+  responseMs?: number;
+}
+
+/** "0.8s", "4.2s", "1m 05s". */
+export function formatResponseTime(ms: number): string {
+  const seconds = ms / 1000;
+  if (seconds < 60)
+    return `${seconds < 10 ? seconds.toFixed(1) : Math.round(seconds)}s`;
+  const whole = Math.round(seconds);
+  return `${Math.floor(whole / 60)}m ${String(whole % 60).padStart(2, "0")}s`;
 }
 
 /** Hover-revealed action row attached to assistant messages. */
 export const MessageActions: React.FC<MessageActionsProps> = ({
   text,
   onRetry,
+  responseMs,
 }) => {
   const { copy, copied } = useClipboard();
   const utterance = useRef<SpeechSynthesisUtterance | null>(null);
@@ -86,6 +98,21 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           <IconButton size="sm" label="Retry message" onClick={onRetry}>
             <RefreshCcw size={11} />
           </IconButton>
+        </Tooltip>
+      )}
+      {responseMs !== undefined && (
+        <Tooltip label="Time to reply">
+          <span
+            aria-label={`Replied in ${formatResponseTime(responseMs)}`}
+            style={{
+              fontSize: 11,
+              fontVariantNumeric: "tabular-nums",
+              padding: "0 6px",
+              color: caretTokens.textDim,
+            }}
+          >
+            {formatResponseTime(responseMs)}
+          </span>
         </Tooltip>
       )}
     </div>
