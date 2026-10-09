@@ -10,16 +10,26 @@ import { useKeyboardShortcuts } from '../../shared/hooks/useKeyboardShortcuts';
 import CommandPalette from './CommandPalette';
 
 const navigate = vi.hoisted(() => vi.fn());
+const route = vi.hoisted(() => ({ pathname: '/' }));
+const chatCommands = vi.hoisted(() => ({ commands: [] as unknown[] }));
+const openChat = vi.hoisted(() => vi.fn());
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigate,
   useRouterState: ({
     select,
   }: {
     select: (state: { location: { pathname: string } }) => unknown;
-  }) => select({ location: { pathname: '/' } }),
+  }) => select({ location: { pathname: route.pathname } }),
 }));
 vi.mock('../../modules/flow/useFlowCommands', () => ({
   useFlowCommands: () => ({ commands: [], loading: false, failed: false }),
+}));
+vi.mock('../../features/caret/useCaretChatCommands', () => ({
+  useCaretChatCommands: () => ({ commands: chatCommands.commands, loading: false, failed: false }),
+}));
+vi.mock('@voxire/caret', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@voxire/caret')>()),
+  useCaretStore: { getState: () => ({ openChat }) },
 }));
 
 const locales = path.resolve(import.meta.dirname, '../../locales');
@@ -38,6 +48,9 @@ function Launcher() {
 beforeEach(async () => {
   vi.restoreAllMocks();
   navigate.mockReset();
+  openChat.mockReset();
+  route.pathname = '/';
+  chatCommands.commands = [];
   await initTestI18nFrom(locales);
   useUserStore.setState({
     user: { effectiveAccess: createEffectiveAccess('flow', { isOwner: true }) },
@@ -46,6 +59,35 @@ beforeEach(async () => {
 });
 
 describe('Portal command launcher', () => {
+  it('lists Caret chats first inside Caret and opens the picked chat', async () => {
+    const ui = userEvent.setup();
+    route.pathname = '/caret';
+    chatCommands.commands = [
+      {
+        id: 'caret-chat-c1',
+        label: 'Quarterly payroll',
+        group: 'chats',
+        icon: () => null,
+        destination: { openCaretChat: 'c1', title: 'Quarterly payroll' },
+      },
+    ];
+    render(<Launcher />);
+    await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
+    const listbox = await screen.findByRole('listbox');
+    expect(within(listbox).getAllByRole('group')[0]).toHaveAccessibleName('Chats');
+    expect(screen.getByRole('combobox')).toHaveAttribute(
+      'aria-activedescendant',
+      expect.stringContaining('caret-chat-c1')
+    );
+    await ui.keyboard('{Enter}');
+    expect(openChat).toHaveBeenCalledWith({
+      sessionId: 'c1',
+      title: 'Quarterly payroll',
+      projectId: undefined,
+    });
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it.each([{ isOwner: true }, { isAdmin: true }])(
     'unlocks subscribed apps and management actions for %j without per-page grants',
     async (role) => {

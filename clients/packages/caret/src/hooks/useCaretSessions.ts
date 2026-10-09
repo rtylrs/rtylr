@@ -6,6 +6,9 @@ import { normalizeChatTitle } from "../lib/chatTitles";
 interface UseCaretSessionsParams {
   userId: number;
   apiBaseUrl: string;
+  /** How many recent chats to load; the sidebar shows 20. */
+  limit?: number;
+  enabled?: boolean;
 }
 
 interface UseCaretSessionsResult {
@@ -18,12 +21,15 @@ interface UseCaretSessionsResult {
 export function useCaretSessions({
   userId,
   apiBaseUrl,
+  limit = 20,
+  enabled = true,
 }: UseCaretSessionsParams): UseCaretSessionsResult {
   const { data, isLoading, error, refetch } = useQuery<CaretChatSummary[]>({
-    queryKey: ["caret", "sessions", userId],
+    // Keyed under ["caret", "sessions", userId] so chat mutations refresh every list.
+    queryKey: ["caret", "sessions", userId, limit],
     queryFn: async (): Promise<CaretChatSummary[]> => {
       const res = await createMemoryClient(apiBaseUrl).listChats({
-        limit: 20,
+        limit,
         offset: 0,
       });
       return (res.chats ?? [])
@@ -40,7 +46,7 @@ export function useCaretSessions({
           projectId: chat.projectId || undefined,
         }));
     },
-    enabled: userId > 0,
+    enabled: enabled && userId > 0,
   });
 
   return {

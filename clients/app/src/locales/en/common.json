@@ -280,10 +280,12 @@
       "finance": "Finance",
       "hr": "HR",
       "pos": "POS",
-      "recruit": "Recruit"
+      "recruit": "Recruit",
+      "chats": "Chats"
     },
     "loadingFlow": "Searching Work…",
-    "flowSearchFailed": "Work search could not load. Try again."
+    "flowSearchFailed": "Work search could not load. Try again.",
+    "chatSearchFailed": "Couldn't load Caret chats."
   },
   "webhook": {
     "active": "Active",

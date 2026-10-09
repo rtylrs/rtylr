@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, CornerDownLeft, Search, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@voxire/ui';
 import { FLAG_KEYS, useFeatureFlag } from '@voxire/config';
+import { useCaretStore } from '@voxire/caret';
+import { useCaretChatCommands } from '../../features/caret/useCaretChatCommands';
 import { useFlowCommands } from '../../modules/flow/useFlowCommands';
 import { useFlowStore } from '../../modules/flow/shared/stores/flowStore';
 import { useCommandPalette } from '../../shared/stores/commandPaletteStore';
@@ -25,21 +27,39 @@ export default function CommandPalette() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const flowPreview = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const flowSearch = useFlowCommands(user, open && pathname.startsWith('/flow/'), query);
+  const onCaret = pathname === '/caret' || pathname.startsWith('/caret/');
+  // Chats are searchable everywhere, but only listed up front inside Caret.
+  const chatSearch = useCaretChatCommands(user, open && (onCaret || query.trim().length > 0));
   const [activeId, setActiveId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const id = useId();
   const commands = useMemo(
-    () => [...getPortalCommands(user, t, flowPreview), ...flowSearch.commands],
-    [user, t, flowPreview, flowSearch.commands]
+    () => [
+      ...getPortalCommands(user, t, flowPreview),
+      ...flowSearch.commands,
+      ...chatSearch.commands,
+    ],
+    [user, t, flowPreview, flowSearch.commands, chatSearch.commands]
   );
   const filtered = useMemo(
     () =>
       searchPortalCommands(commands, query, (group) => t(`common.commandPalette.groups.${group}`)),
     [commands, query, t]
   );
-  const active = filtered.find((command) => command.id === activeId) ?? filtered[0];
+  const groups = useMemo(
+    () =>
+      onCaret
+        ? ['chats' as const, ...COMMAND_GROUPS.filter((group) => group !== 'chats')]
+        : COMMAND_GROUPS,
+    [onCaret]
+  );
+  const ordered = useMemo(
+    () => groups.flatMap((group) => filtered.filter((command) => command.group === group)),
+    [groups, filtered]
+  );
+  const active = ordered.find((command) => command.id === activeId) ?? ordered[0];
 
   useEffect(() => {
     if (!open) {
@@ -71,6 +91,10 @@ export default function CommandPalette() {
           search: (previous: Record<string, unknown>) => ({ ...previous, openTask: taskId }),
         });
       else navigate({ to: '/flow/my-issues', search: { openTask: taskId } });
+    } else if ('openCaretChat' in command.destination) {
+      const { openCaretChat: sessionId, title, projectId } = command.destination;
+      useCaretStore.getState().openChat({ sessionId, title, projectId });
+      if (!onCaret) navigate({ to: '/caret' });
     }
   };
 
@@ -78,10 +102,10 @@ export default function CommandPalette() {
     if (event.nativeEvent.isComposing) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
-      if (!filtered.length) return;
+      if (!ordered.length) return;
       const offset = event.key === 'ArrowDown' ? 1 : -1;
-      const index = filtered.findIndex((command) => command.id === active?.id);
-      setActiveId(filtered[(index + offset + filtered.length) % filtered.length].id);
+      const index = ordered.findIndex((command) => command.id === active?.id);
+      setActiveId(ordered[(index + offset + ordered.length) % ordered.length].id);
     } else if (event.key === 'Enter') {
       event.preventDefault();
       if (active) run(active);
@@ -164,7 +188,12 @@ export default function CommandPalette() {
               {t('common.commandPalette.flowSearchFailed')}
             </p>
           )}
-          {COMMAND_GROUPS.map((group) => {
+          {chatSearch.failed && (
+            <p role="alert" className="px-5 py-2 text-sm">
+              {t('common.commandPalette.chatSearchFailed')}
+            </p>
+          )}
+          {groups.map((group) => {
             const groupCommands = filtered.filter((command) => command.group === group);
             if (!groupCommands.length) return null;
             return (

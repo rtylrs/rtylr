@@ -42,6 +42,8 @@ interface CaretActions {
   close: () => void;
   toggle: () => void;
   newTab: (input?: NewCaretTabInput) => string;
+  /** Focus the tab already showing a saved chat, or open one for it. */
+  openChat: (input: { sessionId: string; title?: string; projectId?: string }) => string;
   setActiveTab: (id: string) => void;
   closeTab: (id: string) => void;
   setTabTitle: (title: string, tabId?: string) => void;
@@ -197,7 +199,7 @@ const emptyAssistant = (): CaretMessage => ({
 
 export const useCaretStore = create<CaretStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
 
       open: () => set({ isOpen: true }),
@@ -213,6 +215,15 @@ export const useCaretStore = create<CaretStore>()(
           isStreaming: tab.isStreaming,
         }));
         return tab.id;
+      },
+
+      openChat: ({ sessionId, title, projectId }) => {
+        const existing = get().tabs.find((tab) => tab.sessionId === sessionId);
+        if (existing) {
+          get().setActiveTab(existing.id);
+          return existing.id;
+        }
+        return get().newTab({ sessionId, title, projectId });
       },
 
       setActiveTab: (id) =>

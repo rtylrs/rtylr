@@ -29,6 +29,7 @@ export const COMMAND_GROUPS = [
   'recruit',
   'projects',
   'tasks',
+  'chats',
   'settings',
   'actions',
 ] as const;
@@ -40,7 +41,11 @@ export interface PortalCommand {
   group: CommandGroup;
   icon: ComponentType<{ size?: number; className?: string }>;
   destination:
-    { path: string } | { href: string } | { newFlowTask: true } | { openFlowTask: string };
+    | { path: string }
+    | { href: string }
+    | { newFlowTask: true }
+    | { openFlowTask: string }
+    | { openCaretChat: string; title?: string; projectId?: string };
 }
 
 export function getPortalCommands(

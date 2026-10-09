@@ -252,19 +252,12 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
   const selectChat = useCallback(
     (id: string): void => {
-      const existing = useCaretStore
-        .getState()
-        .tabs.find((tab) => tab.sessionId === id);
-      if (existing) {
-        caret.setActiveTab(existing.id);
-      } else {
-        const summary = sessions.find((chat) => chat.id === id);
-        caret.newTab({
-          sessionId: id,
-          title: summary?.title,
-          projectId: summary?.projectId,
-        });
-      }
+      const summary = sessions.find((chat) => chat.id === id);
+      useCaretStore.getState().openChat({
+        sessionId: id,
+        title: summary?.title,
+        projectId: summary?.projectId,
+      });
       setSelectedProjectId(
         sessions.find((chat) => chat.id === id)?.projectId ?? null,
       );
@@ -324,11 +317,13 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
   const deleteChat = useCallback(
     async (id: string): Promise<void> => {
+      // Prefix match: the sidebar and the command palette load different limits.
       const queryKey = ["caret", "sessions", userId] as const;
-      const previous = queryClient.getQueryData<CaretChatSummary[]>(queryKey);
+      const previousLists = queryClient.getQueriesData<CaretChatSummary[]>({ queryKey });
+      const previous = previousLists[0]?.[1];
 
       removeRecent(id);
-      queryClient.setQueryData<CaretChatSummary[]>(queryKey, (old) =>
+      queryClient.setQueriesData<CaretChatSummary[]>({ queryKey }, (old) =>
         old ? old.filter((chat) => chat.id !== id) : [],
       );
 
@@ -342,10 +337,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         });
 
       if (!deleted) {
-        if (previous) {
-          queryClient.setQueryData<CaretChatSummary[]>(queryKey, previous);
-          setRecent(previous);
-        }
+        for (const [key, list] of previousLists) queryClient.setQueryData(key, list);
+        if (previous) setRecent(previous);
         return;
       }
 
