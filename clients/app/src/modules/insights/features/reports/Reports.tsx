@@ -1,6 +1,5 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion, type Variants } from 'motion/react';
 import { FileText, Download, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@voxire/auth';
@@ -14,16 +13,6 @@ import {
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import { canInsightsPermission } from '../../shared/lib/insightsPermissions';
-
-const containerVariants: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
-};
 
 const Reports: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -39,14 +28,9 @@ const Reports: React.FC = (): React.JSX.Element => {
   const templates = data?.templates ?? [];
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 max-w-7xl"
-    >
+    <div className="space-y-6 max-w-7xl">
       <HelmetContainer title={t('insights.reports.metaTitle')} />
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.reports.title')}
         </h1>
@@ -84,10 +68,9 @@ const Reports: React.FC = (): React.JSX.Element => {
             {t('insights.reports.generateRevenue')}
           </button>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -133,8 +116,8 @@ const Reports: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

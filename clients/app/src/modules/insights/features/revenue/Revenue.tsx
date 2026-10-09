@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion, type Variants } from 'motion/react';
 import { TrendingUp, ArrowUpRight, ArrowDownRight, PieChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Line, Bar } from 'react-chartjs-2';
@@ -18,16 +17,6 @@ import { formatPercent } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonBlock } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 
-const containerVariants: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
-};
-
 const Revenue: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: series, isLoading, isError, refetch } = useRevenueSeries();
@@ -40,6 +29,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -82,6 +72,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -157,14 +148,9 @@ const Revenue: React.FC = (): React.JSX.Element => {
   const difference = (comparison?.thisPeriod ?? 0) - (comparison?.lastPeriod ?? 0);
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 max-w-7xl"
-    >
+    <div className="space-y-6 max-w-7xl">
       <HelmetContainer title={t('insights.revenue.metaTitle')} />
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
             {t('insights.revenue.title')}
@@ -173,7 +159,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
             {t('insights.revenue.subtitle')}
           </p>
         </div>
-      </motion.div>
+      </div>
 
       {compLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -182,9 +168,8 @@ const Revenue: React.FC = (): React.JSX.Element => {
           ))}
         </div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <motion.div
-            variants={itemVariants}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
@@ -215,9 +200,8 @@ const Revenue: React.FC = (): React.JSX.Element => {
                 </>
               )}
             </div>
-          </motion.div>
-          <motion.div
-            variants={itemVariants}
+          </div>
+          <div
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
@@ -227,9 +211,8 @@ const Revenue: React.FC = (): React.JSX.Element => {
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
               {formatMoney(comparison?.lastPeriod ?? 0, currency)}
             </p>
-          </motion.div>
-          <motion.div
-            variants={itemVariants}
+          </div>
+          <div
             className="rounded-xl p-5"
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
@@ -239,12 +222,11 @@ const Revenue: React.FC = (): React.JSX.Element => {
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
               {formatMoney(difference, currency)}
             </p>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -268,10 +250,9 @@ const Revenue: React.FC = (): React.JSX.Element => {
             <Line data={areaData} options={areaOptions} />
           </div>
         )}
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -292,8 +273,8 @@ const Revenue: React.FC = (): React.JSX.Element => {
             <Bar data={barData} options={barOptions} />
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

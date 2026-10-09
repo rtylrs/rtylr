@@ -19,14 +19,6 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('motion/react', () => ({
-  motion: {
-    div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
-      <div {...props}>{children}</div>
-    ),
-  },
-}));
-
 vi.mock('../../shared/hooks/queries/useInsightsSettings', () => ({
   useInsightsSettings: mocks.useInsightsSettings,
   useUpdateInsightsSettings: mocks.useUpdateInsightsSettings,
