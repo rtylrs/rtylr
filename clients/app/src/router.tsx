@@ -34,6 +34,7 @@ const QrCodes = React.lazy(() => import('./features/qr-codes/QrCodes.tsx'));
 const QrCode = React.lazy(() => import('./features/qr-codes/QrCode.tsx'));
 const Design = React.lazy(() => import('./features/design/Design.tsx'));
 const Automations = React.lazy(() => import('./features/automations/Automations'));
+const Webhooks = React.lazy(() => import('./features/developer/Webhooks'));
 const AutomationBuilder = React.lazy(() => import('./features/automations/AutomationBuilder'));
 const CaretWorkspace = React.lazy(() => import('./features/caret/CaretWorkspace'));
 
@@ -88,6 +89,18 @@ const automationsRoute = createRoute({
         <Automations />
       </AppFlagGuard>
     ),
+});
+// Webhooks live beside automations; there is no separate developer page.
+const automationWebhooksRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/automations/webhooks',
+  beforeLoad: requireDashManagement,
+  component: () => wrap(<Webhooks />),
+});
+const webhooksRedirectRoute = createRoute({
+  getParentRoute: () => businessRoute,
+  path: '/webhooks',
+  component: () => <Navigate to="/automations/webhooks" replace />,
 });
 const automationBuilderRoute = createRoute({
   getParentRoute: () => businessRoute,
@@ -308,6 +321,8 @@ const routeTree = rootRoute.addChildren([
     createRecruitRoutes(businessRoute),
     dashboardRoute,
     automationsRoute,
+    automationWebhooksRoute,
+    webhooksRedirectRoute,
     automationBuilderRoute,
     menusRoute,
     menuRoute,

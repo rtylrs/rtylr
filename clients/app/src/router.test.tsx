@@ -59,13 +59,10 @@ describe('Portal native app routes', () => {
     expect(router.state.location.pathname).toBe('/');
     expect(screen.queryByRole('heading', { name: 'Notification preferences' })).toBeNull();
   });
-  it.each(['/security', '/api-keys', '/webhooks'])(
-    'opens %s in the settings modal',
-    async (url) => {
-      await open(url);
-      expect(useSettingsModalStore.getState().path).toBe(url);
-    }
-  );
+  it.each(['/security', '/api-keys'])('opens %s in the settings modal', async (url) => {
+    await open(url);
+    expect(useSettingsModalStore.getState().path).toBe(url);
+  });
   it('keeps Flow project deep links under their native prefix', async () => {
     await open('/flow/p/42');
     expect(await screen.findByRole('heading', { name: 'Project 42' })).toBeVisible();
@@ -105,9 +102,14 @@ describe('Portal native app routes', () => {
   it('gives every settings route the same id in the settings modal router', () => {
     const modalRouter = createRouter({ routeTree: modalRouteTree });
     const settingsIds = Object.keys(appRouter.routesById).filter((id) =>
-      /^\/business\/(settings|security|api-keys|webhooks)(\/|$)/.test(id)
+      /^\/business\/(settings|security|api-keys)(\/|$)/.test(id)
     );
     expect(settingsIds.length).toBeGreaterThan(10);
     expect(settingsIds.filter((id) => !(id in modalRouter.routesById))).toEqual([]);
+  });
+  it('sends the old webhooks page to Automations', async () => {
+    const router = await open('/webhooks');
+    await vi.waitFor(() => expect(router.state.location.pathname).toBe('/automations/webhooks'));
+    expect(useSettingsModalStore.getState().path).toBeNull();
   });
 });

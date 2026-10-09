@@ -14,7 +14,7 @@ const DASH_ROUTE_PERMISSIONS: Array<[string, string]> = [
   ['/roles', 'hub:roles:view'],
   ['/audit', 'hub:audit:view'],
   ['/api-keys', 'hub:api_keys:manage'],
-  ['/webhooks', 'hub:api_keys:manage'],
+  ['/automations/webhooks', 'hub:api_keys:manage'],
   ['/settings/billing', 'hub:billing:view'],
   ['/settings', 'hub:business:settings:view'],
   ['/menus', 'menu:menus:view'],

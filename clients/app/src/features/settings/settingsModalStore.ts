@@ -14,7 +14,7 @@ export const useSettingsModalStore = create<SettingsModalState>((set) => ({
   close: () => set({ path: null }),
 }));
 
-const SETTINGS_PAGE = /^\/(settings|security|api-keys|webhooks)(\/|$)/;
+const SETTINGS_PAGE = /^\/(settings|security|api-keys)(\/|$)/;
 
 export const isSettingsPath = (pathname: string) => SETTINGS_PAGE.test(pathname);
 

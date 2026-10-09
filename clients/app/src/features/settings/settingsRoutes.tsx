@@ -35,7 +35,6 @@ const AiUsage = React.lazy(() => import('./Settings/components/AiUsage'));
 const Billing = React.lazy(() => import('../billing/Billing.tsx'));
 const Security = React.lazy(() => import('../security/Security'));
 const ApiKeys = React.lazy(() => import('../developer/ApiKeys'));
-const Webhooks = React.lazy(() => import('../developer/Webhooks'));
 
 const fallback = (
   <div className="flex min-h-48 items-center justify-center">
@@ -114,10 +113,7 @@ export function createSettingsRoutes<TParent extends AnyRoute>(
     beforeLoad,
     component: () => wrap(<Security />),
   });
-  const managedRoute = <TPath extends '/api-keys' | '/webhooks'>(
-    path: TPath,
-    element: React.ReactNode
-  ) =>
+  const managedRoute = <TPath extends '/api-keys'>(path: TPath, element: React.ReactNode) =>
     createRoute({
       getParentRoute: () => parent,
       path,
@@ -128,10 +124,5 @@ export function createSettingsRoutes<TParent extends AnyRoute>(
       component: () => wrap(element),
     });
 
-  return [
-    settingsTree,
-    securityRoute,
-    managedRoute('/api-keys', <ApiKeys />),
-    managedRoute('/webhooks', <Webhooks />),
-  ] as const;
+  return [settingsTree, securityRoute, managedRoute('/api-keys', <ApiKeys />)] as const;
 }
