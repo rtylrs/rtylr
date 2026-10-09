@@ -5,7 +5,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
-import { Send, CreditCard, MapPin, Eye, EyeOff } from 'lucide-react';
+import { Send, CreditCard, MapPin, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { EmptyState } from '../../shared/components/dash/EmptyState';
 import { Button, Input, Label } from '../../shared/components/ui';
 import { useInviteMember } from '../../shared/hooks/queries/useTeam';
@@ -95,6 +95,28 @@ const STATUS_COLORS: Record<BulkResult['status'], string> = {
   error: '#ef4444',
 };
 
+type IdentityField = 'name' | 'email' | 'username' | 'password';
+type FieldErrors = Partial<Record<IdentityField, string>>;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ERROR_COLOR = 'var(--dash-error, #ef4444)';
+const invalidInputStyle: React.CSSProperties = {
+  borderColor: ERROR_COLOR,
+  boxShadow: `0 0 0 3px color-mix(in srgb, ${ERROR_COLOR} 12%, transparent)`,
+};
+
+const FieldError: React.FC<{ id: string; message?: string }> = ({ id, message }) =>
+  message ? (
+    <p
+      id={id}
+      className="flex items-center gap-1.5 text-[11px] font-medium"
+      style={{ color: ERROR_COLOR }}
+    >
+      <AlertCircle size={12} aria-hidden className="shrink-0" />
+      {message}
+    </p>
+  ) : null;
+
 const InviteUser: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -110,6 +132,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   // Single tab state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [memberType, setMemberType] = useState<'member' | 'admin'>('member');
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
@@ -118,7 +141,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [singleGroupId, setSingleGroupId] = useState<string>('');
-  const [singleStep, setSingleStep] = useState<0 | 1 | 2 | 3>(0);
+  const [singleStep, setSingleStep] = useState<0 | 1 | 2>(0);
   const [profileIdsByApp, setProfileIdsByApp] = useState<Record<string, string[]>>({});
 
   // Bulk tab state
@@ -180,14 +203,41 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     }
   };
 
+  // Errors show under each field; the first invalid field takes focus.
+  const validateIdentity = (): boolean => {
+    const errors: FieldErrors = {};
+    if (!name.trim()) errors.name = t('team.inviteUser.nameRequired');
+    if (!email.trim()) errors.email = t('team.inviteUser.emailRequired');
+    else if (!EMAIL_PATTERN.test(email.trim())) errors.email = t('team.inviteUser.emailInvalid');
+    if (authMethod === 'manual') {
+      if (!username.trim()) errors.username = t('team.inviteUser.usernameRequired');
+      if (password.length < 8) errors.password = t('team.inviteUser.passwordTooShort');
+    }
+    setFieldErrors(errors);
+    const first = (['name', 'email', 'username', 'password'] as const).find((f) => errors[f]);
+    if (first) document.getElementById(`inv-${first}`)?.focus();
+    return !first;
+  };
+
+  const clearFieldError = (field: IdentityField): void => {
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const fieldProps = (field: IdentityField) => ({
+    'aria-invalid': fieldErrors[field] ? true : undefined,
+    'aria-describedby': fieldErrors[field] ? `inv-${field}-error` : undefined,
+    style: fieldErrors[field] ? invalidInputStyle : undefined,
+  });
+
   const submitSingle = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!email.trim() || !name.trim()) {
-      toast.error(t('team.inviteUser.emailAndNameRequired'));
-      return;
-    }
-    if (authMethod === 'manual' && (!username.trim() || password.length < 8)) {
-      toast.error(t('team.inviteUser.passwordTooShort'));
+    if (!validateIdentity()) {
+      setSingleStep(0);
       return;
     }
     try {
@@ -217,14 +267,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   };
 
   const continueToAccess = (): void => {
-    if (!name.trim() || !email.trim()) {
-      toast.error(t('team.inviteUser.identityRequired'));
-      return;
-    }
-    if (authMethod === 'manual' && (!username.trim() || password.length < 8)) {
-      toast.error(t('team.inviteUser.credentialsRequired'));
-      return;
-    }
+    if (!validateIdentity()) return;
     setSingleStep(1);
   };
 
@@ -512,14 +555,13 @@ const InviteUser: React.FC = (): React.JSX.Element => {
 
         {tab === 'single' && (
           <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-2"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-2"
             aria-label={t('team.inviteUser.progressLabel')}
           >
             {[
               t('team.inviteUser.stepIdentity'),
               t('team.inviteUser.stepAccess'),
               t('team.inviteUser.stepReview'),
-              t('team.inviteUser.stepActivate'),
             ].map((label, index) => (
               <button
                 type="button"
@@ -527,7 +569,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 aria-current={index === singleStep ? 'step' : undefined}
                 disabled={index > singleStep}
                 onClick={() => {
-                  if (index <= singleStep) setSingleStep(index as 0 | 1 | 2 | 3);
+                  if (index <= singleStep) setSingleStep(index as 0 | 1 | 2);
                 }}
                 className="min-h-11 rounded-lg px-3 py-2 text-start text-xs font-semibold"
                 style={{
@@ -564,10 +606,15 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                       <Input
                         id="inv-name"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          clearFieldError('name');
+                        }}
                         placeholder={t('team.inviteUser.fullNamePlaceholder')}
                         required
+                        {...fieldProps('name')}
                       />
+                      <FieldError id="inv-name-error" message={fieldErrors.name} />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="inv-email">{t('team.inviteUser.emailLabel')}</Label>
@@ -575,10 +622,15 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                         id="inv-email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          clearFieldError('email');
+                        }}
                         placeholder="jane@example.com"
                         required
+                        {...fieldProps('email')}
                       />
+                      <FieldError id="inv-email-error" message={fieldErrors.email} />
                     </div>
                   </div>
                 </div>
@@ -594,7 +646,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setAuthMethod('invite')}
+                      onClick={() => {
+                        setAuthMethod('invite');
+                        setFieldErrors({});
+                      }}
                       className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-start transition-colors"
                       style={{
                         background:
@@ -616,7 +671,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setAuthMethod('manual')}
+                      onClick={() => {
+                        setAuthMethod('manual');
+                        setFieldErrors({});
+                      }}
                       className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-start transition-colors"
                       style={{
                         background:
@@ -645,10 +703,15 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                         <Input
                           id="inv-username"
                           value={username}
-                          onChange={(e) => setUsername(e.target.value)}
+                          onChange={(e) => {
+                            setUsername(e.target.value);
+                            clearFieldError('username');
+                          }}
                           placeholder={t('team.inviteUser.usernamePlaceholder')}
                           required={authMethod === 'manual'}
+                          {...fieldProps('username')}
                         />
+                        <FieldError id="inv-username-error" message={fieldErrors.username} />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="inv-password">
@@ -659,10 +722,14 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                             id="inv-password"
                             type={showPassword ? 'text' : 'password'}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {
+                              setPassword(e.target.value);
+                              clearFieldError('password');
+                            }}
                             placeholder={t('team.inviteUser.passwordPlaceholder')}
                             required={authMethod === 'manual'}
                             minLength={8}
+                            {...fieldProps('password')}
                           />
                           <button
                             type="button"
@@ -678,6 +745,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                             {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                           </button>
                         </div>
+                        <FieldError id="inv-password-error" message={fieldErrors.password} />
                       </div>
                       <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
                         {t('team.inviteUser.temporaryPasswordHint')}
@@ -814,46 +882,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                     </p>
                   </div>
                   <div>
-                    <strong>{t('team.inviteUser.reviewSignIn')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {authMethod === 'invite'
-                        ? t('team.inviteUser.invitationMethod')
-                        : t('team.inviteUser.directCredentialMethod')}
-                    </p>
-                  </div>
-                </div>
-                <div
-                  className="rounded-lg px-3 py-2.5 text-xs"
-                  style={{
-                    background: 'var(--accent-muted)',
-                    border: '1px solid var(--accent-border)',
-                    color: 'var(--dash-text-muted)',
-                  }}
-                >
-                  {t('team.inviteUser.activationGuard')}
-                </div>
-              </div>
-            )}
-
-            {singleStep === 3 && (
-              <div
-                className="rounded-xl p-6 space-y-4"
-                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-              >
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                    {t('team.inviteUser.activationTitle')}
-                  </p>
-                  <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
-                    {t('team.inviteUser.activationDescription')}
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <strong>{t('team.inviteUser.activationMember')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>{name}</p>
-                  </div>
-                  <div>
                     <strong>{t('team.inviteUser.activationState')}</strong>
                     <p style={{ color: 'var(--dash-text-muted)' }}>
                       {authMethod === 'invite'
@@ -861,32 +889,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                         : t('team.inviteUser.activationPendingVerification')}
                     </p>
                   </div>
-                  <div>
-                    <strong>{t('team.inviteUser.activationApps')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {memberType === 'admin'
-                        ? t('team.inviteUser.adminReceivesFullAccess')
-                        : selectedApps.length
-                          ? selectedApps.join(', ')
-                          : t('team.inviteUser.noApps')}
-                    </p>
-                  </div>
-                  <div>
-                    <strong>{t('team.inviteUser.activationOwnership')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {t('team.inviteUser.activationOwnershipValue')}
-                    </p>
-                  </div>
-                </div>
-                <div
-                  className="rounded-lg px-3 py-2.5 text-xs"
-                  style={{
-                    background: 'var(--accent-muted)',
-                    border: '1px solid var(--accent-border)',
-                    color: 'var(--dash-text-muted)',
-                  }}
-                >
-                  {t('team.inviteUser.activationGuard')}
                 </div>
               </div>
             )}
@@ -900,28 +902,29 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 <Button
                   variant="ghost"
                   type="button"
-                  onClick={() => setSingleStep((singleStep - 1) as 0 | 1 | 2 | 3)}
+                  onClick={() => setSingleStep((singleStep - 1) as 0 | 1 | 2)}
                 >
                   {t('team.inviteUser.backButton')}
                 </Button>
               )}
-              {singleStep < 3 ? (
+              {/* Distinct keys stop React reusing this button as the submit button,
+                  which would submit the form on the click that reaches Review. */}
+              {singleStep < 2 ? (
                 <Button
+                  key="next"
                   type="button"
                   onClick={() => {
                     if (singleStep === 0) {
                       continueToAccess();
                     } else {
-                      setSingleStep((singleStep + 1) as 0 | 1 | 2 | 3);
+                      setSingleStep((singleStep + 1) as 0 | 1 | 2);
                     }
                   }}
                 >
-                  {singleStep === 2
-                    ? t('team.inviteUser.activateStepButton')
-                    : t('team.inviteUser.nextButton')}
+                  {t('team.inviteUser.nextButton')}
                 </Button>
               ) : (
-                <Button type="submit" disabled={invite.isPending}>
+                <Button key="submit" type="submit" disabled={invite.isPending}>
                   <Send size={14} />
                   {authMethod === 'invite'
                     ? t('team.inviteUser.sendInvitation')
