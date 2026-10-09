@@ -189,13 +189,16 @@ const teamInviteRoute = createRoute({
 const teamGroupsRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/team/groups',
+  validateSearch: z.object({
+    create: z.literal(1).optional().catch(undefined),
+  }),
   component: () => wrap(<Groups />),
 });
 
 const teamGroupNewRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/team/groups/new',
-  component: () => wrap(<GroupDetail />),
+  component: () => <Navigate to="/team/groups" search={{ create: 1 }} replace />,
 });
 
 const teamGroupDetailRoute = createRoute({

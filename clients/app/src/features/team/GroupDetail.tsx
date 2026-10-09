@@ -1,4 +1,3 @@
-import { PermissionProfilePicker } from './PermissionProfilePicker';
 import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useParams } from '@tanstack/react-router';
@@ -6,51 +5,33 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, Users, Plus, UserCheck, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { EmptyState } from '../../shared/components/dash/EmptyState';
-import { Button, Input } from '../../shared/components/ui';
+import { Button } from '../../shared/components/ui';
 import { SkeletonList } from '../../shared/components/dash';
 import {
   useGroup,
-  useCreateGroup,
   useUpdateGroup,
   useAddGroupMembers,
   useRemoveGroupMember,
 } from '../../shared/hooks/queries/useGroups';
 import { useTeam } from '../../shared/hooks/queries/useTeam';
-import { usePermissionProfiles } from '../../shared/hooks/queries/usePermissions';
-import { APP_NAMES } from '../../shared/config/appNames';
 import {
   buildPermissionProfileAssignments,
   getAssignedProfileIdsByApp,
 } from './authorizationDraft';
-
-const APP_IDS = ['pos', 'erp', 'hr', 'crm', 'finance', 'flow', 'insights', 'menu', 'recruit'];
-
-const PRESET_COLORS = [
-  '#6366f1',
-  '#4583C4',
-  '#10b981',
-  '#f59e0b',
-  '#8b5cf6',
-  '#ef4444',
-  '#64C5B9',
-  '#ec4899',
-  '#f97316',
-];
+import { DEFAULT_GROUP_COLOR, GroupAppAccess, GroupGeneralFields } from './GroupForm';
 
 const GROUP_MEMBER_DISPLAY_LIMIT = 500;
 
 const GroupDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { id } = useParams({ strict: false });
+  // New groups are created from the dialog on the groups list; this page edits one.
+  const { id } = useParams({ from: '/business/team/groups/$id' });
   const navigate = useNavigate();
-  const isNew = id === undefined;
 
-  const { data: group, isLoading, isError, refetch } = useGroup(isNew ? undefined : id);
-  const createGroup = useCreateGroup();
+  const { data: group, isLoading, isError, refetch } = useGroup(id);
   const updateGroup = useUpdateGroup(id);
   const addMembers = useAddGroupMembers(id);
   const removeMember = useRemoveGroupMember(id);
-  const { data: permissionProfiles = [] } = usePermissionProfiles();
   const [teamPage, setTeamPage] = useState(1);
   const {
     data: teamData,
@@ -63,7 +44,7 @@ const GroupDetail = (): React.JSX.Element => {
   const [tab, setTab] = useState<'apps' | 'members'>('apps');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [color, setColor] = useState('#6366f1');
+  const [color, setColor] = useState(DEFAULT_GROUP_COLOR);
   const [licensedAppIds, setLicensedAppIds] = useState<string[]>([]);
   const [profileIdsByApp, setProfileIdsByApp] = useState<Record<string, string[]>>({});
   const [showAddMembers, setShowAddMembers] = useState(false);
@@ -72,22 +53,18 @@ const GroupDetail = (): React.JSX.Element => {
   const initializedGroupId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (group && !isNew) {
+    if (group) {
       const groupKey = String(group.id);
       if (initializedGroupId.current === groupKey) return;
       initializedGroupId.current = groupKey;
       setName(group.name);
       setDescription(group.description ?? '');
-      setColor(group.color ?? '#6366f1');
+      setColor(group.color ?? DEFAULT_GROUP_COLOR);
       setLicensedAppIds(group.licensedAppIds);
       setProfileIdsByApp(getAssignedProfileIdsByApp(group.permissionProfileAssignments, 'group'));
       setDirty(false);
-    } else if (isNew && initializedGroupId.current !== 'new') {
-      initializedGroupId.current = 'new';
-      setLicensedAppIds([]);
-      setProfileIdsByApp({});
     }
-  }, [group, isNew]);
+  }, [group]);
 
   const toggleLicensedApp = (appId: string): void => {
     setLicensedAppIds((prev) =>
@@ -106,24 +83,13 @@ const GroupDetail = (): React.JSX.Element => {
       group?.permissionProfileAssignments
     );
     try {
-      if (isNew) {
-        const created = await createGroup.mutateAsync({
-          name,
-          description,
-          color,
-          licensedAppIds,
-          permissionProfileAssignments,
-        });
-        navigate({ to: `/team/groups/${created.id}`, replace: true });
-      } else {
-        await updateGroup.mutateAsync({
-          name,
-          description,
-          color,
-          licensedAppIds,
-          permissionProfileAssignments,
-        });
-      }
+      await updateGroup.mutateAsync({
+        name,
+        description,
+        color,
+        licensedAppIds,
+        permissionProfileAssignments,
+      });
       setDirty(false);
     } catch {
       // onError in hooks handles toast
@@ -154,9 +120,9 @@ const GroupDetail = (): React.JSX.Element => {
     ? Math.max(1, Math.ceil(teamData.total / teamData.pageSize))
     : undefined;
 
-  const isSaving = createGroup.isPending || updateGroup.isPending;
+  const isSaving = updateGroup.isPending;
 
-  if (isLoading && !isNew) {
+  if (isLoading) {
     return (
       <div className="p-4">
         <SkeletonList rows={6} />
@@ -164,7 +130,7 @@ const GroupDetail = (): React.JSX.Element => {
     );
   }
 
-  if (isError && !isNew) {
+  if (isError) {
     return (
       <div className="p-4">
         <EmptyState
@@ -201,21 +167,19 @@ const GroupDetail = (): React.JSX.Element => {
                 className="text-[26px] font-semibold tracking-tight"
                 style={{ color: 'var(--dash-text)' }}
               >
-                {isNew ? t('team.groupDetail.newGroupTitle') : name}
+                {name}
               </h1>
-              {!isNew && (
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  {t(
-                    (group?.memberCount ?? 0) === 1
-                      ? 'team.groupDetail.membersCountSingular'
-                      : 'team.groupDetail.membersCountPlural',
-                    { count: group?.memberCount ?? 0 }
-                  )}
-                </p>
-              )}
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                {t(
+                  (group?.memberCount ?? 0) === 1
+                    ? 'team.groupDetail.membersCountSingular'
+                    : 'team.groupDetail.membersCountPlural',
+                  { count: group?.memberCount ?? 0 }
+                )}
+              </p>
             </div>
           </div>
-          <Button onClick={handleSave} disabled={isSaving || !name.trim() || (!dirty && !isNew)}>
+          <Button onClick={handleSave} disabled={isSaving || !name.trim() || !dirty}>
             <Save size={14} />
             {isSaving ? t('team.groupDetail.savingButton') : t('team.groupDetail.saveButton')}
           </Button>
@@ -229,166 +193,72 @@ const GroupDetail = (): React.JSX.Element => {
           <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             {t('team.groupDetail.generalSection')}
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label
-                htmlFor="group-name"
-                className="text-xs font-medium"
-                style={{ color: 'var(--dash-text-muted)' }}
-              >
-                {t('team.groupDetail.labelName')}
-              </label>
-              <Input
-                id="group-name"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  setDirty(true);
-                }}
-                placeholder={t('team.groupDetail.namePlaceholder')}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label
-                htmlFor="group-description"
-                className="text-xs font-medium"
-                style={{ color: 'var(--dash-text-muted)' }}
-              >
-                {t('team.groupDetail.labelDescription')}
-              </label>
-              <Input
-                id="group-description"
-                value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                  setDirty(true);
-                }}
-                placeholder={t('team.groupDetail.descriptionPlaceholder')}
-              />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('team.groupDetail.labelColor')}
-            </label>
-            <div className="flex items-center gap-2 flex-wrap">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  type="button"
-                  key={c}
-                  aria-label={t('team.groupDetail.colorAriaLabel', { color: c })}
-                  onClick={() => {
-                    setColor(c);
-                    setDirty(true);
-                  }}
-                  className="h-6 w-6 rounded-full transition-transform hover:scale-110"
-                  style={{
-                    background: c,
-                    outline: color === c ? `2px solid ${c}` : 'none',
-                    outlineOffset: '2px',
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+          <GroupGeneralFields
+            name={name}
+            description={description}
+            color={color}
+            onNameChange={(value) => {
+              setName(value);
+              setDirty(true);
+            }}
+            onDescriptionChange={(value) => {
+              setDescription(value);
+              setDirty(true);
+            }}
+            onColorChange={(value) => {
+              setColor(value);
+              setDirty(true);
+            }}
+          />
         </div>
 
         {/* Tabs */}
-        {!isNew && (
-          <div
-            className="flex items-center gap-1"
-            style={{ borderBottom: '1px solid var(--dash-border)' }}
-          >
-            {(['apps', 'members'] as const).map((tabKey) => (
-              <button
-                type="button"
-                key={tabKey}
-                onClick={() => setTab(tabKey)}
-                className="px-4 py-2 text-sm font-medium transition-colors"
-                style={{
-                  color: tab === tabKey ? 'var(--dash-text)' : 'var(--dash-text-muted)',
-                  borderBottom:
-                    tab === tabKey ? '2px solid var(--accent)' : '2px solid transparent',
-                  marginBottom: '-1px',
-                }}
-              >
-                {tabKey === 'apps'
-                  ? t('team.groupDetail.tabApps', { count: activeAppCount })
-                  : t('team.groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
-              </button>
-            ))}
-          </div>
-        )}
+        <div
+          className="flex items-center gap-1"
+          style={{ borderBottom: '1px solid var(--dash-border)' }}
+        >
+          {(['apps', 'members'] as const).map((tabKey) => (
+            <button
+              type="button"
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
+              className="px-4 py-2 text-sm font-medium transition-colors"
+              style={{
+                color: tab === tabKey ? 'var(--dash-text)' : 'var(--dash-text-muted)',
+                borderBottom: tab === tabKey ? '2px solid var(--accent)' : '2px solid transparent',
+                marginBottom: '-1px',
+              }}
+            >
+              {tabKey === 'apps'
+                ? t('team.groupDetail.tabApps', { count: activeAppCount })
+                : t('team.groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
+            </button>
+          ))}
+        </div>
 
         {/* Apps tab */}
-        {(isNew || tab === 'apps') && (
+        {tab === 'apps' && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="rounded-xl overflow-x-auto"
             style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
           >
-            {/* Application licenses and permission profiles */}
-            <div
-              className="portal-list-heading grid grid-cols-12 min-w-[620px] gap-4 items-center px-6 py-3"
-              style={{
-                color: 'var(--dash-text-dim)',
-                borderBottom: '1px solid var(--dash-border)',
+            <GroupAppAccess
+              accentColor={color}
+              licensedAppIds={licensedAppIds}
+              profileIdsByApp={profileIdsByApp}
+              onToggleApp={toggleLicensedApp}
+              onProfilesChange={(appId, ids) => {
+                setProfileIdsByApp((current) => ({ ...current, [appId]: ids }));
+                setDirty(true);
               }}
-            >
-              <div className="col-span-4">{t('team.groupDetail.columnApp')}</div>
-              <div className="col-span-2 text-center">{t('team.groupDetail.columnLicense')}</div>
-              <div className="col-span-6">{t('team.groupDetail.columnPermissionProfile')}</div>
-            </div>
-
-            {APP_IDS.map((appId) => {
-              const appName = APP_NAMES[appId as keyof typeof APP_NAMES];
-              const appProfiles = permissionProfiles.filter((profile) => profile.appId === appId);
-              const licensed = licensedAppIds.includes(appId);
-              return (
-                <div
-                  key={appId}
-                  className="grid grid-cols-12 min-w-[620px] gap-4 items-center px-6 py-4 transition-colors hover:bg-[var(--dash-hover)]"
-                  style={{ borderBottom: '1px solid var(--dash-border)' }}
-                >
-                  <div className="col-span-4">
-                    <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                      {t(appName.short)}
-                    </span>
-                  </div>
-                  <div className="col-span-2 flex justify-center">
-                    <input
-                      type="checkbox"
-                      aria-label={t('team.groupDetail.licenseAppAriaLabel', {
-                        app: t(appName.short),
-                      })}
-                      checked={licensed}
-                      onChange={() => toggleLicensedApp(appId)}
-                      style={{ accentColor: color }}
-                    />
-                  </div>
-                  <div className="col-span-6">
-                    <PermissionProfilePicker
-                      label={t('team.groupDetail.permissionProfileForApp', {
-                        app: t(appName.short),
-                      })}
-                      profiles={appProfiles}
-                      selectedIds={profileIdsByApp[appId] ?? []}
-                      disabled={!licensed}
-                      onChange={(ids) => {
-                        setProfileIdsByApp((current) => ({ ...current, [appId]: ids }));
-                        setDirty(true);
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+            />
           </motion.div>
         )}
 
         {/* Members tab */}
-        {!isNew && tab === 'members' && (
+        {tab === 'members' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
