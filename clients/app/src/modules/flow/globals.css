@@ -124,6 +124,14 @@
   transition: opacity 150ms ease-out;
 }
 
+/* A sidebar row's actions button (28px, 4px in) sits over the link's end edge, so the
+   link must leave that room or its count lands underneath the button.
+   .portal-nav-link sets its own padding in unlayered CSS, which beats a Tailwind
+   padding utility on the same element, hence the doubled selector instead of pe-9. */
+.portal-nav-link.flow-nav-row-link {
+  padding-inline-end: 2.25rem;
+}
+
 @media (hover: hover) {
   .flow-reveal-on-hover {
     opacity: 0;

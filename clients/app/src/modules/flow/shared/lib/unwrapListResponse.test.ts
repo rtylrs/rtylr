@@ -20,6 +20,22 @@ describe('unwrapListResponse', () => {
     );
   });
 
+  it('reads an omitted key as an empty list', () => {
+    // The server drops an empty repeated field from its JSON, so a user with no
+    // tasks gets only the pagination block back.
+    expect(unwrapListResponse({ pagination: { page: 1, limit: 500 } }, 'tasks')).toEqual([]);
+    expect(unwrapListResponse({}, 'tasks')).toEqual([]);
+  });
+
+  it('does not read an unrecognised envelope as empty', () => {
+    expect(() => unwrapListResponse({ unrelated: true }, 'tasks')).toThrow(
+      'Expected a list response with "tasks"'
+    );
+    expect(() => unwrapListResponse({ pagination: {}, items: [] }, 'tasks')).toThrow(
+      'Expected a list response with "tasks"'
+    );
+  });
+
   it('rejects null, missing, and primitive responses', () => {
     for (const response of [null, undefined, 42, 'hello']) {
       expect(() => unwrapListResponse(response, 'tasks')).toThrow(

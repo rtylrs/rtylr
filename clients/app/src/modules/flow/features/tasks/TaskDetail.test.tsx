@@ -1,5 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { chooseFlowOption, flowSelectTrigger } from '../../../../../test/flowSelect';
+import { STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
@@ -390,23 +392,16 @@ describe('TaskDetail completion toast (#1040)', () => {
     renderTaskDetail();
   };
 
-  // The selects in TaskDetail carry no accessible name: each label lives in a
-  // sibling element that is not associated with the control. That is a real gap,
-  // tracked by #1096 (replace the native selects with the shared Select), and
-  // out of scope here. Identify the status select by an option only it has.
-  const statusSelect = (): HTMLSelectElement => {
-    const found = (screen.getAllByRole('combobox') as HTMLSelectElement[]).find((select) =>
-      [...select.options].some((option) => option.value === 'in_review')
-    );
-    if (!found) throw new Error('status select not found');
-    return found;
-  };
+  // The status control is a FlowSelect: open it, then pick an option by its
+  // visible label (the test `t` returns the key, so that is the label too).
+  const chooseStatus = (status: keyof typeof STATUS_LABEL_KEYS): Promise<void> =>
+    chooseFlowOption('flow.taskDetail.status', STATUS_LABEL_KEYS[status]);
 
   it('does not celebrate before the write has succeeded', async () => {
     const { toast } = await import('sonner');
     renderWithStatus('todo');
 
-    fireEvent.change(statusSelect(), { target: { value: 'done' } });
+    await chooseStatus('done');
 
     expect(updateTaskMutate).toHaveBeenCalledTimes(1);
     expect(toast.success).not.toHaveBeenCalled();
@@ -416,7 +411,7 @@ describe('TaskDetail completion toast (#1040)', () => {
     const { toast } = await import('sonner');
     renderWithStatus('todo');
 
-    fireEvent.change(statusSelect(), { target: { value: 'done' } });
+    await chooseStatus('done');
     const options = updateTaskMutate.mock.calls[0][1] as { onSuccess?: () => void };
     expect(options?.onSuccess).toBeTypeOf('function');
 
@@ -429,7 +424,7 @@ describe('TaskDetail completion toast (#1040)', () => {
   it('passes no success handler for a status change that is not a completion', async () => {
     renderWithStatus('todo');
 
-    fireEvent.change(statusSelect(), { target: { value: 'in_progress' } });
+    await chooseStatus('in_progress');
 
     expect(updateTaskMutate.mock.calls[0][1]).toBeUndefined();
   });
@@ -438,12 +433,11 @@ describe('TaskDetail completion toast (#1040)', () => {
     const { toast } = await import('sonner');
     renderWithStatus('done');
 
-    // fireEvent.change dispatches even for an unchanged value, so the handler
-    // does run; what matters is that it carries no success handler and so
-    // cannot celebrate a completion that already happened.
-    fireEvent.change(statusSelect(), { target: { value: 'done' } });
+    // Picking the status the task already has is a no-op: nothing is written
+    // and so nothing can celebrate a completion that already happened.
+    await chooseStatus('done');
 
-    expect(updateTaskMutate.mock.calls[0][1]).toBeUndefined();
+    expect(updateTaskMutate).not.toHaveBeenCalled();
     expect(toast.success).not.toHaveBeenCalled();
   });
 });
@@ -531,7 +525,7 @@ describe('TaskDetail when the request fails', () => {
 });
 
 describe('every task detail control has an accessible name (#1079)', () => {
-  it('leaves no combobox, textbox or spinbutton unnamed', () => {
+  it('leaves no combobox, dropdown trigger, textbox or spinbutton unnamed', () => {
     // WCAG 4.1.2. Ten controls had no name: the title input, six selects in
     // the properties rail, two custom-field inputs and the dependency picker.
     // Each sat beside visible label text that was never associated with it,
@@ -549,6 +543,9 @@ describe('every task detail control has an accessible name (#1079)', () => {
 
     const controls = [
       ...screen.queryAllByRole('combobox'),
+      ...screen
+        .queryAllByRole('button')
+        .filter((button) => button.getAttribute('aria-haspopup') === 'menu'),
       ...screen.queryAllByRole('textbox'),
       ...screen.queryAllByRole('spinbutton'),
     ];
@@ -581,7 +578,7 @@ describe('every task detail control has an accessible name (#1079)', () => {
     expect(screen.getByRole('textbox', { name: 'flow.taskDetail.taskTitle' })).toBeInTheDocument();
   });
 
-  it('names the status select after the label shown beside it', () => {
+  it('names the status dropdown after the label shown beside it', () => {
     taskDetailData.data = {
       task: apiTask({}),
       subtasks: [],
@@ -589,6 +586,6 @@ describe('every task detail control has an accessible name (#1079)', () => {
       activity: [],
     };
     renderTaskDetail();
-    expect(screen.getByRole('combobox', { name: 'flow.taskDetail.status' })).toBeInTheDocument();
+    expect(flowSelectTrigger('flow.taskDetail.status')).toBeInTheDocument();
   });
 });
