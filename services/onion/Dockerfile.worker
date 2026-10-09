@@ -7,7 +7,7 @@
 # ── Build stage ──────────────────────────────────────────────────────────────
 # Build on the native runner arch and cross-compile to TARGETARCH (the builder
 # downloads an amd64 sqlc, which can't run under arm64 emulation).
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.22 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine3.24 AS builder
 WORKDIR /src
 RUN apk add --no-cache ca-certificates curl bash
 # sqlc: the worker imports the email package, whose generated query code is
@@ -25,7 +25,7 @@ RUN set -eux; \
 # Generated contract output is gitignored, so produce it from the pinned onek
 # release before Go compiles against it.
 COPY voxie/ ./voxie/
-RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.21.1 && \
+RUN GOBIN=/usr/local/bin go install github.com/1homsi/onekit/cmd/onek@v0.30.0 && \
     cd /src/voxie && onek build .
 COPY services/onion/ ./services/onion/
 WORKDIR /src/services/onion
