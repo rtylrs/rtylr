@@ -168,7 +168,10 @@ const LoyaltyTiers: React.FC = () => {
   const { data: fetched, refetch } = tiersQuery;
   const isError = hasQueryFailed(tiersQuery);
   const isLoading = tiersQuery.isPending && !isError;
-  const tiers = (fetched ?? []).sort((a, b) => a.threshold - b.threshold);
+  // Copy before sorting: `fetched` is the array held in the react-query cache,
+  // and `Array#sort` mutates in place, so sorting it directly rewrites the
+  // cached order for every other consumer of this query key.
+  const tiers = [...(fetched ?? [])].sort((a, b) => a.threshold - b.threshold);
   const [editingId, setEditingId] = useState<number | null>(null);
 
   return (

@@ -25,7 +25,7 @@ import BoardSettingsPanel from './BoardSettingsPanel';
 
 function column(over: Partial<ApiProjectColumn> = {}): ApiProjectColumn {
   return {
-    id: '1',
+    id: 1,
     projectId: 'p1',
     name: 'Backlog',
     color: '#6b7280',
@@ -37,9 +37,9 @@ function column(over: Partial<ApiProjectColumn> = {}): ApiProjectColumn {
 }
 
 const COLUMNS = [
-  column({ id: '1', name: 'Backlog', sortOrder: 0 }),
-  column({ id: '2', name: 'In progress', sortOrder: 1 }),
-  column({ id: '3', name: 'Done', sortOrder: 2 }),
+  column({ id: 1, name: 'Backlog', sortOrder: 0 }),
+  column({ id: 2, name: 'In progress', sortOrder: 1 }),
+  column({ id: 3, name: 'Done', sortOrder: 2 }),
 ];
 
 function renderPanel(props: Partial<React.ComponentProps<typeof BoardSettingsPanel>> = {}) {

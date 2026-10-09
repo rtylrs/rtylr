@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { afterEach, describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ApiTask } from '../../shared/services/flowApi';
 
 vi.mock('react-i18next', () => ({
@@ -67,6 +67,49 @@ beforeEach(() => {
       },
     ],
     quickCreateOpen: false,
+  });
+});
+
+// A due date is a calendar day. `new Date(dueDate) < new Date()` parses the
+// bare date as UTC midnight, so at 09:00 local (UTC+3) a task due *today* was
+// already 6 hours past midnight and counted as overdue (rtylr#1077).
+describe('ProjectDashboard: overdue counting', () => {
+  const todayAt = (isoTime: string): void => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(isoTime));
+  };
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // The stat tiles render label then value; the overdue tile is the fourth, so
+  // read the value that follows its label.
+  function overdueTile(): string {
+    const tiles = screen.getAllByText('flow.projectDashboard.overdue');
+    const tile = tiles[0].parentElement as HTMLElement;
+    return tile.textContent?.replace('flow.projectDashboard.overdue', '').trim() ?? '';
+  }
+
+  it('does not count a task due today as overdue', () => {
+    todayAt('2026-05-02T09:00:00+03:00');
+    tasksState.data = [
+      { id: '1', title: 'Due today', status: 'todo', dueDate: '2026-05-02' } as ApiTask,
+    ];
+    render(<ProjectDashboard />);
+
+    expect(overdueTile()).toBe('0');
+  });
+
+  it('counts a task due yesterday as overdue, and never a done one', () => {
+    todayAt('2026-05-02T09:00:00+03:00');
+    tasksState.data = [
+      { id: '1', title: 'Open and late', status: 'todo', dueDate: '2026-05-01' } as ApiTask,
+      { id: '2', title: 'Done and late', status: 'done', dueDate: '2026-05-01' } as ApiTask,
+    ];
+    render(<ProjectDashboard />);
+
+    expect(overdueTile()).toBe('1');
   });
 });
 

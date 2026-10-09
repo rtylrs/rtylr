@@ -7,7 +7,53 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance/finance_reconciliation/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 )
+
+// authorizedContext is what the HTTP handler builds before reaching the
+// service, so the tests exercise the permission gate rather than stepping
+// around it.
+func authorizedContext() context.Context {
+	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
+		UserID:     1,
+		BusinessID: 1,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			IsOwner: true,
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:     authorization.AppFinance,
+				Licensed:  true,
+				HasAccess: true,
+			}},
+		},
+		ProvisioningStatus: &authorization.ProvisioningStatus{
+			State: authorization.ProvisioningActive,
+		},
+	})
+}
+
+// The gate must fail closed for a caller with no bearer principal. A bare
+// context previously passed, which opened read and write access to every
+// tenant's bank feeds for any future caller that resolved the business id but
+// not the user.
+func TestReconciliation_RejectsUnauthenticatedCaller(t *testing.T) {
+	s := &Service{repo: &mockRepo{exists: true, targetExists: true, matchID: 99}}
+
+	if _, err := s.Overview(context.Background(), 1); err == nil {
+		t.Error("Overview with no auth user: err = nil, want permission denied")
+	}
+	if _, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7}); err == nil {
+		t.Error("Match with no auth user: err = nil, want permission denied")
+	}
+
+	missingAccess := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: 1})
+	if _, err := s.Overview(missingAccess, 1); err == nil {
+		t.Error("Overview with no effective access: err = nil, want permission denied")
+	}
+	if _, err := s.Match(missingAccess, 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7}); err == nil {
+		t.Error("Match with no effective access: err = nil, want permission denied")
+	}
+}
 
 func TestTruncatePreviewSignalsOverflow(t *testing.T) {
 	items := make([]int, reconciliationPreviewLimit+1)
@@ -66,17 +112,17 @@ func TestOverview_PropagatesEachListError(t *testing.T) {
 	want := errors.New("boom")
 
 	s := &Service{repo: &mockRepo{bankErr: want}}
-	if _, err := s.Overview(context.Background(), 1); !errors.Is(err, want) {
+	if _, err := s.Overview(authorizedContext(), 1); !errors.Is(err, want) {
 		t.Errorf("bank err: %v", err)
 	}
 
 	s = &Service{repo: &mockRepo{invErr: want}}
-	if _, err := s.Overview(context.Background(), 1); !errors.Is(err, want) {
+	if _, err := s.Overview(authorizedContext(), 1); !errors.Is(err, want) {
 		t.Errorf("inv err: %v", err)
 	}
 
 	s = &Service{repo: &mockRepo{expErr: want}}
-	if _, err := s.Overview(context.Background(), 1); !errors.Is(err, want) {
+	if _, err := s.Overview(authorizedContext(), 1); !errors.Is(err, want) {
 		t.Errorf("exp err: %v", err)
 	}
 }
@@ -86,7 +132,7 @@ func TestOverview_ReturnsBundle(t *testing.T) {
 		bank:     []domain.UnmatchedBankTransaction{{ID: 1}},
 		invoices: []domain.UnmatchedInvoice{{ID: 2}},
 	}}
-	got, err := s.Overview(context.Background(), 1)
+	got, err := s.Overview(authorizedContext(), 1)
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
@@ -98,20 +144,20 @@ func TestOverview_ReturnsBundle(t *testing.T) {
 func TestMatch_RejectsBadInputs(t *testing.T) {
 	s := &Service{repo: &mockRepo{exists: true}}
 
-	if _, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: "fake", BankFeedID: 1, TargetID: 1}); !errors.Is(err, domain.ErrInvalidTarget) {
+	if _, err := s.Match(authorizedContext(), 1, domain.MatchInput{TargetType: "fake", BankFeedID: 1, TargetID: 1}); !errors.Is(err, domain.ErrInvalidTarget) {
 		t.Errorf("bad target type: %v", err)
 	}
-	if _, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 0, TargetID: 1}); !errors.Is(err, domain.ErrInvalidTarget) {
+	if _, err := s.Match(authorizedContext(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 0, TargetID: 1}); !errors.Is(err, domain.ErrInvalidTarget) {
 		t.Errorf("zero bank id: %v", err)
 	}
-	if _, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 1, TargetID: 0}); !errors.Is(err, domain.ErrInvalidTarget) {
+	if _, err := s.Match(authorizedContext(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 1, TargetID: 0}); !errors.Is(err, domain.ErrInvalidTarget) {
 		t.Errorf("zero target id: %v", err)
 	}
 }
 
 func TestMatch_RejectsMissingBankFeed(t *testing.T) {
 	s := &Service{repo: &mockRepo{exists: false}}
-	_, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
+	_, err := s.Match(authorizedContext(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
 	if !errors.Is(err, domain.ErrBankFeedNotFound) {
 		t.Errorf("expected ErrBankFeedNotFound, got %v", err)
 	}
@@ -119,7 +165,7 @@ func TestMatch_RejectsMissingBankFeed(t *testing.T) {
 
 func TestMatch_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{exists: true, targetExists: true, matchID: 99}}
-	id, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
+	id, err := s.Match(authorizedContext(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
 	if err != nil || id != 99 {
 		t.Errorf("id=%d err=%v", id, err)
 	}
@@ -127,7 +173,7 @@ func TestMatch_HappyPath(t *testing.T) {
 
 func TestMatch_RejectsMissingTarget(t *testing.T) {
 	s := &Service{repo: &mockRepo{exists: true}}
-	_, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
+	_, err := s.Match(authorizedContext(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
 	if !errors.Is(err, domain.ErrTargetNotFound) {
 		t.Errorf("expected ErrTargetNotFound, got %v", err)
 	}
