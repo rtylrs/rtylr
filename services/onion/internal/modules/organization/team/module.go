@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/organization/team/internal/application"
 	moduleinfra "github.com/voxire/onion/internal/modules/organization/team/internal/infrastructure"
 	teamjobs "github.com/voxire/onion/internal/modules/organization/team/internal/jobs"
+	"github.com/voxire/onion/internal/modules/organization/team/internal/outbox"
 	"github.com/voxire/onion/internal/platform/config"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
@@ -95,7 +96,7 @@ func (a emailQueueAdapter) QueueAccessRequest(ctx context.Context, toEmail, requ
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	repository := moduleinfra.NewRepository(db)
 	return &Module{
-		service:    application.NewService(ctx, repository).WithEmailNotifications(emailQueueAdapter{db: db}),
+		service:    application.NewService(ctx, repository).WithEmailNotifications(emailQueueAdapter{db: db}).WithAuditRecorder(outbox.NewRecorder(db)),
 		repository: repository,
 	}
 }

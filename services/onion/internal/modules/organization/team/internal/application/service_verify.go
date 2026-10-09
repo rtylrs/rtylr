@@ -120,6 +120,7 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 		return failAccept(activateErr)
 	}
 	invalidateUserScope(ctx, userID)
+	s.recordAudit(ctx, businessID, userID, "member", userID, "member.joined", "Accepted their invitation")
 
 	return userID, nil
 }
@@ -207,6 +208,8 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 	if businessID != 0 {
 		invalidateBusinessTeamScope(ctx, businessID)
 	}
+	s.recordAudit(ctx, businessID, actorID, "member", targetUserID, "member.access_granted",
+		fmt.Sprintf("Granted %s access to %s", app, memberLabel(existing.FullName, existing.Email)))
 	return s.repo.ResolveAccessRequest(ctx, requestID, businessID, "approved")
 }
 

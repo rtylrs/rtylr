@@ -23,6 +23,10 @@ type mutationPayload struct {
 	IPAddress   string          `json:"ip_address"`
 }
 
+// auditApps lists the producers that publish audit facts. A fact from any other
+// app is rejected, which leaves it undispatched and retried.
+var auditApps = map[string]bool{"erp": true, "pos": true, "hub": true}
+
 // RecordFact commits the Activity projection independently. Event identity makes retries idempotent.
 func (r *Repository) RecordFact(ctx context.Context, fact eventbus.Event) error {
 	if fact.Type != audit.MutationRecorded {
@@ -35,7 +39,7 @@ func (r *Repository) RecordFact(ctx context.Context, fact eventbus.Event) error 
 	if err := eventbus.DecodePayload(fact.Payload, &payload); err != nil {
 		return err
 	}
-	if (payload.App != "erp" && payload.App != "pos") || payload.Action == "" {
+	if !auditApps[payload.App] || payload.Action == "" {
 		return errors.New("invalid mutation fact payload")
 	}
 	occurred := fact.OccurredAt

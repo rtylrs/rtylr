@@ -73,9 +73,12 @@ func (r *Repository) ListActivity(ctx context.Context, businessID int64, app str
 		}
 
 		if a.UserID > 0 && r.userName != nil {
+			// A missing name (e.g. a removed member) must not hide the whole log;
+			// the entry falls back to the user ID.
 			name, err := r.userName(ctx, businessID, a.UserID)
 			if err != nil {
-				return nil, 0, err
+				logger.Ctx(ctx).Warn("Failed to resolve activity actor name",
+					logger.Int("user_id", int(a.UserID)), logger.Error(err))
 			}
 			a.UserName = name
 		}

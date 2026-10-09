@@ -273,7 +273,9 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		invalidateBusinessTeamScope(ctx, businessID)
 	}
 
+	invitedDescription := fmt.Sprintf("Invited %s as %s", memberLabel(provisionedName, provisionedEmail), memberType)
 	if provisioningMode == "direct_credentials" {
+		s.recordAudit(ctx, businessID, actorID, "member", userID, "member.invited", invitedDescription)
 		return userID, "", nil
 	}
 
@@ -289,5 +291,6 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		return cleanupCreatedUser(err)
 	}
 
+	s.recordAudit(ctx, businessID, actorID, "member", userID, "member.invited", invitedDescription)
 	return userID, token, nil
 }

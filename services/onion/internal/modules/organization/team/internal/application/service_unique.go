@@ -74,7 +74,12 @@ func (s *Service) CreateGroup(ctx context.Context, actorID, ownerID, businessID 
 	}); err != nil {
 		return 0, err
 	}
-	return s.repo.CreateGroup(ctx, ownerID, input)
+	groupID, err := s.repo.CreateGroup(ctx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
+	s.recordAudit(ctx, businessID, actorID, "group", groupID, "group.created", fmt.Sprintf("Created group %q", input.Name))
+	return groupID, nil
 }
 
 func (s *Service) ListGroups(ctx context.Context, ownerID, businessID int64) ([]domain.Group, error) {
@@ -103,15 +108,21 @@ func (s *Service) UpdateGroup(ctx context.Context, actorID, ownerID, businessID,
 		return err
 	}
 	s.invalidateGroupMemberScopes(ctx, ownerID, businessID, groupID)
+	s.recordAudit(ctx, businessID, actorID, "group", groupID, "group.updated", fmt.Sprintf("Updated group %q", input.Name))
 	return nil
 }
 
 func (s *Service) DeleteGroup(ctx context.Context, ownerID, businessID, groupID int64) error {
 	memberIDs := s.groupMemberIDs(ctx, ownerID, businessID, groupID)
+	description := "Deleted a group"
+	if group, lookupErr := s.repo.GetGroup(ctx, ownerID, businessID, groupID); lookupErr == nil && group != nil {
+		description = fmt.Sprintf("Deleted group %q", group.Name)
+	}
 	if err := s.repo.DeleteGroup(ctx, ownerID, businessID, groupID); err != nil {
 		return err
 	}
 	s.invalidateMemberScopes(ctx, ownerID, memberIDs)
+	s.recordAudit(ctx, businessID, 0, "group", groupID, "group.deleted", description)
 	return nil
 }
 
@@ -121,7 +132,8 @@ func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, busines
 	}
 	// Verify the group belongs to this owner before adding members — otherwise
 	// a caller could target a group id owned by another business.
-	if _, err := s.repo.GetGroup(ctx, ownerID, businessID, groupID); err != nil {
+	group, err := s.repo.GetGroup(ctx, ownerID, businessID, groupID)
+	if err != nil {
 		return err
 	}
 	// businessID is the tenant the group's grants are resolved in; a membership
@@ -130,17 +142,26 @@ func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, busines
 		return err
 	}
 	s.invalidateMemberScopes(ctx, ownerID, userIDs)
+	noun := "members"
+	if len(userIDs) == 1 {
+		noun = "member"
+	}
+	s.recordAudit(ctx, businessID, callerID, "group", groupID, "group.members_added",
+		fmt.Sprintf("Added %d %s to group %q", len(userIDs), noun, group.Name))
 	return nil
 }
 
 func (s *Service) RemoveGroupMember(ctx context.Context, ownerID, businessID, groupID, userID int64) error {
-	if _, err := s.repo.GetGroup(ctx, ownerID, businessID, groupID); err != nil {
+	group, err := s.repo.GetGroup(ctx, ownerID, businessID, groupID)
+	if err != nil {
 		return domain.ErrPermissionNotFound
 	}
 	if err := s.repo.RemoveGroupMember(ctx, ownerID, businessID, groupID, userID); err != nil {
 		return err
 	}
 	s.invalidateMemberScopes(ctx, ownerID, []int64{userID})
+	s.recordAudit(ctx, businessID, 0, "group", groupID, "group.member_removed",
+		fmt.Sprintf("Removed a member from group %q", group.Name))
 	return nil
 }
 

@@ -118,7 +118,7 @@ func main() {
 	// Not a module, so it registers itself rather than through AutoRegister.
 	eventbus.RegisterJobs(platformjobs.DefaultRegistry(), eventbus.NewDispatcher(
 		dbclient.Pool(), modules.Automations, modules.Webhooks, modules.Customers, modules.CRMSales, modules.PosGiftCards, modules.Inventory, activity.NewModule(ctx, dbclient.Pool()).WithUserNameReader(scopes.NewReader(dbclient.Pool()).BusinessUserName),
-	).WithSources(booking.Facts(dbclient.Pool()), crm.Facts(dbclient.Pool()), erp.Facts(dbclient.Pool()), finance.Facts(dbclient.Pool()), pos.Facts(dbclient.Pool()), store.Facts(dbclient.Pool()), support.Facts(dbclient.Pool())))
+	).WithSources(booking.Facts(dbclient.Pool()), crm.Facts(dbclient.Pool()), erp.Facts(dbclient.Pool()), finance.Facts(dbclient.Pool()), pos.Facts(dbclient.Pool()), store.Facts(dbclient.Pool()), support.Facts(dbclient.Pool()), team.Facts(dbclient.Pool())))
 	jobActivity := newWorkerJobActivity()
 	if err := trackWorkerJobs(platformjobs.DefaultRegistry(), jobActivity); err != nil {
 		logger.Ctx(ctx).Error("failed to instrument worker jobs", logger.Error(err))

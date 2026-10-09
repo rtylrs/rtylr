@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/activity/internal/application"
@@ -41,7 +42,12 @@ func (a *ActivityAPI) ListActivity(ctx context.Context, req *hubactivityv1.ListA
 		limit = 200
 	}
 
-	page, err := a.Service.ListActivity(ctx, businessID, "", limit, 0)
+	offset := int(req.GetOffset())
+	if offset < 0 {
+		offset = 0
+	}
+
+	page, err := a.Service.ListActivity(ctx, businessID, "", limit, offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list activity")
 	}
@@ -62,5 +68,9 @@ func (a *ActivityAPI) ListActivity(ctx context.Context, req *hubactivityv1.ListA
 		})
 	}
 
-	return &hubactivityv1.ListActivityResponse{Activities: payloads}, nil
+	total := page.Total
+	if total > math.MaxInt32 {
+		total = math.MaxInt32
+	}
+	return &hubactivityv1.ListActivityResponse{Activities: payloads, Total: int32(total)}, nil
 }
