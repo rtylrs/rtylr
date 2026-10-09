@@ -101,7 +101,8 @@ func TestSearXNGWebSearchUsesConfiguredJSONEndpoint(t *testing.T) {
 		if request.Method != http.MethodGet || request.URL.Host != "search.example" || request.URL.Path != "/base/search" {
 			t.Fatalf("unexpected request target: %s %s", request.Method, request.URL.String())
 		}
-		if request.URL.Query().Get("q") != "public query" || request.URL.Query().Get("format") != "json" {
+		if request.URL.Query().Get("q") != "public query" || request.URL.Query().Get("format") != "json" ||
+			request.URL.Query().Get("categories") != "general,news" {
 			t.Fatalf("unexpected search query: %s", request.URL.RawQuery)
 		}
 		if request.Header.Get("Authorization") != "" {
@@ -136,5 +137,12 @@ func TestAssistantWebSearchSurfacesProviderFailure(t *testing.T) {
 	_, executed, err := executor.ExecuteCaretTool(context.Background(), "web.search", map[string]any{"query": "public query"})
 	if !executed || err == nil || err.Error() != "upstream failure" {
 		t.Fatalf("search returned executed=%v err=%v", executed, err)
+	}
+}
+
+func TestSearXNGUnresponsiveEnginesNamesEachFailure(t *testing.T) {
+	payload := []byte(`{"results":[],"unresponsive_engines":[["bing","timeout"],["qwant news","CAPTCHA"]]}`)
+	if got := searXNGUnresponsiveEngines(payload); got != "bing: timeout, qwant news: CAPTCHA" {
+		t.Fatalf("unresponsive engines = %q", got)
 	}
 }

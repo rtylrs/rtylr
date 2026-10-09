@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/config"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type AssistantProfileReader interface {
@@ -207,6 +208,8 @@ func (s SearXNGWebSearch) Search(ctx context.Context, query string) (map[string]
 	params := endpoint.Query()
 	params.Set("q", query)
 	params.Set("format", "json")
+	// News engines keep answering when a web engine is suspended.
+	params.Set("categories", "general,news")
 	endpoint.RawQuery = params.Encode()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if err != nil {
@@ -228,7 +231,28 @@ func (s SearXNGWebSearch) Search(ctx context.Context, query string) (map[string]
 	if err != nil || len(payload) > 1<<20 {
 		return nil, errors.New("web search response exceeded the size limit")
 	}
-	return parseSearXNGResults(payload, query)
+	result, err := parseSearXNGResults(payload, query)
+	if err != nil {
+		logger.Ctx(ctx).Warn("web search returned nothing",
+			logger.Error(err), logger.String("unresponsive_engines", searXNGUnresponsiveEngines(payload)))
+	}
+	return result, err
+}
+
+// searXNGUnresponsiveEngines lists the engines SearXNG reported as failing,
+// e.g. "bing: timeout, qwant news: CAPTCHA".
+func searXNGUnresponsiveEngines(payload []byte) string {
+	var response struct {
+		Unresponsive [][]string `json:"unresponsive_engines"`
+	}
+	if json.Unmarshal(payload, &response) != nil {
+		return ""
+	}
+	engines := make([]string, 0, len(response.Unresponsive))
+	for _, engine := range response.Unresponsive {
+		engines = append(engines, strings.Join(engine, ": "))
+	}
+	return strings.Join(engines, ", ")
 }
 
 func parseSearXNGResults(payload []byte, query string) (map[string]any, error) {
