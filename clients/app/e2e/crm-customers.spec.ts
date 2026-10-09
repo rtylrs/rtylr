@@ -330,7 +330,7 @@ test.describe('CRM customers flow', () => {
     await nameInput.click();
     await nameInput.pressSequentially('Jamie Doe', { delay: 10 });
     await expect(page.getByRole('button', { name: /^Next/i })).toBeEnabled();
-    await expectAppAction(page.getByRole('button', { name: /^Next/i }), '#3b82f6');
+    await expectAppAction(page.getByRole('button', { name: /^Next/i }), '#8b5cf6');
     await page.getByRole('button', { name: /^Next/i }).click();
 
     // Step 2: contact - email or phone required.

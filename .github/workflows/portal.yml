@@ -1,0 +1,108 @@
+name: Portal
+
+# The Portal had no CI: its unit tests ran only in the local pre-push hook and
+# its Playwright suite ran nowhere, so e2e specs drifted out of date unseen.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'clients/app/**'
+      - 'clients/pos/**'
+      - 'clients/packages/**'
+      - 'clients/pnpm-lock.yaml'
+      - 'voxie/**'
+      - '.github/workflows/portal.yml'
+  pull_request:
+    paths:
+      - 'clients/app/**'
+      - 'clients/pos/**'
+      - 'clients/packages/**'
+      - 'clients/pnpm-lock.yaml'
+      - 'voxie/**'
+      - '.github/workflows/portal.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: portal-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Typecheck and unit tests
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    defaults:
+      run:
+        working-directory: clients
+    steps:
+      - &checkout
+        name: Checkout
+        uses: actions/checkout@v4
+
+      - &setup-go
+        name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: services/onion/go.mod
+          cache: false
+
+      - &setup-pnpm
+        name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: clients/package.json
+
+      - &setup-node
+        name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: clients/pnpm-lock.yaml
+
+      - &install
+        name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Contract output is gitignored; every Portal build and test imports it.
+      - &contracts
+        name: Generate contracts
+        working-directory: .
+        run: make -C voxie generate
+
+      - name: Typecheck
+        run: pnpm --filter @rtylr/portal typecheck
+
+      - name: Unit tests
+        run: pnpm --filter @rtylr/portal test
+
+  e2e:
+    name: End-to-end tests
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    defaults:
+      run:
+        working-directory: clients
+    steps:
+      - *checkout
+      - *setup-go
+      - *setup-pnpm
+      - *setup-node
+      - *install
+      - *contracts
+
+      - name: Install Playwright chromium
+        run: pnpm --filter @rtylr/portal exec playwright install --with-deps chromium
+
+      # Every spec stubs the API with page.route(); nothing reaches a real backend.
+      - name: End-to-end tests
+        run: pnpm --filter @rtylr/portal test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-playwright-report
+          path: clients/app/playwright-report
