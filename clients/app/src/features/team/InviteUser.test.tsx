@@ -81,4 +81,29 @@ describe('InviteUser single-member wizard', () => {
       })
     );
   });
+
+  it('shows missing identity fields inline instead of advancing', () => {
+    render(<InviteUser />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.nextButton' }));
+
+    const nameInput = screen.getByLabelText('team.inviteUser.fullNameLabel');
+    const emailInput = screen.getByLabelText('team.inviteUser.emailLabel');
+    expect(screen.getByText('team.inviteUser.nameRequired')).toBeTruthy();
+    expect(screen.getByText('team.inviteUser.emailRequired')).toBeTruthy();
+    expect(nameInput.getAttribute('aria-invalid')).toBe('true');
+    expect(nameInput.getAttribute('aria-describedby')).toBe('inv-name-error');
+    expect(document.activeElement).toBe(nameInput);
+    // Still on Identity.
+    expect(screen.queryByText('team.inviteUser.reviewTitle')).toBeNull();
+
+    fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
+    expect(screen.queryByText('team.inviteUser.nameRequired')).toBeNull();
+    expect(nameInput.getAttribute('aria-invalid')).toBeNull();
+
+    fireEvent.change(emailInput, { target: { value: 'jane@' } });
+    fireEvent.click(screen.getByRole('button', { name: 'team.inviteUser.nextButton' }));
+    expect(screen.getByText('team.inviteUser.emailInvalid')).toBeTruthy();
+    expect(document.activeElement).toBe(emailInput);
+  });
 });
