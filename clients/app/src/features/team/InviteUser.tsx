@@ -118,7 +118,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [singleGroupId, setSingleGroupId] = useState<string>('');
-  const [singleStep, setSingleStep] = useState<0 | 1 | 2 | 3>(0);
+  const [singleStep, setSingleStep] = useState<0 | 1 | 2>(0);
   const [profileIdsByApp, setProfileIdsByApp] = useState<Record<string, string[]>>({});
 
   // Bulk tab state
@@ -512,14 +512,13 @@ const InviteUser: React.FC = (): React.JSX.Element => {
 
         {tab === 'single' && (
           <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-2"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-2"
             aria-label={t('team.inviteUser.progressLabel')}
           >
             {[
               t('team.inviteUser.stepIdentity'),
               t('team.inviteUser.stepAccess'),
               t('team.inviteUser.stepReview'),
-              t('team.inviteUser.stepActivate'),
             ].map((label, index) => (
               <button
                 type="button"
@@ -527,7 +526,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 aria-current={index === singleStep ? 'step' : undefined}
                 disabled={index > singleStep}
                 onClick={() => {
-                  if (index <= singleStep) setSingleStep(index as 0 | 1 | 2 | 3);
+                  if (index <= singleStep) setSingleStep(index as 0 | 1 | 2);
                 }}
                 className="min-h-11 rounded-lg px-3 py-2 text-start text-xs font-semibold"
                 style={{
@@ -821,60 +820,12 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                         : t('team.inviteUser.directCredentialMethod')}
                     </p>
                   </div>
-                </div>
-                <div
-                  className="rounded-lg px-3 py-2.5 text-xs"
-                  style={{
-                    background: 'var(--accent-muted)',
-                    border: '1px solid var(--accent-border)',
-                    color: 'var(--dash-text-muted)',
-                  }}
-                >
-                  {t('team.inviteUser.activationGuard')}
-                </div>
-              </div>
-            )}
-
-            {singleStep === 3 && (
-              <div
-                className="rounded-xl p-6 space-y-4"
-                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-              >
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                    {t('team.inviteUser.activationTitle')}
-                  </p>
-                  <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
-                    {t('team.inviteUser.activationDescription')}
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <strong>{t('team.inviteUser.activationMember')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>{name}</p>
-                  </div>
                   <div>
                     <strong>{t('team.inviteUser.activationState')}</strong>
                     <p style={{ color: 'var(--dash-text-muted)' }}>
                       {authMethod === 'invite'
                         ? t('team.inviteUser.activationPendingInvite')
                         : t('team.inviteUser.activationPendingVerification')}
-                    </p>
-                  </div>
-                  <div>
-                    <strong>{t('team.inviteUser.activationApps')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {memberType === 'admin'
-                        ? t('team.inviteUser.adminReceivesFullAccess')
-                        : selectedApps.length
-                          ? selectedApps.join(', ')
-                          : t('team.inviteUser.noApps')}
-                    </p>
-                  </div>
-                  <div>
-                    <strong>{t('team.inviteUser.activationOwnership')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {t('team.inviteUser.activationOwnershipValue')}
                     </p>
                   </div>
                 </div>
@@ -900,28 +851,29 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 <Button
                   variant="ghost"
                   type="button"
-                  onClick={() => setSingleStep((singleStep - 1) as 0 | 1 | 2 | 3)}
+                  onClick={() => setSingleStep((singleStep - 1) as 0 | 1 | 2)}
                 >
                   {t('team.inviteUser.backButton')}
                 </Button>
               )}
-              {singleStep < 3 ? (
+              {/* Distinct keys stop React reusing this button as the submit button,
+                  which would submit the form on the click that reaches Review. */}
+              {singleStep < 2 ? (
                 <Button
+                  key="next"
                   type="button"
                   onClick={() => {
                     if (singleStep === 0) {
                       continueToAccess();
                     } else {
-                      setSingleStep((singleStep + 1) as 0 | 1 | 2 | 3);
+                      setSingleStep((singleStep + 1) as 0 | 1 | 2);
                     }
                   }}
                 >
-                  {singleStep === 2
-                    ? t('team.inviteUser.activateStepButton')
-                    : t('team.inviteUser.nextButton')}
+                  {t('team.inviteUser.nextButton')}
                 </Button>
               ) : (
-                <Button type="submit" disabled={invite.isPending}>
+                <Button key="submit" type="submit" disabled={invite.isPending}>
                   <Send size={14} />
                   {authMethod === 'invite'
                     ? t('team.inviteUser.sendInvitation')
