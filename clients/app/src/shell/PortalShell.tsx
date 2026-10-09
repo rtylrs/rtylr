@@ -49,6 +49,8 @@ import { insightsNavItems } from '../modules/insights/navigation';
 import ProfileMenu from './ProfileMenu';
 import { Tooltip } from '../shared/components/ui/tooltip';
 import SettingsNavigation from './SettingsNavigation';
+import SettingsModal from '../features/settings/SettingsModal';
+import { useSettingsModalStore } from '../features/settings/settingsModalStore';
 import { PortalHeaderActionsProvider } from './PortalHeaderActions';
 import { SidebarCollapseProvider } from './SidebarCollapseContext';
 import {
@@ -152,6 +154,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
       }
     : {};
   const [settingsQuery, setSettingsQuery] = useState('');
+  const settingsOpen = useSettingsModalStore((state) => state.path !== null);
   const quickCreateOpen = useFlowStore((state) => state.quickCreateOpen);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const mainRef = useRef<HTMLElement>(null);
@@ -430,6 +433,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   );
   const shell = (
     <div className="portal-shell" data-app={accent ? appId : undefined} style={appStyle}>
+      <SettingsModal />
       <a className="portal-skip-link" href="#main-content">
         {t('common.skipToMainContent')}
       </a>
@@ -620,7 +624,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         <Link
           data-tour="settings"
           to="/settings"
-          className={`portal-rail-button${isSettings ? ' is-active' : ''}`}
+          className={`portal-rail-button${settingsOpen ? ' is-active' : ''}`}
           aria-label={t('common.nav.settings')}
           title={t('common.nav.settings')}
         >
