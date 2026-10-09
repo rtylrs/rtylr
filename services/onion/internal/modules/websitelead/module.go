@@ -3,13 +3,14 @@ package websitelead
 import (
 	"context"
 	"database/sql"
-
-	moduleinfra "github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
+	"fmt"
+	"net/http"
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/api"
 	"github.com/voxire/onion/internal/modules/websitelead/internal/application"
+	moduleinfra "github.com/voxire/onion/internal/modules/websitelead/internal/infrastructure"
+	serverhttp "github.com/voxire/onion/internal/platform/server/http"
+	websiteleadv1 "github.com/voxire/voxie/gen/go/website/lead/v1"
 )
 
 // Notify re-exports the recipient configuration so cmd/api does not import the
@@ -26,8 +27,20 @@ func NewModule(ctx context.Context, db *sql.DB, notify Notify) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	api.RegisterRoutes(ctx, router, m.service)
+// RegisterAPI serves website.lead.v1. Each route's @meta("rate_limit") budget
+// is enforced per client.
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	rateLimit := serverhttp.RouteRateLimitMiddleware(func(r *http.Request) (string, string) {
+		metadata, _ := websiteleadv1.RequestMetadataFromContext(r.Context())
+		return metadata.Route, metadata.MetaValue(serverhttp.RouteRateLimitMetaKey)
+	})
+	if err := websiteleadv1.RegisterWebsiteLeadServiceServer(
+		&api.WebsiteLeadAPI{Service: m.service},
+		websiteleadv1.WithMux(mux),
+		websiteleadv1.WithMiddleware(rateLimit),
+	); err != nil {
+		panic(fmt.Errorf("register website lead service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

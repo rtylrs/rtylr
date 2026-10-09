@@ -109,6 +109,7 @@ func (modules *apiModules) apiRegistrars() []http.APIRegistrar {
 		modules.Variants,
 		modules.Warehouses,
 		modules.Workspaces,
+		modules.WebsiteLead,
 	}
 }
 
@@ -154,7 +155,6 @@ func (modules *apiModules) routeRegistrars() []http.RouteRegistrar {
 		modules.SupportTickets,
 		modules.TimeOff,
 		modules.Voxhire,
-		modules.WebsiteLead,
 		modules.Workspaces,
 	}
 }

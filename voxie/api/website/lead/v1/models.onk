@@ -1,0 +1,59 @@
+package website.lead.v1
+
+/// A quote request from the public website.
+message SubmitQuoteRequest {
+  name: string @required @len(1, 200)
+  email: string @required @len(3, 255)
+  phone_number: string @len(0, 50)
+  company: string @len(0, 200)
+  service: string @required @len(1, 200)
+  project: string @len(0, 5000)
+  budget: string @len(0, 200)
+  timeline: string @len(0, 200)
+  source: string @len(0, 200)
+}
+
+message SubmitQuoteResponse {
+  id: int64
+  message: string
+}
+
+/// A contact message from the public website.
+message ContactRequest {
+  name: string @required @len(1, 200)
+  email: string @required @len(3, 255)
+  phone_number: string @len(0, 50)
+  message: string @len(0, 5000)
+}
+
+message ContactResponse {
+  message: string
+}
+
+/// A newsletter signup from the public website or blog.
+message NewsletterRequest {
+  email: string @required @len(3, 255)
+  source: string @len(0, 100)
+  post_slug: string @len(0, 255)
+  post_title: string @len(0, 255)
+  post_category: string @len(0, 100)
+  language: string @len(0, 10)
+}
+
+message NewsletterResponse {
+  id: int64
+  message: string
+}
+
+/// A best-effort analytics event; every field is optional.
+message AnalyticsEventRequest {
+  event: string @len(0, 100)
+  page: string @len(0, 500)
+  /// Job ids arrive as numbers or strings depending on the page.
+  job_id: json
+  job_title: string @len(0, 500)
+}
+
+message AnalyticsEventResponse {
+  logged: bool
+}
