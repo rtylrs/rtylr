@@ -60,9 +60,6 @@ const WebsiteContent = (): React.JSX.Element => {
       <MainLayout>
         <div className={styles.Homepage}>
           <HeroSection />
-          <DirectAnswer label={t('home.directAnswer.label')}>
-            {t('home.directAnswer.body')}
-          </DirectAnswer>
           <ProductsSection />
           <FeaturesSection />
           <HowItWorksSection />
