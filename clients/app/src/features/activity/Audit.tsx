@@ -14,7 +14,10 @@ const PAGE_SIZE = 50;
 const Audit: React.FC = () => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const { data, isLoading, isFetching, refetch } = useAuditLog({ page, pageSize: PAGE_SIZE });
+  const { data, isLoading, isError, isFetching, refetch } = useAuditLog({
+    page,
+    pageSize: PAGE_SIZE,
+  });
   const [query, setQuery] = useState('');
   const [severity, setSeverity] = useState<'all' | 'info' | 'warning' | 'critical'>('all');
   const isFiltering = query.trim() !== '' || severity !== 'all';
@@ -129,6 +132,16 @@ const Audit: React.FC = () => {
           {isLoading ? (
             <div className="p-2">
               <SkeletonList rows={10} />
+            </div>
+          ) : isError ? (
+            // A failed load must not read as an empty log.
+            <div className="p-4" role="alert">
+              <EmptyState
+                icon={ScrollText}
+                title={t('activity.audit.loadFailedTitle')}
+                description={t('activity.audit.loadFailedDescription')}
+                action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+              />
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-4">

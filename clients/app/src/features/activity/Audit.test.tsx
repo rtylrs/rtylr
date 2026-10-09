@@ -14,6 +14,7 @@ const auditData = vi.hoisted(() => ({
   data: { entries: [] as { id: string }[], total: 0 } as
     { entries: { id: string }[]; total: number } | undefined,
   isLoading: false,
+  isError: false,
   isFetching: false,
   refetch: vi.fn(),
   params: [] as unknown[],
@@ -32,8 +33,21 @@ beforeEach(() => {
   vi.clearAllMocks();
   auditData.data = { entries: [], total: 0 };
   auditData.isLoading = false;
+  auditData.isError = false;
   auditData.isFetching = false;
   auditData.params = [];
+});
+
+describe('Audit log load failure', () => {
+  it('shows a retryable error instead of an empty log when loading fails', () => {
+    auditData.data = undefined;
+    auditData.isError = true;
+    render(<Audit />);
+    expect(screen.getByRole('alert')).toHaveTextContent('activity.audit.loadFailedTitle');
+    expect(screen.queryByText('activity.audit.emptyTitle')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
+    expect(auditData.refetch).toHaveBeenCalled();
+  });
 });
 
 describe('Audit log empty state', () => {
