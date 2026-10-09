@@ -39,7 +39,7 @@ type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled';
 const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
   Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
-  Paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  Paid: { background: 'var(--finance-success-soft)', color: 'var(--finance-success)' },
   Overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
   Cancelled: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
 };

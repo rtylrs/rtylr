@@ -66,14 +66,16 @@ import './caret.css';
 import '../modules/crm/crm.css';
 import '../modules/erp/erp.css';
 import '../modules/finance/finance.css';
+import RtylrLogo from '../shared/components/RtylrLogo';
 
+// Keep in sync with the --app-* launcher colours in globals.css.
 const APP_ACCENTS: Partial<Record<string, string>> = {
-  insights: '#4583c4',
-  flow: '#64c5b9',
-  crm: '#3b82f6',
-  erp: '#4583c4',
-  hr: '#8b5cf6',
-  finance: '#10b981',
+  insights: '#6fa3db',
+  flow: '#ef4444',
+  crm: '#8b5cf6',
+  erp: '#64c5b9',
+  hr: '#10b981',
+  finance: '#f59e0b',
 };
 
 function initialCollapsed() {
@@ -102,7 +104,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     theme === 'dark' || (theme === 'system' && systemDark)
       ? ['#0a0a0a', '#111111', '#161616']
       : ['#f8f8f8', '#ffffff'];
-  const actionAccent = appId === 'erp' ? '#f59e0b' : (accent ?? '#111111');
+  const actionAccent = accent ?? '#111111';
   const appStyle: CSSProperties & Record<string, string> = accent
     ? {
         '--app-action-bg': actionAccent,
@@ -115,6 +117,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         ),
         '--app-focus': deriveAccentFgAcross(accent, grounds),
         '--accent': accent,
+        '--app-logo-fold': accent,
         '--accent-foreground': deriveOnAccent(accent),
         '--color-accent-foreground': deriveOnAccent(accent),
         '--color-accent': accent,
@@ -359,8 +362,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           className="portal-wordmark"
           aria-label="RTYLR"
         >
-          <img className="portal-logo-light" src="/logo-dark.png" alt="RTYLR" />
-          <img className="portal-logo-dark" src="/logo.png" alt="RTYLR" />
+          <RtylrLogo />
         </Link>
         <button
           type="button"

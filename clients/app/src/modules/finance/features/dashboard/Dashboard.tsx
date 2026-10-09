@@ -71,7 +71,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, change, up, icon: Ico
     <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
       {up !== null &&
         (up ? (
-          <ArrowUpRight size={13} style={{ color: 'var(--finance-accent)' }} />
+          <ArrowUpRight size={13} style={{ color: 'var(--finance-success)' }} />
         ) : (
           <ArrowDownRight size={13} style={{ color: 'var(--finance-danger)' }} />
         ))}
@@ -81,7 +81,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, change, up, icon: Ico
             up === null
               ? 'var(--hub-text-muted)'
               : up
-                ? 'var(--finance-accent)'
+                ? 'var(--finance-success)'
                 : 'var(--finance-danger)',
           fontWeight: 500,
         }}
@@ -419,7 +419,7 @@ const Dashboard: React.FC = () => {
                   style={{
                     fontSize: 14,
                     fontWeight: 600,
-                    color: t.type === 'credit' ? 'var(--finance-accent)' : 'var(--finance-danger)',
+                    color: t.type === 'credit' ? 'var(--finance-success)' : 'var(--finance-danger)',
                     fontVariantNumeric: 'tabular-nums',
                   }}
                 >

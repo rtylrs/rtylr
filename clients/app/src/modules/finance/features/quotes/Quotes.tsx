@@ -23,8 +23,8 @@ import { canFinancePermission } from '../../shared/lib/financePermissions';
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
   Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-accent-blue)' },
-  Accepted: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
-  Converted: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  Accepted: { background: 'var(--finance-success-soft)', color: 'var(--finance-success)' },
+  Converted: { background: 'var(--finance-success-soft)', color: 'var(--finance-success)' },
   Declined: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
   Expired: { background: 'var(--finance-warning-soft)', color: 'var(--finance-warning)' },
 };

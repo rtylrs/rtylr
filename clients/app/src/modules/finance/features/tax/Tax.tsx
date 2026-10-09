@@ -20,8 +20,8 @@ const fmt = (n: number) =>
 
 const statusStyle: Record<TaxPeriod['status'], React.CSSProperties> = {
   Filed: {
-    background: 'color-mix(in srgb, var(--finance-accent) 12%, transparent)',
-    color: 'var(--finance-accent)',
+    background: 'var(--finance-success-soft)',
+    color: 'var(--finance-success)',
   },
   Pending: {
     background: 'color-mix(in srgb, var(--finance-warning) 12%, transparent)',

@@ -40,7 +40,7 @@ import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 import { useTranslation } from 'react-i18next';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 type DisplayStatus = ReturnType<typeof displayPurchaseOrderStatus>;
 
@@ -64,7 +64,7 @@ const statusConfig: Record<
     icon: ThumbsUp,
   },
   Sent: {
-    color: AMBER,
+    color: ACCENT,
     bg: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
     icon: Send,
   },
@@ -304,7 +304,7 @@ const Purchasing: React.FC = () => {
             type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} />
             {t('erp.purchasing.newOrder')}
@@ -446,7 +446,7 @@ const Purchasing: React.FC = () => {
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{
                             background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
-                            color: AMBER,
+                            color: ACCENT,
                           }}
                         >
                           {t('erp.purchasing.send')}
@@ -634,7 +634,7 @@ const Purchasing: React.FC = () => {
                 onClick={handleCreatePO}
                 disabled={createMut.isPending || !newSupplierId || !newPoNumber.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create Draft'}
               </button>

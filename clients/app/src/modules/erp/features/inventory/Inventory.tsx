@@ -16,7 +16,7 @@ import PaginationControls from '../../shared/components/PaginationControls';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -26,8 +26,8 @@ const statusConfig: Record<ProductStockStatus, { color: string; bg: string }> = 
     bg: 'color-mix(in srgb, var(--erp-success) 10%, transparent)',
   },
   'Low Stock': {
-    color: AMBER,
-    bg: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+    color: 'var(--erp-warning)',
+    bg: 'color-mix(in srgb, var(--erp-warning) 10%, transparent)',
   },
   'Out of Stock': {
     color: 'var(--erp-danger)',
@@ -105,7 +105,7 @@ const Inventory: React.FC = () => {
           data-testid="inventory-add-product-button"
           onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+          style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.opacity = '0.9';
           }}
@@ -257,7 +257,7 @@ const Inventory: React.FC = () => {
                             product.stockQuantity === 0
                               ? 'var(--erp-danger)'
                               : (product.stockQuantity ?? 0) < (product.lowStockThreshold ?? 0)
-                                ? AMBER
+                                ? 'var(--erp-warning)'
                                 : 'var(--hub-text)',
                         }}
                       >

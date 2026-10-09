@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 interface ReceiveLine {
   id?: string;
@@ -239,7 +239,7 @@ const Receiving: React.FC = () => {
             onClick={completeReceipt}
             disabled={lines.length === 0 || updateStatus.isPending}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
           >
             <Check size={14} /> {t('erp.receiving.markReceived')}
           </button>
@@ -278,7 +278,7 @@ const Receiving: React.FC = () => {
                 className="h-9 w-9 rounded-lg flex items-center justify-center"
                 style={{ background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)' }}
               >
-                <PackageCheck size={14} style={{ color: AMBER }} />
+                <PackageCheck size={14} style={{ color: ACCENT }} />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
@@ -295,7 +295,7 @@ const Receiving: React.FC = () => {
                 className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                 style={{
                   background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
-                  color: AMBER,
+                  color: ACCENT,
                 }}
               >
                 {o.status}

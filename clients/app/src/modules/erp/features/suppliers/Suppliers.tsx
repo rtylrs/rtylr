@@ -15,13 +15,13 @@ import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const PALETTE = [
   'var(--erp-success)',
-  AMBER,
+  ACCENT,
   'var(--accent)',
   'var(--erp-violet)',
   'var(--erp-danger)',
@@ -211,7 +211,7 @@ const Suppliers: React.FC = () => {
               background: showScorecards
                 ? 'color-mix(in srgb, var(--erp-accent) 12%, transparent)'
                 : 'var(--hub-hover)',
-              color: showScorecards ? AMBER : 'var(--hub-text-muted)',
+              color: showScorecards ? ACCENT : 'var(--hub-text-muted)',
               border: '1px solid var(--hub-border)',
             }}
           >
@@ -233,7 +233,7 @@ const Suppliers: React.FC = () => {
               data-testid="suppliers-add-button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.opacity = '0.9';
               }}
@@ -449,7 +449,7 @@ const Suppliers: React.FC = () => {
                   !newCountry.trim()
                 }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

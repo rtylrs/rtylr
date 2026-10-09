@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -183,7 +183,7 @@ const StockTakes: React.FC = () => {
               type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               <Plus size={14} /> New Stock Take
             </button>
@@ -211,7 +211,7 @@ const StockTakes: React.FC = () => {
               onClick={() => void refetch()}
               disabled={stockTakesFetching}
               className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               {stockTakesFetching ? 'Retrying…' : 'Retry'}
             </button>
@@ -246,7 +246,7 @@ const StockTakes: React.FC = () => {
               st.status === 'completed'
                 ? 'var(--erp-success)'
                 : st.status === 'in_progress'
-                  ? AMBER
+                  ? ACCENT
                   : 'var(--hub-text-dim)';
             return (
               <div
@@ -262,7 +262,7 @@ const StockTakes: React.FC = () => {
                         background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
                       }}
                     >
-                      <ClipboardList size={16} style={{ color: AMBER }} />
+                      <ClipboardList size={16} style={{ color: ACCENT }} />
                     </div>
                     <div>
                       <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
@@ -359,7 +359,7 @@ const StockTakes: React.FC = () => {
                     <div className="h-1.5 rounded-full" style={{ background: 'var(--hub-hover)' }}>
                       <div
                         className="h-full rounded-full"
-                        style={{ width: `${progress.pct}%`, background: AMBER }}
+                        style={{ width: `${progress.pct}%`, background: ACCENT }}
                       />
                     </div>
                   </div>
@@ -454,7 +454,7 @@ const StockTakes: React.FC = () => {
                   itemsToCount.length === 0
                 }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+                style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

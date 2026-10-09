@@ -10,7 +10,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 
-const AMBER = 'var(--erp-accent)';
+const ACCENT = 'var(--erp-accent)';
 
 const Reorder: React.FC = () => {
   const { t } = useTranslation('erp');
@@ -36,7 +36,7 @@ const Reorder: React.FC = () => {
           border: '1px solid color-mix(in srgb, var(--erp-accent) 20%, transparent)',
         }}
       >
-        <Sparkles size={16} style={{ color: AMBER }} />
+        <Sparkles size={16} style={{ color: ACCENT }} />
         <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
           Suggestions use: current stock / avg daily sales / supplier lead time
         </p>
@@ -92,7 +92,7 @@ const Reorder: React.FC = () => {
               type="button"
               onClick={() => void refetch()}
               className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
             >
               {t('erp.reorder.refresh')}
             </button>
@@ -110,7 +110,7 @@ const Reorder: React.FC = () => {
               s.confidence === 'high'
                 ? 'var(--erp-success)'
                 : s.confidence === 'medium'
-                  ? AMBER
+                  ? 'var(--erp-warning)'
                   : 'var(--hub-text-dim)';
             return (
               <div
@@ -143,7 +143,7 @@ const Reorder: React.FC = () => {
                 >
                   <TrendingUp size={11} /> {s.avgDailySales}/day
                 </span>
-                <span className="text-sm font-bold" style={{ color: AMBER }}>
+                <span className="text-sm font-bold" style={{ color: ACCENT }}>
                   {s.suggestedQuantity} units
                 </span>
                 <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>

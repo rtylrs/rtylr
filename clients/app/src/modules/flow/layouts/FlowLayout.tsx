@@ -35,6 +35,7 @@ import TrialBanner from '../shared/components/TrialBanner';
 import GateNotice from '../shared/components/GateNotice';
 import BulkEditBar from '../shared/components/BulkEditBar';
 import TaskDrawer from '../shared/components/TaskDrawer';
+import RtylrLogo from '../../../shared/components/RtylrLogo';
 
 export default function FlowLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -141,8 +142,7 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
     <>
       <div className="portal-flow-sidebar-header">
         <Link to="/" className="portal-wordmark" aria-label="RTYLR">
-          <img className="portal-logo-light" src="/logo-dark.png" alt="RTYLR" />
-          <img className="portal-logo-dark" src="/logo.png" alt="RTYLR" />
+          <RtylrLogo />
         </Link>
         <div className="flex items-center gap-1">
           {!mobile && (
