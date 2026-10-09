@@ -4,6 +4,7 @@ import { I18nextProvider } from 'react-i18next';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import flow from '../../locales/en/flow.json';
+import { chooseFlowOption, flowSelectTrigger } from '../../../../../test/flowSelect';
 import flowCommon from '../../locales/en/flowCommon.json';
 import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -118,10 +119,9 @@ describe('Task detail persistence controls', () => {
       assigneeInitials: 'TR',
     });
     renderDetail();
-    const assignee = screen.getByRole('combobox', { name: flow.taskDetail.assignee });
+    const assignee = flowSelectTrigger(flow.taskDetail.assignee);
     expect(assignee).toBeDisabled();
-    expect(assignee).toHaveValue('1001');
-    expect(screen.getByRole('option', { name: 'Taylor Reed' })).toBeInTheDocument();
+    expect(assignee).toHaveAccessibleName(`${flow.taskDetail.assignee}: Taylor Reed`);
     expect(update).not.toHaveBeenCalled();
   });
 
@@ -149,11 +149,9 @@ describe('Task detail persistence controls', () => {
     expect(update).toHaveBeenCalledWith({ id: '1', data: { effortMinutes: 0, estimate: 0 } });
   });
 
-  it('links a remote task and removes existing links through the dependency endpoints', () => {
+  it('links a remote task and removes existing links through the dependency endpoints', async () => {
     const rendered = renderDetail();
-    fireEvent.change(screen.getByRole('combobox', { name: flow.taskDetail.addDependency }), {
-      target: { value: '2' },
-    });
+    await chooseFlowOption(flow.taskDetail.addDependency, /Remote blocker/);
     fireEvent.click(screen.getByRole('button', { name: flow.taskDetail.add, exact: true }));
     expect(addDependency).toHaveBeenCalledWith(
       { taskId: '1', dependsOnTaskId: '2' },
@@ -170,12 +168,13 @@ describe('Task detail persistence controls', () => {
     expect(removeDependency).toHaveBeenCalledWith({ taskId: '1', dependsOnTaskId: '2' });
   });
 
-  it('loads the project columns and can remove the selected column', () => {
+  it('loads the project columns and can remove the selected column', async () => {
     state.detail!.task.sectionId = '6';
     renderDetail();
-    const column = screen.getByRole('combobox', { name: flow.taskDetail.section });
-    expect(column).toHaveValue('6');
-    fireEvent.change(column, { target: { value: '' } });
+    expect(flowSelectTrigger(flow.taskDetail.section)).toHaveAccessibleName(
+      new RegExp(`^${flow.taskDetail.section}: .+`)
+    );
+    await chooseFlowOption(flow.taskDetail.section, flow.taskDetail.noSection);
     expect(update).toHaveBeenCalledWith({ id: '1', data: { sectionId: '' } });
   });
 });

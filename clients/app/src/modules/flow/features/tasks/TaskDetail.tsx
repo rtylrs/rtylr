@@ -68,6 +68,8 @@ import CommentInput from '../../shared/components/CommentInput';
 import SubtaskList from '../../shared/components/SubtaskList';
 import AttachmentUpload from '../../shared/components/AttachmentUpload';
 import AssigneeAvatar from '../../shared/components/AssigneeAvatar';
+import FlowSelect from '../../shared/components/FlowSelect';
+import PriorityIcon from '../../shared/components/PriorityIcon';
 import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
@@ -624,11 +626,12 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
         }}
       >
         <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
-          <select
-            aria-label={t('flow.taskDetail.status')}
+          <FlowSelect
+            label={t('flow.taskDetail.status')}
             value={task.status}
-            onChange={(e) => {
-              const next = e.target.value as Task['status'];
+            options={statuses.map((s) => ({ value: s, label: t(STATUS_LABEL_KEYS[s]) }))}
+            onChange={(value) => {
+              const next = value as Task['status'];
               // The celebration belongs on the mutation's success path. Firing
               // it here showed "Nice work!" next to "Failed to update task"
               // while the status reverted and nothing was saved.
@@ -648,15 +651,7 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               );
             }}
             disabled={!canEdit}
-            className="bg-transparent text-flow-meta w-full disabled:opacity-70"
-            style={{ color: 'var(--flow-text)' }}
-          >
-            {statuses.map((s) => (
-              <option key={s} value={s} style={{ background: 'var(--flow-card)' }}>
-                {t(STATUS_LABEL_KEYS[s])}
-              </option>
-            ))}
-          </select>
+          />
 
           {/* One STATUS row, with the project's own statuses inside it.
               These were two adjacent rows reading `STATUS: In Progress` and
@@ -670,75 +665,65 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
               accessible name, so a screen reader announces which is which
               rather than hearing one group called "status" twice. */}
           {projectStatuses.length > 0 && (
-            <select
-              aria-label={t('flow.status.settingsTitle')}
-              value={task.statusId ?? ''}
-              onChange={(e) => {
-                setTaskStatus.mutate({ taskId: task.id, statusId: e.target.value || '0' });
-              }}
-              disabled={!canEdit}
-              className="mt-1.5 w-full bg-transparent text-flow-meta disabled:opacity-70"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <option value="" style={{ background: 'var(--flow-card)' }}>
-                {t('flow.status.none')}
-              </option>
-              {projectStatuses.map((s) => (
-                <option key={s.id} value={s.id} style={{ background: 'var(--flow-card)' }}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1.5">
+              <FlowSelect
+                label={t('flow.status.settingsTitle')}
+                value={task.statusId ?? ''}
+                options={[
+                  { value: '', label: t('flow.status.none') },
+                  ...projectStatuses.map((s) => ({ value: String(s.id), label: s.name })),
+                ]}
+                onChange={(value) => {
+                  setTaskStatus.mutate({ taskId: task.id, statusId: value || '0' });
+                }}
+                disabled={!canEdit}
+                muted
+              />
+            </div>
           )}
         </DetailField>
 
         <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
-          <select
-            aria-label={t('flow.taskDetail.priority')}
+          <FlowSelect
+            label={t('flow.taskDetail.priority')}
             value={task.priority}
-            onChange={(e) => updateTask(task.id, { priority: e.target.value as Task['priority'] })}
+            options={priorities.map((p) => ({
+              value: p,
+              label: p === 'no_priority' ? t('flow.taskDetail.noPriority') : t(`flowPriority.${p}`),
+              icon: (
+                <span aria-hidden="true">
+                  <PriorityIcon priority={p} />
+                </span>
+              ),
+            }))}
+            onChange={(value) => updateTask(task.id, { priority: value as Task['priority'] })}
             disabled={!canEdit}
-            className="bg-transparent text-flow-meta w-full disabled:opacity-70"
-            style={{ color: 'var(--flow-text)' }}
-          >
-            {priorities.map((p) => (
-              <option key={p} value={p} style={{ background: 'var(--flow-card)' }}>
-                {p === 'no_priority' ? t('flow.taskDetail.noPriority') : t(`flowPriority.${p}`)}
-              </option>
-            ))}
-          </select>
+          />
         </DetailField>
 
         <DetailField icon={UserIcon} label={t('flow.taskDetail.assignee')}>
-          <div className="flex items-center gap-2">
-            <AssigneeAvatar name={assignee} initials={assigneeInitials} size={18} />
-            <select
-              aria-label={t('flow.taskDetail.assignee')}
-              value={task.assigneeId}
-              onChange={(e) => {
-                const m = members.find((m) => String(m.id) === e.target.value);
-                updateTask(task.id, {
-                  assigneeId: m?.id ?? '',
-                  assignee: m?.name ?? '',
-                  assigneeInitials: m?.initials ?? '',
-                });
-              }}
-              disabled={!canEdit}
-              className="bg-transparent text-flow-meta flex-1 disabled:opacity-70"
-              style={{ color: 'var(--flow-text)' }}
-            >
-              <option value="">{t('flow.quickCreate.unassigned')}</option>
-              {task.assigneeId &&
-                !members.some((member) => String(member.id) === String(task.assigneeId)) && (
-                  <option value={task.assigneeId}>{assignee}</option>
-                )}
-              {members.map((m) => (
-                <option key={m.id} value={m.id} style={{ background: 'var(--flow-card)' }}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FlowSelect
+            label={t('flow.taskDetail.assignee')}
+            value={task.assigneeId ? String(task.assigneeId) : ''}
+            leading={<AssigneeAvatar name={assignee} initials={assigneeInitials} size={18} />}
+            options={[
+              { value: '', label: t('flow.quickCreate.unassigned') },
+              ...(task.assigneeId &&
+              !members.some((member) => String(member.id) === String(task.assigneeId))
+                ? [{ value: String(task.assigneeId), label: assignee }]
+                : []),
+              ...members.map((m) => ({ value: String(m.id), label: m.name })),
+            ]}
+            onChange={(value) => {
+              const m = members.find((m) => String(m.id) === value);
+              updateTask(task.id, {
+                assigneeId: m?.id ?? '',
+                assignee: m?.name ?? '',
+                assigneeInitials: m?.initials ?? '',
+              });
+            }}
+            disabled={!canEdit}
+          />
         </DetailField>
 
         {overlappingLeave && overlappingLeave.length > 0 && (
@@ -914,21 +899,16 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
 
         {projectSections.length > 0 && (
           <DetailField icon={LayoutList} label={t('flow.taskDetail.section')}>
-            <select
-              aria-label={t('flow.taskDetail.section')}
-              value={task.sectionId ?? ''}
-              onChange={(e) => updateTask(task.id, { sectionId: e.target.value })}
+            <FlowSelect
+              label={t('flow.taskDetail.section')}
+              value={task.sectionId ? String(task.sectionId) : ''}
+              options={[
+                { value: '', label: t('flow.taskDetail.noSection') },
+                ...projectSections.map((s) => ({ value: String(s.id), label: s.name })),
+              ]}
+              onChange={(value) => updateTask(task.id, { sectionId: value })}
               disabled={!canEdit}
-              className="bg-transparent text-flow-meta w-full disabled:opacity-70"
-              style={{ color: 'var(--flow-text)' }}
-            >
-              <option value="">{t('flow.taskDetail.noSection')}</option>
-              {projectSections.map((s) => (
-                <option key={s.id} value={s.id} style={{ background: 'var(--flow-card)' }}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            />
           </DetailField>
         )}
 
@@ -973,20 +953,22 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
             ))}
             {dependencyCandidates.length > 0 && canEdit && (
               <div className="flex gap-1 pt-1">
-                <select
-                  aria-label={t('flow.taskDetail.addDependency')}
-                  value={depId}
-                  onChange={(e) => setDepId(e.target.value)}
-                  className="bg-transparent text-flow-meta flex-1 min-w-0 rounded-sm px-1"
-                  style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
-                >
-                  <option value="">{t('flow.taskDetail.addDependency')}</option>
-                  {dependencyCandidates.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.identifier} {c.title}
-                    </option>
-                  ))}
-                </select>
+                <div className="min-w-0 flex-1">
+                  <FlowSelect
+                    label={t('flow.taskDetail.addDependency')}
+                    value={depId}
+                    placeholder={t('flow.taskDetail.addDependency')}
+                    options={[
+                      { value: '', label: t('flow.taskDetail.addDependency') },
+                      ...dependencyCandidates.map((c) => ({
+                        value: String(c.id),
+                        label: `${c.identifier} ${c.title}`,
+                      })),
+                    ]}
+                    onChange={setDepId}
+                    muted
+                  />
+                </div>
                 <button
                   type="button"
                   disabled={!depId || addDependency.isPending}

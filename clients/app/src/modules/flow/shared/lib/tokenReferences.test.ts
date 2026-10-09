@@ -6,7 +6,9 @@ const SRC = path.resolve(__dirname, '../..');
 const GLOBALS = path.join(SRC, 'globals.css');
 const SHARED_THEME = path.resolve(SRC, '../../../../../packages/tailwind-config/theme.css');
 
-const RUNTIME_TOKENS = new Set(['--tone']);
+// Set at runtime by a script rather than declared in a stylesheet. Radix publishes
+// the trigger's width on the open dropdown so a menu can match it.
+const RUNTIME_TOKENS = new Set(['--tone', '--radix-dropdown-menu-trigger-width']);
 
 function declaredTokens(): Set<string> {
   const declared = new Set<string>();
