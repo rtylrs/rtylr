@@ -249,7 +249,7 @@ const SidebarItemRow: React.FC<{
     </>
   );
   const linkProps = {
-    className: cn('portal-nav-link flow-focus-inset pe-9', active && 'is-active'),
+    className: cn('portal-nav-link flow-nav-row-link flow-focus-inset', active && 'is-active'),
     'aria-current': active ? ('page' as const) : undefined,
   };
   return (
