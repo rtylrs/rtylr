@@ -882,14 +882,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                     </p>
                   </div>
                   <div>
-                    <strong>{t('team.inviteUser.reviewSignIn')}</strong>
-                    <p style={{ color: 'var(--dash-text-muted)' }}>
-                      {authMethod === 'invite'
-                        ? t('team.inviteUser.invitationMethod')
-                        : t('team.inviteUser.directCredentialMethod')}
-                    </p>
-                  </div>
-                  <div>
                     <strong>{t('team.inviteUser.activationState')}</strong>
                     <p style={{ color: 'var(--dash-text-muted)' }}>
                       {authMethod === 'invite'
@@ -897,16 +889,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                         : t('team.inviteUser.activationPendingVerification')}
                     </p>
                   </div>
-                </div>
-                <div
-                  className="rounded-lg px-3 py-2.5 text-xs"
-                  style={{
-                    background: 'var(--accent-muted)',
-                    border: '1px solid var(--accent-border)',
-                    color: 'var(--dash-text-muted)',
-                  }}
-                >
-                  {t('team.inviteUser.activationGuard')}
                 </div>
               </div>
             )}
