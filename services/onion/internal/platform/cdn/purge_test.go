@@ -47,7 +47,7 @@ func TestPurgeUploadURLErrorStatus(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodPost, "/purge", nil)
-			writePurgeUploadURLError(rec, req, "https://cdn.example.com/files/x", tt.err)
+			writePurgeUploadURLError(rec, req, tt.err)
 
 			if rec.Code != tt.want {
 				t.Fatalf("status = %d, want %d", rec.Code, tt.want)

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 
 	commonpaginationv1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
@@ -63,9 +64,7 @@ func TestListProjectsResponseWireShapeIsStable(t *testing.T) {
 	// to numbers breaks every consumer at once.
 	const want = `{"projects":[{"name":"Atlas","description":"desc","icon":"rocket","color":"#64C5B9","status":"active","visibility":"private","is_personal":true,"start_date":"2026-01-01","due_date":"2026-12-31","created_at":"2026-01-01T00:00:00Z","updated_at":"2026-02-01T00:00:00Z","task_count":7,"completed_count":3,"member_count":2,"code":"ATL","archived_at":"2026-08-01T00:00:00Z","purge_at":"2026-09-01T00:00:00Z","id":"12","owner_id":"34","created_by":"56"}],"pagination":{"page":2,"limit":50,"total":137}}`
 
-	if string(got) != want {
-		t.Fatalf("ListProjectsResponse wire shape changed.\n got: %s\nwant: %s", got, want)
-	}
+	assertSameJSON(t, "ListProjectsResponse", got, want)
 }
 
 // An empty page must still be an object with the pagination envelope, not null
@@ -114,9 +113,7 @@ func TestGetFlowDashboardResponseWireShapeIsStable(t *testing.T) {
 	// declares it. When Phase 4 removes it, this test fails, and that failure is
 	// the intended signal rather than a surprise.
 	const want = `{"my_tasks":[{"title":"Ship the backfill","id":"77","project_id":"0","workspace_id":"0","owner_id":"0","reporter_id":"0","sort_order":"0"}],"open_tasks":"11","in_progress_tasks":"5","completed_this_week":"9","overdue_tasks":"2"}`
-	if string(got) != want {
-		t.Fatalf("GetFlowDashboardResponse wire shape changed.\n got: %s\nwant: %s", got, want)
-	}
+	assertSameJSON(t, "GetFlowDashboardResponse", got, want)
 }
 
 // Zero counts stay on the payload as "0" rather than vanishing into undefined,
@@ -134,5 +131,22 @@ func TestGetFlowDashboardResponseZeroCountsWireShape(t *testing.T) {
 	const want = `{"open_tasks":"0","in_progress_tasks":"0","completed_this_week":"0","overdue_tasks":"0"}`
 	if string(got) != want {
 		t.Fatalf("empty GetFlowDashboardResponse wire shape changed.\n got: %s\nwant: %s", got, want)
+	}
+}
+
+// assertSameJSON compares decoded payloads, so field names, values and JSON
+// types (an int64 sent as a string stays a string) must match while key order,
+// which no client reads, may change with the generated encoder.
+func assertSameJSON(t *testing.T, name string, got []byte, want string) {
+	t.Helper()
+	var gotValue, wantValue any
+	if err := json.Unmarshal(got, &gotValue); err != nil {
+		t.Fatalf("%s: decode got: %v", name, err)
+	}
+	if err := json.Unmarshal([]byte(want), &wantValue); err != nil {
+		t.Fatalf("%s: decode want: %v", name, err)
+	}
+	if !reflect.DeepEqual(gotValue, wantValue) {
+		t.Fatalf("%s wire shape changed.\n got: %s\nwant: %s", name, got, want)
 	}
 }
