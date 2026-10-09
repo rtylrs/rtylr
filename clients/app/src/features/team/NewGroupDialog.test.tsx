@@ -38,7 +38,7 @@ describe('NewGroupDialog', () => {
     render(<NewGroupDialog open onOpenChange={onOpenChange} />);
 
     expect(screen.getByRole('heading', { name: 'New group' })).toBeVisible();
-    expect(screen.getByText('ERP')).toBeVisible();
+    expect(screen.getByText('Operations')).toBeVisible();
     expect(screen.queryByText('POS')).toBeNull();
     expect(screen.getByText('ERP Manager')).toBeVisible();
     expect(screen.queryByText('Old ERP role')).toBeNull();
@@ -46,7 +46,7 @@ describe('NewGroupDialog', () => {
     fireEvent.change(screen.getByPlaceholderText('e.g. Store Managers'), {
       target: { value: 'Operations' },
     });
-    fireEvent.click(screen.getByRole('checkbox', { name: 'License ERP' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'License Operations' }));
     fireEvent.click(screen.getByRole('checkbox', { name: 'ERP Manager' }));
     fireEvent.click(screen.getByRole('button', { name: 'New group' }));
 
