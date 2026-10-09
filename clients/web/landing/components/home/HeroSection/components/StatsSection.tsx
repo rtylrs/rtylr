@@ -6,7 +6,10 @@ import styles from '../HeroSection.module.scss';
 
 const StatsSection: React.FC = () => {
   const { t } = useTranslation();
-  const stats = t('home.hero.stats', { returnObjects: true }) as { number: string; label: string }[];
+  const stats = t('home.hero.stats', { returnObjects: true }) as {
+    number: string;
+    label: string;
+  }[];
 
   return (
     <motion.div
@@ -20,7 +23,10 @@ const StatsSection: React.FC = () => {
       }}
     >
       <div className={styles.trustedContainer}>
-        <div className={styles.logoScroll}>
+        <div
+          className={styles.logoScroll}
+          style={{ '--stat-count': stats.length } as React.CSSProperties}
+        >
           {stats.map((stat, index) => (
             <motion.div
               key={index}
