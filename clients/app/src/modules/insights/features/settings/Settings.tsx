@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion, type Variants } from 'motion/react';
 import { Clock, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../../../shared/components/dash/EmptyState';
@@ -16,16 +15,6 @@ import ErrorState from '../../shared/components/ErrorState';
 import { canInsightsPermission } from '../../shared/lib/insightsPermissions';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { Button } from '../../../../shared/components/ui';
-
-const containerVariants: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
-};
 
 const Settings: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -81,16 +70,10 @@ const Settings: React.FC = (): React.JSX.Element => {
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 max-w-3xl"
-    >
+    <div className="space-y-6 max-w-3xl">
       <HelmetContainer title={t('insights.settings.metaTitle')} />
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5 space-y-4"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -170,10 +153,10 @@ const Settings: React.FC = (): React.JSX.Element => {
             </div>
           </>
         )}
-      </motion.div>
+      </div>
 
       {canEditSettings ? (
-        <motion.div variants={itemVariants}>
+        <div>
           <Button
             type="button"
             onClick={handleSave}
@@ -183,7 +166,7 @@ const Settings: React.FC = (): React.JSX.Element => {
             {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
             {updateSettings.isPending ? t('insights.settings.saving') : t('insights.settings.save')}
           </Button>
-        </motion.div>
+        </div>
       ) : (
         <p className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>
           {t('insights.settings.readOnly')}
@@ -191,8 +174,7 @@ const Settings: React.FC = (): React.JSX.Element => {
       )}
 
       {canManageReports && (
-        <motion.div
-          variants={itemVariants}
+        <div
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -249,9 +231,9 @@ const Settings: React.FC = (): React.JSX.Element => {
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 

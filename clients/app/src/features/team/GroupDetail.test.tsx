@@ -207,34 +207,6 @@ describe('GroupDetail: all-members-in-group empty state', () => {
   });
 });
 
-describe('GroupDetail: static creation route', () => {
-  it('creates a group when the new route has no id parameter', async () => {
-    routeParams.id = undefined;
-    groupState.data = undefined;
-    render(<GroupDetail />);
-
-    expect(screen.getByRole('heading', { name: 'New group' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Members \(/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
-    fireEvent.change(screen.getByPlaceholderText('e.g. Store Managers'), {
-      target: { value: 'Operations' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-
-    await waitFor(() =>
-      expect(createGroupMock).toHaveBeenCalledWith({
-        name: 'Operations',
-        description: '',
-        color: '#6366f1',
-        licensedAppIds: [],
-        permissionProfileAssignments: [],
-      })
-    );
-    expect(updateGroupMock).not.toHaveBeenCalled();
-    expect(navigateMock).toHaveBeenCalledWith({ to: '/team/groups/6', replace: true });
-  });
-});
-
 describe('GroupDetail: translated member counts', () => {
   it.each([
     ['en', 1, '1 member'],

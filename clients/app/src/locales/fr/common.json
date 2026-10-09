@@ -29,6 +29,8 @@
     "name": "Nom",
     "namePlaceholder": "Ex. Responsable de service",
     "optionalDescription": "Description facultative",
+    "searchPermissions": "Rechercher des autorisations",
+    "noPermissionMatches": "Aucune autorisation ne correspond à « {{query}} »",
     "members": "Membres",
     "actions": "Actions",
     "empty": "Aucune permission configurée pour le moment.",

@@ -24,6 +24,7 @@ async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify({
         token: 'fake-jwt',
+        refresh_token: 'fake-refresh',
         message: 'Login successful',
         user_id: 1,
         email: body.email ?? '',
@@ -39,6 +40,7 @@ async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify({
         token: 'fake-jwt',
+        refresh_token: 'fake-refresh',
         message: 'Google authentication successful',
         user_id: 1,
         email: 'google@example.com',
@@ -54,6 +56,7 @@ async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify({
         token: 'fake-jwt',
+        refresh_token: 'fake-refresh',
         message: 'Registration successful',
         user_id: 1,
         email: 'new@example.com',

@@ -283,7 +283,7 @@ test.describe('Finance invoices flow', () => {
     await page.goto(`${FINANCE_URL}/invoices/new`);
     await page.getByRole('button', { name: 'Select client', exact: true }).click();
     await page.getByRole('button', { name: /Acme Ltd/ }).click();
-    await expectAppAction(page.getByRole('button', { name: 'Next', exact: true }), '#10b981');
+    await expectAppAction(page.getByRole('button', { name: 'Next', exact: true }), '#f59e0b');
     await page.getByRole('button', { name: 'Next', exact: true }).click();
     const line = page.getByRole('row').filter({ has: page.getByPlaceholder('Description') });
     await line.getByPlaceholder('Description').fill('Migration work');

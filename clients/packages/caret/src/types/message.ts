@@ -44,4 +44,6 @@ export interface CaretMessage {
   /** Legacy/flattened content used when blocks aren't populated yet. */
   content?: string;
   attachments?: CaretImageAttachment[];
+  /** How long the reply took, from sending the prompt to the last token. */
+  responseMs?: number;
 }

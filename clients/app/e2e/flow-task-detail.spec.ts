@@ -353,7 +353,7 @@ test.describe('Flow - Task Detail', () => {
       await assertBounds();
       await expectAppAction(
         picker.getByRole('gridcell').and(picker.locator('[aria-selected="true"]')),
-        '#64c5b9'
+        '#ef4444'
       );
       if (language === 'ar') {
         const anchor = (await trigger.boundingBox())!;

@@ -15,7 +15,6 @@ import {
   QrCode,
   Palette,
   KeyRound,
-  Webhook,
   Settings,
 } from 'lucide-react';
 import {
@@ -62,7 +61,6 @@ export const settingsNavItems: PortalNavItem[] = [
   { key: 'aiUsage', path: '/settings/ai', icon: Sparkles, section: 'business' },
   { key: 'billing', path: '/settings/billing', icon: CreditCard, section: 'business' },
   { key: 'apiKeys', path: '/api-keys', icon: KeyRound, section: 'business' },
-  { key: 'webhooks', path: '/webhooks', icon: Webhook, section: 'business' },
   { key: 'recruitSettings', path: '/settings/recruit', icon: RecruitIcon, section: 'apps' },
   {
     key: 'hrPayrollSettings',

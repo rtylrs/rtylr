@@ -1,6 +1,5 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion, type Variants } from 'motion/react';
 import {
   DollarSign,
   ShoppingCart,
@@ -23,16 +22,6 @@ import { formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import CaretAskBar from '../../shared/components/CaretAskBar';
-
-const containerVariants: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
-};
 
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -151,25 +140,20 @@ const Dashboard: React.FC = (): React.JSX.Element => {
     !!data && data.revenue.value === 0 && data.customers.value === 0 && data.orders.value === 0;
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 max-w-7xl mx-auto"
-    >
+    <div className="space-y-6 max-w-7xl mx-auto">
       <HelmetContainer title={t('insights.dashboard.metaTitle')} />
-      <motion.div variants={itemVariants}>
+      <div>
         <CaretAskBar />
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.dashboard.title')}
         </h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
           {today}
         </p>
-      </motion.div>
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -178,13 +162,12 @@ const Dashboard: React.FC = (): React.JSX.Element => {
           ))}
         </div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <motion.div
+              <div
                 key={stat.id}
-                variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{
                   background: 'var(--hub-card)',
@@ -214,10 +197,10 @@ const Dashboard: React.FC = (): React.JSX.Element => {
                     <Bar data={sparklineData} options={sparklineOptions} />
                   </div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
       )}
 
       {!isLoading && isEmpty && (
@@ -228,7 +211,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
           action={refreshEmptyStateAction(t('common.refresh'), () => refetch())}
         />
       )}
-    </motion.div>
+    </div>
   );
 };
 

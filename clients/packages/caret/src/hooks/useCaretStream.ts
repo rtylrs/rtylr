@@ -94,6 +94,7 @@ export function useCaretStream({
         );
         store.startAssistantMessage(tabId);
         assistantStarted = true;
+        const sentAt = performance.now();
         const token = readAuthToken();
         const mode = modeOverride ?? "agent";
         const response = await fetch(url, {
@@ -135,6 +136,12 @@ export function useCaretStream({
           dispatch(event, openThinking, tabId);
         }
 
+        useCaretStore
+          .getState()
+          .setLastAssistantResponseTime(
+            Math.round(performance.now() - sentAt),
+            tabId,
+          );
         useCaretStore.getState().setStreaming(false, tabId);
       } catch (error) {
         if ((error as Error).name === "AbortError") return;

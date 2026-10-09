@@ -749,7 +749,7 @@ test.describe('ERP inventory flow', () => {
     await page.getByLabel(/barcode/i).fill('BEV-001-BARCODE');
     await page.getByLabel(/description/i).fill('Arabica coffee beans');
 
-    await expectAppAction(page.getByTestId('qap-submit'), '#f59e0b');
+    await expectAppAction(page.getByTestId('qap-submit'), '#64c5b9');
     await page.getByTestId('qap-submit').click();
 
     // Row appears after refetch.

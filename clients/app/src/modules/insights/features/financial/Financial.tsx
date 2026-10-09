@@ -1,6 +1,5 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion, type Variants } from 'motion/react';
 import { Clock, Receipt, ArrowLeftRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
@@ -15,16 +14,6 @@ import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-
-const containerVariants: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
-};
 
 const Financial: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -43,22 +32,16 @@ const Financial: React.FC = (): React.JSX.Element => {
   const buckets = agingRes?.buckets ?? [];
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 max-w-7xl"
-    >
+    <div className="space-y-6 max-w-7xl">
       <HelmetContainer title={t('insights.financial.metaTitle')} />
-      <motion.div variants={itemVariants}>
+      <div>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.financial.title')}
         </h1>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <motion.div
-          variants={itemVariants}
+        <div
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -97,10 +80,9 @@ const Financial: React.FC = (): React.JSX.Element => {
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={itemVariants}
+        <div
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
@@ -150,11 +132,10 @@ const Financial: React.FC = (): React.JSX.Element => {
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -206,8 +187,8 @@ const Financial: React.FC = (): React.JSX.Element => {
             })}
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

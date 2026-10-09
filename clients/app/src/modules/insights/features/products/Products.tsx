@@ -1,6 +1,5 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion, type Variants } from 'motion/react';
 import { Package, TrendingDown, BarChart3, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
@@ -17,16 +16,6 @@ import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-
-const containerVariants: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
-};
 
 const Products: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -99,18 +88,13 @@ const Products: React.FC = (): React.JSX.Element => {
   ];
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 max-w-7xl"
-    >
+    <div className="space-y-6 max-w-7xl">
       <HelmetContainer title={t('insights.products.metaTitle')} />
-      <motion.div variants={itemVariants}>
+      <div>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.title')}
         </h1>
-      </motion.div>
+      </div>
 
       {kpisLoading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -119,13 +103,12 @@ const Products: React.FC = (): React.JSX.Element => {
           ))}
         </div>
       ) : (
-        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <motion.div
+              <div
                 key={stat.id}
-                variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >
@@ -143,14 +126,13 @@ const Products: React.FC = (): React.JSX.Element => {
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
                   {stat.value}
                 </p>
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
       )}
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -205,10 +187,9 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -249,10 +230,9 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -290,10 +270,9 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={itemVariants}
+      <div
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -340,8 +319,8 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

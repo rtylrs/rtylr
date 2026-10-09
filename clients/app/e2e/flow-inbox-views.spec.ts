@@ -151,21 +151,15 @@ test.describe('Flow - Inbox & Features Sweep', () => {
     await page.goto(`${FLOW_URL.replace(/\/flow$/, '')}/settings/flow`);
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByRole('heading', { name: 'Notifications', exact: true })).toBeVisible();
-    const navigation = page.getByRole('navigation', { name: 'Home navigation' });
-    if (!(await navigation.isVisible())) {
-      const toggle = page.getByRole('button', { name: 'Toggle navigation menu' });
-      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-      await toggle.click();
-      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    }
-    await page
-      .getByRole('navigation', { name: 'Home navigation' })
+    // Settings open as a modal over the page; its menu lists the Flow sections.
+    const dialog = page.getByRole('dialog', { name: 'Settings' });
+    await expect(dialog.getByRole('heading', { name: 'Notifications', exact: true })).toBeVisible();
+    await dialog
+      .getByRole('navigation', { name: 'Settings' })
       .getByRole('link', { name: 'Sidebar', exact: true })
       .click();
-    await expect(page).toHaveURL(/settings\/flow\?section=sidebar/);
     await expect(
-      page.getByRole('heading', { name: 'Customize your sidebar', exact: true })
+      dialog.getByRole('heading', { name: 'Customize your sidebar', exact: true })
     ).toBeVisible();
   });
 });

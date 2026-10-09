@@ -30,10 +30,10 @@ func TestOpenCodeRegistration(t *testing.T) {
 	}{
 		{name: "no keys"},
 		{name: "alone", cfg: config.AppConfig{OpenCodeAPIKey: "key"}, want: []string{"opencode"}},
-		{name: "Gemini then OpenCode defaults", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenAIAPIKey: "key", OpenCodeAPIKey: "key"}, want: []string{"gemini", "opencode", "deepseek", "openai"}},
+		{name: "OpenCode then Gemini defaults", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenAIAPIKey: "key", OpenCodeAPIKey: "key"}, want: []string{"opencode", "gemini", "deepseek", "openai"}},
 		{name: "Gemini primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "gemini"}, want: []string{"gemini", "opencode", "deepseek"}},
 		{name: "OpenCode primary", cfg: config.AppConfig{DeepSeekAPIKey: "key", GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "opencode"}, want: []string{"opencode", "gemini", "deepseek"}},
-		{name: "unconfigured preference", cfg: config.AppConfig{GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "deepseek"}, want: []string{"gemini", "opencode"}},
+		{name: "unconfigured preference", cfg: config.AppConfig{GeminiAPIKey: "key", OpenCodeAPIKey: "key", AIPrimaryProvider: "deepseek"}, want: []string{"opencode", "gemini"}},
 		{name: "retired preference", cfg: config.AppConfig{GeminiAPIKey: "key", AIPrimaryProvider: "nvidia"}, want: []string{"gemini"}},
 		{name: "disabled", cfg: config.AppConfig{OpenAIAPIKey: "key"}, want: []string{"openai"}},
 	} {
