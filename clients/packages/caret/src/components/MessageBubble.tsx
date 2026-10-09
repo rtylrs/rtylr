@@ -133,7 +133,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {isStreaming && <StreamingOrb hasText={text.trim().length > 0} />}
       </div>
       {!isStreaming && hasAssistantText && (
-        <MessageActions text={text} onRetry={onRetry} />
+        <MessageActions
+          text={text}
+          onRetry={onRetry}
+          responseMs={message.responseMs}
+        />
       )}
     </div>
   );

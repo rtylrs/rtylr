@@ -54,6 +54,8 @@ interface CaretActions {
   startAssistantMessage: (tabId?: string) => void;
   /** Append a block to the last assistant message. Creates one if missing. */
   appendBlockToLastAssistant: (block: ContentBlock, tabId?: string) => void;
+  /** Record how long the last assistant reply took. */
+  setLastAssistantResponseTime: (responseMs: number, tabId?: string) => void;
   /** Update an existing block on the last assistant message. */
   updateBlockOnLastAssistant: (
     blockId: string,
@@ -344,6 +346,18 @@ export const useCaretStore = create<CaretStore>()(
             isStreaming: true,
             messages: [...tab.messages, emptyAssistant()],
           })),
+        ),
+
+      setLastAssistantResponseTime: (responseMs, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => {
+            const lastIndex = tab.messages.length - 1;
+            if (lastIndex < 0 || tab.messages[lastIndex].role !== "assistant")
+              return tab;
+            const messages = [...tab.messages];
+            messages[lastIndex] = { ...messages[lastIndex], responseMs };
+            return { ...tab, messages };
+          }),
         ),
 
       appendBlockToLastAssistant: (block, tabId) =>

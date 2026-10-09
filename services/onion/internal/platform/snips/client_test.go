@@ -227,7 +227,7 @@ func TestCompleteTextStreamContinuesAfterSelectedFallbackWithoutRetryingIt(t *te
 	if err != nil {
 		t.Fatalf("start primary stream: %v", err)
 	}
-	stream := client.superviseProviderStream(context.Background(), "prompt", primary, primaryStream, []Provider{coolingDown, selected, last})
+	stream := client.superviseProviderStream(context.Background(), "prompt", primary, primaryStream, func() {}, []Provider{coolingDown, selected, last})
 	var text string
 	for token := range stream {
 		if token.Error != "" {
@@ -313,4 +313,76 @@ func (p *recordingCompletionProvider) CompleteTextWithOptions(_ context.Context,
 		return "", errors.New("empty test result")
 	}
 	return p.result, nil
+}
+
+// silentProvider accepts the request and then says nothing until cancelled.
+type silentProvider struct {
+	plainCompletionProvider
+	cancelled chan struct{}
+}
+
+func (p *silentProvider) Name() string { return "silent" }
+func (p *silentProvider) CompleteTextStream(ctx context.Context, _ string) (<-chan StreamToken, error) {
+	out := make(chan StreamToken)
+	go func() {
+		<-ctx.Done()
+		close(p.cancelled)
+		close(out)
+	}()
+	return out, nil
+}
+
+func TestCompleteTextStreamFailsOverWhenPrimaryStaysSilent(t *testing.T) {
+	silent := &silentProvider{cancelled: make(chan struct{})}
+	fallback := &streamingTestProvider{tokens: []StreamToken{{Text: "fallback"}, {Done: true}}}
+	client := &Client{
+		providers:         []Provider{silent, fallback},
+		primaryProvider:   silent,
+		firstTokenTimeout: 20 * time.Millisecond,
+	}
+
+	started := time.Now()
+	stream, err := client.CompleteTextStream(context.Background(), "prompt")
+	if err != nil {
+		t.Fatalf("CompleteTextStream: %v", err)
+	}
+	var text string
+	for token := range stream {
+		if token.Error != "" {
+			t.Fatalf("failover surfaced an error: %#v", token)
+		}
+		text += token.Text
+	}
+	if text != "fallback" || fallback.streamCalls != 1 {
+		t.Fatalf("text=%q fallback calls=%d, want the fallback answer", text, fallback.streamCalls)
+	}
+	if elapsed := time.Since(started); elapsed > time.Second {
+		t.Fatalf("failover took %s; the silent provider held the reply", elapsed)
+	}
+	select {
+	case <-silent.cancelled:
+	case <-time.After(time.Second):
+		t.Fatal("the silent provider's request was never cancelled")
+	}
+}
+
+func TestCompleteTextStreamReportsTimeoutWhenEveryProviderIsSilent(t *testing.T) {
+	silent := &silentProvider{cancelled: make(chan struct{})}
+	client := &Client{
+		providers:         []Provider{silent},
+		primaryProvider:   silent,
+		firstTokenTimeout: 20 * time.Millisecond,
+	}
+
+	stream, err := client.CompleteTextStream(context.Background(), "prompt")
+	if err != nil {
+		t.Fatalf("CompleteTextStream: %v", err)
+	}
+	var last StreamToken
+	for token := range stream {
+		last = token
+	}
+	if !last.Done || last.Error == "" {
+		t.Fatalf("last token = %#v, want a terminal timeout error", last)
+	}
 }
