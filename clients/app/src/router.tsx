@@ -12,19 +12,17 @@ import {
 import { ErrorBoundary } from '@voxire/ui';
 import { Spinner } from '@voxire/components';
 import { BusinessRoute } from './shared/utils/BusinessRoute';
-import { canManageDash } from './shared/utils/canManageDash';
-import { useUserStore } from './shared/stores/userStore';
-import SettingsLayout from './features/settings/Settings/components/SettingsLayout';
 import NoMatch from './features/extras/NoMatch';
 import { createFlowRoutes } from './modules/flow/routes';
-import { settingsSearchSchema } from './modules/flow/shared/schemas/settings';
 import { AppFlagGuard, FLAG_KEYS, resolveAppUrl } from '@voxire/config';
 import { createCrmRoutes } from './modules/crm/routes';
 import { createHrRoutes } from './modules/hr/routes';
-import { createHrSettingsRoutes } from './modules/hr/settingsRoutes';
 import { createFinanceRoutes } from './modules/finance/routes';
 import { createErpRoutes } from './modules/erp/routes';
 import { createInsightsRoutes } from './modules/insights/routes';
+import { createSettingsRoutes } from './features/settings/settingsRoutes';
+import { openInSettingsModal } from './features/settings/settingsModalStore';
+import { requireDashManagement } from './shared/utils/requireDashManagement';
 
 const Orders = React.lazy(() => import('./features/orders/Orders'));
 const Home = React.lazy(() => import('./features/home/Home'));
@@ -39,24 +37,6 @@ const Automations = React.lazy(() => import('./features/automations/Automations'
 const AutomationBuilder = React.lazy(() => import('./features/automations/AutomationBuilder'));
 const CaretWorkspace = React.lazy(() => import('./features/caret/CaretWorkspace'));
 
-const SettingsOverview = React.lazy(() => import('./features/settings/SettingsOverview'));
-const FlowSettings = React.lazy(() => import('./modules/flow/features/settings/FlowSettings'));
-const RecruitSettings = React.lazy(
-  () => import('./modules/recruit/features/admin/CustomizationAdmin')
-);
-const FinanceSettings = React.lazy(() => import('./modules/finance/features/settings/Settings'));
-const ErpSettings = React.lazy(() => import('./modules/erp/features/settings/Settings'));
-const CrmSettings = React.lazy(() => import('./modules/crm/features/settings/Settings'));
-const InsightsSettings = React.lazy(() => import('./modules/insights/features/settings/Settings'));
-
-const Account = React.lazy(() => import('./features/settings/Settings/components/Account'));
-const Businesses = React.lazy(() => import('./features/settings/Settings/components/Businesses'));
-const General = React.lazy(() => import('./features/settings/Settings/components/General'));
-const Industry = React.lazy(() => import('./features/settings/Settings/components/BusinessType'));
-const Domain = React.lazy(() => import('./features/settings/Settings/components/Domain/Domain'));
-const Email = React.lazy(() => import('./features/settings/Settings/components/Email/Email'));
-const AiUsage = React.lazy(() => import('./features/settings/Settings/components/AiUsage'));
-const Billing = React.lazy(() => import('./features/billing/Billing.tsx'));
 const Extensions = React.lazy(() => import('./features/extensions/Extensions'));
 
 const Team = React.lazy(() => import('./features/team/Team'));
@@ -67,9 +47,6 @@ const GroupDetail = React.lazy(() => import('./features/team/GroupDetail'));
 const Roles = React.lazy(() => import('./features/permissions/Roles'));
 const Audit = React.lazy(() => import('./features/activity/Audit'));
 const Notifications = React.lazy(() => import('./features/notifications/Notifications'));
-const ApiKeys = React.lazy(() => import('./features/developer/ApiKeys'));
-const Webhooks = React.lazy(() => import('./features/developer/Webhooks'));
-const Security = React.lazy(() => import('./features/security/Security'));
 
 const ThemeCustomizer = React.lazy(() => import('./features/extras/Theme'));
 const HelpCenter = React.lazy(() => import('./features/extras/HelpCenter'));
@@ -81,14 +58,6 @@ const fallback = (
 );
 
 const wrap = (children: React.ReactNode) => <Suspense fallback={fallback}>{children}</Suspense>;
-
-const requireDashManagement = () => {
-  const user = useUserStore.getState().user;
-  // Deny until Dash access has been hydrated; BusinessRoute handles the session.
-  if (!canManageDash(user)) {
-    throw redirect({ to: '/' });
-  }
-};
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -254,33 +223,13 @@ const notificationsRoute = createRoute({
 const accountRedirectRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/account',
-  component: () => wrap(<SettingsOverview />),
+  component: () => <Navigate to="/settings" replace />,
 });
 
 const billingRedirectRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/billing',
   component: () => <Navigate to="/settings/billing" replace />,
-});
-
-const apiKeysRoute = createRoute({
-  getParentRoute: () => businessRoute,
-  path: '/api-keys',
-  beforeLoad: requireDashManagement,
-  component: () => wrap(<ApiKeys />),
-});
-
-const webhooksRoute = createRoute({
-  getParentRoute: () => businessRoute,
-  path: '/webhooks',
-  beforeLoad: requireDashManagement,
-  component: () => wrap(<Webhooks />),
-});
-
-const securityRoute = createRoute({
-  getParentRoute: () => businessRoute,
-  path: '/security',
-  component: () => wrap(<Security />),
 });
 
 const themeRoute = createRoute({
@@ -309,185 +258,6 @@ const storeRoute = createRoute({
 
 const integrationsRoute = createRoute({
   getParentRoute: () => businessRoute,
-  path: '/integrations',
-  component: () => <Navigate to="/extensions" replace />,
-});
-
-// Settings layout routes
-const settingsRoute = createRoute({
-  getParentRoute: () => businessRoute,
-  path: '/settings',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <SettingsLayout />
-    </Suspense>
-  ),
-});
-
-const settingsIndexRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/',
-  component: () => wrap(<SettingsOverview />),
-});
-
-const settingsFlowRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/flow',
-  validateSearch: settingsSearchSchema,
-  component: () => wrap(<FlowSettings />),
-});
-const settingsInsightsRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/insights',
-  component: () =>
-    wrap(
-      <AppFlagGuard flag={FLAG_KEYS.APP_INSIGHTS}>
-        <InsightsSettings />
-      </AppFlagGuard>
-    ),
-});
-
-const settingsRecruitRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/recruit',
-  component: () =>
-    wrap(
-      <AppFlagGuard flag={FLAG_KEYS.APP_RECRUIT}>
-        <RecruitSettings />
-      </AppFlagGuard>
-    ),
-});
-const settingsFinanceRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/finance',
-  component: () =>
-    wrap(
-      <AppFlagGuard flag={FLAG_KEYS.APP_FINANCE}>
-        <FinanceSettings />
-      </AppFlagGuard>
-    ),
-});
-const settingsErpRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/erp',
-  component: () =>
-    wrap(
-      <AppFlagGuard flag={FLAG_KEYS.APP_ERP}>
-        <ErpSettings />
-      </AppFlagGuard>
-    ),
-});
-const settingsCrmRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/crm',
-  component: () =>
-    wrap(
-      <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>
-        <CrmSettings />
-      </AppFlagGuard>
-    ),
-});
-
-const settingsAccountRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/account',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Account />
-    </Suspense>
-  ),
-});
-
-const settingsBusinessesRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/businesses',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Businesses />
-    </Suspense>
-  ),
-});
-
-const settingsGeneralRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/general',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <General />
-    </Suspense>
-  ),
-});
-
-const settingsIndustryRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/industry',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Industry />
-    </Suspense>
-  ),
-});
-
-const settingsDomainRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/domain',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Domain />
-    </Suspense>
-  ),
-});
-
-const settingsEmailRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/email',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Email />
-    </Suspense>
-  ),
-});
-
-const settingsAiRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/ai',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <AiUsage />
-    </Suspense>
-  ),
-});
-
-const settingsSubscriptionRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/subscription',
-  component: () => <Navigate to="/settings/billing" replace />,
-});
-
-const settingsBillingRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/billing',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Billing />
-    </Suspense>
-  ),
-});
-
-const settingsStoreRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/store',
-  component: () => <Navigate to="/extensions" replace />,
-});
-
-const settingsAddonsRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/addons',
-  component: () => <Navigate to="/extensions" replace />,
-});
-
-const settingsIntegrationsRoute = createRoute({
-  getParentRoute: () => settingsRoute,
   path: '/integrations',
   component: () => <Navigate to="/extensions" replace />,
 });
@@ -560,36 +330,12 @@ const routeTree = rootRoute.addChildren([
     notificationsRoute,
     accountRedirectRoute,
     billingRedirectRoute,
-    apiKeysRoute,
-    webhooksRoute,
-    securityRoute,
     themeRoute,
     helpRoute,
     extensionsRoute,
     storeRoute,
     integrationsRoute,
-    settingsRoute.addChildren([
-      settingsIndexRoute,
-      settingsAccountRoute,
-      settingsFlowRoute,
-      settingsCrmRoute,
-      settingsErpRoute,
-      settingsFinanceRoute,
-      settingsRecruitRoute,
-      createHrSettingsRoutes(settingsRoute),
-      settingsInsightsRoute,
-      settingsBusinessesRoute,
-      settingsGeneralRoute,
-      settingsIndustryRoute,
-      settingsDomainRoute,
-      settingsEmailRoute,
-      settingsAiRoute,
-      settingsSubscriptionRoute,
-      settingsBillingRoute,
-      settingsStoreRoute,
-      settingsAddonsRoute,
-      settingsIntegrationsRoute,
-    ]),
+    ...createSettingsRoutes(businessRoute, openInSettingsModal),
   ]),
   standalonePosRoute,
   standalonePosDeepLinkRoute,

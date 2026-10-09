@@ -8,12 +8,12 @@ import {
 } from '../../packages/utils/src/appearance/colorMath';
 
 const apps = {
-  insights: '#4583c4',
-  flow: '#64c5b9',
-  crm: '#3b82f6',
-  erp: '#4583c4',
-  hr: '#8b5cf6',
-  finance: '#10b981',
+  insights: '#6fa3db',
+  flow: '#ef4444',
+  crm: '#8b5cf6',
+  erp: '#64c5b9',
+  hr: '#10b981',
+  finance: '#f59e0b',
 };
 for (const theme of ['light', 'dark'] as const) {
   test(`app navigation retains distinct accessible colors in ${theme} and returns Home to neutral`, async ({
@@ -47,17 +47,18 @@ for (const theme of ['light', 'dark'] as const) {
       })
     );
     for (const [app, accent] of Object.entries(apps)) {
-      await page.goto(`${PORTAL_URL}/settings/${app}`);
+      await page.goto(`${PORTAL_URL}/${app}`);
       const shell = page.locator('.portal-shell');
       await expect(shell).toBeVisible();
       const style = await shell.evaluate((el) => {
         const css = getComputedStyle(el);
-        const active = el.querySelector('.portal-nav-link.is-active')!;
+        // Insights and Flow use their own headers; the other apps have a sidebar link.
+        const active = el.querySelector('.portal-nav-link.is-active');
         return {
           accent: css.getPropertyValue('--accent').trim(),
           fg: css.getPropertyValue('--accent-on-muted').trim(),
           focus: css.getPropertyValue('--accent-focus').trim(),
-          activeColor: getComputedStyle(active).color,
+          activeColor: active ? getComputedStyle(active).color : null,
           theme: document.documentElement.dataset.theme,
         };
       });
@@ -71,8 +72,10 @@ for (const theme of ['light', 'dark'] as const) {
         );
         expect(contrastRatio(style.focus, ground)).toBeGreaterThanOrEqual(3);
       }
-      const fg = hexToRgb(style.fg);
-      expect(style.activeColor).toBe(`rgb(${fg.r}, ${fg.g}, ${fg.b})`);
+      if (style.activeColor) {
+        const fg = hexToRgb(style.fg);
+        expect(style.activeColor).toBe(`rgb(${fg.r}, ${fg.g}, ${fg.b})`);
+      }
     }
     await page.goto(`${PORTAL_URL}/hr/setup`);
     await expectAppAction(page.getByRole('button', { name: 'Next', exact: true }), apps.hr);
