@@ -287,10 +287,12 @@
       "finance": "المالية",
       "hr": "الموارد البشرية",
       "pos": "نقطة البيع",
-      "recruit": "التوظيف"
+      "recruit": "التوظيف",
+      "chats": "المحادثات"
     },
     "loadingFlow": "جارٍ البحث في العمل…",
-    "flowSearchFailed": "تعذّر تحميل بحث العمل. حاول مجددًا."
+    "flowSearchFailed": "تعذّر تحميل بحث العمل. حاول مجددًا.",
+    "chatSearchFailed": "تعذّر تحميل محادثات Caret."
   },
   "webhook": {
     "active": "نشط",

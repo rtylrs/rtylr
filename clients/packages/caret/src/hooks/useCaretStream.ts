@@ -132,16 +132,28 @@ export function useCaretStream({
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
+        // Time the reply when it finishes, not when the connection closes: the
+        // actions row appears on "done", and the server may hold the stream open.
+        let timed = false;
+        const recordReplyTime = (): void => {
+          if (timed) return;
+          timed = true;
+          useCaretStore
+            .getState()
+            .setLastAssistantResponseTime(
+              Math.round(performance.now() - sentAt),
+              tabId,
+            );
+        };
+
         for await (const event of consumeSse(response, assistantMessageId)) {
           dispatch(event, openThinking, tabId);
+          if (event.type === "done" || event.type === "message_end") {
+            recordReplyTime();
+          }
         }
 
-        useCaretStore
-          .getState()
-          .setLastAssistantResponseTime(
-            Math.round(performance.now() - sentAt),
-            tabId,
-          );
+        recordReplyTime();
         useCaretStore.getState().setStreaming(false, tabId);
       } catch (error) {
         if ((error as Error).name === "AbortError") return;

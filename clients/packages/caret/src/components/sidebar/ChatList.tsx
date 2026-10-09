@@ -1,20 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { caretTokens } from "../../ui/tokens";
 import ChatListItem from "./ChatListItem";
-import ChatSearch from "./ChatSearch";
 import NewChatButton from "./NewChatButton";
-import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import type { CaretChatSummary } from "../../types/chat";
 
 export interface ChatListLabels {
   heading: string;
   description: string;
   newChat: string;
-  search: string;
-  clearSearch: string;
   loading: string;
   empty: string;
-  noResults: string;
   loadFailed: string;
   retry: string;
   deleteChat: string;
@@ -47,22 +42,15 @@ export const ChatList: React.FC<ChatListProps> = ({
   onDelete,
   onTogglePin,
 }) => {
-  const [query, setQuery] = useState("");
-  const debounced = useDebouncedValue(query, 150);
-
-  const filtered = useMemo(() => {
-    const q = debounced.toLowerCase().trim();
-    const ordered = [...chats].sort((a, b) => {
-      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-      return b.updatedAt.localeCompare(a.updatedAt);
-    });
-    if (!q) return ordered;
-    return ordered.filter(
-      (c) =>
-        c.title.toLowerCase().includes(q) ||
-        (c.summary ?? "").toLowerCase().includes(q),
-    );
-  }, [chats, debounced]);
+  // Searching chats lives in the command palette, so this list only orders them.
+  const filtered = useMemo(
+    () =>
+      [...chats].sort((a, b) => {
+        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+        return b.updatedAt.localeCompare(a.updatedAt);
+      }),
+    [chats],
+  );
 
   return (
     <div
@@ -103,12 +91,6 @@ export const ChatList: React.FC<ChatListProps> = ({
         )}
       </div>
       <NewChatButton onClick={onNew} label={labels?.newChat} />
-      <ChatSearch
-        value={query}
-        onChange={setQuery}
-        label={labels?.search}
-        clearLabel={labels?.clearSearch}
-      />
       <div
         className="caret-chat-list-scroll"
         style={{
@@ -182,9 +164,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                   margin: 0,
                 }}
               >
-                {query
-                  ? (labels?.noResults ?? "No chats match your search.")
-                  : (labels?.empty ?? "No saved chats yet.")}
+                {labels?.empty ?? "No saved chats yet."}
               </p>
             )}
             {filtered.map((c) => (

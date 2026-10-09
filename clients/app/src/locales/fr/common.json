@@ -283,10 +283,12 @@
       "finance": "Finance",
       "hr": "RH",
       "pos": "Caisse",
-      "recruit": "Recrutement"
+      "recruit": "Recrutement",
+      "chats": "Discussions"
     },
     "loadingFlow": "Recherche dans Work…",
-    "flowSearchFailed": "La recherche Work a échoué. Réessayez."
+    "flowSearchFailed": "La recherche Work a échoué. Réessayez.",
+    "chatSearchFailed": "Impossible de charger les discussions Caret."
   },
   "webhook": {
     "active": "Actif",
