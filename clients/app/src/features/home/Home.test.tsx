@@ -56,11 +56,11 @@ describe('Portal Home', () => {
       'href',
       '/settings/account'
     );
-    expect(screen.getByRole('link', { name: 'Flow', exact: true })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Work', exact: true })).toHaveAttribute(
       'href',
       '/flow'
     );
-    expect(screen.getByRole('link', { name: 'Flow', exact: true })).not.toHaveAttribute('target');
+    expect(screen.getByRole('link', { name: 'Work', exact: true })).not.toHaveAttribute('target');
   });
   it('launches POS at its own origin while keeping other apps in Portal', () => {
     useUserStore.setState({ user: { effectiveAccess: createEffectiveAccess('pos') } });
@@ -80,7 +80,7 @@ describe('Portal Home', () => {
     });
     render(<Home />);
     expect(screen.queryByRole('link', { name: /Members and access/ })).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Flow', exact: true })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Work', exact: true })).toBeNull();
     expect(screen.getByText(/No apps are assigned/)).toBeVisible();
   });
 });

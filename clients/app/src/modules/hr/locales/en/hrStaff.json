@@ -30,7 +30,7 @@
   },
   "reportingLines": {
     "title": "Reporting lines",
-    "flowNotice": "Setting a manager here also lets them see their reports’ projects in Flow.",
+    "flowNotice": "Setting a manager here also lets them see their reports’ projects in Work.",
     "empty": "No staff members yet.",
     "none": "No manager",
     "change": "Change",

@@ -54,8 +54,8 @@ describe('Settings navigation search', () => {
     const ui = userEvent.setup();
     render(<Navigation />);
     expect(screen.queryByRole('link', { name: 'Settings', exact: true })).toBeNull();
-    await ui.type(screen.getByRole('searchbox'), 'FLOW');
-    expect(screen.getByRole('link', { name: 'Flow', exact: true })).toHaveAttribute(
+    await ui.type(screen.getByRole('searchbox'), 'WORK');
+    expect(screen.getByRole('link', { name: 'Work', exact: true })).toHaveAttribute(
       'href',
       '/settings/flow'
     );
@@ -83,7 +83,7 @@ describe('Settings navigation search', () => {
     render(<Navigation />);
     await ui.type(screen.getByRole('searchbox'), 'business');
     expect(screen.getByRole('link', { name: 'Billing', exact: true })).toBeVisible();
-    expect(screen.queryByRole('link', { name: 'Flow', exact: true })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Work', exact: true })).toBeNull();
   });
   it.each([
     ['en', 'No settings found.'],

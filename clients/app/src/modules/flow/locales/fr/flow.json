@@ -27,7 +27,7 @@
     "system": "Système",
     "signOut": "Se déconnecter",
     "loading": "Chargement…",
-    "loadingApp": "Chargement de Flow…",
+    "loadingApp": "Chargement de Work…",
     "moveSectionUp": "Monter la section",
     "moveUp": "Monter",
     "moveSectionDown": "Descendre la section",
@@ -77,7 +77,7 @@
     "pinItemsHint": "Gardez les projets que vous utilisez le plus à portée de main.",
     "groupName": "Nom du groupe",
     "groupNameRequired": "Saisissez un nom pour ce groupe.",
-    "internalRoute": "Route Flow",
+    "internalRoute": "Route Work",
     "externalLink": "Lien externe",
     "shortcutName": "Nom du raccourci",
     "shortcutNameRequired": "Saisissez un nom pour ce raccourci.",
@@ -253,8 +253,8 @@
     "percentOfEstimate": "{{percent}} % de l'estimation",
     "project": "Projet",
     "reports": "Rapports",
-    "reportsEmptyCta": "Gérer l'accès à Flow",
-    "reportsEmptyDescription": "Personne n'a encore accès à Flow, il n'y a donc rien à afficher pour cette période.",
+    "reportsEmptyCta": "Gérer l'accès à Work",
+    "reportsEmptyDescription": "Personne n'a encore accès à Work, il n'y a donc rien à afficher pour cette période.",
     "reportsEmptyTitle": "Rien à signaler pour l'instant",
     "reportsFrom": "Du",
     "reportsPerson": "Personne",
@@ -275,8 +275,8 @@
     "taskDescriptionPlaceholder": "Choisissez un type de travail pour remplir ce champ",
     "team": "Heures de l'équipe",
     "teamAccessDenied": "Vous n'avez pas accès au temps de l'équipe. Cela nécessite le rôle admin sur l'espace de travail.",
-    "teamEmptyCta": "Gérer l'accès à Flow",
-    "teamEmptyDescription": "Donnez à vos coéquipiers l'accès à Flow pour voir leur temps ici.",
+    "teamEmptyCta": "Gérer l'accès à Work",
+    "teamEmptyDescription": "Donnez à vos coéquipiers l'accès à Work pour voir leur temps ici.",
     "teamEmptyTitle": "Personne à afficher pour l'instant",
     "teamNotStarted": "Pas commencé",
     "unaccounted": "Non affecté",
@@ -344,7 +344,7 @@
       "deleteFailed": "Impossible de supprimer ce type de travail."
     },
     "workspaces": {
-      "subtitle": "Gérez vos espaces de travail Flow.",
+      "subtitle": "Gérez vos espaces de travail Work.",
       "newWorkspace": "Nouvel espace de travail",
       "namePlaceholder": "Nom de l'espace de travail",
       "color": "Couleur",
@@ -388,7 +388,7 @@
       "digestHour": "Heure de résumé préférée (locale)"
     },
     "appearance": {
-      "subtitle": "Personnalisez l'apparence de Flow.",
+      "subtitle": "Personnalisez l'apparence de Work.",
       "perDevice": "Ces réglages s'appliquent à cet appareil uniquement. Ils ne sont pas partagés avec votre équipe et ne suivent pas vers un autre navigateur.",
       "groups": {
         "mode": "Mode",
@@ -399,13 +399,13 @@
         "corners": "Coins",
         "motion": "Réduire les animations"
       },
-      "motionHint": "Désactive les transitions et les animations dans tout Flow.",
+      "motionHint": "Désactive les transitions et les animations dans tout Work.",
       "paletteDescriptions": {
-        "midnight": "Le réglage par défaut de Flow : presque noir, contraste maximal.",
+        "midnight": "Le réglage par défaut de Work : presque noir, contraste maximal.",
         "graphite": "Gris foncé plus chaud, plus doux sur les écrans lumineux.",
         "ink": "Noir bleuté et froid pour les longues sessions du soir.",
         "moss": "Sombre avec une nuance verte et peu d'éblouissement.",
-        "paper": "Le mode clair par défaut de Flow : cartes blanches sur gris doux.",
+        "paper": "Le mode clair par défaut de Work : cartes blanches sur gris doux.",
         "linen": "Blanc cassé chaud, plus reposant sous une lampe.",
         "mist": "Gris clair froid avec des cartes blanches nettes.",
         "slate": "Gris clair plus profond, séparation des cartes plus marquée."
@@ -423,7 +423,7 @@
         "m": "Par défaut",
         "l": "Grand"
       },
-      "textSizeGate": "Les tailles de texte de Flow sont écrites en pixels fixes : un multiplicateur de taille ne peut donc pas encore les atteindre.",
+      "textSizeGate": "Les tailles de texte de Work sont écrites en pixels fixes : un multiplicateur de taille ne peut donc pas encore les atteindre.",
       "corners": {
         "sharp": "Vifs",
         "soft": "Doux",
@@ -438,7 +438,7 @@
       "accentReset": "Rétablir la couleur par défaut"
     },
     "shortcuts": {
-      "subtitle": "Naviguez rapidement dans Flow sans toucher la souris.",
+      "subtitle": "Naviguez rapidement dans Work sans toucher la souris.",
       "items": {
         "createTask": "Créer une nouvelle tâche",
         "openSearch": "Ouvrir la barre de commande / recherche",
@@ -1028,9 +1028,9 @@
     "personal": "Tâches personnelles"
   },
   "start": {
-    "title": "Créer dans Flow",
+    "title": "Créer dans Work",
     "description": "Utilisez les actions disponibles dans cette entreprise.",
     "noActions": "Aucune action attribuée",
-    "noActionsDescription": "Demandez à un administrateur de mettre à jour votre accès à Flow."
+    "noActionsDescription": "Demandez à un administrateur de mettre à jour votre accès à Work."
   }
 }

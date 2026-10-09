@@ -201,7 +201,7 @@ describe('Team member filters', () => {
     effectiveAccess: { apps: [] },
   });
 
-  it('defaults to active members and composes type and status filters', () => {
+  it('shows every status by default and composes type and status filters', () => {
     teamData.data = {
       members: [
         member('1', 'Taylor Owner', 'owner', 'active'),
@@ -214,7 +214,7 @@ describe('Team member filters', () => {
     };
     render(<Team />);
     expect(screen.getByRole('button', { name: 'Taylor Owner' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Jordan Member' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Jordan Member' })).toBeInTheDocument();
 
     fireEvent.change(screen.getByRole('combobox', { name: 'Member type' }), {
       target: { value: 'admin' },
@@ -240,9 +240,19 @@ describe('Team member filters', () => {
       hasMore: false,
     };
     render(<Team />);
+    expect(screen.getByRole('button', { name: 'Jordan Member' })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('combobox', { name: 'Member status' }), {
+      target: { value: 'active' },
+    });
     expect(screen.queryByText('No team members yet')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
     expect(screen.getByRole('button', { name: 'Jordan Member' })).toBeInTheDocument();
+  });
+
+  it('does not repeat the Groups link the sidebar already has', () => {
+    teamData.data = { members: [member('1', 'Taylor Owner', 'owner', 'active')], hasMore: false };
+    render(<Team />);
+    expect(screen.queryByRole('button', { name: 'Groups' })).not.toBeInTheDocument();
   });
 
   it('renders the member actions menu outside the clipped member table', () => {

@@ -123,10 +123,6 @@
       "keywords": "POS, ERP, HR, CRM, Finance, Flow, logiciel de caisse, système de caisse, gestion des stocks, gestion de la paie, programme de fidélité, facturation, gestion de projet, logiciel pour restaurant, logiciel pour commerce, IA",
       "schemaDescription": "La suite rtylr réunit les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé : une vente met à jour l’entreprise sans passer par un export."
     },
-    "directAnswer": {
-      "label": "Qu’est-ce que rtylr ?",
-      "body": "rtylr est la suite d’entreprise des petites et moyennes entreprises. Elle relie les ventes, les stocks, les équipes, les clients, la finance et les opérations sur un modèle de données partagé. Elle est conçue pour les restaurants, les commerces et les entreprises de services qui emploient de 2 à 200 personnes, sur un établissement comme sur vingt. Une vente déplace le stock, le chiffre d’affaires et la fidélité sans que personne n’exporte de fichier."
-    },
     "howItWorks": {
       "eyebrow": "COMMENT ÇA MARCHE",
       "title": "Comment passer de l’inscription\nà la mise en service ?",
@@ -245,36 +241,6 @@
       "submit": "Commencer à construire",
       "demoLinePrefix": "Parlez à un expert et",
       "demoLineLink": "réservez une démo",
-      "stats": [
-        {
-          "number": "Un identifiant",
-          "label": "POS, ERP, CRM, RH et Finance"
-        },
-        {
-          "number": "Liban",
-          "label": "Conçu au Liban"
-        },
-        {
-          "number": "3",
-          "label": "Langues disponibles"
-        },
-        {
-          "number": "Hors ligne",
-          "label": "Toujours opérationnel"
-        },
-        {
-          "number": "IA",
-          "label": "Intégrée"
-        },
-        {
-          "number": "Multi",
-          "label": "Langues"
-        },
-        {
-          "number": "Cloud",
-          "label": "Natif"
-        }
-      ],
       "promptLabel": "Décrivez votre activité"
     },
     "features": {

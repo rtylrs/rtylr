@@ -372,101 +372,7 @@
   }
 }
 
-// ── Logo / stat grid (StatsSection) ──────────────────────────────────────────
-
-.trustedBy {
-  padding: 0 0 60px;
-  display: flex;
-  justify-content: center;
-
-  .trustedContainer {
-    width: 85%;
-    max-width: 1400px;
-  }
-
-  .logoScroll {
-    display: grid;
-    grid-template-columns: repeat(var(--stat-count, 7), minmax(0, 1fr));
-    border: 1px solid var(--hairline);
-
-    .logoItem {
-      color: var(--ink);
-      transition: all 0.3s;
-      padding: 30px 20px;
-      text-align: center;
-      border-inline-end: 1px solid var(--hairline);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      // Top-aligned so titles share a line when a label wraps.
-      justify-content: flex-start;
-      min-height: 120px;
-      gap: 8px;
-      overflow: hidden;
-
-      &:last-child {
-        border-inline-end: none;
-      }
-
-      &:hover {
-        background: rgba(19, 19, 19, 0.02);
-      }
-
-      .statNumber {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--ink);
-      }
-
-      .statLabel {
-        font-size: 0.72rem;
-        font-weight: 400;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        line-height: 1.4;
-        min-height: 2.8em;
-        word-break: break-word;
-        overflow-wrap: break-word;
-      }
-    }
-  }
-}
-
 // ── Responsive ───────────────────────────────────────────────────────────────
-
-@media (max-width: 1200px) {
-  .trustedBy .trustedContainer {
-    width: 95%;
-  }
-}
-
-@media (max-width: 1024px) {
-  .trustedBy .logoScroll {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-
-    .logoItem:nth-child(4n) {
-      border-inline-end: none;
-    }
-
-    .logoItem:nth-child(n + 5) {
-      border-top: 1px solid var(--hairline);
-    }
-
-    // Stretch a short last row instead of leaving empty cells.
-    .logoItem:last-child:nth-child(4n + 1) {
-      grid-column: span 4;
-    }
-
-    .logoItem:last-child:nth-child(4n + 2) {
-      grid-column: span 3;
-    }
-
-    .logoItem:last-child:nth-child(4n + 3) {
-      grid-column: span 2;
-    }
-  }
-}
 
 @media (max-width: 768px) {
   .mainHero {
@@ -500,48 +406,10 @@
   .announceLink {
     margin-bottom: 32px;
   }
-
-  .trustedBy {
-    padding-bottom: 40px;
-
-    .trustedContainer {
-      width: 100%;
-    }
-
-    .logoScroll {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-
-      .logoItem {
-        font-size: 0.8rem;
-        padding: 22px 10px;
-        min-height: 80px;
-      }
-    }
-  }
 }
 
 @media (max-width: 480px) {
   .announceText {
     font-size: 0.74rem;
-  }
-
-  .trustedBy .logoScroll {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    .logoItem:nth-child(2n) {
-      border-inline-end: none;
-    }
-
-    .logoItem:nth-child(n + 3) {
-      border-top: 1px solid var(--hairline);
-    }
-
-    .logoItem:last-child:nth-child(n) {
-      grid-column: auto;
-    }
-
-    .logoItem:last-child:nth-child(odd) {
-      grid-column: span 2;
-    }
   }
 }

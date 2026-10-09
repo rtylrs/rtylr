@@ -122,7 +122,7 @@
     "metaTitle": "Financial · rtylr"
   },
   "operations": {
-    "title": "Operations",
+    "title": "Workforce",
     "kpis": {
       "activeStaff": "Active Staff",
       "shiftsThisWeek": "Shifts This Week",
@@ -156,7 +156,7 @@
     "completion": "Completion",
     "pending": "Pending",
     "approved": "Approved",
-    "metaTitle": "Operations · rtylr"
+    "metaTitle": "Workforce · rtylr"
   },
   "reports": {
     "title": "Reports",

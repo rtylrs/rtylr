@@ -17,7 +17,7 @@
   "purchaseOrders": "Purchase Orders",
   "suppliers": "Suppliers",
   "settings": "Settings",
-  "appName": "ERP",
+  "appName": "Operations",
   "groups": {
     "workspace": "Workspace",
     "catalog": "Catalog",

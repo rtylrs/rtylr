@@ -224,7 +224,7 @@ export function buildPortalPageContext({
     appId: info.module === 'flow' ? 'flow' : info.module === 'insights' ? 'insights' : 'dash',
     appName:
       info.module === 'flow'
-        ? 'RTYLR Flow'
+        ? 'RTYLR Work'
         : info.module === 'insights'
           ? 'RTYLR Insights'
           : 'RTYLR Portal',

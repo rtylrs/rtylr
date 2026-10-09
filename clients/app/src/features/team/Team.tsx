@@ -77,7 +77,7 @@ const Team: React.FC = (): React.JSX.Element => {
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
   const [memberTypeFilter, setMemberTypeFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('active');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [confirm, setConfirm] = useState<TeamMember | null>(null);
   const { data: sub } = useMySubscription();
 
@@ -192,14 +192,9 @@ const Team: React.FC = (): React.JSX.Element => {
               : undefined
           }
           actions={
-            <>
-              <Button variant="outline" onClick={() => navigate({ to: '/team/groups' })}>
-                <FolderOpen /> {t('team.groups.title')}
-              </Button>
-              <Button onClick={() => navigate({ to: '/team/invite' })}>
-                <UserPlus /> {t('common.nav.addMember')}
-              </Button>
-            </>
+            <Button onClick={() => navigate({ to: '/team/invite' })}>
+              <UserPlus /> {t('common.nav.addMember')}
+            </Button>
           }
         />
 

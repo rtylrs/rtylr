@@ -61,7 +61,7 @@ describe('Portal command launcher', () => {
       });
       render(<Launcher />);
       await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
-      expect(screen.getByRole('option', { name: 'ERP' })).toBeVisible();
+      expect(screen.getByRole('option', { name: 'Operations' })).toBeVisible();
       expect(screen.getByRole('option', { name: 'Groups' })).toBeVisible();
       expect(screen.getByRole('option', { name: 'Add a member' })).toBeVisible();
     }
@@ -106,10 +106,10 @@ describe('Portal command launcher', () => {
     });
     render(<Launcher />);
     await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
-    expect(screen.getByRole('option', { name: 'Flow' })).toBeVisible();
+    expect(screen.getByRole('option', { name: 'Work' })).toBeVisible();
     expect(screen.getByRole('option', { name: 'Team' })).toBeVisible();
     expect(screen.queryByRole('option', { name: 'Add a member' })).toBeNull();
-    expect(screen.queryByRole('option', { name: 'ERP' })).toBeNull();
+    expect(screen.queryByRole('option', { name: 'Operations' })).toBeNull();
     expect(screen.queryByRole('option', { name: 'Insights' })).toBeNull();
     expect(screen.queryByRole('option', { name: 'Menus' })).toBeNull();
     act(() =>
@@ -117,7 +117,7 @@ describe('Portal command launcher', () => {
         user: { effectiveAccess: createEffectiveAccess('flow', { licensed: false }) },
       })
     );
-    expect(screen.queryByRole('option', { name: 'Flow' })).toBeNull();
+    expect(screen.queryByRole('option', { name: 'Work' })).toBeNull();
     expect(screen.queryByRole('option', { name: 'Team' })).toBeNull();
   });
 
@@ -176,7 +176,7 @@ describe('Portal command launcher', () => {
     expect(navigate).toHaveBeenCalledWith({ to: '/audit' });
   });
 
-  it('searches app descriptions and opens migrated ERP inside Portal', async () => {
+  it('searches app descriptions and opens migrated Operations inside Portal', async () => {
     const ui = userEvent.setup();
     useUserStore.setState({
       user: { effectiveAccess: createEffectiveAccess('erp', { isOwner: true }) },
@@ -184,7 +184,7 @@ describe('Portal command launcher', () => {
     render(<Launcher />);
     await ui.click(screen.getByRole('button', { name: 'Search Portal' }));
     await ui.type(screen.getByRole('combobox'), 'inventory');
-    await ui.click(screen.getByRole('option', { name: /ERP/ }));
+    await ui.click(screen.getByRole('option', { name: /Operations/ }));
     expect(navigate).toHaveBeenCalledWith({ to: '/erp' });
   });
 

@@ -47,12 +47,12 @@
     "outflow": "Sorties"
   },
   "bills": {
-    "receivedFromErp": "Reçues de l’ERP, en attente de factures",
+    "receivedFromErp": "Reçues de l’Opérations, en attente de factures",
     "receivedFromErpHint": "Le stock est arrivé pour ces bons de commande. Établissez les factures pour les refléter dans les comptes fournisseurs.",
     "balanceSheet": {
       "inventory": "Stock",
-      "inventoryHint": "Valeur de stock en direct depuis l'ERP ; affichée seulement si l'ERP est activé pour cette entreprise.",
-      "inventoryUnavailable": "ERP non connecté"
+      "inventoryHint": "Valeur de stock en direct depuis l'Opérations ; affichée seulement si l'Opérations est activé pour cette entreprise.",
+      "inventoryUnavailable": "Opérations non connecté"
     }
   },
   "fallbackClient": "",
@@ -68,8 +68,8 @@
   },
   "balanceSheet": {
     "inventory": "Stocks",
-    "inventoryHint": "Valeur des stocks en temps réel depuis l'ERP, affichée uniquement lorsque l'ERP est activé pour cette entreprise.",
-    "inventoryUnavailable": "ERP non connecté",
+    "inventoryHint": "Valeur des stocks en temps réel depuis l'Opérations, affichée uniquement lorsque l'Opérations est activé pour cette entreprise.",
+    "inventoryUnavailable": "Opérations non connecté",
     "title": "Bilan",
     "asOf": "À la date du :",
     "assets": "Actif",

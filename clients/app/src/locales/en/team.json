@@ -130,7 +130,7 @@
     "useDefaultAppRole": "Use default app role",
     "effectiveAccessTitle": "Effective access",
     "effectiveAccessDescription": "The access this member currently receives after licenses, roles, groups, and scopes are resolved.",
-    "ownershipNote": "Dash owns cross-app licenses and assignments. POS location scope is managed here, Flow project membership remains in Flow, and HR permission roles remain in HR.",
+    "ownershipNote": "Dash owns cross-app licenses and assignments. POS location scope is managed here, Work project membership remains in Work, and HR permission roles remain in HR.",
     "noEffectiveAccessTitle": "No effective app access",
     "noEffectiveAccessDescription": "This member has no active licensed application access.",
     "directSource": "Direct assignment",

@@ -485,10 +485,6 @@
       "keywords": "POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI",
       "schemaDescription": "The rtylr suite brings sales, inventory, people, customers, finance and operations together on one shared data model, so a sale updates the business without an export."
     },
-    "directAnswer": {
-      "label": "What is rtylr?",
-      "body": "rtylr is the business suite for small and mid-sized companies, connecting sales, inventory, people, customers, finance and operations on one shared data model. It is built for restaurants, retail and services businesses running 2 to 200 staff, across one location or twenty. A sale moves stock, revenue and loyalty without anyone exporting a file."
-    },
     "howItWorks": {
       "eyebrow": "HOW IT WORKS",
       "title": "How do you get\nfrom sign-up to live?",
@@ -607,36 +603,6 @@
       "submit": "Start building",
       "demoLinePrefix": "Talk with an expert and",
       "demoLineLink": "book a demo",
-      "stats": [
-        {
-          "number": "One login",
-          "label": "POS, ERP, CRM, HR and Finance"
-        },
-        {
-          "number": "Lebanon",
-          "label": "Built in Lebanon"
-        },
-        {
-          "number": "3",
-          "label": "App languages"
-        },
-        {
-          "number": "Offline",
-          "label": "Always Works"
-        },
-        {
-          "number": "AI",
-          "label": "Powered"
-        },
-        {
-          "number": "Multi",
-          "label": "Language"
-        },
-        {
-          "number": "Cloud",
-          "label": "Native"
-        }
-      ],
       "promptLabel": "Describe your business"
     },
     "features": {

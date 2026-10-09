@@ -27,7 +27,7 @@
     "system": "System",
     "signOut": "Sign out",
     "loading": "Loading…",
-    "loadingApp": "Loading Flow…",
+    "loadingApp": "Loading Work…",
     "moveSectionUp": "Move section up",
     "moveUp": "Move up",
     "moveSectionDown": "Move section down",
@@ -77,7 +77,7 @@
     "pinItemsHint": "Keep the projects you use most within reach.",
     "groupName": "Group name",
     "groupNameRequired": "Enter a name for this group.",
-    "internalRoute": "Flow route",
+    "internalRoute": "Work route",
     "externalLink": "External link",
     "shortcutName": "Shortcut name",
     "shortcutNameRequired": "Enter a name for this shortcut.",
@@ -251,8 +251,8 @@
     "percentOfEstimate": "{{percent}}% of estimate",
     "project": "Project",
     "reports": "Reports",
-    "reportsEmptyCta": "Manage Flow access",
-    "reportsEmptyDescription": "No one has Flow access yet, so there is nothing to report for this range.",
+    "reportsEmptyCta": "Manage Work access",
+    "reportsEmptyDescription": "No one has Work access yet, so there is nothing to report for this range.",
     "reportsEmptyTitle": "Nothing to report yet",
     "reportsFrom": "From",
     "reportsPerson": "Person",
@@ -272,8 +272,8 @@
     "taskDescriptionPlaceholder": "Pick a type of work to fill this in",
     "team": "Team hours",
     "teamAccessDenied": "You don't have access to see the team's time. This needs admin on the workspace.",
-    "teamEmptyCta": "Manage Flow access",
-    "teamEmptyDescription": "Give your teammates access to Flow to see their time here.",
+    "teamEmptyCta": "Manage Work access",
+    "teamEmptyDescription": "Give your teammates access to Work to see their time here.",
     "teamEmptyTitle": "No one to show yet",
     "teamNotStarted": "Not started",
     "unaccounted": "Unaccounted",
@@ -285,7 +285,7 @@
   "settings": {
     "time": {
       "section": "Time",
-      "localOnlyWarning": "These settings are saved in this browser only. They are not shared with your colleagues yet, so anyone else opening Flow sees the defaults.",
+      "localOnlyWarning": "These settings are saved in this browser only. They are not shared with your colleagues yet, so anyone else opening Work sees the defaults.",
       "weekAndTargets": "Week and targets",
       "weekStart": "Week starts",
       "monday": "Monday",
@@ -340,7 +340,7 @@
       "deleteFailed": "Could not delete that work type."
     },
     "workspaces": {
-      "subtitle": "Manage your Flow workspaces.",
+      "subtitle": "Manage your Work workspaces.",
       "newWorkspace": "New workspace",
       "namePlaceholder": "Workspace name",
       "color": "Color",
@@ -384,7 +384,7 @@
       "digestHour": "Preferred digest hour (local)"
     },
     "appearance": {
-      "subtitle": "Customize the look and feel of Flow.",
+      "subtitle": "Customize the look and feel of Work.",
       "perDevice": "These settings apply to this device only. They are not shared with your team and do not carry to another browser.",
       "groups": {
         "mode": "Mode",
@@ -395,13 +395,13 @@
         "corners": "Corners",
         "motion": "Reduce motion"
       },
-      "motionHint": "Turns off transitions and animations across Flow.",
+      "motionHint": "Turns off transitions and animations across Work.",
       "paletteDescriptions": {
-        "midnight": "Flow's default: near-black, maximum contrast.",
+        "midnight": "Work's default: near-black, maximum contrast.",
         "graphite": "Warmer dark grey, softer on bright screens.",
         "ink": "Cool blue-black for long evening sessions.",
         "moss": "Dark with a green cast and low glare.",
-        "paper": "Flow's default light: white cards on soft grey.",
+        "paper": "Work's default light: white cards on soft grey.",
         "linen": "Warm off-white, easier under lamplight.",
         "mist": "Cool light grey with crisp white cards.",
         "slate": "Deeper light grey, stronger card separation."
@@ -419,7 +419,7 @@
         "m": "Default",
         "l": "Large"
       },
-      "textSizeGate": "Flow's type sizes are written as fixed pixel values, so a text-size multiplier cannot reach them yet.",
+      "textSizeGate": "Work's type sizes are written as fixed pixel values, so a text-size multiplier cannot reach them yet.",
       "corners": {
         "sharp": "Sharp",
         "soft": "Soft",
@@ -434,7 +434,7 @@
       "accentReset": "Reset to the brand default"
     },
     "shortcuts": {
-      "subtitle": "Move fast through Flow without touching the mouse.",
+      "subtitle": "Move fast through Work without touching the mouse.",
       "items": {
         "createTask": "Create a new task",
         "openSearch": "Open command bar / search",
@@ -1010,7 +1010,7 @@
   },
   "previewRoute": {
     "title": "Preview route unavailable",
-    "body": "This Flow page is not enabled in the current environment. The route is still available when preview routes are enabled.",
+    "body": "This Work page is not enabled in the current environment. The route is still available when preview routes are enabled.",
     "back": "Return to My Issues"
   },
   "projectSelect": {
@@ -1018,9 +1018,9 @@
     "personal": "Personal tasks"
   },
   "start": {
-    "title": "Create in Flow",
+    "title": "Create in Work",
     "description": "Use the actions available to you in this business.",
     "noActions": "No actions assigned",
-    "noActionsDescription": "Ask a business administrator to update your Flow access."
+    "noActionsDescription": "Ask a business administrator to update your Work access."
   }
 }

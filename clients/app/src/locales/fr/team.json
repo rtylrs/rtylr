@@ -135,7 +135,7 @@
     "useDefaultAppRole": "Utiliser le rôle d'application par défaut",
     "effectiveAccessTitle": "Accès effectif",
     "effectiveAccessDescription": "L'accès actuellement reçu après résolution des licences, rôles, groupes et périmètres.",
-    "ownershipNote": "Dash gère les licences et affectations inter-applications. Le périmètre des sites POS est géré ici, tandis que l'appartenance aux projets Flow et les rôles de permissions HR restent dans leurs applications.",
+    "ownershipNote": "Dash gère les licences et affectations inter-applications. Le périmètre des sites POS est géré ici, tandis que l'appartenance aux projets Work et les rôles de permissions HR restent dans leurs applications.",
     "noEffectiveAccessTitle": "Aucun accès effectif aux applications",
     "noEffectiveAccessDescription": "Ce membre n'a aucun accès actif à une application sous licence.",
     "directSource": "Affectation directe",

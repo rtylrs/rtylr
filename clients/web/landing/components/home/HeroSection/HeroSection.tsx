@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import MainHero from './components/MainHero';
-import StatsSection from './components/StatsSection';
 import styles from './HeroSection.module.scss';
 
 const HeroSection = (): React.JSX.Element => {
@@ -21,7 +20,6 @@ const HeroSection = (): React.JSX.Element => {
     <section ref={sectionRef} className={styles.heroSection}>
       <motion.div className={styles.heroContentWrap} style={{ scale, opacity, y }}>
         <MainHero />
-        <StatsSection />
       </motion.div>
     </section>
   );
