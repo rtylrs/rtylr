@@ -52,6 +52,7 @@ type Service struct {
 	notifications       notificationPublisher
 	members             memberProvisioner
 	terminatedEmployees terminatedEmployeeSource
+	audit               auditRecorder
 }
 
 func NewService(_ context.Context, repo repository) *Service {

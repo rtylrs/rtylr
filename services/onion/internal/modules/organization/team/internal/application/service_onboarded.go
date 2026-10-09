@@ -93,6 +93,8 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	}
 	invalidateUserScope(ctx, input.UserID)
 	invalidateBusinessTeamScope(ctx, businessID)
+	s.recordAudit(ctx, businessID, actorID, "member", input.UserID, "member.access_updated",
+		"Updated access for "+memberLabel(existing.FullName, existing.Email))
 	return nil
 }
 
@@ -108,6 +110,10 @@ func (s *Service) DeactivateUser(ctx context.Context, actorID, businessID, userI
 	if userID == ownerID {
 		return domain.ErrForbidden
 	}
+	label := memberLabel("", "")
+	if member, lookupErr := s.repo.GetStaffUserByID(ctx, ownerID, businessID, userID); lookupErr == nil && member != nil {
+		label = memberLabel(member.FullName, member.Email)
+	}
 
 	if err := s.repo.DeactivateUser(ctx, businessID, ownerID, actorID, userID); err != nil {
 		return err
@@ -117,6 +123,7 @@ func (s *Service) DeactivateUser(ctx context.Context, actorID, businessID, userI
 	if businessID != 0 {
 		invalidateBusinessTeamScope(ctx, businessID)
 	}
+	s.recordAudit(ctx, businessID, actorID, "member", userID, "member.deactivated", "Deactivated "+label)
 	return nil
 }
 
