@@ -258,7 +258,8 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     [pathname, search, user?.businessName, apps]
   );
   useKeyboardShortcuts();
-  useOnboardingTour(pathname === '/' && canAccessPortalPath(user, '/team'));
+  // The tour's overlay would cover the settings modal, so it waits for it to close.
+  useOnboardingTour(pathname === '/' && !settingsOpen && canAccessPortalPath(user, '/team'));
   useEffect(() => {
     if (caretOpen) setCaretMounted(true);
   }, [caretOpen]);
