@@ -29,6 +29,8 @@
     "name": "الاسم",
     "namePlaceholder": "مثال: مدير الوردية",
     "optionalDescription": "وصف اختياري",
+    "searchPermissions": "ابحث في الصلاحيات",
+    "noPermissionMatches": "لا توجد صلاحيات تطابق \"{{query}}\"",
     "members": "الأعضاء",
     "actions": "الإجراءات",
     "empty": "لم يتم إعداد أي صلاحيات بعد.",

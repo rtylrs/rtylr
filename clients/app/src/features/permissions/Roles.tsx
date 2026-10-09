@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { canEffectiveAccess } from '@voxire/permissions';
-import { Archive, Check, Pencil, Plus, Shield } from 'lucide-react';
+import { Archive, Pencil, Plus, Shield } from 'lucide-react';
 import {
   Button,
   Input,
@@ -31,6 +31,7 @@ import {
 } from '../../shared/hooks/queries/usePermissions';
 import type { PermissionProfile } from '../../shared/schemas/permissions';
 import { useUserStore } from '../../shared/stores/userStore';
+import { PermissionChecklist } from './PermissionChecklist';
 
 const Roles: React.FC = () => {
   const { t } = useTranslation();
@@ -309,62 +310,13 @@ const Roles: React.FC = () => {
                   autoFocus
                 />
               </div>
-              <fieldset className="min-w-0 space-y-2">
-                <legend className="text-xs font-medium" style={{ color: 'var(--dash-text-dim)' }}>
-                  {t('common.roleManagement.permissions')}
-                </legend>
-                <div
-                  className="max-h-56 overflow-y-auto overscroll-contain rounded-lg p-1"
-                  style={{ background: 'var(--dash-bg)', border: '1px solid var(--dash-border)' }}
-                >
-                  {(permissionCatalog?.permissions ?? [])
-                    .filter((permission) => permission.appId === roleAppId)
-                    .map((permission) => {
-                      const checked = rolePermissions.includes(permission.key);
-                      return (
-                        <button
-                          type="button"
-                          key={permission.key}
-                          aria-pressed={checked}
-                          onClick={() =>
-                            setRolePermissions((current) =>
-                              checked
-                                ? current.filter((key) => key !== permission.key)
-                                : [...current, permission.key]
-                            )
-                          }
-                          className="flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2 text-start hover:bg-[var(--dash-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--dash-text)]"
-                          style={{ color: 'var(--dash-text)' }}
-                        >
-                          <span
-                            className="flex h-4 w-4 shrink-0 items-center justify-center rounded border"
-                            style={{
-                              borderColor: checked
-                                ? 'var(--dash-text)'
-                                : 'var(--dash-border-focus)',
-                              background: checked ? 'var(--dash-text)' : 'transparent',
-                            }}
-                          >
-                            {checked && (
-                              <Check size={11} style={{ color: 'var(--dash-surface)' }} />
-                            )}
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block text-sm">
-                              {permission.resource.replace(/:/g, ' / ')} · {permission.action}
-                            </span>
-                            <span
-                              className="mt-0.5 block truncate text-[11px] font-mono"
-                              style={{ color: 'var(--dash-text-dim)' }}
-                            >
-                              {permission.key}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                </div>
-              </fieldset>
+              <PermissionChecklist
+                permissions={(permissionCatalog?.permissions ?? []).filter(
+                  (permission) => permission.appId === roleAppId
+                )}
+                selected={rolePermissions}
+                onChange={setRolePermissions}
+              />
               <div className="space-y-2">
                 <label
                   htmlFor="permission-profile-description"
@@ -438,62 +390,13 @@ const Roles: React.FC = () => {
                   placeholder={t('common.permissionProfiles.optionalDescription')}
                 />
               </div>
-              <fieldset className="min-w-0 space-y-2">
-                <legend className="text-xs font-medium" style={{ color: 'var(--dash-text-dim)' }}>
-                  {t('common.roleManagement.permissions')}
-                </legend>
-                <div
-                  className="max-h-56 overflow-y-auto overscroll-contain rounded-lg p-1"
-                  style={{ background: 'var(--dash-bg)', border: '1px solid var(--dash-border)' }}
-                >
-                  {(permissionCatalog?.permissions ?? [])
-                    .filter((permission) => permission.appId === roleAppId)
-                    .map((permission) => {
-                      const checked = rolePermissions.includes(permission.key);
-                      return (
-                        <button
-                          type="button"
-                          key={permission.key}
-                          aria-pressed={checked}
-                          onClick={() =>
-                            setRolePermissions((current) =>
-                              checked
-                                ? current.filter((key) => key !== permission.key)
-                                : [...current, permission.key]
-                            )
-                          }
-                          className="flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2 text-start hover:bg-[var(--dash-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--dash-text)]"
-                          style={{ color: 'var(--dash-text)' }}
-                        >
-                          <span
-                            className="flex h-4 w-4 shrink-0 items-center justify-center rounded border"
-                            style={{
-                              borderColor: checked
-                                ? 'var(--dash-text)'
-                                : 'var(--dash-border-focus)',
-                              background: checked ? 'var(--dash-text)' : 'transparent',
-                            }}
-                          >
-                            {checked && (
-                              <Check size={11} style={{ color: 'var(--dash-surface)' }} />
-                            )}
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block text-sm">
-                              {permission.resource.replace(/:/g, ' / ')} · {permission.action}
-                            </span>
-                            <span
-                              className="mt-0.5 block truncate text-[11px] font-mono"
-                              style={{ color: 'var(--dash-text-dim)' }}
-                            >
-                              {permission.key}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                </div>
-              </fieldset>
+              <PermissionChecklist
+                permissions={(permissionCatalog?.permissions ?? []).filter(
+                  (permission) => permission.appId === roleAppId
+                )}
+                selected={rolePermissions}
+                onChange={setRolePermissions}
+              />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setEditingRole(null)}>
