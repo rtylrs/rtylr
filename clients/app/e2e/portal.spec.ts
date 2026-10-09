@@ -45,7 +45,7 @@ test.describe('Portal Home', () => {
       'href',
       '/insights'
     );
-    await expect(page.getByRole('link', { name: /Open Flow/ })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /Open Work/ })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'POS', exact: true })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Team', exact: true })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Groups', exact: true })).toHaveCount(0);
