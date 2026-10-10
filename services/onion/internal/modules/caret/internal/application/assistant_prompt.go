@@ -11,12 +11,17 @@ import (
 // module budgets each section below this, so the cap is a backstop only.
 const MaxAssistantContextBytes = 72000
 
+// AssistantBaseTools are offered on every turn, whatever the request is
+// about: search the web, find more tools, delegate, remember, and the small
+// utilities that keep answers exact.
+var AssistantBaseTools = []string{ToolSearchName, "web.search", "memory.remember", "account.profile", "utilities.calculate", "utilities.time"}
+
 func BuildAssistantPrompt(request, scope, context string, pageContext map[string]any, now time.Time) string {
 	var catalog strings.Builder
 	plannerContext := BuildRequestSystemContext(scope, pageContext)
 	tools := PromptToolsForRequest(ModeAgent, request, plannerContext)
 	seen := map[string]bool{}
-	for _, name := range []string{ToolSearchName, "memory.remember", "account.profile", "utilities.calculate", "utilities.time"} {
+	for _, name := range AssistantBaseTools {
 		if tool, ok := ToolByName(name); ok {
 			tools = append(tools, tool)
 		}
