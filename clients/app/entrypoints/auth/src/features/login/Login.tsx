@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
 import { APP_URLS, PORTAL_URL, resolvePortalReturn } from '@voxire/config';
 
@@ -13,6 +12,13 @@ import { createOneKitClient } from '@voxire/api';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { Button, HelmetContainer } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
+import {
+  AuthAlert,
+  AuthDivider,
+  AuthField,
+  AuthPasswordField,
+  authLinkClass,
+} from '../../shared/components/AuthField';
 
 import { getCookie, hasEffectiveAppAccess, parseEffectiveAccess } from '@voxire/auth';
 import { getEmailError } from '../../shared/lib/validation';
@@ -29,7 +35,6 @@ const Login: React.FC = (): React.JSX.Element => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const emailError = getEmailError(email);
 
   const redirectParam = useMemo((): string | null => {
@@ -126,22 +131,20 @@ const Login: React.FC = (): React.JSX.Element => {
         title={title}
         subtitle={subtitle}
         footer={
-          <div className="text-center space-y-3">
-            <p className="text-sm text-[#666]">
-              {t('auth.login.noAccount')}{' '}
-              <button
-                type="button"
-                className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-                onClick={() =>
-                  navigate({
-                    to: redirectParam ? `/register?redirect=${redirectParam}` : '/register',
-                  })
-                }
-              >
-                {t('auth.login.createOne')}
-              </button>
-            </p>
-          </div>
+          <p className="text-center">
+            {t('auth.login.noAccount')}{' '}
+            <button
+              type="button"
+              className={authLinkClass}
+              onClick={() =>
+                navigate({
+                  to: redirectParam ? `/register?redirect=${redirectParam}` : '/register',
+                })
+              }
+            >
+              {t('auth.login.createOne')}
+            </button>
+          </p>
         }
       >
         <form
@@ -151,108 +154,66 @@ const Login: React.FC = (): React.JSX.Element => {
           }}
           className="flex flex-col gap-4"
         >
-          {/* Email */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="login-email" className="text-sm font-medium text-[#111]">
-              {t('auth.common.email')}
-            </label>
-            <input
-              id="login-email"
-              type="email"
-              placeholder={t('auth.login.emailPlaceholder')}
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoFocus
-              required
-              aria-invalid={!!emailError}
-              aria-describedby={emailError ? 'login-email-error' : undefined}
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-            />
-            {emailError && (
-              <p id="login-email-error" className="text-xs text-red-500" role="alert">
-                {emailError}
-              </p>
-            )}
-          </div>
+          <AuthField
+            id="login-email"
+            label={t('auth.common.email')}
+            type="email"
+            placeholder={t('auth.login.emailPlaceholder')}
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoFocus
+            required
+            error={emailError}
+          />
 
-          {/* Password */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="login-password" className="text-sm font-medium text-[#111]">
-              {t('auth.common.password')}
-            </label>
-            <div className="relative">
-              <input
-                id="login-password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder={t('auth.login.passwordPlaceholder')}
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-              />
+          <AuthPasswordField
+            id="login-password"
+            label={t('auth.common.password')}
+            labelAside={
               <button
                 type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium min-h-[36px] px-1 flex items-center"
+                className="text-xs text-[#111]/55 hover:text-[#111] transition-colors"
+                onClick={() => navigate({ to: '/password-reset' })}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {t('auth.login.forgotPassword')}
               </button>
-            </div>
-          </div>
+            }
+            placeholder={t('auth.login.passwordPlaceholder')}
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-          {/* Forgot password */}
-          <div className="flex justify-end -mt-1">
-            <button
-              type="button"
-              className="text-xs text-[#4583C4] hover:underline underline-offset-2"
-              onClick={() => navigate({ to: '/password-reset' })}
-            >
-              {t('auth.login.forgotPassword')}
-            </button>
-          </div>
+          {errorMessage && <AuthAlert>{errorMessage}</AuthAlert>}
 
-          {/* Error */}
-          {errorMessage && (
-            <div
-              className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
-              role="alert"
-              aria-live="polite"
-            >
-              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-              <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
-            </div>
-          )}
-
-          {/* Sign in button */}
           <Button
             type="submit"
             variant="primary"
             className="auth-submit-button"
             fullWidth
             loading={loading}
-            height={40}
+            height={44}
           >
             {t('auth.login.submit')}
           </Button>
 
-          <div className="grid grid-cols-1 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => void handleGoogleLogin()}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaGoogle className="text-[#444]" />
-                {t('auth.common.google')}
-              </span>
-            </Button>
-          </div>
+          <AuthDivider label={t('auth.common.or')} />
+
+          <Button
+            type="button"
+            variant="outline"
+            className="auth-provider-button"
+            fullWidth
+            height={44}
+            onClick={() => void handleGoogleLogin()}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaGoogle className="text-[#444]" />
+              {t('auth.common.continueWithGoogle')}
+            </span>
+          </Button>
         </form>
       </AuthShell>
     </>

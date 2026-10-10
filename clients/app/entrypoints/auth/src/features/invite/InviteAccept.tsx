@@ -10,6 +10,7 @@ import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/
 import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
 import type { InviteAcceptRequest } from '@voxire/voxie/common/auth/v1/types';
 import { isStrongPassword } from '../../shared/lib/validation';
+import { authInputClass } from '../../shared/components/AuthField';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'auth');
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
@@ -80,7 +81,7 @@ const InviteAccept: React.FC = () => {
     return (
       <AuthShell title={t('auth.invite.verifying')} subtitle={t('auth.invite.pleaseWait')}>
         <div className="flex justify-center py-8">
-          <div className="h-6 w-6 border-2 border-[#4583C4] border-t-transparent rounded-full animate-spin" />
+          <div className="h-6 w-6 border-2 border-[#111] border-t-transparent rounded-full animate-spin" />
         </div>
       </AuthShell>
     );
@@ -96,7 +97,7 @@ const InviteAccept: React.FC = () => {
           <p className="text-sm text-[#666]">
             <button
               type="button"
-              className="text-[#4583C4] font-medium hover:underline underline-offset-2"
+              className="text-[#111] font-medium underline decoration-black/25 hover:decoration-black/70 underline-offset-2"
               onClick={() => navigate({ to: '/' })}
             >
               {t('auth.common.goToSignIn')}
@@ -173,7 +174,7 @@ const InviteAccept: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 autoFocus
                 required
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+                className={authInputClass}
               />
               <button
                 type="button"
@@ -200,7 +201,7 @@ const InviteAccept: React.FC = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+                className={authInputClass}
               />
               <button
                 type="button"

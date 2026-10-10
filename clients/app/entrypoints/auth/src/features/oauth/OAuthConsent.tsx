@@ -7,6 +7,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useLogin } from '../../shared/hooks/useAuth';
 import { useIssueAuthCode } from './useOAuth';
 import { getEmailError } from '../../shared/lib/validation';
+import { authInputClass } from '../../shared/components/AuthField';
 
 function isAllowedOAuthRedirect(url: string): boolean {
   try {
@@ -157,7 +158,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-lg border border-[#e5e5e5] px-3 py-2.5 text-sm outline-none focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/10 transition-all"
+              className={authInputClass}
               required
               autoFocus
             />
@@ -173,7 +174,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-[#e5e5e5] px-3 py-2.5 text-sm outline-none focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/10 transition-all"
+              className={authInputClass}
               required
             />
           </div>
@@ -181,7 +182,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
           <button
             type="submit"
             disabled={!isValid || loginMutation.isPending || !!isInvalidRequest}
-            className="w-full rounded-lg bg-[#4583C4] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-lg bg-[#111] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {loginMutation.isPending ? 'Signing in…' : 'Continue'}
           </button>
@@ -199,7 +200,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
 
           <div className="rounded-xl border border-[#e5e5e5] overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-3 bg-[#f9f9f9] border-b border-[#e5e5e5]">
-              <Shield size={16} className="text-[#4583C4] shrink-0" />
+              <Shield size={16} className="text-[#111]/70 shrink-0" />
               <span className="text-sm font-medium text-[#333]">
                 {t('auth.oauth.permissionsRequested')}
               </span>
@@ -219,21 +220,21 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
               type="button"
               onClick={handleConsent}
               disabled={issueMutation.isPending}
-              className="w-full rounded-lg bg-[#4583C4] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="w-full rounded-lg bg-[#111] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
-              {issueMutation.isPending ? 'Authorizing…' : 'Allow access'}
+              {issueMutation.isPending ? t('auth.oauth.authorizing') : t('auth.oauth.allow')}
             </button>
             <button
               type="button"
               onClick={handleDeny}
-              className="w-full rounded-lg border border-[#e5e5e5] py-2.5 text-sm text-[#666] hover:text-[#333] transition-colors"
+              className="w-full h-11 rounded-[10px] border border-black/10 bg-white text-sm font-medium text-[#111]/70 hover:bg-black/[0.03] hover:text-[#111] transition-colors"
             >
               {t('auth.oauth.deny')}
             </button>
           </div>
 
           <p className="text-xs text-[#999] text-center">
-            Signed in as <span className="font-medium text-[#555]">{email}</span>
+            {t('auth.oauth.signedInAs')} <span className="font-medium text-[#555]">{email}</span>
           </p>
         </div>
       </AuthShell>

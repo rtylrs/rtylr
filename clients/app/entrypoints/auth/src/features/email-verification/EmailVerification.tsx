@@ -63,7 +63,7 @@ const EmailVerification = () => {
 
           {loading ? (
             <>
-              <Loader2 className="h-10 w-10 text-[#4583C4] mx-auto animate-spin" />
+              <Loader2 className="h-10 w-10 text-[#111]/70 mx-auto animate-spin" />
               <p className="mt-5 text-sm text-[#666]">{t('auth.verify.verifying')}</p>
             </>
           ) : success ? (
