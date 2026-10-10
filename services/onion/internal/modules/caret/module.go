@@ -61,6 +61,7 @@ func (m *Module) GetSnipsService() *application.Service {
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	learner, _ := m.memoryService.(application.LessonLearner)
 	if err := hubcaretv1.RegisterCaretServiceServer(
 		api.NewCaretAPI(),
 		hubcaretv1.WithMux(mux),
@@ -72,6 +73,8 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 			Tools:    &handlers.ListToolsHandler{},
 			Status:   &handlers.ProviderStatusHandler{SnipsService: m.snipsService},
 			Decision: &handlers.ToolDecisionHandler{Executors: m.toolExecutors, RequirePendingApproval: true},
+			Learner:  learner,
+			AI:       m.snipsService,
 		},
 		hubcaretv1.WithMux(mux),
 	); err != nil {

@@ -86,3 +86,17 @@ message StopReplyResponse {
   /// False when no reply was generating in the chat.
   stopped: bool
 }
+
+message RateReplyRequest {
+  session_id: string
+  /// The stored message id of the reply; empty rates the chat's latest reply.
+  message_id: string
+  /// "up", "down", or "clear" to remove a verdict.
+  rating: string
+  /// What was wrong or right, in the person's words. Optional.
+  reason: string
+}
+
+message RateReplyResponse {
+  saved: bool
+}

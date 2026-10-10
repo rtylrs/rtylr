@@ -30,7 +30,9 @@ func (r *feedbackRepository) ReplaceLessons(_ context.Context, _ int, lessons []
 	return nil
 }
 
-func (r *feedbackRepository) UserLessons(context.Context, int) ([]string, error) { return r.existing, nil }
+func (r *feedbackRepository) UserLessons(context.Context, int) ([]string, error) {
+	return r.existing, nil
+}
 
 func TestRecordReplyFeedbackReadsTheRatedExchangeFromTheChat(t *testing.T) {
 	repo := &feedbackRepository{chatRepository: chatWithTurns(2, 5)}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/snips"
 	hubmemoryv1 "github.com/voxire/voxie/gen/go/hub/memory/v1"
 )
@@ -118,7 +120,14 @@ func (m *Module) SaveChatTitle(ctx context.Context, session string, userID int, 
 // RecordReplyFeedback stores a verdict on a reply in one of the user's chats
 // and returns how many verdicts are waiting to be learned from.
 func (m *Module) RecordReplyFeedback(ctx context.Context, session string, userID int, messageID, rating, reason string) (int, error) {
-	return m.memoryService.RecordReplyFeedback(ctx, session, userID, messageID, rating, reason)
+	pending, err := m.memoryService.RecordReplyFeedback(ctx, session, userID, messageID, rating, reason)
+	switch {
+	case errors.Is(err, application.ErrChatSessionNotFound):
+		return 0, onekiterrors.New(http.StatusNotFound, "reply not found")
+	case errors.Is(err, application.ErrInvalidFeedback):
+		return 0, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+	return pending, err
 }
 
 // PendingLessons returns the user's current lessons and their unlearned
