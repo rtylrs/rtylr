@@ -276,6 +276,7 @@
 
 .caret-follow-up:hover,
 .caret-new-chat-button:hover,
+.caret-source-chip:hover,
 .caret-chat-row:hover {
   background: var(--caret-hover) !important;
   color: var(--caret-text) !important;

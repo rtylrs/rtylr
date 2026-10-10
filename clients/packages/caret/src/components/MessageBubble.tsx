@@ -2,6 +2,8 @@ import React from "react";
 import { caretTokens } from "../ui/tokens";
 import MessageBlocks from "./MessageBlocks";
 import MessageActions from "./MessageActions";
+import SourceChips from "./SourceChips";
+import { replySources } from "../lib/searchSources";
 import { StreamingOrb } from "./CaretOrb";
 import type { CaretMessage, ContentBlock } from "../types/message";
 
@@ -132,6 +134,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         />
         {isStreaming && <StreamingOrb hasText={text.trim().length > 0} />}
       </div>
+      {!isStreaming && <SourceChips sources={replySources(blocks)} />}
       {!isStreaming && hasAssistantText && (
         <MessageActions
           text={text}
