@@ -17,6 +17,12 @@ const MaxAssistantContextBytes = 72000
 var AssistantBaseTools = []string{ToolSearchName, "web.search", AgentsToolName, "memory.remember", "account.profile", "utilities.calculate", "utilities.time"}
 
 func BuildAssistantPrompt(request, scope, context string, pageContext map[string]any, now time.Time) string {
+	return BuildAssistantPromptWithFiles(request, scope, context, nil, pageContext, now)
+}
+
+// BuildAssistantPromptWithFiles also carries the text files attached to the
+// request, in their own data region.
+func BuildAssistantPromptWithFiles(request, scope, context string, files []AttachedFile, pageContext map[string]any, now time.Time) string {
 	var catalog strings.Builder
 	plannerContext := BuildRequestSystemContext(scope, pageContext)
 	tools := append(GeneralToolsForRequest(request), PromptToolsForRequest(ModeAgent, request, plannerContext)...)
@@ -33,7 +39,12 @@ func BuildAssistantPrompt(request, scope, context string, pageContext map[string
 		seen[tool.Name] = true
 		catalog.WriteString("- " + toolContractPrompt(tool) + ": " + tool.Description + "\n")
 	}
+	attached := ""
+	if rendered := RenderAttachedFiles(files); rendered != "" {
+		attached = "Files the person attached to this message:\n<attached_files>\n" + rendered + "\n</attached_files>\n\n"
+	}
 	return strings.TrimSpace(strings.NewReplacer(
+		"{{FILES}}", attached,
 		"{{TODAY}}", now.Format(time.RFC3339),
 		"{{TOOLS}}", catalog.String(),
 		"{{SCOPE}}", escapeCaretPromptData(plannerContext),

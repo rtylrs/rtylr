@@ -365,7 +365,7 @@ func (h *GenerateTextStreamHandler) drainProviderStreamFull(ctx context.Context,
 }
 
 // maxContinuationBytes bounds a tool-loop follow-up prompt.
-const maxContinuationBytes = 128000
+const maxContinuationBytes = 240000
 
 // continuationPrompt appends tool results to the turn's prompt. When they
 // overflow, the oldest results are dropped rather than the newest ones or the
@@ -388,7 +388,8 @@ func continuationPromptWith(base, results, replySoFar, instruction string) strin
 	// Results always get at least half the budget, so the base is trimmed
 	// first and the slice below can never start past the end.
 	if len(base) > maxContinuationBytes/2 {
-		base = application.TruncateUTF8ToBytes(base, maxContinuationBytes/2)
+		// Keep the end too: the person's request closes the base prompt.
+		base = keepHeadAndTail(base, maxContinuationBytes/2, 20000)
 	}
 	room := maxContinuationBytes - len(base) - len(instruction)
 	if len(results) > room {
@@ -405,4 +406,18 @@ func continuationPromptWith(base, results, replySoFar, instruction string) strin
 func recoveryPrompt(base, replySoFar string) string {
 	return continuationPromptWith(base, "", replySoFar,
 		"\nYour reply was cut off by a connection error. Continue it exactly where it stopped, without repeating anything already said.")
+}
+
+// keepHeadAndTail fits text into limit bytes, keeping its last tail bytes and
+// as much of its start as fits.
+func keepHeadAndTail(text string, limit, tail int) string {
+	if len(text) <= limit {
+		return text
+	}
+	const marker = "\n[... omitted for length ...]\n"
+	end := text[len(text)-tail:]
+	for len(end) > 0 && !utf8.RuneStart(end[0]) {
+		end = end[1:]
+	}
+	return application.TruncateUTF8ToBytes(text, limit-len(end)-len(marker)) + marker + end
 }

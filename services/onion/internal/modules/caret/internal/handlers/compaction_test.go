@@ -83,3 +83,11 @@ func TestContinuationPromptHandlesAnOversizedBase(t *testing.T) {
 		}
 	}
 }
+
+func TestContinuationPromptKeepsTheRequestOfAnOversizedBase(t *testing.T) {
+	base := "SYSTEM" + strings.Repeat("f", maxContinuationBytes) + "<user_request>REQUEST</user_request>"
+	got := continuationPrompt(base, "results", "", false)
+	if !strings.HasPrefix(got, "SYSTEM") || !strings.Contains(got, "<user_request>REQUEST</user_request>") || len(got) > maxContinuationBytes {
+		t.Fatalf("continuation lost the request or overflowed: %d bytes", len(got))
+	}
+}
