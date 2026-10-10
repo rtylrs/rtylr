@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	echoapp "github.com/voxire/onion/internal/modules/caret/internal/application"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -514,6 +515,7 @@ func (r *streamEventRenderer) awaitTools() error {
 func (r *streamEventRenderer) finishTool(tool *inflightTool, outcome toolOutcome) error {
 	call, blockID := tool.call, tool.blockID
 	output, executed, duration, execErr := outcome.output, outcome.executed, outcome.duration, outcome.err
+	logToolCall(r.ctx, call.Name, executed, duration, execErr)
 	if execErr == nil && !executed {
 		// No executor claimed the tool; keep unsupported markers invisible rather
 		// than suggesting that an action ran.
@@ -626,4 +628,18 @@ func (r *streamEventRenderer) drainFollowUps(final bool) bool {
 	}
 	r.followUps = followUps
 	return true
+}
+
+// logToolCall records one tool call for operations: which tool, how long,
+// and whether it failed. Inputs and outputs stay out of the logs.
+func logToolCall(ctx context.Context, name string, executed bool, duration time.Duration, err error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fields := []logger.Field{logger.String("tool", name), logger.Int("duration_ms", int(duration.Milliseconds())), logger.Bool("executed", executed)}
+	if err != nil {
+		logger.Ctx(ctx).Warn("Caret tool failed", append(fields, logger.String("error", userFacingToolError(err)))...)
+		return
+	}
+	logger.Ctx(ctx).Info("Caret tool ran", fields...)
 }
