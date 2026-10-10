@@ -152,8 +152,16 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			results := renderer.toolResults[seenResults:]
 			seenResults = len(renderer.toolResults)
 			searchFailed := false
+			searchSucceeded := false
+			for _, result := range renderer.toolResults {
+				if result.Name == "web.search" && result.Status != "error" {
+					searchSucceeded = true
+				}
+			}
 			for _, result := range results {
-				if result.Name != "web.search" || result.Status != "error" {
+				// With results from an earlier search in this reply, a failed
+				// follow-up search goes to the model like any tool error.
+				if result.Name != "web.search" || result.Status != "error" || searchSucceeded {
 					continue
 				}
 				if err := renderer.AppendServerText(webSearchFailureReply(result.Error)); err != nil {

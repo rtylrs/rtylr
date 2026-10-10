@@ -35,8 +35,12 @@ type AssistantToolExecutor struct {
 	Web     PublicWebSearcher
 }
 
+// MaxWebSearchesPerMessage lets Caret refine a search (a narrower query, a
+// different angle) without turning one message into a crawl.
+const MaxWebSearchesPerMessage = 3
+
 type webSearchBudgetKey struct{}
-type webSearchBudget struct{ used atomic.Bool }
+type webSearchBudget struct{ used atomic.Int32 }
 
 func WithWebSearchBudget(ctx context.Context) context.Context {
 	return context.WithValue(ctx, webSearchBudgetKey{}, &webSearchBudget{})
@@ -91,8 +95,8 @@ func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name strin
 		if e.Web == nil {
 			return nil, true, errors.New("web search is unavailable")
 		}
-		if budget, ok := ctx.Value(webSearchBudgetKey{}).(*webSearchBudget); ok && !budget.used.CompareAndSwap(false, true) {
-			return nil, true, errors.New("one public web search is available per message; use its results or ask another question")
+		if budget, ok := ctx.Value(webSearchBudgetKey{}).(*webSearchBudget); ok && budget.used.Add(1) > MaxWebSearchesPerMessage {
+			return nil, true, fmt.Errorf("%d web searches are available per message; answer from the results you have", MaxWebSearchesPerMessage)
 		}
 		result, err := e.Web.Search(ctx, query)
 		return result, true, err

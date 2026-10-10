@@ -71,3 +71,38 @@ func TestAgentLoopContinuesTheReplySoFar(t *testing.T) {
 		t.Fatalf("follow-up round did not see the reply so far")
 	}
 }
+
+type searchSequence struct{ calls int }
+
+func (s *searchSequence) ExecuteCaretTool(_ context.Context, name string, _ map[string]any) (map[string]any, bool, error) {
+	if name != "web.search" {
+		return nil, false, nil
+	}
+	s.calls++
+	if s.calls > 1 {
+		return nil, true, errSearchUnavailable
+	}
+	return map[string]any{"sources": []map[string]string{{"title": "Report", "url": "https://example.com/r"}}}, true, nil
+}
+
+var errSearchUnavailable = errorString("web search returned no usable results")
+
+type errorString string
+
+func (e errorString) Error() string { return string(e) }
+
+// A failed follow-up search must not throw away a search that worked.
+func TestFailedFollowUpSearchStillAnswersFromTheFirst(t *testing.T) {
+	ai := &sequencedAI{replies: []string{
+		`<tool>{"name":"web.search","input":{"query":"refined query"}}</tool>`,
+		"Here is what the first report says.",
+	}}
+	body := runLoop(t, ai, `<tool>{"name":"web.search","input":{"query":"first query"}}</tool>`, &searchSequence{}, 5)
+
+	if strings.Contains(body, "couldn't complete the web search") {
+		t.Fatalf("canned failure replaced a usable answer: %s", body)
+	}
+	if !strings.Contains(body, "Here is what the first report says.") {
+		t.Fatalf("answer missing: %s", body)
+	}
+}
