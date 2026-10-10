@@ -10,8 +10,6 @@ export interface MessageListProps {
   showThinking?: boolean;
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
-  /** Sends a suggested follow-up question. */
-  onFollowUp?: (prompt: string) => void;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -21,7 +19,6 @@ export const MessageList: React.FC<MessageListProps> = ({
   showThinking,
   onApproveTool,
   onDenyTool,
-  onFollowUp,
 }) => {
   const scrollRef = useScrollToBottom<HTMLDivElement>(
     [messages.length, isStreaming],
@@ -51,7 +48,6 @@ export const MessageList: React.FC<MessageListProps> = ({
             showThinking={showThinking}
             onApproveTool={onApproveTool}
             onDenyTool={onDenyTool}
-            onFollowUp={isLastAssistant && !isStreaming ? onFollowUp : undefined}
           />
         );
       })}
