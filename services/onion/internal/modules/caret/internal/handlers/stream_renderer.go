@@ -398,13 +398,7 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		return r.emitToolExecutionNotice(call, "blocked", "I stopped additional checks for this response so the answer stays focused.", "")
 	}
 
-	output, executed, duration, execErr := echoapp.ExecuteToolWithTimeout(ctx, r.executors, call.Name, call.Input)
-	if execErr == nil && !executed {
-		// No executor claimed the tool; keep unsupported markers invisible rather
-		// than suggesting that an action ran.
-		return nil
-	}
-	if err := WriteEvent(r.w, r.flush, StreamEvent{
+	callEvent := StreamEvent{
 		Type:             EventToolCall,
 		MessageID:        r.messageID,
 		BlockID:          blockID,
@@ -413,8 +407,28 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		Input:            call.Input,
 		Preview:          preview,
 		RequiresApproval: false,
-	}); err != nil {
+	}
+	// A slow tool shows its card as soon as it starts, so the person sees work
+	// happening; a quick one appears with its result.
+	announced := echoapp.ToolTimeout(call.Name) > echoapp.ToolExecutionTimeout
+	if announced {
+		if err := WriteEvent(r.w, r.flush, callEvent); err != nil {
+			return err
+		}
+	}
+	output, executed, duration, execErr, err := r.runTool(ctx, call)
+	if err != nil {
 		return err
+	}
+	if execErr == nil && !executed {
+		// No executor claimed the tool; keep unsupported markers invisible rather
+		// than suggesting that an action ran.
+		return nil
+	}
+	if !announced {
+		if err := WriteEvent(r.w, r.flush, callEvent); err != nil {
+			return err
+		}
 	}
 	if execErr != nil {
 		userError := userFacingToolError(execErr)
@@ -437,6 +451,68 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 	summary := summarizeToolResult(call.Name, call.Input, output, "success", "")
 	r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: "success", Summary: summary, Output: output})
 	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventToolResult, MessageID: r.messageID, BlockID: blockID, Status: "success", Summary: summary, Output: output, DurationMs: duration.Milliseconds()})
+}
+
+// runTool executes one read while keeping the stream alive: heartbeats stop
+// proxies from closing a quiet connection, and progress the tool reports is
+// shown as status lines. Only this goroutine writes to the stream.
+func (r *streamEventRenderer) runTool(ctx context.Context, call ToolCallMarker) (map[string]any, bool, time.Duration, error, error) {
+	type outcome struct {
+		output   map[string]any
+		executed bool
+		duration time.Duration
+		err      error
+	}
+	progress := make(chan string, 32)
+	ctx = echoapp.WithToolProgress(ctx, func(message string) {
+		select {
+		case progress <- message:
+		default:
+		}
+	})
+	done := make(chan outcome, 1)
+	go func() {
+		output, executed, duration, err := echoapp.ExecuteToolWithTimeout(ctx, r.executors, call.Name, call.Input)
+		done <- outcome{output, executed, duration, err}
+	}()
+	heartbeat := time.NewTicker(toolHeartbeatInterval)
+	defer heartbeat.Stop()
+	for {
+		select {
+		case result := <-done:
+			return result.output, result.executed, result.duration, result.err, nil
+		case message := <-progress:
+			if err := r.emitStatus(message); err != nil {
+				return nil, false, 0, nil, err
+			}
+		case <-heartbeat.C:
+			if err := WriteSSEHeartbeat(r.w, r.flush); err != nil {
+				return nil, false, 0, nil, err
+			}
+		}
+	}
+}
+
+// toolHeartbeatInterval keeps a connection alive while a tool runs.
+var toolHeartbeatInterval = 10 * time.Second
+
+// emitStatus shows a one-line progress update as a thinking block.
+func (r *streamEventRenderer) emitStatus(message string) error {
+	message = strings.TrimSpace(message)
+	if message == "" || r.plannerOnly {
+		return nil
+	}
+	blockID := newCaretBlockID("thinking")
+	for _, event := range []StreamEvent{
+		{Type: EventThinkingStart, MessageID: r.messageID, BlockID: blockID},
+		{Type: EventThinkingDelta, MessageID: r.messageID, BlockID: blockID, Delta: message},
+		{Type: EventThinkingEnd, MessageID: r.messageID, BlockID: blockID},
+	} {
+		if err := WriteEvent(r.w, r.flush, event); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *streamEventRenderer) emitToolExecutionNotice(call ToolCallMarker, status, summary, errorMessage string) error {
