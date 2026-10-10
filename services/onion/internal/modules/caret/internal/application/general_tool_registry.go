@@ -29,4 +29,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "Current conditions and one entry per day, in the place's local timezone.",
 		Freshness:  "live forecast", SideEffect: "read-only",
 	},
+	{
+		Name:        "currency.convert",
+		Description: "Convert money between currencies with today's exchange rates (about 160 currencies, including LBP, AED, SAR) or the rates on a past date.",
+		Module:      "currency", Scope: "read",
+		InputHint:  `{"amount":100,"from":"USD","to":"EUR,GBP","date":"optional YYYY-MM-DD"}`,
+		OutputHint: "The rate and converted amount per target currency, the rate date and its source.",
+		Freshness:  "daily rates", SideEffect: "read-only",
+	},
 }
