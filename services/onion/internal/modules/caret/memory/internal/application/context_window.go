@@ -18,6 +18,7 @@ const (
 	messageClipBytes      = 10000
 	profileBudgetBytes    = 4000
 	memoriesBudgetBytes   = 4000
+	lessonsBudgetBytes    = 2500
 	summaryBudgetBytes    = 6000
 	projectBudgetBytes    = 8000
 
@@ -173,7 +174,23 @@ func compactionSplit(uncovered []domain.ConversationMessage) []domain.Conversati
 	return uncovered[:1]
 }
 
-func renderMemories(memories []domain.UserMemory) string {
+// LessonMemoryType marks a memory distilled from the person's feedback on
+// Caret's replies: how they want Caret to work, rather than a fact.
+const LessonMemoryType = "lesson"
+
+// splitLessons separates feedback lessons from the other memories.
+func splitLessons(memories []domain.UserMemory) (lessons, others []domain.UserMemory) {
+	for _, memory := range memories {
+		if memory.MemoryType == LessonMemoryType {
+			lessons = append(lessons, memory)
+		} else {
+			others = append(others, memory)
+		}
+	}
+	return lessons, others
+}
+
+func renderMemories(memories []domain.UserMemory, budget int) string {
 	var out strings.Builder
 	for _, memory := range memories {
 		value := strings.TrimSpace(memory.Value)
@@ -181,7 +198,7 @@ func renderMemories(memories []domain.UserMemory) string {
 			continue
 		}
 		line := "- " + value + "\n"
-		if out.Len()+len(line) > memoriesBudgetBytes {
+		if out.Len()+len(line) > budget {
 			break
 		}
 		out.WriteString(line)

@@ -173,3 +173,24 @@ func TestRenderTurnNotesToolStepsAndClipsLongMessages(t *testing.T) {
 		t.Fatal("clipping must not split a multi-byte character")
 	}
 }
+
+type lessonRepository struct{ *chatRepository }
+
+func (r lessonRepository) AssistantMemories(context.Context, string) ([]domain.UserMemory, error) {
+	return []domain.UserMemory{
+		{MemoryType: "preference", Value: "Currency is USD"},
+		{MemoryType: LessonMemoryType, Value: "Lead with the number, then one line of context."},
+	}, nil
+}
+
+func TestAssistantContextGivesLessonsTheirOwnSection(t *testing.T) {
+	got, err := NewService(lessonRepository{chatWithTurns(1, 10)}).AssistantContext(context.Background(), "s", 1, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	lessons := strings.Index(got, "Lessons from this person's feedback")
+	saved := strings.Index(got, "Saved user preferences:\n- Currency is USD")
+	if lessons < 0 || saved < 0 || !strings.Contains(got[lessons:saved], "Lead with the number") {
+		t.Fatalf("context = %s", got)
+	}
+}

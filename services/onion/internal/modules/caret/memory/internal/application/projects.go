@@ -116,8 +116,12 @@ func (s *Service) AssistantContext(ctx context.Context, session string, userID i
 	// profile, preferences or the newest turns out of the prompt.
 	var output strings.Builder
 	output.WriteString(clipEnd(strings.TrimSpace(profile), profileBudgetBytes))
-	if saved := renderMemories(memories); saved != "" {
-		output.WriteString("\n\nSaved user preferences:\n" + saved)
+	lessons, saved := splitLessons(memories)
+	if text := renderMemories(lessons, lessonsBudgetBytes); text != "" {
+		output.WriteString("\n\nLessons from this person's feedback on your replies (standing instructions; follow them):\n" + text)
+	}
+	if text := renderMemories(saved, memoriesBudgetBytes); text != "" {
+		output.WriteString("\n\nSaved user preferences:\n" + text)
 	}
 	compaction := readCompaction(chat)
 	history := orderedHistory(messages)
