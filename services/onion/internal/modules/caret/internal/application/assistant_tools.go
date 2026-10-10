@@ -160,7 +160,7 @@ func calculateArithmetic(expression string) (float64, error) {
 	if len(expression) == 0 || len(expression) > 512 {
 		return 0, errors.New("enter an arithmetic expression under 512 characters")
 	}
-	node, err := parser.ParseExpr(expression)
+	node, err := parser.ParseExpr(prepareArithmetic(expression))
 	if err != nil {
 		return 0, errors.New("invalid arithmetic expression")
 	}
@@ -187,6 +187,16 @@ func evalArithmetic(node ast.Expr) (float64, error) {
 		return value, nil
 	case *ast.ParenExpr:
 		return evalArithmetic(node.X)
+	case *ast.Ident:
+		switch strings.ToLower(node.Name) {
+		case "pi":
+			return math.Pi, nil
+		case "e":
+			return math.E, nil
+		}
+		return 0, fmt.Errorf("unknown name %q", node.Name)
+	case *ast.CallExpr:
+		return evalArithmeticCall(node)
 	case *ast.UnaryExpr:
 		value, err := evalArithmetic(node.X)
 		if err != nil {
@@ -227,6 +237,106 @@ func evalArithmetic(node ast.Expr) (float64, error) {
 	default:
 		return 0, fmt.Errorf("unsupported arithmetic expression %T", node)
 	}
+}
+
+var (
+	percentLiteral = regexp.MustCompile(`(\d+(?:\.\d+)?)\s*%`)
+	percentOf      = regexp.MustCompile(`(?i)\)\s*of\s+`)
+)
+
+// prepareArithmetic accepts everyday notation: "15% of 200", ×, ÷ and
+// thousands separators like 1,250.50 outside function calls.
+func prepareArithmetic(expression string) string {
+	expression = strings.NewReplacer("×", "*", "÷", "/", "−", "-").Replace(expression)
+	if !strings.Contains(expression, "(") {
+		expression = thousandsSeparator.ReplaceAllString(expression, "$1$2")
+	}
+	expression = percentLiteral.ReplaceAllString(expression, "($1/100)")
+	return percentOf.ReplaceAllString(expression, ")*")
+}
+
+var thousandsSeparator = regexp.MustCompile(`(\d),(\d{3})`)
+
+var arithmeticFunctions = map[string]func(args []float64) (float64, error){
+	"sqrt":  unary(math.Sqrt),
+	"abs":   unary(math.Abs),
+	"floor": unary(math.Floor),
+	"ceil":  unary(math.Ceil),
+	"exp":   unary(math.Exp),
+	"ln":    unary(math.Log),
+	"log10": unary(math.Log10),
+	"log2":  unary(math.Log2),
+	"log":   unary(math.Log10),
+	"sin":   unary(math.Sin),
+	"cos":   unary(math.Cos),
+	"tan":   unary(math.Tan),
+	"pow": func(args []float64) (float64, error) {
+		if len(args) != 2 {
+			return 0, errors.New("pow takes two numbers")
+		}
+		return math.Pow(args[0], args[1]), nil
+	},
+	"round": func(args []float64) (float64, error) {
+		switch len(args) {
+		case 1:
+			return math.Round(args[0]), nil
+		case 2:
+			return roundTo(args[0], int(args[1])), nil
+		}
+		return 0, errors.New("round takes a number and optional decimal places")
+	},
+	"min": func(args []float64) (float64, error) {
+		if len(args) == 0 {
+			return 0, errors.New("min needs numbers")
+		}
+		out := args[0]
+		for _, v := range args[1:] {
+			out = math.Min(out, v)
+		}
+		return out, nil
+	},
+	"max": func(args []float64) (float64, error) {
+		if len(args) == 0 {
+			return 0, errors.New("max needs numbers")
+		}
+		out := args[0]
+		for _, v := range args[1:] {
+			out = math.Max(out, v)
+		}
+		return out, nil
+	},
+}
+
+func unary(fn func(float64) float64) func([]float64) (float64, error) {
+	return func(args []float64) (float64, error) {
+		if len(args) != 1 {
+			return 0, errors.New("this function takes one number")
+		}
+		return fn(args[0]), nil
+	}
+}
+
+func evalArithmeticCall(call *ast.CallExpr) (float64, error) {
+	name, ok := call.Fun.(*ast.Ident)
+	if !ok {
+		return 0, errors.New("unsupported function call")
+	}
+	fn, ok := arithmeticFunctions[strings.ToLower(name.Name)]
+	if !ok {
+		return 0, fmt.Errorf("unknown function %q", name.Name)
+	}
+	if len(call.Args) > 64 {
+		return 0, errors.New("too many arguments")
+	}
+	args := make([]float64, len(call.Args))
+	for i, arg := range call.Args {
+		value, err := evalArithmetic(arg)
+		if err != nil {
+			return 0, err
+		}
+		args[i] = value
+	}
+	return fn(args)
 }
 
 type SearXNGWebSearch struct {

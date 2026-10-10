@@ -32,7 +32,13 @@ func TestAssistantToolsCalculateAndRejectUnsupportedExpressions(t *testing.T) {
 	if err != nil || !executed || output["result"] != float64(30) {
 		t.Fatalf("calculate returned (%v, %v, %v), want 30", output, executed, err)
 	}
-	for _, expression := range []string{"1/0", "os.Exit(1)", "1**2", strings.Repeat("1", 513)} {
+	for expression, want := range map[string]float64{"15% of 200": 30, "sqrt(16) + pow(2, 3)": 12, "round(10/3, 2)": 3.33, "max(3, 9, 4) × 2": 18, "1,250.50 + 1": 1251.5, "2 * pi": 2 * 3.141592653589793} {
+		output, _, err := executor.ExecuteCaretTool(context.Background(), "utilities.calculate", map[string]any{"expression": expression})
+		if err != nil || output["result"] != want {
+			t.Errorf("calculate(%q) = %v, %v; want %v", expression, output["result"], err, want)
+		}
+	}
+	for _, expression := range []string{"1/0", "os.Exit(1)", "1**2", "exit(1)", strings.Repeat("1", 513)} {
 		if _, _, err := executor.ExecuteCaretTool(context.Background(), "utilities.calculate", map[string]any{"expression": expression}); err == nil {
 			t.Errorf("calculate(%q) unexpectedly succeeded", expression)
 		}
