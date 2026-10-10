@@ -68,7 +68,7 @@ var generalTools = map[string]generalTool{
 
 // MaxWebSearchesPerMessage lets Caret refine a search (a narrower query, a
 // different angle) without turning one message into a crawl.
-const MaxWebSearchesPerMessage = 3
+const MaxWebSearchesPerMessage = 5
 
 // WebSearchOptions narrow one search. They travel on the context so every
 // backend in the fallback chain sees them without widening the interface.
