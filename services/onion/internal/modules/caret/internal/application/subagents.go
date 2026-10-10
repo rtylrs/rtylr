@@ -32,7 +32,7 @@ const (
 // subAgentTools are listed in every sub-agent's prompt; tools.search reaches
 // the rest of the read-only catalog.
 var subAgentTools = []string{
-	ToolSearchName, "web.search", "web.fetch", "knowledge.wikipedia", "utilities.calculate",
+	ToolSearchName, BusinessFindToolName, "web.search", "web.fetch", "knowledge.wikipedia", "utilities.calculate",
 	"utilities.statistics", "utilities.date_math", "currency.convert",
 }
 

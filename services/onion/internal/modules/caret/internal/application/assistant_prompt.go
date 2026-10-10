@@ -14,7 +14,7 @@ const MaxAssistantContextBytes = 72000
 // AssistantBaseTools are offered on every turn, whatever the request is
 // about: search the web, find more tools, delegate, remember, and the small
 // utilities that keep answers exact.
-var AssistantBaseTools = []string{ToolSearchName, "web.search", AgentsToolName, "memory.remember", "account.profile", "utilities.calculate", "utilities.time"}
+var AssistantBaseTools = []string{ToolSearchName, "web.search", AgentsToolName, BusinessFindToolName, "memory.remember", "account.profile", "utilities.calculate", "utilities.time"}
 
 func BuildAssistantPrompt(request, scope, context string, pageContext map[string]any, now time.Time) string {
 	return BuildAssistantPromptWithFiles(request, scope, context, nil, pageContext, now)

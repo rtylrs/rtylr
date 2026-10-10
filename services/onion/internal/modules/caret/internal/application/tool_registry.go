@@ -35,6 +35,7 @@ var seedTools = []ToolDef{
 	{Name: "account.profile", Description: "Read the authenticated person's name and current business identity.", Module: "account", Scope: "read", InputHint: `{}`},
 	{Name: "utilities.calculate", Description: "Evaluate arithmetic exactly using numbers supplied by the user or verified results. Supports + - * / parentheses, percentages (\"15% of 200\"), pi, and sqrt, pow, round(x, places), min, max, abs, floor, ceil, ln, log10, exp.", Module: "utilities", Scope: "read", InputHint: `{"expression":"round((120 * 0.2) + pow(1.05, 3), 2)"}`},
 	{Name: "utilities.time", Description: "Get the current date and time in an IANA timezone; with no timezone, in the person's own.", Module: "utilities", Scope: "read", InputHint: `{"timezone":"optional, e.g. Asia/Beirut"}`},
+	{Name: "business.find", Description: "Find a person, customer, product, supplier, invoice, ticket, task or appointment by name across every app at once (\"Rana\", \"Acme\", \"latte\"). Use it when you don't know which app holds the record; it returns matches with the tool to open each one.", Module: "business", Scope: "read", InputHint: `{"query":"name or word"}`, OutputHint: "Matching records with kind, name, id and key fields, and the get tool for details.", Freshness: "live at request time", SideEffect: "read-only"},
 	{Name: "business.snapshot", Description: "Build a tenant-scoped owner snapshot across sales, finance, inventory, CRM, HR, and Flow.", Module: "business", Scope: "read"},
 	{Name: "business.get_kpis", Description: "Get headline business KPIs across revenue, orders, staff, customers, stock, and apps.", Module: "business", Scope: "read"},
 	{Name: "memory.list", Description: "List what Caret remembers about the person and their business, with ids. Check it before proposing a memory, when asked what Caret knows about them, or to find a memory to forget.", Module: "memory", Scope: "read", InputHint: `{}`, OutputHint: "Each memory's id, type, text and last update.", Freshness: "live", SideEffect: "read-only"},
@@ -199,6 +200,7 @@ var seedTools = []ToolDef{
 var promptExecutableTools = map[string]struct{}{
 	"web.search": {}, "tools.search": {}, "agents.run": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
 	"business.snapshot":                   {},
+	"business.find":                       {},
 	"business.get_kpis":                   {},
 	"memory.remember":                     {},
 	"memory.list":                         {},
