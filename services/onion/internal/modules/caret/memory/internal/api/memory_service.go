@@ -7,6 +7,8 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/domain"
@@ -264,4 +266,70 @@ func messageResponseMs(raw string) int32 {
 		return 0
 	}
 	return int32(min(metadata.ResponseMs, math.MaxInt32)) // #nosec G115 -- clamped to int32 range above.
+}
+
+func memoryToProto(memory domain.UserMemory) *hubmemoryv1.CaretMemory {
+	return &hubmemoryv1.CaretMemory{
+		Id:        strconv.Itoa(memory.ID),
+		Type:      memory.MemoryType,
+		Value:     memory.Value,
+		CreatedAt: memory.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: memory.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+func (a *MemoryAPI) ListMemories(ctx context.Context, _ *hubmemoryv1.ListMemoriesRequest) (*hubmemoryv1.ListMemoriesResponse, error) {
+	if !hasBusinessIdentity(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	memories, err := a.Service.ListMemories(ctx)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load memories")
+	}
+	out := make([]*hubmemoryv1.CaretMemory, 0, len(memories))
+	for _, memory := range memories {
+		out = append(out, memoryToProto(memory))
+	}
+	return &hubmemoryv1.ListMemoriesResponse{Memories: out}, nil
+}
+
+func (a *MemoryAPI) SaveMemory(ctx context.Context, req *hubmemoryv1.SaveMemoryRequest) (*hubmemoryv1.SaveMemoryResponse, error) {
+	if !hasBusinessIdentity(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	id := 0
+	if raw := strings.TrimSpace(req.GetId()); raw != "" {
+		parsed, err := strconv.Atoi(raw)
+		if err != nil || parsed <= 0 {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid memory")
+		}
+		id = parsed
+	}
+	memory, err := a.Service.SaveMemory(ctx, id, req.GetValue())
+	switch {
+	case errors.Is(err, application.ErrInvalidMemory):
+		return nil, onekiterrors.New(http.StatusBadRequest, "Memory must be 1 to 500 characters")
+	case errors.Is(err, domain.ErrMemoryNotFound):
+		return nil, onekiterrors.New(http.StatusNotFound, "Memory not found")
+	case err != nil:
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to save memory")
+	}
+	return &hubmemoryv1.SaveMemoryResponse{Memory: memoryToProto(*memory)}, nil
+}
+
+func (a *MemoryAPI) DeleteMemory(ctx context.Context, req *hubmemoryv1.DeleteMemoryRequest) (*hubmemoryv1.DeleteMemoryResponse, error) {
+	if !hasBusinessIdentity(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	id, err := strconv.Atoi(strings.TrimSpace(req.GetId()))
+	if err != nil || id <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid memory")
+	}
+	if err := a.Service.DeleteMemory(ctx, id); err != nil {
+		if errors.Is(err, domain.ErrMemoryNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Memory not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete memory")
+	}
+	return &hubmemoryv1.DeleteMemoryResponse{Deleted: true}, nil
 }

@@ -6,6 +6,10 @@ service MemoryService {
  archiveProject(ArchiveProjectRequest) -> ArchiveProjectResponse @delete("/chat-projects/{id}")
  setChatProject(SetChatProjectRequest) -> SetChatProjectResponse @put("/chats/{session_id}/project")
 
+ listMemories(ListMemoriesRequest) -> ListMemoriesResponse @get("/caret-memories")
+ saveMemory(SaveMemoryRequest) -> SaveMemoryResponse @post("/caret-memories")
+ deleteMemory(DeleteMemoryRequest) -> DeleteMemoryResponse @delete("/caret-memories/{id}")
+
   listChats(ListChatsRequest) -> ListChatsResponse @get("/chats")
 
   getChatMessages(GetChatMessagesRequest) -> GetChatMessagesResponse @get("/chats/{session_id}/messages")

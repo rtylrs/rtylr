@@ -220,6 +220,22 @@
   display: none;
 }
 
+.caret-memory-row .caret-memory-actions {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.caret-memory-row:hover .caret-memory-actions,
+.caret-memory-row:focus-within .caret-memory-actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .caret-memory-row .caret-memory-actions {
+    opacity: 1;
+  }
+}
+
 .caret-chat-row .caret-chat-actions {
   opacity: 0;
   transition: opacity 0.12s;

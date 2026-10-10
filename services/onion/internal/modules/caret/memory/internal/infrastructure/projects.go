@@ -138,7 +138,7 @@ func (r *Repository) AssistantMemories(ctx context.Context, sessionID string) ([
 				AND COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(source_chat.metadata,'$.business_id')) AS UNSIGNED),?)=?
 			)
 		)
-		ORDER BY m.confidence DESC LIMIT 10`, user.UserID, sessionID, user.UserID, legacyBusiness, user.BusinessID, legacyBusiness, user.BusinessID)
+		ORDER BY m.confidence DESC, m.updated_at DESC LIMIT 40`, user.UserID, sessionID, user.UserID, legacyBusiness, user.BusinessID, legacyBusiness, user.BusinessID)
 	if err != nil {
 		return nil, err
 	}

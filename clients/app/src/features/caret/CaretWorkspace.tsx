@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, PanelLeft } from 'lucide-react';
+import { Download, PanelLeft, Settings } from 'lucide-react';
 import { resolveApiBase } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretUIStore } from '@voxire/caret';
@@ -22,6 +22,7 @@ export default function CaretWorkspace() {
   );
   const setView = useCaretUIStore((state) => state.setView);
   const { canInstall, install } = useCaretInstall();
+  const view = useCaretUIStore((state) => state.view);
   const [sidebarOpen, setSidebarOpen] = useState(
     () => !window.matchMedia('(max-width: 700px)').matches
   );
@@ -132,6 +133,16 @@ export default function CaretWorkspace() {
                     <Download size={18} />
                   </button>
                 )}
+                <button
+                  type="button"
+                  className="portal-icon-button"
+                  onClick={() => setView(view === 'settings' ? 'chat' : 'settings')}
+                  aria-label={t('common.caret.settings')}
+                  aria-pressed={view === 'settings'}
+                  title={t('common.caret.settings')}
+                >
+                  <Settings size={18} />
+                </button>
                 {actions}
               </div>
             </header>
