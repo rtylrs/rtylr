@@ -89,6 +89,17 @@ func generalToolSummary(name string, input, output map[string]any) (string, bool
 		}
 		return "Found " + strings.Join(names, ", ") + ".", true
 	}
+	if name == "utilities.random" {
+		if picked, ok := output["picked"].([]string); ok && len(picked) > 0 {
+			if len(picked) > 5 {
+				return fmt.Sprintf("Drew %d at random, starting with %s.", len(picked), strings.Join(picked[:3], ", ")), true
+			}
+			return "Drew " + strings.Join(picked, ", ") + ".", true
+		}
+		if number, ok := stringValue(output["number"]); ok {
+			return "Drew " + number + ".", true
+		}
+	}
 	if strings.HasPrefix(name, "utilities.") {
 		if result, ok := stringValue(output["result"]); ok && result != "" {
 			return "Result: " + result + ".", true
