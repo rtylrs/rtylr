@@ -43,6 +43,9 @@ type streamEventRenderer struct {
 	plannerOnly      bool
 	pageContext      map[string]any
 	pendingApprovals int
+	// toolsDisabled drops tool markers, for the final wrap-up round that must
+	// answer from the results it already has.
+	toolsDisabled bool
 }
 
 type streamRendererOption func(*streamEventRenderer)
@@ -321,6 +324,9 @@ func (r *streamEventRenderer) emitPublicText(text string) error {
 func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	var call ToolCallMarker
 	if err := json.Unmarshal([]byte(raw), &call); err != nil || strings.TrimSpace(call.Name) == "" {
+		return nil
+	}
+	if r.toolsDisabled {
 		return nil
 	}
 

@@ -62,7 +62,7 @@ func TestStoreAIResponseCompactsLongChatsAfterTheReply(t *testing.T) {
 func TestContinuationPromptDropsOldestResultsAndKeepsInstruction(t *testing.T) {
 	base := "BASE PROMPT"
 	results := "OLDEST" + strings.Repeat("r", maxContinuationBytes) + "NEWEST"
-	got := continuationPrompt(base, results)
+	got := continuationPrompt(base, results, "", false)
 
 	if len(got) > maxContinuationBytes {
 		t.Fatalf("continuation is %d bytes, over %d", len(got), maxContinuationBytes)
@@ -77,7 +77,7 @@ func TestContinuationPromptDropsOldestResultsAndKeepsInstruction(t *testing.T) {
 
 func TestContinuationPromptHandlesAnOversizedBase(t *testing.T) {
 	for _, baseLen := range []int{maxContinuationBytes - 10, maxContinuationBytes, maxContinuationBytes * 2} {
-		got := continuationPrompt(strings.Repeat("b", baseLen), strings.Repeat("r", 1000)+"NEWEST")
+		got := continuationPrompt(strings.Repeat("b", baseLen), strings.Repeat("r", 1000)+"NEWEST", "", false)
 		if len(got) > maxContinuationBytes || !strings.Contains(got, "NEWEST") {
 			t.Fatalf("base %d: %d bytes, newest kept=%v", baseLen, len(got), strings.Contains(got, "NEWEST"))
 		}
