@@ -173,9 +173,10 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	cachePlan = application.DisableExactCachePlan(cachePlan, "conversation and project context change between turns")
 	cachePlan.ProviderPlannerOnly = false
 	// Multi-step requests (find the tool, list, look up a detail, answer) need
-	// several rounds; a final wrap-up round always explains what ran.
-	cachePlan.ToolBudget = 10
-	cachePlan.ContinuationBudget = 5
+	// several rounds, and one round can run several reads at once; a final
+	// wrap-up round always explains what ran.
+	cachePlan.ToolBudget = application.MaxToolCallsPerTurn
+	cachePlan.ContinuationBudget = 6
 	req.EnhancedPrompt = enhancedPrompt
 
 	h.setupSSEHeaders(w)

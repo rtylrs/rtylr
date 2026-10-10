@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	MaxToolCallsPerTurn   = 10
+	MaxToolCallsPerTurn   = 16
 	maxToolInputBytes     = 12 * 1024
 	maxToolInputKeys      = 32
 	ToolExecutionTimeout  = 15 * time.Second
