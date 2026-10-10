@@ -20,7 +20,7 @@ var generalToolTriggers = map[string][]string{
 	"knowledge.define":         {"define ", "definition of", "meaning of", "what does the word", "synonym", "معنى كلمة", "ما معنى", "que veut dire"},
 	"knowledge.country":        {"capital of", "population of", "currency of", "dialing code", "calling code"},
 	"knowledge.papers":         {"research on", "studies on", "study on", "papers on", "scientific", "evidence that", "peer reviewed"},
-	"places.search":            {"near me", "nearby", "near ", "around ", "competitors in", "cafes in", "restaurants in", "بالقرب", "قريب من", "près de"},
+	"places.search":            {"near me", "nearby", " near ", "competitors in", "cafes in", "restaurants in", "بالقرب", "قريب من", "près de"},
 	"utilities.date_math":      {"days until", "days between", "how many days", "working days", "business days", "weeks until", "days from now", "days ago", "كم يوم", "combien de jours"},
 	"utilities.convert_time":   {"time in", "timezone", "time zone", "what time is it in", "pm in", "am in", "كم الساعة", "الساعة في", "quelle heure"},
 	"utilities.convert_units":  {"km to", "miles to", "kg to", "lbs to", "celsius", "fahrenheit", "liters to", "gallons", "square meters", "sqft", "dunam"},
