@@ -303,3 +303,12 @@ func (f fakeToolExecutor) ExecuteCaretTool(_ context.Context, _ string, _ map[st
 	}
 	return f.output, executed, nil
 }
+
+func TestUserFacingToolErrorSeparatesTimeoutsFromCancellation(t *testing.T) {
+	if got := userFacingToolError(context.DeadlineExceeded); got != "the tool took too long and was stopped" {
+		t.Fatalf("timeout = %q", got)
+	}
+	if got := userFacingToolError(context.Canceled); got != "request was interrupted" {
+		t.Fatalf("cancel = %q", got)
+	}
+}
