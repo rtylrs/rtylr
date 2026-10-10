@@ -37,12 +37,7 @@ const Footer: React.FC = () => {
       id: 'product',
       title: t('footer.group.product'),
       links: [
-        { to: navPath('/pos', locale), label: t('footer.link.pos') },
-        { to: navPath('/erp', locale), label: t('footer.link.erp') },
-        { to: '/hr', label: t('footer.link.hr') },
-        { to: '/crm', label: t('footer.link.crm') },
-        { to: '/finance', label: t('footer.link.finance') },
-        { to: '/flow', label: t('footer.link.flow') },
+        { to: '/workspace/', label: t('footer.link.workspace') },
         { to: navPath('/pricing', locale), label: t('footer.link.pricing') },
         { to: '/hardware', label: t('footer.link.hardware') },
       ],

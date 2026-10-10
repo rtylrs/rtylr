@@ -15,12 +15,12 @@ interface Area {
 }
 
 const AREAS: Area[] = [
-  { href: '/flow', Icon: Briefcase },
-  { href: '/finance', Icon: Wallet },
-  { href: '/crm', Icon: Heart },
-  { href: '/hr', Icon: Users },
-  { href: '/erp', Icon: Package },
-  { href: 'https://insights.rtylr.com', Icon: BarChart2 },
+  { href: '/workspace/#work', Icon: Briefcase },
+  { href: '/workspace/#finance', Icon: Wallet },
+  { href: '/workspace/#customers', Icon: Heart },
+  { href: '/workspace/#team', Icon: Users },
+  { href: '/workspace/#operations', Icon: Package },
+  { href: '/workspace/#insights', Icon: BarChart2 },
 ];
 
 interface AreaCopy {

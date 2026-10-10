@@ -277,10 +277,17 @@ describe('translation keys', () => {
       .map((f) => readFileSync(path.join(APP, f), 'utf8'))
       .join('\n');
 
+    // A templated key (text={t(`a.${id}.title`)}) covers every key with that
+    // prefix and suffix, the same allowance T_TEMPLATE makes for usage.
+    const templated = [...sources.matchAll(/text=\{t\(`([^`$]*)\$\{[^}]+\}([^`$]*)`\)\}/g)].map(
+      ([, prefix, suffix]) => [prefix, suffix]
+    );
     const unbroken = multiline.filter((k) => {
       const call = `t('${k}')`;
       return !(
-        sources.includes(`<Lines text={${call}}`) || sources.includes(`text={${call}}`)
+        sources.includes(`<Lines text={${call}}`) ||
+        sources.includes(`text={${call}}`) ||
+        templated.some(([prefix, suffix]) => k.startsWith(prefix) && k.endsWith(suffix))
       );
     });
     assert.deepEqual(unbroken, [], 'multi-line copy rendered without a line break');

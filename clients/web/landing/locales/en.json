@@ -8,29 +8,37 @@
       "signIn": "Sign in",
       "signUp": "Get started",
       "featureLinks": {
-        "pos": {
-          "title": "POS",
-          "desc": "Payments, tables, orders, and receipts in one register."
+        "overview": {
+          "title": "The rtylr workspace",
+          "desc": "Every part of your business, on the same records."
         },
-        "erp": {
-          "title": "ERP",
-          "desc": "Inventory, suppliers, and purchasing that stay in sync."
-        },
-        "hr": {
-          "title": "HR",
-          "desc": "Staff, schedules, time off, and payroll in one place."
-        },
-        "crm": {
-          "title": "CRM",
-          "desc": "Customer profiles, loyalty, segments, and campaigns."
+        "work": {
+          "title": "Work",
+          "desc": "Projects, tasks and automations for every team."
         },
         "finance": {
           "title": "Finance",
-          "desc": "Invoices, expenses, tax, and a real P&L in seconds."
+          "desc": "Invoices, expenses, tax and a live P&L."
         },
-        "flow": {
-          "title": "Flow",
-          "desc": "Projects, tasks, and team workspaces for every department."
+        "customers": {
+          "title": "Customers",
+          "desc": "Profiles, segments, loyalty and campaigns."
+        },
+        "team": {
+          "title": "Team",
+          "desc": "Schedules, time, payroll and time off."
+        },
+        "operations": {
+          "title": "Operations",
+          "desc": "Inventory, suppliers and transfers that stay in sync."
+        },
+        "sales": {
+          "title": "Sales",
+          "desc": "Checkout that updates everything else."
+        },
+        "insights": {
+          "title": "Insights",
+          "desc": "Live numbers, with Caret to explain them."
         }
       },
       "resourceLinks": {
@@ -54,8 +62,7 @@
     },
     "cta": {
       "bookDemo": "Book a demo",
-      "getStarted": "Get started",
-      "seeItLive": "See it live"
+      "getStarted": "Get started"
     },
     "a11y": {
       "home": "rtylr home",
@@ -80,12 +87,7 @@
       "company": "COMPANY"
     },
     "link": {
-      "pos": "POS",
-      "erp": "ERP",
-      "hr": "HR",
-      "crm": "CRM",
-      "finance": "Finance",
-      "flow": "Flow",
+      "workspace": "Workspace",
       "pricing": "Pricing",
       "hardware": "Hardware",
       "blog": "Blog",
@@ -161,120 +163,6 @@
         }
       ]
     },
-    "pos": {
-      "title": "Questions about rtylr POS",
-      "items": [
-        {
-          "question": "Does rtylr POS work offline?",
-          "answer": "Yes. rtylr POS keeps a full local copy of the menu, modifiers and active orders. When the internet drops, the register keeps taking orders, printing tickets and processing cash. Card transactions queue and settle automatically once the connection returns, so a Saturday night outage does not stop the floor."
-        },
-        {
-          "question": "What hardware works with rtylr POS?",
-          "answer": "rtylr POS runs on iPad, Android tablet and Windows or macOS desktop. It pairs with Epson and Star receipt printers, standard barcode scanners, Zebra and Symbol scanners for retail, and Stripe Terminal, Clover and Square card readers. See rtylr.com/hardware for the tested list."
-        },
-        {
-          "question": "Can rtylr POS handle multi-location restaurants?",
-          "answer": "Yes, on the Pro plan and above. Each location gets its own menu, pricing, staff and reporting, and the owner gets one consolidated dashboard across every site. A menu change can be pushed to all locations at once or tuned per location."
-        },
-        {
-          "question": "What does rtylr POS replace?",
-          "answer": "The register, and the work that usually sits behind it: the stock count someone redoes by hand, the tips spreadsheet that feeds payroll, and the end-of-day export into accounting. Because the POS writes to the same database as ERP, HR and Finance, a sale updates stock and revenue as it happens rather than overnight."
-        }
-      ]
-    },
-    "erp": {
-      "title": "Questions about rtylr ERP",
-      "items": [
-        {
-          "question": "What does rtylr ERP manage?",
-          "answer": "rtylr ERP covers inventory, suppliers, purchase orders, stock transfers between locations, low-stock alerts and cost tracking. It reads item sales from the POS as they happen, so on-hand stock stays accurate without a nightly sync."
-        },
-        {
-          "question": "Does rtylr ERP support multi-warehouse inventory?",
-          "answer": "Yes. Every item can be stocked at multiple locations with per-location counts, reorder thresholds and transfer tracking. A purchase order can be split across warehouses, and staff see only their assigned location by default."
-        },
-        {
-          "question": "What does rtylr ERP replace?",
-          "answer": "The stock spreadsheet, and the CSV that was supposed to keep it in step with sales. A sale in the POS depletes the recipe components in ERP at the moment it happens, so \"how many units of one component remain across three locations\" is a question you can answer without opening a second tool."
-        }
-      ]
-    },
-    "crm": {
-      "title": "Questions about rtylr CRM",
-      "items": [
-        {
-          "question": "What does rtylr CRM track?",
-          "answer": "rtylr CRM tracks customers, visits, purchases, loyalty points and campaign touchpoints. For restaurants and retail it captures who ordered what straight from the POS, with no import. For services businesses you can log contacts, notes and deal stages by hand."
-        },
-        {
-          "question": "Does rtylr CRM have email marketing?",
-          "answer": "Yes. Segment customers by purchase history, loyalty tier or custom tags, then send branded email campaigns. Open and click tracking are built in. SMS campaigns are available on the Pro plan through the Twilio integration."
-        },
-        {
-          "question": "What does rtylr CRM replace?",
-          "answer": "The loyalty app, the mailing list, and the export that connects them to what people actually bought. Because CRM shares a database with the POS, a segment like \"spent above average, has not visited in 60 days\" stays current on its own instead of being rebuilt from a CSV each month."
-        }
-      ]
-    },
-    "hr": {
-      "title": "Questions about rtylr HR",
-      "items": [
-        {
-          "question": "What does rtylr HR do?",
-          "answer": "rtylr HR handles employee records, scheduling, shift swaps, time-off requests, payroll runs and compliance documents. It supports restaurant-specific workflows including tip pooling, minor work-hour limits and split shifts, alongside general retail and services HR."
-        },
-        {
-          "question": "Does rtylr HR run payroll for the US?",
-          "answer": "rtylr HR calculates gross-to-net pay, taxes and withholdings, and exports pay files compatible with Gusto, ADP and Rippling for filing. Direct filing through rtylr is on the roadmap. For now rtylr does the calculation and a third-party provider does the IRS filing."
-        },
-        {
-          "question": "Can staff see their schedule on their phone?",
-          "answer": "Yes. Every staff member gets a mobile view of their schedule, time-off balance and shift swap requests. They can request a swap and submit time off from their phone without an admin account."
-        },
-        {
-          "question": "What does rtylr HR replace?",
-          "answer": "The scheduling tool, the time-off inbox, and the double entry that happens when a new hire is created in HR, again in payroll, again in the CRM and again in access control. In rtylr the person is created once and the schedule, the pay run and the POS login all read the same record."
-        }
-      ]
-    },
-    "finance": {
-      "title": "Questions about rtylr Finance",
-      "items": [
-        {
-          "question": "What does rtylr Finance handle?",
-          "answer": "rtylr Finance handles invoicing, expenses, bill payments, bank reconciliation, and profit and loss, balance sheet and cash flow reports. Revenue from the POS, Stripe and other integrations arrives automatically. Expenses can come from a bank feed or be entered by hand."
-        },
-        {
-          "question": "Can rtylr Finance replace QuickBooks?",
-          "answer": "For many small businesses, yes: invoicing, expenses, reconciliation, P&L and tax reports are all covered. A business with complex audit requirements or multi-entity consolidation may still want a dedicated ledger, and rtylr Finance exports to QuickBooks and Xero for exactly that case. That limit is worth knowing before you switch."
-        },
-        {
-          "question": "Does rtylr Finance support multiple currencies?",
-          "answer": "Yes. Invoice in any currency, and rtylr converts using the exchange rate at invoice time. P&L reports can be read in any reporting currency, with FX lines shown explicitly rather than folded into the totals."
-        },
-        {
-          "question": "What does rtylr Finance replace?",
-          "answer": "The month-end export. Revenue, refunds, tips, purchase orders and payroll already live in the same database as the ledger, so the close does not begin with reconciling four systems against each other. That is the difference the page is really claiming, and it is the one a standalone accounting package cannot make."
-        }
-      ]
-    },
-    "flow": {
-      "title": "Questions about rtylr Flow",
-      "items": [
-        {
-          "question": "What is rtylr Flow?",
-          "answer": "Flow is rtylr's project and task management app. It has kanban boards, lists, timeline views, cycles, milestones, custom fields and automations. What makes it different from a standalone tracker is that it reads the rest of your business: who is on shift from HR, which customer a project belongs to from CRM, and which work is billable from Finance."
-        },
-        {
-          "question": "What can Flow do that a standalone task tracker cannot?",
-          "answer": "Assign a task to a staff member who already exists in HR, attach it to a customer who already exists in CRM, and push billable hours onto an invoice in Finance, without copying anything between tools. The tasks, boards, comments and automations you would expect are all there; the connection to real business records is the part a separate tracker cannot have."
-        },
-        {
-          "question": "Does Flow have a free tier?",
-          "answer": "Yes. Flow is part of the rtylr suite, covering 10 team members at one location with unlimited projects, tasks, comments and attachments. Pro and Scale raise the team and location limits and add the controls a larger team needs. rtylr does not publish prices yet, so Pro and Scale are quoted."
-        }
-      ]
-    },
     "demo": {
       "title": "Questions about the rtylr demo",
       "items": [
@@ -285,6 +173,32 @@
         {
           "question": "Is the demo a sales call?",
           "answer": "It is a 30 minute product walkthrough, run by someone who built rtylr. You do not need one in order to start: the Free plan covers 10 team members at one location and needs no card, so you can sign up and look around on your own first. The walkthrough is for the questions a signup page cannot answer."
+        }
+      ]
+    },
+    "workspace": {
+      "title": "Questions about the workspace",
+      "intro": "How the parts fit together, and what they handle.",
+      "items": [
+        {
+          "question": "Can I use only part of the workspace?",
+          "answer": "Yes. Start with the area that matters most to your business and add the rest when you need it. Everything stays in one workspace on the same records, with no separate logins or exports."
+        },
+        {
+          "question": "What can the workspace do that separate tools cannot?",
+          "answer": "Assign a task to a staff member who already exists in HR, attach it to a customer who already exists in CRM, and push billable hours onto an invoice in Finance, without copying anything between tools. The tasks, boards, comments and automations you would expect are all there; the connection to real business records is the part a separate tracker cannot have."
+        },
+        {
+          "question": "Does checkout work offline?",
+          "answer": "Yes. rtylr POS keeps a full local copy of the menu, modifiers and active orders. When the internet drops, the register keeps taking orders, printing tickets and processing cash. Card transactions queue and settle automatically once the connection returns, so a Saturday night outage does not stop the floor."
+        },
+        {
+          "question": "Does it support multiple currencies?",
+          "answer": "Yes. Invoice in any currency, and rtylr converts using the exchange rate at invoice time. P&L reports can be read in any reporting currency, with FX lines shown explicitly rather than folded into the totals."
+        },
+        {
+          "question": "Does it handle multiple locations?",
+          "answer": "Yes. Every item can be stocked at multiple locations with per-location counts, reorder thresholds and transfer tracking. A purchase order can be split across warehouses, and staff see only their assigned location by default."
         }
       ]
     }
@@ -906,349 +820,6 @@
       ]
     }
   },
-  "pos": {
-    "meta": {
-      "title": "POS · The register that keeps up. | rtylr",
-      "description": "Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform.",
-      "schemaDescription": "Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode."
-    },
-    "hero": {
-      "eyebrow": "rtylr POS",
-      "title": "The register\nthat keeps up.",
-      "subtitle": "Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift cards, house accounts. Keep running when the WiFi goes down. Built for the pace of real service, not a demo video.",
-      "receipt": {
-        "items": [
-          "Margherita Pizza",
-          "House Salad",
-          "Sparkling Water",
-          "Espresso"
-        ],
-        "order": "Order #{{orderId}} · Table {{table}}",
-        "live": "LIVE",
-        "venue": "rtylr · Terrace",
-        "date": "Apr 18",
-        "server": "Server: {{name}}",
-        "subtotal": "Subtotal",
-        "tax": "Tax ({{pct}})",
-        "tip": "Tip ({{pct}})",
-        "total": "Total",
-        "paid": "Paid · Visa ••4891"
-      }
-    },
-    "directAnswer": {
-      "label": "What is rtylr POS?",
-      "body": "rtylr POS is the point-of-sale app inside rtylr, built for restaurants and retail businesses running one location or twenty. It handles tickets, course firing, check splits, tips, modifiers and card payments, and it keeps taking orders when the connection drops. Because it writes to the same database as inventory, staff and accounting, a sale moves stock and revenue without an export."
-    },
-    "features": {
-      "eyebrow": "WHAT IT DOES",
-      "title": "What does a register\nhave to get right?",
-      "items": [
-        {
-          "title": "Tickets that keep up",
-          "copy": "Split, merge, combine. Send courses to the right station. Fire when you say fire."
-        },
-        {
-          "title": "Every payment method",
-          "copy": "Card, Apple Pay, Google Pay, cash, gift, comp, house account. One register handles all of it."
-        },
-        {
-          "title": "Tips, tabs, and splits",
-          "copy": "Seat-level splits. Auto-gratuity. Pre-auth tabs. Tips hit payroll the next morning."
-        },
-        {
-          "title": "Works when the internet doesn’t",
-          "copy": "Full offline mode. Queues transactions locally and syncs the moment you’re back online."
-        }
-      ]
-    },
-    "compare": {
-      "eyebrow": "VS THE OTHERS",
-      "title": "What do other registers\ncharge extra for?",
-      "rows": [
-        "Offline mode (full service, no internet)",
-        "Payment processing locked in",
-        "Hardware you can buy elsewhere",
-        "HR + payroll included",
-        "Inventory depletes per recipe",
-        "Real-time CRM tied to receipts",
-        "Public REST API v1"
-      ],
-      "cell": {
-        "included": "Included",
-        "excluded": "-",
-        "partial": "Partial",
-        "paidAddon": "Paid add-on"
-      },
-      "footnote": "Comparison based on publicly available pricing and product documentation, April 2026. Something out of date?",
-      "footnoteLink": "Let us know"
-    },
-    "cta": {
-      "title": "Your register should\nkeep up. This one does."
-    }
-  },
-  "erp": {
-    "meta": {
-      "title": "ERP · Inventory that counts itself. | rtylr",
-      "description": "Real-time inventory, suppliers, and purchasing. Recipe-linked depletion. Multi-location transfers with full audit trail.",
-      "schemaDescription": "Real-time inventory, suppliers, purchase orders, and warehouse management."
-    },
-    "hero": {
-      "eyebrow": "rtylr ERP · Inventory",
-      "title": "Inventory that\ncounts itself.",
-      "subtitle": "Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved moves the warehouse count. Every low-stock alert fires before you actually run out. Not after the Saturday rush notices.",
-      "inventory": {
-        "items": [
-          "Margherita (225g dough)",
-          "House Red (750ml)",
-          "Olive Oil (5L)",
-          "Espresso Bean (1kg)",
-          "Flour 00 (3kg)"
-        ]
-      }
-    },
-    "directAnswer": {
-      "label": "What is rtylr ERP?",
-      "body": "rtylr ERP is the inventory and supply chain app inside rtylr, for businesses holding stock across one or more locations. It covers on-hand counts, suppliers, purchase orders, transfers between sites, low-stock alerts and cost tracking. It reads sales from the POS as they happen, so stock stays accurate without a nightly sync and a reorder can be drafted before anyone notices an empty shelf."
-    },
-    "capabilities": {
-      "eyebrow": "CAPABILITIES",
-      "title": "What does rtylr ERP\ncover, from the dock\nto the P&L?",
-      "items": [
-        {
-          "title": "Every SKU, every variant",
-          "copy": "Track ingredients down to the gram. Recipe-linked depletion. Real-time counts as sales happen."
-        },
-        {
-          "title": "Suppliers & purchase orders",
-          "copy": "Auto-reorder at threshold. Multi-supplier price comparison. Expected-arrival tracking per line item."
-        },
-        {
-          "title": "Multi-location transfers",
-          "copy": "Move stock between sites with full audit trail. Location-level reporting. No spreadsheet reconciliation."
-        },
-        {
-          "title": "Low-stock before it hurts",
-          "copy": "Smart thresholds based on historical velocity. Alerts route to the right person. Nothing runs out mid-service."
-        }
-      ]
-    },
-    "depletion": {
-      "eyebrow": "LIVE RECIPE DEPLETION",
-      "title": "What happens to stock when a sale goes through?",
-      "copy": "Every POS sale cascades through the recipe tree. Flour, yeast, mozzarella, basil, olive oil, each depletes by exactly the gram. When anything crosses its reorder threshold, a PO is drafted with your preferred supplier and routed for approval."
-    },
-    "cta": {
-      "title": "Close your inventory\nbooks while you sleep."
-    },
-    "mock": {
-      "reset": "Reset",
-      "resetLabel": "Reset inventory",
-      "tabs": {
-        "allSkus": "All SKUs",
-        "lowStock": "Low stock · {{count}}",
-        "suppliers": "Suppliers",
-        "purchaseOrders": "Purchase orders"
-      },
-      "simulate": "Simulate Friday service",
-      "simulateRunning": "Service running…",
-      "table": {
-        "sku": "SKU",
-        "item": "Item",
-        "onHand": "On hand",
-        "min": "Min",
-        "status": "Status"
-      },
-      "status": {
-        "critical": "Critical",
-        "reorder": "Reorder",
-        "healthy": "Healthy"
-      },
-      "footer_one": "Auto-reorder triggered for {{count}} item · PO #{{po}} drafted",
-      "footer_other": "Auto-reorder triggered for {{count}} items · PO #{{po}} drafted"
-    },
-    "flow": {
-      "steps": [
-        {
-          "title": "1 Margherita sold",
-          "desc": "POS fires recipe lookup"
-        },
-        {
-          "title": "7 ingredients depleted",
-          "desc": "Flour, mozz, basil, oil, salt, yeast, dough"
-        },
-        {
-          "title": "PO auto-drafted",
-          "desc": "Routed for manager approval"
-        }
-      ]
-    }
-  },
-  "crm": {
-    "meta": {
-      "title": "CRM · Every customer, remembered. | rtylr",
-      "description": "Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically. Built for restaurants, retail and services.",
-      "schemaDescription": "Customer profiles, loyalty programs, and campaign tracking that connect to every other app."
-    },
-    "hero": {
-      "eyebrow": "rtylr CRM",
-      "subtitle": "Every POS sale enriches the profile on its own. Birthday, last visit, favorite dish, server they love, stored, segmented, ready the moment you want to send the right message. No CRM data entry. No forgotten customers at the door.",
-      "titleA": "Every customer,",
-      "titleB": "remembered."
-    },
-    "directAnswer": {
-      "label": "What is rtylr CRM?",
-      "body": "rtylr CRM is the customer app inside rtylr, for restaurants, retail and services businesses that want to know who their regulars are. It holds customer profiles, visit and purchase history, loyalty points, segments and email campaigns. Because it shares a database with the POS, it records what someone actually bought with no import, so a segment stays current on its own."
-    },
-    "campaigns": {
-      "items": [
-        {
-          "title": "Email that reads personal",
-          "copy": "Pre-built templates. Personalisation tokens. Auto-sent on triggers like birthday, lapse, or first-visit."
-        },
-        {
-          "title": "Loyalty that means something",
-          "copy": "Points, tiers, rewards. Auto-applied at checkout. Built into POS, not stapled onto it."
-        },
-        {
-          "title": "Segments that make sense",
-          "copy": "Slice by visit frequency, average spend, last order, dietary preferences. Save as a segment, send a campaign."
-        },
-        {
-          "title": "SMS that doesn\\u2019t feel like spam",
-          "copy": "Short-code, opt-in, transactional or broadcast. Throttled to protect your sender reputation."
-        }
-      ]
-    },
-    "cta": {
-      "title": "Stop forgetting\nyour best customers."
-    }
-  },
-  "hr": {
-    "meta": {
-      "title": "HR · Your team. Looked after. | rtylr",
-      "description": "Scheduling, time & attendance, payroll, time off, onboarding, and compliance. One app that treats your staff like people.",
-      "schemaDescription": "Scheduling, payroll, compliance, and time-off management for modern teams."
-    },
-    "hero": {
-      "eyebrow": "rtylr HR",
-      "subtitle": "Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions on its own. Compliance flags before they become violations. Software that treats staff like people, not line items in a spreadsheet.",
-      "titleA": "Your team.",
-      "titleB": "Looked after."
-    },
-    "directAnswer": {
-      "label": "What is rtylr HR?",
-      "body": "rtylr HR is the people app inside rtylr, for teams with shift workers, hourly staff or both. It covers employee records, scheduling, shift swaps, time off, payroll calculation and compliance documents. A person is created once: the schedule, the pay run and their POS login all read that same record, so a new hire is not entered in four different places."
-    },
-    "pillars": {
-      "items": [
-        {
-          "title": "Schedules that publish themselves",
-          "copy": "Drag, drop, publish. Staff get texts the moment a shift posts. Conflicts caught before they ship."
-        },
-        {
-          "title": "Time & attendance, zero paperwork",
-          "copy": "Clock in from the POS. Biometric, PIN, or geofenced. Auto-rounding and break enforcement built in."
-        },
-        {
-          "title": "Payroll that runs itself",
-          "copy": "Hours, tips, deductions, taxes, rolled up automatically. Direct deposit, pay stubs, filings handled."
-        },
-        {
-          "title": "Time off, clearly",
-          "copy": "One place for requests, approvals, and balances. Blackout dates, accrual rules, and coverage in one glance."
-        },
-        {
-          "title": "Onboarding without friction",
-          "copy": "E-sign offer letters, W-4s and I-9s. Self-service docs, handbook, and training from day one."
-        },
-        {
-          "title": "Compliance that watches itself",
-          "copy": "Overtime rules, break audits, minor labor, fair workweek. Flags before they become violations."
-        }
-      ]
-    },
-    "cta": {
-      "title": "Your staff deserve\nsoftware built for them."
-    }
-  },
-  "finance": {
-    "meta": {
-      "title": "Finance · A real P&L, in real time. | rtylr",
-      "description": "Invoices, expenses, sales tax, and a live profit-and-loss. Every sale and every payroll roll into the books automatically.",
-      "schemaDescription": "Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business."
-    },
-    "hero": {
-      "eyebrow": "rtylr Finance",
-      "subtitle": "Every POS sale, every payroll run, every paid invoice rolls into the books on its own. The P&amp;L you&apos;re looking at right now? That&apos;s what the numbers actually are. No exports. No reconciliation. No month-end surprises."
-    },
-    "directAnswer": {
-      "label": "What is rtylr Finance?",
-      "body": "rtylr Finance is the accounting app inside rtylr, for owners who want a current profit and loss rather than one that arrives weeks late. It covers invoicing, expenses, bill payments, bank reconciliation, and P&L, balance sheet and cash flow reports. Revenue, refunds, tips and payroll already sit in the same database, so the month-end close does not start by reconciling four systems."
-    },
-    "pillars": {
-      "items": [
-        {
-          "title": "Invoices that collect themselves",
-          "copy": "Recurring schedules, auto-reminders, one-click payment. Paid invoices reconcile automatically against the books."
-        },
-        {
-          "title": "Expenses, captured at source",
-          "copy": "Snap the receipt. Policy-aware categorisation. Approved-to-paid in the same app. No more Friday shoeboxes."
-        },
-        {
-          "title": "Real P&L in real time",
-          "copy": "Every POS sale, every invoice, every payroll run rolls into a live profit-and-loss. Not a month-end surprise."
-        },
-        {
-          "title": "Tax prep without the scramble",
-          "copy": "Jurisdiction-aware sales tax. Quarter-end snapshots. One export your accountant will actually thank you for."
-        }
-      ]
-    },
-    "cta": {
-      "title": "Stop closing your books\nwith a spreadsheet."
-    },
-    "chart": {
-      "rangeLabel": "Time range",
-      "metricLabel": "Metric"
-    }
-  },
-  "flow": {
-    "meta": {
-      "title": "Flow · Projects, tasks, and team workspaces. | rtylr",
-      "description": "Kanban boards, automations, templates, and tasks linked to everything else in rtylr. Operations that don't slip.",
-      "schemaDescription": "Kanban boards, automations, and task management that stay connected to every other app."
-    },
-    "hero": {
-      "eyebrow": "rtylr Flow · Work OS",
-      "subtitle": "Drag-drop kanban. Tasks linked to the actual invoice, customer, or shift they care about. Automations that fire when a PO is approved or payroll closes, no Zapier, no duct tape. The work OS your team will actually open.",
-      "titleA": "Work that moves.",
-      "titleB": "Operations that don't slip."
-    },
-    "directAnswer": {
-      "label": "What is rtylr Flow?",
-      "body": "rtylr Flow is the project and task app inside rtylr, for teams tracking work that touches real customers, staff and money. It has boards, lists, timelines, cycles, milestones, custom fields and automations. What a standalone tracker cannot do is read the rest of the business: assign work to a person from HR, attach it to a customer from CRM, push billable hours onto an invoice in Finance."
-    },
-    "features": {
-      "items": [
-        {
-          "title": "Boards for every team",
-          "copy": "Kanban, list, timeline, or calendar. Each team picks their view. Same data underneath."
-        },
-        {
-          "title": "Tasks that link to reality",
-          "copy": "Attach a task to a customer, a supplier, an invoice, or a shift. When it moves, everything updates."
-        },
-        {
-          "title": "Automations without Zapier",
-          "copy": "When a PO is approved → task on purchasing. When payroll closes → reminder on HR. Built in."
-        }
-      ]
-    },
-    "cta": {
-      "title": "Stop losing work\nbetween tools."
-    }
-  },
   "integrations": {
     "meta": {
       "title": "Integrations: Payments, Accounting, Delivery, Hardware | rtylr",
@@ -1297,8 +868,8 @@
         "description": "See plans and per-seat pricing."
       },
       {
-        "label": "Products",
-        "description": "Explore the capabilities of the rtylr suite."
+        "label": "Workspace",
+        "description": "Every part of rtylr in one place."
       },
       {
         "label": "Book a demo",
@@ -2074,6 +1645,166 @@
       "contactStrip": {
         "title": "Need security or data-processing information?",
         "body": "Email <secMail>security@voxire.com</secMail> to request current documentation and confirm what is available for your deployment."
+      }
+    }
+  },
+  "workspace": {
+    "meta": {
+      "title": "The rtylr workspace · Work, finance, customers, team and more",
+      "description": "One workspace for running a business: projects, finance, customers, team, operations, sales and insights on the same records, with Caret, the AI built in.",
+      "schemaDescription": "The rtylr workspace brings work, finance, customers, team, operations, sales and insights together on shared records, so an update in one place reaches the rest."
+    },
+    "hero": {
+      "eyebrow": "The rtylr workspace",
+      "title": "Every part of your business.\nOne workspace.",
+      "subtitle": "Work, finance, customers, team, operations, sales and insights share the same records, so nothing gets typed twice and nothing falls between tools.",
+      "navLabel": "Areas of the workspace"
+    },
+    "areas": {
+      "work": {
+        "label": "Work",
+        "title": "Projects and tasks.\nLinked to the real work.",
+        "body": "Boards, lists, timelines and calendars for every team, all on the same data underneath.",
+        "features": [
+          {
+            "title": "Views for every team.",
+            "body": "Board, list, timeline or calendar. Each team picks its view; the data stays the same."
+          },
+          {
+            "title": "Tasks that link to reality.",
+            "body": "Attach a task to a customer, a supplier, an invoice or a shift. When it moves, everything updates."
+          },
+          {
+            "title": "Automations built in.",
+            "body": "When a purchase order is approved, a task lands on purchasing. When payroll closes, HR gets a reminder."
+          }
+        ]
+      },
+      "finance": {
+        "label": "Finance",
+        "title": "Money, handled.\nThe books keep up on their own.",
+        "body": "Invoices, expenses, tax and a live P&L, fed by everything else in the workspace.",
+        "features": [
+          {
+            "title": "Invoices that collect themselves.",
+            "body": "Recurring schedules, automatic reminders and one-click payment. Paid invoices reconcile against the books."
+          },
+          {
+            "title": "Expenses captured at source.",
+            "body": "Snap the receipt, categorise it by policy, and take it from approved to paid in the same place."
+          },
+          {
+            "title": "A live P&L.",
+            "body": "Every sale, invoice and payroll run rolls into the profit-and-loss as it happens, not at month-end."
+          },
+          {
+            "title": "Tax without the scramble.",
+            "body": "Jurisdiction-aware sales tax, quarter-end snapshots and one export for your accountant."
+          }
+        ]
+      },
+      "customers": {
+        "label": "Customers",
+        "title": "Every customer.\nRemembered.",
+        "body": "Profiles, segments, loyalty and campaigns, updated by every sale and conversation.",
+        "features": [
+          {
+            "title": "Segments that make sense.",
+            "body": "Slice by visit frequency, average spend or last order, save it, and send a campaign."
+          },
+          {
+            "title": "Loyalty built in.",
+            "body": "Points, tiers and rewards, applied automatically at checkout."
+          },
+          {
+            "title": "Messages that read personal.",
+            "body": "Email and SMS templates with personalisation, sent on triggers like a birthday, a lapse or a first visit."
+          }
+        ]
+      },
+      "team": {
+        "label": "Team",
+        "title": "Your people.\nLooked after.",
+        "body": "Schedules, time, payroll and time off in one place, with permissions for who sees what.",
+        "features": [
+          {
+            "title": "Schedules that publish themselves.",
+            "body": "Drag, drop, publish. People are notified the moment a shift posts, and conflicts are caught first."
+          },
+          {
+            "title": "Time and attendance.",
+            "body": "Clock in with a PIN or a geofence, with rounding and break rules built in."
+          },
+          {
+            "title": "Payroll from real hours.",
+            "body": "Hours, tips, deductions and taxes roll up automatically, with pay stubs for everyone."
+          },
+          {
+            "title": "Time off, clearly.",
+            "body": "Requests, approvals and balances in one place."
+          }
+        ]
+      },
+      "operations": {
+        "label": "Operations",
+        "title": "Stock that counts itself.\nSuppliers that stay in sync.",
+        "body": "Inventory, purchasing and transfers that move as you sell.",
+        "features": [
+          {
+            "title": "Every item, every variant.",
+            "body": "Real-time counts as sales happen, down to the component."
+          },
+          {
+            "title": "Suppliers and purchase orders.",
+            "body": "Reorder at a threshold, compare supplier prices and track arrivals line by line."
+          },
+          {
+            "title": "Multi-location transfers.",
+            "body": "Move stock between sites with a full audit trail."
+          },
+          {
+            "title": "Low-stock alerts.",
+            "body": "Thresholds based on how fast things sell, routed to the right person."
+          }
+        ]
+      },
+      "sales": {
+        "label": "Sales",
+        "title": "Checkout that keeps up.\nAnd feeds everything else.",
+        "body": "A point of sale that updates stock, revenue and the customer the moment a sale goes through.",
+        "features": [
+          {
+            "title": "Every payment method.",
+            "body": "Card, Apple Pay, Google Pay, cash, gift cards and house accounts on one register."
+          },
+          {
+            "title": "Splits, tabs and tips.",
+            "body": "Split by item or seat, run tabs, and send tips straight to payroll."
+          },
+          {
+            "title": "Works offline.",
+            "body": "Sales queue locally when the internet drops and sync the moment it's back."
+          }
+        ]
+      },
+      "insights": {
+        "label": "Insights",
+        "title": "The numbers.\nAlways current.",
+        "body": "Revenue, customers and margins across the whole workspace, with Caret on hand to explain what changed.",
+        "features": [
+          {
+            "title": "One view of the business.",
+            "body": "Sales, costs, people and customers side by side, without exporting anything."
+          },
+          {
+            "title": "Ask instead of digging.",
+            "body": "Ask Caret why a number moved and get an answer from your own records."
+          },
+          {
+            "title": "Live, not nightly.",
+            "body": "Numbers update as the business runs, not after an overnight sync."
+          }
+        ]
       }
     }
   }

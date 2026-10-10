@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
-import { localeFromPath, navPath } from '../../../../lib/locales';
+import { localeFromPath, navPath, navPathWithHash } from '../../../../lib/locales';
 import { FEATURE_LINKS, RESOURCE_LINKS, COMPANY_LINKS } from '../../../../lib/navLinks';
 import { LanguageSwitcher } from '../../../../components/LanguageSwitcher/LanguageSwitcher';
 import styles from './HeaderMobile.module.scss';
@@ -194,7 +194,7 @@ const HeaderMobile: React.FC = () => {
                   {FEATURE_LINKS.map((item) => (
                     <Link
                       key={item.href}
-                      href={navPath(item.href, locale)}
+                      href={navPathWithHash(item.href, locale)}
                       onClick={closeMenu}
                       className={styles['mobile-feature-link']}
                     >

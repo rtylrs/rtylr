@@ -300,12 +300,7 @@ export function jsonError(status, code, message, hint) {
 const NOT_FOUND_LINKS = [
   ['/', 'Home'],
   ['/pricing/', 'Pricing'],
-  ['/pos/', 'POS'],
-  ['/erp/', 'ERP'],
-  ['/crm/', 'CRM'],
-  ['/hr/', 'HR'],
-  ['/finance/', 'Finance'],
-  ['/flow/', 'Flow'],
+  ['/workspace/', 'The rtylr workspace'],
   ['/demo/', 'Book a demo'],
   ['/contact/', 'Contact'],
 ];
@@ -430,6 +425,18 @@ async function handleApi(request, url, env) {
   return handler();
 }
 
+// The six module pages were merged into one /workspace/ page (one section
+// per area). Each old URL lands on its section, so links and rankings
+// carry over. The fragments are the section ids in pages/workspace.
+export const MOVED_PAGES = {
+  '/pos': '/workspace/#sales',
+  '/erp': '/workspace/#operations',
+  '/hr': '/workspace/#team',
+  '/crm': '/workspace/#customers',
+  '/finance': '/workspace/#finance',
+  '/flow': '/workspace/#work',
+};
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -450,6 +457,15 @@ export default {
     // 3. Legacy parity with the previous _redirects rule: /version -> /version.json.
     if (pathname === '/version' || pathname === '/version/') {
       return fetchAsset(env, '/version.json', request);
+    }
+
+    // 3b. Retired module pages: one permanent hop to their workspace section.
+    //     Matches /pos, /pos/ and /pos/index.html alike. The query string is
+    //     kept (campaign links), placed before the fragment.
+    const moved = MOVED_PAGES[pathname.replace(/\/(index\.html)?$/, '')];
+    if (moved) {
+      const [path, hash] = moved.split('#');
+      return Response.redirect(`${url.origin}${path}${url.search}#${hash}`, 301);
     }
 
     // 4. One URL per document. The export is directory-style, so /trust and

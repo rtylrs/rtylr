@@ -66,7 +66,7 @@ test.describe('Agentic artifacts', () => {
 
     // And it must carry real page text, not just headings. If the body
     // conversion ever returns empty, the file would still look plausible.
-    expect(body).toContain('rtylr POS is the point-of-sale app inside rtylr');
+    expect(body).toContain('nothing gets typed twice and nothing falls between tools');
     expect(body).toContain('keeps a full local copy of the menu');
     expect(body.length).toBeGreaterThan(50_000);
   });

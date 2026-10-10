@@ -35,13 +35,13 @@ interface Feature extends FeatureMeta {
 // description are written per language in home.features.items, matched to
 // this array by index.
 const FEATURE_META: FeatureMeta[] = [
-  { id: 'flow', href: '/flow', Demo: FlowDemo },
-  { id: 'finance', href: '/finance', Demo: FinanceDemo },
-  { id: 'crm', href: '/crm', Demo: CRMDemo },
-  { id: 'hr', href: '/hr', Demo: HRDemo },
-  { id: 'erp', href: '/erp', Demo: ERPDemo },
-  { id: 'pos', href: '/pos', Demo: POSDemo },
-  { id: 'insights', href: 'https://insights.rtylr.com', Demo: InsightsDemo },
+  { id: 'flow', href: '/workspace/#work', Demo: FlowDemo },
+  { id: 'finance', href: '/workspace/#finance', Demo: FinanceDemo },
+  { id: 'crm', href: '/workspace/#customers', Demo: CRMDemo },
+  { id: 'hr', href: '/workspace/#team', Demo: HRDemo },
+  { id: 'erp', href: '/workspace/#operations', Demo: ERPDemo },
+  { id: 'pos', href: '/workspace/#sales', Demo: POSDemo },
+  { id: 'insights', href: '/workspace/#insights', Demo: InsightsDemo },
 ];
 
 const AUTO_ADVANCE_MS = 6000;

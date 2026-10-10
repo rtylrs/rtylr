@@ -7,32 +7,6 @@
       "company": "Entreprise",
       "signIn": "Se connecter",
       "signUp": "Créer un compte",
-      "featureLinks": {
-        "pos": {
-          "title": "POS",
-          "desc": "Paiements, tables, commandes et tickets dans une seule caisse."
-        },
-        "erp": {
-          "title": "ERP",
-          "desc": "Stocks, fournisseurs et achats qui restent synchronisés."
-        },
-        "hr": {
-          "title": "HR",
-          "desc": "Équipes, plannings, congés et paie au même endroit."
-        },
-        "crm": {
-          "title": "CRM",
-          "desc": "Fiches clients, fidélité, segments et campagnes."
-        },
-        "finance": {
-          "title": "Finance",
-          "desc": "Factures, dépenses, TVA et un vrai compte de résultat en quelques secondes."
-        },
-        "flow": {
-          "title": "Flow",
-          "desc": "Projets, tâches et espaces d’équipe pour chaque département."
-        }
-      },
       "resourceLinks": {
         "hardware": "Matériel",
         "integrations": "Intégrations",
@@ -54,8 +28,7 @@
     },
     "cta": {
       "bookDemo": "Réserver une démo",
-      "getStarted": "Commencer",
-      "seeItLive": "Voir en action"
+      "getStarted": "Commencer"
     },
     "a11y": {
       "home": "Accueil rtylr",
@@ -80,12 +53,6 @@
       "company": "ENTREPRISE"
     },
     "link": {
-      "pos": "POS",
-      "erp": "ERP",
-      "hr": "HR",
-      "crm": "CRM",
-      "finance": "Finance",
-      "flow": "Flow",
       "pricing": "Tarifs",
       "hardware": "Matériel",
       "blog": "Blog",
@@ -180,183 +147,6 @@
     "bottom": {
       "title": "Commencez sur Free. Montez de forfait quand vous l’aurez dépassé.",
       "subtitle": "10 utilisateurs et la suite rtylr sont à vous dès le premier jour, sans carte. Réservez une démo si vous préférez d’abord le voir tourner sur vos propres chiffres."
-    }
-  },
-  "pos": {
-    "meta": {
-      "title": "POS · La caisse qui suit le rythme. | rtylr",
-      "description": "Logiciel de caisse complet pour la restauration et le commerce. Tickets, additions partagées, pourboires et un vrai mode hors ligne, dans rtylr.",
-      "schemaDescription": "Logiciel de caisse complet pour la restauration et le commerce. Tickets, additions partagées, pourboires et un vrai mode hors ligne."
-    },
-    "hero": {
-      "eyebrow": "rtylr POS",
-      "title": "La caisse\nqui suit le rythme.",
-      "subtitle": "Envoyez les plats à la bonne station. Partagez une addition en sept. Acceptez Apple Pay, les cartes cadeaux, les comptes clients. Continuez à encaisser quand le WiFi tombe. Conçue pour le rythme du vrai service, pas pour une vidéo de démonstration.",
-      "receipt": {
-        "items": [
-          "Pizza margherita",
-          "Salade maison",
-          "Eau pétillante",
-          "Expresso"
-        ],
-        "order": "Commande n° {{orderId}} · Table {{table}}",
-        "live": "DIRECT",
-        "venue": "rtylr · Terrasse",
-        "date": "18 avr.",
-        "server": "Servi par {{name}}",
-        "subtotal": "Sous-total",
-        "tax": "TVA ({{pct}})",
-        "tip": "Pourboire ({{pct}})",
-        "total": "Total",
-        "paid": "Payé · Visa ••4891"
-      }
-    },
-    "directAnswer": {
-      "label": "Qu’est-ce que rtylr POS ?",
-      "body": "rtylr POS est l’application de caisse de rtylr, conçue pour les restaurants et les commerces qui exploitent aussi bien un seul établissement que vingt. Elle gère les tickets, l’envoi des plats, le partage des additions, les pourboires, les options et les paiements par carte, et elle continue de prendre les commandes quand la connexion tombe. Comme elle écrit dans la même base de données que les stocks, les équipes et la comptabilité, une vente déplace le stock et le chiffre d’affaires sans export."
-    },
-    "features": {
-      "eyebrow": "CE QU’ELLE FAIT",
-      "title": "Que doit réussir\nune caisse ?",
-      "items": [
-        {
-          "title": "Des tickets qui suivent",
-          "copy": "Partager, fusionner, regrouper. Envoyer chaque plat à la bonne station. Lancer quand vous dites de lancer."
-        },
-        {
-          "title": "Tous les moyens de paiement",
-          "copy": "Carte, Apple Pay, Google Pay, espèces, carte cadeau, offert, compte client. Une seule caisse pour tout."
-        },
-        {
-          "title": "Pourboires, additions ouvertes et partages",
-          "copy": "Partage par couvert. Pourboire automatique. Additions pré-autorisées. Les pourboires arrivent dans la paie le lendemain matin."
-        },
-        {
-          "title": "Fonctionne quand internet ne fonctionne pas",
-          "copy": "Mode hors ligne complet. Les transactions sont mises en file en local et se synchronisent dès que vous êtes de nouveau en ligne."
-        }
-      ]
-    },
-    "compare": {
-      "eyebrow": "FACE AUX AUTRES",
-      "title": "Que font payer en plus\nles autres caisses ?",
-      "rows": [
-        "Mode hors ligne (service complet, sans internet)",
-        "Prestataire de paiement imposé",
-        "Matériel que vous pouvez acheter ailleurs",
-        "HR et paie inclus",
-        "Le stock se décrémente par recette",
-        "CRM en temps réel lié aux tickets",
-        "API REST publique v1"
-      ],
-      "cell": {
-        "included": "Inclus",
-        "excluded": "-",
-        "partial": "Partiel",
-        "paidAddon": "Option payante"
-      },
-      "footnote": "Comparatif établi d’après les tarifs et la documentation produit accessibles publiquement, avril 2026. Une information n’est plus à jour ?",
-      "footnoteLink": "Signalez-le-nous"
-    },
-    "cta": {
-      "title": "Votre caisse devrait\nsuivre le rythme. Celle-ci le fait."
-    }
-  },
-  "erp": {
-    "meta": {
-      "title": "ERP · Des stocks qui se comptent tout seuls. | rtylr",
-      "description": "Stocks en temps réel, fournisseurs et achats. Décrémentation liée aux recettes. Transferts entre établissements avec piste d’audit complète.",
-      "schemaDescription": "Stocks en temps réel, fournisseurs, bons de commande et gestion d’entrepôt."
-    },
-    "hero": {
-      "eyebrow": "rtylr ERP · Stocks",
-      "title": "Des stocks qui\nse comptent tout seuls.",
-      "subtitle": "Chaque margherita vendue retire de la farine, de la mozzarella et de l’huile d’olive. Chaque bon de commande approuvé met à jour le stock de l’entrepôt. Chaque alerte de stock bas part avant la rupture, pas après que le coup de feu du samedi s’en est aperçu.",
-      "inventory": {
-        "items": [
-          "Margherita (225 g de pâte)",
-          "Rouge maison (750 ml)",
-          "Huile d’olive (5 L)",
-          "Café en grains (1 kg)",
-          "Farine 00 (3 kg)"
-        ]
-      }
-    },
-    "directAnswer": {
-      "label": "Qu’est-ce que rtylr ERP ?",
-      "body": "rtylr ERP est l’application de gestion des stocks et des approvisionnements de rtylr, pour les entreprises qui détiennent du stock sur un ou plusieurs établissements. Elle couvre les quantités en stock, les fournisseurs, les bons de commande, les transferts entre sites, les alertes de stock bas et le suivi des coûts. Elle lit les ventes de POS au fil de l’eau : le stock reste juste sans synchronisation nocturne et un réassort peut être préparé avant que quiconque remarque une étagère vide."
-    },
-    "capabilities": {
-      "eyebrow": "CAPACITÉS",
-      "title": "Que couvre rtylr ERP,\ndu quai de réception\nau compte de résultat ?",
-      "items": [
-        {
-          "title": "Chaque référence, chaque variante",
-          "copy": "Suivez les ingrédients au gramme près. Décrémentation liée aux recettes. Quantités en temps réel au fil des ventes."
-        },
-        {
-          "title": "Fournisseurs et bons de commande",
-          "copy": "Réassort automatique au seuil. Comparaison des prix entre fournisseurs. Suivi de la date d’arrivée prévue, ligne par ligne."
-        },
-        {
-          "title": "Transferts entre établissements",
-          "copy": "Déplacez du stock entre les sites avec une piste d’audit complète. Reporting par établissement. Aucun rapprochement sur tableur."
-        },
-        {
-          "title": "Le stock bas avant qu’il fasse mal",
-          "copy": "Seuils intelligents fondés sur la vitesse d’écoulement passée. Les alertes partent à la bonne personne. Plus de rupture en plein service."
-        }
-      ]
-    },
-    "depletion": {
-      "eyebrow": "DÉCRÉMENTATION EN DIRECT PAR RECETTE",
-      "title": "Qu’arrive-t-il au stock quand une vente passe ?",
-      "copy": "Chaque vente encaissée dans POS descend l’arbre de la recette. Farine, levure, mozzarella, basilic, huile d’olive : chacun se décrémente au gramme exact. Dès qu’un article franchit son seuil de réassort, un bon de commande est préparé avec votre fournisseur habituel et envoyé pour approbation."
-    },
-    "cta": {
-      "title": "Bouclez vos stocks\npendant que vous dormez."
-    },
-    "mock": {
-      "reset": "Réinitialiser",
-      "resetLabel": "Réinitialiser les stocks",
-      "tabs": {
-        "allSkus": "Toutes les références",
-        "lowStock": "Stock bas · {{count}}",
-        "suppliers": "Fournisseurs",
-        "purchaseOrders": "Bons de commande"
-      },
-      "simulate": "Simuler le service du vendredi",
-      "simulateRunning": "Service en cours…",
-      "table": {
-        "sku": "Référence",
-        "item": "Article",
-        "onHand": "En stock",
-        "min": "Seuil",
-        "status": "État"
-      },
-      "status": {
-        "critical": "Critique",
-        "reorder": "À réassortir",
-        "healthy": "Suffisant"
-      },
-      "footer_one": "Réassort automatique déclenché pour {{count}} article · bon de commande n° {{po}} préparé",
-      "footer_other": "Réassort automatique déclenché pour {{count}} articles · bon de commande n° {{po}} préparé"
-    },
-    "flow": {
-      "steps": [
-        {
-          "title": "1 margherita vendue",
-          "desc": "POS interroge la fiche recette"
-        },
-        {
-          "title": "7 ingrédients décrémentés",
-          "desc": "Farine, mozza, basilic, huile, sel, levure, pâte"
-        },
-        {
-          "title": "Bon de commande préparé automatiquement",
-          "desc": "Envoyé au responsable pour approbation"
-        }
-      ]
     }
   },
   "contact": {
@@ -484,44 +274,6 @@
         {
           "question": "Y a-t-il un engagement ou un verrouillage ?",
           "answer": "Aucun. Vous pouvez résilier à tout moment, et vos données restent exportables tant que le compte est ouvert : clients, commandes, employés, factures et stocks partent en CSV depuis la page des réglages."
-        }
-      ]
-    },
-    "pos": {
-      "title": "Questions sur rtylr POS",
-      "items": [
-        {
-          "question": "rtylr POS fonctionne-t-il hors ligne ?",
-          "answer": "Oui. rtylr POS garde une copie locale complète de la carte, des options et des commandes en cours. Quand internet tombe, la caisse continue de prendre les commandes, d’imprimer les tickets et d’encaisser les espèces. Les paiements par carte sont mis en file et se règlent automatiquement au retour de la connexion : une coupure un samedi soir n’arrête pas la salle."
-        },
-        {
-          "question": "Quel matériel fonctionne avec rtylr POS ?",
-          "answer": "rtylr POS tourne sur iPad, tablette Android et ordinateur Windows ou macOS. Il s’associe aux imprimantes de tickets Epson et Star, aux lecteurs de codes-barres standards, aux scanners Zebra et Symbol pour le commerce, et aux terminaux de paiement Stripe Terminal, Clover et Square. Voir rtylr.com/hardware pour la liste du matériel testé."
-        },
-        {
-          "question": "rtylr POS gère-t-il les restaurants à plusieurs établissements ?",
-          "answer": "Oui, à partir du forfait Pro. Chaque établissement a sa propre carte, ses prix, ses équipes et son reporting, et le propriétaire dispose d’un tableau de bord consolidé sur l’ensemble des sites. Une modification de carte peut être poussée partout d’un coup ou ajustée établissement par établissement."
-        },
-        {
-          "question": "Qu’est-ce que rtylr POS remplace ?",
-          "answer": "La caisse, et le travail qui se cache derrière : le comptage de stock que quelqu’un refait à la main, le tableur des pourboires qui alimente la paie, et l’export de fin de journée vers la comptabilité. Comme POS écrit dans la même base de données que ERP, HR et Finance, une vente met à jour le stock et le chiffre d’affaires au moment où elle se produit, pas dans la nuit."
-        }
-      ]
-    },
-    "erp": {
-      "title": "Questions sur rtylr ERP",
-      "items": [
-        {
-          "question": "Que gère rtylr ERP ?",
-          "answer": "rtylr ERP couvre les stocks, les fournisseurs, les bons de commande, les transferts de stock entre établissements, les alertes de stock bas et le suivi des coûts. Il lit les ventes d’articles de POS au fil de l’eau : les quantités en stock restent justes sans synchronisation nocturne."
-        },
-        {
-          "question": "rtylr ERP gère-t-il les stocks sur plusieurs entrepôts ?",
-          "answer": "Oui. Chaque article peut être stocké sur plusieurs sites, avec des quantités, des seuils de réassort et un suivi des transferts propres à chaque site. Un bon de commande peut être réparti entre plusieurs entrepôts, et par défaut chaque employé ne voit que le site auquel il est affecté."
-        },
-        {
-          "question": "Qu’est-ce que rtylr ERP remplace ?",
-          "answer": "Le tableur de stock, et le CSV censé le tenir à jour avec les ventes. Une vente dans POS décrémente les composants de la recette dans ERP au moment où elle se produit : « combien d’unités d’un composant reste-t-il sur trois établissements ? » devient une question à laquelle vous répondez sans ouvrir un second outil."
         }
       ]
     },
@@ -945,12 +697,6 @@
     "meta": {
       "title": "Intégrations : paiements, comptabilité, livraison | rtylr",
       "description": "Tous les services auxquels rtylr se connecte : paiements, comptabilité, livraison, communication, matériel et productivité, avec le statut de chacun."
-    }
-  },
-  "crm": {
-    "meta": {
-      "title": "CRM : chaque client, gardé en mémoire | rtylr",
-      "description": "Fiches clients, fidélité, segments et campagnes. Chaque vente en caisse enrichit la fiche automatiquement. Pensé pour la restauration, le commerce et les services."
     }
   },
   "hardware": {

@@ -5,8 +5,6 @@ import { baseRouteOf, localeRouteParams } from '../../lib/locales';
 import AboutlessNotFound from '../404';
 import ContactPage from '../contact';
 import HomePage from '../index';
-import ErpPage from '../erp';
-import PosPage from '../pos';
 import PricingPage from '../pricing';
 import TermsPage from '../legal/terms';
 import PrivacyPage from '../legal/privacy-policy';
@@ -39,8 +37,6 @@ import TrustPage from '../trust';
 const PAGES: Record<string, React.ComponentType> = {
   '/': HomePage,
   '/pricing/': PricingPage,
-  '/pos/': PosPage,
-  '/erp/': ErpPage,
   '/contact/': ContactPage,
   '/legal/terms/': TermsPage,
   '/legal/privacy-policy/': PrivacyPage,

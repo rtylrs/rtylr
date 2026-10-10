@@ -31,33 +31,13 @@
     "route": "/contact/",
     "headline": "Reach out. We read it all."
   },
-  "crm": {
-    "route": "/crm/",
-    "headline": "Every customer, remembered."
-  },
   "demo": {
     "route": "/demo/",
     "headline": "See rtylr on your data."
   },
-  "erp": {
-    "route": "/erp/",
-    "headline": "Inventory that counts itself."
-  },
-  "finance": {
-    "route": "/finance/",
-    "headline": "A real P&L, in real time."
-  },
-  "flow": {
-    "route": "/flow/",
-    "headline": "Work that moves. Operations that don't slip."
-  },
   "hardware": {
     "route": "/hardware/",
     "headline": "Plug it in. Ring it up."
-  },
-  "hr": {
-    "route": "/hr/",
-    "headline": "Your team. Looked after."
   },
   "integrations": {
     "route": "/integrations/",
@@ -79,10 +59,6 @@
     "route": "/partners/",
     "headline": "Build with rtylr. Grow with us."
   },
-  "pos": {
-    "route": "/pos/",
-    "headline": "The register that keeps up."
-  },
   "pricing": {
     "route": "/pricing/",
     "headline": "One rtylr suite. Every plan."
@@ -94,5 +70,9 @@
   "trust": {
     "route": "/trust/",
     "headline": "Run your business on something trustworthy."
+  },
+  "workspace": {
+    "route": "/workspace/",
+    "headline": "Every part of your business. One workspace."
   }
 }
