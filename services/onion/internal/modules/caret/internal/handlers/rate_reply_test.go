@@ -29,7 +29,9 @@ func (l *recordingLearner) SaveLessons(context.Context, int, []string, []int64) 
 
 type noopCompleter struct{}
 
-func (noopCompleter) CompleteText(context.Context, string) (string, error) { return "<lessons></lessons>", nil }
+func (noopCompleter) CompleteText(context.Context, string) (string, error) {
+	return "<lessons></lessons>", nil
+}
 
 func TestRateReplyStoresTheVerdictAndLearnsFromAComplaint(t *testing.T) {
 	learner := &recordingLearner{pending: 1, distilled: make(chan int, 1)}
