@@ -96,328 +96,642 @@ func CompatibilityServiceRoutes() []string {
 		"PUT /hr/core/departments/{id}",
 		"PUT /hr/locations/{id}",
 		"PUT /hr/performance/config",
+		"POST /hr/reports/generate",
 	}
 }
 
 func (s CompatibilityService) GetMyEmployee(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/employees/me", nil)
-}
-
-func (s CompatibilityService) ApproveTimeOff(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/time-off/approve", req.GetBody())
-}
-
-func (s CompatibilityService) GetShifts(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/shifts", nil)
-}
-
-func (s CompatibilityService) GetAvailability(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/shifts/availability", nil)
-}
-
-func (s CompatibilityService) UpsertShift(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/shifts", req.GetBody())
-}
-
-func (s CompatibilityService) SetAvailability(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/shifts/availability", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateShift(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/shifts", req.GetBody())
-}
-
-func (s CompatibilityService) GetRoster(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/shifts/roster", nil)
-}
-
-func (s CompatibilityService) CreateShiftAssignment(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/shifts/roster/assignments", req.GetBody())
-}
-
-func (s CompatibilityService) PublishRoster(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/shifts/roster/publish", req.GetBody())
-}
-
-func (s CompatibilityService) GetTimesheets(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/timesheets", nil)
-}
-
-func (s CompatibilityService) GetCurrentTimesheet(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/timesheets/current", nil)
-}
-
-func (s CompatibilityService) GetTimesheet(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/timesheets/{id}", nil)
-}
-
-func (s CompatibilityService) SubmitTimesheet(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/timesheets/{id}/submit", req.GetBody())
-}
-
-func (s CompatibilityService) ApproveTimesheet(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/timesheets/{id}/approve", req.GetBody())
-}
-
-func (s CompatibilityService) RejectTimesheet(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/timesheets/{id}/reject", req.GetBody())
-}
-
-func (s CompatibilityService) GetDocuments(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/documents", nil)
-}
-
-func (s CompatibilityService) GetExpiringDocuments(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/documents/expiring", nil)
-}
-
-func (s CompatibilityService) CreateDocument(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/documents", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteDocument(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/hr/documents/{id}", nil)
-}
-
-func (s CompatibilityService) GetConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/config", nil)
-}
-
-func (s CompatibilityService) UpdateConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/config", req.GetBody())
-}
-
-func (s CompatibilityService) GetEmployees(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/employees", nil)
-}
-
-func (s CompatibilityService) GetEmployee(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/employees/{id}", nil)
-}
-
-func (s CompatibilityService) CreateEmployee(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/employees", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateEmployee(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/employees/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) InviteEmployee(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/employees/invite", req.GetBody())
-}
-
-func (s CompatibilityService) GetAttendance(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/attendance", nil)
-}
-
-func (s CompatibilityService) UpdateEmployeePin(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/employees/me/pin", req.GetBody())
-}
-
-func (s CompatibilityService) GetRoles(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/roles", nil)
-}
-
-func (s CompatibilityService) GetPermissions(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/permissions", nil)
-}
-
-func (s CompatibilityService) CreateRole(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/roles", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateRole(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/roles/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) GetReviewCycle(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/performance/cycles/{id}", nil)
-}
-
-func (s CompatibilityService) OpenReviewCycle(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/performance/cycles/{id}/open", req.GetBody())
-}
-
-func (s CompatibilityService) CreateGoal(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/performance/goals", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateGoal(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/performance/goals/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) GetPerformanceReviews(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/performance/reviews", nil)
-}
-
-func (s CompatibilityService) SubmitPerformanceReview(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/performance/reviews/{id}/submit", req.GetBody())
-}
-
-func (s CompatibilityService) SharePerformanceReview(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/performance/reviews/{id}/share", req.GetBody())
-}
-
-func (s CompatibilityService) GetLeaveCalendar(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/leave/calendar", nil)
-}
-
-func (s CompatibilityService) CreateLocation(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/locations", req.GetBody())
-}
-
-func (s CompatibilityService) GetSetupStatus(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/setup/status", nil)
-}
-
-func (s CompatibilityService) CompleteSetupStep(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/setup/steps/{id}/complete", req.GetBody())
-}
-
-func (s CompatibilityService) GetOvertimeConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/overtime/config", nil)
-}
-
-func (s CompatibilityService) UpdateOvertimeConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/overtime/config", req.GetBody())
-}
-
-func (s CompatibilityService) GetPayrollConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/payroll/config", nil)
-}
-
-func (s CompatibilityService) UpdatePayrollConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/payroll/config", req.GetBody())
-}
-
-func (s CompatibilityService) GetPayrollRuns(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/payroll/runs", nil)
-}
-
-func (s CompatibilityService) GetPayrollRun(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/payroll/runs/{id}", nil)
-}
-
-func (s CompatibilityService) GetMyPayrollRuns(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/payroll/my-runs", nil)
-}
-
-func (s CompatibilityService) GetMyPayrollRun(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/payroll/my-runs/{id}", nil)
-}
-
-func (s CompatibilityService) TriggerPayrollRun(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/payroll/runs/trigger", req.GetBody())
-}
-
-func (s CompatibilityService) ApprovePayrollRun(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/payroll/runs/{id}/approve", req.GetBody())
-}
-
-func (s CompatibilityService) GetTimeEntries(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/time-entries", nil)
-}
-
-func (s CompatibilityService) CreateTimeEntry(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/time-entries", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateTimeEntry(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/time-entries/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteTimeEntry(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/hr/time-entries/{id}", nil)
-}
-
-func (s CompatibilityService) MarkTimeEntriesInvoiced(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPatch, "/hr/time-entries/mark-invoiced", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteEmployee(ctx context.Context, req *hrcompatv1.PathIdRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/hr/employees/{id}", nil)
-}
-
-func (s CompatibilityService) DeleteShift(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/hr/shifts", nil)
-}
-
-func (s CompatibilityService) DeleteAvailability(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/hr/shifts/availability", nil)
-}
-
-func (s CompatibilityService) GetCompanyConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/company-config", nil)
-}
-
-func (s CompatibilityService) ListCoreDepartments(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/core/departments", nil)
-}
-
-func (s CompatibilityService) GetDocument(ctx context.Context, req *hrcompatv1.PathIdRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/documents/{id}", nil)
-}
-
-func (s CompatibilityService) VerifyEmployeeInvite(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/employees/invite/verify", nil)
-}
-
-func (s CompatibilityService) ListLocations(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/locations", nil)
-}
-
-func (s CompatibilityService) GetEmployeeChecklist(ctx context.Context, req *hrcompatv1.PathIdRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/onboarding/checklists/{id}", nil)
-}
-
-func (s CompatibilityService) GetPerformanceConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/hr/performance/config", nil)
-}
-
-func (s CompatibilityService) CreateCoreDepartment(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/core/departments", req.GetBody())
-}
-
-func (s CompatibilityService) AcceptEmployeeInvite(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/employees/invite/accept", req.GetBody())
-}
-
-func (s CompatibilityService) AssignEmployeeRole(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/employees/{id}/role", req.GetBody())
-}
-
-func (s CompatibilityService) CompleteChecklistItem(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/onboarding/checklists/items/{id}/complete", req.GetBody())
-}
-
-func (s CompatibilityService) ExportPayrollRun(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/hr/payroll/runs/{id}/export", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateCompanyConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/company-config", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateCoreDepartment(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/core/departments/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateLocation(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/locations/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) UpdatePerformanceConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/hr/performance/config", req.GetBody())
-}
-
-func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*hrcompatv1.JsonResponse, error) {
-	r, _ := hrcompatv1.HTTPRequestFromContext(ctx)
-	data, err := s.Routes.Serve(ctx, r, method, pattern, body)
+	data, err := s.serve(ctx, http.MethodGet, "/hr/employees/me", nil)
 	if err != nil {
 		return nil, err
 	}
 	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ApproveTimeOff(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/time-off/approve", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetShifts(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/shifts", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetAvailability(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/shifts/availability", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpsertShift(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/shifts", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) SetAvailability(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/shifts/availability", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateShift(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/shifts", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetRoster(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/shifts/roster", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateShiftAssignment(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/shifts/roster/assignments", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) PublishRoster(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/shifts/roster/publish", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetTimesheets(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/timesheets", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCurrentTimesheet(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/timesheets/current", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetTimesheet(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/timesheets/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) SubmitTimesheet(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/timesheets/{id}/submit", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ApproveTimesheet(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/timesheets/{id}/approve", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) RejectTimesheet(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/timesheets/{id}/reject", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetDocuments(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/documents", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetExpiringDocuments(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/documents/expiring", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateDocument(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/documents", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteDocument(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/hr/documents/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/config", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/config", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetEmployees(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/employees", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetEmployee(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/employees/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateEmployee(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/employees", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateEmployee(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/employees/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) InviteEmployee(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/employees/invite", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetAttendance(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/attendance", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateEmployeePin(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/employees/me/pin", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetRoles(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/roles", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPermissions(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/permissions", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateRole(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/roles", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateRole(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/roles/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetReviewCycle(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/performance/cycles/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) OpenReviewCycle(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/performance/cycles/{id}/open", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateGoal(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/performance/goals", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateGoal(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/performance/goals/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPerformanceReviews(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/performance/reviews", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) SubmitPerformanceReview(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/performance/reviews/{id}/submit", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) SharePerformanceReview(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/performance/reviews/{id}/share", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetLeaveCalendar(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/leave/calendar", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateLocation(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/locations", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetSetupStatus(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/setup/status", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CompleteSetupStep(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/setup/steps/{id}/complete", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetOvertimeConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/overtime/config", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateOvertimeConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/overtime/config", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPayrollConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/payroll/config", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdatePayrollConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/payroll/config", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPayrollRuns(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/payroll/runs", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPayrollRun(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/payroll/runs/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetMyPayrollRuns(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/payroll/my-runs", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetMyPayrollRun(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/payroll/my-runs/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) TriggerPayrollRun(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/payroll/runs/trigger", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ApprovePayrollRun(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/payroll/runs/{id}/approve", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetTimeEntries(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/time-entries", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateTimeEntry(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/time-entries", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateTimeEntry(ctx context.Context, req *hrcompatv1.PathBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/time-entries/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteTimeEntry(ctx context.Context, req *hrcompatv1.PathRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/hr/time-entries/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) MarkTimeEntriesInvoiced(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPatch, "/hr/time-entries/mark-invoiced", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteEmployee(ctx context.Context, req *hrcompatv1.PathIdRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/hr/employees/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteShift(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/hr/shifts", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteAvailability(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/hr/shifts/availability", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCompanyConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/company-config", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListCoreDepartments(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/core/departments", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetDocument(ctx context.Context, req *hrcompatv1.PathIdRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/documents/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) VerifyEmployeeInvite(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/employees/invite/verify", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListLocations(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/locations", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetEmployeeChecklist(ctx context.Context, req *hrcompatv1.PathIdRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/onboarding/checklists/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPerformanceConfig(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/performance/config", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateCoreDepartment(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/core/departments", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) AcceptEmployeeInvite(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/employees/invite/accept", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) AssignEmployeeRole(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/employees/{id}/role", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CompleteChecklistItem(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/onboarding/checklists/items/{id}/complete", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ExportPayrollRun(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/payroll/runs/{id}/export", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCompanyConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/company-config", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCoreDepartment(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/core/departments/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateLocation(ctx context.Context, req *hrcompatv1.PathIdBodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/locations/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdatePerformanceConfig(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/hr/performance/config", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateReportsGenerate(w http.ResponseWriter, r *http.Request, _ *hrcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/hr/reports/generate")
+	return nil
+}
+
+func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {
+	r, _ := hrcompatv1.HTTPRequestFromContext(ctx)
+	return s.Routes.Serve(ctx, r, method, pattern, body)
 }
 
 // Routes lists every legacy route this package's contracts serve.
@@ -425,6 +739,12 @@ func Routes() []string {
 	var routes []string
 	routes = append(routes, CompatibilityServiceRoutes()...)
 	return routes
+}
+
+// HTTPRoutes lists the routes served by @http methods: the original
+// handler runs, route middlewares included.
+func HTTPRoutes() []string {
+	return []string{"POST /hr/reports/generate"}
 }
 
 // Register serves this package's contracts on mux from the route table,

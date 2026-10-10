@@ -4,8 +4,10 @@
 Reads the route table written by `ROUTE_DUMP=<file> go test ./cmd/api -run
 TestDumpLegacyRoutes`, then rewrites <compat>/service.onk so that:
 - methods whose route has no legacy handler are removed,
-- every JSON route under the given prefixes that no contract declares yet
-  is added, with request types chosen from its verb and path parameters,
+- every route under the given prefixes that no contract declares yet is
+  added, with request types chosen from its verb and path parameters. Raw
+  handlers and JSON routes that run inside route middlewares are added as
+  @http methods, which hand the request to that handler unchanged,
 - existing methods keep their names and request types.
 
 Usage: scripts/sync_compat_contract.py <route-table> <compat-pkg-dir> <prefix>...
@@ -16,6 +18,10 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+# Routes the global request body limit exempts: multipart CV uploads whose
+# handlers cap the body themselves (5 MiB plus form overhead).
+LARGE_BODY_ROUTES = {"/careers/apply", "/voxhire/applications", "/voxhire/careers/apply"}
 API = ROOT.parent.parent / "voxie" / "api"
 
 
@@ -70,13 +76,12 @@ def main() -> None:
     service_file, models_file = pkg / "service.onk", pkg / "models.onk"
     service, models = service_file.read_text(), models_file.read_text()
 
-    served = {}
+    served, kinds = {}, {}
     for line in open(table_file):
         kind, route = line.rstrip("\n").split("\t")
-        if kind != "json":
-            continue
         verb, path = route.split(" ", 1)
         served[(verb, norm(path))] = path
+        kinds[(verb, norm(path))] = kind
 
     other = contract_routes(service_file)
     svc_match = re.search(r"(service \w+ \{)(.*?)(\n\})", service, re.S)
@@ -107,12 +112,21 @@ def main() -> None:
             continue
         if not path.startswith(base):
             raise SystemExit(f"{path} is outside base_path {base}")
-        req, body_tag = request_type(verb, path)
         params = re.findall(r"\{(\w+)\}", path)
-        if req not in ("BodyRequest", "EmptyRequest"):
-            needed[req] = (params, verb in {"POST", "PUT", "PATCH"})
+        if kinds[key] == "json":
+            req, tags = request_type(verb, path)
+            if req not in ("BodyRequest", "EmptyRequest"):
+                needed[req] = (params, verb in {"POST", "PUT", "PATCH"})
+        else:
+            # The handler reads the raw request itself.
+            req = "Path" + "".join(p.title().replace("_", "") for p in params) + "Request" if params else "EmptyRequest"
+            if params:
+                needed[req] = (params, False)
+            tags = " @http"
+            if path in LARGE_BODY_ROUTES:
+                tags += ' @max_body("16MiB")'
         name = method_name(verb, path, base, taken)
-        added.append(f'  {name}({req}) -> JsonResponse @{verb.lower()}("{path[len(base):]}"){body_tag}')
+        added.append(f'  {name}({req}) -> JsonResponse @{verb.lower()}("{path[len(base):]}"){tags}')
 
     body = "\n".join(kept).rstrip()
     if added:

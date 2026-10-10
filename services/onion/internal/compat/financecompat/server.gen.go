@@ -24,20 +24,24 @@ func CompatibilityServiceRoutes() []string {
 }
 
 func (s CompatibilityService) ListBankFeeds(ctx context.Context, req *financecompatv1.BankFeedRequest) (*financecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/finance/bank-feeds", nil)
-}
-
-func (s CompatibilityService) SyncBankFeeds(ctx context.Context, req *financecompatv1.BodyRequest) (*financecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/finance/bank-feeds/sync", req.GetBody())
-}
-
-func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*financecompatv1.JsonResponse, error) {
-	r, _ := financecompatv1.HTTPRequestFromContext(ctx)
-	data, err := s.Routes.Serve(ctx, r, method, pattern, body)
+	data, err := s.serve(ctx, http.MethodGet, "/finance/bank-feeds", nil)
 	if err != nil {
 		return nil, err
 	}
 	return &financecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) SyncBankFeeds(ctx context.Context, req *financecompatv1.BodyRequest) (*financecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/finance/bank-feeds/sync", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &financecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {
+	r, _ := financecompatv1.HTTPRequestFromContext(ctx)
+	return s.Routes.Serve(ctx, r, method, pattern, body)
 }
 
 // Routes lists every legacy route this package's contracts serve.
@@ -45,6 +49,12 @@ func Routes() []string {
 	var routes []string
 	routes = append(routes, CompatibilityServiceRoutes()...)
 	return routes
+}
+
+// HTTPRoutes lists the routes served by @http methods: the original
+// handler runs, route middlewares included.
+func HTTPRoutes() []string {
+	return []string{}
 }
 
 // Register serves this package's contracts on mux from the route table,

@@ -48,13 +48,26 @@ func TestAllRoutesMountWithoutConflicts(t *testing.T) {
 	// A compat route with no handler in the table would answer 404, and one
 	// whose handler runs inside route middlewares (auth guards, rate limits)
 	// would lose them: it must stay mounted from the table.
+	httpRoutes := compatHTTPRoutes()
 	for route := range compatRoutes() {
 		method, pattern, _ := strings.Cut(route, " ")
-		if !routes.Has(method, pattern) {
+		raw := routes.IsRaw(method, pattern)
+		if !routes.Has(method, pattern) && !raw {
 			t.Errorf("compat contract serves %s, but no legacy handler is registered for it", route)
 		}
-		if routes.HasMiddlewares(method, pattern) {
-			t.Errorf("compat contract serves %s, which runs inside route middlewares the contract would skip", route)
+		viaHTTP := httpRoutes.Contains(method + " " + pattern)
+		if routes.HasMiddlewares(method, pattern) && !viaHTTP {
+			t.Errorf("compat contract serves %s, which runs inside route middlewares; it must be an @http method", route)
+		}
+		if raw && !viaHTTP {
+			t.Errorf("compat contract serves raw handler %s as JSON; it must be an @http method", route)
+		}
+	}
+
+	// Every route is served by a contract: nothing is left to mount raw.
+	for _, route := range append(routes.Routes(), routes.RawRoutes()...) {
+		if !compatRoutes().Contains(route) {
+			t.Errorf("%s is not served by any contract", route)
 		}
 	}
 

@@ -1,31 +1,54 @@
 #!/usr/bin/env python3
-"""Generate Go adapters that serve OneKit compat contracts from the legacy
-route table.
+"""Generate Go adapters that serve OneKit contracts from the legacy route table.
 
 A compat contract (voxie/api/**/compat/v1) keeps a module's existing wire
-paths. Its methods take the legacy request (query parameters, or a raw JSON
-body) and return the legacy JSON unchanged (JsonResponse with data @unwrap).
-Each generated method dispatches to serverHttp.LegacyRoutes by verb and path,
-so the handler that served the route before still serves it.
+paths. Each generated method dispatches to serverHttp.LegacyRoutes by verb
+and path, so the handler that served the route before still serves it:
 
-Usage: scripts/gen_compat_adapters.py crm/compat/v1 [...]   (from services/onion)
-Writes internal/compat/<name>/server.gen.go for each listed compat package.
+- JsonResponse methods return the handler's JSON unchanged (data @unwrap).
+- @http methods hand the request to the route's own handler, middlewares
+  included: raw handlers (webhooks, sockets, downloads) and JSON routes that
+  run inside route middlewares (auth guards, rate limits).
+- Methods with a typed response re-encode the decoded request as the JSON
+  body the handler reads, and decode its JSON into the typed response.
+
+Methods whose route has no handler in the table answer 404 and are left out
+of Routes(), so the boot test can tell served routes from declared ones.
+
+Usage (from services/onion):
+  ROUTE_DUMP=/tmp/routes.tsv go test ./cmd/api -run TestDumpLegacyRoutes
+  scripts/gen_compat_adapters.py /tmp/routes.tsv crm/compat/v1 [...]
+Writes internal/compat/<name>/server.gen.go for each listed package.
 """
 import pathlib
 import re
+import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 API = ROOT.parent.parent / "voxie" / "api"
 OUT = ROOT / "internal" / "compat"
 GEN_MODULE = "github.com/voxire/voxie/gen/go"
+BODY_VERBS = {"POST", "PUT", "PATCH"}
 
 
 def pascal(name: str) -> str:
     return name[0].upper() + name[1:]
 
 
-def body_fields(models: str) -> set[str]:
-    """Request messages that carry a json body field."""
+def norm(path: str) -> str:
+    return re.sub(r"\{[^}]+\}", "{}", path.rstrip("/") or "/")
+
+
+def load_table(path: str) -> set:
+    served = set()
+    for line in open(path):
+        _, route = line.rstrip("\n").split("\t")
+        verb, pattern = route.split(" ", 1)
+        served.add((verb, norm(pattern)))
+    return served
+
+
+def body_fields(models: str) -> set:
     out = set()
     for m in re.finditer(r"message (\w+)\s*\{(.*?)\}", models, re.S):
         if re.search(r"^\s*body:\s*json\b", m.group(2), re.M):
@@ -33,14 +56,18 @@ def body_fields(models: str) -> set[str]:
     return out
 
 
-def generate(pkg_dir: pathlib.Path) -> None:
+def go_package(rel: str) -> str:
+    stem = rel.replace("/compat/v1", "").replace("/v1", "")
+    return stem.replace("/", "").replace("_", "") + "compat"
+
+
+def generate(pkg_dir: pathlib.Path, served: set) -> None:
     service = (pkg_dir / "service.onk").read_text()
     models = (pkg_dir / "models.onk").read_text()
     package = re.search(r"package ([\w.]+)", service).group(1)
     rel = pkg_dir.relative_to(API).as_posix()
-    import_path = f"{GEN_MODULE}/{rel}"
     alias = rel.replace("/", "").replace("_", "")
-    go_pkg = rel.replace("/compat/v1", "").replace("/", "") + "compat"
+    go_pkg = go_package(rel)
     with_body = body_fields(models)
 
     services = []
@@ -50,15 +77,24 @@ def generate(pkg_dir: pathlib.Path) -> None:
         base = base_match.group(1) if base_match else "/" + package.replace(".", "/")
         methods = []
         for m in re.finditer(
-            r'(\w+)\((\w+)\)\s*->\s*(\w+)\s*@(get|post|put|patch|delete)\("([^"]*)"\)', body
+            r'(\w+)\((\w+)\)\s*->\s*(\w+)\s*@(get|post|put|patch|delete)\("([^"]*)"\)([^\n]*)', body
         ):
-            name, req, res, verb, path = m.groups()
-            if res != "JsonResponse":
-                raise SystemExit(f"{package}.{name}: compat methods must return JsonResponse")
+            name, req, res, verb, path, rest = m.groups()
+            verb = verb.upper()
             full = re.sub(r"/+", "/", base.rstrip("/") + path) if path else base
-            methods.append((pascal(name), req, verb.upper(), full, req in with_body))
+            methods.append({
+                "name": pascal(name), "req": req, "res": res, "verb": verb, "path": full,
+                "raw": "@http" in rest,
+                "json_body": req in with_body and "@body(" in rest,
+                "served": (verb, norm(full)) in served,
+            })
         services.append((svc.group(1), methods))
 
+    uses_json = any(not m["raw"] for _, ms in services for m in ms)
+    imports = ['\t"context"'] if uses_json else []
+    if uses_json:
+        imports.append('\t"encoding/json"')
+    imports.append('\t"net/http"')
     lines = [
         "// Code generated by scripts/gen_compat_adapters.py. DO NOT EDIT.",
         "",
@@ -66,12 +102,11 @@ def generate(pkg_dir: pathlib.Path) -> None:
         f"package {go_pkg}",
         "",
         "import (",
-        '\t"context"',
-        '\t"encoding/json"',
-        '\t"net/http"',
+        *imports,
         "",
+        *(['\t"github.com/voxire/onion/internal/platform/onekiterrors"'] if any(not m["served"] for _, ms in services for m in ms) else []),
         '\tserverHttp "github.com/voxire/onion/internal/platform/server/http"',
-        f'\t{alias} "{import_path}"',
+        f'\t{alias} "{GEN_MODULE}/{rel}"',
         ")",
         "",
     ]
@@ -84,27 +119,72 @@ def generate(pkg_dir: pathlib.Path) -> None:
             f"func {svc_name}Routes() []string {{",
             "\treturn []string{",
         ]
-        lines += [f'\t\t"{verb} {path}",' for _, _, verb, path, _ in methods]
+        lines += [f'\t\t"{m["verb"]} {m["path"]}",' for m in methods if m["served"]]
         lines += ["\t}", "}", ""]
-        for method, req, verb, path, has_body in methods:
-            body = "req.GetBody()" if has_body else "nil"
+        for m in methods:
+            verb_const = "http.Method" + m["verb"].capitalize()
+            if m["raw"]:
+                lines += [
+                    f"func (s {svc_name}) {m['name']}(w http.ResponseWriter, r *http.Request, _ *{alias}.{m['req']}) error {{",
+                ]
+                if m["served"]:
+                    lines += [f'\ts.Routes.ServeRoute(w, r, {verb_const}, "{m["path"]}")', "\treturn nil"]
+                else:
+                    lines += ['\treturn onekiterrors.New(http.StatusNotFound, "Not found")']
+                lines += ["}", ""]
+                continue
+            if m["res"] == "JsonResponse":
+                lines += [f"func (s {svc_name}) {m['name']}(ctx context.Context, req *{alias}.{m['req']}) (*{alias}.JsonResponse, error) {{"]
+                if not m["served"]:
+                    lines += ['\treturn nil, onekiterrors.New(http.StatusNotFound, "Not found")', "}", ""]
+                    continue
+                body = "req.GetBody()" if m["json_body"] else "nil"
+                lines += [
+                    f'\tdata, err := s.serve(ctx, {verb_const}, "{m["path"]}", {body})',
+                    "\tif err != nil {",
+                    "\t\treturn nil, err",
+                    "\t}",
+                    f"\treturn &{alias}.JsonResponse{{Data: data}}, nil",
+                    "}",
+                    "",
+                ]
+                continue
+            # Typed response: the handler reads the request as JSON and its
+            # JSON decodes into the typed response.
+            lines += [f"func (s {svc_name}) {m['name']}(ctx context.Context, req *{alias}.{m['req']}) (*{alias}.{m['res']}, error) {{"]
+            if not m["served"]:
+                lines += ['\treturn nil, onekiterrors.New(http.StatusNotFound, "Not found")', "}", ""]
+                continue
+            if m["verb"] in BODY_VERBS:
+                lines += [
+                    "\tbody, err := json.Marshal(req)",
+                    "\tif err != nil {",
+                    "\t\treturn nil, err",
+                    "\t}",
+                    f'\tdata, err := s.serve(ctx, {verb_const}, "{m["path"]}", body)',
+                ]
+            else:
+                lines += [f'\tdata, err := s.serve(ctx, {verb_const}, "{m["path"]}", nil)']
             lines += [
-                f"func (s {svc_name}) {method}(ctx context.Context, req *{alias}.{req}) (*{alias}.JsonResponse, error) {{",
-                f'\treturn s.serve(ctx, http.Method{verb.capitalize()}, "{path}", {body})',
+                "\tif err != nil {",
+                "\t\treturn nil, err",
+                "\t}",
+                f"\tres := new({alias}.{m['res']})",
+                "\tif err := json.Unmarshal(data, res); err != nil {",
+                "\t\treturn nil, err",
+                "\t}",
+                "\treturn res, nil",
                 "}",
                 "",
             ]
-        lines += [
-            f"func (s {svc_name}) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*{alias}.JsonResponse, error) {{",
-            f"\tr, _ := {alias}.HTTPRequestFromContext(ctx)",
-            "\tdata, err := s.Routes.Serve(ctx, r, method, pattern, body)",
-            "\tif err != nil {",
-            "\t\treturn nil, err",
-            "\t}",
-            f"\treturn &{alias}.JsonResponse{{Data: data}}, nil",
-            "}",
-            "",
-        ]
+        if any(not m["raw"] for m in methods):
+            lines += [
+                f"func (s {svc_name}) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {{",
+                f"\tr, _ := {alias}.HTTPRequestFromContext(ctx)",
+                "\treturn s.Routes.Serve(ctx, r, method, pattern, body)",
+                "}",
+                "",
+            ]
     lines += [
         "// Routes lists every legacy route this package's contracts serve.",
         "func Routes() []string {",
@@ -112,6 +192,15 @@ def generate(pkg_dir: pathlib.Path) -> None:
     ]
     lines += [f"\troutes = append(routes, {svc_name}Routes()...)" for svc_name, _ in services]
     lines += ["\treturn routes", "}", ""]
+    raw_routes = [f'"{m["verb"]} {m["path"]}"' for _, ms in services for m in ms if m["raw"] and m["served"]]
+    lines += [
+        "// HTTPRoutes lists the routes served by @http methods: the original",
+        "// handler runs, route middlewares included.",
+        "func HTTPRoutes() []string {",
+        "\treturn []string{" + ", ".join(raw_routes) + "}",
+        "}",
+        "",
+    ]
     lines += [
         "// Register serves this package's contracts on mux from the route table,",
         "// with the legacy request body limit and error shape.",
@@ -132,11 +221,12 @@ def generate(pkg_dir: pathlib.Path) -> None:
     out_dir = OUT / go_pkg
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "server.gen.go").write_text("\n".join(lines).rstrip() + "\n")
-    print(f"wrote {out_dir.relative_to(ROOT)}/server.gen.go ({sum(len(m) for _, m in services)} methods)")
+    count = sum(len(ms) for _, ms in services)
+    unserved = sum(1 for _, ms in services for m in ms if not m["served"])
+    print(f"wrote {out_dir.relative_to(ROOT)}/server.gen.go ({count} methods, {unserved} without a handler)")
 
 
 if __name__ == "__main__":
-    import sys
-
-    for rel in sys.argv[1:]:
-        generate(API / rel)
+    table = load_table(sys.argv[1])
+    for rel in sys.argv[2:]:
+        generate(API / rel, table)

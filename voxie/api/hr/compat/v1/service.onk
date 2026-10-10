@@ -103,4 +103,6 @@ service CompatibilityService {
   updateCoreDepartment(PathIdBodyRequest) -> JsonResponse @put("/core/departments/{id}") @body("body")
   updateLocation(PathIdBodyRequest) -> JsonResponse @put("/locations/{id}") @body("body")
   updatePerformanceConfig(BodyRequest) -> JsonResponse @put("/performance/config") @body("body")
+
+  createReportsGenerate(EmptyRequest) -> JsonResponse @post("/reports/generate") @http
 }
