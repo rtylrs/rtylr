@@ -21,9 +21,14 @@ type ToolDef struct {
 	ApprovalReason   string `json:"approval_reason,omitempty"`
 }
 
-// CoreTools is the seed registry — the long-term plan is to source this
+// CoreTools is every tool Caret can call: the business seed registry plus
+// the general tools (web, reference data, utilities) that need no business
+// data.
+var CoreTools = append(append([]ToolDef(nil), seedTools...), generalToolDefs...)
+
+// seedTools is the business registry. The long-term plan is to source this
 // list from each module's MCP descriptor.
-var CoreTools = []ToolDef{
+var seedTools = []ToolDef{
 	{Name: "web.search", Description: "Search the public web for current information and return an answer with sources. Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question"}`},
 	{Name: "tools.search", Description: "Find more tools by describing what you need, e.g. \"list team members\" or \"unpaid invoices\". Covers HR and the team, CRM customers, POS and store orders, products and stock, finance, bookings, support, loyalty, Flow tasks, and insights. Returns matching tools with their inputs; call one next.", Module: "tools", Scope: "read", InputHint: `{"query":"what you need"}`},
 	{Name: "account.profile", Description: "Read the authenticated person's name and current business identity.", Module: "account", Scope: "read", InputHint: `{}`},
@@ -387,6 +392,16 @@ func ValidateToolRegistry() error {
 			return fmt.Errorf("prompt executable %q is not registered", name)
 		}
 	}
+	for _, tool := range generalToolDefs {
+		if _, ok := generalTools[tool.Name]; !ok {
+			return fmt.Errorf("general tool %q has no handler", tool.Name)
+		}
+	}
+	for name := range generalTools {
+		if _, ok := seen[name]; !ok {
+			return fmt.Errorf("general tool handler %q is not registered", name)
+		}
+	}
 	return nil
 }
 
@@ -439,6 +454,9 @@ func ToolAllowedForMode(m CaretMode, tool ToolDef) bool {
 }
 
 func promptToolCanExecute(name string) bool {
+	if _, ok := generalTools[name]; ok {
+		return true
+	}
 	_, ok := promptExecutableTools[name]
 	return ok
 }
