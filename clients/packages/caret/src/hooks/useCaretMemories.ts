@@ -5,6 +5,8 @@ export interface CaretMemoryItem {
   id: string;
   value: string;
   updatedAt?: string;
+  /** Distilled from the person's feedback on replies, not told directly. */
+  learned?: boolean;
 }
 
 interface UseCaretMemoriesParams {
@@ -32,6 +34,7 @@ export function useCaretMemories({
           id: memory.id as string,
           value: memory.value as string,
           updatedAt: memory.updatedAt,
+          learned: memory.type === "lesson",
         }));
     },
   });
