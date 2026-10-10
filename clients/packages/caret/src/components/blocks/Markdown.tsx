@@ -2,6 +2,7 @@ import React from 'react';
 import ReactMarkdown, { type Components, type UrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../../styles/markdown.css';
+import ChartBlock, { parseChartSpec, type ChartSpec } from './ChartBlock';
 
 export interface MarkdownProps {
   source: string;
@@ -23,6 +24,15 @@ function tableHasBodyRows(children: React.ReactNode): boolean {
   });
 }
 
+/** A ```chart block whose JSON describes a usable chart. */
+function chartFromCode(children: React.ReactNode): ChartSpec | null {
+  const code = React.Children.toArray(children)[0];
+  if (!React.isValidElement<{ className?: string; children?: React.ReactNode }>(code)) return null;
+  if (!/\blanguage-chart\b/.test(code.props.className ?? '')) return null;
+  const raw = React.Children.toArray(code.props.children).join('');
+  return parseChartSpec(raw);
+}
+
 const markdownComponents: Components = {
   h1: ({ node: _node, ...props }) => <h1 className="caret-h" {...props} />,
   h2: ({ node: _node, ...props }) => <h2 className="caret-h" {...props} />,
@@ -38,7 +48,15 @@ const markdownComponents: Components = {
   code: ({ node: _node, className, ...props }) => (
     <code className={['caret-inline-code', className].filter(Boolean).join(' ')} {...props} />
   ),
-  pre: ({ node: _node, ...props }) => <pre className="caret-codeblock" {...props} />,
+  pre: ({ node: _node, children, ...props }) => {
+    const chart = chartFromCode(children);
+    if (chart) return <ChartBlock spec={chart} />;
+    return (
+      <pre className="caret-codeblock" {...props}>
+        {children}
+      </pre>
+    );
+  },
   table: ({ node: _node, children, ...props }) =>
     tableHasBodyRows(children) ? (
       <div className="caret-table-wrap">
