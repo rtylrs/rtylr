@@ -23,7 +23,7 @@ func (r *chatRepository) GetChatSession(context.Context, string, int) (*domain.C
 	return &chat, nil
 }
 
-func (r *chatRepository) GetSessionMessages(context.Context, string) ([]domain.ConversationMessage, error) {
+func (r *chatRepository) GetContextMessages(context.Context, string) ([]domain.ConversationMessage, error) {
 	return r.messages, nil
 }
 

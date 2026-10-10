@@ -78,7 +78,7 @@ func (s *Service) SessionMessages(ctx context.Context, session string, userID in
 	if err := s.EnsureSessionOwnership(ctx, session, userID); err != nil {
 		return nil, err
 	}
-	return s.repository.GetSessionMessages(ctx, session)
+	return s.repository.GetContextMessages(ctx, session)
 }
 func (s *Service) AssistantContext(ctx context.Context, session string, userID int, projectID string) (string, error) {
 	chat, err := s.repository.GetChatSession(ctx, session, userID)
@@ -103,7 +103,7 @@ func (s *Service) AssistantContext(ctx context.Context, session string, userID i
 	if err != nil {
 		return "", err
 	}
-	messages, err := s.repository.GetSessionMessages(ctx, session)
+	messages, err := s.repository.GetContextMessages(ctx, session)
 	if err != nil {
 		return "", err
 	}
@@ -159,7 +159,7 @@ func (s *Service) PendingCompaction(ctx context.Context, session string, userID 
 	if err != nil {
 		return CompactionWork{}, false, err
 	}
-	messages, err := s.repository.GetSessionMessages(ctx, session)
+	messages, err := s.repository.GetContextMessages(ctx, session)
 	if err != nil {
 		return CompactionWork{}, false, err
 	}

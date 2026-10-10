@@ -14,6 +14,7 @@ type repository interface {
 	CreateMessage(context.Context, *domain.ConversationMessage) (*domain.ConversationMessage, error)
 	ListUserSessions(context.Context, int, int, int) ([]domain.ChatSession, error)
 	GetSessionMessages(context.Context, string) ([]domain.ConversationMessage, error)
+	GetContextMessages(context.Context, string) ([]domain.ConversationMessage, error)
 	GetContextForSession(context.Context, string, int) ([]domain.ContextItem, error)
 	CreateConversationSummary(context.Context, *domain.ConversationSummary) (*domain.ConversationSummary, error)
 	StoreUserMemory(context.Context, *domain.UserMemory) (*domain.UserMemory, error)
