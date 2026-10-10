@@ -96,6 +96,23 @@ func (s *Service) StoreMessageWithImages(ctx context.Context, sessionID string, 
 	return s.storeMessage(ctx, sessionID, userID, role, content, tokensUsed, string(metadata))
 }
 
+// StoreMessageWithTranscript keeps the reply's ordered blocks and duration in
+// message metadata; content stays the plain text the model sees as history.
+func (s *Service) StoreMessageWithTranscript(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int, blocks json.RawMessage, responseMs int64) (*domain.ConversationMessage, error) {
+	transcript := map[string]any{}
+	if len(blocks) > 0 && json.Valid(blocks) {
+		transcript["blocks"] = blocks
+	}
+	if responseMs > 0 {
+		transcript["response_ms"] = responseMs
+	}
+	metadata, err := json.Marshal(transcript)
+	if err != nil {
+		return nil, err
+	}
+	return s.storeMessage(ctx, sessionID, userID, role, content, tokensUsed, string(metadata))
+}
+
 func (s *Service) storeMessage(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int, metadata string) (*domain.ConversationMessage, error) {
 	if s == nil || s.repository == nil {
 		return nil, errors.New("memory repository not available")

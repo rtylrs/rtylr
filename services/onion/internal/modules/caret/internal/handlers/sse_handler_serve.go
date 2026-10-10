@@ -15,8 +15,11 @@ import (
 	"github.com/voxire/onion/internal/platform/snips"
 )
 
-func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	// Every stream event passes through the recorder so the saved reply keeps
+	// its tool steps and timing.
+	var w http.ResponseWriter = newTranscriptWriter(rw, time.Now())
 	log := logger.Ctx(ctx)
 
 	log.Info("Processing AI text stream request",
@@ -234,7 +237,7 @@ func (h *GenerateTextStreamHandler) streamDirectResponse(ctx context.Context, w 
 	if err := renderer.FlushPending(); err != nil {
 		return
 	}
-	if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
+	if err := h.storeAIResponse(ctx, w, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
 		h.writeErrorResponse(w, "Failed to persist response")
 		return
 	}

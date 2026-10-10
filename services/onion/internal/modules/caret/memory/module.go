@@ -3,6 +3,7 @@ package memory
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -125,4 +126,8 @@ func (m *Module) ValidateProjectSelection(ctx context.Context, session, project 
 }
 func (m *Module) StoreMessageWithImages(ctx context.Context, session string, userID int, role, content string, tokens int, images []snips.ImageInput) (any, error) {
 	return m.memoryService.StoreMessageWithImages(ctx, session, userID, role, content, tokens, images)
+}
+
+func (m *Module) StoreMessageWithTranscript(ctx context.Context, session string, userID int, role, content string, tokens int, blocks json.RawMessage, responseMs int64) (any, error) {
+	return m.memoryService.StoreMessageWithTranscript(ctx, session, userID, role, content, tokens, blocks, responseMs)
 }

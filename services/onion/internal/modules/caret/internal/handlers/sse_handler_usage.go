@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/caret/internal/application"
 	"github.com/voxire/onion/internal/platform/aicache"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
@@ -129,7 +130,7 @@ func flushResponse(w http.ResponseWriter) func() {
 // storeAIResponse persists the completed assistant turn before the stream's
 // done event is acknowledged. The request context is still live at each call
 // site; callers that need detached work should derive that context explicitly.
-func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) (err error) {
+func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.ResponseWriter, sessionID string, userID int, response string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("store AI response panic: %v", r)
@@ -141,7 +142,20 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 	storeCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	_, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+	if recorder, ok := w.(*transcriptWriter); ok {
+		if store, ok := h.MemoryService.(application.TranscriptMessageService); ok {
+			transcript := recorder.Transcript()
+			blocks, marshalErr := json.Marshal(transcript.Blocks)
+			if marshalErr != nil {
+				return marshalErr
+			}
+			_, err = store.StoreMessageWithTranscript(storeCtx, sessionID, userID, "assistant", response, len(response)/4, blocks, transcript.ResponseMs)
+		} else {
+			_, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+		}
+	} else {
+		_, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to store AI response",
 			logger.Error(err),

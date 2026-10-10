@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -24,6 +25,13 @@ type AssistantContextService interface {
 
 type ImageMessageService interface {
 	StoreMessageWithImages(context.Context, string, int, string, string, int, []snips.ImageInput) (any, error)
+}
+
+// TranscriptMessageService stores an assistant reply with its ordered steps
+// (text and finished tool calls) and how long it took, so reopened chats
+// render the same way they streamed.
+type TranscriptMessageService interface {
+	StoreMessageWithTranscript(ctx context.Context, sessionID string, userID int, role, content string, tokens int, blocks json.RawMessage, responseMs int64) (any, error)
 }
 
 type MemorySessionAuthorizer interface {

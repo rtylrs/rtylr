@@ -42,7 +42,7 @@ func TestStoreAIResponseDetachedSurvivesRequestCancellation(t *testing.T) {
 	memory := &detachedMemoryFake{}
 	handler := &GenerateTextStreamHandler{MemoryService: memory}
 
-	if err := handler.storeAIResponse(context.WithoutCancel(requestCtx), "session-1", 7, "answer"); err != nil {
+	if err := handler.storeAIResponse(context.WithoutCancel(requestCtx), nil, "session-1", 7, "answer"); err != nil {
 		t.Fatalf("storeAIResponse: %v", err)
 	}
 

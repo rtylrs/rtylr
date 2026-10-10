@@ -150,7 +150,7 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 	if err := renderer.FlushPending(); err != nil {
 		return
 	}
-	if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
+	if err := h.storeAIResponse(ctx, w, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
 		h.writeErrorResponse(w, "Failed to persist response")
 		return
 	}
