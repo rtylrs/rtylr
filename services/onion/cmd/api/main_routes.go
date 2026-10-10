@@ -215,7 +215,8 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	// of a router. Routes no contract serves yet are mounted on the same mux.
 	legacyRoutes := http.NewLegacyRoutes()
 	http.AutoRegisterRoutes(ctx, legacyRoutes, modules.routeRegistrars()...)
-	legacyRoutes.Mount(oneKitMux, nil)
+	registerCompatContracts(oneKitMux, legacyRoutes)
+	legacyRoutes.Mount(oneKitMux, compatRoutes().Contains)
 	observability.SetRouteMux(oneKitMux)
 	http.MountOneKit(r, oneKitMux)
 

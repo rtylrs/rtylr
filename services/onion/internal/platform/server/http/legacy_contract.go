@@ -224,6 +224,18 @@ func (l *LegacyRoutes) Serve(ctx context.Context, r *http.Request, method, contr
 		return nil, onekiterrors.New(http.StatusNotFound, "Not found")
 	}
 	ctx = withLegacyPathValues(ctx, r, route.pattern, contractPattern)
+	// Contracts cannot declare a DELETE body, but legacy DELETEs accept one
+	// ({"id": N}); read it here when the client sent it.
+	if body == nil && r != nil && r.Method == http.MethodDelete && r.Body != nil && r.ContentLength != 0 {
+		raw, err := io.ReadAll(io.LimitReader(r.Body, DefaultMaxRequestBodyBytes+1))
+		if err != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid request")
+		}
+		if int64(len(raw)) > DefaultMaxRequestBodyBytes {
+			return nil, onekiterrors.New(http.StatusRequestEntityTooLarge, "Request body too large")
+		}
+		body = raw
+	}
 	out, err := route.serve(ctx, r, body)
 	if stdErrors.Is(err, errInvalidLegacyBody) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid request")
@@ -459,4 +471,52 @@ func (l *LegacyRoutes) Handler() http.Handler {
 // fresh mux per call, so it is meant for tests; servers Mount the table once.
 func (l *LegacyRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	l.Handler().ServeHTTP(w, r)
+}
+
+// Has reports whether a route is registered for method and pattern (path
+// parameter names are ignored).
+func (l *LegacyRoutes) Has(method, pattern string) bool {
+	_, ok := l.route(method, pattern)
+	return ok
+}
+
+// RouteSet is a set of "METHOD /pattern" routes, matched ignoring path
+// parameter names.
+type RouteSet map[string]struct{}
+
+func NewRouteSet(routes ...[]string) RouteSet {
+	set := RouteSet{}
+	for _, group := range routes {
+		for _, route := range group {
+			method, pattern, _ := strings.Cut(route, " ")
+			set[legacyRouteKey(method, pattern)] = struct{}{}
+		}
+	}
+	return set
+}
+
+func (s RouteSet) Contains(route string) bool {
+	method, pattern, _ := strings.Cut(route, " ")
+	_, ok := s[legacyRouteKey(method, pattern)]
+	return ok
+}
+
+// WriteContractError reports a generated contract server's error the way the
+// legacy helpers did. Server failures go through WriteOneKitError, which logs
+// unhandled errors; client errors (bad parameters, failed validation, a
+// handler's 4xx) keep the status and public message the server chose.
+func WriteContractError(w http.ResponseWriter, r *http.Request, status int, message string, violations []string, cause error) {
+	if cause != nil && status >= http.StatusInternalServerError {
+		WriteOneKitError(r.Context(), w, cause)
+		return
+	}
+	body := map[string]any{"message": message}
+	if len(violations) > 0 {
+		body["violations"] = violations
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if err := json.NewEncoder(w).Encode(body); err != nil {
+		logger.Ctx(r.Context()).Error("Failed to write error response", logger.Error(err))
+	}
 }

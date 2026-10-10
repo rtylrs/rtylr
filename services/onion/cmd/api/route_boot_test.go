@@ -32,7 +32,16 @@ func TestAllRoutesMountWithoutConflicts(t *testing.T) {
 	http.AutoRegisterAPIs(ctx, mux, modules.apiRegistrars()...)
 	routes := http.NewLegacyRoutes()
 	http.AutoRegisterRoutes(ctx, routes, modules.routeRegistrars()...)
-	routes.Mount(mux, nil)
+	registerCompatContracts(mux, routes)
+	routes.Mount(mux, compatRoutes().Contains)
+
+	// A compat route with no handler in the table would answer 404.
+	for route := range compatRoutes() {
+		method, pattern, _ := strings.Cut(route, " ")
+		if !routes.Has(method, pattern) {
+			t.Errorf("compat contract serves %s, but no legacy handler is registered for it", route)
+		}
+	}
 
 	if got := len(routes.Routes()) + len(routes.RawRoutes()); got == 0 {
 		t.Fatal("no legacy routes registered")
