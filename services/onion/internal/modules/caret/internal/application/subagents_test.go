@@ -152,3 +152,17 @@ func TestAgentRunsAreBoundedPerMessage(t *testing.T) {
 		t.Fatal("a run past the per-message budget was allowed")
 	}
 }
+
+func TestSubAgentToolSearchHidesAgentsRun(t *testing.T) {
+	e := NewAssistantToolExecutor(nil, nil)
+	ctx := context.WithValue(context.Background(), subAgentKey{}, true)
+	output, _, err := e.ExecuteCaretTool(ctx, ToolSearchName, map[string]any{"query": "run sub-agents in parallel"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tool := range output["tools"].([]map[string]string) {
+		if tool["name"] == AgentsToolName {
+			t.Fatal("a sub-agent was offered agents.run")
+		}
+	}
+}

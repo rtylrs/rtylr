@@ -110,7 +110,22 @@ func SearchTools(mode CaretMode, query string) []ToolDef {
 
 // toolSearchOutput is what the model sees: each match's exact call contract.
 func toolSearchOutput(mode CaretMode, query string) map[string]any {
+	return toolSearchOutputExcluding(mode, query)
+}
+
+func toolSearchOutputExcluding(mode CaretMode, query string, excluded ...string) map[string]any {
 	matches := SearchTools(mode, query)
+	kept := matches[:0]
+	for _, tool := range matches {
+		skip := false
+		for _, name := range excluded {
+			skip = skip || tool.Name == name
+		}
+		if !skip {
+			kept = append(kept, tool)
+		}
+	}
+	matches = kept
 	tools := make([]map[string]string, len(matches))
 	for i, tool := range matches {
 		tools[i] = map[string]string{
