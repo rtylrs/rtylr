@@ -159,6 +159,11 @@ func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name strin
 			return nil, true, errors.New("timezone is too long")
 		}
 		location, err := time.LoadLocation(zone)
+		if strings.TrimSpace(zone) == "" {
+			// No zone named: the person's own.
+			location, err = userLocation(ctx), nil
+			zone = location.String()
+		}
 		if err != nil {
 			return nil, true, errors.New("use a valid IANA timezone")
 		}

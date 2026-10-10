@@ -163,12 +163,17 @@ func WithUserLocation(ctx context.Context, location *time.Location) context.Cont
 	return context.WithValue(ctx, userLocationKey{}, location)
 }
 
-// todayIn is the person's current date, as midnight UTC of that day.
-func todayIn(ctx context.Context) time.Time {
+// userLocation is the person's timezone, or UTC when unknown.
+func userLocation(ctx context.Context) *time.Location {
 	location, ok := ctx.Value(userLocationKey{}).(*time.Location)
 	if !ok || location == nil {
-		location = time.UTC
+		return time.UTC
 	}
-	local := time.Now().In(location)
+	return location
+}
+
+// todayIn is the person's current date, as midnight UTC of that day.
+func todayIn(ctx context.Context) time.Time {
+	local := time.Now().In(userLocation(ctx))
 	return time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, time.UTC)
 }

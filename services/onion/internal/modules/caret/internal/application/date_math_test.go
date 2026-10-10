@@ -53,3 +53,12 @@ func TestDateMathTodayIsThePersonsLocalDay(t *testing.T) {
 		t.Fatalf("today = %v, want %v", got, want)
 	}
 }
+
+func TestUtilitiesTimeDefaultsToThePersonsZone(t *testing.T) {
+	e := &AssistantToolExecutor{}
+	ctx := WithUserLocation(context.Background(), LocationFor("Asia/Tokyo"))
+	output, _, err := e.ExecuteCaretTool(ctx, "utilities.time", map[string]any{})
+	if err != nil || output["timezone"] != "Asia/Tokyo" {
+		t.Fatalf("output = %#v, %v", output, err)
+	}
+}
