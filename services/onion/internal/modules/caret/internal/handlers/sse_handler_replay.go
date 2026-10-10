@@ -102,7 +102,12 @@ func waitCachedReplay(ctx context.Context, clientGone chan bool, delay time.Dura
 
 func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, reservation *quotaReservation) {
 	ctx = application.WithWebSearchBudget(ctx)
+	var renderer *streamEventRenderer
 	settleUsage := func(actualTokens int64) {
+		// Tools that call the model themselves (sub-agents) count too.
+		if renderer != nil {
+			actualTokens += renderer.toolTokens
+		}
 		if reservation != nil {
 			reservation.settle(actualTokens)
 			return
@@ -114,7 +119,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
 		return
 	}
-	renderer := newStreamEventRenderer(
+	renderer = newStreamEventRenderer(
 		w,
 		flushResponse(w),
 		messageID,

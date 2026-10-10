@@ -51,6 +51,9 @@ type streamEventRenderer struct {
 	// toolsDisabled drops tool markers, for the final wrap-up round that must
 	// answer from the results it already has.
 	toolsDisabled bool
+	// toolTokens are model tokens tools spent on their own calls, metered
+	// with the reply.
+	toolTokens int64
 	// followUps are the next questions the model suggested, sent as their
 	// own event when the reply finishes rather than shown as text.
 	followUps []string
@@ -441,6 +444,10 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		// continuation loop. The model only sees capabilities that the prompt
 		// builder shortlisted as executable.
 		return nil
+	}
+	if tokens, ok := output[echoapp.ToolUsageTokensKey].(int64); ok {
+		r.toolTokens += tokens
+		delete(output, echoapp.ToolUsageTokensKey)
 	}
 	if call.Name == "web.search" {
 		if answer, ok := output["answer"].(string); ok {

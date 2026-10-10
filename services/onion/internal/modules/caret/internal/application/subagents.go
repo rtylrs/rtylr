@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/snips"
@@ -35,6 +36,10 @@ var subAgentTools = []string{
 	"utilities.statistics", "utilities.date_math", "currency.convert",
 }
 
+// ToolUsageTokensKey carries the model tokens a tool spent itself. The
+// stream meters them with the reply and strips the key before anyone sees it.
+const ToolUsageTokensKey = "_usage_tokens"
+
 // TextCompleter is the model call a sub-agent makes each step.
 type TextCompleter interface {
 	CompleteText(ctx context.Context, prompt string) (string, error)
@@ -52,6 +57,7 @@ type SubAgentExecutor struct {
 }
 
 type subAgentKey struct{}
+type subAgentUsageKey struct{}
 
 // IsSubAgent reports whether ctx belongs to a sub-agent, which may only read.
 func IsSubAgent(ctx context.Context) bool {
@@ -87,6 +93,8 @@ func (e *SubAgentExecutor) ExecuteCaretTool(ctx context.Context, name string, in
 	if err != nil {
 		return nil, true, err
 	}
+	var spent atomic.Int64
+	ctx = context.WithValue(ctx, subAgentUsageKey{}, &spent)
 	reports := make([]subAgentReport, len(tasks))
 	var wg sync.WaitGroup
 	for i, task := range tasks {
@@ -115,9 +123,10 @@ func (e *SubAgentExecutor) ExecuteCaretTool(ctx context.Context, name string, in
 		}
 	}
 	return map[string]any{
-		"reports": out,
-		"sources": sources,
-		"note":    "Combine these reports into one answer for the person. Keep claims tied to their sources and say what stayed unverified.",
+		ToolUsageTokensKey: spent.Load(),
+		"reports":          out,
+		"sources":          sources,
+		"note":             "Combine these reports into one answer for the person. Keep claims tied to their sources and say what stayed unverified.",
 	}, true, nil
 }
 
@@ -166,7 +175,12 @@ func (e *SubAgentExecutor) run(parent context.Context, index, total int, task su
 	state.SetLimit(maxSubAgentSteps * maxSubAgentCallsPerStep)
 	for step := 0; step <= maxSubAgentSteps; step++ {
 		final := step == maxSubAgentSteps
-		reply, err := e.AI.CompleteText(ctx, e.prompt(task, results.String(), final))
+		prompt := e.prompt(task, results.String(), final)
+		reply, err := e.AI.CompleteText(ctx, prompt)
+		if spent, ok := ctx.Value(subAgentUsageKey{}).(*atomic.Int64); ok {
+			// The same chars/4 estimate the stream uses for its own prompts.
+			spent.Add(int64((len(prompt) + len(reply)) / 4))
+		}
 		report.Steps = step + 1
 		if err != nil {
 			if ctx.Err() != nil {

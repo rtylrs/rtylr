@@ -65,6 +65,9 @@ func TestSubAgentsResearchInParallelAndReport(t *testing.T) {
 	if sources := output["sources"].([]map[string]string); len(sources) != 2 {
 		t.Fatalf("sources = %#v", sources)
 	}
+	if tokens, _ := output[ToolUsageTokensKey].(int64); tokens <= 0 {
+		t.Fatalf("usage tokens = %v", output[ToolUsageTokensKey])
+	}
 	if searches.Load() != 2 {
 		t.Fatalf("searches = %d", searches.Load())
 	}
