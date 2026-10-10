@@ -165,4 +165,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "Exact counts and length-limit checks.",
 		Freshness:  "computed", SideEffect: "read-only",
 	},
+	{
+		Name:        "utilities.random",
+		Description: "Draw fairly at random: pick giveaway winners from a list, shuffle a list, or a number in a range. Use it instead of choosing yourself.",
+		Module:      "utilities", Scope: "read",
+		InputHint:  `{"from":["Ali","Sara","Omar"],"count":1} | {"from":[...],"shuffle":true} | {"min":1,"max":100}`,
+		OutputHint: "The picked items or number and how they were drawn.",
+		Freshness:  "computed", SideEffect: "read-only",
+	},
 }

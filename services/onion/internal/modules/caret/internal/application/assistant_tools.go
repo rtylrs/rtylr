@@ -64,6 +64,7 @@ var generalTools = map[string]generalTool{
 	"utilities.statistics":     (*AssistantToolExecutor).statistics,
 	"utilities.business_math":  (*AssistantToolExecutor).businessMath,
 	"text.count":               (*AssistantToolExecutor).countText,
+	"utilities.random":         (*AssistantToolExecutor).randomPick,
 }
 
 // MaxWebSearchesPerMessage lets Caret refine a search (a narrower query, a

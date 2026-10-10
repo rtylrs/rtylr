@@ -26,6 +26,7 @@ var generalToolTriggers = map[string][]string{
 	"utilities.convert_units":  {"km to", "miles to", "kg to", "lbs to", "celsius", "fahrenheit", "liters to", "gallons", "square meters", "sqft", "dunam"},
 	"utilities.statistics":     {"average of", "median", "standard deviation", "mean of"},
 	"utilities.business_math":  {"margin", "markup", "vat", "break even", "break-even", "loan", "interest", "cagr", "discount"},
+	"utilities.random":         {"pick a winner", "random winner", "giveaway", "raffle", "draw a name", "pick randomly", "shuffle", "random number", "سحب", "اختر عشوائيا"},
 	"text.count":               {"word count", "how many words", "how many characters", "character count", "too long for"},
 	"chats.search":             {"last time we", "we discussed", "we talked about", "i told you", "i mentioned", "earlier chat", "we decided"},
 	"memory.list":              {"what do you know about me", "what do you remember", "your memory", "my memories"},
