@@ -110,6 +110,7 @@ func (modules *apiModules) apiRegistrars() []http.APIRegistrar {
 		modules.Warehouses,
 		modules.Workspaces,
 		modules.WebsiteLead,
+		modules.EmailTest,
 	}
 }
 
@@ -123,7 +124,6 @@ func (modules *apiModules) routeRegistrars() []http.RouteRegistrar {
 		modules.CRMSales,
 		modules.Customers,
 		modules.Echo,
-		modules.EmailTest,
 		modules.FinanceBankFeeds,
 		modules.HRAttendance,
 		modules.HRCore,
@@ -137,7 +137,6 @@ func (modules *apiModules) routeRegistrars() []http.RouteRegistrar {
 		modules.HRSetup,
 		modules.HRShifts,
 		modules.HRTime,
-		modules.Insights,
 		modules.Loyalty,
 		modules.Memory,
 		modules.Notifications,
@@ -155,7 +154,6 @@ func (modules *apiModules) routeRegistrars() []http.RouteRegistrar {
 		modules.SupportTickets,
 		modules.TimeOff,
 		modules.Voxhire,
-		modules.Workspaces,
 	}
 }
 

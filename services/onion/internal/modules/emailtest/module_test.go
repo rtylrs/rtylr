@@ -2,6 +2,7 @@ package emailtest
 
 import (
 	"context"
+	"encoding/json"
 	stdErrors "errors"
 	"net/http"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/config"
+	emailtestv1 "github.com/voxire/voxie/gen/go/devtools/emailtest/v1"
 )
 
 func oneKitStatus(err error) int {
@@ -24,12 +26,12 @@ func oneKitStatus(err error) int {
 func TestEmailTestHandlersRejectAnonymous(t *testing.T) {
 	withTestEnv(t, "development")
 
-	_, err := (&ListTemplatesHandler{}).Serve(context.Background(), &ListTemplatesRequest{})
+	_, err := (&EmailTestAPI{}).ListTemplates(context.Background(), &emailtestv1.ListTemplatesRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusForbidden {
 		t.Fatalf("expected anonymous list to be forbidden, got %+v", err)
 	}
 
-	_, err = (&TestEmailHandler{}).Serve(context.Background(), &TestEmailRequest{})
+	_, err = (&EmailTestAPI{}).SendTestEmail(context.Background(), &emailtestv1.SendTestEmailRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusForbidden {
 		t.Fatalf("expected anonymous send to be forbidden, got %+v", err)
 	}
@@ -39,12 +41,12 @@ func TestEmailTestHandlersAreUnavailableInProduction(t *testing.T) {
 	withTestEnv(t, "production")
 
 	ctx := authenticatedContext()
-	_, err := (&ListTemplatesHandler{}).Serve(ctx, &ListTemplatesRequest{})
+	_, err := (&EmailTestAPI{}).ListTemplates(ctx, &emailtestv1.ListTemplatesRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusNotFound {
 		t.Fatalf("expected production list to be unavailable, got %+v", err)
 	}
 
-	_, err = (&TestEmailHandler{}).Serve(ctx, &TestEmailRequest{})
+	_, err = (&EmailTestAPI{}).SendTestEmail(ctx, &emailtestv1.SendTestEmailRequest{})
 	if err == nil || oneKitStatus(err) != http.StatusNotFound {
 		t.Fatalf("expected production send to be unavailable, got %+v", err)
 	}
@@ -74,10 +76,10 @@ func TestEmailTestHandlersRefuseAnythingButDeclaredDevelopment(t *testing.T) {
 			withTestEnv(t, tc.env)
 
 			ctx := authenticatedContext()
-			if _, err := (&ListTemplatesHandler{}).Serve(ctx, &ListTemplatesRequest{}); err == nil || oneKitStatus(err) != http.StatusNotFound {
+			if _, err := (&EmailTestAPI{}).ListTemplates(ctx, &emailtestv1.ListTemplatesRequest{}); err == nil || oneKitStatus(err) != http.StatusNotFound {
 				t.Errorf("APP_ENV=%q: expected template listing to be unavailable, got %+v", tc.env, err)
 			}
-			if _, err := (&TestEmailHandler{}).Serve(ctx, &TestEmailRequest{}); err == nil || oneKitStatus(err) != http.StatusNotFound {
+			if _, err := (&EmailTestAPI{}).SendTestEmail(ctx, &emailtestv1.SendTestEmailRequest{}); err == nil || oneKitStatus(err) != http.StatusNotFound {
 				t.Errorf("APP_ENV=%q: expected send to be unavailable, got %+v", tc.env, err)
 			}
 		})
@@ -96,11 +98,11 @@ func TestEmailTestHandlersRefuseWhenAppEnvIsUnset(t *testing.T) {
 	}
 
 	ctx := authenticatedContext()
-	if _, err := (&TestEmailHandler{}).Serve(ctx, &TestEmailRequest{
+	if _, err := (&EmailTestAPI{}).SendTestEmail(ctx, &emailtestv1.SendTestEmailRequest{
 		Template: "auth/password_reset",
 		To:       "ceo@target-bank.example",
 		Subject:  "Action required",
-		Data:     map[string]any{"ResetLink": "https://attacker.example/reset?t=..."},
+		Data:     json.RawMessage(`{"ResetLink":"https://attacker.example/reset?t=..."}`),
 	}); err == nil || oneKitStatus(err) != http.StatusNotFound {
 		t.Fatalf("expected send to be unavailable with APP_ENV unset, got %+v", err)
 	}
@@ -115,7 +117,7 @@ func TestEmailTestHandlersRemainAvailableInDeclaredDevelopment(t *testing.T) {
 
 			// Authenticated and not production: the request must get past the
 			// environment gate and reach the ordinary per-request validation.
-			_, err := (&ListTemplatesHandler{}).Serve(authenticatedContext(), &ListTemplatesRequest{})
+			_, err := (&EmailTestAPI{}).ListTemplates(authenticatedContext(), &emailtestv1.ListTemplatesRequest{})
 			if err != nil {
 				t.Fatalf("APP_ENV=%q: expected listing to be served, got %+v", env, err)
 			}

@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/insights/internal/api"
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
@@ -106,11 +104,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 			insightsreportv1.WithMiddleware(api.ScheduledReportPresenceMiddleware),
 		)
 	})
-}
-
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	_ = ctx
-	_ = router
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

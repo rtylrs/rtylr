@@ -8,8 +8,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/flow/workspaces/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/api"
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/application/identity"
@@ -106,6 +104,11 @@ func (m *Module) Service() *application.Service {
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	// These realtime endpoints are deliberate transport-level escape hatches
+	// from the JSON API contract. The WebSocket upgrade cannot use the standard
+	// JSON handler, while the ticket is its bearer-authenticated preflight.
+	mux.HandleFunc("GET /flow/ws", realtime.ServeRealtime)
+	mux.HandleFunc("POST /flow/ws-ticket", realtime.IssueRealtimeTicket)
 	if err := flowworkspacev1.RegisterWorkspaceServiceServer(
 		api.NewWorkspaceAPI(m.service),
 		flowworkspacev1.WithMux(mux),
@@ -250,14 +253,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	); err != nil {
 		panic(fmt.Errorf("register flow time service: %w", err))
 	}
-}
-
-func (m *Module) RegisterRoutes(_ context.Context, router *chi.Mux, _ ...interface{}) {
-	// These realtime endpoints are deliberate transport-level escape hatches
-	// from the JSON API contract. The WebSocket upgrade cannot use the standard
-	// JSON handler, while the ticket is its bearer-authenticated preflight.
-	router.Get("/flow/ws", realtime.ServeRealtime)
-	router.Post("/flow/ws-ticket", realtime.IssueRealtimeTicket)
 }
 
 // GetAnonymousRoutes tells the global auth middleware to skip bearer-token
