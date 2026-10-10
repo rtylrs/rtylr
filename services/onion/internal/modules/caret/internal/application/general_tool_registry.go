@@ -85,4 +85,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The source time and the same moment in each target timezone.",
 		Freshness:  "computed", SideEffect: "read-only",
 	},
+	{
+		Name:        "utilities.convert_units",
+		Description: "Convert between units of length, mass, volume, area (including dunams and acres), speed, temperature, data size, time and energy.",
+		Module:      "utilities", Scope: "read",
+		InputHint:  `{"value":5,"from":"km","to":"mi"}`,
+		OutputHint: "The converted value.",
+		Freshness:  "computed", SideEffect: "read-only",
+	},
 }
