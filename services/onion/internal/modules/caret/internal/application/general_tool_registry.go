@@ -77,4 +77,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The span in days, weeks, calendar terms and working days, or the resulting date with weekday and ISO week.",
 		Freshness:  "computed", SideEffect: "read-only",
 	},
+	{
+		Name:        "utilities.convert_time",
+		Description: "Convert a time between timezones, with UTC offsets and whether it lands on another day. Handles daylight saving.",
+		Module:      "utilities", Scope: "read",
+		InputHint:  `{"time":"2026-10-11 15:00|15:00|now","from":"Asia/Beirut","to":"America/New_York,Europe/London"}`,
+		OutputHint: "The source time and the same moment in each target timezone.",
+		Freshness:  "computed", SideEffect: "read-only",
+	},
 }
