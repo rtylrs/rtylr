@@ -56,6 +56,19 @@ func TestSearchChatsStaysInTheUsersBusiness(t *testing.T) {
 	}
 	repo := NewRepository(db).WithIdentityReaders(scopes.NewReader(db).DefaultBusiness, scopes.NewReader(db).AssistantIdentity)
 	ctx = auth.WithAuthUser(ctx, &auth.AuthUser{UserID: userID, BusinessID: businessID})
+	if err := repo.SetChatMetadataNumber(ctx, here, userID, "learned_through_id", 42); err != nil {
+		t.Fatal(err)
+	}
+	var metadata string
+	if err := db.QueryRowContext(ctx, `SELECT metadata FROM chat_sessions WHERE session_id=?`, here).Scan(&metadata); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(metadata, `"learned_through_id": 42`) || !strings.Contains(metadata, `"business_id": 910081`) {
+		t.Fatalf("metadata = %s", metadata)
+	}
+	if err := repo.SetChatMetadataNumber(ctx, here, userID, "bad'key", 1); err == nil {
+		t.Fatal("an unsafe metadata key was accepted")
+	}
 	for _, query := range []string{"espresso price", "spress"} {
 		hits, err := repo.SearchChats(ctx, userID, query, 10)
 		if err != nil {
