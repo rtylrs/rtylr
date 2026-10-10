@@ -154,3 +154,23 @@ func (m *Module) PendingLessons(ctx context.Context, userID int) (lessons []stri
 func (m *Module) SaveLessons(ctx context.Context, userID int, lessons []string, feedbackIDs []int64) error {
 	return m.memoryService.SaveLessons(ctx, userID, lessons, feedbackIDs)
 }
+
+// PendingChatLearning returns the part of a chat not yet read for durable
+// facts, once enough of it has accumulated, and the facts already known.
+func (m *Module) PendingChatLearning(ctx context.Context, session string, userID int) (transcript string, known []string, throughID int, ok bool, err error) {
+	work, ok, err := m.memoryService.PendingChatLearning(ctx, session, userID)
+	return work.Transcript, work.Known, work.ThroughID, ok, err
+}
+
+// SaveLearnedFacts stores facts learned from a chat; personal facts follow
+// the person, business facts stay with this business.
+func (m *Module) SaveLearnedFacts(ctx context.Context, session string, userID int, personal, business []string, throughID int) error {
+	facts := make([]application.LearnedFact, 0, len(personal)+len(business))
+	for _, value := range personal {
+		facts = append(facts, application.LearnedFact{Personal: true, Value: value})
+	}
+	for _, value := range business {
+		facts = append(facts, application.LearnedFact{Value: value})
+	}
+	return m.memoryService.SaveLearnedFacts(ctx, session, userID, facts, throughID)
+}

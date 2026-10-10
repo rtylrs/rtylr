@@ -97,3 +97,16 @@ func matchSnippet(content, query string, width int) string {
 	}
 	return snippet
 }
+
+// SetChatMetadataNumber sets one numeric metadata key on a chat in place, so
+// concurrent background passes don't overwrite each other's keys.
+func (r *Repository) SetChatMetadataNumber(ctx context.Context, sessionID string, userID int, key string, value int) error {
+	for _, ch := range key {
+		if ch != '_' && (ch < 'a' || ch > 'z') {
+			return errors.New("metadata key must be lowercase letters and underscores")
+		}
+	}
+	_, err := r.pool.ExecContext(ctx, `UPDATE chat_sessions SET metadata=JSON_SET(COALESCE(metadata, JSON_OBJECT()), ?, ?) WHERE session_id=? AND user_id=?`,
+		"$."+key, value, sessionID, userID)
+	return err
+}

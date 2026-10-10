@@ -166,6 +166,9 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.
 	if titler, ok := h.MemoryService.(application.ChatTitler); ok && h.AiService != nil && h.AiService.IsAvailable() {
 		go h.titleChat(context.WithoutCancel(ctx), titler, sessionID, userID)
 	}
+	if learner, ok := h.MemoryService.(application.ChatLearner); ok && h.AiService != nil && h.AiService.IsAvailable() {
+		go h.learnFromChat(context.WithoutCancel(ctx), learner, sessionID, userID)
+	}
 	if !h.claimSessionSummary(sessionID) {
 		return nil
 	}

@@ -36,4 +36,5 @@ type repository interface {
 	PendingReplyFeedback(context.Context, int, int) ([]domain.ReplyFeedback, error)
 	ReplaceLessons(context.Context, int, []string, []int64) error
 	UserLessons(context.Context, int) ([]string, error)
+	SetChatMetadataNumber(context.Context, string, int, string, int) error
 }

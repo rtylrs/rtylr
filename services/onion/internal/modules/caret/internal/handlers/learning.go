@@ -60,3 +60,18 @@ func (h *GenerateTextStreamHandler) learnFromCorrection(ctx context.Context, ses
 		}
 	}()
 }
+
+// learnFromChat reads the newest part of a chat for durable facts after a
+// reply is saved; most passes find nothing and only record their progress.
+func (h *GenerateTextStreamHandler) learnFromChat(ctx context.Context, learner application.ChatLearner, sessionID string, userID int) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Ctx(ctx).Error("panic while learning from a chat", logger.Any("panic", r))
+		}
+	}()
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	if err := application.LearnFromChat(ctx, completerFor(h.AiService), learner, sessionID, userID); err != nil {
+		logger.Ctx(ctx).Warn("Caret could not learn from a chat", logger.Error(err))
+	}
+}
