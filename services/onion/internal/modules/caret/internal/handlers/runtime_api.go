@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
 )
@@ -83,6 +85,18 @@ func (a *RuntimeAPI) DecideTool(ctx context.Context, req *hubcaretv1.ToolDecisio
 		Output:     output,
 		DurationMs: resp.DurationMs,
 	}, nil
+}
+
+// StopReply ends the reply generating in one of the caller's chats.
+func (a *RuntimeAPI) StopReply(ctx context.Context, req *hubcaretv1.StopReplyRequest) (*hubcaretv1.StopReplyResponse, error) {
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || user == nil || user.UserID <= 0 {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if strings.TrimSpace(req.GetSessionId()) == "" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "session_id is required")
+	}
+	return &hubcaretv1.StopReplyResponse{Stopped: activeReplies.stop(user.UserID, req.GetSessionId())}, nil
 }
 
 func toolDefToProto(tool ToolDef) *hubcaretv1.CaretToolDef {

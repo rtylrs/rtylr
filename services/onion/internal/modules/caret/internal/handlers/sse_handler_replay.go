@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/caret/internal/application"
 	"github.com/voxire/onion/internal/platform/aicache"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
 )
 
@@ -304,7 +305,13 @@ func (h *GenerateTextStreamHandler) drainProviderStreamWithHeartbeat(ctx context
 			}
 
 		case <-clientGone:
-			return snips.StreamToken{}, false
+			// The client left. Keep generating in the background and save the
+			// reply; reopening the chat shows it.
+			if !detachClient(w) {
+				return snips.StreamToken{}, false
+			}
+			logger.Ctx(ctx).Info("Client left; finishing the reply in the background")
+			clientGone = nil
 
 		case <-ctx.Done():
 			return snips.StreamToken{}, false
