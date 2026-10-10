@@ -1,8 +1,13 @@
 package application
 
 import (
+	"context"
+	"io"
+	"net/http"
 	"net/netip"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestIsPublicAddrRejectsInternalNetworks(t *testing.T) {
@@ -24,5 +29,31 @@ func TestPublicDialControlBlocksMetadataService(t *testing.T) {
 	}
 	if err := publicDialControl("tcp4", "1.1.1.1:443", nil); err != nil {
 		t.Fatalf("public address rejected: %v", err)
+	}
+}
+
+func TestGetPublicJSONRetriesOnceOnTransientFailure(t *testing.T) {
+	previous := publicRetryDelay
+	publicRetryDelay = time.Millisecond
+	defer func() { publicRetryDelay = previous }()
+	calls := 0
+	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		calls++
+		if calls == 1 {
+			return &http.Response{StatusCode: 503, Body: io.NopCloser(strings.NewReader("busy"))}, nil
+		}
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"ok":true}`))}, nil
+	})}
+	var out map[string]bool
+	if err := getPublicJSON(context.Background(), client, "https://api.example/x", &out); err != nil || !out["ok"] || calls != 2 {
+		t.Fatalf("err=%v out=%v calls=%d", err, out, calls)
+	}
+	calls = 10 // every later call fails
+	client = &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		calls++
+		return &http.Response{StatusCode: 429, Body: io.NopCloser(strings.NewReader(""))}, nil
+	})}
+	if err := getPublicJSON(context.Background(), client, "https://api.example/x", &out); err == nil || err.Error() != "the service returned status 429" || calls != 12 {
+		t.Fatalf("err=%v calls=%d", err, calls)
 	}
 }

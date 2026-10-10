@@ -96,9 +96,44 @@ func getPublicJSON(ctx context.Context, client *http.Client, endpoint string, ou
 }
 
 func getPublicJSONWith(ctx context.Context, client *http.Client, endpoint string, out any, headers map[string]string) error {
+	body, err := fetchPublicBody(ctx, client, endpoint, headers)
+	if errors.Is(err, errRetryable) {
+		// Public APIs hiccup; one quick retry clears most transient failures.
+		select {
+		case <-ctx.Done():
+			return errors.New("the service did not respond")
+		case <-time.After(publicRetryDelay):
+		}
+		body, err = fetchPublicBody(ctx, client, endpoint, headers)
+	}
+	if err != nil {
+		if errors.Is(err, errRetryable) {
+			return errors.Unwrap(err)
+		}
+		return err
+	}
+	if err := json.Unmarshal(body, out); err != nil {
+		return errors.New("the service returned an invalid response")
+	}
+	return nil
+}
+
+// errRetryable wraps a failure worth one more try: no response, a rate limit
+// or a server error.
+var errRetryable = errors.New("retryable")
+
+type retryableError struct{ cause error }
+
+func (e retryableError) Error() string        { return e.cause.Error() }
+func (e retryableError) Unwrap() error        { return e.cause }
+func (e retryableError) Is(target error) bool { return target == errRetryable }
+
+var publicRetryDelay = 400 * time.Millisecond
+
+func fetchPublicBody(ctx context.Context, client *http.Client, endpoint string, headers map[string]string) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		return errors.New("could not build the request")
+		return nil, errors.New("could not build the request")
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", caretUserAgent)
@@ -107,26 +142,26 @@ func getPublicJSONWith(ctx context.Context, client *http.Client, endpoint string
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return errors.New("the service did not respond")
+		return nil, retryableError{errors.New("the service did not respond")}
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusNoContent {
-		return errNotFound
+		return nil, errNotFound
+	}
+	if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
+		return nil, retryableError{fmt.Errorf("the service returned status %d", resp.StatusCode)}
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("the service returned status %d", resp.StatusCode)
+		return nil, fmt.Errorf("the service returned status %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxPublicResponseBytes+1))
 	if err != nil || len(body) > maxPublicResponseBytes {
-		return errors.New("the response was too large")
+		return nil, errors.New("the response was too large")
 	}
 	if len(bytes.TrimSpace(body)) == 0 {
-		return errNotFound
+		return nil, errNotFound
 	}
-	if err := json.Unmarshal(body, out); err != nil {
-		return errors.New("the service returned an invalid response")
-	}
-	return nil
+	return body, nil
 }
 
 var errNotFound = errors.New("nothing was found")
