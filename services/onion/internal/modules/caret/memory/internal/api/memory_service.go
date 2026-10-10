@@ -275,6 +275,18 @@ func memoryToProto(memory domain.UserMemory) *hubmemoryv1.CaretMemory {
 		Value:     memory.Value,
 		CreatedAt: memory.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: memory.UpdatedAt.Format(time.RFC3339),
+		Origin:    memoryOrigin(memory),
+	}
+}
+
+func memoryOrigin(memory domain.UserMemory) string {
+	switch {
+	case memory.MemoryType == "lesson":
+		return "feedback"
+	case strings.HasPrefix(memory.Key, "learned_"):
+		return "chat"
+	default:
+		return ""
 	}
 }
 

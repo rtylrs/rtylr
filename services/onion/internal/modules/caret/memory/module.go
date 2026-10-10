@@ -4,12 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/snips"
 	hubmemoryv1 "github.com/voxire/voxie/gen/go/hub/memory/v1"
 )
@@ -112,4 +115,72 @@ func (m *Module) PendingChatTitle(ctx context.Context, session string, userID in
 // SaveChatTitle stores a written title unless the chat was renamed meanwhile.
 func (m *Module) SaveChatTitle(ctx context.Context, session string, userID int, expectedTitle, title string) error {
 	return m.memoryService.SaveChatTitle(ctx, session, userID, expectedTitle, title)
+}
+
+// RecordReplyFeedback stores a verdict on a reply in one of the user's chats
+// and returns how many verdicts are waiting to be learned from.
+func (m *Module) RecordReplyFeedback(ctx context.Context, session string, userID int, messageID, rating, reason string) (int, error) {
+	pending, err := m.memoryService.RecordReplyFeedback(ctx, session, userID, messageID, rating, reason)
+	switch {
+	case errors.Is(err, application.ErrChatSessionNotFound):
+		return 0, onekiterrors.New(http.StatusNotFound, "reply not found")
+	case errors.Is(err, application.ErrInvalidFeedback):
+		return 0, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+	return pending, err
+}
+
+// PendingLessons returns the user's current lessons and their unlearned
+// feedback, rendered as reference text for a distillation prompt.
+func (m *Module) PendingLessons(ctx context.Context, userID int) (lessons []string, feedback string, feedbackIDs []int64, err error) {
+	work, err := m.memoryService.PendingLessonWork(ctx, userID)
+	if err != nil || len(work.Feedback) == 0 {
+		return nil, "", nil, err
+	}
+	var text strings.Builder
+	for i, item := range work.Feedback {
+		feedbackIDs = append(feedbackIDs, item.ID)
+		verdict := map[string]string{"up": "thumbs up", "down": "thumbs down", "correction": "the person corrected Caret in their next message"}[item.Rating]
+		fmt.Fprintf(&text, "Feedback %d: %s\n", i+1, verdict)
+		if item.Reason != "" {
+			fmt.Fprintf(&text, "Their words: %s\n", item.Reason)
+		}
+		fmt.Fprintf(&text, "They had asked: %s\nCaret replied: %s\n\n", item.Prompt, item.Reply)
+	}
+	return work.Lessons, text.String(), feedbackIDs, nil
+}
+
+// SaveLessons replaces the user's lessons and marks their feedback learned.
+func (m *Module) SaveLessons(ctx context.Context, userID int, lessons []string, feedbackIDs []int64) error {
+	return m.memoryService.SaveLessons(ctx, userID, lessons, feedbackIDs)
+}
+
+// PendingChatLearning returns the part of a chat not yet read for durable
+// facts, once enough of it has accumulated, and the facts already known.
+func (m *Module) PendingChatLearning(ctx context.Context, session string, userID int) (transcript string, known []string, throughID int, ok bool, err error) {
+	work, ok, err := m.memoryService.PendingChatLearning(ctx, session, userID)
+	return work.Transcript, work.Known, work.ThroughID, ok, err
+}
+
+// SaveLearnedFacts stores facts learned from a chat; personal facts follow
+// the person, business facts stay with this business.
+func (m *Module) SaveLearnedFacts(ctx context.Context, session string, userID int, personal, business []string, throughID int) error {
+	facts := make([]application.LearnedFact, 0, len(personal)+len(business))
+	for _, value := range personal {
+		facts = append(facts, application.LearnedFact{Personal: true, Value: value})
+	}
+	for _, value := range business {
+		facts = append(facts, application.LearnedFact{Value: value})
+	}
+	return m.memoryService.SaveLearnedFacts(ctx, session, userID, facts, throughID)
+}
+
+// LearnToolRoute remembers which tool served a kind of request.
+func (m *Module) LearnToolRoute(ctx context.Context, userID int, tool string, words []string) error {
+	return m.memoryService.LearnToolRoute(ctx, userID, tool, words)
+}
+
+// ToolRoutes returns the user's learned request-to-tool routes.
+func (m *Module) ToolRoutes(ctx context.Context, userID int) (map[string][][]string, error) {
+	return m.memoryService.ToolRoutes(ctx, userID)
 }

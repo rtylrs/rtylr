@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Copy, RefreshCcw, Check, Volume2, VolumeX } from "lucide-react";
+import {
+  Copy,
+  RefreshCcw,
+  Check,
+  Volume2,
+  VolumeX,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react";
 import { caretTokens } from "../ui/tokens";
 import IconButton from "../ui/IconButton";
 import Tooltip from "../ui/Tooltip";
@@ -11,7 +19,11 @@ export interface MessageActionsProps {
   onRetry?: () => void;
   /** How long the reply took; shown only for replies timed in this session. */
   responseMs?: number;
+  /** Rates the reply; Caret learns lessons from these verdicts. */
+  onRate?: (rating: ReplyRating, reason?: string) => void;
 }
+
+export type ReplyRating = "up" | "down" | "clear";
 
 /** "0.8s", "4.2s", "1m 05s". */
 export function formatResponseTime(ms: number): string {
@@ -27,8 +39,35 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   text,
   onRetry,
   responseMs,
+  onRate,
 }) => {
   const { copy, copied } = useClipboard();
+  const [rating, setRating] = useState<"up" | "down" | null>(null);
+  const [askReason, setAskReason] = useState(false);
+  const [reason, setReason] = useState("");
+  const rate = (next: "up" | "down"): void => {
+    if (!onRate) return;
+    if (rating === next) {
+      setRating(null);
+      setAskReason(false);
+      onRate("clear");
+      return;
+    }
+    setRating(next);
+    setAskReason(next === "down");
+    onRate(next);
+  };
+  const cancelled = useRef(false);
+  const sendReason = (): void => {
+    if (cancelled.current) {
+      cancelled.current = false;
+      return;
+    }
+    const text = reason.trim();
+    setAskReason(false);
+    if (text && onRate) onRate("down", text);
+    setReason("");
+  };
   const utterance = useRef<SpeechSynthesisUtterance | null>(null);
   const [reading, setReading] = useState(false);
   const canRead =
@@ -93,6 +132,36 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
           {reading ? <VolumeX size={11} /> : <Volume2 size={11} />}
         </IconButton>
       </Tooltip>
+      {onRate && (
+        <>
+          <Tooltip label={rating === "up" ? "Remove rating" : "Good reply"}>
+            <IconButton
+              size="sm"
+              label="Good reply"
+              aria-pressed={rating === "up"}
+              onClick={() => rate("up")}
+            >
+              <ThumbsUp
+                size={11}
+                fill={rating === "up" ? "currentColor" : "none"}
+              />
+            </IconButton>
+          </Tooltip>
+          <Tooltip label={rating === "down" ? "Remove rating" : "Bad reply"}>
+            <IconButton
+              size="sm"
+              label="Bad reply"
+              aria-pressed={rating === "down"}
+              onClick={() => rate("down")}
+            >
+              <ThumbsDown
+                size={11}
+                fill={rating === "down" ? "currentColor" : "none"}
+              />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
       {onRetry && (
         <Tooltip label="Retry">
           <IconButton size="sm" label="Retry message" onClick={onRetry}>
@@ -114,6 +183,39 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
             {formatResponseTime(responseMs)}
           </span>
         </Tooltip>
+      )}
+      {askReason && (
+        <input
+          autoFocus
+          aria-label="What was wrong with this reply?"
+          placeholder="What was wrong? Caret will learn from it"
+          value={reason}
+          maxLength={1000}
+          onChange={(event) => setReason(event.target.value)}
+          onKeyDown={(event) => {
+            // Blurring sends the reason, so Enter and leaving the field
+            // both submit it exactly once.
+            if (event.key === "Enter") event.currentTarget.blur();
+            if (event.key === "Escape") {
+              cancelled.current = true;
+              setReason("");
+              setAskReason(false);
+            }
+          }}
+          onBlur={sendReason}
+          style={{
+            flex: "1 1 180px",
+            minWidth: 0,
+            marginLeft: 6,
+            padding: "3px 8px",
+            fontSize: 12,
+            color: caretTokens.text,
+            background: "transparent",
+            border: `1px solid ${caretTokens.border}`,
+            borderRadius: 6,
+            outline: "none",
+          }}
+        />
       )}
     </div>
   );

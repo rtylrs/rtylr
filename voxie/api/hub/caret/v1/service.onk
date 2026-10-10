@@ -15,4 +15,7 @@ service CaretRuntimeService {
   /// Stops the reply generating in a chat. A reply whose client disconnects
   /// otherwise keeps generating and is saved, so the Stop button calls this.
   stopReply(StopReplyRequest) -> StopReplyResponse @post("/ai/generate-text-stream/stop")
+  /// Records a thumbs up or down on a reply. Caret learns lessons from these
+  /// verdicts and follows them in later replies.
+  rateReply(RateReplyRequest) -> RateReplyResponse @post("/caret/feedback")
 }

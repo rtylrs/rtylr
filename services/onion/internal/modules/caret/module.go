@@ -41,6 +41,14 @@ func NewModule(ctx context.Context, memoryService application.MemoryService, quo
 		toolExecutors = append([]application.ToolExecutor{application.NewAssistantToolExecutor(profile, nil)}, toolExecutors...)
 	}
 
+	// Sub-agents call the same executors as the main reply (reads only); the
+	// list is resolved at call time because it includes the agent executor.
+	agents := &application.SubAgentExecutor{AI: snipsService}
+	find := &application.BusinessFindExecutor{}
+	toolExecutors = append(toolExecutors, agents, find)
+	agents.Executors = func() []application.ToolExecutor { return toolExecutors }
+	find.Executors = agents.Executors
+
 	return &Module{
 		snipsService:   snipsService,
 		memoryService:  memoryService,
@@ -55,6 +63,8 @@ func (m *Module) GetSnipsService() *application.Service {
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	learner, _ := m.memoryService.(application.LessonLearner)
+	history, _ := m.memoryService.(handlers.DecisionHistory)
 	if err := hubcaretv1.RegisterCaretServiceServer(
 		api.NewCaretAPI(),
 		hubcaretv1.WithMux(mux),
@@ -66,6 +76,9 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 			Tools:    &handlers.ListToolsHandler{},
 			Status:   &handlers.ProviderStatusHandler{SnipsService: m.snipsService},
 			Decision: &handlers.ToolDecisionHandler{Executors: m.toolExecutors, RequirePendingApproval: true},
+			Learner:  learner,
+			AI:       m.snipsService,
+			History:  history,
 		},
 		hubcaretv1.WithMux(mux),
 	); err != nil {

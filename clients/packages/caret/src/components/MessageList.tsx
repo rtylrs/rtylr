@@ -2,6 +2,7 @@ import React from "react";
 import MessageBubble from "./MessageBubble";
 import { useScrollToBottom } from "../hooks/useScrollToBottom";
 import type { CaretMessage } from "../types/message";
+import type { ReplyRating } from "./MessageActions";
 
 export interface MessageListProps {
   messages: CaretMessage[];
@@ -10,6 +11,7 @@ export interface MessageListProps {
   showThinking?: boolean;
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
+  onRateMessage?: (messageId: string, rating: ReplyRating, reason?: string) => void;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -19,6 +21,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   showThinking,
   onApproveTool,
   onDenyTool,
+  onRateMessage,
 }) => {
   const scrollRef = useScrollToBottom<HTMLDivElement>(
     [messages.length, isStreaming],
@@ -48,6 +51,7 @@ export const MessageList: React.FC<MessageListProps> = ({
             showThinking={showThinking}
             onApproveTool={onApproveTool}
             onDenyTool={onDenyTool}
+            onRate={onRateMessage}
           />
         );
       })}

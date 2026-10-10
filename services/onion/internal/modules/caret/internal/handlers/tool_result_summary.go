@@ -40,7 +40,7 @@ var toolCollectionLabels = map[string]string{
 	"work_schedules": "work schedules",
 }
 
-func summarizeToolResult(name string, _, output map[string]any, status, errorMessage string) string {
+func summarizeToolResult(name string, input, output map[string]any, status, errorMessage string) string {
 	target := toolResultTarget(name)
 	if status == "error" {
 		if strings.TrimSpace(errorMessage) == "" {
@@ -50,6 +50,9 @@ func summarizeToolResult(name string, _, output map[string]any, status, errorMes
 	}
 	if len(output) == 0 {
 		return clampToolSummary("Checked " + target + "; no result data came back.")
+	}
+	if summary, ok := generalToolSummary(name, input, output); ok {
+		return clampToolSummary(summary)
 	}
 	if summary, ok := stringValue(output["summary"]); ok && summary != "" {
 		return clampToolSummary(summary)
@@ -121,6 +124,12 @@ func collectionValue(value any) ([]any, bool) {
 	case []any:
 		return v, true
 	case []map[string]any:
+		out := make([]any, len(v))
+		for i := range v {
+			out[i] = v[i]
+		}
+		return out, true
+	case []map[string]string:
 		out := make([]any, len(v))
 		for i := range v {
 			out[i] = v[i]

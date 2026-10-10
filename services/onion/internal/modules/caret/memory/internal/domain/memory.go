@@ -74,3 +74,29 @@ type ContextItem struct {
 	MemoryKey   string
 	MemoryValue string
 }
+
+// ChatSearchHit is one past message that matched a chat search.
+type ChatSearchHit struct {
+	SessionID string
+	Title     string
+	Role      string
+	Snippet   string
+	CreatedAt time.Time
+}
+
+// ReplyFeedback is the person's verdict on one Caret reply: a thumbs up or
+// down from the app, or a correction they typed in the next message.
+type ReplyFeedback struct {
+	ID        int64
+	SessionID string
+	MessageID int64
+	Rating    string // "up", "down" or "correction".
+	Reason    string
+	Prompt    string
+	Reply     string
+	CreatedAt time.Time
+}
+
+// StoredID is the message's database id, for callers outside the memory
+// module that only see it as an opaque value.
+func (m *ConversationMessage) StoredID() int { return m.ID }

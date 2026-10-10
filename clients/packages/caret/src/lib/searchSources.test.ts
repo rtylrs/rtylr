@@ -36,3 +36,30 @@ describe("replySources", () => {
     expect(replySources([failed])).toEqual([]);
   });
 });
+
+describe("replySources from other tools", () => {
+  it("collects sources from page reads and sub-agents too", () => {
+    const sources = replySources([
+      {
+        id: "a",
+        type: "tool_call",
+        name: "agents.run",
+        status: "success",
+        input: {},
+        output: { sources: [{ title: "Report", url: "https://example.com/r" }] },
+      },
+      {
+        id: "b",
+        type: "tool_call",
+        name: "web.fetch",
+        status: "success",
+        input: {},
+        output: { sources: [{ title: "Page", url: "https://example.org/p" }] },
+      },
+    ] as never);
+    expect(sources.map((source) => source.host)).toEqual([
+      "example.com",
+      "example.org",
+    ]);
+  });
+});

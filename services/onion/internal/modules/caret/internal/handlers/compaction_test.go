@@ -70,7 +70,7 @@ func TestContinuationPromptDropsOldestResultsAndKeepsInstruction(t *testing.T) {
 	if !strings.HasPrefix(got, base) || !strings.Contains(got, "NEWEST") || strings.Contains(got, "OLDEST") {
 		t.Fatal("continuation must keep the base prompt and newest results, dropping the oldest")
 	}
-	if !strings.HasSuffix(got, "Do not repeat completed calls.") {
+	if !strings.HasSuffix(got, "never claim a check that did not run.") {
 		t.Fatal("closing instruction must survive truncation")
 	}
 }
@@ -81,5 +81,13 @@ func TestContinuationPromptHandlesAnOversizedBase(t *testing.T) {
 		if len(got) > maxContinuationBytes || !strings.Contains(got, "NEWEST") {
 			t.Fatalf("base %d: %d bytes, newest kept=%v", baseLen, len(got), strings.Contains(got, "NEWEST"))
 		}
+	}
+}
+
+func TestContinuationPromptKeepsTheRequestOfAnOversizedBase(t *testing.T) {
+	base := "SYSTEM" + strings.Repeat("f", maxContinuationBytes) + "<user_request>REQUEST</user_request>"
+	got := continuationPrompt(base, "results", "", false)
+	if !strings.HasPrefix(got, "SYSTEM") || !strings.Contains(got, "<user_request>REQUEST</user_request>") || len(got) > maxContinuationBytes {
+		t.Fatalf("continuation lost the request or overflowed: %d bytes", len(got))
 	}
 }

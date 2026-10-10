@@ -31,4 +31,12 @@ type repository interface {
 	SaveMemory(context.Context, int, string) (*domain.UserMemory, error)
 	DeleteMemory(context.Context, int) error
 	ProjectConversationContext(context.Context, string, string) (string, error)
+	SearchChats(context.Context, int, string, int) ([]domain.ChatSearchHit, error)
+	SaveReplyFeedback(context.Context, int, domain.ReplyFeedback) error
+	PendingReplyFeedback(context.Context, int, int) ([]domain.ReplyFeedback, error)
+	ReplaceLessons(context.Context, int, []string, []int64) error
+	UserLessons(context.Context, int) ([]string, error)
+	SetChatMetadataNumber(context.Context, string, int, string, int) error
+	SaveToolRoute(context.Context, int, string, string) error
+	ToolRoutes(context.Context, int) ([]string, error)
 }

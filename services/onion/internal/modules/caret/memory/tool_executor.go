@@ -25,7 +25,9 @@ type rememberToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != rememberToolName {
+	switch name {
+	case rememberToolName, "memory.list", "memory.forget", "chats.search", "chats.read":
+	default:
 		return nil, false, nil
 	}
 	if m == nil || m.memoryService == nil {
@@ -35,6 +37,16 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	userID := authenticatedUserID(ctx)
 	if userID <= 0 {
 		return nil, true, errors.New("sign in is required before Caret can remember this")
+	}
+	switch name {
+	case "memory.list":
+		return m.listMemoriesTool(ctx)
+	case "memory.forget":
+		return m.forgetMemoryTool(ctx, input)
+	case "chats.search":
+		return m.searchChatsTool(ctx, int(userID), input)
+	case "chats.read":
+		return m.readChatTool(ctx, int(userID), input)
 	}
 
 	parsed, err := parseRememberToolInput(input)

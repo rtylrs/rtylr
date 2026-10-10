@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/voxire/onion/internal/modules/caret/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
 )
@@ -18,6 +21,93 @@ type RuntimeAPI struct {
 	Tools    *ListToolsHandler
 	Status   *ProviderStatusHandler
 	Decision *ToolDecisionHandler
+	// Learner stores reply feedback; AI distills it into lessons.
+	Learner application.LessonLearner
+	AI      application.TextCompleter
+	// History records an approved or skipped action in its chat.
+	History DecisionHistory
+}
+
+// DecisionHistory is the part of the memory module that records a decided
+// action in the chat it came from.
+type DecisionHistory interface {
+	EnsureSessionOwnership(ctx context.Context, sessionID string, userID int) error
+	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
+}
+
+// recordDecision notes what happened to a proposal in its chat, so the next
+// turn's history says the action was done (or skipped) rather than pending.
+func (a *RuntimeAPI) recordDecision(ctx context.Context, sessionID string, resp ToolDecisionResponse) {
+	user, ok := authPkg.GetAuthUser(ctx)
+	sessionID = strings.TrimSpace(sessionID)
+	if a.History == nil || sessionID == "" || !ok || user == nil || user.UserID <= 0 {
+		return
+	}
+	note := decisionNote(resp)
+	if note == "" {
+		return
+	}
+	if err := a.History.EnsureSessionOwnership(ctx, sessionID, int(user.UserID)); err != nil {
+		return
+	}
+	if _, err := a.History.StoreMessage(ctx, sessionID, int(user.UserID), "assistant", note, len(note)/4); err != nil {
+		logger.Ctx(ctx).Warn("Could not record a tool decision in its chat", logger.Error(err))
+	}
+}
+
+func decisionNote(resp ToolDecisionResponse) string {
+	action := strings.TrimSpace(resp.Preview)
+	if action == "" {
+		action = resp.Tool.Name
+	}
+	switch {
+	case resp.Status == "denied":
+		return "Skipped at your request: " + action + ". No changes were made."
+	case resp.Executed:
+		note := "Done: " + action + "."
+		if message := strings.TrimSpace(resp.Message); message != "" && message != action {
+			note += " " + message
+		}
+		return note
+	default:
+		return ""
+	}
+}
+
+// RateReply records the caller's verdict on a reply in one of their chats and,
+// when it is worth it, starts a background pass that learns from it.
+func (a *RuntimeAPI) RateReply(ctx context.Context, req *hubcaretv1.RateReplyRequest) (*hubcaretv1.RateReplyResponse, error) {
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || user == nil || user.UserID <= 0 {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if strings.TrimSpace(req.GetSessionId()) == "" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "session_id is required")
+	}
+	if a.Learner == nil {
+		return nil, onekiterrors.New(http.StatusServiceUnavailable, "feedback is unavailable")
+	}
+	rating := strings.ToLower(strings.TrimSpace(req.GetRating()))
+	if rating != "up" && rating != "down" && rating != "clear" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "rating must be up, down or clear")
+	}
+	pending, err := a.Learner.RecordReplyFeedback(ctx, req.GetSessionId(), int(user.UserID), req.GetMessageId(), rating, req.GetReason())
+	if err != nil {
+		return nil, err
+	}
+	if a.AI != nil && application.ShouldDistillLessons(rating, pending) {
+		go learnFromFeedback(context.WithoutCancel(ctx), a.AI, a.Learner, int(user.UserID))
+	}
+	return &hubcaretv1.RateReplyResponse{Saved: true}, nil
+}
+
+// learnFromFeedback runs one distillation pass; failures only delay learning.
+func learnFromFeedback(ctx context.Context, ai application.TextCompleter, learner application.LessonLearner, userID int) {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	if err := application.DistillLessons(ctx, ai, learner, userID); err != nil {
+		logger.Ctx(ctx).Warn("Caret could not learn from feedback", logger.Error(err))
+	}
 }
 
 func (a *RuntimeAPI) ListTools(ctx context.Context, req *hubcaretv1.ListToolsRequest) (*hubcaretv1.ListToolsResponse, error) {
@@ -69,6 +159,7 @@ func (a *RuntimeAPI) DecideTool(ctx context.Context, req *hubcaretv1.ToolDecisio
 	if err != nil {
 		return nil, err
 	}
+	a.recordDecision(ctx, req.GetSessionId(), resp)
 	var output json.RawMessage
 	if resp.Output != nil {
 		if output, err = json.Marshal(resp.Output); err != nil {

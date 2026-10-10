@@ -86,3 +86,12 @@ func TestExecuteToolWithTimeoutHonorsCanceledParentContext(t *testing.T) {
 		t.Fatalf("expected canceled context, got %v", err)
 	}
 }
+
+func TestToolTimeoutGivesMultiStepToolsLonger(t *testing.T) {
+	if ToolTimeout("crm.list_customers") != ToolExecutionTimeout {
+		t.Fatal("ordinary tools must keep the default timeout")
+	}
+	if ToolTimeout("agents.run") <= ToolExecutionTimeout || ToolTimeout("web.fetch") <= ToolExecutionTimeout {
+		t.Fatal("multi-step tools need a longer timeout")
+	}
+}

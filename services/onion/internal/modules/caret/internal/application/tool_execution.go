@@ -12,13 +12,29 @@ import (
 )
 
 const (
-	MaxToolCallsPerTurn   = 10
+	MaxToolCallsPerTurn   = 16
 	maxToolInputBytes     = 12 * 1024
 	maxToolInputKeys      = 32
 	ToolExecutionTimeout  = 15 * time.Second
 	MaxToolStringValueLen = 4000
 	MaxToolOutputBytes    = 24000
 )
+
+// slowToolTimeouts lets the tools that do several steps of their own run
+// longer than a single read.
+var slowToolTimeouts = map[string]time.Duration{
+	"web.fetch":     25 * time.Second,
+	"places.search": 26 * time.Second,
+	"agents.run":    150 * time.Second,
+}
+
+// ToolTimeout is how long one call of the named tool may run.
+func ToolTimeout(name string) time.Duration {
+	if timeout, ok := slowToolTimeouts[name]; ok {
+		return timeout
+	}
+	return ToolExecutionTimeout
+}
 
 var (
 	ErrToolCallLimit     = errors.New("tool call limit reached for this response")
@@ -155,7 +171,7 @@ func ExecuteToolWithTimeout(ctx context.Context, executors []ToolExecutor, name 
 		}
 	}()
 
-	callCtx, cancel := context.WithTimeout(ctx, ToolExecutionTimeout)
+	callCtx, cancel := context.WithTimeout(ctx, ToolTimeout(name))
 	defer cancel()
 	for _, executor := range executors {
 		if executor == nil {

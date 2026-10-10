@@ -173,3 +173,37 @@ func TestRenderTurnNotesToolStepsAndClipsLongMessages(t *testing.T) {
 		t.Fatal("clipping must not split a multi-byte character")
 	}
 }
+
+type lessonRepository struct{ *chatRepository }
+
+func (r lessonRepository) AssistantMemories(context.Context, string) ([]domain.UserMemory, error) {
+	return []domain.UserMemory{
+		{MemoryType: "preference", Value: "Currency is USD"},
+		{MemoryType: LessonMemoryType, Value: "Lead with the number, then one line of context."},
+	}, nil
+}
+
+func TestAssistantContextGivesLessonsTheirOwnSection(t *testing.T) {
+	got, err := NewService(lessonRepository{chatWithTurns(1, 10)}).AssistantContext(context.Background(), "s", 1, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	lessons := strings.Index(got, "Lessons from this person's feedback")
+	saved := strings.Index(got, "Saved user preferences:\n- Currency is USD")
+	if lessons < 0 || saved < 0 || !strings.Contains(got[lessons:saved], "Lead with the number") {
+		t.Fatalf("context = %s", got)
+	}
+}
+
+type learnedFactRepository struct{ *chatRepository }
+
+func (r learnedFactRepository) AssistantMemories(context.Context, string) ([]domain.UserMemory, error) {
+	return []domain.UserMemory{{MemoryType: "business_fact", Key: "learned_ab12", Value: "Opens at 7am"}}, nil
+}
+
+func TestAssistantContextMarksInferredFacts(t *testing.T) {
+	got, err := NewService(learnedFactRepository{chatWithTurns(1, 10)}).AssistantContext(context.Background(), "s", 1, "")
+	if err != nil || !strings.Contains(got, "- Opens at 7am (picked up from a chat, not confirmed)") {
+		t.Fatalf("context = %s, %v", got, err)
+	}
+}

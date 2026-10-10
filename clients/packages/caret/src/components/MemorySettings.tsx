@@ -199,6 +199,20 @@ export const MemorySettings: React.FC<MemorySettingsProps> = ({
                       }}
                     >
                       {memory.value}
+                      {memory.origin && (
+                        <span
+                          style={{
+                            display: "block",
+                            marginTop: 2,
+                            fontSize: 11,
+                            color: caretTokens.textDim,
+                          }}
+                        >
+                          {memory.origin === "feedback"
+                            ? "Learned from your feedback"
+                            : "Picked up from a chat"}
+                        </span>
+                      )}
                     </span>
                     <span
                       className="caret-memory-actions"

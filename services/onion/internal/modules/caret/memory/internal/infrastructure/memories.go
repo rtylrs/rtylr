@@ -14,7 +14,7 @@ import (
 // personal preferences everywhere, and facts learned in a chat of the current
 // business. Parameters: user, user, legacy business, business.
 const memoryVisibility = `m.user_id=? AND m.confidence>0.7 AND (
-	m.memory_type IN ('preference','interest') OR EXISTS (
+	m.memory_type IN ('preference','interest','lesson') OR EXISTS (
 		SELECT 1 FROM chat_sessions source_chat
 		WHERE source_chat.session_id=m.source_session AND source_chat.user_id=?
 		AND COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(source_chat.metadata,'$.business_id')) AS UNSIGNED),?)=?

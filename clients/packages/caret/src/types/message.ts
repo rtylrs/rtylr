@@ -33,7 +33,9 @@ export type ContentBlock = TextBlock | ThinkingBlock | ToolCallBlock;
 
 export interface CaretImageAttachment {
   name: string;
+  /** Empty for a text file, which is shown by name. */
   dataUrl: string;
+  kind?: "image" | "file";
 }
 
 export interface CaretMessage {
@@ -46,6 +48,8 @@ export interface CaretMessage {
   attachments?: CaretImageAttachment[];
   /** How long the reply took, from sending the prompt to the last token. */
   responseMs?: number;
+  /** The saved message's id, once the server has stored the reply. */
+  storedId?: string;
   /** Next questions the reply suggests, shown as buttons under it. */
   followUps?: string[];
 }

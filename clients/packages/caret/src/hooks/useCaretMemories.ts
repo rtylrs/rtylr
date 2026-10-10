@@ -5,6 +5,8 @@ export interface CaretMemoryItem {
   id: string;
   value: string;
   updatedAt?: string;
+  /** How Caret learned it when nobody told it directly. */
+  origin?: "feedback" | "chat";
 }
 
 interface UseCaretMemoriesParams {
@@ -32,6 +34,10 @@ export function useCaretMemories({
           id: memory.id as string,
           value: memory.value as string,
           updatedAt: memory.updatedAt,
+          origin:
+            memory.origin === "feedback" || memory.origin === "chat"
+              ? memory.origin
+              : undefined,
         }));
     },
   });

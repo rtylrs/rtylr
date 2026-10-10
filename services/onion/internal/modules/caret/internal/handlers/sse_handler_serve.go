@@ -40,6 +40,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 
 		return
 	}
+	// Attached PDFs become text before anything else sees the request.
+	if req.Files, err = application.ExtractAttachedFiles(req.Files); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	if h.AiService == nil || !h.AiService.IsAvailable() {
 		log.Warn("AI service not available")
@@ -103,8 +108,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	}
 
 	requestNow := time.Now()
+	// The chat history keeps the start of each attached file, so follow-up
+	// questions still know what was shared; this turn sees the files whole.
+	request := req.Prompt
 	prepared, setupErr := application.PrepareTurn(ctx, h.MemoryService, application.TurnRequest{
-		Prompt:        req.Prompt,
+		Prompt:        req.Prompt + application.AttachedFilesHistoryNote(req.Files),
 		SessionID:     req.SessionID,
 		UserID:        req.UserID,
 		SystemContext: req.SystemContext,
@@ -120,11 +128,17 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	}
 	req.Mode = "agent"
 	req.Prompt = prepared.Request.Prompt
+	if len(req.Files) > 0 {
+		req.Prompt = application.SanitizeUserInput(request, application.MaxUserPromptLen)
+	}
 	req.SessionID = prepared.Request.SessionID
 	req.UserID = prepared.Request.UserID
 	req.SystemContext = prepared.Request.SystemContext
 	req.PageContext = prepared.Request.PageContext
 	ctx = snips.WithConversation(ctx, req.SessionID)
+	if application.LooksLikeCorrection(req.Prompt) {
+		h.learnFromCorrection(ctx, req.SessionID, int(authUserID), req.Prompt)
+	}
 
 	// Do not spend a model call on connectivity checks. A content-free prompt
 	// gives a generative model room to invent a plausible business report even
@@ -145,7 +159,19 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 			return
 		}
 	}
-	enhancedPrompt := application.BuildAssistantPrompt(req.Prompt, req.SystemContext, savedContext, req.PageContext, requestNow)
+	location := application.LocationFor(req.Timezone)
+	ctx = application.WithUserLocation(ctx, location)
+	var routes application.ToolRoutes
+	if router, ok := h.MemoryService.(application.ToolRouter); ok {
+		// Routing hints only; a failed read just means no shortcuts this turn.
+		if learned, routeErr := router.ToolRoutes(ctx, int(authUserID)); routeErr == nil {
+			routes = learned
+		}
+	}
+	enhancedPrompt := application.BuildAssistantPromptFor(application.AssistantPromptInput{
+		Request: req.Prompt, Scope: req.SystemContext, Context: savedContext, Files: req.Files,
+		PageContext: req.PageContext, Now: requestNow.In(location), Routes: routes,
+	})
 	ctx = snips.WithImages(ctx, req.Images)
 
 	cachePlan := application.BuildCacheWritePlan(mode, application.TurnRequest{
@@ -157,9 +183,10 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	cachePlan = application.DisableExactCachePlan(cachePlan, "conversation and project context change between turns")
 	cachePlan.ProviderPlannerOnly = false
 	// Multi-step requests (find the tool, list, look up a detail, answer) need
-	// several rounds; a final wrap-up round always explains what ran.
-	cachePlan.ToolBudget = 10
-	cachePlan.ContinuationBudget = 5
+	// several rounds, and one round can run several reads at once; a final
+	// wrap-up round always explains what ran.
+	cachePlan.ToolBudget = application.MaxToolCallsPerTurn
+	cachePlan.ContinuationBudget = 6
 	req.EnhancedPrompt = enhancedPrompt
 
 	h.setupSSEHeaders(w)

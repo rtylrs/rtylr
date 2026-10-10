@@ -25,3 +25,34 @@ describe("MessageActions reply time", () => {
     expect(screen.queryByLabelText(/Replied in/)).toBeNull();
   });
 });
+
+describe("MessageActions rating", () => {
+  it("rates up, clears on a second click, and asks why on a thumbs down", async () => {
+    const { fireEvent } = await import("@testing-library/react");
+    const calls: Array<[string, string | undefined]> = [];
+    render(
+      <MessageActions
+        text="Hey!"
+        onRate={(rating, reason) => calls.push([rating, reason])}
+      />,
+    );
+    fireEvent.click(screen.getByLabelText("Good reply"));
+    fireEvent.click(screen.getByLabelText("Good reply"));
+    fireEvent.click(screen.getByLabelText("Bad reply"));
+    const input = screen.getByLabelText("What was wrong with this reply?");
+    fireEvent.change(input, { target: { value: "too long" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.blur(input);
+    expect(calls).toEqual([
+      ["up", undefined],
+      ["clear", undefined],
+      ["down", undefined],
+      ["down", "too long"],
+    ]);
+  });
+
+  it("hides rating buttons without a handler", () => {
+    render(<MessageActions text="Hey!" />);
+    expect(screen.queryByLabelText("Good reply")).toBeNull();
+  });
+});

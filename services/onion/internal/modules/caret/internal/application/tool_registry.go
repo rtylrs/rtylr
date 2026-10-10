@@ -21,16 +21,27 @@ type ToolDef struct {
 	ApprovalReason   string `json:"approval_reason,omitempty"`
 }
 
-// CoreTools is the seed registry — the long-term plan is to source this
+// CoreTools is every tool Caret can call: the business seed registry plus
+// the general tools (web, reference data, utilities) that need no business
+// data.
+var CoreTools = append(append([]ToolDef(nil), seedTools...), generalToolDefs...)
+
+// seedTools is the business registry. The long-term plan is to source this
 // list from each module's MCP descriptor.
-var CoreTools = []ToolDef{
-	{Name: "web.search", Description: "Search the public web for current information and return an answer with sources. Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question"}`},
+var seedTools = []ToolDef{
+	{Name: "web.search", Description: "Search the public web or the news for current information. Returns results with snippets and source links (and publish dates for news). Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question","news":false,"recency":"optional day|week|month|year"}`},
 	{Name: "tools.search", Description: "Find more tools by describing what you need, e.g. \"list team members\" or \"unpaid invoices\". Covers HR and the team, CRM customers, POS and store orders, products and stock, finance, bookings, support, loyalty, Flow tasks, and insights. Returns matching tools with their inputs; call one next.", Module: "tools", Scope: "read", InputHint: `{"query":"what you need"}`},
+	{Name: "agents.run", Description: "Run up to four sub-agents in parallel, one per independent part of a bigger task (e.g. research each competitor, compare each option, check each question). Each works on its own with read-only tools (web search and pages, reference data, business reads) and returns a report with sources. Use it when parts don't depend on each other; give each a self-contained task.", Module: "agents", Scope: "read", InputHint: `{"tasks":[{"task":"self-contained instruction","context":"optional details it needs"}],"context":"optional background shared by all tasks"}`, OutputHint: "One report per task (status, findings, steps taken) and the combined web sources.", Freshness: "live at request time", SideEffect: "read-only; sub-agents can't change anything"},
 	{Name: "account.profile", Description: "Read the authenticated person's name and current business identity.", Module: "account", Scope: "read", InputHint: `{}`},
-	{Name: "utilities.calculate", Description: "Evaluate arithmetic using numbers supplied by the user or verified results.", Module: "utilities", Scope: "read", InputHint: `{"expression":"(120 * 0.2) + 8"}`},
-	{Name: "utilities.time", Description: "Get the current date and time in an IANA timezone.", Module: "utilities", Scope: "read", InputHint: `{"timezone":"Asia/Beirut"}`},
+	{Name: "utilities.calculate", Description: "Evaluate arithmetic exactly using numbers supplied by the user or verified results. Supports + - * / parentheses, percentages (\"15% of 200\"), pi, and sqrt, pow, round(x, places), min, max, abs, floor, ceil, ln, log10, exp.", Module: "utilities", Scope: "read", InputHint: `{"expression":"round((120 * 0.2) + pow(1.05, 3), 2)"}`},
+	{Name: "utilities.time", Description: "Get the current date and time in an IANA timezone; with no timezone, in the person's own.", Module: "utilities", Scope: "read", InputHint: `{"timezone":"optional, e.g. Asia/Beirut"}`},
+	{Name: "business.find", Description: "Find a person, customer, product, supplier, invoice, ticket, task or appointment by name across every app at once (\"Rana\", \"Acme\", \"latte\"). Use it when you don't know which app holds the record; it returns matches with the tool to open each one.", Module: "business", Scope: "read", InputHint: `{"query":"name or word"}`, OutputHint: "Matching records with kind, name, id and key fields, and the get tool for details.", Freshness: "live at request time", SideEffect: "read-only"},
 	{Name: "business.snapshot", Description: "Build a tenant-scoped owner snapshot across sales, finance, inventory, CRM, HR, and Flow.", Module: "business", Scope: "read"},
 	{Name: "business.get_kpis", Description: "Get headline business KPIs across revenue, orders, staff, customers, stock, and apps.", Module: "business", Scope: "read"},
+	{Name: "memory.list", Description: "List what Caret remembers about the person and their business, with ids. Check it before proposing a memory, when asked what Caret knows about them, or to find a memory to forget.", Module: "memory", Scope: "read", InputHint: `{}`, OutputHint: "Each memory's id, type, text and last update.", Freshness: "live", SideEffect: "read-only"},
+	{Name: "memory.forget", Description: "Forget one saved memory by id (from memory.list) when the person asks Caret to stop using it or it is wrong.", Module: "memory", Scope: "write", RequiresApproval: true, InputHint: `{"id":123}`, OutputHint: "The forgotten memory's id.", Freshness: "persistent after approval", SideEffect: "deletes one saved memory", ApprovalReason: "This removes something Caret remembers."},
+	{Name: "chats.search", Description: "Search the person's past Caret chats in this business for a topic, decision, number or name they discussed before (\"what did we decide about pricing\", \"the supplier I mentioned last week\").", Module: "chats", Scope: "read", InputHint: `{"query":"words to look for","limit":10}`, OutputHint: "Matching excerpts with chat id, chat title, who said it and the date.", Freshness: "live", SideEffect: "read-only"},
+	{Name: "chats.read", Description: "Read the latest messages of one past chat found with chats.search.", Module: "chats", Scope: "read", InputHint: `{"chat_id":"id from chats.search","limit":20}`, OutputHint: "The chat title and its recent messages.", Freshness: "live", SideEffect: "read-only"},
 	{Name: "memory.remember", Description: "Remember a user-approved business fact, preference, reporting default, or operating rule for future Caret answers.", Module: "memory", Scope: "write", RequiresApproval: true},
 	{Name: "analytics.query", Description: "Run a tenant-scoped, read-only analytics query over allowlisted business views.", Module: "analytics", Scope: "read"},
 	{Name: "documents.map_form_fields", Description: "Map values from a document (scanned form, invoice, onboarding sheet, intake note) onto form fields. Returns a per-field plan with fill, check, click, or skip decisions, values, confidence, and review flags.", Module: "documents", Scope: "read"},
@@ -61,7 +72,7 @@ var CoreTools = []ToolDef{
 	{Name: "crm.get_customer", Description: "Get a CRM customer profile by ID, including contact, loyalty, spend, visit, tag, and note details.", Module: "crm", Scope: "read"},
 	{Name: "crm.create_customer", Description: "Create a CRM customer.", Module: "crm", Scope: "write", RequiresApproval: true},
 	{Name: "crm.list_campaigns", Description: "List CRM marketing campaigns and engagement counts.", Module: "crm", Scope: "read"},
-	{Name: "crm.get_campaign", Description: "Get a CRM marketing campaign.", Module: "crm", Scope: "read"},
+	{Name: "crm.get_campaign", Description: "Get a CRM marketing campaign by ID.", Module: "crm", Scope: "read"},
 	{Name: "crm.list_segments", Description: "List CRM customer segments.", Module: "crm", Scope: "read"},
 	{Name: "loyalty.get_config", Description: "Get loyalty program configuration.", Module: "loyalty", Scope: "read"},
 	{Name: "loyalty.list_members", Description: "List loyalty members by points and visits.", Module: "loyalty", Scope: "read"},
@@ -83,16 +94,16 @@ var CoreTools = []ToolDef{
 	{Name: "pos.list_low_stock_items", Description: "List low-stock POS branch inventory items.", Module: "pos", Scope: "read"},
 	{Name: "pos.refund_order", Description: "Refund a POS order.", Module: "pos", Scope: "write", RequiresApproval: true},
 	{Name: "store.list_orders", Description: "List ecommerce store orders.", Module: "store", Scope: "read"},
-	{Name: "store.get_order", Description: "Get an ecommerce store order with line items.", Module: "store", Scope: "read"},
+	{Name: "store.get_order", Description: "Get an ecommerce store order by ID, with line items.", Module: "store", Scope: "read"},
 	{Name: "store.list_products", Description: "List ecommerce store products.", Module: "store", Scope: "read"},
 	{Name: "store.get_product", Description: "Get an ecommerce store product by ID, inventory product ID, slug, or title.", Module: "store", Scope: "read"},
 	{Name: "store.list_categories", Description: "List ecommerce store categories.", Module: "store", Scope: "read"},
 	{Name: "support.list_tickets", Description: "List customer support tickets.", Module: "support", Scope: "read"},
-	{Name: "support.get_ticket", Description: "Get a support ticket with its messages.", Module: "support", Scope: "read"},
+	{Name: "support.get_ticket", Description: "Get a support ticket by ID, with its messages.", Module: "support", Scope: "read"},
 	{Name: "support.list_inbox", Description: "List active support inbox items.", Module: "support", Scope: "read"},
 	{Name: "support.get_unread_count", Description: "Get the count of open support tickets.", Module: "support", Scope: "read"},
 	{Name: "support.list_customers", Description: "List support customers.", Module: "support", Scope: "read"},
-	{Name: "support.get_customer", Description: "Get a support customer summary.", Module: "support", Scope: "read"},
+	{Name: "support.get_customer", Description: "Get a support customer summary by ID.", Module: "support", Scope: "read"},
 	{Name: "support.list_canned_responses", Description: "List reusable support canned responses.", Module: "support", Scope: "read"},
 	{Name: "support.list_articles", Description: "List support knowledge-base articles.", Module: "support", Scope: "read"},
 	{Name: "support.get_article", Description: "Get a support knowledge-base article by ID, slug, or title.", Module: "support", Scope: "read"},
@@ -133,18 +144,18 @@ var CoreTools = []ToolDef{
 	{Name: "hr.list_reviews", Description: "List HR performance reviews.", Module: "hr", Scope: "read"},
 	{Name: "hr.list_leave_types", Description: "List HR leave types and accrual settings.", Module: "hr", Scope: "read"},
 	{Name: "hr.list_leave_requests", Description: "List HR leave requests and approval status.", Module: "hr", Scope: "read"},
-	{Name: "hr.get_leave_balances", Description: "Get leave balances for an employee and year.", Module: "hr", Scope: "read"},
+	{Name: "hr.get_leave_balances", Description: "Get leave balances for an employee and year.", Module: "hr", Scope: "read", InputHint: `{"employee_id":"id from hr.list_employees","year":2026}`},
 	{Name: "hr.get_leave_calendar", Description: "Get approved or pending leave on the HR calendar.", Module: "hr", Scope: "read"},
 	{Name: "hr.list_overtime_requests", Description: "List overtime requests and approval status.", Module: "hr", Scope: "read"},
 	{Name: "hr.get_overtime_config", Description: "Get HR overtime rules and auto-detection settings.", Module: "hr", Scope: "read"},
 	{Name: "hr.get_payroll_config", Description: "Get payroll period and overtime configuration.", Module: "hr", Scope: "read"},
 	{Name: "hr.list_payroll_runs", Description: "List payroll runs and totals.", Module: "hr", Scope: "read"},
-	{Name: "hr.get_payroll_run", Description: "Get a payroll run with employee entries.", Module: "hr", Scope: "read"},
+	{Name: "hr.get_payroll_run", Description: "Get a payroll run by ID, with employee entries.", Module: "hr", Scope: "read"},
 	{Name: "hr.list_time_entries", Description: "List employee time entries for a period.", Module: "hr", Scope: "read"},
 	{Name: "hr.list_timesheets", Description: "List employee timesheets.", Module: "hr", Scope: "read"},
 	{Name: "hr.get_timesheet", Description: "Get a timesheet by ID or employee period.", Module: "hr", Scope: "read"},
 	{Name: "hr.list_attendance", Description: "List attendance records for an employee.", Module: "hr", Scope: "read"},
-	{Name: "hr.get_location_attendance", Description: "Get branch attendance records for a day.", Module: "hr", Scope: "read"},
+	{Name: "hr.get_location_attendance", Description: "Get branch attendance records for a day.", Module: "hr", Scope: "read", InputHint: `{"location_id":"id from hr.list_locations","date":"YYYY-MM-DD"}`},
 	{Name: "hr.create_employee", Description: "Create an HR employee record.", Module: "hr", Scope: "write", RequiresApproval: true},
 	{Name: "flow.list_tasks", Description: "List Flow tasks.", Module: "flow", Scope: "read"},
 	{Name: "flow.get_task", Description: "Get a Flow task by ID, including subtasks, comments, and recent activity.", Module: "flow", Scope: "read"},
@@ -155,7 +166,7 @@ var CoreTools = []ToolDef{
 	{Name: "finance.list_invoices", Description: "List finance invoices.", Module: "finance", Scope: "read"},
 	{Name: "finance.get_invoice", Description: "Get a finance invoice by ID, including customer, line item, payment, balance, and due-date details.", Module: "finance", Scope: "read"},
 	{Name: "finance.get_balance_sheet", Description: "Get a finance balance sheet summary.", Module: "finance", Scope: "read"},
-	{Name: "finance.get_cash_flow_report", Description: "Get a finance cash-flow report for month, quarter, or year.", Module: "finance", Scope: "read"},
+	{Name: "finance.get_cash_flow_report", Description: "Get a finance cash-flow report for month, quarter, or year.", Module: "finance", Scope: "read", InputHint: `{"period":"month|quarter|year"}`},
 	{Name: "finance.list_expenses", Description: "List finance expenses.", Module: "finance", Scope: "read"},
 	{Name: "finance.get_expense", Description: "Get a finance expense by ID, including category, amount, vendor, receipt, date, and approval status.", Module: "finance", Scope: "read"},
 	{Name: "finance.list_expense_categories", Description: "List finance expense categories.", Module: "finance", Scope: "read"},
@@ -183,14 +194,19 @@ var CoreTools = []ToolDef{
 	{Name: "booking.list_waitlist", Description: "List booking waitlist entries.", Module: "booking", Scope: "read"},
 	{Name: "booking.list_reminders", Description: "List booking reminders and delivery state.", Module: "booking", Scope: "read"},
 	{Name: "booking.create_appointment", Description: "Create a booking appointment.", Module: "booking", Scope: "write", RequiresApproval: true},
-	{Name: "pos.get_day_summary", Description: "Get POS sales, tax, tips, refunds, orders, and payments for a day.", Module: "pos", Scope: "read"},
+	{Name: "pos.get_day_summary", Description: "Get POS sales, tax, tips, refunds, orders, and payments for a day.", Module: "pos", Scope: "read", InputHint: `{"date":"YYYY-MM-DD"}`},
 }
 
 var promptExecutableTools = map[string]struct{}{
-	"web.search": {}, "tools.search": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
+	"web.search": {}, "tools.search": {}, "agents.run": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
 	"business.snapshot":                   {},
+	"business.find":                       {},
 	"business.get_kpis":                   {},
 	"memory.remember":                     {},
+	"memory.list":                         {},
+	"memory.forget":                       {},
+	"chats.search":                        {},
+	"chats.read":                          {},
 	"analytics.query":                     {},
 	"documents.map_form_fields":           {},
 	"insights.get_dashboard":              {},
@@ -387,6 +403,16 @@ func ValidateToolRegistry() error {
 			return fmt.Errorf("prompt executable %q is not registered", name)
 		}
 	}
+	for _, tool := range generalToolDefs {
+		if _, ok := generalTools[tool.Name]; !ok {
+			return fmt.Errorf("general tool %q has no handler", tool.Name)
+		}
+	}
+	for name := range generalTools {
+		if _, ok := seen[name]; !ok {
+			return fmt.Errorf("general tool handler %q is not registered", name)
+		}
+	}
 	return nil
 }
 
@@ -439,6 +465,9 @@ func ToolAllowedForMode(m CaretMode, tool ToolDef) bool {
 }
 
 func promptToolCanExecute(name string) bool {
+	if _, ok := generalTools[name]; ok {
+		return true
+	}
 	_, ok := promptExecutableTools[name]
 	return ok
 }

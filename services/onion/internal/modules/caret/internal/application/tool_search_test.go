@@ -70,3 +70,23 @@ func TestAssistantPromptAlwaysOffersToolSearch(t *testing.T) {
 		t.Fatal("assistant prompt must always offer tools.search and explain it")
 	}
 }
+
+func TestSearchToolsFindsGeneralTools(t *testing.T) {
+	for query, want := range map[string]string{
+		"weather forecast":         "weather.forecast",
+		"stock price for a ticker": "markets.quote",
+		"convert dollars to euros": "currency.convert",
+		"read a link":              "web.fetch",
+		"public holidays":          "calendar.public_holidays",
+	} {
+		found := false
+		for _, tool := range SearchTools(ModeAgent, query) {
+			if tool.Name == want {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("tools.search %q did not find %s", query, want)
+		}
+	}
+}

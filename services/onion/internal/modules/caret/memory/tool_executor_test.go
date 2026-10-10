@@ -58,3 +58,19 @@ func TestParseRememberToolInputRejectsEmptyValue(t *testing.T) {
 		t.Fatal("expected empty value to be rejected")
 	}
 }
+
+func TestToolIntAcceptsNumbersAndStrings(t *testing.T) {
+	if toolInt(map[string]any{"id": 42.0}, "id") != 42 || toolInt(map[string]any{"memory_id": " 7 "}, "id", "memory_id") != 7 || toolInt(map[string]any{}, "id") != 0 {
+		t.Fatal("toolInt misread its input")
+	}
+}
+
+func TestMemoryExecutorIgnoresOtherTools(t *testing.T) {
+	var m *Module
+	if _, executed, _ := m.ExecuteCaretTool(nil, "crm.list_customers", nil); executed {
+		t.Fatal("memory executor claimed a tool it does not own")
+	}
+	if _, executed, err := m.ExecuteCaretTool(nil, "chats.search", nil); !executed || err == nil {
+		t.Fatal("a missing service must be reported for owned tools")
+	}
+}

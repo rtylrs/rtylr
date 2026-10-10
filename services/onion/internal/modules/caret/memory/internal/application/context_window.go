@@ -18,8 +18,10 @@ const (
 	messageClipBytes      = 10000
 	profileBudgetBytes    = 4000
 	memoriesBudgetBytes   = 4000
-	summaryBudgetBytes    = 6000
-	projectBudgetBytes    = 8000
+	// Lessons fit whole: 15 of up to 300 characters, as the distiller keeps.
+	lessonsBudgetBytes = 4500
+	summaryBudgetBytes = 6000
+	projectBudgetBytes = 8000
 
 	// Compaction starts once unsummarized history no longer fits the window,
 	// and folds older turns in until the newest compactKeepBytes remain
@@ -173,15 +175,35 @@ func compactionSplit(uncovered []domain.ConversationMessage) []domain.Conversati
 	return uncovered[:1]
 }
 
-func renderMemories(memories []domain.UserMemory) string {
+// LessonMemoryType marks a memory distilled from the person's feedback on
+// Caret's replies: how they want Caret to work, rather than a fact.
+const LessonMemoryType = "lesson"
+
+// splitLessons separates feedback lessons from the other memories.
+func splitLessons(memories []domain.UserMemory) (lessons, others []domain.UserMemory) {
+	for _, memory := range memories {
+		if memory.MemoryType == LessonMemoryType {
+			lessons = append(lessons, memory)
+		} else {
+			others = append(others, memory)
+		}
+	}
+	return lessons, others
+}
+
+func renderMemories(memories []domain.UserMemory, budget int) string {
 	var out strings.Builder
 	for _, memory := range memories {
 		value := strings.TrimSpace(memory.Value)
 		if value == "" {
 			continue
 		}
-		line := "- " + value + "\n"
-		if out.Len()+len(line) > memoriesBudgetBytes {
+		line := "- " + value
+		if strings.HasPrefix(memory.Key, "learned_") {
+			line += " (picked up from a chat, not confirmed)"
+		}
+		line += "\n"
+		if out.Len()+len(line) > budget {
 			break
 		}
 		out.WriteString(line)

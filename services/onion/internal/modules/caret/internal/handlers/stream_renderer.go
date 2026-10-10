@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	echoapp "github.com/voxire/onion/internal/modules/caret/internal/application"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -51,6 +52,15 @@ type streamEventRenderer struct {
 	// toolsDisabled drops tool markers, for the final wrap-up round that must
 	// answer from the results it already has.
 	toolsDisabled bool
+	// toolTokens are model tokens tools spent on their own calls, metered
+	// with the reply.
+	toolTokens int64
+	// inflight reads started during this turn; progress carries their
+	// status lines.
+	inflight []*inflightTool
+	// storedID is the saved reply's message id, sent with message_end.
+	storedID string
+	progress chan string
 	// followUps are the next questions the model suggested, sent as their
 	// own event when the reply finishes rather than shown as text.
 	followUps []string
@@ -137,7 +147,7 @@ func (r *streamEventRenderer) AppendServerText(text string) error {
 }
 
 func (r *streamEventRenderer) Finish() error {
-	if err := r.drain(true); err != nil {
+	if err := r.FlushPending(); err != nil {
 		return err
 	}
 	if len(r.followUps) > 0 && !r.plannerOnly {
@@ -145,14 +155,19 @@ func (r *streamEventRenderer) Finish() error {
 			return err
 		}
 	}
-	if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventMessageEnd, MessageID: r.messageID}); err != nil {
+	if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventMessageEnd, MessageID: r.messageID, StoredID: r.storedID}); err != nil {
 		return err
 	}
 	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventDone})
 }
 
+// FlushPending ends the model's turn: it renders what is buffered and
+// collects the reads still running.
 func (r *streamEventRenderer) FlushPending() error {
-	return r.drain(true)
+	if err := r.drain(true); err != nil {
+		return err
+	}
+	return r.awaitTools()
 }
 
 func (r *streamEventRenderer) ToolResultCount() int {
@@ -398,13 +413,7 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		return r.emitToolExecutionNotice(call, "blocked", "I stopped additional checks for this response so the answer stays focused.", "")
 	}
 
-	output, executed, duration, execErr := echoapp.ExecuteToolWithTimeout(ctx, r.executors, call.Name, call.Input)
-	if execErr == nil && !executed {
-		// No executor claimed the tool; keep unsupported markers invisible rather
-		// than suggesting that an action ran.
-		return nil
-	}
-	if err := WriteEvent(r.w, r.flush, StreamEvent{
+	callEvent := StreamEvent{
 		Type:             EventToolCall,
 		MessageID:        r.messageID,
 		BlockID:          blockID,
@@ -413,8 +422,111 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		Input:            call.Input,
 		Preview:          preview,
 		RequiresApproval: false,
-	}); err != nil {
-		return err
+	}
+	// A slow tool shows its card as soon as it starts, so the person sees work
+	// happening; a quick one appears with its result.
+	announced := echoapp.ToolTimeout(call.Name) > echoapp.ToolExecutionTimeout
+	if announced {
+		if err := WriteEvent(r.w, r.flush, callEvent); err != nil {
+			return err
+		}
+	}
+	r.startTool(ctx, &inflightTool{blockID: blockID, call: call, event: callEvent, announced: announced})
+	return nil
+}
+
+// inflightTool is a read that started when its marker closed and is
+// collected when the model's turn ends, so several reads in one turn run at
+// the same time and overlap with the rest of the model's output.
+type inflightTool struct {
+	blockID   string
+	call      ToolCallMarker
+	event     StreamEvent
+	announced bool
+	done      chan toolOutcome
+}
+
+type toolOutcome struct {
+	output   map[string]any
+	executed bool
+	duration time.Duration
+	err      error
+}
+
+func (r *streamEventRenderer) startTool(ctx context.Context, tool *inflightTool) {
+	if r.progress == nil {
+		r.progress = make(chan string, 64)
+	}
+	progress := r.progress
+	ctx = echoapp.WithToolProgress(ctx, func(message string) {
+		select {
+		case progress <- message:
+		default:
+		}
+	})
+	tool.done = make(chan toolOutcome, 1)
+	go func() {
+		output, executed, duration, err := echoapp.ExecuteToolWithTimeout(ctx, r.executors, tool.call.Name, tool.call.Input)
+		tool.done <- toolOutcome{output, executed, duration, err}
+	}()
+	r.inflight = append(r.inflight, tool)
+}
+
+// awaitTools collects every running read in the order the model called them,
+// keeping the stream alive meanwhile: heartbeats stop proxies from closing a
+// quiet connection, and progress the tools report is shown as status lines.
+// Only this goroutine writes to the stream.
+func (r *streamEventRenderer) awaitTools() error {
+	heartbeat := time.NewTicker(toolHeartbeatInterval)
+	defer heartbeat.Stop()
+	for len(r.inflight) > 0 {
+		tool := r.inflight[0]
+		var outcome toolOutcome
+	wait:
+		for {
+			select {
+			case outcome = <-tool.done:
+				break wait
+			case message := <-r.progress:
+				if err := r.emitStatus(message); err != nil {
+					return err
+				}
+			case <-heartbeat.C:
+				if err := WriteSSEHeartbeat(r.w, r.flush); err != nil {
+					return err
+				}
+			}
+		}
+		r.inflight = r.inflight[1:]
+		if err := r.finishTool(tool, outcome); err != nil {
+			return err
+		}
+	}
+	for {
+		select {
+		case message := <-r.progress:
+			if err := r.emitStatus(message); err != nil {
+				return err
+			}
+		default:
+			return nil
+		}
+	}
+}
+
+func (r *streamEventRenderer) finishTool(tool *inflightTool, outcome toolOutcome) error {
+	call, blockID := tool.call, tool.blockID
+	output, executed, duration, execErr := outcome.output, outcome.executed, outcome.duration, outcome.err
+	logToolCall(r.ctx, call.Name, executed, duration, execErr)
+	if execErr == nil && !executed {
+		// No executor claimed the tool; keep unsupported markers invisible rather
+		// than suggesting that an action ran.
+		return nil
+	}
+	if !tool.announced {
+		if err := WriteEvent(r.w, r.flush, tool.event); err != nil {
+			return err
+		}
 	}
 	if execErr != nil {
 		userError := userFacingToolError(execErr)
@@ -422,12 +534,13 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: "error", Summary: summary, Error: userError})
 		return WriteEvent(r.w, r.flush, StreamEvent{Type: EventToolResult, MessageID: r.messageID, BlockID: blockID, Status: "error", Summary: summary, Error: userError, DurationMs: duration.Milliseconds()})
 	}
-	if !executed {
-		// Keep unsupported read markers invisible to the user and out of the
-		// continuation loop. The model only sees capabilities that the prompt
-		// builder shortlisted as executable.
-		return nil
+	switch tokens := output[echoapp.ToolUsageTokensKey].(type) {
+	case int64:
+		r.toolTokens += tokens
+	case float64: // a shortened output went through JSON
+		r.toolTokens += int64(tokens)
 	}
+	delete(output, echoapp.ToolUsageTokensKey)
 	if call.Name == "web.search" {
 		if answer, ok := output["answer"].(string); ok {
 			output["answer"] = removeCaretEmDashes(answer)
@@ -437,6 +550,28 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 	summary := summarizeToolResult(call.Name, call.Input, output, "success", "")
 	r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: "success", Summary: summary, Output: output})
 	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventToolResult, MessageID: r.messageID, BlockID: blockID, Status: "success", Summary: summary, Output: output, DurationMs: duration.Milliseconds()})
+}
+
+// toolHeartbeatInterval keeps a connection alive while a tool runs.
+var toolHeartbeatInterval = 10 * time.Second
+
+// emitStatus shows a one-line progress update as a thinking block.
+func (r *streamEventRenderer) emitStatus(message string) error {
+	message = strings.TrimSpace(message)
+	if message == "" || r.plannerOnly {
+		return nil
+	}
+	blockID := newCaretBlockID("thinking")
+	for _, event := range []StreamEvent{
+		{Type: EventThinkingStart, MessageID: r.messageID, BlockID: blockID},
+		{Type: EventThinkingDelta, MessageID: r.messageID, BlockID: blockID, Delta: message},
+		{Type: EventThinkingEnd, MessageID: r.messageID, BlockID: blockID},
+	} {
+		if err := WriteEvent(r.w, r.flush, event); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *streamEventRenderer) emitToolExecutionNotice(call ToolCallMarker, status, summary, errorMessage string) error {
@@ -495,4 +630,18 @@ func (r *streamEventRenderer) drainFollowUps(final bool) bool {
 	}
 	r.followUps = followUps
 	return true
+}
+
+// logToolCall records one tool call for operations: which tool, how long,
+// and whether it failed. Inputs and outputs stay out of the logs.
+func logToolCall(ctx context.Context, name string, executed bool, duration time.Duration, err error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	fields := []logger.Field{logger.String("tool", name), logger.Int("duration_ms", int(duration.Milliseconds())), logger.Bool("executed", executed)}
+	if err != nil {
+		logger.Ctx(ctx).Warn("Caret tool failed", append(fields, logger.String("error", userFacingToolError(err)))...)
+		return
+	}
+	logger.Ctx(ctx).Info("Caret tool ran", fields...)
 }

@@ -46,6 +46,9 @@ type StreamEvent struct {
 	DurationMs       int64           `json:"duration_ms,omitempty"`
 	RequiresApproval bool            `json:"requires_approval,omitempty"`
 	Items            []string        `json:"items,omitempty"`
+	// StoredID is the saved message's id on message_end, so the client can
+	// rate that exact reply.
+	StoredID string `json:"stored_id,omitempty"`
 }
 
 // WriteEvent serializes the event to the SSE stream and flushes immediately.

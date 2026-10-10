@@ -234,7 +234,12 @@ func userFacingToolError(err error) string {
 	if message == "" {
 		return "unknown error"
 	}
-	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+	if errors.Is(err, context.DeadlineExceeded) {
+		// Say so plainly: the model can retry with a narrower request or
+		// another route, which it can't do for a cancelled one.
+		return "the tool took too long and was stopped"
+	}
+	if errors.Is(err, context.Canceled) {
 		return "request was interrupted"
 	}
 	return message
