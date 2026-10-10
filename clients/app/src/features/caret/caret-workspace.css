@@ -24,6 +24,12 @@
   padding: 0 16px;
 }
 .caret-workspace-brand > span,
+.caret-workspace-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .caret-workspace-header > div:first-child {
   display: flex;
   align-items: center;

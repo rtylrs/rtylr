@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PanelLeft } from 'lucide-react';
+import { Download, PanelLeft } from 'lucide-react';
 import { resolveApiBase } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 import { CaretIcon, CaretPanel, useCaretStore, useCaretUIStore } from '@voxire/caret';
@@ -10,6 +10,7 @@ import {
   buildPortalSystemContext,
 } from '../../shared/lib/portalCaretContext';
 import { usePortalHeaderActions } from '../../shell/PortalHeaderActions';
+import { useCaretInstall } from './useCaretInstall';
 import './caret-workspace.css';
 
 export default function CaretWorkspace() {
@@ -20,6 +21,7 @@ export default function CaretWorkspace() {
     (state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.title
   );
   const setView = useCaretUIStore((state) => state.setView);
+  const { canInstall, install } = useCaretInstall();
   const [sidebarOpen, setSidebarOpen] = useState(
     () => !window.matchMedia('(max-width: 700px)').matches
   );
@@ -40,6 +42,15 @@ export default function CaretWorkspace() {
   useEffect(() => {
     setView('chat');
   }, [setView]);
+  useEffect(() => {
+    // The installed app's "New chat" shortcut opens /caret?new=1.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('new') !== '1') return;
+    useCaretStore.getState().newTab();
+    params.delete('new');
+    const query = params.toString();
+    window.history.replaceState(null, '', `/caret${query ? `?${query}` : ''}`);
+  }, []);
   useEffect(() => {
     if (restoreToggleFocus.current) {
       (sidebarOpen ? sidebarToggleRef : headerToggleRef).current?.focus();
@@ -109,7 +120,20 @@ export default function CaretWorkspace() {
                 {!sidebarOpen && toggle('header')}
                 <span>{title || 'Caret'}</span>
               </div>
-              {actions}
+              <div className="caret-workspace-header-actions">
+                {canInstall && (
+                  <button
+                    type="button"
+                    className="portal-icon-button"
+                    onClick={() => void install()}
+                    aria-label={t('common.caret.installApp')}
+                    title={t('common.caret.installApp')}
+                  >
+                    <Download size={18} />
+                  </button>
+                )}
+                {actions}
+              </div>
             </header>
           ),
           welcome: (
