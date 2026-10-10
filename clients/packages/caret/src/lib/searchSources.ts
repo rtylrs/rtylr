@@ -38,7 +38,7 @@ export function toSearchSource(value: unknown): SearchSource | null {
   };
 }
 
-/** Sources returned by a web.search tool output. */
+/** Sources a tool output cites, e.g. web.search results. */
 export function searchOutputSources(output: unknown): SearchSource[] {
   if (!output || typeof output !== "object") return [];
   const sources = (output as Record<string, unknown>).sources;
@@ -60,12 +60,8 @@ export function replySources(blocks: ContentBlock[]): SearchSource[] {
   const seen = new Set<string>();
   const sources: SearchSource[] = [];
   for (const block of blocks) {
-    if (
-      block.type !== "tool_call" ||
-      block.name !== "web.search" ||
-      block.status !== "success"
-    )
-      continue;
+    // Any tool may cite pages (search, page reads, Wikipedia, sub-agents).
+    if (block.type !== "tool_call" || block.status !== "success") continue;
     for (const source of searchOutputSources(block.output)) {
       if (seen.has(source.url)) continue;
       seen.add(source.url);
