@@ -126,7 +126,7 @@
   background: var(--dash-hover);
   color: var(--dash-text);
 }
-.portal-home-app-grid span {
+.portal-home-app-grid span:not(.portal-app-tile) {
   flex: 1;
   font-size: 13px;
 }

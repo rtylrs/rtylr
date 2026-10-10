@@ -1,8 +1,8 @@
-import { Boxes } from "lucide-react";
-import { AppIconFrame, type AppIconProps } from "./AppIconFrame";
+import { createAppIcon } from "./createAppIcon";
 
-export function ErpIcon(props: AppIconProps) {
-  return (
-    <AppIconFrame icon={Boxes} {...props} />
-  );
-}
+/** Operations: a box, its lid in colour. */
+export const ErpIcon = createAppIcon(
+  "ErpIcon",
+  <><path d="M4 7.75v8.5L12 20.5l8-4.25v-8.5M12 12v8.5" /></>,
+  <><path d="M12 3.5 20 7.75 12 12 4 7.75z" /></>,
+);

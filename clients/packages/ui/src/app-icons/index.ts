@@ -1,4 +1,6 @@
-export type { AppIconProps } from "./AppIconFrame";
+export type { AppIconProps } from "./createAppIcon";
+export { appIconAccentStyle, createAppIcon } from "./createAppIcon";
+export { AppIconTile } from "./AppIconTile";
 export { HomeIcon } from "./HomeIcon";
 export { InsightsIcon } from "./InsightsIcon";
 export { PosIcon } from "./PosIcon";
@@ -7,5 +9,6 @@ export { HrIcon } from "./HrIcon";
 export { CrmIcon } from "./CrmIcon";
 export { FinanceIcon } from "./FinanceIcon";
 export { FlowIcon } from "./FlowIcon";
+export { AutomationsIcon } from "./AutomationsIcon";
 export { MenuIcon } from "./MenuIcon";
 export { RecruitIcon } from "./RecruitIcon";

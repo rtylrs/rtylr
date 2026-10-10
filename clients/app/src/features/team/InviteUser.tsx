@@ -19,6 +19,7 @@ import {
 import { buildPermissionProfileAssignments } from './authorizationDraft';
 import { usePermissionProfiles } from '../../shared/hooks/queries/usePermissions';
 import { APP_ICONS } from '../../shared/config/appIcons';
+import { AppIconTile } from '@voxire/ui';
 import { APP_NAMES } from '../../shared/config/appNames';
 
 const ALL_APPS = [
@@ -389,16 +390,22 @@ const InviteUser: React.FC = (): React.JSX.Element => {
             onClick={() => toggle(app.key)}
             className="flex flex-col items-center gap-2 py-4 rounded-xl transition-all"
             style={{
-              background: checked ? `${app.color}08` : 'var(--dash-bg)',
-              border: `1px solid ${checked ? `${app.color}40` : 'var(--dash-border)'}`,
+              background: checked
+                ? `color-mix(in srgb, ${app.color} 6%, var(--dash-bg))`
+                : 'var(--dash-bg)',
+              border: `1px solid ${checked ? `color-mix(in srgb, ${app.color} 35%, transparent)` : 'var(--dash-border)'}`,
             }}
           >
-            <div
-              className="h-10 w-10 rounded-xl flex items-center justify-center"
-              style={{ background: `${app.color}12` }}
-            >
-              <Icon size={20} style={{ color: app.color }} />
-            </div>
+            {checked ? (
+              <AppIconTile icon={Icon} color={app.color} size={40} />
+            ) : (
+              <span
+                className="h-10 w-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
+              >
+                <Icon size={22} />
+              </span>
+            )}
             <span
               className="text-xs font-semibold"
               style={{ color: checked ? app.color : 'var(--dash-text-muted)' }}

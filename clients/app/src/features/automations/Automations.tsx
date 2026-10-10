@@ -3,7 +3,8 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Workflow, Plus, Play, Pause, Trash2 } from 'lucide-react';
+import { Plus, Play, Pause, Trash2 } from 'lucide-react';
+import { AutomationsIcon } from '@voxire/ui';
 import { EmptyState } from '@voxire/ui';
 import {
   useListAutomations,
@@ -80,7 +81,7 @@ export default function Automations() {
           </div>
         ) : !automations.length ? (
           <EmptyState
-            icon={Workflow}
+            icon={AutomationsIcon}
             title={t('crm.automations.emptyTitle')}
             description={t('automations.emptyDescription')}
             action={{
@@ -99,7 +100,7 @@ export default function Automations() {
                   className="automation-open"
                   onClick={() => navigate({ to: '/automations/new', search: { id: item.id } })}
                 >
-                  <Workflow size={19} />
+                  <AutomationsIcon size={19} />
                   <span>
                     <strong>{item.name}</strong>
                     <small>

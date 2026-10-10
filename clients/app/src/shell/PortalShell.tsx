@@ -19,8 +19,9 @@ import { resolveApiBase, resolveAppUrl } from '@voxire/config';
 import { ThemeScopeProvider } from '@voxire/ui';
 import { useMediaQuery, deriveAccentFgAcross, deriveOnAccent, compositeOver } from '@voxire/utils';
 import { useThemeStore } from '../shared/stores/themeStore';
-import { PanelLeft, Search, Bell, Settings, Webhook, Workflow, Plus, X } from 'lucide-react';
+import { PanelLeft, Search, Bell, Settings, Webhook, Plus, X } from 'lucide-react';
 import {
+  AutomationsIcon,
   HomeIcon,
   InsightsIcon,
   FlowIcon,
@@ -221,7 +222,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const nav = (
     isAutomations
       ? [
-          { key: 'automationWorkflows', path: '/automations', icon: Workflow },
+          { key: 'automationWorkflows', path: '/automations', icon: AutomationsIcon },
           { key: 'newAutomation', path: '/automations/new', icon: Plus },
           { key: 'webhooks', path: '/automations/webhooks', icon: Webhook },
         ]
@@ -574,7 +575,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
                 aria-current={isAutomations ? 'page' : undefined}
                 onClick={() => setMobileOpen(false)}
               >
-                <Workflow size={20} />
+                <AutomationsIcon size={21} />
               </Link>
             </Tooltip>
           </>
