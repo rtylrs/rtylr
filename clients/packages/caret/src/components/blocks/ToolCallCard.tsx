@@ -92,7 +92,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
   return (
     <div
       style={{
-        margin: isPending ? "8px 0 10px" : "4px 0",
+        margin: isPending ? "8px 0 10px" : "10px 0",
         color: caretTokens.textDim,
       }}
     >
