@@ -93,4 +93,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The converted value.",
 		Freshness:  "computed", SideEffect: "read-only",
 	},
+	{
+		Name:        "utilities.statistics",
+		Description: "Summarise a list of numbers exactly: count, sum, mean, median, mode, min, max, percentiles, standard deviation, and growth from first to last value (for a time series in order).",
+		Module:      "utilities", Scope: "read",
+		InputHint:  `{"values":[120,135,150]}`,
+		OutputHint: "Descriptive statistics for the list.",
+		Freshness:  "computed", SideEffect: "read-only",
+	},
 }
