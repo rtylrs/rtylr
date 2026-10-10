@@ -359,6 +359,7 @@
   "caret": {
     "toggleHistory": "Toggle chat sidebar",
     "installApp": "Install Caret as an app",
+    "settings": "Caret settings and memory",
     "welcome": "What’s on your mind?",
     "welcomeHint": "Ask a question, explore an idea, or work with your business.",
     "composer": "Ask Caret anything…",

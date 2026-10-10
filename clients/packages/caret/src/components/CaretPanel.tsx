@@ -706,7 +706,9 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         />
       )}
 
-      {view === "settings" && <SettingsPanel />}
+      {view === "settings" && (
+        <SettingsPanel userId={userId} apiBaseUrl={apiBaseUrl} />
+      )}
     </div>
   );
 

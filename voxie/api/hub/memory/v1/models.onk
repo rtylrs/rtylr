@@ -89,3 +89,20 @@ message SetChatProjectRequest {
  project_id: string
 }
 message SetChatProjectResponse { updated: bool }
+
+message CaretMemory {
+ id: string
+ type: string
+ value: string
+ created_at: string
+ updated_at: string
+}
+message ListMemoriesRequest {}
+message ListMemoriesResponse { memories: CaretMemory[] }
+message SaveMemoryRequest {
+ id: string
+ value: string
+}
+message SaveMemoryResponse { memory: CaretMemory }
+message DeleteMemoryRequest { id: string }
+message DeleteMemoryResponse { deleted: bool }

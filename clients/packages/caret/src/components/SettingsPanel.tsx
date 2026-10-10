@@ -1,6 +1,7 @@
 import React, { useId } from "react";
 import { caretTokens, caretRadius } from "../ui/tokens";
 import { useCaretSettingsStore } from "../stores/settingsStore";
+import MemorySettings from "./MemorySettings";
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 10.5,
@@ -93,7 +94,16 @@ const SettingsToggle: React.FC<SettingsToggleProps> = ({
   </button>
 );
 
-export const SettingsPanel: React.FC = () => {
+export interface SettingsPanelProps {
+  /** Enables the Memory section, which reads and edits saved memories. */
+  userId?: number;
+  apiBaseUrl?: string;
+}
+
+export const SettingsPanel: React.FC<SettingsPanelProps> = ({
+  userId = 0,
+  apiBaseUrl,
+}) => {
   const s = useCaretSettingsStore();
 
   return (
@@ -150,6 +160,17 @@ export const SettingsPanel: React.FC = () => {
           />
         </div>
       </section>
+
+      {userId > 0 && apiBaseUrl !== undefined && (
+        <section style={{ marginTop: 22 }}>
+          <h3 style={sectionTitle}>Memory</h3>
+          <p style={{ ...description, margin: "0 2px 8px" }}>
+            Caret uses these in every chat. Correct or remove anything that is
+            wrong.
+          </p>
+          <MemorySettings userId={userId} apiBaseUrl={apiBaseUrl} />
+        </section>
+      )}
     </div>
   );
 };

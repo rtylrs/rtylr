@@ -27,5 +27,8 @@ type repository interface {
 	SetChatProject(context.Context, string, int, string) error
 	AssistantProfile(context.Context) (string, error)
 	AssistantMemories(context.Context, string) ([]domain.UserMemory, error)
+	ListMemories(context.Context) ([]domain.UserMemory, error)
+	SaveMemory(context.Context, int, string) (*domain.UserMemory, error)
+	DeleteMemory(context.Context, int) error
 	ProjectConversationContext(context.Context, string, string) (string, error)
 }
