@@ -3,13 +3,16 @@ import { cn } from '../../../../lib/cn';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
-import { ArrowRight, Sparkles, Shuffle } from 'lucide-react';
+import { ArrowUp, Check, ChevronRight, Shuffle } from 'lucide-react';
+import { CaretMark } from '../../../CaretMark/CaretMark';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import { SplitWords } from '../../../motion/SplitWords';
 import { SPRING_SNAPPY } from '../../../../lib/animations';
 import { localeFromPath, navPath } from '../../../../lib/locales';
-import { track, EV_SIGNUP_CLICK, EV_CTA_CLICK } from '../../../../lib/analytics';
+import { track, EV_SIGNUP_CLICK } from '../../../../lib/analytics';
+import { useTypedPlaceholder } from '../../../../hooks/useTypedPlaceholder';
+import ProductPreview from './ProductPreview';
 import styles from '../HeroSection.module.scss';
 
 const MainHero: React.FC = (): React.JSX.Element => {
@@ -17,6 +20,22 @@ const MainHero: React.FC = (): React.JSX.Element => {
   const router = useRouter();
   const locale = localeFromPath(router.asPath).code;
   const [prompt, setPrompt] = useState('');
+  const [focused, setFocused] = useState(false);
+
+  const examples = t('home.hero.promptExamples', { returnObjects: true });
+  const exampleList = Array.isArray(examples) ? (examples as string[]) : [];
+  const placeholder = useTypedPlaceholder(
+    exampleList,
+    t('home.hero.promptPlaceholder'),
+    focused || prompt.length > 0,
+  );
+
+  const fillExample = (): void => {
+    if (exampleList.length === 0) return;
+    const next = exampleList[Math.floor(Math.random() * exampleList.length)];
+    setPrompt(next);
+    document.getElementById('hero-prompt')?.focus();
+  };
 
   const goToRegister = (): void => {
     track(EV_SIGNUP_CLICK, { source: 'hero' });
@@ -41,14 +60,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
 
   return (
     <div className={styles.mainHero}>
-      {/* Retool-style framing rails, scoped to just this block so they don't
-          bleed into the stats section below */}
-      <div className={styles.heroFrame} aria-hidden="true">
-        <span className={cn(styles.heroVLine, styles.heroVLineLeft)} />
-        <span className={cn(styles.heroVLine, styles.heroVLineRight)} />
-      </div>
-
-      {/* Announcement row, BETA pill sits next to plain link text */}
+      {/* Announcement chip: beta badge, one line of news, chevron */}
       <motion.a
         href={navPath('/pricing', locale)}
         className={styles.announceRow}
@@ -57,12 +69,8 @@ const MainHero: React.FC = (): React.JSX.Element => {
         transition={{ delay: 0.05, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       >
         <span className={styles.announcePill}>{t('home.hero.announcePill')}</span>
-        <span className={styles.announceText}>
-          {t('home.hero.announceText')}
-          <span className={styles.announceArrow} aria-hidden="true">
-            ↗
-          </span>
-        </span>
+        <span className={styles.announceText}>{t('home.hero.announceText')}</span>
+        <ChevronRight className={styles.announceArrow} size={14} aria-hidden="true" />
       </motion.a>
 
       {/* Headline - per-word masked rise */}
@@ -70,10 +78,11 @@ const MainHero: React.FC = (): React.JSX.Element => {
         as="h1"
         className={styles.heroTitle}
         text={t('home.hero.title')}
+        restLinesClassName={styles.heroTitleMuted}
         delay={0.18}
       />
 
-      {/* AI prompt card, Retool AppGen clone */}
+      {/* Caret composer */}
       <motion.form
         className={styles.aiCard}
         onSubmit={handleSubmit}
@@ -87,32 +96,24 @@ const MainHero: React.FC = (): React.JSX.Element => {
         <textarea
           id="hero-prompt"
           className={styles.aiCardTextarea}
-          placeholder={t('home.hero.promptPlaceholder')}
-          rows={5}
+          placeholder={placeholder}
+          rows={3}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
         />
 
         <div className={styles.aiCardBottom}>
           <div className={styles.aiCardIcons}>
-            <button
-              type="button"
-              onClick={goToRegister}
-              className={cn(styles.aiCardIcon, styles.aiCardIconActive)}
-              aria-label={t('home.hero.caretLabel')}
-              title={t('home.hero.caretLabel')}
-            >
-              <Sparkles size={14} strokeWidth={2} />
-            </button>
-            <button
-              type="button"
-              onClick={goToRegister}
-              className={styles.aiCardIcon}
-              aria-label={t('home.hero.moreOptions')}
-              title={t('home.hero.moreOptions')}
-            >
-              <Shuffle size={14} strokeWidth={2} />
+            <span className={cn(styles.aiCardChip, styles.aiCardChipCaret)}>
+              <CaretMark size={15} />
+              {t('home.hero.caretLabel')}
+            </span>
+            <button type="button" onClick={fillExample} className={styles.aiCardChip}>
+              <Shuffle size={13} strokeWidth={2} aria-hidden="true" />
+              {t('home.hero.moreOptions')}
             </button>
           </div>
 
@@ -124,27 +125,37 @@ const MainHero: React.FC = (): React.JSX.Element => {
             transition={SPRING_SNAPPY}
           >
             <span>{t('home.hero.submit')}</span>
-            <ArrowRight size={15} strokeWidth={2.2} aria-hidden="true" />
+            <ArrowUp size={15} strokeWidth={2.4} aria-hidden="true" />
           </motion.button>
         </div>
       </motion.form>
 
-      {/* Talk with an expert */}
+      {/* Beta reassurance, links straight to sign-up */}
       <motion.p
         className={styles.demoLine}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.85, duration: 0.7 }}
       >
+        <Check size={14} strokeWidth={2.4} aria-hidden="true" />
         {t('home.hero.demoLinePrefix')}{' '}
+        {/* APP_URLS.auth resolves to the local auth app in the browser on
+            localhost and to production on the server, so the href can differ
+            between the two renders in dev only. */}
         <a
-            href="/demo"
-            className={styles.demoLineAnchor}
-            onClick={() => track(EV_CTA_CLICK, { cta: 'demo', page: router.pathname })}
-          >
+          href={`${APP_URLS.auth}/register`}
+          suppressHydrationWarning
+          className={styles.demoLineAnchor}
+          onClick={(e) => {
+            e.preventDefault();
+            goToRegister();
+          }}
+        >
           {t('home.hero.demoLineLink')}
         </a>
       </motion.p>
+
+      <ProductPreview alt={t('home.hero.productAlt')} />
     </div>
   );
 };

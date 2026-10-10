@@ -1,230 +1,150 @@
 .productsSection {
-  padding: 120px 0 100px;
+  padding: 128px 0 120px;
   background: var(--bg-surface-b);
   position: relative;
   overflow: hidden;
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 0 50px;
+  padding: 0 32px;
   position: relative;
   z-index: 1;
 }
 
-// ── Section header ────────────────────────────────────────────────────────────
+// ── Header ───────────────────────────────────────────────────────────────────
+// Left-aligned, two-tone, like the hero but quieter.
 
 .header {
-  text-align: center;
-  margin-bottom: 72px;
+  margin-bottom: 56px;
+  max-width: 760px;
 }
 
 .badge {
-  display: inline-flex;
-  align-items: center;
-  background: var(--bg-surface-a);
-  border: 1px solid var(--hairline-strong);
-  color: var(--ink);
-  padding: 5px 16px;
-  border-radius: 100px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-bottom: 20px;
+  display: inline-block;
+  margin-bottom: 18px;
+  color: rgba(19, 19, 19, 0.55);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .sectionTitle {
-  font-size: 3.2rem;
-  font-weight: 700;
-  color: var(--ink);
   margin: 0 0 20px;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.sectionTitleMuted {
+  color: rgba(19, 19, 19, 0.4);
 }
 
 .sectionSubtitle {
+  max-width: 560px;
+  margin: 0;
   font-size: 1.05rem;
+  line-height: 1.6;
   color: rgba(19, 19, 19, 0.6);
-  max-width: 480px;
-  margin: 0 auto;
-  line-height: 1.7;
 }
 
-// ── Product grid ──────────────────────────────────────────────────────────────
+// ── Ruled grid ───────────────────────────────────────────────────────────────
+// 1px gaps over a hairline-coloured backing draw the rules between cells.
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--hairline);
-  border: 1px solid var(--hairline);
-}
-
-.card {
-  background: var(--bg-surface-a);
-  padding: 36px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  overflow: hidden;
-
-  &:hover {
-    background: var(--bg-surface-b);
-
-    .cardArrow {
-      opacity: 1;
-      // --dir-x flips this to -2px in RTL; see HeroSection.module.scss.
-      transform: translateX(calc(2px * var(--dir-x)));
-    }
-
-    // transform not set here - iconWrap has its own whileHover in
-    // ProductsSection.tsx, and a competing CSS transform would fight it.
-    .iconWrap {
-      border-color: var(--hairline-strong);
-    }
-  }
-}
-
-.iconWrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: var(--bg-surface-b);
-  border: 1px solid var(--hairline);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink);
-  transition:
-    border-color 0.25s ease,
-    transform 0.3s var(--ease-out-soft);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.cardLabel {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: rgba(19, 19, 19, 0.55);
-  margin: 0;
-}
-
-.cardTitle {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-}
-
-.cardDescription {
-  font-size: 0.875rem;
-  color: rgba(19, 19, 19, 0.6);
-  line-height: 1.6;
-  margin: 0;
-  flex: 1;
-}
-
-.cardArrow {
-  font-size: 0.8rem;
-  color: rgba(19, 19, 19, 0.45);
-  opacity: 0;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-
-  &:focus-visible {
-    opacity: 1;
-    outline: 2px solid var(--ink);
-    outline-offset: 4px;
-  }
-}
-
-// Last row, 3 cards, centered
-.card:nth-child(5),
-.card:nth-child(6),
-.card:nth-child(7) {
-  // handled by grid spanning for centering
-}
-
-// ── Bottom row alignment ──────────────────────────────────────────────────────
-
-.gridBottom {
-  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
-  background: var(--hairline);
-  border: 1px solid var(--hairline);
-  border-top: none;
+  background: rgba(19, 19, 19, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(19, 19, 19, 0.08);
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 220px;
+  padding: 28px;
+  background: var(--bg-surface-a);
+  transition: background 0.2s ease;
 
-@media (max-width: 1200px) {
-  .sectionTitle {
-    font-size: 2.8rem;
+  &:hover {
+    background: #fcfcfb;
   }
 
-  .grid,
-  .gridBottom {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .gridBottom {
-    // 3 cols for last row when main is 3 cols too
-    grid-template-columns: repeat(3, 1fr);
+  &:hover .cellLink svg {
+    transform: translateX(calc(3px * var(--dir-x)));
   }
 }
 
-@media (max-width: 1024px) {
-  .productsSection {
-    padding: 80px 0;
-  }
+.cellLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(19, 19, 19, 0.55);
 
-  .container {
-    padding: 0 30px;
+  svg {
+    color: rgba(19, 19, 19, 0.5);
   }
+}
 
-  .grid,
-  .gridBottom {
+.cellText {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: rgba(19, 19, 19, 0.5);
+
+  strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
+
+.cellLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+
+  svg {
+    transition: transform 0.2s var(--ease-out-soft);
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 960px) {
+  .grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .productsSection {
-    padding: 60px 0;
+    padding: 88px 0 80px;
   }
 
   .container {
     padding: 0 20px;
   }
 
-  .sectionTitle {
-    font-size: 2.2rem;
-  }
-
-  .grid,
-  .gridBottom {
+  .grid {
     grid-template-columns: 1fr;
   }
 
-  .card {
-    padding: 28px 24px;
-  }
-
-  .header {
-    margin-bottom: 48px;
+  .cell {
+    min-height: 0;
+    padding: 24px;
   }
 }

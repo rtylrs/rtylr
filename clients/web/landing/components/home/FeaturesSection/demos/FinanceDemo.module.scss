@@ -1,0 +1,113 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.bottom {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.cardTitle {
+  font-weight: 600;
+}
+
+.chartCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  font-size: 11px;
+}
+
+.legendIn,
+.legendOut {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--p-accent);
+}
+
+.legendOut {
+  background: rgba(9, 9, 11, 0.15);
+  margin-inline-start: 6px;
+}
+
+.chart {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-height: 0;
+}
+
+.month {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.bars {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  border-bottom: 1px solid var(--p-border);
+}
+
+.barIn,
+.barOut {
+  width: 34%;
+  max-width: 14px;
+  border-radius: 3px 3px 0 0;
+  background: var(--p-accent);
+  transform-origin: bottom;
+}
+
+.barOut {
+  background: rgba(9, 9, 11, 0.13);
+}
+
+.invoices {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+}
+
+.invoice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--p-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.invoiceWho {
+  font-weight: 500;
+}
+
+.invoiceRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.invoiceAmount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

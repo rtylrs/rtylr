@@ -1,223 +1,134 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { PortalFrame, type PortalView } from './portal/PortalFrame';
+import { money, useCountUp, useDemoStep } from './portal/usePortalDemo';
+import styles from './portal/PortalDemo.module.scss';
+import local from './FinanceDemo.module.scss';
 
-import { formatMoneyK } from '../../../../lib/formatMoney';
-
-const MONTH_KEYS = ['nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may'];
-const REVENUE = [31200, 44800, 28400, 33600, 38900, 41200, 42840];
-const EXPENSES = [21800, 30100, 20200, 23400, 26100, 27800, 28310];
-
-interface Metric {
-  labelKey: 'revenue' | 'expenses' | 'netProfit';
-  value: number;
-  prev: number;
-  prefix: string;
-}
-
-const METRICS: Metric[] = [
-  { labelKey: 'revenue', value: 42840, prev: 41200, prefix: '$' },
-  { labelKey: 'expenses', value: 28310, prev: 27800, prefix: '$' },
-  { labelKey: 'netProfit', value: 14530, prev: 13400, prefix: '$' },
+const KPIS = [
+  { value: 48200, delta: '+12.4%' },
+  { value: 31650, delta: '+3.1%' },
+  { value: 16550, delta: '+31.8%' },
 ];
 
-// French typography puts a non-breaking space before %; other locales in
-// this batch don't.
-const pctSuffix = (locale: string): string => (locale === 'fr' ? ' %' : '%');
+// Thousands, money in / money out per month.
+const FLOW = [
+  [32, 24],
+  [36, 27],
+  [34, 29],
+  [41, 28],
+  [44, 30],
+  [48, 32],
+];
+const MAX = 50;
 
-const pctChange = (cur: number, prev: number, locale: string): string => {
-  const d = ((cur - prev) / prev) * 100;
-  // toFixed always renders a period; toLocaleString respects the active language.
-  return `${d >= 0 ? '+' : ''}${d.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}${pctSuffix(locale)}`;
-};
+const INVOICES = [
+  { id: 'INV-1042', who: 'Voxire', amount: 4200, status: 'paid' },
+  { id: 'INV-1043', who: 'Northwind', amount: 1850, status: 'due' },
+];
+// The overdue invoice the demo resolves: overdue → reminder sent → paid.
+const RESOLVING = { id: 'INV-1039', who: 'Lumen Studio', amount: 2600 };
+const RESOLVE_STEPS = ['overdue', 'sent', 'paid'] as const;
+const TONE: Record<string, string> = { paid: 'green', due: 'neutral', overdue: 'red', sent: 'amber' };
 
-const maxVal = Math.max(...REVENUE);
-
-export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t, i18n } = useTranslation();
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    if (isActive) {
-      const timer = setTimeout(() => setShown(true), 100);
-      return () => clearTimeout(timer);
-    } else {
-      setShown(false);
-    }
-  }, [isActive]);
-
+const Kpi = ({ i, label, isActive }: { i: number; label: string; isActive: boolean }) => {
+  const { t } = useTranslation();
+  const value = useCountUp(KPIS[i].value, isActive);
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'var(--bg-surface-a)',
-        fontFamily: 'inherit',
-        fontSize: 13,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        padding: '20px',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
-            {t('home.features.demos.finance.pnl')}
-          </span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginInlineStart: 10 }}>
-            {t('home.features.demos.finance.monthLabel')}
-          </span>
-        </div>
-        <span
-          style={{
-            background: 'rgba(34,197,94,0.12)',
-            color: '#16a34a',
-            borderRadius: 999,
-            padding: '3px 10px',
-            fontSize: 11,
-            fontWeight: 600,
-          }}
-        >
-          {t('home.features.demos.finance.profitable')}
-        </span>
-      </div>
-
-      {/* Metric tiles */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 10,
-          marginBottom: 24,
-        }}
-      >
-        {METRICS.map((m) => (
-          <div
-            key={m.labelKey}
-            style={{
-              background: 'var(--bg-surface-b)',
-              border: '1px solid var(--hairline)',
-              borderRadius: 10,
-              padding: '12px 14px',
-            }}
-          >
-            <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.55)', marginBottom: 6 }}>
-              {t(`home.features.demos.finance.metrics.${m.labelKey}`)}
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>
-              {shown
-                ? formatMoneyK(m.value / 1000, i18n.language)
-                : '-'}
-            </div>
-            <div style={{ fontSize: 11, color: '#16a34a' }}>
-              {/* dir="ltr" is load-bearing: a leading "+" is bidi-neutral, so
-                  inside an RTL paragraph it resolves to the paragraph
-                  direction and the sign lands on the wrong end of the number. */}
-              <span dir="ltr">{pctChange(m.value, m.prev, i18n.language)}</span>{' '}
-              {t('home.features.demos.finance.momSuffix')}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Bar chart */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <div
-          style={{
-            fontSize: 11,
-            color: 'rgba(19,19,19,0.5)',
-            marginBottom: 12,
-            display: 'flex',
-            gap: 16,
-          }}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 2,
-                background: 'var(--ink)',
-                display: 'inline-block',
-              }}
-            />
-            {t('home.features.demos.finance.metrics.revenue')}
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 2,
-                background: 'rgba(19,19,19,0.25)',
-                display: 'inline-block',
-              }}
-            />
-            {t('home.features.demos.finance.metrics.expenses')}
-          </span>
-        </div>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: 8, minHeight: 0 }}>
-          {MONTH_KEYS.map((monthKey, i) => (
-            <div
-              key={monthKey}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 4,
-                height: '100%',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <div
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  gap: 3,
-                  alignItems: 'flex-end',
-                  flex: 1,
-                  minHeight: 0,
-                }}
-              >
-                <motion.div
-                  animate={{ height: shown ? `${(REVENUE[i] / maxVal) * 100}%` : '0%' }}
-                  transition={{ duration: 0.7, delay: i * 0.05, ease: 'easeOut' }}
-                  style={{
-                    flex: 1,
-                    background: i === MONTH_KEYS.length - 1 ? 'var(--ink)' : 'rgba(19,19,19,0.3)',
-                    borderRadius: '3px 3px 0 0',
-                    minHeight: 2,
-                  }}
-                />
-                <motion.div
-                  animate={{ height: shown ? `${(EXPENSES[i] / maxVal) * 100}%` : '0%' }}
-                  transition={{ duration: 0.7, delay: i * 0.05, ease: 'easeOut' }}
-                  style={{
-                    flex: 1,
-                    background:
-                      i === MONTH_KEYS.length - 1 ? 'rgba(19,19,19,0.35)' : 'rgba(19,19,19,0.12)',
-                    borderRadius: '3px 3px 0 0',
-                    minHeight: 2,
-                  }}
-                />
-              </div>
-              <div style={{ fontSize: 9, color: 'rgba(19,19,19,0.45)', whiteSpace: 'nowrap' }}>
-                {t(`home.features.demos.finance.months.${monthKey}`)}
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className={styles.kpi}>
+      <div className={styles.kpiLabel}>{label}</div>
+      <div className={styles.kpiValue}>{money(value)}</div>
+      <div className={styles.delta}>
+        {KPIS[i].delta} <span className={styles.muted}>{t('home.features.demos.finance.vsLast')}</span>
       </div>
     </div>
+  );
+};
+
+export const FinanceDemo = ({
+  isActive,
+  onNavigate,
+}: {
+  isActive: boolean;
+  onNavigate?: (view: PortalView) => void;
+}): React.JSX.Element => {
+  const { t } = useTranslation();
+  const step = useDemoStep(isActive, RESOLVE_STEPS.length, 1900);
+  const labels = t('home.features.demos.finance.kpis', { returnObjects: true }) as string[];
+  const months = t('home.features.demos.finance.months', { returnObjects: true }) as string[];
+  const status = RESOLVE_STEPS[step];
+  const rows = [{ ...RESOLVING, status }, ...INVOICES];
+
+  return (
+    <PortalFrame
+      onNavigate={onNavigate}
+      app="finance"
+      crumb={t('home.features.demos.finance.crumb', { returnObjects: true }) as string[]}
+    >
+      <div className={local.layout}>
+        <div className={styles.kpis}>
+          {labels.map((label, i) => (
+            <Kpi key={label} i={i} label={label} isActive={isActive} />
+          ))}
+        </div>
+
+        <div className={local.bottom}>
+          <div className={`${styles.card} ${local.chartCard}`}>
+            <div className={styles.spread}>
+              <span className={local.cardTitle}>{t('home.features.demos.finance.chart')}</span>
+              <span className={styles.row}>
+                <span className={local.legendIn} /> {t('home.features.demos.finance.in')}
+                <span className={local.legendOut} /> {t('home.features.demos.finance.out')}
+              </span>
+            </div>
+            <div className={local.chart}>
+              {FLOW.map(([moneyIn, moneyOut], m) => (
+                <div key={months[m]} className={local.month}>
+                  <div className={local.bars}>
+                    {[moneyIn, moneyOut].map((v, k) => (
+                      <motion.span
+                        key={k}
+                        className={k === 0 ? local.barIn : local.barOut}
+                        style={{ height: `${(v / MAX) * 100}%` }}
+                        initial={false}
+                        animate={isActive ? { scaleY: [0, 1] } : { scaleY: 1 }}
+                        transition={{ duration: 0.7, delay: 0.15 + m * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    ))}
+                  </div>
+                  <span className={styles.muted}>{months[m]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`${styles.card} ${local.invoices}`}>
+            <span className={local.cardTitle}>{t('home.features.demos.finance.invoices')}</span>
+            {rows.map((inv) => (
+              <div key={inv.id} className={local.invoice}>
+                <div>
+                  <div className={local.invoiceWho}>{inv.who}</div>
+                  <div className={styles.muted}>{inv.id}</div>
+                </div>
+                <div className={local.invoiceRight}>
+                  <div className={local.invoiceAmount}>{money(inv.amount)}</div>
+                  <motion.span
+                    key={inv.status}
+                    className={styles.pill}
+                    data-tone={TONE[inv.status]}
+                    initial={{ opacity: 0, y: 3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {t(`home.features.demos.finance.status.${inv.status}`)}
+                  </motion.span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </PortalFrame>
   );
 };

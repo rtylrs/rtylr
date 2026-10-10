@@ -71,7 +71,13 @@
     align-items: flex-end;
 
     .cta-button {
-      width: 160px;
+      height: 38px;
+      padding: 0 18px;
+      border-radius: 999px;
+      font-family: var(--primary-font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
     }
   }
 
@@ -160,7 +166,7 @@
       align-items: flex-start;
 
       .cta-button {
-        width: 140px;
+        width: auto;
       }
     }
 

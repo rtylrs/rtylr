@@ -216,7 +216,7 @@ describe('FAQ answers reach a crawler', () => {
     ['hr/index.html', 'tip pooling, minor work-hour limits'],
     ['finance/index.html', 'balance sheet and cash flow reports'],
     ['flow/index.html', 'boards, lists, timeline views, cycles'],
-    ['index.html', 'stops stitching a register, a spreadsheet'],
+    ['index.html', 'so an update in one place shows up everywhere else'],
     ['demo/index.html', 'the questions a signup page cannot answer'],
   ];
 

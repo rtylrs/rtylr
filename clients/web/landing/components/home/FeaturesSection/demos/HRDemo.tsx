@@ -1,308 +1,119 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../../../lib/cn';
+import { PortalFrame, type PortalView } from './portal/PortalFrame';
+import { useCountUp } from './portal/usePortalDemo';
+import styles from './portal/PortalDemo.module.scss';
+import local from './HRDemo.module.scss';
 
-import { findLocale } from '../../../../lib/locales';
+type Role = 'ops' | 'sales' | 'support' | 'finance' | 'design';
 
-interface Staff {
-  initials: string;
+interface Shift {
   name: string;
-  roleKey: 'floorManager' | 'barista' | 'chef' | 'server';
+  initials: string;
+  role: Role;
   start: number;
   end: number;
   color: string;
-  clockedIn?: boolean;
 }
 
-const STAFF: Staff[] = [
-  {
-    initials: 'MC',
-    name: 'Maya Chen',
-    roleKey: 'floorManager',
-    start: 8,
-    end: 16,
-    color: '#b3c5e8',
-    clockedIn: true,
-  },
-  {
-    initials: 'SP',
-    name: 'Sam Park',
-    roleKey: 'barista',
-    start: 9,
-    end: 17,
-    color: '#a2d9af',
-    clockedIn: true,
-  },
-  {
-    initials: 'JK',
-    name: 'James K.',
-    roleKey: 'chef',
-    start: 10,
-    end: 22,
-    color: '#f3c08a',
-    clockedIn: true,
-  },
-  {
-    initials: 'AR',
-    name: 'Aisha R.',
-    roleKey: 'server',
-    start: 11,
-    end: 19,
-    color: '#c9a48a',
-    clockedIn: false,
-  },
-  {
-    initials: 'LB',
-    name: 'Luca B.',
-    roleKey: 'barista',
-    start: 14,
-    end: 22,
-    color: '#d6b88e',
-    clockedIn: false,
-  },
-  {
-    initials: 'NA',
-    name: 'Nadia A.',
-    roleKey: 'server',
-    start: 16,
-    end: 23,
-    color: '#b3c5e8',
-    clockedIn: false,
-  },
+const TEAM: Shift[] = [
+  { name: 'Sara Haddad', initials: 'SH', role: 'ops', start: 8, end: 16, color: '#10b981' },
+  { name: 'Marc Khoury', initials: 'MK', role: 'sales', start: 9, end: 17, color: '#3b82f6' },
+  { name: 'Lina Rahme', initials: 'LR', role: 'support', start: 10.5, end: 18.5, color: '#8b5cf6' },
+  { name: 'Jad Daou', initials: 'JD', role: 'finance', start: 12, end: 20, color: '#f59e0b' },
+  { name: 'Nour Saad', initials: 'NS', role: 'design', start: 9, end: 13, color: '#ef4444' },
 ];
 
-const DAY_START = 7;
-const DAY_END = 24;
-const TOTAL_HRS = DAY_END - DAY_START;
+const DAY_START = 8;
+const DAY_END = 20;
+const SPAN = DAY_END - DAY_START;
+const TICKS = [8, 10, 12, 14, 16, 18, 20];
+// "Now" walks from 9:45 to 11:15 while the tab is open, so Lina's shift
+// visibly starts mid-demo.
+const NOW_FROM = 9.75;
+const NOW_TRAVEL = 1.5;
 
-export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t, i18n } = useTranslation();
-  const [now, setNow] = useState(10.5);
-  // transform-origin has no widely-supported logical keyword yet, so the
-  // scaleX growth anchor for each shift bar is set explicitly from the
-  // active locale's direction rather than a CSS property alone.
-  const isRtl = findLocale(i18n.language)?.dir === 'rtl';
+const pct = (h: number): string => `${((h - DAY_START) / SPAN) * 100}%`;
+const fmt = (h: number): string => {
+  const hh = Math.floor(h);
+  const mm = Math.floor((h - hh) * 60);
+  return `${hh}:${String(mm).padStart(2, '0')}`;
+};
 
-  useEffect(() => {
-    if (!isActive) return;
-    const timer = setInterval(() => {
-      setNow((h) => {
-        const next = h + 0.15;
-        return next > 22 ? 8.5 : next;
-      });
-    }, 120);
-    return () => clearInterval(timer);
-  }, [isActive]);
-
-  const nowPct = ((now - DAY_START) / TOTAL_HRS) * 100;
-  const clocked = STAFF.filter((s) => now >= s.start && now < s.end).length;
-
-  // 24-hour, not 12-hour with an am/pm suffix: am/pm has no equivalent
-  // worth inventing in French or Arabic, and 24-hour is the locale-neutral
-  // convention anyway, so this sidesteps translating it at all.
-  const fmtHour = (h: number): string => {
-    const hh = Math.floor(h);
-    const mm = Math.round((h - hh) * 60);
-    return mm === 0 ? `${hh}:00` : `${hh}:${String(mm).padStart(2, '0')}`;
-  };
+export const HRDemo = ({
+  isActive,
+  onNavigate,
+}: {
+  isActive: boolean;
+  onNavigate?: (view: PortalView) => void;
+}): React.JSX.Element => {
+  const { t } = useTranslation();
+  const now = NOW_FROM + useCountUp(NOW_TRAVEL, isActive, 5200);
+  const onShift = TEAM.filter((s) => now >= s.start && now < s.end).length;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'var(--bg-surface-a)',
-        fontFamily: 'inherit',
-        fontSize: 13,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
+    <PortalFrame
+      onNavigate={onNavigate}
+      app="hr"
+      crumb={t('home.features.demos.hr.crumb', { returnObjects: true }) as string[]}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: '16px 20px 14px',
-          borderBottom: '1px solid var(--hairline)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-        }}
-      >
-        <div>
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
-            {t('home.features.demos.hr.scheduleTitle')}
-          </span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginInlineStart: 10 }}>
-            {t('home.features.demos.hr.today')}
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e' }} />
-          <span style={{ color: 'rgba(19,19,19,0.65)', fontSize: 12 }}>
-            {t('home.features.demos.hr.onShift', { count: clocked })}
-          </span>
-        </div>
+      <div className={styles.spread}>
+        <span className={styles.title}>{t('home.features.demos.hr.today')}</span>
+        <span className={styles.pill} data-tone="green">
+          <span className={local.liveDot} />
+          {t('home.features.demos.hr.onShift', { count: onShift })}
+        </span>
       </div>
 
-      {/* Timeline header */}
-      <div
-        style={{
-          paddingBlock: '8px 6px',
-          paddingInlineStart: 148,
-          paddingInlineEnd: 20,
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-        }}
-      >
-        {[8, 10, 12, 14, 16, 18, 20, 22].map((h) => (
-          <span
-            key={h}
-            dir="ltr"
-            style={{ fontSize: 9, color: 'rgba(19,19,19,0.4)', width: 24, textAlign: 'center' }}
-          >
-            {fmtHour(h)}
-          </span>
-        ))}
-      </div>
-
-      {/* Staff rows */}
-      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-        {/* Now line */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            insetInlineStart: `calc(148px + ${nowPct}% * ((100% - 148px) / 100))`,
-            width: 1,
-            background: 'var(--ink)',
-            zIndex: 10,
-            pointerEvents: 'none',
-          }}
-        >
-          <div
-            dir="ltr"
-            style={{
-              position: 'absolute',
-              top: 0,
-              insetInlineStart: -18,
-              background: 'var(--ink)',
-              color: '#ffffff',
-              borderRadius: 4,
-              padding: '1px 5px',
-              fontSize: 9,
-              fontWeight: 700,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {fmtHour(now)}
-          </div>
+      <div className={local.grid} dir="ltr">
+        <div />
+        <div className={local.ticks} dir="ltr">
+          {TICKS.map((h) => (
+            <span key={h} style={{ left: pct(h) }}>
+              {h}:00
+            </span>
+          ))}
         </div>
 
-        {STAFF.map((s) => {
-          const isOn = now >= s.start && now < s.end;
-          const leftPct = ((s.start - DAY_START) / TOTAL_HRS) * 100;
-          const widthPct = ((s.end - s.start) / TOTAL_HRS) * 100;
+        {TEAM.map((s) => {
+          const on = now >= s.start && now < s.end;
           return (
-            <div
-              key={s.initials}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                paddingBlock: 7,
-                paddingInlineEnd: 20,
-                borderBottom: '1px solid var(--hairline)',
-              }}
-            >
-              {/* Staff info */}
-              <div
-                style={{
-                  width: 148,
-                  paddingInlineStart: 20,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  flexShrink: 0,
-                }}
-              >
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: '50%',
-                    background: isOn ? s.color : 'var(--hairline)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: isOn ? '#0a0a0a' : 'rgba(19,19,19,0.4)',
-                    transition: 'all 0.3s ease',
-                    flexShrink: 0,
-                  }}
-                >
+            <React.Fragment key={s.name}>
+              <div className={local.person}>
+                <span className={styles.avatar} style={{ background: s.color }}>
                   {s.initials}
-                </div>
+                </span>
                 <div>
-                  {/* dir="ltr": a Latin name ending in a period (an
-                      abbreviated surname) puts the period at the visual
-                      start under dir="rtl" otherwise, e.g. ".James K". */}
-                  <div
-                    dir="ltr"
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 500,
-                      color: isOn ? 'var(--ink)' : 'rgba(19,19,19,0.5)',
-                    }}
-                  >
-                    {s.name}
-                  </div>
-                  <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.45)' }}>
-                    {t(`home.features.demos.hr.roles.${s.roleKey}`)}
-                  </div>
+                  <div className={local.name}>{s.name}</div>
+                  <div className={styles.muted}>{t(`home.features.demos.hr.roles.${s.role}`)}</div>
                 </div>
               </div>
-
-              {/* Shift bar track */}
-              <div style={{ flex: 1, position: 'relative', height: 20 }}>
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
-                  style={{
-                    position: 'absolute',
-                    insetInlineStart: `${leftPct}%`,
-                    width: `${widthPct}%`,
-                    height: '100%',
-                    background: isOn ? `${s.color}33` : 'var(--hairline)',
-                    borderRadius: 4,
-                    border: `1px solid ${isOn ? `${s.color}66` : 'var(--hairline-strong)'}`,
-                    transformOrigin: isRtl ? 'right' : 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                    paddingInlineStart: 6,
-                    overflow: 'hidden',
-                  }}
+              <div className={local.track} dir="ltr">
+                <span
+                  className={cn(local.shift, on && local.shiftOn)}
+                  style={
+                    {
+                      left: pct(s.start),
+                      width: `${((s.end - s.start) / SPAN) * 100}%`,
+                      '--shift': s.color,
+                    } as React.CSSProperties
+                  }
                 >
-                  <span
-                    dir="ltr"
-                    style={{
-                      fontSize: 9,
-                      color: isOn ? s.color : 'rgba(19,19,19,0.4)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {fmtHour(s.start)}–{fmtHour(s.end)}
-                  </span>
-                </motion.div>
+                  {fmt(s.start)}–{fmt(s.end)}
+                </span>
               </div>
-            </div>
+            </React.Fragment>
           );
         })}
+
+        {/* Now line spans the timeline column only. */}
+        <div className={local.nowLayer} dir="ltr" aria-hidden="true">
+          <span className={local.now} style={{ left: pct(now) }}>
+            <span className={local.nowLabel}>{fmt(now)}</span>
+          </span>
+        </div>
       </div>
-    </div>
+    </PortalFrame>
   );
 };

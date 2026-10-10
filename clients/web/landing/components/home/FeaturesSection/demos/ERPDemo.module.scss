@@ -1,0 +1,16 @@
+.table {
+  margin-top: 14px;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.barCell {
+  width: 30%;
+}
+
+// Soft highlight on the row the demo is following.
+.watched td {
+  background: color-mix(in srgb, var(--p-accent) 6%, transparent);
+}

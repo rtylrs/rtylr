@@ -1,0 +1,97 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.chartCard {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 8px;
+}
+
+.plot {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.chart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.dip {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--p-surface);
+  box-shadow: 0 0 0 2px var(--p-accent);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dipOn {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.days {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 6px;
+  color: var(--p-muted);
+  font-size: 10.5px;
+}
+
+.dayOn {
+  color: var(--p-text);
+  font-weight: 600;
+}
+
+// Caret thread under the chart.
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 74px;
+}
+
+.question {
+  align-self: flex-end;
+  max-width: 70%;
+  padding: 7px 11px;
+  border-radius: 12px 12px 4px 12px;
+  background: var(--p-text);
+  color: #fff;
+}
+
+.answer {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  max-width: 85%;
+  padding: 8px 11px;
+  border-radius: 12px 12px 12px 4px;
+  background: var(--p-bg);
+  box-shadow: inset 0 0 0 1px var(--p-border);
+  color: var(--p-dim);
+}
+
+.caret {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: #111214;
+  color: #f2f2ef;
+  flex-shrink: 0;
+}

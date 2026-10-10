@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import { Button } from '@voxire/components';
 import { ASSETS, resolveAuthUrl } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import { localeFromPath, navPath } from '../../../../lib/locales';
@@ -324,12 +323,17 @@ const HeaderDesktop: React.FC = () => {
         <LanguageSwitcher />
 
         <div className={styles['header-buttons']}>
-          <Button onClick={handleLoginClick} variant="soft" width="140px" height="40px">
+          {/* nav-link opts the plain sign-in out of the global button fill */}
+          <button
+            type="button"
+            onClick={handleLoginClick}
+            className={cn(styles['nav-link'], styles['header-signin'])}
+          >
             {t('common.nav.signIn')}
-          </Button>
-          <Button onClick={handleSignupClick} variant="dark-outline" width="140px" height="40px">
+          </button>
+          <button type="button" onClick={handleSignupClick} className={styles['header-cta']}>
             {t('common.nav.signUp')}
-          </Button>
+          </button>
         </div>
       </div>
     </header>

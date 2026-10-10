@@ -133,7 +133,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']) {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):not([class*='aiCardChip']):not([class*='consent-btn']):not([class*='PortalDemo_']):not([class*='HomeDemo_']):not([class*='HeroPortal_']) {
   background: var(--btn-cream-bg) !important;
   background-image: var(--btn-cream-bg) !important;
   color: #ffffff !important;
@@ -151,7 +151,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):hover {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):not([class*='aiCardChip']):not([class*='consent-btn']):not([class*='PortalDemo_']):not([class*='HomeDemo_']):not([class*='HeroPortal_']):hover {
   background: var(--btn-cream-bg-hover) !important;
   background-image: var(--btn-cream-bg-hover) !important;
   color: #ffffff !important;
@@ -167,7 +167,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):active {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):not([class*='aiCardChip']):not([class*='consent-btn']):not([class*='PortalDemo_']):not([class*='HomeDemo_']):not([class*='HeroPortal_']):active {
   background: #000000 !important;
   background-image: none !important;
   color: #ffffff !important;
@@ -186,7 +186,7 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']) {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):not([class*='aiCardChip']):not([class*='consent-btn']):not([class*='PortalDemo_']):not([class*='HomeDemo_']):not([class*='HeroPortal_']) {
   background: var(--btn-glass-bg) !important;
   background-image: none !important;
   color: var(--ink) !important;
@@ -206,7 +206,7 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):hover {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):not([class*='aiCardChip']):not([class*='consent-btn']):not([class*='PortalDemo_']):not([class*='HomeDemo_']):not([class*='HeroPortal_']):hover {
   background: var(--btn-glass-bg-hover) !important;
   background-image: none !important;
   color: var(--ink) !important;
@@ -222,7 +222,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node'])::before,
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):not([class*='aiCardChip']):not([class*='consent-btn']):not([class*='PortalDemo_']):not([class*='HomeDemo_']):not([class*='HeroPortal_'])::before,
 :where(
     button,
     a[class*='Btn'],
@@ -231,7 +231,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node'])::after {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):not([class*='aiCardChip']):not([class*='consent-btn']):not([class*='PortalDemo_']):not([class*='HomeDemo_']):not([class*='HeroPortal_'])::after {
   background-image: none !important;
   box-shadow: none !important;
 }

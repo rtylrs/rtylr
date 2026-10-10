@@ -1,158 +1,68 @@
+// Closing CTA. Centered and quiet: the page has done the showing by now.
+
 .ctaSection {
+  padding: 140px 24px 150px;
   background: var(--bg-surface-b);
-  position: relative;
   border-top: 1px solid var(--hairline);
-  overflow: hidden;
 }
 
-.split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 640px;
-  align-items: stretch;
-}
-
-// ── Left column ──────────────────────────────────────────────────────────────
-
-.left {
+.inner {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 32px;
-  padding: 96px 80px;
-  border-inline-end: 1px solid var(--hairline);
+  align-items: center;
+  max-width: 820px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .ctaTitle {
-  font-size: clamp(2.4rem, 4.2vw, 3.8rem);
-  font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: -0.04em;
-  color: var(--ink);
   margin: 0;
+  font-size: clamp(2.2rem, 4.4vw, 3.6rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ctaTitleMuted {
+  color: rgba(19, 19, 19, 0.4);
+}
+
 .ctaSubtitle {
-  font-size: 1rem;
+  margin: 22px 0 32px;
+  font-size: 1.02rem;
   line-height: 1.6;
   color: rgba(19, 19, 19, 0.6);
-  margin: -12px 0 0;
-  max-width: 440px;
-  letter-spacing: -0.005em;
 }
 
 .ctaButtons {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
-// transform not set on hover/active here - CTASection.tsx already drives
-// these buttons' scale via whileHover/whileTap; a competing CSS transform
-// would fight Motion's inline style.
-.primaryBtn {
-  background: var(--btn-cream-bg);
-  color: #ffffff;
-  border: none;
-  border-radius: 12px;
-  padding: 11px 24px;
-  font-size: 0.88rem;
+// Fill and colour come from the global button rule (solid ink for the
+// primary, outline for `ctaSecondary`); only size and shape live here.
+// transform belongs to Motion's whileHover/whileTap.
+.ctaPrimary,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-family: var(--primary-font);
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  font-family: var(--primary-font);
-  letter-spacing: 0;
-  min-height: 42px;
-  box-shadow: var(--btn-cream-shadow);
-  transition: background 0.22s ease, box-shadow 0.22s ease;
-
-  &:hover {
-    background: var(--btn-cream-bg-hover);
-    box-shadow: var(--btn-cream-shadow-hover);
-  }
-
-  &:active {
-    background: #000000;
-  }
 }
 
-.outlineBtn {
-  background: var(--btn-glass-bg);
-  color: var(--ink);
-  border: 1px solid var(--hairline-strong);
-  border-radius: 999px;
-  padding: 11px 24px;
-  font-size: 0.88rem;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: var(--primary-font);
-  letter-spacing: -0.01em;
-  min-height: 42px;
-  box-shadow: none;
-  transition:
-    border-color 0.22s ease,
-    background 0.22s ease;
-
-  &:hover {
-    border-color: var(--ink);
-    background: var(--btn-glass-bg-hover);
-  }
-}
-
-// ── Right column - interactive "seven apps, one platform" orbit graphic ────
-
-.right {
-  position: relative;
-  overflow: hidden;
-  min-height: 100%;
-  background: var(--bg-surface-a);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// ── Responsive ───────────────────────────────────────────────────────────────
-
-@media (max-width: 1100px) {
-  .left {
-    padding: 80px 56px;
-  }
-}
-
-@media (max-width: 900px) {
-  .split {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .left {
-    padding: 72px 32px;
-    border-inline-end: none;
-    border-bottom: 1px solid var(--hairline);
-  }
-
-  .right {
-    min-height: 400px;
-  }
-}
-
-@media (max-width: 640px) {
-  .left {
-    padding: 64px 24px;
-    gap: 24px;
-  }
-
-  .ctaButtons {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    max-width: 320px;
-  }
-
-  .primaryBtn,
-  .outlineBtn {
-    width: 100%;
-    text-align: center;
+@media (max-width: 560px) {
+  .ctaSection {
+    padding: 96px 20px 104px;
   }
 }

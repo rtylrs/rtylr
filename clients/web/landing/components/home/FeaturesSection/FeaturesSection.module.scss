@@ -1,223 +1,179 @@
-// ── Features / Apps showcase ─────────────────────────────────────────────────
-// Tabbed one-screen layout. Previously a sticky-right-column
-// scroll-linked feed that occupied 7 viewport heights. Now one
-// viewport tall, tabs swap the image + copy.
+// ── Features showcase ────────────────────────────────────────────────────────
+// Vertical area list on the left, live demo on the right. The active area
+// opens to show its copy; a hairline under it fills while it auto-advances.
 
 .featuresSection {
-  padding: 120px 0;
+  padding: 128px 0;
   background: var(--bg-surface-a);
-  min-height: 100vh;
-  display: flex;
-  align-items: flex-start;
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 0 50px;
+  padding: 0 32px;
   width: 100%;
 }
 
-// Header
+// ── Header ───────────────────────────────────────────────────────────────────
 
 .header {
-  margin-bottom: 40px;
-  text-align: start;
+  margin-bottom: 56px;
+  max-width: 760px;
 }
 
 .badge {
   display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: rgba(19, 19, 19, 0.65);
-  background: var(--bg-surface-b);
-  border: 1px solid var(--hairline-strong);
-  padding: 6px 12px;
-  border-radius: 999px;
   margin-bottom: 18px;
+  color: rgba(19, 19, 19, 0.55);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .sectionTitle {
-  font-size: clamp(2rem, 3.4vw, 3rem);
-  font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: -0.028em;
-  color: var(--ink);
   margin: 0;
-  max-width: 860px;
-}
-
-.sectionTitleAccent {
-  color: rgba(19, 19, 19, 0.55);
-}
-
-// Tab bar - horizontal pill row. Scrolls horizontally on narrow
-// screens rather than wrapping, so it stays one line and one row.
-
-.tabBar {
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 40px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-bottom: 4px;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.tab {
-  position: relative;
-  flex-shrink: 0;
-  background: transparent;
-  color: rgba(19, 19, 19, 0.62);
-  border: 1px solid var(--hairline-strong);
-  border-radius: 999px;
-  padding: 9px 18px;
-  font-size: 0.88rem;
+  font-size: clamp(2rem, 3.6vw, 3rem);
   font-weight: 500;
-  letter-spacing: -0.005em;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    color 0.18s ease,
-    border-color 0.18s ease;
-  font-family: inherit;
-  min-height: 38px;
-
-  &:hover {
-    color: var(--ink);
-    border-color: rgba(19, 19, 19, 0.3);
-    background: rgba(19, 19, 19, 0.04);
-  }
-}
-
-// The cream background lives on a shared-layout pill that glides between
-// tabs; the button itself only switches text color.
-.tabPill {
-  position: absolute;
-  inset: -1px;
-  background: var(--btn-cream-bg);
-  border-radius: 999px;
-  box-shadow: var(--btn-cream-shadow);
-}
-
-.tabLabel {
-  position: relative;
-  z-index: 1;
-}
-
-.tabActive {
-  color: #ffffff;
-  border-color: transparent;
-
-  &:hover {
-    color: #ffffff;
-    border-color: transparent;
-    background: transparent;
-  }
-}
-
-// Showcase row - left copy column, right image column.
-
-.showcaseRow {
-  display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
-  gap: 48px;
-  align-items: center;
-}
-
-.copyCol {
-  min-height: 320px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.featureCategory {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(19, 19, 19, 0.55);
-  margin-bottom: 14px;
-  display: block;
-}
-
-.featureTitle {
-  font-size: clamp(1.75rem, 2.6vw, 2.4rem);
-  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
   color: var(--ink);
-  margin: 0 0 18px;
-  line-height: 1.1;
-  letter-spacing: -0.025em;
-  max-width: 520px;
 }
 
-.featureDescription {
-  font-size: 1.05rem;
-  color: rgba(19, 19, 19, 0.7);
-  line-height: 1.55;
-  margin: 0 0 26px;
-  max-width: 520px;
-  letter-spacing: -0.003em;
+// Own line, so the follow-up never breaks mid-phrase after the claim.
+.sectionTitleAccent {
+  display: block;
+  color: rgba(19, 19, 19, 0.4);
 }
 
-.featureActions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+// ── Layout ───────────────────────────────────────────────────────────────────
+
+.layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 56px;
+  align-items: start;
 }
 
-.featureButton {
-  flex-shrink: 0;
-  min-width: 148px;
-  justify-content: space-between;
+// ── Area list ────────────────────────────────────────────────────────────────
 
-  :global(.voxire-button-content) {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  :global(.voxire-button-suffix) {
-    transition: transform 0.22s var(--ease-out-soft);
-  }
-
-  &:hover {
-    :global(.voxire-button-suffix) {
-      transform: translate(2px, -2px);
-    }
-  }
-}
-
-// Image column
-
-.imgCol {
+.tabList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  border-top: 1px solid rgba(19, 19, 19, 0.08);
+}
+
+.tabItem {
+  position: relative;
+  border-bottom: 1px solid rgba(19, 19, 19, 0.08);
+}
+
+.tabTrigger {
+  display: block;
+  width: 100%;
+  padding: 16px 0;
+  border: 0;
+  background: transparent;
+  color: rgba(19, 19, 19, 0.45);
+  font-family: var(--primary-font);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  text-align: start;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: rgba(19, 19, 19, 0.8);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+.tabItemActive .tabTrigger {
+  color: var(--ink);
+}
+
+.tabBody {
+  overflow: hidden;
+}
+
+.tabText {
+  // Same height for every area (four lines), so switching tabs never
+  // changes the list's height and nothing below the section jumps.
+  min-height: calc(0.95rem * 1.55 * 4);
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(19, 19, 19, 0.55);
+
+  strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
+
+.tabLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+
+  svg {
+    transition: transform 0.2s var(--ease-out-soft);
+  }
+
+  &:hover svg {
+    transform: translateX(calc(3px * var(--dir-x)));
+  }
+}
+
+// Fills left-to-right over the auto-advance interval, sitting on the rule.
+.tabProgress {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--ink);
+  transform-origin: left center;
+
+  :global([dir='rtl']) & {
+    transform-origin: right center;
+  }
+}
+
+// ── Demo stage ───────────────────────────────────────────────────────────────
+
+.stage {
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--bg-surface-b);
+  box-shadow: inset 0 0 0 1px rgba(19, 19, 19, 0.05);
 }
 
 .showcaseImageContainer {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  max-height: 540px;
+  aspect-ratio: 16 / 11;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--hairline);
-  background: var(--bg-surface-b);
-  box-shadow: var(--elev-1);
+  background: var(--bg-surface-a);
+  box-shadow:
+    0 0 0 1px rgba(19, 19, 19, 0.07),
+    0 16px 40px -20px rgba(19, 19, 19, 0.2);
 }
 
 .showcaseImage {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
   pointer-events: none;
 
   &.active {
@@ -226,120 +182,27 @@
   }
 }
 
-.showcaseImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+// ── Responsive ───────────────────────────────────────────────────────────────
 
-// Progress dots under the image - visual indicator of auto-advance.
-
-.progressRow {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-  padding: 4px 0 0;
-}
-
-.progressDot {
-  appearance: none;
-  border: 0;
-  padding: 0;
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(19, 19, 19, 0.15);
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    width 0.2s ease;
-
-  &:hover {
-    background: rgba(19, 19, 19, 0.4);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 5px;
-  }
-}
-
-.progressDotActive {
-  position: relative;
-  overflow: hidden;
-  background: rgba(19, 19, 19, 0.2);
-  width: 20px;
-  border-radius: 999px;
-
-  &:hover {
-    background: rgba(19, 19, 19, 0.3);
-  }
-}
-
-.progressFill {
-  position: absolute;
-  inset: 0;
-  background: var(--ink);
-  border-radius: 999px;
-  transform-origin: left;
-}
-
-// Responsive
-
-@media (max-width: 1024px) {
-  .container {
-    padding: 0 30px;
-  }
-
-  .showcaseRow {
+@media (max-width: 960px) {
+  .layout {
     grid-template-columns: 1fr;
     gap: 32px;
   }
 
-  .imgCol {
+  .stage {
     order: -1;
-  }
-
-  .copyCol {
-    min-height: auto;
-  }
-
-  .featureTitle {
-    max-width: 100%;
-  }
-
-  .featureDescription {
-    max-width: 100%;
+    padding: 12px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .featuresSection {
-    padding: 72px 0;
-    min-height: auto;
+    padding: 88px 0;
   }
 
   .container {
     padding: 0 20px;
-  }
-
-  .tabBar {
-    margin: 24px 0 28px;
-  }
-
-  .tab {
-    padding: 8px 14px;
-    font-size: 0.82rem;
-  }
-
-  .featureTitle {
-    font-size: 1.65rem;
-  }
-
-  .featureDescription {
-    font-size: 0.95rem;
   }
 
   .showcaseImageContainer {
