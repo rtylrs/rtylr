@@ -5,8 +5,8 @@ export interface CaretMemoryItem {
   id: string;
   value: string;
   updatedAt?: string;
-  /** Distilled from the person's feedback on replies, not told directly. */
-  learned?: boolean;
+  /** How Caret learned it when nobody told it directly. */
+  origin?: "feedback" | "chat";
 }
 
 interface UseCaretMemoriesParams {
@@ -34,7 +34,10 @@ export function useCaretMemories({
           id: memory.id as string,
           value: memory.value as string,
           updatedAt: memory.updatedAt,
-          learned: memory.type === "lesson",
+          origin:
+            memory.origin === "feedback" || memory.origin === "chat"
+              ? memory.origin
+              : undefined,
         }));
     },
   });

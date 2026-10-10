@@ -199,7 +199,7 @@ export const MemorySettings: React.FC<MemorySettingsProps> = ({
                       }}
                     >
                       {memory.value}
-                      {memory.learned && (
+                      {memory.origin && (
                         <span
                           style={{
                             display: "block",
@@ -208,7 +208,9 @@ export const MemorySettings: React.FC<MemorySettingsProps> = ({
                             color: caretTokens.textDim,
                           }}
                         >
-                          Learned from your feedback
+                          {memory.origin === "feedback"
+                            ? "Learned from your feedback"
+                            : "Picked up from a chat"}
                         </span>
                       )}
                     </span>
