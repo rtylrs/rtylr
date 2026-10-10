@@ -109,4 +109,20 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The computed figures for the operation.",
 		Freshness:  "computed", SideEffect: "read-only",
 	},
+	{
+		Name:        "markets.quote",
+		Description: "Latest market price for a stock, ETF, index or currency pair (e.g. AAPL, ^GSPC, EURUSD=X), with the day and 52-week range and the last month of daily closes. Accepts a ticker or a company name.",
+		Module:      "markets", Scope: "read",
+		InputHint:  `{"symbol":"AAPL or a company name"}`,
+		OutputHint: "Price, currency, exchange, change vs the previous close, day and 52-week range, and daily closes.",
+		Freshness:  "delayed market data", SideEffect: "read-only",
+	},
+	{
+		Name:        "markets.crypto",
+		Description: "Current price, 24-hour change and market cap of a cryptocurrency in any currency.",
+		Module:      "markets", Scope: "read",
+		InputHint:  `{"coin":"bitcoin or BTC","currency":"usd"}`,
+		OutputHint: "Price, 24-hour change and market cap.",
+		Freshness:  "live", SideEffect: "read-only",
+	},
 }

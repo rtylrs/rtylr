@@ -91,12 +91,19 @@ var nonPublicPrefixes = []netip.Prefix{
 
 // getPublicJSON reads a JSON document from a fixed public API.
 func getPublicJSON(ctx context.Context, client *http.Client, endpoint string, out any) error {
+	return getPublicJSONWith(ctx, client, endpoint, out, nil)
+}
+
+func getPublicJSONWith(ctx context.Context, client *http.Client, endpoint string, out any, headers map[string]string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return errors.New("could not build the request")
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", caretUserAgent)
+	for key, value := range headers {
+		req.Header.Set(key, value)
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.New("the service did not respond")
