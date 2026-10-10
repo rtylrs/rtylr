@@ -8,8 +8,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/notifications/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/notifications/internal/api"
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	"github.com/voxire/onion/internal/modules/notifications/internal/domain"
@@ -49,16 +47,15 @@ func (m *Module) CreateNotification(ctx context.Context, input NotificationInput
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	// The dashboard notification socket is a WebSocket upgrade, which the JSON
+	// contract cannot carry, so it stays a raw handler.
+	mux.HandleFunc("GET /dash/ws", api.ServeDashWS)
 	if err := hubnotificationv1.RegisterNotificationServiceServer(
 		api.NewNotificationAPI(m.service),
 		hubnotificationv1.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register hub notification service: %w", err))
 	}
-}
-
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	api.RegisterRoutes(ctx, router, m.service)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -3,3 +3,13 @@ package hub.caret.v1
 service CaretService {
   listCaretTools(ListCaretToolsRequest) -> ListCaretToolsResponse @post("/tools")
 }
+
+/// Runtime routes the Caret panel calls directly. Paths match the routes the
+/// legacy handlers served; the SSE stream stays a raw handler.
+service CaretRuntimeService {
+  base_path: "/"
+
+  listTools(ListToolsRequest) -> ListToolsResponse @get("/caret/tools")
+  getProviderStatus(GetProviderStatusRequest) -> GetProviderStatusResponse @get("/ai/status")
+  decideTool(ToolDecisionRequest) -> ToolDecisionResponse @post("/caret/tools/decision")
+}

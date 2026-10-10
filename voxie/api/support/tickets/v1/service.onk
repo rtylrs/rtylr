@@ -1,0 +1,12 @@
+package support.tickets.v1
+
+/// Support tickets for the signed-in business. Paths match the routes the
+/// legacy handlers served.
+service TicketService {
+  base_path: "/"
+
+  listTickets(ListTicketsRequest) -> ListTicketsResponse @get("/support/tickets")
+  getTicket(GetTicketRequest) -> GetTicketResponse @get("/support/tickets/detail")
+  createTicket(CreateTicketRequest) -> CreateTicketResponse @post("/support/tickets")
+  updateTicket(UpdateTicketRequest) -> UpdateTicketResponse @put("/support/tickets")
+}
