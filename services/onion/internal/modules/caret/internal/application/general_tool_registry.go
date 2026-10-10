@@ -149,4 +149,20 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "Up to 20 named places with distance in metres and any listed street, hours, phone, website and cuisine.",
 		Freshness:  "community map data", SideEffect: "read-only",
 	},
+	{
+		Name:        "knowledge.papers",
+		Description: "Search scholarly papers and studies (OpenAlex) on a topic, with authors, year, venue, citation count, abstract and link. Use it when a question deserves research evidence.",
+		Module:      "knowledge", Scope: "read",
+		InputHint:  `{"query":"topic","since":2018,"most_cited":false}`,
+		OutputHint: "Up to six papers with title, authors, year, venue, citations, abstract and DOI link.",
+		Freshness:  "research index", SideEffect: "read-only",
+	},
+	{
+		Name:        "text.count",
+		Description: "Count characters, words, sentences and lines in a text exactly, with reading time, whether it fits SMS, X post or meta-description limits, and how often a word appears.",
+		Module:      "text", Scope: "read",
+		InputHint:  `{"text":"the text","find":"optional word to count"}`,
+		OutputHint: "Exact counts and length-limit checks.",
+		Freshness:  "computed", SideEffect: "read-only",
+	},
 }
