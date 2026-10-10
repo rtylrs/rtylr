@@ -18,8 +18,8 @@ const LANGUAGES = ['en', 'ar'] as const;
 const THEMES = ['light', 'dark'] as const;
 
 const TAGLINE = {
-  en: 'Rtylr suite, Everything you need to run your operation, unified in a single workspace',
-  ar: 'منظومة Rtylr، كل ما تحتاجه لتشغيل أعمالك، موحّد في مساحة عمل واحدة',
+  en: 'Work, finance, customers, team and sales on the same records, with Caret, the AI built in.',
+  ar: 'العمل والمالية والعملاء والفريق والمبيعات على السجلات نفسها، مع Caret، الذكاء الاصطناعي المدمج.',
 };
 
 test.describe('auth-showcase responsive matrix @screenshots', () => {
