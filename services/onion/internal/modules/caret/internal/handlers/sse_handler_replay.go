@@ -265,7 +265,9 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		return
 	}
 	if fullResponse.Len() > 0 {
-		if err := h.storeAIResponse(ctx, w, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
+		storedID, err := h.storeAIResponseID(ctx, w, req.SessionID, int(req.UserID), fullResponse.String())
+		renderer.storedID = storedID
+		if err != nil {
 			h.writeErrorResponse(w, "Failed to persist response")
 			settleUsage(int64(totalTokens))
 			return

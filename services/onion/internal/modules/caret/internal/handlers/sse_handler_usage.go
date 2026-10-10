@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -130,7 +131,17 @@ func flushResponse(w http.ResponseWriter) func() {
 // storeAIResponse persists the completed assistant turn before the stream's
 // done event is acknowledged. The request context is still live at each call
 // site; callers that need detached work should derive that context explicitly.
-func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.ResponseWriter, sessionID string, userID int, response string) (err error) {
+func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.ResponseWriter, sessionID string, userID int, response string) error {
+	_, err := h.storeAIResponseID(ctx, w, sessionID, userID, response)
+	return err
+}
+
+// storedMessage is what the memory module returns for a stored message.
+type storedMessage interface{ StoredID() int }
+
+// storeAIResponseID stores the reply and returns its stored message id, so
+// the client can rate this exact reply later; empty when unknown.
+func (h *GenerateTextStreamHandler) storeAIResponseID(ctx context.Context, w http.ResponseWriter, sessionID string, userID int, response string) (storedID string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("store AI response panic: %v", r)
@@ -147,21 +158,33 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.
 			transcript := recorder.Transcript()
 			blocks, marshalErr := json.Marshal(transcript.Blocks)
 			if marshalErr != nil {
-				return marshalErr
+				return "", marshalErr
 			}
-			_, err = store.StoreMessageWithTranscript(storeCtx, sessionID, userID, "assistant", response, len(response)/4, blocks, transcript.ResponseMs)
+			var stored any
+			stored, err = store.StoreMessageWithTranscript(storeCtx, sessionID, userID, "assistant", response, len(response)/4, blocks, transcript.ResponseMs)
+			if message, ok := stored.(storedMessage); ok && err == nil {
+				storedID = strconv.Itoa(message.StoredID())
+			}
 		} else {
-			_, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+			var stored any
+			stored, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+			if message, ok := stored.(storedMessage); ok && err == nil {
+				storedID = strconv.Itoa(message.StoredID())
+			}
 		}
 	} else {
-		_, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+		var stored any
+		stored, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+		if message, ok := stored.(storedMessage); ok && err == nil {
+			storedID = strconv.Itoa(message.StoredID())
+		}
 	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to store AI response",
 			logger.Error(err),
 			logger.String("session_id", sessionID),
 			logger.Int("user_id", userID))
-		return err
+		return "", err
 	}
 	if titler, ok := h.MemoryService.(application.ChatTitler); ok && h.AiService != nil && h.AiService.IsAvailable() {
 		go h.titleChat(context.WithoutCancel(ctx), titler, sessionID, userID)
@@ -170,7 +193,7 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.
 		go h.learnFromChat(context.WithoutCancel(ctx), learner, sessionID, userID)
 	}
 	if !h.claimSessionSummary(sessionID) {
-		return nil
+		return storedID, nil
 	}
 	if compactor, ok := h.MemoryService.(application.ConversationCompactor); ok && h.AiService != nil && h.AiService.IsAvailable() {
 		// Compaction calls the model, so it runs after the reply instead of
@@ -179,7 +202,7 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.
 			defer h.releaseSessionSummary(sessionID)
 			h.compactConversation(context.WithoutCancel(ctx), compactor, sessionID, userID)
 		}()
-		return nil
+		return storedID, nil
 	}
 	defer h.releaseSessionSummary(sessionID)
 
@@ -192,7 +215,7 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.
 			logger.String("session_id", sessionID),
 			logger.Int("user_id", userID))
 	}
-	return nil
+	return storedID, nil
 }
 
 func (h *GenerateTextStreamHandler) claimSessionSummary(sessionID string) bool {

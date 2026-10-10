@@ -148,7 +148,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           responseMs={message.responseMs}
           onRate={
             onRate
-              ? (rating, reason) => onRate(message.id, rating, reason)
+              ? (rating, reason) =>
+                  onRate(message.storedId ?? message.id, rating, reason)
               : undefined
           }
         />

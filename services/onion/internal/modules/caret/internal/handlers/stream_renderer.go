@@ -58,6 +58,8 @@ type streamEventRenderer struct {
 	// inflight reads started during this turn; progress carries their
 	// status lines.
 	inflight []*inflightTool
+	// storedID is the saved reply's message id, sent with message_end.
+	storedID string
 	progress chan string
 	// followUps are the next questions the model suggested, sent as their
 	// own event when the reply finishes rather than shown as text.
@@ -153,7 +155,7 @@ func (r *streamEventRenderer) Finish() error {
 			return err
 		}
 	}
-	if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventMessageEnd, MessageID: r.messageID}); err != nil {
+	if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventMessageEnd, MessageID: r.messageID, StoredID: r.storedID}); err != nil {
 		return err
 	}
 	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventDone})

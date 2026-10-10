@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"context"
+	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/snips"
 	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
 )
 
@@ -76,5 +79,29 @@ func TestCorrectionsInChatBecomeFeedbackOnThePreviousReply(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("a correction did not start a learning pass")
+	}
+}
+
+type storedReply int
+
+func (s storedReply) StoredID() int { return int(s) }
+
+type idMemoryFake struct{ detachedMemoryFake }
+
+func (m *idMemoryFake) StoreMessage(context.Context, string, int, string, string, int) (any, error) {
+	return storedReply(4321), nil
+}
+
+func TestMessageEndCarriesTheStoredReplyID(t *testing.T) {
+	handler := &GenerateTextStreamHandler{AiService: &fakeAIStreamService{}, MemoryService: &idMemoryFake{}}
+	rec := httptest.NewRecorder()
+	tokens := make(chan snips.StreamToken, 2)
+	tokens <- snips.StreamToken{Text: "Hello there."}
+	tokens <- snips.StreamToken{Done: true}
+	close(tokens)
+	handler.streamTokensToClient(context.Background(), rec, tokens, make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "s1", UserID: 7}, 1, 7, cacheWritePlan{Mode: "agent"}, nil)
+	if !strings.Contains(rec.Body.String(), `"type":"message_end"`) || !strings.Contains(rec.Body.String(), `"stored_id":"4321"`) {
+		t.Fatalf("message_end lacks the stored id:\n%s", rec.Body.String())
 	}
 }

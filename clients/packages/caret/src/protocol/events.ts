@@ -33,7 +33,7 @@ export type CaretStreamEvent =
       summary?: string;
       error?: string;
     }
-  | { type: 'message_end'; messageId: string }
+  | { type: 'message_end'; messageId: string; stored_id?: string }
   | { type: 'follow_ups'; messageId: string; items: string[] }
   | { type: 'error'; error: string; recoverable?: boolean }
   | { type: 'done' };

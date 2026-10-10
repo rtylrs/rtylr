@@ -352,6 +352,9 @@ export function useCaretStream({
         break;
 
       case "message_end":
+        if (event.stored_id) store.setLastAssistantStoredId(event.stored_id, tabId);
+        store.setStreaming(false, tabId);
+        break;
       case "done":
         store.setStreaming(false, tabId);
         break;

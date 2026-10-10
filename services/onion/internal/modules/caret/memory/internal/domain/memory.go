@@ -96,3 +96,7 @@ type ReplyFeedback struct {
 	Reply     string
 	CreatedAt time.Time
 }
+
+// StoredID is the message's database id, for callers outside the memory
+// module that only see it as an opaque value.
+func (m *ConversationMessage) StoredID() int { return m.ID }
