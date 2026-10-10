@@ -34,6 +34,13 @@ type TranscriptMessageService interface {
 	StoreMessageWithTranscript(ctx context.Context, sessionID string, userID int, role, content string, tokens int, blocks json.RawMessage, responseMs int64) (any, error)
 }
 
+// ConversationCompactor folds chat history that no longer fits the context
+// window into a rolling summary, so long chats keep their early decisions.
+type ConversationCompactor interface {
+	PendingCompaction(ctx context.Context, sessionID string, userID int) (previousSummary, transcript string, previousThrough, newThrough int, ok bool, err error)
+	SaveCompaction(ctx context.Context, sessionID string, userID, previousThrough, newThrough int, summary string) error
+}
+
 type MemorySessionAuthorizer interface {
 	EnsureSessionOwnership(ctx context.Context, sessionID string, userID int) error
 }

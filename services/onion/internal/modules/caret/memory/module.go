@@ -11,7 +11,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/application"
-	"github.com/voxire/onion/internal/modules/caret/memory/internal/contextjson"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/infrastructure"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/snips"
@@ -25,7 +24,7 @@ type Module struct {
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	repository := infrastructure.NewRepository(db)
-	memoryService := application.NewService(repository).WithContextEncoder(contextjson.Encode)
+	memoryService := application.NewService(repository)
 
 	return &Module{
 		memoryService: memoryService,
@@ -130,4 +129,17 @@ func (m *Module) StoreMessageWithImages(ctx context.Context, session string, use
 
 func (m *Module) StoreMessageWithTranscript(ctx context.Context, session string, userID int, role, content string, tokens int, blocks json.RawMessage, responseMs int64) (any, error) {
 	return m.memoryService.StoreMessageWithTranscript(ctx, session, userID, role, content, tokens, blocks, responseMs)
+}
+
+// PendingCompaction returns the chat history that has outgrown the context
+// window: the current summary, the turns to fold into it, and the message
+// range they cover. ok is false when nothing needs compacting.
+func (m *Module) PendingCompaction(ctx context.Context, session string, userID int) (previousSummary, transcript string, previousThrough, newThrough int, ok bool, err error) {
+	work, ok, err := m.memoryService.PendingCompaction(ctx, session, userID)
+	return work.PreviousSummary, work.Transcript, work.PreviousThrough, work.NewThrough, ok, err
+}
+
+// SaveCompaction stores the summary covering messages through newThrough.
+func (m *Module) SaveCompaction(ctx context.Context, session string, userID, previousThrough, newThrough int, summary string) error {
+	return m.memoryService.SaveCompaction(ctx, session, userID, application.CompactionWork{PreviousThrough: previousThrough, NewThrough: newThrough}, summary)
 }

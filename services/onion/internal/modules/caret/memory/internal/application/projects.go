@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/google/uuid"
@@ -101,38 +103,111 @@ func (s *Service) AssistantContext(ctx context.Context, session string, userID i
 	if err != nil {
 		return "", err
 	}
-	history, err := s.GetConversationContext(ctx, session, userID)
+	messages, err := s.repository.GetSessionMessages(ctx, session)
 	if err != nil {
 		return "", err
 	}
-	history.Memories, err = s.repository.AssistantMemories(ctx, session)
+	memories, err := s.repository.AssistantMemories(ctx, session)
 	if err != nil {
 		return "", err
 	}
-	// The current request is already supplied separately. Keep prior turns in order.
-	if len(history.Messages) > 0 {
-		history.Messages = history.Messages[:len(history.Messages)-1]
+
+	// Each section has its own budget, so a long chat can never push the
+	// profile, preferences or the newest turns out of the prompt.
+	var output strings.Builder
+	output.WriteString(clipEnd(strings.TrimSpace(profile), profileBudgetBytes))
+	if saved := renderMemories(memories); saved != "" {
+		output.WriteString("\n\nSaved user preferences:\n" + saved)
 	}
-	if len(history.Messages) > 10 {
-		history.Messages = history.Messages[len(history.Messages)-10:]
+	compaction := readCompaction(chat)
+	history := orderedHistory(messages)
+	transcript, omitted := transcriptWindow(uncoveredMessages(history, compaction.ThroughID), transcriptBudgetBytes)
+	if compaction.Summary != "" {
+		output.WriteString("\n\nSummary of the earlier part of this chat (older messages are not shown):\n" + clipEnd(compaction.Summary, summaryBudgetBytes))
 	}
-	for i := range history.Messages {
-		history.Messages[i].Content = truncateSummaryRunes(history.Messages[i].Content, 900)
+	if transcript != "" {
+		heading := "\n\nConversation so far, oldest first:\n"
+		if omitted > 0 {
+			heading = fmt.Sprintf("\n\nConversation so far, oldest first (%d older message(s) are not shown yet):\n", omitted)
+		}
+		output.WriteString(heading + transcript)
 	}
-	if s.contextEncoder == nil {
-		return "", errors.New("conversation context encoder is not configured")
-	}
-	data, err := s.contextEncoder(history)
-	if err != nil {
-		return "", err
-	}
-	output := profile + "\nConversation and user preferences (reference data):\n" + string(data)
 	if metadata.ProjectID != "" {
 		project, err := s.repository.ProjectConversationContext(ctx, metadata.ProjectID, session)
 		if err != nil {
 			return "", err
 		}
-		output += "\nProject context shared across this project's chats:\n" + project
+		if project = strings.TrimSpace(project); project != "" {
+			output.WriteString("\n\nProject context shared across this project's chats:\n" + clipEnd(project, projectBudgetBytes))
+		}
 	}
-	return truncateSummaryRunes(output, 28000), nil
+	return output.String(), nil
+}
+
+// CompactionWork is the next batch of history to fold into a chat's summary.
+type CompactionWork struct {
+	PreviousSummary string
+	PreviousThrough int
+	Transcript      string
+	NewThrough      int
+}
+
+// PendingCompaction reports whether a chat's unsummarized history has
+// outgrown the context window, and if so which turns to summarize next.
+func (s *Service) PendingCompaction(ctx context.Context, session string, userID int) (CompactionWork, bool, error) {
+	chat, err := s.repository.GetChatSession(ctx, session, userID)
+	if err != nil {
+		return CompactionWork{}, false, err
+	}
+	messages, err := s.repository.GetSessionMessages(ctx, session)
+	if err != nil {
+		return CompactionWork{}, false, err
+	}
+	compaction := readCompaction(chat)
+	ordered := append([]domain.ConversationMessage(nil), messages...)
+	sort.SliceStable(ordered, func(i, j int) bool { return ordered[i].ID < ordered[j].ID })
+	batch := compactionSplit(uncoveredMessages(ordered, compaction.ThroughID))
+	if len(batch) == 0 {
+		return CompactionWork{}, false, nil
+	}
+	turns := make([]string, len(batch))
+	for i, message := range batch {
+		turns[i] = renderTurn(message)
+	}
+	return CompactionWork{
+		PreviousSummary: compaction.Summary,
+		PreviousThrough: compaction.ThroughID,
+		Transcript:      strings.Join(turns, "\n\n"),
+		NewThrough:      batch[len(batch)-1].ID,
+	}, true, nil
+}
+
+// SaveCompaction stores a new rolling summary. It is a no-op when another
+// compaction already moved the summary on, so concurrent replies cannot
+// overwrite a newer summary with an older one.
+func (s *Service) SaveCompaction(ctx context.Context, session string, userID int, work CompactionWork, summary string) error {
+	summary = strings.TrimSpace(summary)
+	if summary == "" || work.NewThrough <= work.PreviousThrough {
+		return errors.New("compaction summary is empty")
+	}
+	chat, err := s.repository.GetChatSession(ctx, session, userID)
+	if err != nil {
+		return err
+	}
+	if readCompaction(chat).ThroughID != work.PreviousThrough {
+		return nil
+	}
+	metadata := map[string]any{}
+	if strings.TrimSpace(chat.Metadata) != "" && chat.Metadata != "null" {
+		if err := json.Unmarshal([]byte(chat.Metadata), &metadata); err != nil {
+			return err
+		}
+	}
+	metadata[compactedThroughKey] = work.NewThrough
+	encoded, err := json.Marshal(metadata)
+	if err != nil {
+		return err
+	}
+	_, err = s.repository.UpdateChatSession(ctx, session, userID, chat.Title, clipEnd(summary, summaryBudgetBytes), string(encoded))
+	return err
 }

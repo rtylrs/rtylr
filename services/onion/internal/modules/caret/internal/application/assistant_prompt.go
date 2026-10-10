@@ -7,6 +7,10 @@ import (
 
 // BuildAssistantPrompt is the unified chat runtime. Context comes from an
 // ownership-checked server adapter, never from client identity fields.
+// MaxAssistantContextBytes bounds saved chat context in one prompt. The memory
+// module budgets each section below this, so the cap is a backstop only.
+const MaxAssistantContextBytes = 72000
+
 func BuildAssistantPrompt(request, scope, context string, pageContext map[string]any, now time.Time) string {
 	var catalog strings.Builder
 	plannerContext := BuildRequestSystemContext(scope, pageContext)
@@ -28,7 +32,7 @@ func BuildAssistantPrompt(request, scope, context string, pageContext map[string
 		"{{TODAY}}", now.Format(time.RFC3339),
 		"{{TOOLS}}", catalog.String(),
 		"{{SCOPE}}", escapeCaretPromptData(plannerContext),
-		"{{CONTEXT}}", escapeCaretPromptData(TruncateUTF8ToBytes(context, 32000)),
+		"{{CONTEXT}}", escapeCaretPromptData(TruncateUTF8ToBytes(context, MaxAssistantContextBytes)),
 		"{{REQUEST}}", escapeCaretPromptData(SanitizeUserInput(request, MaxUserPromptLen)),
 	).Replace(assistantPromptTemplate))
 }

@@ -32,17 +32,11 @@ func invalidateMemoryScope(ctx context.Context, userID int) {
 }
 
 type Service struct {
-	repository     repository
-	contextEncoder func(*domain.ConversationContext) ([]byte, error)
+	repository repository
 }
 
 func NewService(repo repository) *Service {
 	return &Service{repository: repo}
-}
-
-func (s *Service) WithContextEncoder(encoder func(*domain.ConversationContext) ([]byte, error)) *Service {
-	s.contextEncoder = encoder
-	return s
 }
 
 func (s *Service) CreateSession(ctx context.Context, userID int, title string) (*domain.ChatSession, error) {
