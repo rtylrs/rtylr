@@ -37,4 +37,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The rate and converted amount per target currency, the rate date and its source.",
 		Freshness:  "daily rates", SideEffect: "read-only",
 	},
+	{
+		Name:        "calendar.public_holidays",
+		Description: "List a country's public holidays for a year, with dates and weekdays. Useful for scheduling, staffing and delivery estimates.",
+		Module:      "calendar", Scope: "read",
+		InputHint:  `{"country_code":"AE","year":2026,"upcoming":true}`,
+		OutputHint: "Each holiday's date, weekday, English and local name, and whether it is regional.",
+		Freshness:  "reference data", SideEffect: "read-only",
+	},
 }
