@@ -604,3 +604,16 @@
 [data-theme-scope] .text-accent {
   color: var(--accent-fg, var(--accent));
 }
+
+/* App icons: the accent part (the "fold") takes the app's colour on the
+   active rail and nav item, and stays a quiet tint everywhere else. */
+.portal-shell[data-app] :is(.portal-rail-button, .portal-nav-link).is-active {
+  --app-icon-accent: var(--accent);
+  --app-icon-accent-stroke: var(--accent);
+  --app-icon-accent-opacity: 1;
+}
+.portal-shell:not([data-app]) :is(.portal-rail-button, .portal-nav-link).is-active {
+  --app-icon-accent: #4583c4;
+  --app-icon-accent-stroke: #4583c4;
+  --app-icon-accent-opacity: 1;
+}

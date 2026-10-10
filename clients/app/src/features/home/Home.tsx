@@ -6,6 +6,7 @@ import { useUserStore } from '../../shared/stores/userStore';
 import { useCommandPalette } from '../../shared/stores/commandPaletteStore';
 import { canAccessPortalPath } from '../../shared/utils/canAccessPortalPath';
 import { APP_NAMES } from '../../shared/config/appNames';
+import { AppIconTile } from '@voxire/ui';
 import { APP_ICONS, WORKSPACE_APP_IDS } from '../../shared/config/appIcons';
 import { insightsNavItems } from '../../modules/insights/navigation';
 import './home.css';
@@ -68,7 +69,12 @@ export default function Home() {
                   : `/${id}`;
               const content = (
                 <>
-                  <Icon size={20} />
+                  <AppIconTile
+                    icon={Icon}
+                    color={`var(--app-${id})`}
+                    size={32}
+                    className="portal-app-tile"
+                  />
                   <span>{t(APP_NAMES[id].short)}</span>
                   <ChevronRight size={14} className="rtl:rotate-180" />
                 </>

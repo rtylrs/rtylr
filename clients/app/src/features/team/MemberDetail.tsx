@@ -408,7 +408,11 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                       color: selected ? 'var(--dash-text)' : 'var(--dash-text-dim)',
                     }}
                   >
-                    <Icon size={15} style={{ color: 'var(--dash-text-dim)' }} />
+                    <Icon
+                      size={15}
+                      accent={selected ? `var(--app-${app.key})` : undefined}
+                      style={{ color: 'var(--dash-text-dim)' }}
+                    />
                     <span className="text-xs font-semibold">{t(app.labelKey)}</span>
                   </button>
                 );

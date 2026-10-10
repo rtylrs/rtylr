@@ -2,6 +2,7 @@ import React from 'react';
 import { Store, Globe, ShoppingBag, Circle } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
+import { appIconAccentStyle } from '@voxire/ui';
 import { APP_ICONS } from '../../config/appIcons';
 import { APP_NAMES } from '../../config/appNames';
 
@@ -97,7 +98,11 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
         textSize,
         className
       )}
-      style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
+      style={{
+        background: 'var(--dash-hover)',
+        color: 'var(--dash-text-dim)',
+        ...(app in APP_ICONS ? appIconAccentStyle(`var(--app-${app}, currentColor)`) : {}),
+      }}
     >
       <Icon size={iconSize} />
       {showLabel && <span>{t(meta.labelKey)}</span>}

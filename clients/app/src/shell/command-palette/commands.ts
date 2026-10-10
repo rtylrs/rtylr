@@ -1,7 +1,8 @@
 import { financeNavItems } from '../../modules/finance/navigation';
 import { hrNavItems } from '../../modules/hr/navigation';
 import { recruitNavItems } from '../../modules/recruit/navigation';
-import { Webhook, Workflow } from 'lucide-react';
+import { Webhook } from 'lucide-react';
+import { AutomationsIcon } from '@voxire/ui';
 import { CaretIcon } from '@voxire/caret';
 import type { ComponentType } from 'react';
 import { Bell, UserPlus, Plus } from 'lucide-react';
@@ -68,7 +69,7 @@ export function getPortalCommands(
       id: 'tool-automations',
       label: t('common.nav.automations'),
       group: 'actions',
-      icon: Workflow,
+      icon: AutomationsIcon,
       destination: { path: '/automations' },
     });
   }
