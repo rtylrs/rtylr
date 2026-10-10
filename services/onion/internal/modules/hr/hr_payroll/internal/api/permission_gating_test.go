@@ -1,9 +1,9 @@
 package api
 
 import (
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
 	stdErrors "errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"testing"

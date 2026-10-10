@@ -1,16 +1,15 @@
 package api
 
 import (
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"testing"
 	"time"
-
 
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/domain"

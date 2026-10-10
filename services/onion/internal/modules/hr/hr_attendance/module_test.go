@@ -1,13 +1,12 @@
 package hr_attendance
 
 import (
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-
 )
 
 func TestRegisterRoutesIncludesValidatedSetPINPath(t *testing.T) {

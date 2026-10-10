@@ -1,10 +1,10 @@
 package api
 
 import (
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
 	"database/sql"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"testing"

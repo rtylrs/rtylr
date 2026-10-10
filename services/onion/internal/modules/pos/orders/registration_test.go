@@ -1,12 +1,11 @@
 package orders
 
 import (
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
 )
 
 func TestRegisterRoutesIncludesDashboardOrderList(t *testing.T) {

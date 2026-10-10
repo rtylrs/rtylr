@@ -1,12 +1,11 @@
 package api
 
 import (
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"testing"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_core/internal/infrastructure"
-
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
 	"github.com/voxire/onion/internal/platform/authorization"
