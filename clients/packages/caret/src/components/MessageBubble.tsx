@@ -1,7 +1,7 @@
 import React from "react";
 import { caretTokens } from "../ui/tokens";
 import MessageBlocks from "./MessageBlocks";
-import MessageActions from "./MessageActions";
+import MessageActions, { type ReplyRating } from "./MessageActions";
 import SourceChips from "./SourceChips";
 import { replySources } from "../lib/searchSources";
 import { StreamingOrb } from "./CaretOrb";
@@ -14,6 +14,8 @@ export interface MessageBubbleProps {
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
   onRetry?: () => void;
+  /** Rates this reply; see MessageActions. */
+  onRate?: (messageId: string, rating: ReplyRating, reason?: string) => void;
 }
 
 /** Flatten content blocks to plain text for copy. */
@@ -43,6 +45,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onApproveTool,
   onDenyTool,
   onRetry,
+  onRate,
 }) => {
   const isUser = message.role === "user";
   const blocks: ContentBlock[] =
@@ -140,6 +143,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           text={text}
           onRetry={onRetry}
           responseMs={message.responseMs}
+          onRate={
+            onRate
+              ? (rating, reason) => onRate(message.id, rating, reason)
+              : undefined
+          }
         />
       )}
     </div>

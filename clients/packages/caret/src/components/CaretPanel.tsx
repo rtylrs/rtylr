@@ -14,6 +14,8 @@ import { usePanelResize } from "../hooks/usePanelResize";
 import { useShortcuts } from "../hooks/useShortcuts";
 import { authHeaders } from "../lib/auth";
 import { createMemoryClient } from "../lib/memoryClient";
+import { createRuntimeClient } from "../lib/runtimeClient";
+import type { ReplyRating } from "./MessageActions";
 import { ApiError } from "@voxire/voxie/hub/memory/v1/client";
 import { buildCaretEmptyState, type CaretStarter } from "../lib/suggestions";
 import type { CaretChatSummary, CaretProject } from "../types/chat";
@@ -142,6 +144,21 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const messages = activeTab?.messages ?? EMPTY_MESSAGES;
   const isStreaming = activeTab?.isStreaming ?? false;
   const isLoading = activeTab?.isLoading ?? false;
+  // Thumbs up/down: stored server-side, where Caret distills lessons from them.
+  const rateMessage = useCallback(
+    (messageId: string, rating: ReplyRating, reason?: string): void => {
+      if (!sessionId) return;
+      void createRuntimeClient(apiBaseUrl)
+        .rateReply({
+          sessionId,
+          messageId: /^\d+$/.test(messageId) ? messageId : "",
+          rating,
+          reason: reason ?? "",
+        })
+        .catch(() => undefined);
+    },
+    [apiBaseUrl, sessionId],
+  );
   const { isOpen } = caret;
   const showThinking = useCaretSettingsStore((s) => s.showThinking);
   const panelWidth = useCaretSettingsStore((s) => s.panelWidth);
@@ -732,6 +749,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                   showThinking={showThinking}
                   onApproveTool={onApprove}
                   onDenyTool={onDeny}
+                  onRateMessage={rateMessage}
                 />
               )}
             </div>
