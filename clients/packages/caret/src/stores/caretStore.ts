@@ -58,6 +58,8 @@ interface CaretActions {
   appendBlockToLastAssistant: (block: ContentBlock, tabId?: string) => void;
   /** Record how long the last assistant reply took. */
   setLastAssistantResponseTime: (responseMs: number, tabId?: string) => void;
+  /** Attach suggested follow-up questions to the last assistant reply. */
+  setLastAssistantFollowUps: (items: string[], tabId?: string) => void;
   /** Update an existing block on the last assistant message. */
   updateBlockOnLastAssistant: (
     blockId: string,
@@ -355,6 +357,17 @@ export const useCaretStore = create<CaretStore>()(
             isStreaming: true,
             messages: [...tab.messages, emptyAssistant()],
           })),
+        ),
+
+      setLastAssistantFollowUps: (items, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => {
+            const index = tab.messages.length - 1;
+            if (index < 0 || tab.messages[index].role !== "assistant") return tab;
+            const messages = [...tab.messages];
+            messages[index] = { ...messages[index], followUps: items };
+            return { ...tab, messages };
+          }),
         ),
 
       setLastAssistantResponseTime: (responseMs, tabId) =>

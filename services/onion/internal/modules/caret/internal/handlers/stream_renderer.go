@@ -18,6 +18,10 @@ const (
 	thinkingCloseTag = "</thinking>"
 	toolOpenTag      = "<tool>"
 	toolCloseTag     = "</tool>"
+	followUpsOpen    = "<followups>"
+	followUpsClose   = "</followups>"
+	maxFollowUps     = 3
+	maxFollowUpRunes = 120
 	markerHoldBytes  = answerQualityHoldBytes
 )
 
@@ -27,6 +31,7 @@ const (
 	markerNone markerKind = iota
 	markerThinking
 	markerTool
+	markerFollowUps
 )
 
 type streamEventRenderer struct {
@@ -46,6 +51,9 @@ type streamEventRenderer struct {
 	// toolsDisabled drops tool markers, for the final wrap-up round that must
 	// answer from the results it already has.
 	toolsDisabled bool
+	// followUps are the next questions the model suggested, sent as their
+	// own event when the reply finishes rather than shown as text.
+	followUps []string
 }
 
 type streamRendererOption func(*streamEventRenderer)
@@ -132,6 +140,11 @@ func (r *streamEventRenderer) Finish() error {
 	if err := r.drain(true); err != nil {
 		return err
 	}
+	if len(r.followUps) > 0 && !r.plannerOnly {
+		if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventFollowUps, MessageID: r.messageID, Items: r.followUps}); err != nil {
+			return err
+		}
+	}
 	if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventMessageEnd, MessageID: r.messageID}); err != nil {
 		return err
 	}
@@ -192,6 +205,8 @@ func (r *streamEventRenderer) drain(final bool) error {
 			handled, err = r.drainThinking(final)
 		case markerTool:
 			handled, err = r.drainTool(final)
+		case markerFollowUps:
+			handled = r.drainFollowUps(final)
 		default:
 			handled = true
 		}
@@ -431,18 +446,53 @@ func (r *streamEventRenderer) emitToolExecutionNotice(call ToolCallMarker, statu
 }
 
 func firstMarker(s string) (int, markerKind) {
-	thinking := strings.Index(s, thinkingOpenTag)
-	tool := strings.Index(s, toolOpenTag)
-	switch {
-	case thinking < 0 && tool < 0:
-		return -1, markerNone
-	case tool < 0 || (thinking >= 0 && thinking < tool):
-		return thinking, markerThinking
-	default:
-		return tool, markerTool
+	best, kind := -1, markerNone
+	for _, candidate := range []struct {
+		tag  string
+		kind markerKind
+	}{{thinkingOpenTag, markerThinking}, {toolOpenTag, markerTool}, {followUpsOpen, markerFollowUps}} {
+		if index := strings.Index(s, candidate.tag); index >= 0 && (best < 0 || index < best) {
+			best, kind = index, candidate.kind
+		}
 	}
+	return best, kind
 }
 
 func newCaretBlockID(prefix string) string {
 	return fmt.Sprintf("%s-%d-%d", prefix, time.Now().UnixNano(), caretIDCounter.Add(1))
+}
+
+// drainFollowUps takes a <followups>["...", ...]</followups> marker out of
+// the reply. Malformed or unfinished markers are dropped, never shown.
+func (r *streamEventRenderer) drainFollowUps(final bool) bool {
+	end := strings.Index(r.pending, followUpsClose)
+	if end < 0 {
+		if final {
+			r.pending = ""
+			return true
+		}
+		return false
+	}
+	raw := strings.TrimSpace(r.pending[len(followUpsOpen):end])
+	r.pending = r.pending[end+len(followUpsClose):]
+	var items []string
+	if json.Unmarshal([]byte(raw), &items) != nil {
+		return true
+	}
+	seen := map[string]bool{}
+	followUps := make([]string, 0, maxFollowUps)
+	for _, item := range items {
+		item = strings.Join(strings.Fields(item), " ")
+		key := strings.ToLower(item)
+		if item == "" || seen[key] || utf8.RuneCountInString(item) > maxFollowUpRunes {
+			continue
+		}
+		seen[key] = true
+		followUps = append(followUps, item)
+		if len(followUps) == maxFollowUps {
+			break
+		}
+	}
+	r.followUps = followUps
+	return true
 }

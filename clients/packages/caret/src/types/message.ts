@@ -46,4 +46,6 @@ export interface CaretMessage {
   attachments?: CaretImageAttachment[];
   /** How long the reply took, from sending the prompt to the last token. */
   responseMs?: number;
+  /** Next questions the reply suggests, shown as buttons under it. */
+  followUps?: string[];
 }

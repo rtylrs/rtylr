@@ -732,6 +732,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                   showThinking={showThinking}
                   onApproveTool={onApprove}
                   onDenyTool={onDeny}
+                  onFollowUp={(prompt) => void sendMessage(prompt, "agent")}
                 />
               )}
             </div>

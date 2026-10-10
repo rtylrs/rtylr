@@ -21,6 +21,9 @@ const (
 	EventMessageEnd    StreamEventType = "message_end"
 	EventError         StreamEventType = "error"
 	EventDone          StreamEventType = "done"
+	// EventFollowUps carries up to three suggested next questions, sent just
+	// before message_end.
+	EventFollowUps StreamEventType = "follow_ups"
 )
 
 // StreamEvent is the JSON envelope written to the wire after `data: `.
@@ -42,6 +45,7 @@ type StreamEvent struct {
 	Recoverable      bool            `json:"recoverable,omitempty"`
 	DurationMs       int64           `json:"duration_ms,omitempty"`
 	RequiresApproval bool            `json:"requires_approval,omitempty"`
+	Items            []string        `json:"items,omitempty"`
 }
 
 // WriteEvent serializes the event to the SSE stream and flushes immediately.

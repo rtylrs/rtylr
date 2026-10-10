@@ -313,6 +313,12 @@ export function useCaretStream({
         );
         break;
 
+      case "follow_ups":
+        if (Array.isArray(event.items) && event.items.length > 0) {
+          store.setLastAssistantFollowUps(event.items.slice(0, 3), tabId);
+        }
+        break;
+
       case "message_end":
       case "done":
         store.setStreaming(false, tabId);
