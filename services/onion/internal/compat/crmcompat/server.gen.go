@@ -81,248 +81,480 @@ func CompatibilityServiceRoutes() []string {
 }
 
 func (s CompatibilityService) GetDashboard(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/dashboard", nil)
-}
-
-func (s CompatibilityService) ListCustomers(ctx context.Context, req *crmcompatv1.CustomerListRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/customers", nil)
-}
-
-func (s CompatibilityService) GetCustomer(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/customers/detail", nil)
-}
-
-func (s CompatibilityService) GetCustomerFull(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/customers/detail/full", nil)
-}
-
-func (s CompatibilityService) GetCustomerTimeline(ctx context.Context, req *crmcompatv1.CustomerTimelineRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/customers/timeline", nil)
-}
-
-func (s CompatibilityService) CreateCustomer(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/customers", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateCustomer(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/customers", req.GetBody())
-}
-
-func (s CompatibilityService) RecordVisit(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/customers/record-visit", req.GetBody())
-}
-
-func (s CompatibilityService) ImportCustomers(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/customers/import", req.GetBody())
-}
-
-func (s CompatibilityService) MergeCustomers(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/customers/merge", req.GetBody())
-}
-
-func (s CompatibilityService) ExportCustomer(ctx context.Context, req *crmcompatv1.ExportCustomerRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/customers/export", nil)
-}
-
-func (s CompatibilityService) DeleteCustomer(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/customers", nil)
-}
-
-func (s CompatibilityService) AwardPoints(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/loyalty/award", req.GetBody())
-}
-
-func (s CompatibilityService) RedeemPoints(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/loyalty/redeem", req.GetBody())
-}
-
-func (s CompatibilityService) GetLoyaltyConfig(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/loyalty/config", nil)
-}
-
-func (s CompatibilityService) UpdateLoyaltyConfig(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/loyalty/config", req.GetBody())
-}
-
-func (s CompatibilityService) GetLoyaltyTransactions(ctx context.Context, req *crmcompatv1.LoyaltyTransactionsRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/loyalty/transactions", nil)
-}
-
-func (s CompatibilityService) GetLoyaltyMembers(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/loyalty/members", nil)
-}
-
-func (s CompatibilityService) GetLoyaltyRewards(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/loyalty/rewards", nil)
-}
-
-func (s CompatibilityService) UpsertLoyaltyReward(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/loyalty/rewards/upsert", req.GetBody())
-}
-
-func (s CompatibilityService) GetLoyaltyTiers(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/loyalty/tiers", nil)
-}
-
-func (s CompatibilityService) CreateLoyaltyTier(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/loyalty/tiers", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateLoyaltyTier(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/loyalty/tiers", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteLoyaltyTier(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/loyalty/tiers/{id}", nil)
-}
-
-func (s CompatibilityService) ListSegments(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/segments", nil)
-}
-
-func (s CompatibilityService) GetSegment(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/segments/detail", nil)
-}
-
-func (s CompatibilityService) GetSegmentCustomers(ctx context.Context, req *crmcompatv1.SegmentCustomersRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/segments/customers", nil)
-}
-
-func (s CompatibilityService) CreateSegment(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/segments", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateSegment(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/segments", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteSegment(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/segments", nil)
-}
-
-func (s CompatibilityService) ListCampaigns(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/campaigns", nil)
-}
-
-func (s CompatibilityService) GetCampaign(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/campaigns/detail", nil)
-}
-
-func (s CompatibilityService) GetCampaignById(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/campaigns/{id}", nil)
-}
-
-func (s CompatibilityService) GetCampaignStats(ctx context.Context, req *crmcompatv1.CampaignStatsRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/campaigns/stats", nil)
-}
-
-func (s CompatibilityService) CreateCampaign(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/campaigns", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateCampaign(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/campaigns/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateCampaignStatus(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/campaigns/{id}/status", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteCampaign(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/campaigns/{id}", nil)
-}
-
-func (s CompatibilityService) ListAutomations(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/automations", nil)
-}
-
-func (s CompatibilityService) CreateAutomation(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/automations", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateAutomation(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/automations/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteAutomation(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/automations/{id}", nil)
-}
-
-func (s CompatibilityService) GetSalesPipeline(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/sales/pipeline", nil)
-}
-
-func (s CompatibilityService) ListLeads(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/sales/leads", nil)
-}
-
-func (s CompatibilityService) GetLead(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/sales/leads/{id}", nil)
-}
-
-func (s CompatibilityService) CreateLead(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/sales/leads", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateLead(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/sales/leads/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteLead(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/sales/leads/{id}", nil)
-}
-
-func (s CompatibilityService) ListTouchpoints(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/sales/leads/{id}/touchpoints", nil)
-}
-
-func (s CompatibilityService) CreateTouchpoint(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/sales/touchpoints", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteTouchpoint(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/sales/touchpoints/{id}", nil)
-}
-
-func (s CompatibilityService) ListContacts(ctx context.Context, req *crmcompatv1.ContactsRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/sales/contacts", nil)
-}
-
-func (s CompatibilityService) CreateContact(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/sales/contacts", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateContact(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/sales/contacts/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteContact(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/crm/sales/contacts/{id}", nil)
-}
-
-func (s CompatibilityService) ListContracts(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/sales/contracts", nil)
-}
-
-func (s CompatibilityService) GetContract(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/crm/sales/contracts/{id}", nil)
-}
-
-func (s CompatibilityService) CreateContract(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/crm/sales/contracts", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateContract(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/crm/sales/contracts/{id}", req.GetBody())
-}
-
-func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*crmcompatv1.JsonResponse, error) {
-	r, _ := crmcompatv1.HTTPRequestFromContext(ctx)
-	data, err := s.Routes.Serve(ctx, r, method, pattern, body)
+	data, err := s.serve(ctx, http.MethodGet, "/crm/dashboard", nil)
 	if err != nil {
 		return nil, err
 	}
 	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListCustomers(ctx context.Context, req *crmcompatv1.CustomerListRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/customers", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCustomer(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/customers/detail", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCustomerFull(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/customers/detail/full", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCustomerTimeline(ctx context.Context, req *crmcompatv1.CustomerTimelineRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/customers/timeline", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateCustomer(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/customers", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCustomer(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/customers", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) RecordVisit(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/customers/record-visit", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ImportCustomers(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/customers/import", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) MergeCustomers(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/customers/merge", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ExportCustomer(ctx context.Context, req *crmcompatv1.ExportCustomerRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/customers/export", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteCustomer(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/customers", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) AwardPoints(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/loyalty/award", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) RedeemPoints(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/loyalty/redeem", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetLoyaltyConfig(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/loyalty/config", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateLoyaltyConfig(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/loyalty/config", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetLoyaltyTransactions(ctx context.Context, req *crmcompatv1.LoyaltyTransactionsRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/loyalty/transactions", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetLoyaltyMembers(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/loyalty/members", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetLoyaltyRewards(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/loyalty/rewards", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpsertLoyaltyReward(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/loyalty/rewards/upsert", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetLoyaltyTiers(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/loyalty/tiers", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateLoyaltyTier(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/loyalty/tiers", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateLoyaltyTier(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/loyalty/tiers", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteLoyaltyTier(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/loyalty/tiers/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListSegments(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/segments", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetSegment(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/segments/detail", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetSegmentCustomers(ctx context.Context, req *crmcompatv1.SegmentCustomersRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/segments/customers", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateSegment(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/segments", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateSegment(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/segments", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteSegment(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/segments", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListCampaigns(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/campaigns", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCampaign(ctx context.Context, req *crmcompatv1.IdQueryRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/campaigns/detail", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCampaignById(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/campaigns/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCampaignStats(ctx context.Context, req *crmcompatv1.CampaignStatsRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/campaigns/stats", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateCampaign(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/campaigns", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCampaign(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/campaigns/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCampaignStatus(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/campaigns/{id}/status", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteCampaign(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/campaigns/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListAutomations(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/automations", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateAutomation(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/automations", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateAutomation(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/automations/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteAutomation(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/automations/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetSalesPipeline(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/pipeline", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListLeads(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/leads", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetLead(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/leads/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateLead(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/sales/leads", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateLead(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/sales/leads/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteLead(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/sales/leads/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListTouchpoints(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/leads/{id}/touchpoints", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateTouchpoint(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/sales/touchpoints", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteTouchpoint(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/sales/touchpoints/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListContacts(ctx context.Context, req *crmcompatv1.ContactsRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/contacts", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateContact(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/sales/contacts", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateContact(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/sales/contacts/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteContact(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/crm/sales/contacts/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListContracts(ctx context.Context, req *crmcompatv1.PageRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/contracts", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetContract(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/contracts/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateContract(ctx context.Context, req *crmcompatv1.BodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/sales/contracts", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateContract(ctx context.Context, req *crmcompatv1.PathBodyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/crm/sales/contracts/{id}", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {
+	r, _ := crmcompatv1.HTTPRequestFromContext(ctx)
+	return s.Routes.Serve(ctx, r, method, pattern, body)
 }
 
 // Routes lists every legacy route this package's contracts serve.
@@ -330,6 +562,12 @@ func Routes() []string {
 	var routes []string
 	routes = append(routes, CompatibilityServiceRoutes()...)
 	return routes
+}
+
+// HTTPRoutes lists the routes served by @http methods: the original
+// handler runs, route middlewares included.
+func HTTPRoutes() []string {
+	return []string{}
 }
 
 // Register serves this package's contracts on mux from the route table,

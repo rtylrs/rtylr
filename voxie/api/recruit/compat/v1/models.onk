@@ -23,3 +23,12 @@ message BodyRequest {
 message IdQueryRequest {
   id: string @query("id")
 }
+
+message PathIdRequest {
+  id: string
+}
+
+message PathSourceIdRequest {
+  source: string
+  id: string
+}

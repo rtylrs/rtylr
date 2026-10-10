@@ -1,4 +1,4 @@
-package console.compat.v1
+package organization.compat.v1
 
 message EmptyRequest {}
 
@@ -35,4 +35,8 @@ message PathTableIdBodyRequest {
   table: string
   id: string
   body: json
+}
+
+message PathTableRequest {
+  table: string
 }

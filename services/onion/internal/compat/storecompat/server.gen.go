@@ -49,120 +49,224 @@ func CompatibilityServiceRoutes() []string {
 }
 
 func (s CompatibilityService) DeleteCategory(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/store/categories", nil)
-}
-
-func (s CompatibilityService) DeleteProduct(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/store/products", nil)
-}
-
-func (s CompatibilityService) DeleteShipping(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/store/shipping", nil)
-}
-
-func (s CompatibilityService) ListCategories(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/categories", nil)
-}
-
-func (s CompatibilityService) ListOrders(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/orders", nil)
-}
-
-func (s CompatibilityService) GetOrderDetail(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/orders/detail", nil)
-}
-
-func (s CompatibilityService) ListPayments(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/payments", nil)
-}
-
-func (s CompatibilityService) ListProducts(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/products", nil)
-}
-
-func (s CompatibilityService) ListShipping(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/shipping", nil)
-}
-
-func (s CompatibilityService) ListSites(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/sites", nil)
-}
-
-func (s CompatibilityService) ListThemes(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/store/themes", nil)
-}
-
-func (s CompatibilityService) CreateCategory(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/categories", req.GetBody())
-}
-
-func (s CompatibilityService) CompleteCheckout(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/checkout/complete", req.GetBody())
-}
-
-func (s CompatibilityService) CreateCheckout(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/checkout/create", req.GetBody())
-}
-
-func (s CompatibilityService) CreateOrder(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/orders", req.GetBody())
-}
-
-func (s CompatibilityService) CreatePayment(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/payments", req.GetBody())
-}
-
-func (s CompatibilityService) CreateProduct(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/products", req.GetBody())
-}
-
-func (s CompatibilityService) CreateShipping(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/shipping", req.GetBody())
-}
-
-func (s CompatibilityService) CreateSite(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/sites", req.GetBody())
-}
-
-func (s CompatibilityService) CreateTheme(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/store/themes", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateCategory(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/store/categories", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateOrder(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/store/orders", req.GetBody())
-}
-
-func (s CompatibilityService) UpdatePayment(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/store/payments", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateProduct(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/store/products", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateShipping(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/store/shipping", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateSite(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/store/sites", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateTheme(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/store/themes", req.GetBody())
-}
-
-func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*storecompatv1.JsonResponse, error) {
-	r, _ := storecompatv1.HTTPRequestFromContext(ctx)
-	data, err := s.Routes.Serve(ctx, r, method, pattern, body)
+	data, err := s.serve(ctx, http.MethodDelete, "/store/categories", nil)
 	if err != nil {
 		return nil, err
 	}
 	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteProduct(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/store/products", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteShipping(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/store/shipping", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListCategories(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/categories", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListOrders(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/orders", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetOrderDetail(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/orders/detail", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListPayments(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/payments", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListProducts(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/products", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListShipping(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/shipping", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListSites(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/sites", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListThemes(ctx context.Context, req *storecompatv1.EmptyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/store/themes", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateCategory(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/categories", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CompleteCheckout(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/checkout/complete", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateCheckout(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/checkout/create", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateOrder(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/orders", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreatePayment(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/payments", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateProduct(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/products", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateShipping(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/shipping", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateSite(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/sites", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateTheme(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/store/themes", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCategory(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/store/categories", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateOrder(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/store/orders", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdatePayment(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/store/payments", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateProduct(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/store/products", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateShipping(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/store/shipping", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateSite(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/store/sites", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateTheme(ctx context.Context, req *storecompatv1.BodyRequest) (*storecompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/store/themes", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &storecompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {
+	r, _ := storecompatv1.HTTPRequestFromContext(ctx)
+	return s.Routes.Serve(ctx, r, method, pattern, body)
 }
 
 // Routes lists every legacy route this package's contracts serve.
@@ -170,6 +274,12 @@ func Routes() []string {
 	var routes []string
 	routes = append(routes, CompatibilityServiceRoutes()...)
 	return routes
+}
+
+// HTTPRoutes lists the routes served by @http methods: the original
+// handler runs, route middlewares included.
+func HTTPRoutes() []string {
+	return []string{}
 }
 
 // Register serves this package's contracts on mux from the route table,

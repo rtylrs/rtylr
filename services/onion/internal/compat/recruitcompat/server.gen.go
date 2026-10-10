@@ -41,115 +41,393 @@ func CompatibilityServiceRoutes() []string {
 		"POST /recruit/public/resume-upload-url",
 		"GET /recruit/public/branding",
 		"GET /recruit/submissions/export",
+		"GET /recruit/public/og",
+		"POST /recruit/public/apply",
 	}
 }
 
 func (s CompatibilityService) ListCareers(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/careers", nil)
-}
-
-func (s CompatibilityService) CreateCareer(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/recruit/careers", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateCareer(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/recruit/careers", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteCareer(ctx context.Context, req *recruitcompatv1.IdQueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/recruit/careers", nil)
-}
-
-func (s CompatibilityService) GetCustomization(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/customization", nil)
-}
-
-func (s CompatibilityService) UpdateCustomization(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/recruit/customization", req.GetBody())
-}
-
-func (s CompatibilityService) ListSubmissions(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/submissions", nil)
-}
-
-func (s CompatibilityService) UpdateSubmissionStatus(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/recruit/submissions/status", req.GetBody())
-}
-
-func (s CompatibilityService) GetResumeURL(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/submissions/resume-url", nil)
-}
-
-func (s CompatibilityService) ListSections(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/sections", nil)
-}
-
-func (s CompatibilityService) CreateSection(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/recruit/sections", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateSection(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/recruit/sections", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteSection(ctx context.Context, req *recruitcompatv1.IdQueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/recruit/sections", nil)
-}
-
-func (s CompatibilityService) ReorderSections(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/recruit/sections/reorder", req.GetBody())
-}
-
-func (s CompatibilityService) ListFormFields(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/form-fields", nil)
-}
-
-func (s CompatibilityService) CreateFormField(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/recruit/form-fields", req.GetBody())
-}
-
-func (s CompatibilityService) UpdateFormField(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/recruit/form-fields", req.GetBody())
-}
-
-func (s CompatibilityService) DeleteFormField(ctx context.Context, req *recruitcompatv1.IdQueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodDelete, "/recruit/form-fields", nil)
-}
-
-func (s CompatibilityService) ListPublicCareers(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/public/careers", nil)
-}
-
-func (s CompatibilityService) GetPublicCareer(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/public/career", nil)
-}
-
-func (s CompatibilityService) RequestResumeUploadURL(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/recruit/public/resume-upload-url", req.GetBody())
-}
-
-func (s CompatibilityService) GetPublicBranding(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/public/branding", nil)
-}
-
-func (s CompatibilityService) ExportSubmissions(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/recruit/submissions/export", nil)
-}
-
-func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*recruitcompatv1.JsonResponse, error) {
-	r, _ := recruitcompatv1.HTTPRequestFromContext(ctx)
-	data, err := s.Routes.Serve(ctx, r, method, pattern, body)
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/careers", nil)
 	if err != nil {
 		return nil, err
 	}
 	return &recruitcompatv1.JsonResponse{Data: data}, nil
 }
 
+func (s CompatibilityService) CreateCareer(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/recruit/careers", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCareer(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/recruit/careers", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteCareer(ctx context.Context, req *recruitcompatv1.IdQueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/recruit/careers", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetCustomization(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/customization", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateCustomization(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/recruit/customization", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListSubmissions(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/submissions", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateSubmissionStatus(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/recruit/submissions/status", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetResumeURL(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/submissions/resume-url", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListSections(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/sections", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateSection(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/recruit/sections", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateSection(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/recruit/sections", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteSection(ctx context.Context, req *recruitcompatv1.IdQueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/recruit/sections", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ReorderSections(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/recruit/sections/reorder", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListFormFields(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/form-fields", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateFormField(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/recruit/form-fields", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) UpdateFormField(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/recruit/form-fields", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) DeleteFormField(ctx context.Context, req *recruitcompatv1.IdQueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodDelete, "/recruit/form-fields", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListPublicCareers(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/public/careers", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPublicCareer(ctx context.Context, req *recruitcompatv1.QueryRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/public/career", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) RequestResumeUploadURL(ctx context.Context, req *recruitcompatv1.BodyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/recruit/public/resume-upload-url", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetPublicBranding(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/public/branding", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ExportSubmissions(ctx context.Context, req *recruitcompatv1.EmptyRequest) (*recruitcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/recruit/submissions/export", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &recruitcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListPublicOg(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/recruit/public/og")
+	return nil
+}
+
+func (s CompatibilityService) CreatePublicApply(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/recruit/public/apply")
+	return nil
+}
+
+func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {
+	r, _ := recruitcompatv1.HTTPRequestFromContext(ctx)
+	return s.Routes.Serve(ctx, r, method, pattern, body)
+}
+
+// VoxhireService implements recruit.compat.v1.VoxhireService.
+type VoxhireService struct{ Routes *serverHttp.LegacyRoutes }
+
+// VoxhireServiceRoutes lists the legacy routes VoxhireService serves.
+func VoxhireServiceRoutes() []string {
+	return []string{
+		"GET /voxhire/admin/admins",
+		"GET /voxhire/admin/analytics",
+		"GET /voxhire/admin/applications/{id}/cv",
+		"GET /voxhire/admin/applications/{id}/timeline",
+		"GET /voxhire/admin/candidates",
+		"GET /voxhire/admin/cv-jobs",
+		"GET /voxhire/admin/leads",
+		"GET /voxhire/admin/me",
+		"GET /voxhire/admin/openings",
+		"GET /voxhire/admin/openings/{id}/applications",
+		"GET /voxhire/admin/shortlists",
+		"GET /voxhire/admin/tasks",
+		"POST /voxhire/admin/admins",
+		"POST /voxhire/admin/careers",
+		"POST /voxhire/admin/login",
+		"POST /voxhire/admin/shortlists",
+		"POST /voxhire/admin/shortlists/{id}/items",
+		"POST /voxhire/admin/tasks",
+		"POST /voxhire/applications",
+		"POST /voxhire/careers/apply",
+		"POST /voxhire/contact",
+		"PUT /voxhire/admin/applications/{id}/review",
+		"PUT /voxhire/admin/applications/{id}/status",
+		"PUT /voxhire/admin/careers/{id}",
+		"PUT /voxhire/admin/careers/{id}/active",
+		"PUT /voxhire/admin/cv-jobs/{source}/{id}/retry",
+		"PUT /voxhire/admin/tasks/{id}",
+	}
+}
+
+func (s VoxhireService) ListAdminAdmins(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/admins")
+	return nil
+}
+
+func (s VoxhireService) ListAdminAnalytics(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/analytics")
+	return nil
+}
+
+func (s VoxhireService) GetAdminApplicationsCv(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/applications/{id}/cv")
+	return nil
+}
+
+func (s VoxhireService) GetAdminApplicationsTimeline(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/applications/{id}/timeline")
+	return nil
+}
+
+func (s VoxhireService) ListAdminCandidates(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/candidates")
+	return nil
+}
+
+func (s VoxhireService) ListAdminCvJobs(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/cv-jobs")
+	return nil
+}
+
+func (s VoxhireService) ListAdminLeads(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/leads")
+	return nil
+}
+
+func (s VoxhireService) ListAdminMe(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/me")
+	return nil
+}
+
+func (s VoxhireService) ListAdminOpenings(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/openings")
+	return nil
+}
+
+func (s VoxhireService) GetAdminOpeningsApplications(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/openings/{id}/applications")
+	return nil
+}
+
+func (s VoxhireService) ListAdminShortlists(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/shortlists")
+	return nil
+}
+
+func (s VoxhireService) ListAdminTasks(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/voxhire/admin/tasks")
+	return nil
+}
+
+func (s VoxhireService) CreateAdminAdmins(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/admin/admins")
+	return nil
+}
+
+func (s VoxhireService) CreateAdminCareers(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/admin/careers")
+	return nil
+}
+
+func (s VoxhireService) CreateAdminLogin(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/admin/login")
+	return nil
+}
+
+func (s VoxhireService) CreateAdminShortlists(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/admin/shortlists")
+	return nil
+}
+
+func (s VoxhireService) CreateAdminShortlistsItems(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/admin/shortlists/{id}/items")
+	return nil
+}
+
+func (s VoxhireService) CreateAdminTasks(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/admin/tasks")
+	return nil
+}
+
+func (s VoxhireService) CreateApplications(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/applications")
+	return nil
+}
+
+func (s VoxhireService) CreateCareersApply(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/careers/apply")
+	return nil
+}
+
+func (s VoxhireService) CreateContact(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/voxhire/contact")
+	return nil
+}
+
+func (s VoxhireService) UpdateAdminApplicationsReview(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPut, "/voxhire/admin/applications/{id}/review")
+	return nil
+}
+
+func (s VoxhireService) UpdateAdminApplicationsStatus(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPut, "/voxhire/admin/applications/{id}/status")
+	return nil
+}
+
+func (s VoxhireService) UpdateAdminCareers(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPut, "/voxhire/admin/careers/{id}")
+	return nil
+}
+
+func (s VoxhireService) UpdateAdminCareersActive(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPut, "/voxhire/admin/careers/{id}/active")
+	return nil
+}
+
+func (s VoxhireService) UpdateAdminCvJobsRetry(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathSourceIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPut, "/voxhire/admin/cv-jobs/{source}/{id}/retry")
+	return nil
+}
+
+func (s VoxhireService) UpdateAdminTasks(w http.ResponseWriter, r *http.Request, _ *recruitcompatv1.PathIdRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPut, "/voxhire/admin/tasks/{id}")
+	return nil
+}
+
 // Routes lists every legacy route this package's contracts serve.
 func Routes() []string {
 	var routes []string
 	routes = append(routes, CompatibilityServiceRoutes()...)
+	routes = append(routes, VoxhireServiceRoutes()...)
 	return routes
+}
+
+// HTTPRoutes lists the routes served by @http methods: the original
+// handler runs, route middlewares included.
+func HTTPRoutes() []string {
+	return []string{"GET /recruit/public/og", "POST /recruit/public/apply", "GET /voxhire/admin/admins", "GET /voxhire/admin/analytics", "GET /voxhire/admin/applications/{id}/cv", "GET /voxhire/admin/applications/{id}/timeline", "GET /voxhire/admin/candidates", "GET /voxhire/admin/cv-jobs", "GET /voxhire/admin/leads", "GET /voxhire/admin/me", "GET /voxhire/admin/openings", "GET /voxhire/admin/openings/{id}/applications", "GET /voxhire/admin/shortlists", "GET /voxhire/admin/tasks", "POST /voxhire/admin/admins", "POST /voxhire/admin/careers", "POST /voxhire/admin/login", "POST /voxhire/admin/shortlists", "POST /voxhire/admin/shortlists/{id}/items", "POST /voxhire/admin/tasks", "POST /voxhire/applications", "POST /voxhire/careers/apply", "POST /voxhire/contact", "PUT /voxhire/admin/applications/{id}/review", "PUT /voxhire/admin/applications/{id}/status", "PUT /voxhire/admin/careers/{id}", "PUT /voxhire/admin/careers/{id}/active", "PUT /voxhire/admin/cv-jobs/{source}/{id}/retry", "PUT /voxhire/admin/tasks/{id}"}
 }
 
 // Register serves this package's contracts on mux from the route table,
@@ -160,6 +438,10 @@ func Register(mux *http.ServeMux, routes *serverHttp.LegacyRoutes) error {
 		serverHttp.WriteContractError(w, r, status, message, violations, cause)
 	})
 	if err := recruitcompatv1.RegisterCompatibilityServiceServer(CompatibilityService{Routes: routes}, recruitcompatv1.WithMux(mux),
+		recruitcompatv1.WithMaxRequestBodyBytes(serverHttp.DefaultMaxRequestBodyBytes), writeError); err != nil {
+		return err
+	}
+	if err := recruitcompatv1.RegisterVoxhireServiceServer(VoxhireService{Routes: routes}, recruitcompatv1.WithMux(mux),
 		recruitcompatv1.WithMaxRequestBodyBytes(serverHttp.DefaultMaxRequestBodyBytes), writeError); err != nil {
 		return err
 	}

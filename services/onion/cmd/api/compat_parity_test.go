@@ -129,3 +129,47 @@ func TestCompatContractsAnswerExactlyLikeTheLegacyRoutes(t *testing.T) {
 		}
 	}
 }
+
+// Routes behind a guard or a rate limit keep it when a contract serves them:
+// @http methods run the original handler with its route middlewares.
+func TestCompatContractsKeepRouteMiddlewares(t *testing.T) {
+	ctx := context.Background()
+	routes := http.NewLegacyRoutes()
+	guard := func(next stdhttp.Handler) stdhttp.Handler {
+		return stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+			if r.Header.Get("Authorization") != "Bearer admin" {
+				w.WriteHeader(stdhttp.StatusUnauthorized)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+	admin := routes.With(guard)
+	admin.Get("/voxhire/admin/me", func(w stdhttp.ResponseWriter, _ *stdhttp.Request) {
+		_, _ = w.Write([]byte(`{"admin":true}`))
+	})
+	http.RegisterPOSTWithValidation[parityUpdateRequest, parityUpdateResponse](ctx, admin, []string{"/voxhire/admin/careers"}, parityUpdate{})
+
+	mux := stdhttp.NewServeMux()
+	registerCompatContracts(mux, routes)
+
+	for _, tc := range []struct {
+		method, target, body, auth string
+		want                       int
+	}{
+		{stdhttp.MethodGet, "/voxhire/admin/me", "", "", stdhttp.StatusUnauthorized},
+		{stdhttp.MethodGet, "/voxhire/admin/me", "", "Bearer admin", stdhttp.StatusOK},
+		{stdhttp.MethodPost, "/voxhire/admin/careers", `{"name":"Engineer"}`, "", stdhttp.StatusUnauthorized},
+		{stdhttp.MethodPost, "/voxhire/admin/careers", `{"name":"Engineer"}`, "Bearer admin", stdhttp.StatusOK},
+	} {
+		req := httptest.NewRequest(tc.method, tc.target, strings.NewReader(tc.body))
+		if tc.auth != "" {
+			req.Header.Set("Authorization", tc.auth)
+		}
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, req)
+		if rec.Code != tc.want {
+			t.Errorf("%s %s auth=%q: status %d, want %d (%s)", tc.method, tc.target, tc.auth, rec.Code, tc.want, rec.Body)
+		}
+	}
+}

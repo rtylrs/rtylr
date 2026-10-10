@@ -26,48 +26,94 @@ func CompatibilityServiceRoutes() []string {
 		"POST /pos/orders/{id}/void/approve",
 		"POST /pos/orders/{id}/void/override",
 		"PUT /pos/orders/{id}/resume",
+		"GET /pos/ws",
+		"POST /pos/payments/webhook",
+		"POST /pos/ws-ticket",
 	}
 }
 
 func (s CompatibilityService) ListOrders(ctx context.Context, req *poscompatv1.EmptyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/pos/orders", nil)
-}
-
-func (s CompatibilityService) CreateCompatOrder(ctx context.Context, req *poscompatv1.BodyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/pos/orders/compat", req.GetBody())
-}
-
-func (s CompatibilityService) PayOrder(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/pos/orders/{id}/pay", req.GetBody())
-}
-
-func (s CompatibilityService) ApproveOrderRefund(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/pos/orders/{id}/refund/approve", req.GetBody())
-}
-
-func (s CompatibilityService) OverrideOrderRefund(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/pos/orders/{id}/refund/override", req.GetBody())
-}
-
-func (s CompatibilityService) ApproveOrderVoid(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/pos/orders/{id}/void/approve", req.GetBody())
-}
-
-func (s CompatibilityService) OverrideOrderVoid(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPost, "/pos/orders/{id}/void/override", req.GetBody())
-}
-
-func (s CompatibilityService) ResumeOrder(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodPut, "/pos/orders/{id}/resume", req.GetBody())
-}
-
-func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*poscompatv1.JsonResponse, error) {
-	r, _ := poscompatv1.HTTPRequestFromContext(ctx)
-	data, err := s.Routes.Serve(ctx, r, method, pattern, body)
+	data, err := s.serve(ctx, http.MethodGet, "/pos/orders", nil)
 	if err != nil {
 		return nil, err
 	}
 	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateCompatOrder(ctx context.Context, req *poscompatv1.BodyRequest) (*poscompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/pos/orders/compat", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) PayOrder(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/pos/orders/{id}/pay", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ApproveOrderRefund(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/pos/orders/{id}/refund/approve", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) OverrideOrderRefund(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/pos/orders/{id}/refund/override", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ApproveOrderVoid(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/pos/orders/{id}/void/approve", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) OverrideOrderVoid(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/pos/orders/{id}/void/override", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ResumeOrder(ctx context.Context, req *poscompatv1.PathIdBodyRequest) (*poscompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPut, "/pos/orders/{id}/resume", req.GetBody())
+	if err != nil {
+		return nil, err
+	}
+	return &poscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListWs(w http.ResponseWriter, r *http.Request, _ *poscompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/pos/ws")
+	return nil
+}
+
+func (s CompatibilityService) CreatePaymentsWebhook(w http.ResponseWriter, r *http.Request, _ *poscompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/pos/payments/webhook")
+	return nil
+}
+
+func (s CompatibilityService) CreateWsTicket(w http.ResponseWriter, r *http.Request, _ *poscompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/pos/ws-ticket")
+	return nil
+}
+
+func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {
+	r, _ := poscompatv1.HTTPRequestFromContext(ctx)
+	return s.Routes.Serve(ctx, r, method, pattern, body)
 }
 
 // Routes lists every legacy route this package's contracts serve.
@@ -75,6 +121,12 @@ func Routes() []string {
 	var routes []string
 	routes = append(routes, CompatibilityServiceRoutes()...)
 	return routes
+}
+
+// HTTPRoutes lists the routes served by @http methods: the original
+// handler runs, route middlewares included.
+func HTTPRoutes() []string {
+	return []string{"GET /pos/ws", "POST /pos/payments/webhook", "POST /pos/ws-ticket"}
 }
 
 // Register serves this package's contracts on mux from the route table,

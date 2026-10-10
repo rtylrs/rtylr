@@ -19,20 +19,26 @@ type CompatibilityService struct{ Routes *serverHttp.LegacyRoutes }
 func CompatibilityServiceRoutes() []string {
 	return []string{
 		"GET /careers",
+		"POST /careers/apply",
 	}
 }
 
 func (s CompatibilityService) ListCareers(ctx context.Context, req *recruitcareerscompatv1.EmptyRequest) (*recruitcareerscompatv1.JsonResponse, error) {
-	return s.serve(ctx, http.MethodGet, "/careers", nil)
-}
-
-func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (*recruitcareerscompatv1.JsonResponse, error) {
-	r, _ := recruitcareerscompatv1.HTTPRequestFromContext(ctx)
-	data, err := s.Routes.Serve(ctx, r, method, pattern, body)
+	data, err := s.serve(ctx, http.MethodGet, "/careers", nil)
 	if err != nil {
 		return nil, err
 	}
 	return &recruitcareerscompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) CreateApply(w http.ResponseWriter, r *http.Request, _ *recruitcareerscompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/careers/apply")
+	return nil
+}
+
+func (s CompatibilityService) serve(ctx context.Context, method, pattern string, body json.RawMessage) (json.RawMessage, error) {
+	r, _ := recruitcareerscompatv1.HTTPRequestFromContext(ctx)
+	return s.Routes.Serve(ctx, r, method, pattern, body)
 }
 
 // Routes lists every legacy route this package's contracts serve.
@@ -40,6 +46,12 @@ func Routes() []string {
 	var routes []string
 	routes = append(routes, CompatibilityServiceRoutes()...)
 	return routes
+}
+
+// HTTPRoutes lists the routes served by @http methods: the original
+// handler runs, route middlewares included.
+func HTTPRoutes() []string {
+	return []string{"POST /careers/apply"}
 }
 
 // Register serves this package's contracts on mux from the route table,

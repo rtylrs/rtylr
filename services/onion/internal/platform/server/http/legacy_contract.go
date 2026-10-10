@@ -253,55 +253,75 @@ func (l *LegacyRoutes) Serve(ctx context.Context, r *http.Request, method, contr
 // Mount serves every route the skip function does not claim straight from the
 // shared ServeMux, writing responses exactly as the old router helpers did.
 func (l *LegacyRoutes) Mount(mux *http.ServeMux, skip func(route string) bool) {
-	for _, name := range l.Routes() {
+	for _, name := range append(l.Routes(), l.RawRoutes()...) {
 		if skip != nil && skip(name) {
 			continue
 		}
 		method, pattern, _ := strings.Cut(name, " ")
-		route, _ := l.route(method, pattern)
-		var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			body, err := readLegacyBody(w, r)
-			if err != nil {
-				if isRequestBodyTooLarge(err) {
-					writeRequestEntityTooLarge(ctx, w)
-				} else {
-					writeBadRequest(ctx, w)
-				}
-				return
-			}
-			out, err := route.serve(withLegacyPathValues(ctx, r, route.pattern, route.pattern), r, body)
-			if err != nil {
-				if stdErrors.Is(err, errInvalidLegacyBody) {
-					writeBadRequest(ctx, w)
-					return
-				}
-				WriteOneKitError(ctx, w, err)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			if _, err := w.Write(append(out, '\n')); err != nil {
-				logger.Ctx(ctx).Error("Failed to encode response", logger.Error(err))
-			}
-		})
-		for i := len(route.middlewares) - 1; i >= 0; i-- {
-			handler = route.middlewares[i](handler)
-		}
-		mux.Handle(method+" "+pattern, handler)
+		mux.Handle(method+" "+pattern, l.httpHandler(method, pattern, pattern))
 	}
+}
+
+// ServeRoute serves one registered route, middlewares included, for a
+// contract method declared with @http: raw handlers (webhooks, sockets,
+// downloads) and JSON routes that run inside route middlewares. The response
+// is exactly what mounting the table would have produced.
+func (l *LegacyRoutes) ServeRoute(w http.ResponseWriter, r *http.Request, method, contractPattern string) {
+	l.httpHandler(method, contractPattern, contractPattern).ServeHTTP(w, r)
+}
+
+// httpHandler builds the HTTP handler for a registered route. matched is the
+// pattern the request was routed by, whose path values the handler reads.
+func (l *LegacyRoutes) httpHandler(method, pattern, matched string) http.Handler {
 	l.mu.Lock()
-	raw := make([]rawRoute, 0, len(l.raw))
-	for _, route := range l.raw {
-		raw = append(raw, route)
-	}
+	raw, isRaw := l.raw[legacyRouteKey(method, pattern)]
 	l.mu.Unlock()
-	for _, route := range raw {
-		if skip != nil && skip(route.method+" "+route.pattern) {
-			continue
-		}
-		mux.Handle(route.method+" "+route.pattern, route.handler)
+	if isRaw {
+		return raw.handler
 	}
+	route, ok := l.route(method, pattern)
+	if !ok {
+		return http.NotFoundHandler()
+	}
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		body, err := readLegacyBody(w, r)
+		if err != nil {
+			if isRequestBodyTooLarge(err) {
+				writeRequestEntityTooLarge(ctx, w)
+			} else {
+				writeBadRequest(ctx, w)
+			}
+			return
+		}
+		out, err := route.serve(withLegacyPathValues(ctx, r, route.pattern, matched), r, body)
+		if err != nil {
+			if stdErrors.Is(err, errInvalidLegacyBody) {
+				writeBadRequest(ctx, w)
+				return
+			}
+			WriteOneKitError(ctx, w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write(append(out, '\n')); err != nil {
+			logger.Ctx(ctx).Error("Failed to encode response", logger.Error(err))
+		}
+	})
+	for i := len(route.middlewares) - 1; i >= 0; i-- {
+		handler = route.middlewares[i](handler)
+	}
+	return handler
+}
+
+// IsRaw reports whether a raw handler (not a Validate/Serve pair) is
+// registered for method and pattern.
+func (l *LegacyRoutes) IsRaw(method, pattern string) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	_, ok := l.raw[legacyRouteKey(method, pattern)]
+	return ok
 }
 
 // readLegacyBody reads the body the way the old helpers decided whether to

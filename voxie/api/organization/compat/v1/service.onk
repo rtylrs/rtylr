@@ -1,9 +1,8 @@
-package console.compat.v1
+package organization.compat.v1
 
 /// Legacy console administration routes, served with their existing wire format.
-service CompatibilityService {
+service ConsoleService {
   base_path: "/console"
-
   deleteAddonGrant(PathIdRequest) -> JsonResponse @delete("/addon-grants/{id}")
   deleteGrant(PathIdRequest) -> JsonResponse @delete("/grants/{id}")
   deleteResourceRow(PathTableIdRequest) -> JsonResponse @delete("/resources/{table}/rows/{id}")
@@ -17,4 +16,22 @@ service CompatibilityService {
   revokeGrant(PathIdBodyRequest) -> JsonResponse @post("/grants/{id}/revoke") @body("body")
   createResourceRow(PathTableBodyRequest) -> JsonResponse @post("/resources/{table}/rows") @body("body")
   updateResourceRow(PathTableIdBodyRequest) -> JsonResponse @put("/resources/{table}/rows/{id}") @body("body")
+
+  listResources(EmptyRequest) -> JsonResponse @get("/resources") @http
+  getResources(PathTableRequest) -> JsonResponse @get("/resources/{table}") @http
+  getResourcesRows(PathTableRequest) -> JsonResponse @get("/resources/{table}/rows") @http
+  getResourcesRows2(PathTableIdRequest) -> JsonResponse @get("/resources/{table}/rows/{id}") @http
+}
+
+/// OAuth authorization redirect, served by its original handler.
+service OAuthService {
+  base_path: "/oauth"
+  listAuthorize(EmptyRequest) -> JsonResponse @get("/authorize") @http
+}
+
+/// Billing provider webhooks, served by their original handlers (they verify
+/// the raw body signature).
+service BillingWebhookService {
+  base_path: "/subscriptions"
+  createPaddleWebhook(EmptyRequest) -> JsonResponse @post("/paddle-webhook") @http
 }

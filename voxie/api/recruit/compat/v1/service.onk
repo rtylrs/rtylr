@@ -34,4 +34,41 @@ service CompatibilityService {
 
   getPublicBranding(EmptyRequest) -> JsonResponse @get("/public/branding")
   exportSubmissions(EmptyRequest) -> JsonResponse @get("/submissions/export")
+
+  listPublicOg(EmptyRequest) -> JsonResponse @get("/public/og") @http
+  createPublicApply(EmptyRequest) -> JsonResponse @post("/public/apply") @http
+}
+
+/// Voxhire recruiting routes. The admin routes run behind the Voxhire admin
+/// session guard and the login, contact and apply routes behind per-route
+/// rate limits, so they are @http methods served by the original handlers.
+service VoxhireService {
+  base_path: "/voxhire"
+  listAdminAdmins(EmptyRequest) -> JsonResponse @get("/admin/admins") @http
+  listAdminAnalytics(EmptyRequest) -> JsonResponse @get("/admin/analytics") @http
+  getAdminApplicationsCv(PathIdRequest) -> JsonResponse @get("/admin/applications/{id}/cv") @http
+  getAdminApplicationsTimeline(PathIdRequest) -> JsonResponse @get("/admin/applications/{id}/timeline") @http
+  listAdminCandidates(EmptyRequest) -> JsonResponse @get("/admin/candidates") @http
+  listAdminCvJobs(EmptyRequest) -> JsonResponse @get("/admin/cv-jobs") @http
+  listAdminLeads(EmptyRequest) -> JsonResponse @get("/admin/leads") @http
+  listAdminMe(EmptyRequest) -> JsonResponse @get("/admin/me") @http
+  listAdminOpenings(EmptyRequest) -> JsonResponse @get("/admin/openings") @http
+  getAdminOpeningsApplications(PathIdRequest) -> JsonResponse @get("/admin/openings/{id}/applications") @http
+  listAdminShortlists(EmptyRequest) -> JsonResponse @get("/admin/shortlists") @http
+  listAdminTasks(EmptyRequest) -> JsonResponse @get("/admin/tasks") @http
+  createAdminAdmins(EmptyRequest) -> JsonResponse @post("/admin/admins") @http
+  createAdminCareers(EmptyRequest) -> JsonResponse @post("/admin/careers") @http
+  createAdminLogin(EmptyRequest) -> JsonResponse @post("/admin/login") @http
+  createAdminShortlists(EmptyRequest) -> JsonResponse @post("/admin/shortlists") @http
+  createAdminShortlistsItems(PathIdRequest) -> JsonResponse @post("/admin/shortlists/{id}/items") @http
+  createAdminTasks(EmptyRequest) -> JsonResponse @post("/admin/tasks") @http
+  createApplications(EmptyRequest) -> JsonResponse @post("/applications") @http @max_body("16MiB")
+  createCareersApply(EmptyRequest) -> JsonResponse @post("/careers/apply") @http @max_body("16MiB")
+  createContact(EmptyRequest) -> JsonResponse @post("/contact") @http
+  updateAdminApplicationsReview(PathIdRequest) -> JsonResponse @put("/admin/applications/{id}/review") @http
+  updateAdminApplicationsStatus(PathIdRequest) -> JsonResponse @put("/admin/applications/{id}/status") @http
+  updateAdminCareers(PathIdRequest) -> JsonResponse @put("/admin/careers/{id}") @http
+  updateAdminCareersActive(PathIdRequest) -> JsonResponse @put("/admin/careers/{id}/active") @http
+  updateAdminCvJobsRetry(PathSourceIdRequest) -> JsonResponse @put("/admin/cv-jobs/{source}/{id}/retry") @http
+  updateAdminTasks(PathIdRequest) -> JsonResponse @put("/admin/tasks/{id}") @http
 }

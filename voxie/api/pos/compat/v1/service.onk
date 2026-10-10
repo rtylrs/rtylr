@@ -12,4 +12,8 @@ service CompatibilityService {
   approveOrderVoid(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/void/approve") @body("body")
   overrideOrderVoid(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/void/override") @body("body")
   resumeOrder(PathIdBodyRequest) -> JsonResponse @put("/orders/{id}/resume") @body("body")
+
+  listWs(EmptyRequest) -> JsonResponse @get("/ws") @http
+  createPaymentsWebhook(EmptyRequest) -> JsonResponse @post("/payments/webhook") @http
+  createWsTicket(EmptyRequest) -> JsonResponse @post("/ws-ticket") @http
 }
