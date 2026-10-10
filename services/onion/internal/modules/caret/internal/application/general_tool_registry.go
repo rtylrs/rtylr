@@ -141,4 +141,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "Current air-quality readings and the US AQI category.",
 		Freshness:  "live", SideEffect: "read-only",
 	},
+	{
+		Name:        "places.search",
+		Description: "Find businesses or amenities of a kind near a place from OpenStreetMap (cafes, restaurants, pharmacies, banks, supermarkets, gyms, hotels and more), nearest first, with address, hours, phone and website when listed. Good for scouting competitors or a location.",
+		Module:      "places", Scope: "read",
+		InputHint:  `{"category":"cafe","location":"Hamra, Beirut","radius_m":1500}`,
+		OutputHint: "Up to 20 named places with distance in metres and any listed street, hours, phone, website and cuisine.",
+		Freshness:  "community map data", SideEffect: "read-only",
+	},
 }
