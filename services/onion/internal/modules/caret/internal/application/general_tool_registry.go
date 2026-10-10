@@ -69,4 +69,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The country's official name, ISO code, capital, currencies, languages, population, region, timezones and dialing code.",
 		Freshness:  "reference data", SideEffect: "read-only",
 	},
+	{
+		Name:        "utilities.date_math",
+		Description: "Exact date arithmetic: days, weeks and working days between two dates, or a date plus or minus days, weeks, months, years or working days. Use it instead of counting dates yourself.",
+		Module:      "utilities", Scope: "read",
+		InputHint:  `{"from":"YYYY-MM-DD|today","to":"YYYY-MM-DD"} or {"from":"today","days":30,"months":0,"business_days":0}; optional "weekend":"saturday,sunday"`,
+		OutputHint: "The span in days, weeks, calendar terms and working days, or the resulting date with weekday and ISO week.",
+		Freshness:  "computed", SideEffect: "read-only",
+	},
 }
