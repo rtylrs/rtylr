@@ -103,8 +103,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	}
 
 	requestNow := time.Now()
+	// The chat history keeps the start of each attached file, so follow-up
+	// questions still know what was shared; this turn sees the files whole.
+	request := req.Prompt
 	prepared, setupErr := application.PrepareTurn(ctx, h.MemoryService, application.TurnRequest{
-		Prompt:        req.Prompt,
+		Prompt:        req.Prompt + application.AttachedFilesHistoryNote(req.Files),
 		SessionID:     req.SessionID,
 		UserID:        req.UserID,
 		SystemContext: req.SystemContext,
@@ -120,6 +123,9 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	}
 	req.Mode = "agent"
 	req.Prompt = prepared.Request.Prompt
+	if len(req.Files) > 0 {
+		req.Prompt = application.SanitizeUserInput(request, application.MaxUserPromptLen)
+	}
 	req.SessionID = prepared.Request.SessionID
 	req.UserID = prepared.Request.UserID
 	req.SystemContext = prepared.Request.SystemContext
@@ -148,7 +154,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 			return
 		}
 	}
-	enhancedPrompt := application.BuildAssistantPrompt(req.Prompt, req.SystemContext, savedContext, req.PageContext, requestNow)
+	enhancedPrompt := application.BuildAssistantPromptWithFiles(req.Prompt, req.SystemContext, savedContext, req.Files, req.PageContext, requestNow)
 	ctx = snips.WithImages(ctx, req.Images)
 
 	cachePlan := application.BuildCacheWritePlan(mode, application.TurnRequest{
