@@ -1,0 +1,18 @@
+package pos.compat.v1
+
+message EmptyRequest {}
+
+/// The route's JSON body, passed through unchanged.
+message BodyRequest {
+  body: json
+}
+
+/// The handler's JSON response, sent unchanged.
+message JsonResponse {
+  data: json @unwrap
+}
+
+message PathIdBodyRequest {
+  id: string
+  body: json
+}

@@ -35,11 +35,16 @@ func TestAllRoutesMountWithoutConflicts(t *testing.T) {
 	registerCompatContracts(mux, routes)
 	routes.Mount(mux, compatRoutes().Contains)
 
-	// A compat route with no handler in the table would answer 404.
+	// A compat route with no handler in the table would answer 404, and one
+	// whose handler runs inside route middlewares (auth guards, rate limits)
+	// would lose them: it must stay mounted from the table.
 	for route := range compatRoutes() {
 		method, pattern, _ := strings.Cut(route, " ")
 		if !routes.Has(method, pattern) {
 			t.Errorf("compat contract serves %s, but no legacy handler is registered for it", route)
+		}
+		if routes.HasMiddlewares(method, pattern) {
+			t.Errorf("compat contract serves %s, which runs inside route middlewares the contract would skip", route)
 		}
 	}
 

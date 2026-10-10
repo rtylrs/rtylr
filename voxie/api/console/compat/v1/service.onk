@@ -1,0 +1,20 @@
+package console.compat.v1
+
+/// Legacy console administration routes, served with their existing wire format.
+service CompatibilityService {
+  base_path: "/console"
+
+  deleteAddonGrant(PathIdRequest) -> JsonResponse @delete("/addon-grants/{id}")
+  deleteGrant(PathIdRequest) -> JsonResponse @delete("/grants/{id}")
+  deleteResourceRow(PathTableIdRequest) -> JsonResponse @delete("/resources/{table}/rows/{id}")
+  listAddonGrants(EmptyRequest) -> JsonResponse @get("/addon-grants")
+  listAddons(EmptyRequest) -> JsonResponse @get("/addons")
+  getAiCacheAnalytics(EmptyRequest) -> JsonResponse @get("/ai-cache/analytics")
+  listGrants(EmptyRequest) -> JsonResponse @get("/grants")
+  createAddonGrant(BodyRequest) -> JsonResponse @post("/addon-grants") @body("body")
+  revokeAddonGrant(PathIdBodyRequest) -> JsonResponse @post("/addon-grants/{id}/revoke") @body("body")
+  createGrant(BodyRequest) -> JsonResponse @post("/grants") @body("body")
+  revokeGrant(PathIdBodyRequest) -> JsonResponse @post("/grants/{id}/revoke") @body("body")
+  createResourceRow(PathTableBodyRequest) -> JsonResponse @post("/resources/{table}/rows") @body("body")
+  updateResourceRow(PathTableIdBodyRequest) -> JsonResponse @put("/resources/{table}/rows/{id}") @body("body")
+}

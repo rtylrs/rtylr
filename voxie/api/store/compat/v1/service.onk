@@ -1,0 +1,34 @@
+package store.compat.v1
+
+/// Legacy storefront routes, served with their existing wire format.
+service CompatibilityService {
+  base_path: "/store"
+
+  deleteCategory(EmptyRequest) -> JsonResponse @delete("/categories")
+  deleteProduct(EmptyRequest) -> JsonResponse @delete("/products")
+  deleteShipping(EmptyRequest) -> JsonResponse @delete("/shipping")
+  listCategories(EmptyRequest) -> JsonResponse @get("/categories")
+  listOrders(EmptyRequest) -> JsonResponse @get("/orders")
+  getOrderDetail(EmptyRequest) -> JsonResponse @get("/orders/detail")
+  listPayments(EmptyRequest) -> JsonResponse @get("/payments")
+  listProducts(EmptyRequest) -> JsonResponse @get("/products")
+  listShipping(EmptyRequest) -> JsonResponse @get("/shipping")
+  listSites(EmptyRequest) -> JsonResponse @get("/sites")
+  listThemes(EmptyRequest) -> JsonResponse @get("/themes")
+  createCategory(BodyRequest) -> JsonResponse @post("/categories") @body("body")
+  completeCheckout(BodyRequest) -> JsonResponse @post("/checkout/complete") @body("body")
+  createCheckout(BodyRequest) -> JsonResponse @post("/checkout/create") @body("body")
+  createOrder(BodyRequest) -> JsonResponse @post("/orders") @body("body")
+  createPayment(BodyRequest) -> JsonResponse @post("/payments") @body("body")
+  createProduct(BodyRequest) -> JsonResponse @post("/products") @body("body")
+  createShipping(BodyRequest) -> JsonResponse @post("/shipping") @body("body")
+  createSite(BodyRequest) -> JsonResponse @post("/sites") @body("body")
+  createTheme(BodyRequest) -> JsonResponse @post("/themes") @body("body")
+  updateCategory(BodyRequest) -> JsonResponse @put("/categories") @body("body")
+  updateOrder(BodyRequest) -> JsonResponse @put("/orders") @body("body")
+  updatePayment(BodyRequest) -> JsonResponse @put("/payments") @body("body")
+  updateProduct(BodyRequest) -> JsonResponse @put("/products") @body("body")
+  updateShipping(BodyRequest) -> JsonResponse @put("/shipping") @body("body")
+  updateSite(BodyRequest) -> JsonResponse @put("/sites") @body("body")
+  updateTheme(BodyRequest) -> JsonResponse @put("/themes") @body("body")
+}

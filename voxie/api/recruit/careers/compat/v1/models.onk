@@ -1,0 +1,13 @@
+package recruit.careers.compat.v1
+
+message EmptyRequest {}
+
+/// The route's JSON body, passed through unchanged.
+message BodyRequest {
+  body: json
+}
+
+/// The handler's JSON response, sent unchanged.
+message JsonResponse {
+  data: json @unwrap
+}

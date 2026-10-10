@@ -6,52 +6,13 @@ package finance.compat.v1
 service CompatibilityService {
   base_path: "/finance"
 
-  getDashboard(EmptyRequest) -> JsonResponse @get("/dashboard")
-  listInvoices(PageRequest) -> JsonResponse @get("/invoices")
-  getInvoice(IdQueryRequest) -> JsonResponse @get("/invoices/detail")
-  createInvoice(BodyRequest) -> JsonResponse @post("/invoices") @body("body")
-  updateInvoice(BodyRequest) -> JsonResponse @put("/invoices") @body("body")
-  updateInvoiceStatus(BodyRequest) -> JsonResponse @put("/invoices/status") @body("body")
-  recordPayment(BodyRequest) -> JsonResponse @post("/invoices/payment") @body("body")
 
-  listExpenses(PageRequest) -> JsonResponse @get("/expenses")
-  createExpense(BodyRequest) -> JsonResponse @post("/expenses") @body("body")
-  updateExpense(BodyRequest) -> JsonResponse @put("/expenses") @body("body")
-  listExpenseCategories(EmptyRequest) -> JsonResponse @get("/expense-categories")
-  createExpenseCategory(BodyRequest) -> JsonResponse @post("/expense-categories") @body("body")
-  updateExpenseCategory(PathBodyRequest) -> JsonResponse @put("/expense-categories/{id}") @body("body")
-  deleteExpenseCategory(PathRequest) -> JsonResponse @delete("/expense-categories/{id}")
 
-  getPL(ReportRequest) -> JsonResponse @get("/report/v1/pl")
-  listTaxConfig(EmptyRequest) -> JsonResponse @get("/tax/config")
-  createTaxConfig(BodyRequest) -> JsonResponse @post("/tax/config") @body("body")
-  getTaxReport(EmptyRequest) -> JsonResponse @get("/tax/report")
-  updateTaxConfig(BodyRequest) -> JsonResponse @put("/tax") @body("body")
 
-  listRecurringInvoices(PageRequest) -> JsonResponse @get("/recurring-invoices")
-  createRecurringInvoice(BodyRequest) -> JsonResponse @post("/recurring-invoices") @body("body")
-  updateRecurringInvoice(BodyRequest) -> JsonResponse @put("/recurring-invoices") @body("body")
-  triggerRecurringInvoice(PathBodyRequest) -> JsonResponse @post("/recurring-invoices/{id}/trigger") @body("body")
 
-  listQuotes(PageRequest) -> JsonResponse @get("/quotes")
-  createQuote(BodyRequest) -> JsonResponse @post("/quotes") @body("body")
-  updateQuote(BodyRequest) -> JsonResponse @put("/quotes") @body("body")
-  deleteQuote(PathRequest) -> JsonResponse @delete("/quotes/{id}")
 
-  listBills(PageRequest) -> JsonResponse @get("/bills")
-  createBill(BodyRequest) -> JsonResponse @post("/bills") @body("body")
-  updateBill(BodyRequest) -> JsonResponse @put("/bills") @body("body")
 
-  listBankAccounts(PageRequest) -> JsonResponse @get("/bank-accounts")
-  createBankAccount(BodyRequest) -> JsonResponse @post("/bank-accounts") @body("body")
-  getReconciliation(EmptyRequest) -> JsonResponse @get("/reconciliation")
-  matchTransaction(BodyRequest) -> JsonResponse @post("/reconciliation/match") @body("body")
-  matchReconcile(BodyRequest) -> JsonResponse @post("/reconcile/match") @body("body")
   listBankFeeds(BankFeedRequest) -> JsonResponse @get("/bank-feeds")
-  getBalanceSheet(EmptyRequest) -> JsonResponse @get("/balance-sheet")
-  getCashFlow(EmptyRequest) -> JsonResponse @get("/cash-flow")
-  listAccounts(PageRequest) -> JsonResponse @get("/accounts")
-  createAccount(BodyRequest) -> JsonResponse @post("/accounts") @body("body")
-  getJournal(PageRequest) -> JsonResponse @get("/journal")
-  createJournalEntry(BodyRequest) -> JsonResponse @post("/journal") @body("body")
+
+  syncBankFeeds(BodyRequest) -> JsonResponse @post("/bank-feeds/sync") @body("body")
 }

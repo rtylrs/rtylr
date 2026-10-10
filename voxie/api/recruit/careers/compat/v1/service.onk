@@ -1,0 +1,8 @@
+package recruit.careers.compat.v1
+
+/// Legacy public careers routes, served with their existing wire format.
+service CompatibilityService {
+  base_path: "/careers"
+
+  listCareers(EmptyRequest) -> JsonResponse @get("")
+}

@@ -28,6 +28,10 @@ service CompatibilityService {
 
   listPublicCareers(QueryRequest) -> JsonResponse @get("/public/careers")
   getPublicCareer(QueryRequest) -> JsonResponse @get("/public/career")
-  submitApplication(BodyRequest) -> JsonResponse @post("/public/apply") @body("body")
+  // POST /public/apply stays mounted from the route table: it runs inside
+  // a per-route rate limit a contract method cannot apply.
   requestResumeUploadURL(BodyRequest) -> JsonResponse @post("/public/resume-upload-url") @body("body")
+
+  getPublicBranding(EmptyRequest) -> JsonResponse @get("/public/branding")
+  exportSubmissions(EmptyRequest) -> JsonResponse @get("/submissions/export")
 }

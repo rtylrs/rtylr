@@ -223,6 +223,13 @@ func (l *LegacyRoutes) Serve(ctx context.Context, r *http.Request, method, contr
 	if !ok {
 		return nil, onekiterrors.New(http.StatusNotFound, "Not found")
 	}
+	if len(route.middlewares) > 0 {
+		// Route middlewares (auth guards, rate limits) are HTTP handlers and
+		// cannot run inside a contract method. Such a route must stay mounted
+		// from the table; refusing here keeps a guard from being bypassed.
+		logger.Ctx(ctx).Error("Contract dispatch refused for a route with middlewares", logger.String("route", method+" "+contractPattern))
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Internal server error")
+	}
 	ctx = withLegacyPathValues(ctx, r, route.pattern, contractPattern)
 	// Contracts cannot declare a DELETE body, but legacy DELETEs accept one
 	// ({"id": N}); read it here when the client sent it.
@@ -471,6 +478,13 @@ func (l *LegacyRoutes) Handler() http.Handler {
 // fresh mux per call, so it is meant for tests; servers Mount the table once.
 func (l *LegacyRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	l.Handler().ServeHTTP(w, r)
+}
+
+// HasMiddlewares reports whether a registered JSON route runs inside route
+// middlewares, which only the table's own mount applies.
+func (l *LegacyRoutes) HasMiddlewares(method, pattern string) bool {
+	route, ok := l.route(method, pattern)
+	return ok && len(route.middlewares) > 0
 }
 
 // Has reports whether a route is registered for method and pattern (path
