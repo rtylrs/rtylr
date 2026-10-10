@@ -2,13 +2,17 @@ package application
 
 import (
 	"context"
+	"sync"
 	"testing"
 )
 
 func TestBusinessFindSearchesEveryAppAndFiltersMatches(t *testing.T) {
 	asked := map[string]any{}
+	var mu sync.Mutex
 	executor := toolExecutorFunc(func(_ context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+		mu.Lock()
 		asked[name] = input["search"]
+		mu.Unlock()
 		switch name {
 		case "crm.list_customers":
 			return map[string]any{"customers": []any{map[string]any{"id": "c1", "name": "Rana Haddad", "email": "rana@x.co"}, map[string]any{"id": "c2", "name": "Omar"}}}, true, nil
