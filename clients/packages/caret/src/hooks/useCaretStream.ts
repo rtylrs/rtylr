@@ -3,6 +3,7 @@ import { useCaretStore } from "../stores/caretStore";
 import { consumeSse } from "../protocol/sse";
 import type { CaretStreamEvent } from "../protocol/events";
 import { readAuthToken } from "../lib/auth";
+import { readTextFiles } from "../lib/fileAttachments";
 import { prepareCaretImages } from "../lib/imageAttachments";
 import type { CaretPageContext } from "../types/context";
 import type { CaretMode } from "../types/mode";
@@ -101,18 +102,33 @@ export function useCaretStream({
 
       const openThinking: Record<string, OpenThinking> = {};
       let assistantStarted = false;
+      // Anything typed as an image goes through image preparation, which
+      // rejects formats Caret can't read.
+      const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+      const textFiles = files.filter((file) => !file.type.startsWith("image/"));
       const requestPrompt =
-        prompt.trim() || "Please describe the attached image.";
+        prompt.trim() ||
+        (textFiles.length > 0
+          ? "Please look at the attached file."
+          : "Please describe the attached image.");
 
       try {
-        const images = await prepareCaretImages(files);
+        const images = await prepareCaretImages(imageFiles);
+        const texts = await readTextFiles(textFiles);
         store.addMessage(
           {
             id: `user-${Date.now()}`,
             role: "user",
             blocks: [],
             content: requestPrompt,
-            attachments: images,
+            attachments: [
+              ...images,
+              ...texts.map(({ name }) => ({
+                name,
+                dataUrl: "",
+                kind: "file" as const,
+              })),
+            ],
             createdAt: new Date().toISOString(),
           },
           tabId,
@@ -150,6 +166,7 @@ export function useCaretStream({
               name,
               data_url: dataUrl,
             })),
+            files: texts,
           }),
         });
 

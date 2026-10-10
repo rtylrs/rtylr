@@ -11,6 +11,14 @@ import { caretTokens, caretRadius } from "../../ui/tokens";
 import ApprovalPicker from "./ApprovalPicker";
 import MicButton, { type VoiceInputStatus } from "./MicButton";
 import AttachButton from "./AttachButton";
+import FileChip from "./FileChip";
+import {
+  IMAGE_ACCEPT,
+  MAX_TEXT_FILES,
+  TEXT_FILE_ACCEPT,
+  isImageFile,
+  isTextFile,
+} from "../../lib/fileAttachments";
 import SendButton from "./SendButton";
 import StopButton from "./StopButton";
 import { useAutosize } from "../../hooks/useAutosize";
@@ -84,18 +92,24 @@ export const Composer: React.FC<ComposerProps> = ({
 
   const addAttachments = useCallback(
     (files: File[]): void => {
-      const accepted = files.filter((file) =>
-        ["image/jpeg", "image/png", "image/webp"].includes(file.type),
+      const accepted = files.filter(
+        (file) => isImageFile(file) || isTextFile(file),
       );
       if (accepted.length !== files.length)
-        setAttachmentError("Choose JPEG, PNG, or WebP images.");
+        setAttachmentError(
+          "Choose JPEG, PNG or WebP images, or text files such as CSV.",
+        );
       else setAttachmentError(null);
       if (accepted.length === 0) return;
       setAttachments((current) => {
         const next = [...current, ...accepted];
-        if (next.length > 4) {
-          setAttachmentError("Attach up to four images per message.");
-          return next.slice(0, 4);
+        const images = next.filter(isImageFile);
+        const texts = next.filter((file) => !isImageFile(file));
+        if (images.length > 4 || texts.length > MAX_TEXT_FILES) {
+          setAttachmentError(
+            `Attach up to four images and ${MAX_TEXT_FILES} files per message.`,
+          );
+          return [...images.slice(0, 4), ...texts.slice(0, MAX_TEXT_FILES)];
         }
         return next;
       });
@@ -218,7 +232,7 @@ export const Composer: React.FC<ComposerProps> = ({
     >
       {previews.length > 0 && (
         <div
-          aria-label="Image attachments"
+          aria-label="Attachments"
           style={{
             display: "flex",
             flexWrap: "wrap",
@@ -231,17 +245,21 @@ export const Composer: React.FC<ComposerProps> = ({
               key={`${file.name}-${file.lastModified}-${index}`}
               style={{ position: "relative" }}
             >
-              <img
-                src={url}
-                alt={file.name}
-                style={{
-                  width: 64,
-                  height: 64,
-                  objectFit: "cover",
-                  borderRadius: 9,
-                  border: `1px solid ${caretTokens.border}`,
-                }}
-              />
+              {isImageFile(file) ? (
+                <img
+                  src={url}
+                  alt={file.name}
+                  style={{
+                    width: 64,
+                    height: 64,
+                    objectFit: "cover",
+                    borderRadius: 9,
+                    border: `1px solid ${caretTokens.border}`,
+                  }}
+                />
+              ) : (
+                <FileChip name={file.name} />
+              )}
               <button
                 type="button"
                 aria-label={`Remove ${file.name}`}
@@ -486,7 +504,10 @@ export const Composer: React.FC<ComposerProps> = ({
           }}
         >
           <ApprovalPicker />
-          <AttachButton onFiles={addAttachments} />
+          <AttachButton
+            onFiles={addAttachments}
+            accept={`${IMAGE_ACCEPT},${TEXT_FILE_ACCEPT}`}
+          />
           {voiceEnabled && (
             <MicButton
               onTranscript={appendTranscript}

@@ -36,8 +36,24 @@ describe("Composer image attachments", () => {
     });
 
     expect(screen.getByRole("alert").textContent).toContain(
-      "Choose JPEG, PNG, or WebP images.",
+      "Choose JPEG, PNG or WebP images, or text files such as CSV.",
     );
     expect(screen.queryByRole("img", { name: "diagram.svg" })).toBeNull();
+  });
+
+  it("accepts a CSV file and shows it by name", () => {
+    const file = new File(["date,total\n2026-10-01,12"], "sales.csv", {
+      type: "text/csv",
+    });
+    const onSubmit = vi.fn();
+    const { container } = render(
+      <Composer isStreaming={false} onSubmit={onSubmit} onStop={vi.fn()} />,
+    );
+    fireEvent.drop(container.querySelector(".caret-composer")!, {
+      dataTransfer: { files: [file] },
+    });
+    expect(screen.getByTitle("sales.csv")).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    expect(onSubmit).toHaveBeenCalledWith("", [file]);
   });
 });

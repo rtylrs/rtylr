@@ -33,7 +33,9 @@ export type ContentBlock = TextBlock | ThinkingBlock | ToolCallBlock;
 
 export interface CaretImageAttachment {
   name: string;
+  /** Empty for a text file, which is shown by name. */
   dataUrl: string;
+  kind?: "image" | "file";
 }
 
 export interface CaretMessage {

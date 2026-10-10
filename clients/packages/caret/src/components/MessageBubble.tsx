@@ -3,6 +3,7 @@ import { caretTokens } from "../ui/tokens";
 import MessageBlocks from "./MessageBlocks";
 import MessageActions, { type ReplyRating } from "./MessageActions";
 import SourceChips from "./SourceChips";
+import FileChip from "./composer/FileChip";
 import { replySources } from "../lib/searchSources";
 import { StreamingOrb } from "./CaretOrb";
 import type { CaretMessage, ContentBlock } from "../types/message";
@@ -96,6 +97,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 borderRadius: 10,
               }}
             />
+          ) : attachment.kind === "file" ? (
+            <FileChip key={`${attachment.name}-${index}`} name={attachment.name} />
           ) : null,
         )}
         {text && (
