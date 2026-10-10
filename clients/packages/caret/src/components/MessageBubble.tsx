@@ -3,7 +3,6 @@ import { caretTokens } from "../ui/tokens";
 import MessageBlocks from "./MessageBlocks";
 import MessageActions from "./MessageActions";
 import SourceChips from "./SourceChips";
-import FollowUpChips from "./FollowUpChips";
 import { replySources } from "../lib/searchSources";
 import { StreamingOrb } from "./CaretOrb";
 import type { CaretMessage, ContentBlock } from "../types/message";
@@ -15,8 +14,6 @@ export interface MessageBubbleProps {
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
   onRetry?: () => void;
-  /** Present on the latest reply only: sends a suggested follow-up. */
-  onFollowUp?: (prompt: string) => void;
 }
 
 /** Flatten content blocks to plain text for copy. */
@@ -46,7 +43,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onApproveTool,
   onDenyTool,
   onRetry,
-  onFollowUp,
 }) => {
   const isUser = message.role === "user";
   const blocks: ContentBlock[] =
@@ -139,12 +135,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {isStreaming && <StreamingOrb hasText={text.trim().length > 0} />}
       </div>
       {!isStreaming && <SourceChips sources={replySources(blocks)} />}
-      {!isStreaming && onFollowUp && message.followUps && message.followUps.length > 0 && (
-        <FollowUpChips
-          items={message.followUps.map((prompt) => ({ prompt, mode: "agent" }))}
-          onSelect={(item) => onFollowUp(item.prompt)}
-        />
-      )}
       {!isStreaming && hasAssistantText && (
         <MessageActions
           text={text}
