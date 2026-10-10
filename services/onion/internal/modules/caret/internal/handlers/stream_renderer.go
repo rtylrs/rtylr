@@ -445,10 +445,13 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		// builder shortlisted as executable.
 		return nil
 	}
-	if tokens, ok := output[echoapp.ToolUsageTokensKey].(int64); ok {
+	switch tokens := output[echoapp.ToolUsageTokensKey].(type) {
+	case int64:
 		r.toolTokens += tokens
-		delete(output, echoapp.ToolUsageTokensKey)
+	case float64: // a shortened output went through JSON
+		r.toolTokens += int64(tokens)
 	}
+	delete(output, echoapp.ToolUsageTokensKey)
 	if call.Name == "web.search" {
 		if answer, ok := output["answer"].(string); ok {
 			output["answer"] = removeCaretEmDashes(answer)

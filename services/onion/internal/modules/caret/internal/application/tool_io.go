@@ -2,6 +2,7 @@ package application
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode"
@@ -83,6 +84,11 @@ func SanitizeToolOutput(output map[string]any) map[string]any {
 	if err == nil && len(encoded) <= MaxToolOutputBytes {
 		return clean
 	}
+	if err == nil {
+		if shrunk, ok := shrinkToolOutput(encoded); ok {
+			return shrunk
+		}
+	}
 	return map[string]any{
 		"truncated":        true,
 		"notice":           "The tool returned more data than this response can safely display. Use a narrower filter or date range.",
@@ -141,4 +147,48 @@ func sortedToolOutputKeys(output map[string]any) []string {
 		}
 	}
 	return keys
+}
+
+// shrinkToolOutput fits an oversized output by cutting long strings and long
+// lists step by step, rather than dropping the whole result: a long page or
+// a big list still answers the question from its first part.
+func shrinkToolOutput(encoded []byte) (map[string]any, bool) {
+	for _, limits := range []struct{ runes, items int }{{6000, 60}, {3000, 40}, {1500, 25}, {800, 15}, {400, 10}, {200, 5}} {
+		var generic map[string]any
+		if json.Unmarshal(encoded, &generic) != nil {
+			return nil, false
+		}
+		shrunk, _ := shrinkToolValue(generic, limits.runes, limits.items).(map[string]any)
+		shrunk["truncated"] = true
+		shrunk["truncation_note"] = "Long text and lists were shortened to fit. Ask a narrower question or filter for the rest."
+		if out, err := json.Marshal(shrunk); err == nil && len(out) <= MaxToolOutputBytes {
+			return shrunk, true
+		}
+	}
+	return nil, false
+}
+
+func shrinkToolValue(value any, maxRunes, maxItems int) any {
+	switch value := value.(type) {
+	case string:
+		if runes := []rune(value); len(runes) > maxRunes {
+			return string(runes[:maxRunes]) + " [...]"
+		}
+		return value
+	case map[string]any:
+		for key, nested := range value {
+			value[key] = shrinkToolValue(nested, maxRunes, maxItems)
+		}
+		return value
+	case []any:
+		if len(value) > maxItems {
+			value = append(value[:maxItems:maxItems], fmt.Sprintf("[%d more not shown]", len(value)-maxItems))
+		}
+		for i, nested := range value {
+			value[i] = shrinkToolValue(nested, maxRunes, maxItems)
+		}
+		return value
+	default:
+		return value
+	}
 }
