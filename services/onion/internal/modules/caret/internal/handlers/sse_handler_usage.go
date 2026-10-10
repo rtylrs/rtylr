@@ -166,6 +166,15 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.
 	if !h.claimSessionSummary(sessionID) {
 		return nil
 	}
+	if compactor, ok := h.MemoryService.(application.ConversationCompactor); ok && h.AiService != nil && h.AiService.IsAvailable() {
+		// Compaction calls the model, so it runs after the reply instead of
+		// holding the done event. The claim keeps one compaction per chat.
+		go func() {
+			defer h.releaseSessionSummary(sessionID)
+			h.compactConversation(context.WithoutCancel(ctx), compactor, sessionID, userID)
+		}()
+		return nil
+	}
 	defer h.releaseSessionSummary(sessionID)
 
 	// Bound summarization within the same request.
@@ -200,4 +209,55 @@ func (h *GenerateTextStreamHandler) releaseSessionSummary(sessionID string) {
 	h.summaryMu.Lock()
 	defer h.summaryMu.Unlock()
 	delete(h.summaryRunning, sessionID)
+}
+
+const compactionTimeout = 90 * time.Second
+
+// compactConversation folds chat history that has outgrown the context window
+// into the chat's rolling summary. Failure only means the next turn shows
+// fewer old messages; it never affects the reply already sent.
+func (h *GenerateTextStreamHandler) compactConversation(ctx context.Context, compactor application.ConversationCompactor, sessionID string, userID int) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Ctx(ctx).Error("panic while compacting chat", logger.Any("panic", r))
+		}
+	}()
+	ctx, cancel := context.WithTimeout(ctx, compactionTimeout)
+	defer cancel()
+	log := logger.Ctx(ctx)
+
+	previousSummary, transcript, previousThrough, newThrough, ok, err := compactor.PendingCompaction(ctx, sessionID, userID)
+	if err != nil {
+		log.Warn("Failed to read chat for compaction", logger.Error(err), logger.String("session_id", sessionID))
+		return
+	}
+	if !ok {
+		return
+	}
+	tokens, err := h.AiService.GenerateTextStream(ctx, application.BuildCompactionPrompt(previousSummary, transcript))
+	if err != nil {
+		log.Warn("Failed to start chat compaction", logger.Error(err), logger.String("session_id", sessionID))
+		return
+	}
+	var raw strings.Builder
+	for token := range tokens {
+		if token.Error != "" {
+			log.Warn("Chat compaction stream failed", logger.String("error", token.Error), logger.String("session_id", sessionID))
+			return
+		}
+		raw.WriteString(token.Text)
+	}
+	summary := application.CleanCompactionSummary(raw.String())
+	if summary == "" {
+		log.Warn("Chat compaction returned an empty summary", logger.String("session_id", sessionID))
+		return
+	}
+	if err := compactor.SaveCompaction(ctx, sessionID, userID, previousThrough, newThrough, summary); err != nil {
+		log.Warn("Failed to save chat compaction", logger.Error(err), logger.String("session_id", sessionID))
+		return
+	}
+	log.Info("Compacted chat history",
+		logger.String("session_id", sessionID),
+		logger.Int("through_message_id", newThrough),
+		logger.Int("summary_bytes", len(summary)))
 }

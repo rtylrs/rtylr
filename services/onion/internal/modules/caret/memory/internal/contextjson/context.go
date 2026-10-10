@@ -1,7 +1,6 @@
 package contextjson
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/domain"
@@ -62,5 +61,3 @@ func FromDomain(v *domain.ConversationContext) *Context {
 	}
 	return out
 }
-
-func Encode(v *domain.ConversationContext) ([]byte, error) { return json.Marshal(FromDomain(v)) }
