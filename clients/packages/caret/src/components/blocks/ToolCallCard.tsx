@@ -39,6 +39,7 @@ function actionForTool(name: string): string {
   const normalized = name.trim().toLowerCase();
   const actions: Array<[RegExp, string]> = [
     [/^web\.search$/, "search the web"],
+    [/^tools\.search$/, "find the right tool"],
     [/^erp\.create_product$/, "add a product"],
     [/^erp\.update_product$/, "update a product"],
     [/^erp\.delete_product$/, "delete a product"],

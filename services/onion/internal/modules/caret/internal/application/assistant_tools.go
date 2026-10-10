@@ -61,6 +61,12 @@ func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name strin
 		}
 		profile, err := e.Profile.GetAssistantProfile(ctx)
 		return map[string]any{"profile": profile}, true, err
+	case ToolSearchName:
+		query, _ := input["query"].(string)
+		if strings.TrimSpace(query) == "" {
+			return nil, true, errors.New("describe the tool you need")
+		}
+		return toolSearchOutput(ModeAgent, truncateSearchText(query, 300)), true, nil
 	case "utilities.calculate":
 		expression, _ := input["expression"].(string)
 		value, err := calculateArithmetic(expression)
