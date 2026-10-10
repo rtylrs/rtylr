@@ -1,6 +1,7 @@
 package application
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -63,5 +64,21 @@ func TestAssistantPromptStatesLocalTime(t *testing.T) {
 	}
 	if LocationFor("Mars/Olympus") != time.UTC || LocationFor("") != time.UTC {
 		t.Fatal("an unknown timezone must fall back to UTC")
+	}
+}
+
+var listedToolLine = regexp.MustCompile(`\n- [a-z_]+\.[a-z_]+ \[`)
+
+// Every turn pays for the base prompt, so keep it lean: the listed tools stay
+// a shortlist and tools.search reaches the rest.
+func TestAssistantPromptStaysLean(t *testing.T) {
+	for _, request := range []string{"hi", "Compare our revenue this month with last month, by branch, and check the weather and the USD to EUR rate", "list unpaid invoices and remind me to follow up Friday"} {
+		prompt := BuildAssistantPrompt(request, "", "", nil, time.Now())
+		if len(prompt) > 24000 {
+			t.Errorf("prompt for %q is %d bytes", request, len(prompt))
+		}
+		if tools := len(listedToolLine.FindAllString(prompt, -1)); tools > 22 {
+			t.Errorf("prompt for %q lists %d tools", request, tools)
+		}
 	}
 }
