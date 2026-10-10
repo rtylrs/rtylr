@@ -45,4 +45,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "Each holiday's date, weekday, English and local name, and whether it is regional.",
 		Freshness:  "reference data", SideEffect: "read-only",
 	},
+	{
+		Name:        "knowledge.wikipedia",
+		Description: "Look up a topic, person, place, company or concept on Wikipedia and return the article summary. Supports other languages.",
+		Module:      "knowledge", Scope: "read",
+		InputHint:  `{"query":"topic","language":"optional code such as en, ar, fr"}`,
+		OutputHint: "The best article's title, description, summary and link, plus other matching titles.",
+		Freshness:  "encyclopedia; recent events may be missing", SideEffect: "read-only",
+	},
 }
