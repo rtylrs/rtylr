@@ -18,9 +18,10 @@ const (
 	messageClipBytes      = 10000
 	profileBudgetBytes    = 4000
 	memoriesBudgetBytes   = 4000
-	lessonsBudgetBytes    = 2500
-	summaryBudgetBytes    = 6000
-	projectBudgetBytes    = 8000
+	// Lessons fit whole: 15 of up to 300 characters, as the distiller keeps.
+	lessonsBudgetBytes = 4500
+	summaryBudgetBytes = 6000
+	projectBudgetBytes = 8000
 
 	// Compaction starts once unsummarized history no longer fits the window,
 	// and folds older turns in until the newest compactKeepBytes remain
