@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/domain"
 	"github.com/voxire/onion/internal/modules/organization/scopes"
 	"github.com/voxire/onion/internal/platform/auth"

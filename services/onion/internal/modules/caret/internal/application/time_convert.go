@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-func init() {
-	registerGeneralTool("utilities.convert_time", (*AssistantToolExecutor).convertTime)
-}
-
 // convertTime shows one moment in several timezones, for "what time is 3pm
 // Beirut in New York" and for scheduling across offices.
 func (e *AssistantToolExecutor) convertTime(_ context.Context, input map[string]any) (map[string]any, error) {

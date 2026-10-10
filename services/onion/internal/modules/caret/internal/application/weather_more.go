@@ -13,11 +13,6 @@ var (
 	airQualityEndpoint     = "https://air-quality-api.open-meteo.com/v1/air-quality"
 )
 
-func init() {
-	registerGeneralTool("weather.history", (*AssistantToolExecutor).weatherHistory)
-	registerGeneralTool("weather.air_quality", (*AssistantToolExecutor).airQuality)
-}
-
 // weatherHistory reports the observed daily weather for past dates, e.g. to
 // check whether rain explains a slow sales day.
 func (e *AssistantToolExecutor) weatherHistory(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -71,8 +66,10 @@ func (e *AssistantToolExecutor) weatherHistory(ctx context.Context, input map[st
 		return nil
 	}
 	for i, day := range response.Daily.Time {
-		entry := map[string]any{"date": day, "high_c": value(response.Daily.Max, i), "low_c": value(response.Daily.Min, i),
-			"precipitation_mm": value(response.Daily.Rain, i), "max_wind_kmh": value(response.Daily.Wind, i)}
+		entry := map[string]any{
+			"date": day, "high_c": value(response.Daily.Max, i), "low_c": value(response.Daily.Min, i),
+			"precipitation_mm": value(response.Daily.Rain, i), "max_wind_kmh": value(response.Daily.Wind, i),
+		}
 		if code, ok := value(response.Daily.Code, i).(float64); ok {
 			entry["conditions"] = weatherCodeText(int(code))
 		}

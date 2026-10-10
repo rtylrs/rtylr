@@ -14,10 +14,6 @@ var (
 	wikipediaLanguage = regexp.MustCompile(`^[a-z]{2,3}$`)
 )
 
-func init() {
-	registerGeneralTool("knowledge.wikipedia", (*AssistantToolExecutor).wikipedia)
-}
-
 func (e *AssistantToolExecutor) wikipedia(ctx context.Context, input map[string]any) (map[string]any, error) {
 	query := inputText(input, "query", "title", "topic", "q")
 	if query == "" || len([]rune(query)) > 200 {

@@ -19,11 +19,6 @@ var (
 	tickerSymbol         = regexp.MustCompile(`^[A-Z0-9.\-^=]{1,15}$`)
 )
 
-func init() {
-	registerGeneralTool("markets.quote", (*AssistantToolExecutor).stockQuote)
-	registerGeneralTool("markets.crypto", (*AssistantToolExecutor).cryptoPrice)
-}
-
 // stockQuote reads a delayed market quote for a stock, ETF, index or FX pair.
 func (e *AssistantToolExecutor) stockQuote(ctx context.Context, input map[string]any) (map[string]any, error) {
 	query := inputText(input, "symbol", "ticker", "company", "query", "name")
@@ -108,8 +103,7 @@ func (e *AssistantToolExecutor) stockQuote(ctx context.Context, input map[string
 		"note":                    "Quotes can be delayed; this is information, not investment advice.",
 	}
 	if len(history) >= 2 {
-		previous := history[len(history)-2]["close"].(float64)
-		if previous != 0 {
+		if previous, _ := history[len(history)-2]["close"].(float64); previous != 0 {
 			out["change_percent_vs_previous_close"] = roundTo((meta.Price-previous)/previous*100, 2)
 		}
 	}

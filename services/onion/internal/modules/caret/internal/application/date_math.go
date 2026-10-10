@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-func init() {
-	registerGeneralTool("utilities.date_math", (*AssistantToolExecutor).dateMath)
-}
-
 // dateMath answers the date questions models get wrong: the span between two
 // dates (with working days), a date plus or minus an offset, and weekdays.
 func (e *AssistantToolExecutor) dateMath(ctx context.Context, input map[string]any) (map[string]any, error) {

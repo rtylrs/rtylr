@@ -8,9 +8,8 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/caret/internal/application"
-	"github.com/voxire/onion/internal/platform/logger"
-
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
 )

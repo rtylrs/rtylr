@@ -38,10 +38,6 @@ var placeCategories = map[string][2]string{
 	"laundry": {"shop", "laundry"}, "bookstore": {"shop", "books"}, "mall": {"shop", "mall"},
 }
 
-func init() {
-	registerGeneralTool("places.search", (*AssistantToolExecutor).searchPlaces)
-}
-
 // searchPlaces lists businesses or amenities of a kind near a place, from
 // OpenStreetMap: for scouting competitors, suppliers or a location.
 func (e *AssistantToolExecutor) searchPlaces(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -110,7 +106,11 @@ func (e *AssistantToolExecutor) searchPlaces(ctx context.Context, input map[stri
 		}
 		places = append(places, place)
 	}
-	sort.SliceStable(places, func(i, j int) bool { return places[i]["distance_m"].(float64) < places[j]["distance_m"].(float64) })
+	sort.SliceStable(places, func(i, j int) bool {
+		a, _ := places[i]["distance_m"].(float64)
+		b, _ := places[j]["distance_m"].(float64)
+		return a < b
+	})
 	if len(places) > 20 {
 		places = places[:20]
 	}

@@ -10,10 +10,6 @@ import (
 
 var geocodingEndpoint = "https://geocoding-api.open-meteo.com/v1/search"
 
-func init() {
-	registerGeneralTool("places.geocode", (*AssistantToolExecutor).geocodeTool)
-}
-
 type place struct {
 	Name       string  `json:"name"`
 	Latitude   float64 `json:"latitude"`

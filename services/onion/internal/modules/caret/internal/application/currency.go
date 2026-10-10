@@ -17,18 +17,11 @@ var (
 	currencyCode            = regexp.MustCompile(`^[A-Z]{3}$`)
 )
 
-func init() {
-	registerGeneralTool("currency.convert", (*AssistantToolExecutor).convertCurrency)
-}
-
 // convertCurrency converts with today's rates (about 160 currencies) or, for
 // a past date, the European Central Bank reference rates.
 func (e *AssistantToolExecutor) convertCurrency(ctx context.Context, input map[string]any) (map[string]any, error) {
 	from := strings.ToUpper(inputText(input, "from", "base", "source"))
-	targets := []string{}
-	for _, code := range strings.FieldsFunc(strings.ToUpper(inputText(input, "to", "target", "targets", "symbols")), func(r rune) bool { return r == ',' || r == ' ' }) {
-		targets = append(targets, code)
-	}
+	targets := strings.FieldsFunc(strings.ToUpper(inputText(input, "to", "target", "targets", "symbols")), func(r rune) bool { return r == ',' || r == ' ' })
 	if list, ok := input["to"].([]any); ok {
 		for _, item := range list {
 			if code, ok := item.(string); ok {

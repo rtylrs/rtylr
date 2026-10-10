@@ -7,10 +7,6 @@ import (
 	"strings"
 )
 
-func init() {
-	registerGeneralTool("utilities.convert_units", (*AssistantToolExecutor).convertUnits)
-}
-
 type unitDef struct {
 	kind   string
 	factor float64 // to the kind's base unit
@@ -19,15 +15,15 @@ type unitDef struct {
 // units maps names and symbols to a factor of the base unit: metre,
 // kilogram, litre, square metre, metre per second, byte, second, joule.
 // Temperature is converted separately because it has offsets.
-var units = map[string]unitDef{}
+var units = buildUnits()
 
-func addUnits(kind string, factor float64, names ...string) {
-	for _, name := range names {
-		units[name] = unitDef{kind: kind, factor: factor}
+func buildUnits() map[string]unitDef {
+	units := map[string]unitDef{}
+	addUnits := func(kind string, factor float64, names ...string) {
+		for _, name := range names {
+			units[name] = unitDef{kind: kind, factor: factor}
+		}
 	}
-}
-
-func init() {
 	addUnits("length", 1, "m", "meter", "meters", "metre", "metres")
 	addUnits("length", 1000, "km", "kilometer", "kilometers", "kilometre", "kilometres")
 	addUnits("length", 0.01, "cm", "centimeter", "centimeters", "centimetre", "centimetres")
@@ -83,6 +79,7 @@ func init() {
 	addUnits("energy", 1000, "kj", "kilojoule", "kilojoules")
 	addUnits("energy", 4184, "kcal", "calorie", "calories", "kilocalorie", "kilocalories")
 	addUnits("energy", 3.6e6, "kwh", "kilowatt hour", "kilowatt hours")
+	return units
 }
 
 var temperatureUnits = map[string]string{

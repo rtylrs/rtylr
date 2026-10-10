@@ -12,10 +12,6 @@ var (
 	wiktionaryEndpoint = "https://en.wiktionary.org/api/rest_v1/page/definition/"
 )
 
-func init() {
-	registerGeneralTool("knowledge.define", (*AssistantToolExecutor).defineWord)
-}
-
 // defineWord defines a word from Wiktionary, which covers many languages,
 // falling back to an English dictionary that also lists synonyms.
 func (e *AssistantToolExecutor) defineWord(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -69,8 +65,10 @@ func (e *AssistantToolExecutor) wiktionaryDefinition(ctx context.Context, word, 
 		return nil, errors.New("the dictionary has no entry for that word in that language")
 	}
 	link := "https://en.wiktionary.org/wiki/" + url.PathEscape(word)
-	return map[string]any{"word": word, "language": language, "meanings": meanings,
-		"sources": []map[string]string{{"title": word + " - Wiktionary", "url": link}}}, nil
+	return map[string]any{
+		"word": word, "language": language, "meanings": meanings,
+		"sources": []map[string]string{{"title": word + " - Wiktionary", "url": link}},
+	}, nil
 }
 
 func (e *AssistantToolExecutor) englishDictionary(ctx context.Context, word string) (map[string]any, error) {

@@ -37,7 +37,7 @@ func TestGetPublicJSONRetriesOnceOnTransientFailure(t *testing.T) {
 	publicRetryDelay = time.Millisecond
 	defer func() { publicRetryDelay = previous }()
 	calls := 0
-	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client := &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
 		calls++
 		if calls == 1 {
 			return &http.Response{StatusCode: 503, Body: io.NopCloser(strings.NewReader("busy"))}, nil
@@ -49,7 +49,7 @@ func TestGetPublicJSONRetriesOnceOnTransientFailure(t *testing.T) {
 		t.Fatalf("err=%v out=%v calls=%d", err, out, calls)
 	}
 	calls = 10 // every later call fails
-	client = &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client = &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
 		calls++
 		return &http.Response{StatusCode: 429, Body: io.NopCloser(strings.NewReader(""))}, nil
 	})}
@@ -60,7 +60,7 @@ func TestGetPublicJSONRetriesOnceOnTransientFailure(t *testing.T) {
 
 func TestGetPublicJSONCachesRepeatCalls(t *testing.T) {
 	calls := 0
-	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+	client := &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
 		calls++
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"rate":1.5}`))}, nil
 	})}

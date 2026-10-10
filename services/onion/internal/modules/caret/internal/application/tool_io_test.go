@@ -29,8 +29,8 @@ func TestSanitizeToolOutputRedactsSecretsAndBoundsLargePayloads(t *testing.T) {
 	if large["truncated"] != true || !strings.HasPrefix(large["rows"].(string), "xxxx") {
 		t.Fatalf("large output was not shortened: %#v", large)
 	}
-	encoded, _ := json.Marshal(large)
-	if len(encoded) > MaxToolOutputBytes {
+	encoded, err := json.Marshal(large)
+	if err != nil || len(encoded) > MaxToolOutputBytes {
 		t.Fatalf("shortened output is %d bytes", len(encoded))
 	}
 }

@@ -11,10 +11,6 @@ import (
 
 var papersEndpoint = "https://api.openalex.org/works"
 
-func init() {
-	registerGeneralTool("knowledge.papers", (*AssistantToolExecutor).searchPapers)
-}
-
 // searchPapers finds scholarly work on a topic in OpenAlex, for questions
 // that deserve evidence rather than blog posts.
 func (e *AssistantToolExecutor) searchPapers(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -74,8 +70,10 @@ func (e *AssistantToolExecutor) searchPapers(ctx context.Context, input map[stri
 		if link == "" {
 			link = work.Location.LandingPage
 		}
-		paper := map[string]any{"title": work.Title, "year": work.Year, "cited_by": work.Cited, "authors": strings.Join(authors, ", "), "url": link,
-			"abstract": truncateSearchText(rebuildAbstract(work.Abstract), 900)}
+		paper := map[string]any{
+			"title": work.Title, "year": work.Year, "cited_by": work.Cited, "authors": strings.Join(authors, ", "), "url": link,
+			"abstract": truncateSearchText(rebuildAbstract(work.Abstract), 900),
+		}
 		if work.Location.Source != nil {
 			paper["venue"] = work.Location.Source.Name
 		}

@@ -21,10 +21,6 @@ import (
 // read an article, small enough to leave room for the rest of the turn.
 const maxFetchedTextRunes = 12000
 
-func init() {
-	registerGeneralTool("web.fetch", (*AssistantToolExecutor).fetchPage)
-}
-
 func (e *AssistantToolExecutor) fetchPage(ctx context.Context, input map[string]any) (map[string]any, error) {
 	target, err := publicPageURL(inputText(input, "url", "link", "page", "href"))
 	if err != nil {

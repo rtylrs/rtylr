@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-func init() {
-	registerGeneralTool("utilities.business_math", (*AssistantToolExecutor).businessMath)
-}
-
 // businessMath covers the formulas owners ask about most, where a model doing
 // the algebra itself tends to slip: margins, VAT, loans, growth, break-even.
 func (e *AssistantToolExecutor) businessMath(_ context.Context, input map[string]any) (map[string]any, error) {
@@ -36,8 +32,10 @@ func (e *AssistantToolExecutor) businessMath(_ context.Context, input map[string
 		if price == 0 || cost == 0 {
 			return nil, errors.New("cost and price must be non-zero")
 		}
-		return map[string]any{"cost": cost, "price": price, "profit": round2(price - cost),
-			"margin_percent": round2((price - cost) / price * 100), "markup_percent": round2((price - cost) / cost * 100)}, nil
+		return map[string]any{
+			"cost": cost, "price": price, "profit": round2(price - cost),
+			"margin_percent": round2((price - cost) / price * 100), "markup_percent": round2((price - cost) / cost * 100),
+		}, nil
 	case "price_for_margin":
 		cost, err := num("cost")
 		if err != nil {

@@ -51,8 +51,10 @@ func TestPublicPageURLRejectsUnsafeTargets(t *testing.T) {
 
 func TestWebFetchReturnsTextAndSource(t *testing.T) {
 	executor := &AssistantToolExecutor{HTTP: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
-		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"text/html; charset=utf-8"}}, Request: r,
-			Body: io.NopCloser(strings.NewReader(`<title>Docs</title><p>Hello world</p>`))}, nil
+		return &http.Response{
+			StatusCode: 200, Header: http.Header{"Content-Type": {"text/html; charset=utf-8"}}, Request: r,
+			Body: io.NopCloser(strings.NewReader(`<title>Docs</title><p>Hello world</p>`)),
+		}, nil
 	})}}
 	output, executed, err := executor.ExecuteCaretTool(context.Background(), "web.fetch", map[string]any{"url": "https://example.com/docs"})
 	if err != nil || !executed {

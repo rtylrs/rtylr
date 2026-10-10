@@ -7,10 +7,6 @@ import (
 	"sort"
 )
 
-func init() {
-	registerGeneralTool("utilities.statistics", (*AssistantToolExecutor).statistics)
-}
-
 const maxStatisticsValues = 5000
 
 // statistics summarises a list of numbers exactly, so Caret never eyeballs a

@@ -41,14 +41,29 @@ type AssistantToolExecutor struct {
 // reference APIs and the web.
 type generalTool func(e *AssistantToolExecutor, ctx context.Context, input map[string]any) (map[string]any, error)
 
-// generalTools is filled by each tool's file, keyed by tool name.
-var generalTools = map[string]generalTool{}
-
-func registerGeneralTool(name string, run generalTool) {
-	if _, exists := generalTools[name]; exists {
-		panic("general tool registered twice: " + name)
-	}
-	generalTools[name] = run
+// generalTools maps each general tool to its handler; generalToolDefs
+// describes them to the model.
+var generalTools = map[string]generalTool{
+	"web.fetch":                (*AssistantToolExecutor).fetchPage,
+	"places.geocode":           (*AssistantToolExecutor).geocodeTool,
+	"places.search":            (*AssistantToolExecutor).searchPlaces,
+	"weather.forecast":         (*AssistantToolExecutor).weatherForecast,
+	"weather.history":          (*AssistantToolExecutor).weatherHistory,
+	"weather.air_quality":      (*AssistantToolExecutor).airQuality,
+	"currency.convert":         (*AssistantToolExecutor).convertCurrency,
+	"markets.quote":            (*AssistantToolExecutor).stockQuote,
+	"markets.crypto":           (*AssistantToolExecutor).cryptoPrice,
+	"calendar.public_holidays": (*AssistantToolExecutor).publicHolidays,
+	"knowledge.wikipedia":      (*AssistantToolExecutor).wikipedia,
+	"knowledge.define":         (*AssistantToolExecutor).defineWord,
+	"knowledge.country":        (*AssistantToolExecutor).countryFactsTool,
+	"knowledge.papers":         (*AssistantToolExecutor).searchPapers,
+	"utilities.date_math":      (*AssistantToolExecutor).dateMath,
+	"utilities.convert_time":   (*AssistantToolExecutor).convertTime,
+	"utilities.convert_units":  (*AssistantToolExecutor).convertUnits,
+	"utilities.statistics":     (*AssistantToolExecutor).statistics,
+	"utilities.business_math":  (*AssistantToolExecutor).businessMath,
+	"text.count":               (*AssistantToolExecutor).countText,
 }
 
 // MaxWebSearchesPerMessage lets Caret refine a search (a narrower query, a

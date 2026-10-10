@@ -61,7 +61,8 @@ func newTestPDF(t *testing.T, pageContents []string) []byte {
 	for i := range pageContents {
 		writeObject(firstPageID+i, fmt.Sprintf(
 			"<< /Type /Page /Parent %d 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 %d 0 R >> >> /Contents %d 0 R >>",
-			pagesID, fontID, firstContentID+i))
+			pagesID, fontID, firstContentID+i,
+		))
 	}
 	for i, content := range pageContents {
 		var compressed bytes.Buffer

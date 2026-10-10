@@ -10,10 +10,6 @@ import (
 
 var forecastEndpoint = "https://api.open-meteo.com/v1/forecast"
 
-func init() {
-	registerGeneralTool("weather.forecast", (*AssistantToolExecutor).weatherForecast)
-}
-
 func (e *AssistantToolExecutor) weatherForecast(ctx context.Context, input map[string]any) (map[string]any, error) {
 	lat, lon, label, err := e.coordinates(ctx, input)
 	if err != nil {

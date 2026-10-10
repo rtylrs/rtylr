@@ -11,10 +11,6 @@ import (
 
 var holidaysEndpoint = "https://date.nager.at/api/v3/PublicHolidays/"
 
-func init() {
-	registerGeneralTool("calendar.public_holidays", (*AssistantToolExecutor).publicHolidays)
-}
-
 func (e *AssistantToolExecutor) publicHolidays(ctx context.Context, input map[string]any) (map[string]any, error) {
 	country := strings.ToUpper(inputText(input, "country_code", "country", "code"))
 	if len(country) != 2 {
@@ -64,6 +60,8 @@ func (e *AssistantToolExecutor) publicHolidays(ctx context.Context, input map[st
 		}
 		out = append(out, entry)
 	}
-	return map[string]any{"country_code": country, "year": year, "holidays": out,
-		"note": "Movable religious holidays can shift by a day once officially announced."}, nil
+	return map[string]any{
+		"country_code": country, "year": year, "holidays": out,
+		"note": "Movable religious holidays can shift by a day once officially announced.",
+	}, nil
 }

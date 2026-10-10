@@ -46,7 +46,7 @@ func TestSlowToolShowsItsCardProgressAndHeartbeats(t *testing.T) {
 }
 
 func TestReadsInOneTurnRunAtTheSameTime(t *testing.T) {
-	executor := fakeNamedToolExecutorFunc(func(_ context.Context, name string, input map[string]any) (map[string]any, bool, error) {
+	executor := fakeNamedToolExecutorFunc(func(_ context.Context, _ string, input map[string]any) (map[string]any, bool, error) {
 		time.Sleep(150 * time.Millisecond)
 		return map[string]any{"title": input["url"]}, true, nil
 	})

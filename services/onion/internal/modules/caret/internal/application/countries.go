@@ -39,10 +39,6 @@ var (
 	countries     []countryFacts
 )
 
-func init() {
-	registerGeneralTool("knowledge.country", (*AssistantToolExecutor).countryFactsTool)
-}
-
 func loadCountries() []countryFacts {
 	countriesOnce.Do(func() {
 		_ = json.Unmarshal(countriesData, &countries)

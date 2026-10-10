@@ -9,10 +9,6 @@ import (
 	"unicode/utf8"
 )
 
-func init() {
-	registerGeneralTool("text.count", (*AssistantToolExecutor).countText)
-}
-
 // countText counts exactly what models miscount: characters, words,
 // sentences, lines, and whether text fits common length limits.
 func (e *AssistantToolExecutor) countText(_ context.Context, input map[string]any) (map[string]any, error) {
