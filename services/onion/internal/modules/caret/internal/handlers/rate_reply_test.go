@@ -57,3 +57,22 @@ func TestRateReplyStoresTheVerdictAndLearnsFromAComplaint(t *testing.T) {
 		t.Fatal("an anonymous rating was accepted")
 	}
 }
+
+type learningMemoryFake struct {
+	detachedMemoryFake
+	*recordingLearner
+}
+
+func TestCorrectionsInChatBecomeFeedbackOnThePreviousReply(t *testing.T) {
+	learner := &recordingLearner{pending: 1, distilled: make(chan int, 1)}
+	handler := &GenerateTextStreamHandler{AiService: &fakeAIStreamService{}, MemoryService: &learningMemoryFake{recordingLearner: learner}}
+	handler.learnFromCorrection(context.Background(), "s1", 7, "No, I asked for last month")
+	select {
+	case user := <-learner.distilled:
+		if user != 7 || learner.rating != "correction" || learner.reason != "No, I asked for last month" {
+			t.Fatalf("user=%d rating=%q reason=%q", user, learner.rating, learner.reason)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("a correction did not start a learning pass")
+	}
+}

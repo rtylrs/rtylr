@@ -125,6 +125,9 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	req.SystemContext = prepared.Request.SystemContext
 	req.PageContext = prepared.Request.PageContext
 	ctx = snips.WithConversation(ctx, req.SessionID)
+	if application.LooksLikeCorrection(req.Prompt) {
+		h.learnFromCorrection(ctx, req.SessionID, int(authUserID), req.Prompt)
+	}
 
 	// Do not spend a model call on connectivity checks. A content-free prompt
 	// gives a generative model room to invent a plausible business report even
