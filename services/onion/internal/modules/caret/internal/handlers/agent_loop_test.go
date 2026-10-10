@@ -164,3 +164,16 @@ func TestReplyFailureWithoutTextStillReportsTheError(t *testing.T) {
 		t.Fatalf("expected the error and no retry: %s %v", rec.Body.String(), ai.prompts)
 	}
 }
+
+// Tools that run without any words after them still end in an answer.
+func TestAgentLoopAnswersWhenTheModelGoesSilentAfterTools(t *testing.T) {
+	ai := &sequencedAI{replies: []string{"", "You have 3 open tasks."}}
+	executor := namedToolExecutor{"flow.list_tasks": {"tasks": []string{"a", "b", "c"}}}
+	body := runLoop(t, ai, `<tool>{"name":"flow.list_tasks","input":{"assignee":"me"}}</tool>`, executor, 5)
+	if !strings.Contains(body, "You have 3 open tasks.") || strings.Contains(body, "empty response") {
+		t.Fatalf("expected a recovered answer:\n%s", body)
+	}
+	if last := ai.prompts[len(ai.prompts)-1]; !strings.Contains(last, "No more tools can run") {
+		t.Fatal("the recovery round must have tools off")
+	}
+}
