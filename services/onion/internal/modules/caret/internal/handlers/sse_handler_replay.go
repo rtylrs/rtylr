@@ -309,13 +309,14 @@ const maxContinuationBytes = 128000
 // closing instruction, which is what the model must act on.
 func continuationPrompt(base, results string) string {
 	const instruction = "\nExplain the result to the user, or call the next needed tool. Do not repeat completed calls."
-	room := maxContinuationBytes - len(base) - len(instruction)
-	if room < 0 {
+	const omitted = "\n[Earlier tool results omitted for length.]"
+	// Results always get at least half the budget, so the base is trimmed
+	// first and the slice below can never start past the end.
+	if len(base) > maxContinuationBytes/2 {
 		base = application.TruncateUTF8ToBytes(base, maxContinuationBytes/2)
-		room = maxContinuationBytes - len(base) - len(instruction)
 	}
+	room := maxContinuationBytes - len(base) - len(instruction)
 	if len(results) > room {
-		const omitted = "\n[Earlier tool results omitted for length.]"
 		start := len(results) - (room - len(omitted))
 		for start < len(results) && !utf8.RuneStart(results[start]) {
 			start++

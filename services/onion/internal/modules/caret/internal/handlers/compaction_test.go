@@ -74,3 +74,12 @@ func TestContinuationPromptDropsOldestResultsAndKeepsInstruction(t *testing.T) {
 		t.Fatal("closing instruction must survive truncation")
 	}
 }
+
+func TestContinuationPromptHandlesAnOversizedBase(t *testing.T) {
+	for _, baseLen := range []int{maxContinuationBytes - 10, maxContinuationBytes, maxContinuationBytes * 2} {
+		got := continuationPrompt(strings.Repeat("b", baseLen), strings.Repeat("r", 1000)+"NEWEST")
+		if len(got) > maxContinuationBytes || !strings.Contains(got, "NEWEST") {
+			t.Fatalf("base %d: %d bytes, newest kept=%v", baseLen, len(got), strings.Contains(got, "NEWEST"))
+		}
+	}
+}
