@@ -5,7 +5,9 @@ import (
 	"strings"
 )
 
-const promptToolShortlistLimit = 20
+// The shortlist only seeds obvious matches; tools.search reaches the rest,
+// so it stays small to keep each prompt light.
+const promptToolShortlistLimit = 8
 
 var promptToolGlobalNames = map[string]struct{}{
 	"business.snapshot":      {},

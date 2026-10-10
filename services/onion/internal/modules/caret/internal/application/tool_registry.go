@@ -25,6 +25,7 @@ type ToolDef struct {
 // list from each module's MCP descriptor.
 var CoreTools = []ToolDef{
 	{Name: "web.search", Description: "Search the public web for current information and return an answer with sources. Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question"}`},
+	{Name: "tools.search", Description: "Find more tools by describing what you need, e.g. \"list team members\" or \"unpaid invoices\". Covers HR and the team, CRM customers, POS and store orders, products and stock, finance, bookings, support, loyalty, Flow tasks, and insights. Returns matching tools with their inputs; call one next.", Module: "tools", Scope: "read", InputHint: `{"query":"what you need"}`},
 	{Name: "account.profile", Description: "Read the authenticated person's name and current business identity.", Module: "account", Scope: "read", InputHint: `{}`},
 	{Name: "utilities.calculate", Description: "Evaluate arithmetic using numbers supplied by the user or verified results.", Module: "utilities", Scope: "read", InputHint: `{"expression":"(120 * 0.2) + 8"}`},
 	{Name: "utilities.time", Description: "Get the current date and time in an IANA timezone.", Module: "utilities", Scope: "read", InputHint: `{"timezone":"Asia/Beirut"}`},
@@ -186,7 +187,7 @@ var CoreTools = []ToolDef{
 }
 
 var promptExecutableTools = map[string]struct{}{
-	"web.search": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
+	"web.search": {}, "tools.search": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
 	"business.snapshot":                   {},
 	"business.get_kpis":                   {},
 	"memory.remember":                     {},
