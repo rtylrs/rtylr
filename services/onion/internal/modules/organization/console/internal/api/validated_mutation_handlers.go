@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/organization/console/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -37,7 +36,7 @@ func (h *createResourceRowHandler) Serve(ctx context.Context, req *createResourc
 	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return createResourceRowResponse{}, err
 	}
-	id, err := h.Service.CreateResourceRow(ctx, chi.URLParamFromCtx(ctx, "table"), req.Values)
+	id, err := h.Service.CreateResourceRow(ctx, serverHttp.PathParam(ctx, "table"), req.Values)
 	if err != nil {
 		return createResourceRowResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
@@ -62,7 +61,7 @@ func (h *deleteResourceRowHandler) Serve(ctx context.Context, _ *deleteResourceR
 	if err := requireConsoleResourceAdmin(ctx); err != nil {
 		return resourceMutationResponse{}, err
 	}
-	if err := h.Service.DeleteResourceRow(ctx, chi.URLParamFromCtx(ctx, "table"), chi.URLParamFromCtx(ctx, "id")); err != nil {
+	if err := h.Service.DeleteResourceRow(ctx, serverHttp.PathParam(ctx, "table"), serverHttp.PathParam(ctx, "id")); err != nil {
 		return resourceMutationResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return resourceMutationResponse{Message: "Resource row deleted"}, nil
@@ -187,7 +186,7 @@ func validateIDPath(ctx context.Context, param, message string) error {
 }
 
 func parseIDPath(ctx context.Context, param string) (int64, error) {
-	raw := chi.URLParamFromCtx(ctx, param)
+	raw := serverHttp.PathParam(ctx, param)
 	id, err := strconv.ParseInt(raw, 10, 64)
 	if err != nil || id <= 0 {
 		return 0, errors.New("invalid path id")

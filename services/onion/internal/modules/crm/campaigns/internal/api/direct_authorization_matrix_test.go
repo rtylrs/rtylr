@@ -2,11 +2,10 @@ package api
 
 import (
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"testing"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/crm/campaigns/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/campaigns/internal/application"
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -24,9 +23,9 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "crm campaigns send", App: authorization.AppCRM, Permission: "crm:campaigns:send", Call: func(ctx context.Context) (any, error) {
-			rctx := chi.NewRouteContext()
-			rctx.URLParams.Add("id", "7006")
-			response, err := (&UpdateCampaignStatusHandler{Service: application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))}).Serve(context.WithValue(ctx, chi.RouteCtxKey, rctx), &UpdateCampaignStatusRequest{Status: "sent"})
+			rctx := map[string]string{}
+			rctx["id"] = ("7006")
+			response, err := (&UpdateCampaignStatusHandler{Service: application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))}).Serve(serverHttp.WithPathParams(ctx, rctx), &UpdateCampaignStatusRequest{Status: "sent"})
 			return response, err
 		}},
 	}

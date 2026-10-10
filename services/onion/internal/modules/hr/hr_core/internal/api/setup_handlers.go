@@ -3,9 +3,8 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/domain"
@@ -94,7 +93,7 @@ func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupSt
 		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	stepKey := chi.URLParamFromCtx(ctx, "step_key")
+	stepKey := serverHttp.PathParam(ctx, "step_key")
 	if stepKey == "" {
 		return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusBadRequest, "step_key is required")
 	}

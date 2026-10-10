@@ -3,13 +3,11 @@ package api
 import (
 	"context"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/crm/campaigns/internal/application"
 	"github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Service) {
+func RegisterRoutes(ctx context.Context, router http.LegacyRouter, svc *application.Service) {
 	http.RegisterGET[ListCampaignsRequest, ListCampaignsResponse](
 		ctx, router, CampaignListRoutes(),
 		&ListCampaignsHandler{Service: svc},

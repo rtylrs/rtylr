@@ -7,8 +7,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
@@ -23,7 +21,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db))}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	serverHttp.RegisterGET[api.GetEmployeeChecklistRequest, api.GetEmployeeChecklistResponse](
 		ctx, router, api.GetEmployeeChecklistRoutes(), &api.GetEmployeeChecklistHandler{Service: m.service},
 	)

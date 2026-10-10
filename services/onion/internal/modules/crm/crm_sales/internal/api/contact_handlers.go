@@ -3,11 +3,10 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
@@ -91,7 +90,7 @@ func (h *ListLeadTouchpointsHandler) Serve(ctx context.Context, _ *ListLeadTouch
 		return ListLeadTouchpointsResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	leadID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return ListLeadTouchpointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")
@@ -217,7 +216,7 @@ func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequ
 		return UpdateContactResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateContactResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contact id")
@@ -271,7 +270,7 @@ func (h *DeleteContactHandler) Serve(ctx context.Context, _ *DeleteContactReques
 		return DeleteContactResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return DeleteContactResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contact id")

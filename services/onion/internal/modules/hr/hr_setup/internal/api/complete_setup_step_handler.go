@@ -3,9 +3,8 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_setup/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_setup/internal/domain"
@@ -32,7 +31,7 @@ func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupSt
 		return CompleteSetupStepResponse{}, err
 	}
 
-	stepKey := chi.URLParamFromCtx(ctx, "stepKey")
+	stepKey := serverHttp.PathParam(ctx, "stepKey")
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

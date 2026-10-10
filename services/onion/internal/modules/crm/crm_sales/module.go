@@ -5,11 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/api"
@@ -67,7 +66,7 @@ func (m *Module) DispatchEvent(ctx context.Context, event eventbus.Event) error 
 	return nil
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

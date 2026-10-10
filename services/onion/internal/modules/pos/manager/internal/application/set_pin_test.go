@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/voxire/onion/internal/modules/pos/manager/internal/domain"
 	"github.com/voxire/onion/internal/contracts/audit"
+	"github.com/voxire/onion/internal/modules/pos/manager/internal/domain"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 

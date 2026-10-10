@@ -3,11 +3,10 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
@@ -189,7 +188,7 @@ func (h *GetLeadHandler) Serve(ctx context.Context, _ *GetLeadRequest) (GetLeadR
 		return GetLeadResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return GetLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")
@@ -251,7 +250,7 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 		return UpdateLeadResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")
@@ -315,7 +314,7 @@ func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (De
 		return DeleteLeadResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return DeleteLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")

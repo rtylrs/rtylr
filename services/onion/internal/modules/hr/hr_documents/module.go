@@ -3,8 +3,7 @@ package hr_documents
 import (
 	"context"
 	"database/sql"
-
-	"github.com/go-chi/chi/v5"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_documents/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/hr_documents/internal/application"
@@ -19,7 +18,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(infrastructure.NewRepository(db))}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

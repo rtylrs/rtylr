@@ -3,11 +3,11 @@ package api
 import (
 	"context"
 	stdErrors "errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
 	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_payroll/internal/application"
@@ -63,9 +63,9 @@ func deviceContext(userID int64) context.Context {
 }
 
 func withURLParam(ctx context.Context, key, value string) context.Context {
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add(key, value)
-	return context.WithValue(ctx, chi.RouteCtxKey, rctx)
+	rctx := map[string]string{}
+	rctx[key] = (value)
+	return serverHttp.WithPathParams(ctx, rctx)
 }
 
 func statusOf(err error) int {

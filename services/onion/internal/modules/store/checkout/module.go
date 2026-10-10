@@ -3,10 +3,9 @@ package store_checkout
 import (
 	"context"
 	"database/sql"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/store/checkout/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/store/checkout/internal/api"
 	"github.com/voxire/onion/internal/modules/store/checkout/internal/application"
@@ -22,7 +21,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, repo), repository: repo}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

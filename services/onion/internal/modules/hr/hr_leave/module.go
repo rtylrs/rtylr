@@ -7,8 +7,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_leave/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	hrcore "github.com/voxire/onion/internal/modules/hr/hr_core"
 	"github.com/voxire/onion/internal/modules/hr/hr_leave/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/hr_leave/internal/application"
@@ -102,7 +100,7 @@ func (m *Module) ApprovedLeaveEmployeeIDs(ctx context.Context, ownerID int64, da
 	return onLeave, nil
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	serverHttp.RegisterGET[api.GetLeaveCalendarRequest, api.GetLeaveCalendarResponse](
 		ctx, router, api.GetLeaveCalendarRoutes(), &api.GetLeaveCalendarHandler{Service: m.service},
 	)

@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/domain"
@@ -16,7 +15,7 @@ import (
 // resolveOrderID returns the order id from either the chi URL param or the request body.
 // The URL param takes precedence when present.
 func resolveOrderID(ctx context.Context, bodyID int64) (int64, error) {
-	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+	if raw := serverHttp.PathParam(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
 			return 0, onekiterrors.New(http.StatusBadRequest, "Invalid order id")

@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_payroll/internal/domain"
@@ -56,7 +55,7 @@ func (h *ApprovePayrollRunHandler) Serve(ctx context.Context, _ *ApprovePayrollR
 		return ApprovePayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	runID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid payroll run id")

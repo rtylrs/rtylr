@@ -7,8 +7,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_overtime/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	hrcore "github.com/voxire/onion/internal/modules/hr/hr_core"
 	"github.com/voxire/onion/internal/modules/hr/hr_overtime/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/hr_overtime/internal/application"
@@ -73,7 +71,7 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	serverHttp.RegisterGET[api.GetOvertimeConfigRequest, api.GetOvertimeConfigResponse](
 		ctx, router, api.GetOvertimeConfigRoutes(), &api.GetOvertimeConfigHandler{Service: m.service},
 	)

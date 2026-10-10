@@ -151,15 +151,24 @@ func RequestRouteTemplate(r *http.Request) string {
 		return "[unmatched route]"
 	}
 
-	routeCtx := chi.RouteContext(r.Context())
-	if routeCtx != nil && routeCtx.RoutePattern() != "" {
-		return routeCtx.RoutePattern()
+	pattern := ""
+	if routeCtx := chi.RouteContext(r.Context()); routeCtx != nil {
+		pattern = routeCtx.RoutePattern()
 	}
-	if router, ok := r.Context().Value(RouteLookupContextKey{}).(*chi.Mux); ok && router != nil && r.URL != nil {
-		resolved := chi.NewRouteContext()
-		if pattern := router.Find(resolved, r.Method, r.URL.Path); pattern != "" {
-			return pattern
+	if pattern == "" {
+		if router, ok := r.Context().Value(RouteLookupContextKey{}).(*chi.Mux); ok && router != nil && r.URL != nil {
+			pattern = router.Find(chi.NewRouteContext(), r.Method, r.URL.Path)
 		}
+	}
+	// The outer router hands every contract and legacy route to the shared
+	// mux through a catch-all; ask the mux for the real template.
+	if pattern == "" || pattern == "/*" {
+		if muxPattern := muxRouteTemplate(r); muxPattern != "" {
+			return muxPattern
+		}
+	}
+	if pattern != "" {
+		return pattern
 	}
 	return "[unmatched route]"
 }

@@ -3,11 +3,11 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
 	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_time/internal/application"
@@ -44,9 +44,9 @@ func w2AuthenticatedContext(userID, businessID int64, urlID string) context.Cont
 	if urlID == "" {
 		return ctx
 	}
-	routeCtx := chi.NewRouteContext()
-	routeCtx.URLParams.Add("id", urlID)
-	return context.WithValue(ctx, chi.RouteCtxKey, routeCtx)
+	routeCtx := map[string]string{}
+	routeCtx["id"] = (urlID)
+	return serverHttp.WithPathParams(ctx, routeCtx)
 }
 
 func w2APIStatus(err error) int {

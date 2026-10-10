@@ -3,8 +3,7 @@ package hr_shifts
 import (
 	"context"
 	"database/sql"
-
-	"github.com/go-chi/chi/v5"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr/hr_core"
 	"github.com/voxire/onion/internal/modules/hr/hr_shifts/internal/api"
@@ -46,7 +45,7 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

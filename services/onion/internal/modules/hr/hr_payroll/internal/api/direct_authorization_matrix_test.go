@@ -2,11 +2,10 @@ package api
 
 import (
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"testing"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_payroll/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr/hr_core"
 	"github.com/voxire/onion/internal/modules/hr/hr_payroll/internal/application"
@@ -17,9 +16,9 @@ import (
 
 func TestDirectAuthorizationMatrix(t *testing.T) {
 	withID := func(ctx context.Context) context.Context {
-		rctx := chi.NewRouteContext()
-		rctx.URLParams.Add("id", "4301")
-		return context.WithValue(ctx, chi.RouteCtxKey, rctx)
+		rctx := map[string]string{}
+		rctx["id"] = ("4301")
+		return serverHttp.WithPathParams(ctx, rctx)
 	}
 	newService := func(ctx context.Context) *application.Service {
 		service := application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)), nil, hrcore.NewModule(ctx, testutil.DirectAuthorizationDB(ctx)))

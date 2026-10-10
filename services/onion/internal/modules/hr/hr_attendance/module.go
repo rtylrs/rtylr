@@ -8,8 +8,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_attendance/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/hr/hr_attendance/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/hr_attendance/internal/application"
 	hrcore "github.com/voxire/onion/internal/modules/hr/hr_core"
@@ -29,7 +27,7 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	attendanceAPI := api.NewAttendanceAPI(m.service, m.employeeResolver)
 	serverHttp.RegisterGET[api.GetAttendanceRequest, api.GetAttendanceResponse](
 		ctx, router, api.GetAttendanceRoutes(), &api.GetAttendanceHandler{

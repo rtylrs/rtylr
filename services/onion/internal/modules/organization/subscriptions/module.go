@@ -4,11 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/organization/subscriptions/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/organization/subscriptions/internal/api"
 	"github.com/voxire/onion/internal/modules/organization/subscriptions/internal/application"
@@ -42,7 +41,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	_ = ctx
 	// Paddle signs the raw request body, so this webhook must own body reads.
 	router.Post("/subscriptions/paddle-webhook", api.PaddleWebhookHTTPHandler(m.service))

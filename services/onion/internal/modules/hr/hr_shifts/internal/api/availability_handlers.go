@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_shifts/internal/domain"
@@ -207,10 +206,7 @@ func (h *DeleteAvailabilityHandler) Validate(_ context.Context, _ *DeleteAvailab
 
 func (h *DeleteAvailabilityHandler) Serve(ctx context.Context, req *DeleteAvailabilityRequest) (DeleteAvailabilityResponse, error) {
 	if req.ID <= 0 {
-		pathID := ""
-		if routeContext := chi.RouteContext(ctx); routeContext != nil {
-			pathID = routeContext.URLParam("id")
-		}
+		pathID := serverHttp.PathParam(ctx, "id")
 		parsedID, parseErr := strconv.ParseInt(pathID, 10, 64)
 		if parseErr != nil || parsedID <= 0 {
 			return DeleteAvailabilityResponse{}, onekiterrors.New(http.StatusBadRequest, "id is required")

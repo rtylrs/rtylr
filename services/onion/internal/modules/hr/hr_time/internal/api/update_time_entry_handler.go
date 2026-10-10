@@ -3,11 +3,10 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_time/internal/domain"
@@ -72,7 +71,7 @@ func (h *UpdateTimeEntryHandler) Serve(ctx context.Context, req *UpdateTimeEntry
 		return UpdateTimeEntryResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid time entry id")

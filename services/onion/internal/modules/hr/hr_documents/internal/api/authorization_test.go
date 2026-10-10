@@ -2,10 +2,9 @@ package api
 
 import (
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"testing"
-
-	"github.com/go-chi/chi/v5"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -27,9 +26,9 @@ func documentAuthContext(permissions ...string) context.Context {
 }
 
 func documentIDContext(ctx context.Context) context.Context {
-	routeCtx := chi.NewRouteContext()
-	routeCtx.URLParams.Add("id", "1")
-	return context.WithValue(ctx, chi.RouteCtxKey, routeCtx)
+	routeCtx := map[string]string{}
+	routeCtx["id"] = ("1")
+	return serverHttp.WithPathParams(ctx, routeCtx)
 }
 
 func TestDocumentHandlersRequireCanonicalPermissions(t *testing.T) {

@@ -45,11 +45,11 @@ func EffectiveAccessToProto(access *authorization.EffectiveAccess) *hubuserv1.Ef
 	}
 	for _, app := range access.Apps {
 		item := &hubuserv1.EffectiveAppAccess{
-			AppId:        string(app.AppID),
-			Licensed:     app.Licensed,
-			HasAccess:    app.HasAccess,
-			Permissions:  append([]string{}, app.Permissions...),
-			Sources:      make([]string, 0, len(app.Sources)),
+			AppId:            string(app.AppID),
+			Licensed:         app.Licensed,
+			HasAccess:        app.HasAccess,
+			Permissions:      append([]string{}, app.Permissions...),
+			Sources:          make([]string, 0, len(app.Sources)),
 			PermissionScopes: make([]*hubuserv1.PermissionScopeGrant, 0, len(app.PermissionScopes)),
 		}
 		for _, source := range app.Sources {
@@ -81,11 +81,11 @@ func PermissionProfileAssignmentsToProto(assignments []authorization.RoleAssignm
 			status = "active"
 		}
 		item := &hubuserv1.PermissionProfileAssignment{
-			AppId:            string(assignment.AppID),
+			AppId:                string(assignment.AppID),
 			PermissionProfileIds: make([]string, 0, len(assignment.RoleIDs)),
-			AssignmentSource: string(assignment.Source),
-			Status:           status,
-			Scopes:           make([]*hubuserv1.PermissionScope, 0, len(assignment.Scopes)),
+			AssignmentSource:     string(assignment.Source),
+			Status:               status,
+			Scopes:               make([]*hubuserv1.PermissionScope, 0, len(assignment.Scopes)),
 		}
 		for _, roleID := range assignment.RoleIDs {
 			item.PermissionProfileIds = append(item.PermissionProfileIds, strconv.FormatInt(roleID, 10))

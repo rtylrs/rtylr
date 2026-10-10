@@ -2,11 +2,10 @@ package api
 
 import (
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"testing"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -36,7 +35,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 }
 
 func withContactID(ctx context.Context) context.Context {
-	routeCtx := chi.NewRouteContext()
-	routeCtx.URLParams.Add("id", "7102")
-	return context.WithValue(ctx, chi.RouteCtxKey, routeCtx)
+	routeCtx := map[string]string{}
+	routeCtx["id"] = ("7102")
+	return serverHttp.WithPathParams(ctx, routeCtx)
 }

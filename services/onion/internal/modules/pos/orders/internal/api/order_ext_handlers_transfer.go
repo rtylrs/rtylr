@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"math"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/domain"
@@ -187,7 +186,7 @@ func (h *CreateOrderCompatHandler) Serve(ctx context.Context, req *CreateOrderCo
 type ResumeOrderHandler struct{ Service *application.Service }
 
 func (h *ResumeOrderHandler) Validate(ctx context.Context, req *ResumeOrderRequest) error {
-	if req.OrderID <= 0 && chi.URLParamFromCtx(ctx, "id") == "" {
+	if req.OrderID <= 0 && serverHttp.PathParam(ctx, "id") == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Order id is required")
 	}
 	if req.Type != "" && !domain.IsOrderType(domain.OrderType(req.Type)) {

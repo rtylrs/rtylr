@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/campaigns/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/campaigns/internal/domain"
@@ -33,7 +32,7 @@ func (h *DeleteCampaignHandler) Serve(ctx context.Context, _ *DeleteCampaignRequ
 	if err := requireCampaignPermission(ctx, "crm:campaigns:create"); err != nil {
 		return DeleteCampaignResponse{}, err
 	}
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
 		return DeleteCampaignResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign ID")

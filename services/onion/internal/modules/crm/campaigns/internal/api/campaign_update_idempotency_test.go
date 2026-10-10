@@ -3,13 +3,13 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"testing"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/crm/campaigns/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
 	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/crm/campaigns/internal/application"
@@ -35,9 +35,9 @@ func campaignWriteContext(businessID, userID, id int64) context.Context {
 		},
 	}
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("id", strconv.FormatInt(id, 10))
-	return authPkg.WithAuthUser(context.WithValue(context.Background(), chi.RouteCtxKey, rctx), user)
+	rctx := map[string]string{}
+	rctx["id"] = (strconv.FormatInt(id, 10))
+	return authPkg.WithAuthUser(serverHttp.WithPathParams(context.Background(), rctx), user)
 }
 
 func campaignHTTPStatus(err error) int {

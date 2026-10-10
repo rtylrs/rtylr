@@ -3,10 +3,9 @@ package hr_payroll
 import (
 	"context"
 	"database/sql"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_payroll/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr/hr_core"
 	"github.com/voxire/onion/internal/modules/hr/hr_payroll/internal/api"
@@ -80,7 +79,7 @@ func (m *Module) LabourCostProvider() labourcost.Provider {
 	return m.service
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

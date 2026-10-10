@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_time/internal/domain"
@@ -42,7 +41,7 @@ func (h *ApproveTimesheetHandler) Serve(ctx context.Context, _ *ApproveTimesheet
 		return ApproveTimesheetResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return ApproveTimesheetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")

@@ -3,12 +3,11 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/campaigns/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/campaigns/internal/domain"
@@ -127,7 +126,7 @@ func (h *GetCampaignHandler) Serve(ctx context.Context, _ *GetCampaignRequest) (
 		return GetCampaignResponse{}, err
 	}
 	device := authPkg.DeviceCtx(ctx)
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
 		return GetCampaignResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign ID")
@@ -248,7 +247,7 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 	if device.User == nil {
 		return UpdateCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateCampaignResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign ID")
@@ -309,7 +308,7 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 	if device.IsAnonymous || device.User == nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign ID")
