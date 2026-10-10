@@ -276,6 +276,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	// events. Settling first keeps the deferred settle(0) from refunding the
 	// whole reservation when Finish fails on a disconnected client.
 	settleUsage(int64(totalTokens))
+	h.learnToolRoutes(ctx, userID, req.Prompt, renderer.toolResults)
 	if err := renderer.Finish(); err != nil {
 		return
 	}

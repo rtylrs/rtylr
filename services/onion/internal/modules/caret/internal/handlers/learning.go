@@ -75,3 +75,31 @@ func (h *GenerateTextStreamHandler) learnFromChat(ctx context.Context, learner a
 		logger.Ctx(ctx).Warn("Caret could not learn from a chat", logger.Error(err))
 	}
 }
+
+// learnToolRoutes remembers the tools this reply had to search for, so the
+// next similar request is offered them directly.
+func (h *GenerateTextStreamHandler) learnToolRoutes(ctx context.Context, userID int64, request string, results []streamToolExecution) {
+	router, ok := h.MemoryService.(application.ToolRouter)
+	if !ok || userID <= 0 {
+		return
+	}
+	calls := make([]application.RouteTarget, len(results))
+	for i, result := range results {
+		calls[i] = application.RouteTarget{Name: result.Name, Success: result.Status == "success", Output: result.Output}
+	}
+	tools := application.LearnedRoutes(calls)
+	words := application.RouteWords(request)
+	if len(tools) == 0 || len(words) == 0 {
+		return
+	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		for _, tool := range tools {
+			if err := router.LearnToolRoute(ctx, int(userID), tool, words); err != nil {
+				logger.Ctx(ctx).Warn("Caret could not remember a tool route", logger.Error(err))
+				return
+			}
+		}
+	}()
+}

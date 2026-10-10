@@ -23,9 +23,25 @@ func BuildAssistantPrompt(request, scope, context string, pageContext map[string
 // BuildAssistantPromptWithFiles also carries the text files attached to the
 // request, in their own data region.
 func BuildAssistantPromptWithFiles(request, scope, context string, files []AttachedFile, pageContext map[string]any, now time.Time) string {
+	return BuildAssistantPromptFor(AssistantPromptInput{Request: request, Scope: scope, Context: context, Files: files, PageContext: pageContext, Now: now})
+}
+
+// AssistantPromptInput is everything one turn's prompt is built from.
+type AssistantPromptInput struct {
+	Request, Scope, Context string
+	Files                   []AttachedFile
+	PageContext             map[string]any
+	Now                     time.Time
+	// Routes are tools this person's similar requests needed before.
+	Routes ToolRoutes
+}
+
+func BuildAssistantPromptFor(in AssistantPromptInput) string {
+	request, scope, context, files, pageContext, now := in.Request, in.Scope, in.Context, in.Files, in.PageContext, in.Now
 	var catalog strings.Builder
 	plannerContext := BuildRequestSystemContext(scope, pageContext)
-	tools := append(GeneralToolsForRequest(request), PromptToolsForRequest(ModeAgent, request, plannerContext)...)
+	tools := append(RoutedToolsForRequest(request, in.Routes), GeneralToolsForRequest(request)...)
+	tools = append(tools, PromptToolsForRequest(ModeAgent, request, plannerContext)...)
 	seen := map[string]bool{}
 	for _, name := range AssistantBaseTools {
 		if tool, ok := ToolByName(name); ok {

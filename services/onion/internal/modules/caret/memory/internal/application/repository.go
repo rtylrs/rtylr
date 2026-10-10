@@ -37,4 +37,6 @@ type repository interface {
 	ReplaceLessons(context.Context, int, []string, []int64) error
 	UserLessons(context.Context, int) ([]string, error)
 	SetChatMetadataNumber(context.Context, string, int, string, int) error
+	SaveToolRoute(context.Context, int, string, string) error
+	ToolRoutes(context.Context, int) ([]string, error)
 }

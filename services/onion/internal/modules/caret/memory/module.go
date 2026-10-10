@@ -174,3 +174,13 @@ func (m *Module) SaveLearnedFacts(ctx context.Context, session string, userID in
 	}
 	return m.memoryService.SaveLearnedFacts(ctx, session, userID, facts, throughID)
 }
+
+// LearnToolRoute remembers which tool served a kind of request.
+func (m *Module) LearnToolRoute(ctx context.Context, userID int, tool string, words []string) error {
+	return m.memoryService.LearnToolRoute(ctx, userID, tool, words)
+}
+
+// ToolRoutes returns the user's learned request-to-tool routes.
+func (m *Module) ToolRoutes(ctx context.Context, userID int) (map[string][][]string, error) {
+	return m.memoryService.ToolRoutes(ctx, userID)
+}

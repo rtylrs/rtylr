@@ -67,6 +67,18 @@ func TestReplyFeedbackBecomesLessons(t *testing.T) {
 	if lessons, _ := repo.UserLessons(ctx, userID); len(lessons) != 1 {
 		t.Fatalf("a replaced set must drop removed lessons: %q", lessons)
 	}
+	if err := repo.SaveToolRoute(ctx, userID, "hr.list_leave_requests", "asked time off"); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.SaveToolRoute(ctx, userID, "hr.list_leave_requests", "asked time off"); err != nil {
+		t.Fatal(err)
+	}
+	if routes, err := repo.ToolRoutes(ctx, userID); err != nil || len(routes) != 1 || routes[0] != "hr.list_leave_requests\tasked time off" {
+		t.Fatalf("routes = %q, %v", routes, err)
+	}
+	if listed, err := repo.ListMemories(authed); err != nil || len(listed) != 1 {
+		t.Fatalf("a tool route must stay out of the memory list: %#v %v", listed, err)
+	}
 	save("clear", "")
 	save("correction", "again")
 	if pending, _ := repo.PendingReplyFeedback(ctx, userID, 20); len(pending) != 1 || pending[0].Reason != "again" {

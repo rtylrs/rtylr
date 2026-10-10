@@ -161,7 +161,17 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	}
 	location := application.LocationFor(req.Timezone)
 	ctx = application.WithUserLocation(ctx, location)
-	enhancedPrompt := application.BuildAssistantPromptWithFiles(req.Prompt, req.SystemContext, savedContext, req.Files, req.PageContext, requestNow.In(location))
+	var routes application.ToolRoutes
+	if router, ok := h.MemoryService.(application.ToolRouter); ok {
+		// Routing hints only; a failed read just means no shortcuts this turn.
+		if learned, routeErr := router.ToolRoutes(ctx, int(authUserID)); routeErr == nil {
+			routes = learned
+		}
+	}
+	enhancedPrompt := application.BuildAssistantPromptFor(application.AssistantPromptInput{
+		Request: req.Prompt, Scope: req.SystemContext, Context: savedContext, Files: req.Files,
+		PageContext: req.PageContext, Now: requestNow.In(location), Routes: routes,
+	})
 	ctx = snips.WithImages(ctx, req.Images)
 
 	cachePlan := application.BuildCacheWritePlan(mode, application.TurnRequest{
