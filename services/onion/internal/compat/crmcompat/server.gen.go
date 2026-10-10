@@ -324,3 +324,24 @@ func (s CompatibilityService) serve(ctx context.Context, method, pattern string,
 	}
 	return &crmcompatv1.JsonResponse{Data: data}, nil
 }
+
+// Routes lists every legacy route this package's contracts serve.
+func Routes() []string {
+	var routes []string
+	routes = append(routes, CompatibilityServiceRoutes()...)
+	return routes
+}
+
+// Register serves this package's contracts on mux from the route table,
+// with the legacy request body limit and error shape.
+func Register(mux *http.ServeMux, routes *serverHttp.LegacyRoutes) error {
+	writeError := crmcompatv1.WithErrorWriter(func(w http.ResponseWriter, r *http.Request, e *crmcompatv1.ServerError) {
+		status, _, message, _, violations, cause := e.Parts()
+		serverHttp.WriteContractError(w, r, status, message, violations, cause)
+	})
+	if err := crmcompatv1.RegisterCompatibilityServiceServer(CompatibilityService{Routes: routes}, crmcompatv1.WithMux(mux),
+		crmcompatv1.WithMaxRequestBodyBytes(serverHttp.DefaultMaxRequestBodyBytes), writeError); err != nil {
+		return err
+	}
+	return nil
+}

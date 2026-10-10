@@ -5,30 +5,37 @@ import (
 	stdhttp "net/http"
 
 	"github.com/voxire/onion/internal/compat/crmcompat"
+	"github.com/voxire/onion/internal/compat/hrcompat"
 	"github.com/voxire/onion/internal/platform/server/http"
-	crmcompatv1 "github.com/voxire/voxie/gen/go/crm/compat/v1"
 )
+
+// compatPackages are the generated compat contract adapters, each serving
+// its module group's legacy routes from the route table.
+var compatPackages = []struct {
+	name     string
+	routes   func() []string
+	register func(*stdhttp.ServeMux, *http.LegacyRoutes) error
+}{
+	{"crm", crmcompat.Routes, crmcompat.Register},
+	{"hr", hrcompat.Routes, hrcompat.Register},
+}
 
 // compatRoutes lists every legacy route a compat contract serves. Routes not
 // listed are still mounted straight from the table.
 func compatRoutes() http.RouteSet {
-	return http.NewRouteSet(
-		crmcompat.CompatibilityServiceRoutes(),
-	)
+	groups := make([][]string, 0, len(compatPackages))
+	for _, pkg := range compatPackages {
+		groups = append(groups, pkg.routes())
+	}
+	return http.NewRouteSet(groups...)
 }
 
 // registerCompatContracts serves the compat contracts from the legacy route
-// table, with the legacy error shape and request body limit.
+// table.
 func registerCompatContracts(mux *stdhttp.ServeMux, routes *http.LegacyRoutes) {
-	if err := crmcompatv1.RegisterCompatibilityServiceServer(
-		crmcompat.CompatibilityService{Routes: routes},
-		crmcompatv1.WithMux(mux),
-		crmcompatv1.WithMaxRequestBodyBytes(http.DefaultMaxRequestBodyBytes),
-		crmcompatv1.WithErrorWriter(func(w stdhttp.ResponseWriter, r *stdhttp.Request, e *crmcompatv1.ServerError) {
-			status, _, message, _, violations, cause := e.Parts()
-			http.WriteContractError(w, r, status, message, violations, cause)
-		}),
-	); err != nil {
-		panic(fmt.Errorf("register crm compat service: %w", err))
+	for _, pkg := range compatPackages {
+		if err := pkg.register(mux, routes); err != nil {
+			panic(fmt.Errorf("register %s compat contract: %w", pkg.name, err))
+		}
 	}
 }

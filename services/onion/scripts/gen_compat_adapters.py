@@ -105,6 +105,30 @@ def generate(pkg_dir: pathlib.Path) -> None:
             "}",
             "",
         ]
+    lines += [
+        "// Routes lists every legacy route this package's contracts serve.",
+        "func Routes() []string {",
+        "\tvar routes []string",
+    ]
+    lines += [f"\troutes = append(routes, {svc_name}Routes()...)" for svc_name, _ in services]
+    lines += ["\treturn routes", "}", ""]
+    lines += [
+        "// Register serves this package's contracts on mux from the route table,",
+        "// with the legacy request body limit and error shape.",
+        "func Register(mux *http.ServeMux, routes *serverHttp.LegacyRoutes) error {",
+        f"\twriteError := {alias}.WithErrorWriter(func(w http.ResponseWriter, r *http.Request, e *{alias}.ServerError) {{",
+        "\t\tstatus, _, message, _, violations, cause := e.Parts()",
+        "\t\tserverHttp.WriteContractError(w, r, status, message, violations, cause)",
+        "\t})",
+    ]
+    for svc_name, _ in services:
+        lines += [
+            f"\tif err := {alias}.Register{svc_name}Server({svc_name}{{Routes: routes}}, {alias}.WithMux(mux),",
+            f"\t\t{alias}.WithMaxRequestBodyBytes(serverHttp.DefaultMaxRequestBodyBytes), writeError); err != nil {{",
+            "\t\treturn err",
+            "\t}",
+        ]
+    lines += ["\treturn nil", "}", ""]
     out_dir = OUT / go_pkg
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "server.gen.go").write_text("\n".join(lines).rstrip() + "\n")
