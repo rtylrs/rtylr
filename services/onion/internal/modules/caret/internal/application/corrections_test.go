@@ -8,7 +8,7 @@ func TestLooksLikeCorrection(t *testing.T) {
 			t.Errorf("missed correction %q", message)
 		}
 	}
-	for _, message := range []string{"What were sales yesterday?", "Notes for the meeting", "Nobody showed up today", "Thanks!", "Do you know a good supplier?"} {
+	for _, message := range []string{"What were sales yesterday?", "Notes for the meeting", "Nobody showed up today", "Thanks!", "Do you know a good supplier?", "No worries, thanks!", "no, that's all for now", "Don't worry about it"} {
 		if LooksLikeCorrection(message) {
 			t.Errorf("false correction %q", message)
 		}

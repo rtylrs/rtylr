@@ -22,6 +22,13 @@ var correctionPhrases = []string{
 	"in arabic please", "answer in", "reply in", "طويل", "باختصار",
 }
 
+// friendlyOpenings start with a correction word but aren't pushback.
+var friendlyOpenings = []string{
+	"no worries", "no problem", "no thanks", "no thank you", "no rush", "no, thanks", "no, that's all", "no that's all",
+	"no, that's it", "no that's it", "no, all good", "no all good", "nope, all good", "nope that's all", "no, perfect",
+	"don't worry", "dont worry", "لا شكرا", "لا مشكلة",
+}
+
 // LooksLikeCorrection reports whether a message is the person pushing back on
 // Caret's previous reply, so Caret can learn from it. It is deliberately
 // narrow; the learning pass also discards feedback without a clear lesson.
@@ -31,6 +38,11 @@ func LooksLikeCorrection(message string) bool {
 		return false
 	}
 	text = strings.NewReplacer("’", "'", "‘", "'").Replace(text)
+	for _, friendly := range friendlyOpenings {
+		if strings.HasPrefix(text, friendly) {
+			return false
+		}
+	}
 	for _, opening := range correctionOpenings {
 		if strings.HasPrefix(text, opening) {
 			return true
