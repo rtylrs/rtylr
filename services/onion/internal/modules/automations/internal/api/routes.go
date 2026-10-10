@@ -3,13 +3,11 @@ package api
 import (
 	"context"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/automations/internal/application"
 	"github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+func RegisterRoutes(ctx context.Context, router http.LegacyRouter, service *application.Service) {
 	http.RegisterGET[ListAutomationsRequest, ListAutomationsResponse](
 		ctx,
 		router,

@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"math"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/customers/internal/domain"
@@ -338,7 +337,7 @@ func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTi
 		return DeleteLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
 		return DeleteLoyaltyTierResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid tier ID")

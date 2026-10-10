@@ -7,8 +7,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/time_off/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/hr/time_off/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/time_off/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
@@ -30,7 +28,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 // the approve REST route below.
 func (m *Module) RegisterAPI(_ *http.ServeMux) {}
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	serverHttp.RegisterPOSTWithValidation[api.ApproveTimeOffRequest, api.ApproveTimeOffResponse](
 		ctx,
 		router,

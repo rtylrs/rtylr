@@ -2,10 +2,9 @@ package api
 
 import (
 	"context"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/domain"
@@ -60,7 +59,7 @@ func ApproveRefundOrderRoutes() []string {
 }
 
 func (h *ApproveRefundOrderHandler) Validate(ctx context.Context, req *ProcessRefundRequest) error {
-	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
+	if req.OrderID == 0 && serverHttp.PathParam(ctx, "id") == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Order id is required")
 	}
 	return nil
@@ -76,7 +75,7 @@ func (h *ApproveRefundOrderHandler) Serve(ctx context.Context, req *ProcessRefun
 		return ProcessRefundResponse{}, bizErr
 	}
 	orderID := req.OrderID
-	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+	if raw := serverHttp.PathParam(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
 			return ProcessRefundResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
@@ -114,7 +113,7 @@ func (h *OverrideRefundOrderHandler) Serve(ctx context.Context, req *ProcessRefu
 		return ProcessRefundResponse{}, bizErr
 	}
 	orderID := req.OrderID
-	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+	if raw := serverHttp.PathParam(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
 			return ProcessRefundResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")

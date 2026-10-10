@@ -98,8 +98,8 @@ func routeParamNamesFromRequest(r *http.Request) []string {
 	}
 
 	routeCtx := routeContextForRequest(r)
-	if routeCtx == nil {
-		return nil
+	if routeCtx == nil || len(routeCtx.URLParams.Keys) == 0 {
+		return observability.RouteParamNames(requestRouteTemplate(r))
 	}
 
 	routeParams := make([]string, 0, len(routeCtx.URLParams.Keys))

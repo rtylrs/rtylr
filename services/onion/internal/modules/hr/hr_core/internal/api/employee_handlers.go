@@ -3,12 +3,11 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/domain"
@@ -132,7 +131,7 @@ func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (
 	}
 	includeSensitive := authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:sensitive_view")
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return GetEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
@@ -362,7 +361,7 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
@@ -442,7 +441,7 @@ func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequ
 		return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")

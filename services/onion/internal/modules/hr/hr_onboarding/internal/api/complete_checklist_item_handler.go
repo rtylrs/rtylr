@@ -6,10 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/domain"
@@ -99,7 +98,7 @@ func (h *CompleteChecklistItemHandler) Serve(ctx context.Context, req *CompleteC
 		return CompleteChecklistItemResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	itemID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return CompleteChecklistItemResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid item id")

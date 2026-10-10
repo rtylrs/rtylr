@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/application"
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
@@ -254,7 +253,7 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		return UpdateAutomationResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
 		return UpdateAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid automation ID")
@@ -317,7 +316,7 @@ func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomation
 		return DeleteAutomationResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
 		return DeleteAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid automation ID")

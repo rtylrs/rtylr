@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
@@ -13,7 +11,7 @@ import (
 // RegisterRoutes wires the legacy /careers endpoint (global, voxire-
 // corporate list) plus the recruit product endpoints (tenant-scoped,
 // powering recruit.rtylr.com).
-func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *application.Service) {
+func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, careersService *application.Service) {
 	// Legacy: voxire-corporate global careers list. Kept for back-compat
 	// while the landing site is migrated to the tenant-scoped recruit
 	// flow; once the voxire careers page redirects to recruit.rtylr.com

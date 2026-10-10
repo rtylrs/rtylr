@@ -5,8 +5,6 @@ import (
 	"fmt"
 	stdhttp "net/http"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -15,7 +13,7 @@ type APIRegistrar interface {
 }
 
 type RouteRegistrar interface {
-	RegisterRoutes(context.Context, *chi.Mux, ...interface{})
+	RegisterRoutes(context.Context, LegacyRouter, ...interface{})
 }
 
 type AnonymousRouteProvider interface {
@@ -29,7 +27,7 @@ func AutoRegisterAPIs(ctx context.Context, mux *stdhttp.ServeMux, modules ...API
 	}
 }
 
-func AutoRegisterRoutes(ctx context.Context, router *chi.Mux, modules ...RouteRegistrar) {
+func AutoRegisterRoutes(ctx context.Context, router LegacyRouter, modules ...RouteRegistrar) {
 	for _, module := range modules {
 		logger.Ctx(ctx).Debug("Registering routes", logger.String("module", fmt.Sprintf("%T", module)))
 		module.RegisterRoutes(ctx, router)

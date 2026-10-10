@@ -3,11 +3,10 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/application"
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/domain"
@@ -174,7 +173,7 @@ func (h *RetryCVJobValidatedHandler) Validate(ctx context.Context, _ *RetryCVJob
 	if err := validateRecruitID(ctx, "id", "Invalid CV job id"); err != nil {
 		return err
 	}
-	if source := strings.TrimSpace(chi.URLParamFromCtx(ctx, "source")); source != "career" && source != "talent" {
+	if source := strings.TrimSpace(serverHttp.PathParam(ctx, "source")); source != "career" && source != "talent" {
 		return onekiterrors.New(http.StatusBadRequest, "Invalid CV job")
 	}
 	return nil
@@ -185,7 +184,7 @@ func (h *RetryCVJobValidatedHandler) Serve(ctx context.Context, _ *RetryCVJobReq
 	if err != nil {
 		return StatusResponse{}, err
 	}
-	if err := h.Service.RetryCVProcessing(ctx, chi.URLParamFromCtx(ctx, "source"), id); err != nil {
+	if err := h.Service.RetryCVProcessing(ctx, serverHttp.PathParam(ctx, "source"), id); err != nil {
 		if errors.Is(err, domain.ErrInvalidInput) {
 			return StatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid CV job")
 		}
@@ -389,7 +388,7 @@ func validateRecruitID(ctx context.Context, param, message string) error {
 }
 
 func recruitID(ctx context.Context, param, message string) (int64, error) {
-	id, err := strconv.ParseInt(chi.URLParamFromCtx(ctx, param), 10, 64)
+	id, err := strconv.ParseInt(serverHttp.PathParam(ctx, param), 10, 64)
 	if err != nil || id <= 0 {
 		return 0, onekiterrors.New(http.StatusBadRequest, message)
 	}

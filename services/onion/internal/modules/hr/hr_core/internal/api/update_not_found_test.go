@@ -1,6 +1,7 @@
 package api
 
 import (
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
 	"errors"
 	"net/http"
@@ -9,7 +10,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_core/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
 	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
@@ -47,9 +47,9 @@ func hrRouteContext(businessID, userID int64, param, value string) context.Conte
 		},
 	}
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add(param, value)
-	return authPkg.WithAuthUser(context.WithValue(context.Background(), chi.RouteCtxKey, rctx), user)
+	rctx := map[string]string{}
+	rctx[param] = (value)
+	return authPkg.WithAuthUser(serverHttp.WithPathParams(context.Background(), rctx), user)
 }
 
 func requireNotFound(t *testing.T, resp any, err error) {

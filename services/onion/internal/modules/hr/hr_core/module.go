@@ -5,12 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	nethttp "net/http"
 	"time"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_core/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
@@ -183,7 +182,7 @@ func (m *Module) RegisterAPI(mux *nethttp.ServeMux) {
 	api.RegisterEmployeeListAPI(mux, api.NewEmployeeListAPI(m.service))
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

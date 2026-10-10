@@ -13,10 +13,9 @@ package voxhire
 import (
 	"context"
 	"database/sql"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/recruit/voxhire/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/api"
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/application"
@@ -32,7 +31,7 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db))}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

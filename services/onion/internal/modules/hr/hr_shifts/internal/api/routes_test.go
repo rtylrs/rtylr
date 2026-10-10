@@ -2,35 +2,28 @@ package api
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 func TestRegisterRoutesIncludesContractAvailabilityPaths(t *testing.T) {
-	router := chi.NewRouter()
+	router := serverHttp.NewLegacyRoutes()
 	RegisterRoutes(context.Background(), router, nil)
 
-	want := map[string]bool{
-		"GET /hr/shift/v1/availability":         false,
-		"POST /hr/shift/v1/availability":        false,
-		"DELETE /hr/shift/v1/availability/{id}": false,
-		"GET /hr/shifts/availability":           false,
-		"POST /hr/shifts/availability":          false,
-		"DELETE /hr/shifts/availability":        false,
+	registered := map[string]bool{}
+	for _, route := range router.Routes() {
+		registered[route] = true
 	}
-	if err := chi.Walk(router, func(method, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
-		key := method + " " + route
-		if _, ok := want[key]; ok {
-			want[key] = true
-		}
-		return nil
-	}); err != nil {
-		t.Fatalf("walk routes: %v", err)
-	}
-	for route, found := range want {
-		if !found {
+	for _, route := range []string{
+		"GET /hr/shift/v1/availability",
+		"POST /hr/shift/v1/availability",
+		"DELETE /hr/shift/v1/availability/{id}",
+		"GET /hr/shifts/availability",
+		"POST /hr/shifts/availability",
+		"DELETE /hr/shifts/availability",
+	} {
+		if !registered[route] {
 			t.Errorf("missing registered route %s", route)
 		}
 	}

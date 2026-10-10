@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"buf.build/go/protovalidate"
-	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 
 	"github.com/voxire/onion/internal/platform/logger"
@@ -29,27 +28,20 @@ type ValidatorFunc[Req any] interface {
 	Validate(ctx context.Context, req *Req) error
 }
 
-func RegisterGET[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Get(path, wrapHandler(ctx, handler, false))
-	}
+func RegisterGET[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodGet, paths, handler, false)
 }
 
-func RegisterGETWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Get(path, wrapHandler(ctx, handler, true))
-	}
-}
-func RegisterPOST[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Post(path, wrapHandler(ctx, handler, false))
-	}
+func RegisterGETWithValidation[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodGet, paths, handler, true)
 }
 
-func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Post(path, wrapHandler(ctx, handler, true))
-	}
+func RegisterPOST[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodPost, paths, handler, false)
+}
+
+func RegisterPOSTWithValidation[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodPost, paths, handler, true)
 }
 
 // RegisterPOSTWithValidationAndMiddleware is the per-route
@@ -58,41 +50,29 @@ func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router chi.Ro
 // /auth/login, /auth/register, /recruit/public/apply). Middlewares
 // run in order around the handler — index 0 is outermost.
 func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
-	ctx context.Context,
-	router chi.Router,
+	_ context.Context,
+	router LegacyRouter,
 	paths []string,
 	handler HandlerFunc[Req, Res],
 	middlewares ...MiddlewareFunc,
 ) {
-	for _, path := range paths {
-		var final http.Handler = wrapHandler(ctx, handler, true)
-		for i := len(middlewares) - 1; i >= 0; i-- {
-			final = middlewares[i](final)
-		}
-		router.Method(http.MethodPost, path, final)
-	}
-}
-func RegisterPATCHWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Patch(path, wrapHandler(ctx, handler, true))
-	}
-}
-func RegisterPUTWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Put(path, wrapHandler(ctx, handler, true))
-	}
+	registerLegacy(router, http.MethodPost, paths, handler, true, middlewares...)
 }
 
-func RegisterDELETE[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Delete(path, wrapHandler(ctx, handler, false))
-	}
+func RegisterPATCHWithValidation[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodPatch, paths, handler, true)
 }
 
-func RegisterDELETEWithValidation[Req, Res any](ctx context.Context, router chi.Router, paths []string, handler HandlerFunc[Req, Res]) {
-	for _, path := range paths {
-		router.Delete(path, wrapHandler(ctx, handler, true))
-	}
+func RegisterPUTWithValidation[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodPut, paths, handler, true)
+}
+
+func RegisterDELETE[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodDelete, paths, handler, false)
+}
+
+func RegisterDELETEWithValidation[Req, Res any](_ context.Context, router LegacyRouter, paths []string, handler HandlerFunc[Req, Res]) {
+	registerLegacy(router, http.MethodDelete, paths, handler, true)
 }
 
 func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res], validate bool) http.HandlerFunc {

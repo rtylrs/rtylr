@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos/orders/internal/domain"
@@ -52,7 +51,7 @@ func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayO
 		return PayOrderResponse{}, bizErr
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	orderID, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || orderID <= 0 {
 		return PayOrderResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")

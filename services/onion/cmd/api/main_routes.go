@@ -19,6 +19,7 @@ import (
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/storage"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
@@ -209,9 +210,14 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 	// special routes) can reference the mux captured in RegisterAPI.
 	oneKitMux := stdhttp.NewServeMux()
 	http.AutoRegisterAPIs(ctx, oneKitMux, modules.apiRegistrars()...)
-	http.MountOneKit(r, oneKitMux)
 
-	http.AutoRegisterRoutes(ctx, r, modules.routeRegistrars()...)
+	// Modules that still use the Register* helpers fill a route table instead
+	// of a router. Routes no contract serves yet are mounted on the same mux.
+	legacyRoutes := http.NewLegacyRoutes()
+	http.AutoRegisterRoutes(ctx, legacyRoutes, modules.routeRegistrars()...)
+	legacyRoutes.Mount(oneKitMux, nil)
+	observability.SetRouteMux(oneKitMux)
+	http.MountOneKit(r, oneKitMux)
 
 	return middlewares
 }

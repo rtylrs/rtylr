@@ -6,12 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"time"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/crm/customers/internal/infrastructure"
-
-	"github.com/go-chi/chi/v5"
 
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
 	"github.com/voxire/onion/internal/modules/crm/customers/internal/api"
@@ -91,7 +90,7 @@ func (m *Module) ResolveEmailRecipient(ctx context.Context, businessID, customer
 	return EmailRecipient{Email: customer.Email, Name: name}, true, nil
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
 }
 

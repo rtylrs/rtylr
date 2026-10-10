@@ -3,10 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
@@ -103,7 +102,7 @@ func (h *DeleteTouchpointHandler) Serve(ctx context.Context, _ *DeleteTouchpoint
 		return DeleteTouchpointResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return DeleteTouchpointResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid touchpoint id")

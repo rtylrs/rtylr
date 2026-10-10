@@ -5,8 +5,6 @@ import (
 	stdhttp "net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/go-chi/chi/v5"
 )
 
 type testAPIRegistrar struct{}
@@ -19,7 +17,7 @@ func (testAPIRegistrar) RegisterAPI(mux *stdhttp.ServeMux) {
 
 type testRouteRegistrar struct{}
 
-func (testRouteRegistrar) RegisterRoutes(_ context.Context, router *chi.Mux, _ ...interface{}) {
+func (testRouteRegistrar) RegisterRoutes(_ context.Context, router LegacyRouter, _ ...interface{}) {
 	router.Get("/registered", func(w stdhttp.ResponseWriter, _ *stdhttp.Request) {
 		w.WriteHeader(stdhttp.StatusNoContent)
 	})
@@ -32,7 +30,7 @@ func TestAutoRegisterAPIs(t *testing.T) {
 }
 
 func TestAutoRegisterRoutes(t *testing.T) {
-	router := chi.NewRouter()
+	router := NewLegacyRoutes()
 	AutoRegisterRoutes(context.Background(), router, testRouteRegistrar{})
 	assertNoContent(t, router, "/registered")
 }

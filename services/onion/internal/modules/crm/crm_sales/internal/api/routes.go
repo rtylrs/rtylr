@@ -3,13 +3,11 @@ package api
 import (
 	"context"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, service *application.Service) {
 	// Pipeline summary
 	serverHttp.RegisterGET[GetPipelineRequest, GetPipelineResponse](
 		ctx, router, GetPipelineRoutes(), &GetPipelineHandler{Service: service},

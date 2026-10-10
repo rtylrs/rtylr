@@ -4,13 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, service *application.Service) {
 	// Public company-side hiring inquiry — JSON, validated.
 	// Tighter per-route rate limit because this is a public surface
 	// that bots will try to spam. 10/min/IP is generous for real use.
@@ -42,8 +40,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// Admin panel — self-guarded by the admin JWT middleware.
-	router.Group(func(gr chi.Router) {
-		gr.Use(AdminAuthMiddleware(service))
+	{
+		gr := router.With(AdminAuthMiddleware(service))
 
 		gr.Get(AdminMeRoute(), AdminMeHandler(service))
 		gr.Get(AdminAdminsRoute(), ListAdminsHandler(service))
@@ -101,5 +99,5 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		)
 		gr.Get(AdminAppCVRoute(), ApplicationCVHandler(service))
 		gr.Get(AdminAppTimelineRoute(), ApplicationTimelineHandler(service))
-	})
+	}
 }

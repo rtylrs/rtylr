@@ -3,12 +3,11 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"math"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
@@ -168,7 +167,7 @@ func (h *GetContractHandler) Serve(ctx context.Context, _ *GetContractRequest) (
 		return GetContractResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return GetContractResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contract id")
@@ -237,7 +236,7 @@ func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRe
 		return UpdateContractResponse{}, err
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateContractResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contract id")

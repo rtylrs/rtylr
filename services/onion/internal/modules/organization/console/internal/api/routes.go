@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/organization/console/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -18,7 +16,7 @@ import (
 
 const consoleJSONBodyLimit = 4 << 20
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, service *application.Service) {
 	// Generic admin resources
 	router.Get("/console/resources", rawListResources(ctx, service))
 	router.Get("/console/resources/{table}", rawDescribeResource(ctx, service))
@@ -140,7 +138,7 @@ func (h *updateResourceRowHandler) Serve(ctx context.Context, req *updateResourc
 	if !ok || !authPkg.IsConsoleAdmin(user) {
 		return updateResourceRowResponse{}, onekiterrors.New(http.StatusForbidden, "Console admin access required")
 	}
-	if err := h.Service.UpdateResourceRow(ctx, chi.URLParamFromCtx(ctx, "table"), chi.URLParamFromCtx(ctx, "id"), req.Values); err != nil {
+	if err := h.Service.UpdateResourceRow(ctx, serverHttp.PathParam(ctx, "table"), serverHttp.PathParam(ctx, "id"), req.Values); err != nil {
 		return updateResourceRowResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return updateResourceRowResponse{Message: "Resource row updated"}, nil
@@ -191,7 +189,7 @@ func rawDescribeResource(_ context.Context, svc *application.Service) http.Handl
 			writeError(w, http.StatusForbidden, "Console admin access required")
 			return
 		}
-		table := chi.URLParam(r, "table")
+		table := r.PathValue("table")
 		result, err := svc.DescribeResource(r.Context(), table)
 		if err != nil {
 			writeError(w, http.StatusNotFound, "Resource not found")
@@ -207,7 +205,7 @@ func rawListResourceRows(_ context.Context, svc *application.Service) http.Handl
 			writeError(w, http.StatusForbidden, "Console admin access required")
 			return
 		}
-		table := chi.URLParam(r, "table")
+		table := r.PathValue("table")
 		limit := getPositiveQueryInt(r, "limit", 50)
 		offset := getPositiveQueryInt(r, "offset", 0)
 		result, err := svc.ListResourceRows(r.Context(), table, limit, offset)
@@ -225,7 +223,7 @@ func rawGetResourceRow(_ context.Context, svc *application.Service) http.Handler
 			writeError(w, http.StatusForbidden, "Console admin access required")
 			return
 		}
-		result, err := svc.GetResourceRow(r.Context(), chi.URLParam(r, "table"), chi.URLParam(r, "id"))
+		result, err := svc.GetResourceRow(r.Context(), r.PathValue("table"), r.PathValue("id"))
 		if err != nil {
 			writeError(w, http.StatusNotFound, "Resource row not found")
 			return

@@ -3,11 +3,10 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/domain"
@@ -170,7 +169,7 @@ func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRe
 		return UpdateLocationResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateLocationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid location id")

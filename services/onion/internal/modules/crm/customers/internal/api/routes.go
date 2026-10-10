@@ -3,13 +3,11 @@ package api
 import (
 	"context"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/crm/customers/internal/application"
 	"github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, crmService *application.Service) {
+func RegisterRoutes(ctx context.Context, router http.LegacyRouter, crmService *application.Service) {
 	// Customers
 	http.RegisterGETWithValidation[ListCustomersRequest, ListCustomersResponse](
 		ctx,

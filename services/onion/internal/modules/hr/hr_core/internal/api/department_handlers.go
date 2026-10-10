@@ -3,11 +3,10 @@ package api
 import (
 	"context"
 	"errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/domain"
@@ -152,7 +151,7 @@ func (h *UpdateHRCoreDepartmentHandler) Serve(ctx context.Context, req *UpdateHR
 		return UpdateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := chi.URLParamFromCtx(ctx, "id")
+	idStr := serverHttp.PathParam(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return UpdateHRCoreDepartmentResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid department id")

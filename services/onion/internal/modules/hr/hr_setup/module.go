@@ -8,8 +8,6 @@ import (
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_setup/internal/infrastructure"
 
-	"github.com/go-chi/chi/v5"
-
 	hrcore "github.com/voxire/onion/internal/modules/hr/hr_core"
 	"github.com/voxire/onion/internal/modules/hr/hr_setup/internal/api"
 	"github.com/voxire/onion/internal/modules/hr/hr_setup/internal/application"
@@ -35,7 +33,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	serverHttp.RegisterGET[api.GetSetupStatusRequest, api.GetSetupStatusResponse](
 		ctx, router, api.GetSetupStatusRoutes(), &api.GetSetupStatusHandler{Service: m.service},
 	)

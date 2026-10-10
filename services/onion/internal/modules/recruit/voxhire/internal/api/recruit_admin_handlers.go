@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/application"
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -210,7 +208,7 @@ func ListLeadsHandler(svc *application.Service) http.HandlerFunc {
 
 func ListApplicationsHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jobID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		jobID, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 		if err != nil || jobID <= 0 {
 			writeApplyError(w, http.StatusBadRequest, "Invalid opening id")
 			return
@@ -244,7 +242,7 @@ func ListApplicationsHandler(svc *application.Service) http.HandlerFunc {
 
 func ApplicationCVHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 		if err != nil || id <= 0 {
 			writeApplyError(w, http.StatusBadRequest, "Invalid application id")
 			return
@@ -266,7 +264,7 @@ func ApplicationCVHandler(svc *application.Service) http.HandlerFunc {
 
 func ApplicationTimelineHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 		if err != nil || id <= 0 {
 			writeApplyError(w, http.StatusBadRequest, "Invalid application id")
 			return

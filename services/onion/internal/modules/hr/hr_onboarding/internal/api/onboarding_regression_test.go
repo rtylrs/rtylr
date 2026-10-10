@@ -1,6 +1,7 @@
 package api
 
 import (
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -10,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_onboarding/internal/domain"
@@ -92,9 +92,9 @@ func createEmployeeForRegression(t *testing.T, db *sql.DB, businessID, employeeI
 }
 
 func withItemID(ctx context.Context, id int64) context.Context {
-	routeCtx := chi.NewRouteContext()
-	routeCtx.URLParams.Add("id", strconv.FormatInt(id, 10))
-	return context.WithValue(ctx, chi.RouteCtxKey, routeCtx)
+	routeCtx := map[string]string{}
+	routeCtx["id"] = (strconv.FormatInt(id, 10))
+	return serverHttp.WithPathParams(ctx, routeCtx)
 }
 
 func TestOnboardingServiceListTemplatesUsesBusinessAndTriggerFilter(t *testing.T) {

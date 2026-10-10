@@ -1,10 +1,10 @@
 package infrastructure
 
 import (
- "github.com/voxire/onion/internal/modules/pos/internal/outbox"
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/voxire/onion/internal/modules/pos/internal/outbox"
 	"strconv"
 	"time"
 

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/infrastructure"

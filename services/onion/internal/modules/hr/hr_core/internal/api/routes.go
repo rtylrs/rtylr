@@ -3,20 +3,13 @@ package api
 import (
 	"context"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
-	// Setup
-	serverHttp.RegisterGET[GetSetupStatusRequest, GetSetupStatusResponse](
-		ctx, router, GetSetupStatusRoutes(), &GetSetupStatusHandler{Service: service},
-	)
-	serverHttp.RegisterPOSTWithValidation[CompleteSetupStepRequest, CompleteSetupStepResponse](
-		ctx, router, CompleteSetupStepRoutes(), &CompleteSetupStepHandler{Service: service},
-	)
+func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, service *application.Service) {
+	// GET /hr/setup/status and POST /hr/setup/steps/{id}/complete are served
+	// by hr_setup; registering them here too was silently shadowed under chi.
 
 	// Config
 	serverHttp.RegisterGET[GetHRConfigRequest, GetHRConfigResponse](

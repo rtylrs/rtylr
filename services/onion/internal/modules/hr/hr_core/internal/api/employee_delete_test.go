@@ -1,6 +1,7 @@
 package api
 
 import (
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"context"
 	"database/sql"
 	"errors"
@@ -8,7 +9,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
 	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
 
 	"github.com/voxire/onion/internal/modules/hr/hr_core/internal/application"
@@ -64,9 +64,9 @@ func deleteEmployeeContext(businessID, userID, employeeID int64) context.Context
 		},
 	}
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("id", strconv.FormatInt(employeeID, 10))
-	return authPkg.WithAuthUser(context.WithValue(context.Background(), chi.RouteCtxKey, rctx), user)
+	rctx := map[string]string{}
+	rctx["id"] = (strconv.FormatInt(employeeID, 10))
+	return authPkg.WithAuthUser(serverHttp.WithPathParams(context.Background(), rctx), user)
 }
 
 // seedTerminationEmployee inserts a fully populated employee row so the
