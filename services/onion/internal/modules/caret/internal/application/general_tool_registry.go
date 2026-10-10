@@ -101,4 +101,12 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "Descriptive statistics for the list.",
 		Freshness:  "computed", SideEffect: "read-only",
 	},
+	{
+		Name:        "utilities.business_math",
+		Description: "Business formulas done exactly: margin and markup, price for a target margin, VAT or sales tax (inclusive or on top), percent change, CAGR, loan payments, compound interest with contributions, break-even, discounts.",
+		Module:      "utilities", Scope: "read",
+		InputHint:  `{"operation":"margin","cost":6,"price":10} | {"operation":"price_for_margin","cost":6,"margin_percent":40} | {"operation":"vat","amount":100,"rate_percent":11,"inclusive":false} | {"operation":"percent_change","from":80,"to":100} | {"operation":"cagr","start":100,"end":180,"years":3} | {"operation":"loan_payment","principal":20000,"annual_rate_percent":7,"months":36} | {"operation":"compound_interest","principal":1000,"annual_rate_percent":5,"years":10,"monthly_contribution":100} | {"operation":"break_even","fixed_costs":5000,"price":25,"variable_cost":10} | {"operation":"discount","price":80,"discount_percent":15}`,
+		OutputHint: "The computed figures for the operation.",
+		Freshness:  "computed", SideEffect: "read-only",
+	},
 }
