@@ -83,3 +83,16 @@ type ChatSearchHit struct {
 	Snippet   string
 	CreatedAt time.Time
 }
+
+// ReplyFeedback is the person's verdict on one Caret reply: a thumbs up or
+// down from the app, or a correction they typed in the next message.
+type ReplyFeedback struct {
+	ID        int64
+	SessionID string
+	MessageID int64
+	Rating    string // "up", "down" or "correction".
+	Reason    string
+	Prompt    string
+	Reply     string
+	CreatedAt time.Time
+}

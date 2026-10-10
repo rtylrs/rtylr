@@ -38,6 +38,7 @@ rtylr/chat_sessions.sql	internal/modules/caret/sql/schema/rtylr/chat_sessions.sq
 rtylr/conversation_messages.sql	internal/modules/caret/sql/schema/rtylr/conversation_messages.sql
 rtylr/conversation_summaries.sql	internal/modules/caret/sql/schema/rtylr/conversation_summaries.sql
 rtylr/user_memory.sql	internal/modules/caret/sql/schema/rtylr/user_memory.sql
+rtylr/caret_reply_feedback.sql	internal/modules/caret/sql/schema/rtylr/caret_reply_feedback.sql
 voxire/career_applications.sql	internal/modules/recruit/sql/schema/voxire/career_applications.sql
 voxire/careers.sql	internal/modules/recruit/sql/schema/voxire/careers.sql
 voxire/clients.sql	internal/modules/crm/sql/schema/voxire/clients.sql
