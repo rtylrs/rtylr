@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
 	"github.com/voxire/onion/internal/platform/logger"
@@ -65,7 +64,7 @@ func (c *CDN) imagePlan(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := chi.URLParam(r, "id")
+	id := r.PathValue("id")
 	if _, err := uuid.Parse(id); err != nil {
 		http.Error(w, "invalid image id", http.StatusBadRequest)
 		return
@@ -205,7 +204,7 @@ func (c *CDN) imageVariants(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := chi.URLParam(r, "id")
+	id := r.PathValue("id")
 	if _, err := uuid.Parse(id); err != nil {
 		http.Error(w, "invalid image id", http.StatusBadRequest)
 		return

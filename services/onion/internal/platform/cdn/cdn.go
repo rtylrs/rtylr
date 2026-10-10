@@ -16,10 +16,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
 	"os"
 	"runtime"
 
-	"github.com/go-chi/chi/v5"
 	"golang.org/x/sync/singleflight"
 
 	"github.com/voxire/onion/internal/platform/storage"
@@ -109,57 +109,40 @@ func (c *CDN) CheckMediaEngine() error {
 	return nil
 }
 
-// PURGE is a non-standard HTTP method (used here for cache/derivative
-// invalidation). chi panics if you route a method it doesn't know about, so it
-// must be registered once at package load — before any RegisterRoutes call —
-// otherwise the upload runmode crash-loops on boot.
-func registerPurgeMethod() struct{} {
-	chi.RegisterMethod("PURGE")
-	return struct{}{}
-}
-
-var _ = registerPurgeMethod()
-
 // RegisterRoutes mounts the CDN endpoints. Read endpoints are mounted behind
 // deliveryAuth, which resolves the caller's tenant when a bearer token is
 // present and leaves the request anonymous otherwise; anonymous callers only
 // see assets flagged public, and a validated delivery signature is the
 // credential for the rest. /health, /metrics and CORS are provided by the
 // shared web server, so they are not registered here.
-func (c *CDN) RegisterRoutes(r chi.Router) {
-	r.Get("/capabilities", c.capabilities)
+//
+// GET patterns also answer HEAD: net/http discards the body, so callers get
+// Content-Type/ETag/Cache-Control without transferring bytes. PURGE is a
+// non-standard method, which the standard mux routes like any other.
+func (c *CDN) RegisterRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /capabilities", c.capabilities)
 
-	r.Group(func(dr chi.Router) {
-		dr.Use(c.deliveryAuth)
-		dr.Get("/upload", c.serveUploadURL)
-		dr.Get("/upload/plan", c.uploadPlan)
-		dr.Get("/upload/responsive", c.uploadResponsive)
-		dr.Get("/upload/variants", c.uploadVariants)
-		dr.Get("/files/{id}", c.serveFile)
-		dr.Get("/images/{id}/analyze", c.imageAnalyze)
-		dr.Get("/images/{id}/info", c.imageInfo)
-		dr.Get("/images/{id}/plan", c.imagePlan)
-		dr.Get("/images/{id}/responsive", c.imageResponsive)
-		dr.Get("/images/{id}/variants", c.imageVariants)
-		dr.Get("/images/{id}", c.serveTransformed)
-		dr.Get("/videos/info", c.videoInfo)
+	delivery := func(handler http.HandlerFunc) http.Handler { return c.deliveryAuth(handler) }
+	mux.Handle("GET /upload", delivery(c.serveUploadURL))
+	mux.Handle("GET /upload/plan", delivery(c.uploadPlan))
+	mux.Handle("GET /upload/responsive", delivery(c.uploadResponsive))
+	mux.Handle("GET /upload/variants", delivery(c.uploadVariants))
+	mux.Handle("GET /files/{id}", delivery(c.serveFile))
+	mux.Handle("GET /images/{id}/analyze", delivery(c.imageAnalyze))
+	mux.Handle("GET /images/{id}/info", delivery(c.imageInfo))
+	mux.Handle("GET /images/{id}/plan", delivery(c.imagePlan))
+	mux.Handle("GET /images/{id}/responsive", delivery(c.imageResponsive))
+	mux.Handle("GET /images/{id}/variants", delivery(c.imageVariants))
+	mux.Handle("GET /images/{id}", delivery(c.serveTransformed))
+	mux.Handle("GET /videos/info", delivery(c.videoInfo))
 
-		// HEAD reuses the GET handlers — net/http discards the body for HEAD, so
-		// callers get Content-Type/ETag/Cache-Control without transferring bytes.
-		dr.Head("/upload", c.serveUploadURL)
-		dr.Head("/files/{id}", c.serveFile)
-		dr.Head("/images/{id}", c.serveTransformed)
-	})
-
-	r.Group(func(gr chi.Router) {
-		gr.Use(c.apiKeyAuth)
-		gr.Post("/upload", c.upload)
-		gr.Post("/purge", c.purgeControl)
-		gr.Post("/sign", c.signDelivery)
-		gr.MethodFunc("PURGE", "/upload", c.purgeUploadURL)
-		gr.MethodFunc("PURGE", "/files/{id}", c.purgeFileVariants)
-		gr.MethodFunc("PURGE", "/images/{id}", c.purgeFileVariants)
-	})
+	apiKey := func(handler http.HandlerFunc) http.Handler { return c.apiKeyAuth(handler) }
+	mux.Handle("POST /upload", apiKey(c.upload))
+	mux.Handle("POST /purge", apiKey(c.purgeControl))
+	mux.Handle("POST /sign", apiKey(c.signDelivery))
+	mux.Handle("PURGE /upload", apiKey(c.purgeUploadURL))
+	mux.Handle("PURGE /files/{id}", apiKey(c.purgeFileVariants))
+	mux.Handle("PURGE /images/{id}", apiKey(c.purgeFileVariants))
 }
 
 // WithUploadKeyReader grants only credential validation, without Organization persistence access.

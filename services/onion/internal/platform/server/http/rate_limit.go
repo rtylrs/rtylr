@@ -185,7 +185,7 @@ func peerIP(remoteAddr string) string {
 
 // PerRouteRateLimit returns middleware that applies a tighter limit
 // than the global 100/min on specific auth + abuse-prone endpoints.
-// Returns a func that wraps a single chi.Mux Method call rather than
+// Returns a func that wraps a single route registration rather than
 // an `r.Use(...)` layer, so we can attach it to one route without
 // touching every handler.
 //

@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -99,7 +97,7 @@ func (c *CDN) imageAnalyze(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := chi.URLParam(r, "id")
+	id := r.PathValue("id")
 	metric := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("metric")))
 	if metric == "" {
 		metric = "info"
@@ -211,7 +209,7 @@ func (c *CDN) imageResponsive(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	id := chi.URLParam(r, "id")
+	id := r.PathValue("id")
 	if _, err := c.fileForRead(r.Context(), scope, id); err != nil {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return

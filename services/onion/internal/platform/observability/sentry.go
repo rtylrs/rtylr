@@ -12,14 +12,10 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
-
-// RouteLookupContextKey stores the chi router for outer middleware to resolve route templates.
-type RouteLookupContextKey struct{}
 
 // InitSentry boots sentry-go. A missing SENTRY_DSN is not a fatal
 // condition — local development and preview builds run without it.
@@ -145,29 +141,11 @@ func RecoverMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// RequestRouteTemplate returns the matched route without request-specific path or query values.
+// RequestRouteTemplate returns the matched route without request-specific path
+// or query values. Middlewares run before routing, so the template is looked
+// up on the server's ServeMux rather than read from the matched request.
 func RequestRouteTemplate(r *http.Request) string {
-	if r == nil {
-		return "[unmatched route]"
-	}
-
-	pattern := ""
-	if routeCtx := chi.RouteContext(r.Context()); routeCtx != nil {
-		pattern = routeCtx.RoutePattern()
-	}
-	if pattern == "" {
-		if router, ok := r.Context().Value(RouteLookupContextKey{}).(*chi.Mux); ok && router != nil && r.URL != nil {
-			pattern = router.Find(chi.NewRouteContext(), r.Method, r.URL.Path)
-		}
-	}
-	// The outer router hands every contract and legacy route to the shared
-	// mux through a catch-all; ask the mux for the real template.
-	if pattern == "" || pattern == "/*" {
-		if muxPattern := muxRouteTemplate(r); muxPattern != "" {
-			return muxPattern
-		}
-	}
-	if pattern != "" {
+	if pattern := muxRouteTemplate(r); pattern != "" {
 		return pattern
 	}
 	return "[unmatched route]"

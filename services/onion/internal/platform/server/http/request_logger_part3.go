@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
 )
@@ -68,46 +66,11 @@ func requestRouteTemplate(r *http.Request) string {
 	return observability.RequestRouteTemplate(r)
 }
 
-func routeContextForRequest(r *http.Request) *chi.Context {
-	if r == nil {
-		return nil
-	}
-
-	routeCtx := chi.RouteContext(r.Context())
-	if routeCtx != nil && routeCtx.RoutePattern() != "" {
-		return routeCtx
-	}
-	if r.URL == nil {
-		return routeCtx
-	}
-
-	router, ok := r.Context().Value(observability.RouteLookupContextKey{}).(*chi.Mux)
-	if ok && router != nil {
-		resolved := chi.NewRouteContext()
-		if router.Find(resolved, r.Method, r.URL.Path) != "" {
-			return resolved
-		}
-	}
-
-	return routeCtx
-}
-
 func routeParamNamesFromRequest(r *http.Request) []string {
 	if r == nil {
 		return nil
 	}
-
-	routeCtx := routeContextForRequest(r)
-	if routeCtx == nil || len(routeCtx.URLParams.Keys) == 0 {
-		return observability.RouteParamNames(requestRouteTemplate(r))
-	}
-
-	routeParams := make([]string, 0, len(routeCtx.URLParams.Keys))
-	for _, key := range routeCtx.URLParams.Keys {
-		routeParams = append(routeParams, key)
-	}
-
-	return routeParams
+	return observability.RouteParamNames(requestRouteTemplate(r))
 }
 
 func truncateString(s string, maxLen int) string {

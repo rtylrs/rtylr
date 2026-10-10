@@ -7,15 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/platform/config"
 )
 
 func TestInvalidateCacheRequiresInternalToken(t *testing.T) {
 	withInternalToken(t, "secret")
 
-	router := chi.NewRouter()
+	router := http.NewServeMux()
 	RegisterCacheRoutes(context.Background(), router)
 
 	req := httptest.NewRequest(http.MethodPost, "/invalidate-cache", strings.NewReader(`{"type":"all"}`))
@@ -31,7 +29,7 @@ func TestInvalidateCacheRequiresInternalToken(t *testing.T) {
 func TestInvalidateCacheAcceptsInternalToken(t *testing.T) {
 	withInternalToken(t, "secret")
 
-	router := chi.NewRouter()
+	router := http.NewServeMux()
 	RegisterCacheRoutes(context.Background(), router)
 
 	req := httptest.NewRequest(http.MethodPost, "/invalidate-cache", strings.NewReader(`{"type":"all"}`))
@@ -48,7 +46,7 @@ func TestInvalidateCacheAcceptsInternalToken(t *testing.T) {
 func TestInvalidateCacheRejectsTrailingJSON(t *testing.T) {
 	withInternalToken(t, "secret")
 
-	router := chi.NewRouter()
+	router := http.NewServeMux()
 	RegisterCacheRoutes(context.Background(), router)
 
 	req := httptest.NewRequest(http.MethodPost, "/invalidate-cache", strings.NewReader(`{"type":"all"}{"type":"ids"}`))
@@ -72,7 +70,7 @@ func TestInvalidateCacheRejectsRequestsThatWouldBeSkipped(t *testing.T) {
 		`{"type":"team","ids":["business-42"]}`,
 	} {
 		t.Run(body, func(t *testing.T) {
-			router := chi.NewRouter()
+			router := http.NewServeMux()
 			RegisterCacheRoutes(context.Background(), router)
 
 			req := httptest.NewRequest(http.MethodPost, "/invalidate-cache", strings.NewReader(body))

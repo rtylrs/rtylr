@@ -7,8 +7,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 )
 
 type DuplicateDetector struct {
@@ -95,14 +93,6 @@ func generateRequestKey(r *http.Request, statusCode int) string {
 	for _, param := range importantParams {
 		if value := r.URL.Query().Get(param); value != "" {
 			_, _ = fmt.Fprintf(&key, ":%s=%s", param, value)
-		}
-	}
-
-	if routeCtx := chi.RouteContext(r.Context()); routeCtx != nil {
-		for i, paramKey := range routeCtx.URLParams.Keys {
-			if i < len(routeCtx.URLParams.Values) {
-				_, _ = fmt.Fprintf(&key, ":%s=%s", paramKey, routeCtx.URLParams.Values[i])
-			}
 		}
 	}
 

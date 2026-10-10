@@ -10,8 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -184,7 +182,7 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileUUID := chi.URLParam(r, "id")
+	fileUUID := r.PathValue("id")
 	if fileUUID == "" {
 		http.Error(w, "missing image id", http.StatusBadRequest)
 		return

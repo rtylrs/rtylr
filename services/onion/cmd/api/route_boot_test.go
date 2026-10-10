@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/voxire/onion/internal/platform/cdn"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -29,6 +30,15 @@ func TestAllRoutesMountWithoutConflicts(t *testing.T) {
 	modules := initializeModules(ctx)
 
 	mux := stdhttp.NewServeMux()
+	// The platform and server routes share the root mux with every module.
+	noop := stdhttp.HandlerFunc(func(stdhttp.ResponseWriter, *stdhttp.Request) {})
+	for _, pattern := range []string{"GET /metrics", "GET /health", "GET /{$}", "GET /favicon.ico"} {
+		mux.Handle(pattern, noop)
+	}
+	http.RegisterCacheRoutes(ctx, mux)
+	http.RegisterStatusRoutes(ctx, mux)
+	http.RegisterVersionRoutes(mux)
+	cdn.New(nil, nil, "", 0, "", "").RegisterRoutes(mux)
 	http.AutoRegisterAPIs(ctx, mux, modules.apiRegistrars()...)
 	routes := http.NewLegacyRoutes()
 	http.AutoRegisterRoutes(ctx, routes, modules.routeRegistrars()...)

@@ -2,14 +2,13 @@ package http
 
 import (
 	"context"
+	"github.com/voxire/onion/internal/platform/observability"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 )
 
 func TestRequestLoggerPreservesJSONBodyWithCharset(t *testing.T) {
@@ -115,10 +114,12 @@ func TestResponseWriterPreservesFlusher(t *testing.T) {
 }
 
 func TestRequestRouteTemplateDoesNotExposeValuesOrQuery(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /login", func(http.ResponseWriter, *http.Request) {})
+	observability.SetRouteMux(mux)
+	t.Cleanup(func() { observability.SetRouteMux(nil) })
+
 	req := httptest.NewRequest(http.MethodGet, "/login?token=secret", nil)
-	routeCtx := chi.NewRouteContext()
-	routeCtx.RoutePatterns = []string{"/login"}
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeCtx))
 	if got := requestRouteTemplate(req); got != "/login" {
 		t.Fatalf("requestRouteTemplate = %q, want /login", got)
 	}

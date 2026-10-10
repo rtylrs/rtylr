@@ -4,16 +4,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/go-chi/chi/v5"
 )
 
 // serveTransformed must reject invalid params with 400 before it ever touches
 // the database or storage, so these run against a CDN with nil deps.
 func TestServeTransformed_RejectsOversizeWidth(t *testing.T) {
 	c := &CDN{}
-	r := chi.NewRouter()
-	r.Get("/images/{id}", c.serveTransformed)
+	r := http.NewServeMux()
+	r.HandleFunc("GET /images/{id}", c.serveTransformed)
 
 	req := httptest.NewRequest("GET", "/images/abc?w=99999", nil)
 	rec := httptest.NewRecorder()
@@ -26,8 +24,8 @@ func TestServeTransformed_RejectsOversizeWidth(t *testing.T) {
 
 func TestServeTransformed_RejectsMissingDimensions(t *testing.T) {
 	c := &CDN{}
-	r := chi.NewRouter()
-	r.Get("/images/{id}", c.serveTransformed)
+	r := http.NewServeMux()
+	r.HandleFunc("GET /images/{id}", c.serveTransformed)
 
 	req := httptest.NewRequest("GET", "/images/abc", nil)
 	rec := httptest.NewRecorder()
