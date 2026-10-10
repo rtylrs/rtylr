@@ -8,6 +8,7 @@ import (
 	"io"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	echoapp "github.com/voxire/onion/internal/modules/caret/internal/application"
 )
@@ -216,6 +217,11 @@ func (r *streamEventRenderer) emitPlainRemainder(final bool) error {
 	}
 	emitLen := len(r.pending) - markerHoldBytes
 	emitLen = safePublicAnswerPrefix(r.pending, emitLen)
+	// The hold-back cut is in bytes; never split a multi-byte character, or
+	// it reaches the client as replacement characters (e.g. an em dash as ���).
+	for emitLen > 0 && emitLen < len(r.pending) && !utf8.RuneStart(r.pending[emitLen]) {
+		emitLen--
+	}
 	if emitLen <= 0 {
 		return nil
 	}
