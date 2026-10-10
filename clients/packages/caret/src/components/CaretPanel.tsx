@@ -26,6 +26,7 @@ import { Composer } from "./composer";
 import WelcomeHero from "./WelcomeHero";
 import SettingsPanel from "./SettingsPanel";
 import { ChatList, type ChatListLabels } from "./sidebar";
+import NewChatButton from "./sidebar/NewChatButton";
 import ProjectSidebar, { type ProjectLabels } from "./sidebar/ProjectSidebar";
 
 export interface CaretWorkspaceOptions {
@@ -759,6 +760,12 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             }}
           >
             {workspace?.sidebarHeader}
+            <div style={{ padding: "8px 14px 0", flexShrink: 0 }}>
+              <NewChatButton
+                onClick={newChat}
+                label={workspace?.historyLabels.newChat}
+              />
+            </div>
             <ProjectSidebar
               projects={projects}
               activeId={selectedProjectId}
@@ -779,6 +786,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               onSelect={selectChat}
               onNew={newChat}
               onDelete={deleteChat}
+              showNewChat={false}
             />
           </div>
           {mainColumn}
