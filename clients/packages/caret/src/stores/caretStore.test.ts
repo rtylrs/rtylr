@@ -95,3 +95,37 @@ describe("useCaretStore reply timing", () => {
     expect(messages[messages.length - 1]?.responseMs).toBeUndefined();
   });
 });
+
+describe("useCaretStore streamed text", () => {
+  it("starts a new text block after a tool call so the reply keeps its order", () => {
+    const tabId = useCaretStore.getState().activeTabId;
+    const store = useCaretStore.getState();
+    store.startAssistantMessage(tabId);
+    store.appendToLastAssistantMessage("I'll search. ", tabId);
+    store.appendToLastAssistantMessage("One moment.", tabId);
+    store.appendBlockToLastAssistant(
+      {
+        id: "tool-1",
+        type: "tool_call",
+        name: "web.search",
+        input: {},
+        status: "running",
+      },
+      tabId,
+    );
+    store.appendToLastAssistantMessage("Here's what I found.", tabId);
+
+    const messages = useCaretStore
+      .getState()
+      .tabs.find((tab) => tab.id === tabId)!.messages;
+    const blocks = messages[messages.length - 1]!.blocks;
+    expect(blocks.map((block) => block.type)).toEqual([
+      "text",
+      "tool_call",
+      "text",
+    ]);
+    expect(blocks[0]).toMatchObject({ content: "I'll search. One moment." });
+    expect(blocks[2]).toMatchObject({ content: "Here's what I found." });
+    expect(new Set(blocks.map((block) => block.id)).size).toBe(3);
+  });
+});

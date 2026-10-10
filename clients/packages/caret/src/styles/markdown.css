@@ -1,49 +1,92 @@
 .caret-md {
-  font-size: 13.5px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.65;
   color: var(--caret-text, #f2f2ef);
+  overflow-wrap: anywhere;
+}
+/* Zero-specificity reset so the block gap below always applies. */
+.caret-md :where(p, ul, ol, blockquote, pre, h1, h2, h3, h4, h5, h6) {
+  margin: 0;
 }
 .caret-md > * + * {
-  margin-top: 6px;
+  margin-top: 12px;
+}
+.caret-md > :first-child {
+  margin-top: 0;
 }
 .caret-md p.caret-p {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: pre-line;
+}
+.caret-md strong {
+  font-weight: 600;
 }
 .caret-md .caret-h {
   font-weight: 600;
-  margin: 8px 0 4px;
+  line-height: 1.35;
+  margin: 20px 0 0;
+}
+.caret-md > .caret-h:first-child {
+  margin-top: 0;
+}
+.caret-md .caret-h + * {
+  margin-top: 6px;
 }
 .caret-md h1.caret-h {
-  font-size: 17px;
+  font-size: 19px;
 }
 .caret-md h2.caret-h {
-  font-size: 15px;
+  font-size: 17px;
 }
 .caret-md h3.caret-h {
+  font-size: 15px;
+}
+.caret-md h4.caret-h,
+.caret-md h5.caret-h,
+.caret-md h6.caret-h {
   font-size: 14px;
 }
+/* Host apps reset list markers; restore them for model output. */
 .caret-md ul.caret-list,
 .caret-md ol.caret-list {
-  padding-left: 20px;
-  margin: 0;
+  padding-left: 22px;
+}
+.caret-md ul.caret-list {
+  list-style: disc;
+}
+.caret-md ol.caret-list {
+  list-style: decimal;
+}
+.caret-md .caret-list .caret-list {
+  margin-top: 4px;
+}
+.caret-md ul.caret-list ul.caret-list {
+  list-style: circle;
 }
 .caret-md li {
-  margin: 2px 0;
+  margin: 4px 0;
+  padding-left: 2px;
+}
+.caret-md li::marker {
+  color: var(--caret-text-muted, #b2b2ae);
+}
+.caret-md li > p.caret-p + p.caret-p {
+  margin-top: 6px;
+}
+.caret-md li.task-list-item {
+  list-style: none;
+  margin-left: -20px;
 }
 .caret-md blockquote.caret-quote {
-  border-left: 2px solid var(--caret-border-strong, rgba(255, 255, 255, 0.24));
-  padding-left: 8px;
+  border-left: 3px solid var(--caret-border-strong, rgba(255, 255, 255, 0.24));
+  padding-left: 12px;
   color: var(--caret-text-muted, #b2b2ae);
-  margin: 0;
   font-style: italic;
 }
 .caret-md hr.caret-hr {
   border: none;
   height: 1px;
   background: var(--caret-border, rgba(255, 255, 255, 0.12));
-  margin: 12px 0;
+  margin: 18px 0;
 }
 .caret-md code.caret-inline-code {
   font-family: SFMono-Regular, Menlo, Consolas, monospace;
@@ -75,7 +118,6 @@
   background: var(--caret-surface, #17181b);
 }
 .caret-md .caret-table-empty {
-  margin: 0;
   padding: 9px 11px;
   border: 1px solid var(--caret-border, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
@@ -106,8 +148,11 @@
 }
 .caret-md a.caret-link {
   color: var(--caret-accent, #63d1c4);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 2px;
+  word-break: break-word;
 }
 .caret-md a.caret-link:hover {
-  text-decoration: underline;
+  text-decoration-color: currentColor;
 }

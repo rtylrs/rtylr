@@ -323,23 +323,21 @@ export const useCaretStore = create<CaretStore>()(
               return tab;
 
             const last = messages[lastIndex];
-            const blocks = last.blocks.length > 0 ? [...last.blocks] : [];
-            let firstText = blocks.findIndex((block) => block.type === "text");
-            if (firstText === -1) {
+            // Text continues the trailing text block; text after a tool call or
+            // thought starts a new block so the reply reads in the order it ran.
+            const blocks = [...last.blocks];
+            const tail = blocks[blocks.length - 1];
+            if (tail?.type === "text") {
+              blocks[blocks.length - 1] = {
+                ...tail,
+                content: tail.content + token,
+              };
+            } else {
               blocks.push({
-                id: `${last.id}-text-0`,
+                id: `${last.id}-text-${blocks.length}`,
                 type: "text",
                 content: token,
               });
-              firstText = blocks.length - 1;
-            } else {
-              const existing = blocks[firstText];
-              if (existing.type === "text") {
-                blocks[firstText] = {
-                  ...existing,
-                  content: existing.content + token,
-                };
-              }
             }
             messages[lastIndex] = {
               ...last,
