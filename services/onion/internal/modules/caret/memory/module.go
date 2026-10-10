@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/caret/memory/internal/application"
@@ -112,4 +113,35 @@ func (m *Module) PendingChatTitle(ctx context.Context, session string, userID in
 // SaveChatTitle stores a written title unless the chat was renamed meanwhile.
 func (m *Module) SaveChatTitle(ctx context.Context, session string, userID int, expectedTitle, title string) error {
 	return m.memoryService.SaveChatTitle(ctx, session, userID, expectedTitle, title)
+}
+
+// RecordReplyFeedback stores a verdict on a reply in one of the user's chats
+// and returns how many verdicts are waiting to be learned from.
+func (m *Module) RecordReplyFeedback(ctx context.Context, session string, userID int, messageID, rating, reason string) (int, error) {
+	return m.memoryService.RecordReplyFeedback(ctx, session, userID, messageID, rating, reason)
+}
+
+// PendingLessons returns the user's current lessons and their unlearned
+// feedback, rendered as reference text for a distillation prompt.
+func (m *Module) PendingLessons(ctx context.Context, userID int) (lessons []string, feedback string, feedbackIDs []int64, err error) {
+	work, err := m.memoryService.PendingLessonWork(ctx, userID)
+	if err != nil || len(work.Feedback) == 0 {
+		return nil, "", nil, err
+	}
+	var text strings.Builder
+	for i, item := range work.Feedback {
+		feedbackIDs = append(feedbackIDs, item.ID)
+		verdict := map[string]string{"up": "thumbs up", "down": "thumbs down", "correction": "the person corrected Caret in their next message"}[item.Rating]
+		fmt.Fprintf(&text, "Feedback %d: %s\n", i+1, verdict)
+		if item.Reason != "" {
+			fmt.Fprintf(&text, "Their words: %s\n", item.Reason)
+		}
+		fmt.Fprintf(&text, "They had asked: %s\nCaret replied: %s\n\n", item.Prompt, item.Reply)
+	}
+	return work.Lessons, text.String(), feedbackIDs, nil
+}
+
+// SaveLessons replaces the user's lessons and marks their feedback learned.
+func (m *Module) SaveLessons(ctx context.Context, userID int, lessons []string, feedbackIDs []int64) error {
+	return m.memoryService.SaveLessons(ctx, userID, lessons, feedbackIDs)
 }
