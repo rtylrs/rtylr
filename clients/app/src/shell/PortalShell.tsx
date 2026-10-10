@@ -413,7 +413,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           content={t('common.portal.home')}
           side={i18n.dir() === 'rtl' ? 'left' : 'right'}
           focusable={false}
-          contentClassName="portal-rail-tooltip"
+          contentClassName="portal-rail-tooltip portal-rail-tooltip-home"
         >
           <Link
             to="/"
@@ -441,7 +441,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             content={t('appNames.short.insights')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
-            contentClassName="portal-rail-tooltip"
+            contentClassName="portal-rail-tooltip portal-rail-tooltip-insights"
           >
             <Link
               to={availableInsights[0].path}
@@ -458,7 +458,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             content={t('appNames.short.flow')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
-            contentClassName="portal-rail-tooltip"
+            contentClassName="portal-rail-tooltip portal-rail-tooltip-flow"
           >
             <Link
               to="/flow"
@@ -475,7 +475,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             content={t('appNames.short.crm')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
-            contentClassName="portal-rail-tooltip"
+            contentClassName="portal-rail-tooltip portal-rail-tooltip-crm"
           >
             <Link
               to="/crm"
@@ -492,7 +492,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             content={t('appNames.short.erp')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
-            contentClassName="portal-rail-tooltip"
+            contentClassName="portal-rail-tooltip portal-rail-tooltip-erp"
           >
             <Link
               to="/erp"
@@ -509,7 +509,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             content={t('appNames.short.finance')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
-            contentClassName="portal-rail-tooltip"
+            contentClassName="portal-rail-tooltip portal-rail-tooltip-finance"
           >
             <Link
               to="/finance"
@@ -526,7 +526,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             content={t('appNames.short.hr')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
-            contentClassName="portal-rail-tooltip"
+            contentClassName="portal-rail-tooltip portal-rail-tooltip-hr"
           >
             <Link
               to="/hr"
@@ -543,7 +543,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             content={t('appNames.short.pos')}
             side={i18n.dir() === 'rtl' ? 'left' : 'right'}
             focusable={false}
-            contentClassName="portal-rail-tooltip"
+            contentClassName="portal-rail-tooltip portal-rail-tooltip-pos"
           >
             <a
               href={resolveAppUrl('pos')}
@@ -562,7 +562,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               content={t('common.nav.automations')}
               side={i18n.dir() === 'rtl' ? 'left' : 'right'}
               focusable={false}
-              contentClassName="portal-rail-tooltip"
+              contentClassName="portal-rail-tooltip portal-rail-tooltip-automations"
             >
               <Link
                 to={
