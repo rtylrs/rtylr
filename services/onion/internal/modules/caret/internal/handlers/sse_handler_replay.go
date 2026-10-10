@@ -127,7 +127,28 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	)
 
 	promptChars := cachePlan.PromptChars
-	token, ok := h.drainProviderStream(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, promptChars)
+	// A provider can fail after part of the reply is on screen. One retry
+	// continues from the text already shown; only if that also fails does the
+	// person see the error.
+	recovered := false
+	drain := func(tokens <-chan snips.StreamToken, prompt string, promptLen int) (snips.StreamToken, bool) {
+		token, ok := h.drainRecoverable(ctx, w, tokens, clientGone, renderer, cachePlan, businessID, userID, promptLen)
+		if ok || token.Error == "" {
+			return token, ok
+		}
+		if !recovered && h.AiService != nil && prompt != "" && strings.TrimSpace(fullResponse.String()) != "" {
+			recovered = true
+			logger.Ctx(ctx).Warn("Provider failed mid-reply; continuing from the text so far", logger.String("error", token.Error))
+			renderer.pending = ""
+			retry := recoveryPrompt(prompt, fullResponse.String())
+			if next, err := h.AiService.GenerateTextStream(snips.WithImages(ctx, req.Images), retry); err == nil {
+				return h.drainProviderStream(ctx, w, next, clientGone, renderer, cachePlan, businessID, userID, len(retry))
+			}
+		}
+		h.writeErrorResponse(w, token.Error)
+		return token, false
+	}
+	token, ok := drain(tokenChan, req.EnhancedPrompt, promptChars)
 	if !ok {
 		partialResponseChars := fullResponse.Len() + len(renderer.pending)
 		if token.Error != "" || partialResponseChars > 0 {
@@ -200,7 +221,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 				h.writeErrorResponse(w, "Could not finish explaining the result")
 				break
 			}
-			nextToken, completed := h.drainProviderStream(ctx, w, next, clientGone, renderer, cachePlan, businessID, userID, len(continuation))
+			nextToken, completed := drain(next, continuation, len(continuation))
 			totalTokens += streamUsageTokens(nextToken, len(continuation), fullResponse.Len()-responseLengthBeforeContinuation)
 			if !completed {
 				settleUsage(int64(totalTokens))
@@ -250,7 +271,17 @@ func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w h
 	return h.drainProviderStreamWithHeartbeat(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, promptChars, sseHeartbeatInterval)
 }
 
+// drainRecoverable drains like drainProviderStream but leaves a provider
+// error unreported, so the caller can retry before showing it.
+func (h *GenerateTextStreamHandler) drainRecoverable(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int) (snips.StreamToken, bool) {
+	return h.drainProviderStreamFull(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, promptChars, sseHeartbeatInterval, false)
+}
+
 func (h *GenerateTextStreamHandler) drainProviderStreamWithHeartbeat(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int, heartbeatInterval time.Duration) (snips.StreamToken, bool) {
+	return h.drainProviderStreamFull(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, promptChars, heartbeatInterval, true)
+}
+
+func (h *GenerateTextStreamHandler) drainProviderStreamFull(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int, heartbeatInterval time.Duration, writeErrors bool) (snips.StreamToken, bool) {
 	heartbeat := time.NewTicker(heartbeatInterval)
 	defer heartbeat.Stop()
 
@@ -259,7 +290,9 @@ func (h *GenerateTextStreamHandler) drainProviderStreamWithHeartbeat(ctx context
 		case token, ok := <-tokenChan:
 			if !ok {
 				token := snips.StreamToken{Error: unexpectedStreamClosureError, Done: true}
-				h.writeErrorResponse(w, token.Error)
+				if writeErrors {
+					h.writeErrorResponse(w, token.Error)
+				}
 				aicache.Record(aicache.Event{
 					Outcome:         aicache.OutcomeError,
 					Mode:            cachePlan.Mode,
@@ -275,7 +308,9 @@ func (h *GenerateTextStreamHandler) drainProviderStreamWithHeartbeat(ctx context
 			}
 
 			if token.Error != "" {
-				h.writeErrorResponse(w, token.Error)
+				if writeErrors {
+					h.writeErrorResponse(w, token.Error)
+				}
 				aicache.Record(aicache.Event{
 					Outcome:         aicache.OutcomeError,
 					Mode:            cachePlan.Mode,
@@ -335,6 +370,10 @@ func continuationPrompt(base, results, replySoFar string, final bool) string {
 	if final {
 		instruction = "\nNo more tools can run for this request. Answer now from the results above; if something could not be checked, say so plainly."
 	}
+	return continuationPromptWith(base, results, replySoFar, instruction)
+}
+
+func continuationPromptWith(base, results, replySoFar, instruction string) string {
 	// The reply so far is already on the user's screen. Continue it instead of
 	// starting over, so an opening line like "Let me check" is not repeated.
 	if reply := strings.TrimSpace(replySoFar); reply != "" {
@@ -355,4 +394,10 @@ func continuationPrompt(base, results, replySoFar string, final bool) string {
 		results = omitted + results[start:]
 	}
 	return base + results + instruction
+}
+
+// recoveryPrompt resumes a reply a provider dropped partway through.
+func recoveryPrompt(base, replySoFar string) string {
+	return continuationPromptWith(base, "", replySoFar,
+		"\nYour reply was cut off by a connection error. Continue it exactly where it stopped, without repeating anything already said.")
 }

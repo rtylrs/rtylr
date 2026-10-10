@@ -106,3 +106,61 @@ func TestFailedFollowUpSearchStillAnswersFromTheFirst(t *testing.T) {
 		t.Fatalf("answer missing: %s", body)
 	}
 }
+
+// droppingAI fails its first stream after some text; later calls succeed.
+type droppingAI struct{ prompts []string }
+
+func (d *droppingAI) IsAvailable() bool          { return true }
+func (d *droppingAI) GetPrimaryProvider() string { return "test" }
+func (d *droppingAI) GenerateTextStream(_ context.Context, prompt string) (<-chan snips.StreamToken, error) {
+	d.prompts = append(d.prompts, prompt)
+	tokens := make(chan snips.StreamToken, 3)
+	tokens <- snips.StreamToken{Text: "and the rest of the answer."}
+	tokens <- snips.StreamToken{Done: true}
+	close(tokens)
+	return tokens, nil
+}
+
+// A provider that fails partway through is retried once from the text that
+// was already shown, instead of ending the reply with an error.
+func TestReplyRecoversFromAProviderFailingMidway(t *testing.T) {
+	ai := &droppingAI{}
+	memory := &detachedMemoryFake{}
+	handler := &GenerateTextStreamHandler{AiService: ai, MemoryService: memory}
+	tokens := make(chan snips.StreamToken, 3)
+	tokens <- snips.StreamToken{Text: "Here is the first part " + strings.Repeat("of the reply ", 20)}
+	tokens <- snips.StreamToken{Error: "provider connection reset"}
+	close(tokens)
+	rec := httptest.NewRecorder()
+
+	handler.streamTokensToClient(context.Background(), rec, tokens, make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "s", UserID: 7, EnhancedPrompt: "explain"}, 1, 7,
+		cacheWritePlan{Mode: string(application.ModeAgent), ContinuationBudget: 5}, nil)
+
+	body := rec.Body.String()
+	if strings.Contains(body, "provider connection reset") {
+		t.Fatalf("the error must not reach the person when the retry works: %s", body)
+	}
+	if len(ai.prompts) != 1 || !strings.Contains(ai.prompts[0], "<reply_so_far>Here is the first part") || !strings.Contains(ai.prompts[0], "cut off by a connection error") {
+		t.Fatalf("retry must continue from the reply so far: %v", ai.prompts)
+	}
+	if memory.storeCalls != 1 || !strings.Contains(memory.storedContent, "and the rest of the answer.") {
+		t.Fatalf("recovered reply not saved: %q", memory.storedContent)
+	}
+}
+
+// With nothing on screen yet there is nothing to continue: the error shows.
+func TestReplyFailureWithoutTextStillReportsTheError(t *testing.T) {
+	ai := &droppingAI{}
+	handler := &GenerateTextStreamHandler{AiService: ai, MemoryService: &detachedMemoryFake{}}
+	tokens := make(chan snips.StreamToken, 1)
+	tokens <- snips.StreamToken{Error: "provider unavailable"}
+	close(tokens)
+	rec := httptest.NewRecorder()
+	handler.streamTokensToClient(context.Background(), rec, tokens, make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "s", UserID: 7, EnhancedPrompt: "explain"}, 1, 7,
+		cacheWritePlan{Mode: string(application.ModeAgent)}, nil)
+	if !strings.Contains(rec.Body.String(), "provider unavailable") || len(ai.prompts) != 0 {
+		t.Fatalf("expected the error and no retry: %s %v", rec.Body.String(), ai.prompts)
+	}
+}
