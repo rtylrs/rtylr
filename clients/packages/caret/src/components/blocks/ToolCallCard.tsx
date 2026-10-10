@@ -7,6 +7,7 @@ import {
   X,
   AlertCircle,
 } from "lucide-react";
+import { searchOutputSources } from "../../lib/searchSources";
 import { caretTokens, caretRadius } from "../../ui/tokens";
 import CaretOrb, { orbStateForTool } from "../CaretOrb";
 import FormMappingPlan from "./FormMappingPlan";
@@ -254,60 +255,30 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
 };
 
 function SearchResultsDetails({ output }: { output: unknown }) {
-  if (!output || typeof output !== "object") return null;
-  const value = output as Record<string, unknown>;
-  const sources = Array.isArray(value.sources) ? value.sources : [];
+  const sources = searchOutputSources(output);
+  if (sources.length === 0) return null;
   return (
     <div style={{ marginBottom: 8 }}>
-      {sources.length > 0 && (
-        <div>
-          <div style={detailLabelStyle}>search results</div>
-          <ul
-            style={{ ...summaryStyle, margin: 0, padding: "7px 9px 7px 26px" }}
-          >
-            {sources.map((source, index) => {
-              if (!source || typeof source !== "object") return null;
-              const item = source as Record<string, unknown>;
-              if (
-                typeof item.title !== "string" ||
-                typeof item.url !== "string"
-              )
-                return null;
-              let url: URL;
-              try {
-                url = new URL(item.url);
-              } catch {
-                return null;
-              }
-              if (
-                url.protocol !== "https:" ||
-                !url.hostname ||
-                url.username ||
-                url.password ||
-                item.url.length > 2048
-              )
-                return null;
-              return (
-                <li key={`${url.href}-${index}`} style={{ margin: "2px 0" }}>
-                  <a
-                    href={url.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: caretTokens.accent }}
-                  >
-                    {item.title}
-                  </a>
-                  {typeof item.snippet === "string" && item.snippet.trim() && (
-                    <div style={{ color: caretTokens.textMuted, marginTop: 2 }}>
-                      {item.snippet}
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
+      <div style={detailLabelStyle}>search results</div>
+      <ul style={{ ...summaryStyle, margin: 0, padding: "7px 9px 7px 26px" }}>
+        {sources.map((source, index) => (
+          <li key={`${source.url}-${index}`} style={{ margin: "2px 0" }}>
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: caretTokens.accent }}
+            >
+              {source.title}
+            </a>
+            {source.snippet && (
+              <div style={{ color: caretTokens.textMuted, marginTop: 2 }}>
+                {source.snippet}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
