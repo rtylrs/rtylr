@@ -1,6 +1,7 @@
 package application
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 	"unicode/utf8"
 
@@ -33,7 +35,7 @@ func (e *AssistantToolExecutor) fetchPage(ctx context.Context, input map[string]
 		return nil, errors.New("could not build the request")
 	}
 	req.Header.Set("User-Agent", caretUserAgent)
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,text/plain;q=0.9,application/json;q=0.8")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,text/plain;q=0.9,application/json;q=0.8,application/pdf;q=0.8")
 	resp, err := e.httpClient().Do(req)
 	if err != nil {
 		if errors.Is(err, errPrivateAddress) || strings.Contains(err.Error(), errPrivateAddress.Error()) {
@@ -56,6 +58,11 @@ func (e *AssistantToolExecutor) fetchPage(ctx context.Context, input map[string]
 		title, description, text = extractPageText(string(body))
 	case strings.HasPrefix(mediaType, "text/") || strings.Contains(mediaType, "json") || strings.Contains(mediaType, "xml"):
 		text = string(body)
+	case mediaType == "application/pdf" || bytes.HasPrefix(body, []byte("%PDF-")):
+		if text, err = extractPDFText(body); err != nil {
+			return nil, err
+		}
+		title = path.Base(resp.Request.URL.Path)
 	default:
 		return nil, fmt.Errorf("the page is %s, which Caret can't read as text", mediaType)
 	}
