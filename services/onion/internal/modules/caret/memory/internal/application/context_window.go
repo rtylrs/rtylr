@@ -197,7 +197,11 @@ func renderMemories(memories []domain.UserMemory, budget int) string {
 		if value == "" {
 			continue
 		}
-		line := "- " + value + "\n"
+		line := "- " + value
+		if strings.HasPrefix(memory.Key, "learned_") {
+			line += " (picked up from a chat, not confirmed)"
+		}
+		line += "\n"
 		if out.Len()+len(line) > budget {
 			break
 		}
