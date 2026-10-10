@@ -155,3 +155,22 @@ func TestSearXNGUnresponsiveEnginesNamesEachFailure(t *testing.T) {
 		t.Fatalf("unresponsive engines = %q", got)
 	}
 }
+
+func TestSearXNGSearchPassesNewsAndRecency(t *testing.T) {
+	var seen string
+	search := SearXNGWebSearch{BaseURL: "https://search.example", Client: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		seen = r.URL.RawQuery
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"results":[{"title":"T","url":"https://news.example/a","content":"c","publishedDate":"2026-10-10T08:00:00"}]}`))}, nil
+	})}}
+	executor := NewAssistantToolExecutor(nil, search)
+	output, _, err := executor.ExecuteCaretTool(context.Background(), "web.search", map[string]any{"query": "rate decision", "news": true, "recency": "week"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(seen, "categories=news") || !strings.Contains(seen, "time_range=week") {
+		t.Fatalf("query = %s", seen)
+	}
+	if output["sources"].([]map[string]string)[0]["published"] != "2026-10-10T08:00:00" {
+		t.Fatalf("sources = %#v", output["sources"])
+	}
+}

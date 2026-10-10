@@ -55,6 +55,41 @@ func registerGeneralTool(name string, run generalTool) {
 // different angle) without turning one message into a crawl.
 const MaxWebSearchesPerMessage = 3
 
+// WebSearchOptions narrow one search. They travel on the context so every
+// backend in the fallback chain sees them without widening the interface.
+type WebSearchOptions struct {
+	// Recency is "day", "week", "month" or "year"; empty means any time.
+	Recency string
+	// News searches news sources instead of the general web.
+	News bool
+}
+
+type webSearchOptionsKey struct{}
+
+func withWebSearchOptions(ctx context.Context, opts WebSearchOptions) context.Context {
+	return context.WithValue(ctx, webSearchOptionsKey{}, opts)
+}
+
+func webSearchOptionsFrom(ctx context.Context) WebSearchOptions {
+	opts, _ := ctx.Value(webSearchOptionsKey{}).(WebSearchOptions)
+	return opts
+}
+
+func parseWebSearchOptions(input map[string]any) WebSearchOptions {
+	opts := WebSearchOptions{News: inputBool(input, "news") || strings.EqualFold(inputText(input, "type", "kind", "category"), "news")}
+	switch recency := strings.ToLower(inputText(input, "recency", "time_range", "freshness", "since")); {
+	case strings.HasPrefix(recency, "day"), recency == "24h", recency == "today":
+		opts.Recency = "day"
+	case strings.HasPrefix(recency, "week"), recency == "7d":
+		opts.Recency = "week"
+	case strings.HasPrefix(recency, "month"), recency == "30d":
+		opts.Recency = "month"
+	case strings.HasPrefix(recency, "year"):
+		opts.Recency = "year"
+	}
+	return opts
+}
+
 type webSearchBudgetKey struct{}
 type webSearchBudget struct{ used atomic.Int32 }
 
@@ -121,7 +156,7 @@ func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name strin
 		if budget, ok := ctx.Value(webSearchBudgetKey{}).(*webSearchBudget); ok && budget.used.Add(1) > MaxWebSearchesPerMessage {
 			return nil, true, fmt.Errorf("%d web searches are available per message; answer from the results you have", MaxWebSearchesPerMessage)
 		}
-		result, err := e.Web.Search(ctx, query)
+		result, err := e.Web.Search(withWebSearchOptions(ctx, parseWebSearchOptions(input)), query)
 		return result, true, err
 	default:
 		run, ok := generalTools[name]
@@ -362,6 +397,13 @@ func (s SearXNGWebSearch) Search(ctx context.Context, query string) (map[string]
 	params.Set("format", "json")
 	// News engines keep answering when a web engine is suspended.
 	params.Set("categories", "general,news")
+	opts := webSearchOptionsFrom(ctx)
+	if opts.News {
+		params.Set("categories", "news")
+	}
+	if opts.Recency != "" {
+		params.Set("time_range", opts.Recency)
+	}
 	endpoint.RawQuery = params.Encode()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if err != nil {
@@ -414,6 +456,7 @@ func parseSearXNGResults(payload []byte, query string) (map[string]any, error) {
 			URL        string `json:"url"`
 			Content    string `json:"content"`
 			Suggestion string `json:"suggestion"`
+			Published  string `json:"publishedDate"`
 		} `json:"results"`
 	}
 	if err := json.Unmarshal(payload, &response); err != nil {
@@ -425,16 +468,17 @@ func parseSearXNGResults(payload []byte, query string) (map[string]any, error) {
 		if snippet == "" {
 			snippet = strings.TrimSpace(result.Suggestion)
 		}
-		results = append(results, webSearchResult{Title: result.Title, URL: result.URL, Snippet: snippet})
+		results = append(results, webSearchResult{Title: result.Title, URL: result.URL, Snippet: snippet, Published: result.Published})
 	}
 	return searchSourcesOutput(results, query)
 }
 
 // webSearchResult is one hit from any search backend before validation.
 type webSearchResult struct {
-	Title   string
-	URL     string
-	Snippet string
+	Title     string
+	URL       string
+	Snippet   string
+	Published string
 }
 
 // searchSourcesOutput keeps up to eight distinct https results and shapes them
@@ -457,11 +501,15 @@ func searchSourcesOutput(results []webSearchResult, query string) (map[string]an
 		if title == "" {
 			title = parsedURL.Host
 		}
-		sources = append(sources, map[string]string{
+		source := map[string]string{
 			"title":   title,
 			"url":     parsedURL.String(),
 			"snippet": truncateSearchText(strings.TrimSpace(result.Snippet), 1200),
-		})
+		}
+		if published := strings.TrimSpace(result.Published); published != "" && len(published) <= 40 {
+			source["published"] = published
+		}
+		sources = append(sources, source)
 		seen[parsedURL.String()] = true
 	}
 	if len(sources) == 0 {

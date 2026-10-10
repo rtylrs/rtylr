@@ -29,7 +29,7 @@ var CoreTools = append(append([]ToolDef(nil), seedTools...), generalToolDefs...)
 // seedTools is the business registry. The long-term plan is to source this
 // list from each module's MCP descriptor.
 var seedTools = []ToolDef{
-	{Name: "web.search", Description: "Search the public web for current information and return an answer with sources. Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question"}`},
+	{Name: "web.search", Description: "Search the public web or the news for current information. Returns results with snippets and source links (and publish dates for news). Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question","news":false,"recency":"optional day|week|month|year"}`},
 	{Name: "tools.search", Description: "Find more tools by describing what you need, e.g. \"list team members\" or \"unpaid invoices\". Covers HR and the team, CRM customers, POS and store orders, products and stock, finance, bookings, support, loyalty, Flow tasks, and insights. Returns matching tools with their inputs; call one next.", Module: "tools", Scope: "read", InputHint: `{"query":"what you need"}`},
 	{Name: "account.profile", Description: "Read the authenticated person's name and current business identity.", Module: "account", Scope: "read", InputHint: `{}`},
 	{Name: "utilities.calculate", Description: "Evaluate arithmetic exactly using numbers supplied by the user or verified results. Supports + - * / parentheses, percentages (\"15% of 200\"), pi, and sqrt, pow, round(x, places), min, max, abs, floor, ceil, ln, log10, exp.", Module: "utilities", Scope: "read", InputHint: `{"expression":"round((120 * 0.2) + pow(1.05, 3), 2)"}`},

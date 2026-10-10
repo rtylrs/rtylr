@@ -71,6 +71,9 @@ func (s BraveWebSearch) Search(ctx context.Context, query string) (map[string]an
 	params := url.Values{}
 	params.Set("q", query)
 	params.Set("count", "10")
+	if freshness, ok := map[string]string{"day": "pd", "week": "pw", "month": "pm", "year": "py"}[webSearchOptionsFrom(ctx).Recency]; ok {
+		params.Set("freshness", freshness)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint+"?"+params.Encode(), nil)
 	if err != nil {
 		return nil, errors.New("web search request failed")
@@ -105,6 +108,7 @@ func parseBraveResults(payload []byte, query string) (map[string]any, error) {
 				Title       string `json:"title"`
 				URL         string `json:"url"`
 				Description string `json:"description"`
+				Age         string `json:"age"`
 			} `json:"results"`
 		} `json:"web"`
 	}
@@ -114,9 +118,10 @@ func parseBraveResults(payload []byte, query string) (map[string]any, error) {
 	results := make([]webSearchResult, 0, len(response.Web.Results))
 	for _, result := range response.Web.Results {
 		results = append(results, webSearchResult{
-			Title:   plainSearchText(result.Title),
-			URL:     result.URL,
-			Snippet: plainSearchText(result.Description),
+			Title:     plainSearchText(result.Title),
+			URL:       result.URL,
+			Snippet:   plainSearchText(result.Description),
+			Published: result.Age,
 		})
 	}
 	return searchSourcesOutput(results, query)
