@@ -14,6 +14,7 @@ import {
   VERIFICATION_TOKEN_MAX_LENGTH,
 } from './verificationToken';
 import notify from '../../shared/lib/notify/notify';
+import { authInputClass } from '../../shared/components/AuthField';
 
 type Status = 'loading' | 'success' | 'error' | 'awaitingCode';
 
@@ -121,7 +122,7 @@ const VerifyEmail: React.FC = () => {
         {status === 'loading' && (
           <>
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 mx-auto">
-              <Loader2 className="h-8 w-8 text-[#4583C4] animate-spin" />
+              <Loader2 className="h-8 w-8 text-[#111]/70 animate-spin" />
             </div>
             <p className="mt-4 text-sm text-[#666]">{t('auth.verify.verifying')}</p>
           </>
@@ -150,7 +151,7 @@ const VerifyEmail: React.FC = () => {
             {status === 'awaitingCode' ? (
               <>
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 mx-auto">
-                  <Mail className="h-8 w-8 text-[#4583C4]" />
+                  <Mail className="h-8 w-8 text-[#111]/70" />
                 </div>
                 <p className="mt-4 text-sm text-[#666]">{t('auth.verify.enterCodePrompt')}</p>
               </>
@@ -192,7 +193,7 @@ const VerifyEmail: React.FC = () => {
                   onChange={(event) =>
                     setVerificationCode(normalizeVerificationToken(event.target.value))
                   }
-                  className="w-full h-11 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base text-[#111] text-center tracking-[0.15em] outline-none focus:border-[#4583C4]"
+                  className={authInputClass}
                 />
                 <Button type="submit" variant="primary" fullWidth height={44}>
                   {t('auth.verify.verifyCode')}
@@ -212,7 +213,7 @@ const VerifyEmail: React.FC = () => {
                 value={resendEmail}
                 onChange={(e) => setResendEmail(e.target.value)}
                 required
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none focus:border-[#4583C4]"
+                className={authInputClass}
               />
               <Button
                 type="submit"
@@ -234,7 +235,7 @@ const VerifyEmail: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate({ to: '/' })}
-            className="text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
+            className="text-sm text-[#111] font-medium underline decoration-black/25 hover:decoration-black/70 underline-offset-2"
           >
             {t('auth.reset.backToSignIn')}
           </button>
