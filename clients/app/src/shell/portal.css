@@ -71,6 +71,39 @@
 .portal-rail-tooltip > span {
   display: none;
 }
+/* Each app's rail tooltip wears the app's colour. Light colours take dark
+   text; white on them would fall below 3:1. */
+.portal-rail-tooltip-home {
+  background: #4583c4 !important;
+}
+.portal-rail-tooltip-insights {
+  background: var(--app-insights) !important;
+  color: #111 !important;
+}
+.portal-rail-tooltip-flow {
+  background: var(--app-flow) !important;
+}
+.portal-rail-tooltip-crm {
+  background: var(--app-crm) !important;
+}
+.portal-rail-tooltip-erp {
+  background: var(--app-erp) !important;
+  color: #111 !important;
+}
+.portal-rail-tooltip-finance {
+  background: var(--app-finance) !important;
+  color: #111 !important;
+}
+.portal-rail-tooltip-hr {
+  background: var(--app-hr) !important;
+  color: #111 !important;
+}
+.portal-rail-tooltip-pos {
+  background: var(--app-pos) !important;
+}
+.portal-rail-tooltip-automations {
+  background: #64748b !important;
+}
 .portal-workspace {
   display: flex;
   flex: 1;
