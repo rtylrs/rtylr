@@ -371,9 +371,9 @@ const maxContinuationBytes = 128000
 // overflow, the oldest results are dropped rather than the newest ones or the
 // closing instruction, which is what the model must act on.
 func continuationPrompt(base, results, replySoFar string, final bool) string {
-	instruction := "\nExplain the result to the user, or call the next needed tool. Do not repeat completed calls."
+	instruction := "\nNext step: if these results answer the request, give the answer now, leading with the finding. If something the answer needs is still missing, call the next tool (independent calls together, then stop). If a tool failed, try one other route if there is one; otherwise say what could not be checked. Never repeat a completed call, and never claim a check that did not run."
 	if final {
-		instruction = "\nNo more tools can run for this request. Answer now from the results above; if something could not be checked, say so plainly."
+		instruction = "\nNo more tools can run for this request. Answer now from the results above, leading with the finding; say plainly what could not be checked."
 	}
 	return continuationPromptWith(base, results, replySoFar, instruction)
 }

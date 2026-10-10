@@ -70,7 +70,7 @@ func TestContinuationPromptDropsOldestResultsAndKeepsInstruction(t *testing.T) {
 	if !strings.HasPrefix(got, base) || !strings.Contains(got, "NEWEST") || strings.Contains(got, "OLDEST") {
 		t.Fatal("continuation must keep the base prompt and newest results, dropping the oldest")
 	}
-	if !strings.HasSuffix(got, "Do not repeat completed calls.") {
+	if !strings.HasSuffix(got, "never claim a check that did not run.") {
 		t.Fatal("closing instruction must survive truncation")
 	}
 }
