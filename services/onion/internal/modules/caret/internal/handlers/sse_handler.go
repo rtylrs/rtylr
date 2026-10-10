@@ -98,6 +98,8 @@ type GenerateTextStreamRequest struct {
 	SystemContext  string                     `json:"system_context"` // optional — app context injected as system message
 	Mode           string                     `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
 	PageContext    map[string]any             `json:"page_context,omitempty"`
+	// Timezone is the person's IANA timezone, from their browser.
+	Timezone string `json:"timezone,omitempty"`
 }
 
 // UnmarshalJSON keeps older Caret clients working while maintaining a single
@@ -145,6 +147,9 @@ func (r *GenerateTextStreamRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if err := decode(&parsed.Files, "files"); err != nil {
+		return err
+	}
+	if err := decode(&parsed.Timezone, "timezone"); err != nil {
 		return err
 	}
 	*r = parsed

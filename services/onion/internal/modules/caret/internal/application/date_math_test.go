@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"testing"
+	"time"
 )
 
 func TestDateMathSpanCountsWorkingDays(t *testing.T) {
@@ -36,5 +37,19 @@ func TestDateMathAddsMonthsAndWorkingDays(t *testing.T) {
 	}
 	if _, _, err := e.ExecuteCaretTool(context.Background(), "utilities.date_math", map[string]any{"from": "next blursday"}); err == nil {
 		t.Fatal("nonsense date accepted")
+	}
+}
+
+func TestDateMathTodayIsThePersonsLocalDay(t *testing.T) {
+	e := &AssistantToolExecutor{}
+	far := time.FixedZone("UTC+14", 14*3600)
+	ctx := WithUserLocation(context.Background(), far)
+	output, _, err := e.ExecuteCaretTool(ctx, "utilities.date_math", map[string]any{"from": "today", "days": 0.0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := time.Now().In(far).Format(time.DateOnly)
+	if got := output["result"].(map[string]any)["date"]; got != want {
+		t.Fatalf("today = %v, want %v", got, want)
 	}
 }

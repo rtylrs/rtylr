@@ -154,7 +154,9 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 			return
 		}
 	}
-	enhancedPrompt := application.BuildAssistantPromptWithFiles(req.Prompt, req.SystemContext, savedContext, req.Files, req.PageContext, requestNow)
+	location := application.LocationFor(req.Timezone)
+	ctx = application.WithUserLocation(ctx, location)
+	enhancedPrompt := application.BuildAssistantPromptWithFiles(req.Prompt, req.SystemContext, savedContext, req.Files, req.PageContext, requestNow.In(location))
 	ctx = snips.WithImages(ctx, req.Images)
 
 	cachePlan := application.BuildCacheWritePlan(mode, application.TurnRequest{

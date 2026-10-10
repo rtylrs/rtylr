@@ -54,3 +54,14 @@ func TestAssistantPromptLetsCaretLearnPreferences(t *testing.T) {
 		t.Fatal("the prompt must bound how often Caret proposes a memory")
 	}
 }
+
+func TestAssistantPromptStatesLocalTime(t *testing.T) {
+	now := time.Date(2026, 10, 11, 21, 30, 0, 0, time.UTC).In(LocationFor("Asia/Beirut"))
+	prompt := BuildAssistantPrompt("hi", "", "", nil, now)
+	if !strings.Contains(prompt, "It is Monday, October 12, 2026, 00:30 in Asia/Beirut (UTC+03:00)") {
+		t.Fatalf("prompt opening = %.160s", prompt)
+	}
+	if LocationFor("Mars/Olympus") != time.UTC || LocationFor("") != time.UTC {
+		t.Fatal("an unknown timezone must fall back to UTC")
+	}
+}

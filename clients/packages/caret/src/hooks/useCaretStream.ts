@@ -167,6 +167,7 @@ export function useCaretStream({
               data_url: dataUrl,
             })),
             files: texts,
+            timezone: browserTimezone(),
           }),
         });
 
@@ -356,4 +357,13 @@ export function useCaretStream({
   }
 
   return { sendMessage, stopStreaming };
+}
+
+/** The person's IANA timezone, so Caret's "today" is their today. */
+function browserTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+  } catch {
+    return "";
+  }
 }

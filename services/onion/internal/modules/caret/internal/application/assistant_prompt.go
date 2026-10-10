@@ -45,10 +45,29 @@ func BuildAssistantPromptWithFiles(request, scope, context string, files []Attac
 	}
 	return strings.TrimSpace(strings.NewReplacer(
 		"{{FILES}}", attached,
-		"{{TODAY}}", now.Format(time.RFC3339),
+		"{{TODAY}}", describeNow(now),
 		"{{TOOLS}}", catalog.String(),
 		"{{SCOPE}}", escapeCaretPromptData(plannerContext),
 		"{{CONTEXT}}", escapeCaretPromptData(TruncateUTF8ToBytes(context, MaxAssistantContextBytes)),
 		"{{REQUEST}}", escapeCaretPromptData(SanitizeUserInput(request, MaxUserPromptLen)),
 	).Replace(assistantPromptTemplate))
+}
+
+// describeNow spells out the moment in the person's timezone, so "today",
+// "this morning" and "end of the week" mean what they mean to them.
+func describeNow(now time.Time) string {
+	_, offset := now.Zone()
+	zone := now.Location().String()
+	if zone == "Local" || zone == "" {
+		zone = "UTC"
+	}
+	return now.Format("Monday, January 2, 2006, 15:04") + " in " + zone + " (" + formatUTCOffset(offset) + ")"
+}
+
+// LocationFor resolves the person's IANA timezone, falling back to UTC.
+func LocationFor(zone string) *time.Location {
+	if location, err := loadToolLocation(zone); err == nil && zone != "" {
+		return location
+	}
+	return time.UTC
 }

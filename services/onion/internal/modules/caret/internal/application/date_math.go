@@ -14,17 +14,18 @@ func init() {
 
 // dateMath answers the date questions models get wrong: the span between two
 // dates (with working days), a date plus or minus an offset, and weekdays.
-func (e *AssistantToolExecutor) dateMath(_ context.Context, input map[string]any) (map[string]any, error) {
+func (e *AssistantToolExecutor) dateMath(ctx context.Context, input map[string]any) (map[string]any, error) {
+	today := todayIn(ctx)
 	weekend, err := weekendDays(inputText(input, "weekend"))
 	if err != nil {
 		return nil, err
 	}
-	start, err := parseToolDate(inputText(input, "from", "start", "date", "start_date"))
+	start, err := parseToolDateFrom(inputText(input, "from", "start", "date", "start_date"), today)
 	if err != nil {
 		return nil, err
 	}
 	if end := inputText(input, "to", "end", "end_date"); end != "" {
-		finish, err := parseToolDate(end)
+		finish, err := parseToolDateFrom(end, today)
 		if err != nil {
 			return nil, err
 		}
@@ -109,10 +110,15 @@ func describeDate(date time.Time) map[string]any {
 	return map[string]any{"date": date.Format(time.DateOnly), "weekday": date.Weekday().String(), "iso_week": week, "day_of_year": date.YearDay()}
 }
 
-// parseToolDate reads YYYY-MM-DD, an RFC 3339 timestamp, or "today".
+// parseToolDate reads YYYY-MM-DD, an RFC 3339 timestamp, or "today" (UTC).
 func parseToolDate(raw string) (time.Time, error) {
+	return parseToolDateFrom(raw, time.Now().UTC().Truncate(24*time.Hour))
+}
+
+// parseToolDateFrom resolves "today", "tomorrow" and "yesterday" against the
+// given date (midnight UTC of the person's local day).
+func parseToolDateFrom(raw string, today time.Time) (time.Time, error) {
 	raw = strings.TrimSpace(strings.ToLower(raw))
-	today := time.Now().UTC().Truncate(24 * time.Hour)
 	switch raw {
 	case "", "today", "now":
 		return today, nil
@@ -151,4 +157,22 @@ func weekendDays(raw string) (map[time.Weekday]bool, error) {
 		}
 	}
 	return out, nil
+}
+
+type userLocationKey struct{}
+
+// WithUserLocation records the person's timezone for tools that resolve
+// "today".
+func WithUserLocation(ctx context.Context, location *time.Location) context.Context {
+	return context.WithValue(ctx, userLocationKey{}, location)
+}
+
+// todayIn is the person's current date, as midnight UTC of that day.
+func todayIn(ctx context.Context) time.Time {
+	location, ok := ctx.Value(userLocationKey{}).(*time.Location)
+	if !ok || location == nil {
+		location = time.UTC
+	}
+	local := time.Now().In(location)
+	return time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, time.UTC)
 }
