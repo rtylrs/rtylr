@@ -51,6 +51,7 @@ const (
 	// primary ("deepseek", "gemini", "openai", "opencode"). Empty uses default order.
 	AIPrimaryProviderEnvVar = "AI_PRIMARY_PROVIDER"
 	SearXNGURLEnvVar        = "SEARXNG_URL"
+	BraveSearchAPIKeyEnvVar = "BRAVE_SEARCH_API_KEY"
 )
 
 const (
@@ -106,6 +107,7 @@ type AppConfig struct {
 	DeepSeekAPIKey    string
 	AIPrimaryProvider string
 	SearXNGURL        string
+	BraveSearchAPIKey string
 
 	// FormMappingCheckpointPath points the Caret document-to-form mapping tool at
 	// a form-mapping classifier checkpoint (directory, .safetensors, or .json).

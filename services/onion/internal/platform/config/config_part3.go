@@ -136,6 +136,15 @@ func GetSearXNGURL() string {
 	return strings.TrimSpace(os.Getenv(SearXNGURLEnvVar))
 }
 
+// GetBraveSearchAPIKey returns the optional Brave Search API key that backs
+// up SearXNG when its free engines return nothing.
+func GetBraveSearchAPIKey() string {
+	if GlobalConfig != nil {
+		return strings.TrimSpace(GlobalConfig.BraveSearchAPIKey)
+	}
+	return strings.TrimSpace(os.Getenv(BraveSearchAPIKeyEnvVar))
+}
+
 func IsAnyAIConfigured() bool {
 	return IsDeepSeekConfigured() || IsOpenAIConfigured() || IsGeminiConfigured() || IsOpenCodeConfigured()
 }
