@@ -17,6 +17,7 @@ service CompatibilityService {
   importCustomers(BodyRequest) -> JsonResponse @post("/customers/import") @body("body")
   mergeCustomers(BodyRequest) -> JsonResponse @post("/customers/merge") @body("body")
   exportCustomer(ExportCustomerRequest) -> JsonResponse @get("/customers/export")
+  deleteCustomer(IdQueryRequest) -> JsonResponse @delete("/customers")
 
   awardPoints(BodyRequest) -> JsonResponse @post("/loyalty/award") @body("body")
   redeemPoints(BodyRequest) -> JsonResponse @post("/loyalty/redeem") @body("body")
@@ -29,15 +30,18 @@ service CompatibilityService {
   getLoyaltyTiers(EmptyRequest) -> JsonResponse @get("/loyalty/tiers")
   createLoyaltyTier(BodyRequest) -> JsonResponse @post("/loyalty/tiers") @body("body")
   updateLoyaltyTier(BodyRequest) -> JsonResponse @put("/loyalty/tiers") @body("body")
+  deleteLoyaltyTier(PathRequest) -> JsonResponse @delete("/loyalty/tiers/{id}")
 
   listSegments(EmptyRequest) -> JsonResponse @get("/segments")
   getSegment(IdQueryRequest) -> JsonResponse @get("/segments/detail")
   getSegmentCustomers(SegmentCustomersRequest) -> JsonResponse @get("/segments/customers")
   createSegment(BodyRequest) -> JsonResponse @post("/segments") @body("body")
   updateSegment(BodyRequest) -> JsonResponse @put("/segments") @body("body")
+  deleteSegment(IdQueryRequest) -> JsonResponse @delete("/segments")
 
   listCampaigns(PageRequest) -> JsonResponse @get("/campaigns")
   getCampaign(IdQueryRequest) -> JsonResponse @get("/campaigns/detail")
+  getCampaignById(PathRequest) -> JsonResponse @get("/campaigns/{id}")
   getCampaignStats(CampaignStatsRequest) -> JsonResponse @get("/campaigns/stats")
   createCampaign(BodyRequest) -> JsonResponse @post("/campaigns") @body("body")
   updateCampaign(PathBodyRequest) -> JsonResponse @put("/campaigns/{id}") @body("body")
@@ -45,16 +49,10 @@ service CompatibilityService {
   deleteCampaign(PathRequest) -> JsonResponse @delete("/campaigns/{id}")
 
   listAutomations(EmptyRequest) -> JsonResponse @get("/automations")
-  getAutomation(PathRequest) -> JsonResponse @get("/automations/{id}")
   createAutomation(BodyRequest) -> JsonResponse @post("/automations") @body("body")
   updateAutomation(PathBodyRequest) -> JsonResponse @put("/automations/{id}") @body("body")
   deleteAutomation(PathRequest) -> JsonResponse @delete("/automations/{id}")
 
-  listTemplates(EmptyRequest) -> JsonResponse @get("/templates")
-  createTemplate(BodyRequest) -> JsonResponse @post("/templates") @body("body")
-  listFeedback(EmptyRequest) -> JsonResponse @get("/feedback")
-  getSettings(EmptyRequest) -> JsonResponse @get("/settings")
-  updateSettings(BodyRequest) -> JsonResponse @put("/settings") @body("body")
 
   getSalesPipeline(EmptyRequest) -> JsonResponse @get("/sales/pipeline")
   listLeads(PageRequest) -> JsonResponse @get("/sales/leads")

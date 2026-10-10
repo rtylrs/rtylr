@@ -70,3 +70,4 @@ message PathBodyRequest {
   id: string
   body: json
 }
+
