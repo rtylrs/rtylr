@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -48,14 +49,16 @@ func TestAssistantWebSearchRejectsPersonalDataAndLimitsCalls(t *testing.T) {
 	if _, _, err := executor.ExecuteCaretTool(ctx, "web.search", map[string]any{"query": "Call me at +1 (555) 123-4567"}); err == nil {
 		t.Fatal("expected personal phone number to be rejected")
 	}
-	if _, executed, err := executor.ExecuteCaretTool(ctx, "web.search", map[string]any{"query": "Gemini release notes from 2026-10-03"}); err != nil || !executed {
-		t.Fatalf("first public search returned executed=%v err=%v", executed, err)
+	for i := 1; i <= MaxWebSearchesPerMessage; i++ {
+		if _, executed, err := executor.ExecuteCaretTool(ctx, "web.search", map[string]any{"query": fmt.Sprintf("Gemini release notes part %d", i)}); err != nil || !executed {
+			t.Fatalf("search %d returned executed=%v err=%v", i, executed, err)
+		}
 	}
 	if _, _, err := executor.ExecuteCaretTool(ctx, "web.search", map[string]any{"query": "another query"}); err == nil {
-		t.Fatal("expected the second search in one turn to be rejected")
+		t.Fatal("expected a search past the per-message limit to be rejected")
 	}
-	if got := calls.Load(); got != 1 {
-		t.Fatalf("search calls = %d, want 1", got)
+	if got := calls.Load(); got != MaxWebSearchesPerMessage {
+		t.Fatalf("search calls = %d, want %d", got, MaxWebSearchesPerMessage)
 	}
 }
 

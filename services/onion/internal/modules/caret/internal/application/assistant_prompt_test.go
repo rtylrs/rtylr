@@ -44,3 +44,13 @@ func TestBuildAssistantPromptKeepsOnlyRelevantToolsAndSupportsWebSearch(t *testi
 		t.Fatal("web research prompt included unrelated business write tools")
 	}
 }
+
+func TestAssistantPromptLetsCaretLearnPreferences(t *testing.T) {
+	prompt := BuildAssistantPrompt("I always want answers in bullet points", "", "", nil, time.Now())
+	if !strings.Contains(prompt, "memory.remember [write, approval required]") {
+		t.Fatal("memory.remember must always be offered so Caret can propose saving a lasting preference")
+	}
+	if !strings.Contains(prompt, "propose at most one memory per reply") {
+		t.Fatal("the prompt must bound how often Caret proposes a memory")
+	}
+}

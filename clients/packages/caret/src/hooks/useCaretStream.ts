@@ -20,7 +20,12 @@ export interface UseCaretStreamResult {
     modeOverride?: CaretMode,
     images?: File[],
   ) => Promise<void>;
-  stopStreaming: (tabId?: string) => void;
+  /**
+   * Stops a reply. By default the server stops generating too; pass
+   * { keepServer: true } to only stop listening (closing a chat tab), so the
+   * reply still finishes and is saved to the chat.
+   */
+  stopStreaming: (tabId?: string, options?: { keepServer?: boolean }) => void;
 }
 
 interface OpenThinking {
@@ -41,16 +46,36 @@ export function useCaretStream({
   systemContext,
   pageContext,
 }: UseCaretStreamParams): UseCaretStreamResult {
-  const stopStreaming = useCallback((tabId?: string): void => {
+  const stopStreaming = useCallback(
+    (tabId?: string, options?: { keepServer?: boolean }): void => {
     const store = useCaretStore.getState();
     const targetTabId = tabId ?? store.activeTabId;
     const controller = streamControllers.get(targetTabId);
+    const sessionId = store.tabs.find((tab) => tab.id === targetTabId)?.sessionId;
+    // A dropped connection keeps the reply generating on the server so it is
+    // not lost; an explicit stop has to say so.
+    if (controller && sessionId && !options?.keepServer) {
+      const baseUrl = apiBaseUrl.endsWith("/") ? apiBaseUrl : `${apiBaseUrl}/`;
+      const token = readAuthToken();
+      void fetch(`${baseUrl}ai/generate-text-stream/stop`, {
+        method: "POST",
+        credentials: "include",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ session_id: sessionId }),
+      }).catch(() => undefined);
+    }
     controller?.abort();
     if (streamControllers.get(targetTabId) === controller) {
       streamControllers.delete(targetTabId);
     }
     store.setStreaming(false, targetTabId);
-  }, []);
+    },
+    [apiBaseUrl],
+  );
 
   const sendMessage = useCallback(
     async (
@@ -286,6 +311,12 @@ export function useCaretStream({
           },
           tabId,
         );
+        break;
+
+      case "follow_ups":
+        if (Array.isArray(event.items) && event.items.length > 0) {
+          store.setLastAssistantFollowUps(event.items.slice(0, 3), tabId);
+        }
         break;
 
       case "message_end":

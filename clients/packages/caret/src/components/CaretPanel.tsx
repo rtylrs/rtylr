@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import "../styles/index.css";
 import { caretTokens } from "../ui/tokens";
@@ -19,6 +19,13 @@ import { buildCaretEmptyState, type CaretStarter } from "../lib/suggestions";
 import type { CaretChatSummary, CaretProject } from "../types/chat";
 import type { CaretPageContext } from "../types/context";
 import type { CaretMessage, ToolCallBlock } from "../types/message";
+import {
+  awaitsBackgroundReply,
+  BACKGROUND_REPLY_POLL_MS,
+  BACKGROUND_REPLY_WAIT_MS,
+  PENDING_REPLY_ID,
+  withPendingReply,
+} from "../lib/backgroundReply";
 import HeaderBar from "./header/HeaderBar";
 import MessageList from "./MessageList";
 import MessageSkeleton from "./MessageSkeleton";
@@ -167,6 +174,21 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const retrySessions = useCallback((): void => {
     void refetchSessions();
   }, [refetchSessions]);
+  // When a reply finishes, refresh the chat list so a new chat shows up, and
+  // again shortly after, when the server has written the chat's title.
+  const wasStreaming = useRef(false);
+  useEffect(() => {
+    if (isStreaming) {
+      wasStreaming.current = true;
+      return;
+    }
+    if (!wasStreaming.current) return;
+    wasStreaming.current = false;
+    const sessionsKey = { queryKey: ["caret", "sessions", userId] };
+    void queryClient.invalidateQueries(sessionsKey);
+    const titled = setTimeout(() => void queryClient.invalidateQueries(sessionsKey), 4000);
+    return () => clearTimeout(titled);
+  }, [isStreaming, queryClient, userId]);
   const loadChat = useLoadCaretChat({ userId, apiBaseUrl });
   const setRecent = useChatsStore((s) => s.setRecent);
   const removeRecent = useChatsStore((s) => s.removeRecent);
@@ -268,6 +290,43 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     [caret, sessions, setView, workspace],
   );
 
+  // A reply keeps generating on the server when its client leaves. Reopening
+  // that chat shows a placeholder and swaps in the saved reply when it lands.
+  const pollBackgroundReply = useCallback(
+    (tabId: string, tabSessionId: string): void => {
+      const started = Date.now();
+      const poll = (): void => {
+        const tab = useCaretStore
+          .getState()
+          .tabs.find((candidate) => candidate.id === tabId);
+        const last = tab?.messages[tab.messages.length - 1];
+        // Stop once the user moved on: sent a message, or switched chats.
+        if (!tab || tab.sessionId !== tabSessionId || last?.id !== PENDING_REPLY_ID) return;
+        if (Date.now() - started > BACKGROUND_REPLY_WAIT_MS) {
+          caret.setMessages(tab.messages.slice(0, -1), tabId);
+          return;
+        }
+        void loadChat(tabSessionId)
+          .then((loaded) => {
+            const current = useCaretStore
+              .getState()
+              .tabs.find((candidate) => candidate.id === tabId);
+            const currentLast = current?.messages[current.messages.length - 1];
+            if (current?.sessionId !== tabSessionId || currentLast?.id !== PENDING_REPLY_ID) return;
+            if (awaitsBackgroundReply(loaded)) {
+              setTimeout(poll, BACKGROUND_REPLY_POLL_MS);
+              return;
+            }
+            caret.setMessages(loaded, tabId);
+            void queryClient.invalidateQueries({ queryKey: ["caret", "sessions", userId] });
+          })
+          .catch(() => setTimeout(poll, BACKGROUND_REPLY_POLL_MS));
+      };
+      setTimeout(poll, BACKGROUND_REPLY_POLL_MS);
+    },
+    [caret, loadChat, queryClient, userId],
+  );
+
   useEffect(() => {
     if (
       !activeTab ||
@@ -300,17 +359,26 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
     caret.setTabLoading(true, tabId);
     void loadChat(tabSessionId)
-      .then(applyHistory)
+      .then((loaded) => {
+        applyHistory(withPendingReply(loaded));
+        if (awaitsBackgroundReply(loaded)) {
+          pollBackgroundReply(tabId, tabSessionId);
+        }
+      })
       .catch(() => applyHistory([]))
       .finally(() => caret.setTabLoading(false, tabId));
-  }, [activeTab, caret, loadChat]);
+  }, [activeTab, caret, loadChat, pollBackgroundReply]);
+
+
 
   const closeChatTab = useCallback(
     (tabId: string): void => {
       const tab = useCaretStore
         .getState()
         .tabs.find((candidate) => candidate.id === tabId);
-      if (tab?.isStreaming) stopStreaming(tabId);
+      // Closing the tab only stops listening: the reply still finishes and is
+      // saved, and reopening the chat shows it.
+      if (tab?.isStreaming) stopStreaming(tabId, { keepServer: true });
       caret.closeTab(tabId);
     },
     [caret, stopStreaming],
@@ -664,6 +732,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                   showThinking={showThinking}
                   onApproveTool={onApprove}
                   onDenyTool={onDeny}
+                  onFollowUp={(prompt) => void sendMessage(prompt, "agent")}
                 />
               )}
             </div>

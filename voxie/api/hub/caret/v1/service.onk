@@ -12,4 +12,7 @@ service CaretRuntimeService {
   listTools(ListToolsRequest) -> ListToolsResponse @get("/caret/tools")
   getProviderStatus(GetProviderStatusRequest) -> GetProviderStatusResponse @get("/ai/status")
   decideTool(ToolDecisionRequest) -> ToolDecisionResponse @post("/caret/tools/decision")
+  /// Stops the reply generating in a chat. A reply whose client disconnects
+  /// otherwise keeps generating and is saved, so the Stop button calls this.
+  stopReply(StopReplyRequest) -> StopReplyResponse @post("/ai/generate-text-stream/stop")
 }

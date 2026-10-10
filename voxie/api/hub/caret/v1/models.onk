@@ -77,3 +77,12 @@ message ToolDecisionResponse {
   output: json
   duration_ms: int64 @encode(number)
 }
+
+message StopReplyRequest {
+  session_id: string
+}
+
+message StopReplyResponse {
+  /// False when no reply was generating in the chat.
+  stopped: bool
+}

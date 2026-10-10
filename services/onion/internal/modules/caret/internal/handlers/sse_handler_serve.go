@@ -19,7 +19,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	// Every stream event passes through the recorder so the saved reply keeps
 	// its tool steps and timing.
-	var w http.ResponseWriter = newTranscriptWriter(rw, time.Now())
+	var w http.ResponseWriter = newTranscriptWriter(newResilientWriter(rw), time.Now())
 	log := logger.Ctx(ctx)
 
 	log.Info("Processing AI text stream request",
@@ -156,8 +156,10 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 
 	cachePlan = application.DisableExactCachePlan(cachePlan, "conversation and project context change between turns")
 	cachePlan.ProviderPlannerOnly = false
-	cachePlan.ToolBudget = 6
-	cachePlan.ContinuationBudget = 3
+	// Multi-step requests (find the tool, list, look up a detail, answer) need
+	// several rounds; a final wrap-up round always explains what ran.
+	cachePlan.ToolBudget = 10
+	cachePlan.ContinuationBudget = 5
 	req.EnhancedPrompt = enhancedPrompt
 
 	h.setupSSEHeaders(w)
@@ -198,6 +200,12 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 		logger.String("enhanced_prompt_length", strconv.Itoa(len(enhancedPrompt))),
 		logger.String("cache_mode", cachePlan.Mode),
 		logger.String("cache_policy", cachePlan.Policy.Reason))
+
+	// The reply runs on its own context, so it finishes and is saved even if
+	// the client leaves; only the Stop button (or the time limit) ends it.
+	ctx, cancelReply := context.WithTimeout(context.WithoutCancel(ctx), backgroundReplyLimit)
+	defer cancelReply()
+	defer activeReplies.start(authUserID, req.SessionID, cancelReply)()
 
 	tokenChan, err := h.AiService.GenerateTextStream(ctx, enhancedPrompt)
 	if err != nil {

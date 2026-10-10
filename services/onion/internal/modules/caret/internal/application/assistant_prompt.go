@@ -16,7 +16,7 @@ func BuildAssistantPrompt(request, scope, context string, pageContext map[string
 	plannerContext := BuildRequestSystemContext(scope, pageContext)
 	tools := PromptToolsForRequest(ModeAgent, request, plannerContext)
 	seen := map[string]bool{}
-	for _, name := range []string{ToolSearchName, "account.profile", "utilities.calculate", "utilities.time"} {
+	for _, name := range []string{ToolSearchName, "memory.remember", "account.profile", "utilities.calculate", "utilities.time"} {
 		if tool, ok := ToolByName(name); ok {
 			tools = append(tools, tool)
 		}
