@@ -31,4 +31,5 @@ type repository interface {
 	SaveMemory(context.Context, int, string) (*domain.UserMemory, error)
 	DeleteMemory(context.Context, int) error
 	ProjectConversationContext(context.Context, string, string) (string, error)
+	SearchChats(context.Context, int, string, int) ([]domain.ChatSearchHit, error)
 }

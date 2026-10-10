@@ -74,3 +74,12 @@ type ContextItem struct {
 	MemoryKey   string
 	MemoryValue string
 }
+
+// ChatSearchHit is one past message that matched a chat search.
+type ChatSearchHit struct {
+	SessionID string
+	Title     string
+	Role      string
+	Snippet   string
+	CreatedAt time.Time
+}
