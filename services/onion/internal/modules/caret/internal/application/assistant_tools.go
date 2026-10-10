@@ -112,6 +112,12 @@ func WithWebSearchBudget(ctx context.Context) context.Context {
 	return context.WithValue(ctx, webSearchBudgetKey{}, &webSearchBudget{})
 }
 
+// WithReplyBudgets starts the per-message budgets for web searches and
+// sub-agent runs.
+func WithReplyBudgets(ctx context.Context) context.Context {
+	return WithAgentRunBudget(WithWebSearchBudget(ctx))
+}
+
 func NewAssistantToolExecutor(profile AssistantProfileReader, web PublicWebSearcher) *AssistantToolExecutor {
 	if web == nil {
 		client := &http.Client{Timeout: 12 * time.Second}

@@ -61,6 +61,17 @@ type (
 	subAgentUsageKey struct{}
 )
 
+// MaxAgentRunsPerMessage bounds agents.run calls in one reply: two rounds
+// of up to four sub-agents is plenty, and each costs several model calls.
+const MaxAgentRunsPerMessage = 2
+
+type agentRunBudgetKey struct{}
+
+// WithAgentRunBudget starts a fresh agents.run budget for one reply.
+func WithAgentRunBudget(ctx context.Context) context.Context {
+	return context.WithValue(ctx, agentRunBudgetKey{}, &atomic.Int32{})
+}
+
 // IsSubAgent reports whether ctx belongs to a sub-agent, which may only read.
 func IsSubAgent(ctx context.Context) bool {
 	_, ok := ctx.Value(subAgentKey{}).(bool)
@@ -90,6 +101,9 @@ func (e *SubAgentExecutor) ExecuteCaretTool(ctx context.Context, name string, in
 	}
 	if e == nil || e.AI == nil || e.Executors == nil {
 		return nil, true, errors.New("sub-agents are unavailable")
+	}
+	if budget, ok := ctx.Value(agentRunBudgetKey{}).(*atomic.Int32); ok && budget.Add(1) > MaxAgentRunsPerMessage {
+		return nil, true, fmt.Errorf("sub-agents already ran %d times for this message; answer from their reports", MaxAgentRunsPerMessage)
 	}
 	tasks, err := parseSubAgentTasks(input)
 	if err != nil {

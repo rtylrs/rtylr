@@ -137,3 +137,18 @@ func TestParseSubAgentTasksBoundsTheFanOut(t *testing.T) {
 		t.Fatalf("tasks = %#v, %v", tasks, err)
 	}
 }
+
+func TestAgentRunsAreBoundedPerMessage(t *testing.T) {
+	ai := completerFunc(func(context.Context, string) (string, error) { return "<report>ok</report>", nil })
+	agents := &SubAgentExecutor{AI: ai}
+	agents.Executors = func() []ToolExecutor { return nil }
+	ctx := WithAgentRunBudget(context.Background())
+	for i := 0; i < MaxAgentRunsPerMessage; i++ {
+		if _, _, err := agents.ExecuteCaretTool(ctx, AgentsToolName, map[string]any{"tasks": []any{"t"}}); err != nil {
+			t.Fatalf("run %d: %v", i, err)
+		}
+	}
+	if _, _, err := agents.ExecuteCaretTool(ctx, AgentsToolName, map[string]any{"tasks": []any{"t"}}); err == nil {
+		t.Fatal("a run past the per-message budget was allowed")
+	}
+}
