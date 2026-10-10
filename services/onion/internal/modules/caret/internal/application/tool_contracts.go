@@ -82,6 +82,24 @@ func contractForTool(tool ToolDef) toolContract {
 			Freshness:  "live at request time",
 			SideEffect: "read-only; no business data is changed",
 		}
+	case "web.search":
+		return toolContract{
+			Output:     "Up to eight public results, each with title, URL, snippet and, for news, a publish date. Raw material to answer from, not an answer.",
+			Freshness:  "live web",
+			SideEffect: "read-only; sends the query to a public search engine",
+		}
+	case ToolSearchName:
+		return toolContract{
+			Output:     "Up to eight matching tools with their exact call contract; call one next.",
+			Freshness:  "the tool catalog",
+			SideEffect: "read-only",
+		}
+	case "utilities.calculate":
+		return toolContract{Output: "The exact result of the expression.", Freshness: "computed", SideEffect: "read-only"}
+	case "utilities.time":
+		return toolContract{Output: "The timezone, local time and date.", Freshness: "live clock", SideEffect: "read-only"}
+	case "account.profile":
+		return toolContract{Output: "The signed-in person's name, role and current business.", Freshness: "live", SideEffect: "read-only"}
 	case "memory.remember":
 		return toolContract{
 			Input:          `{"key":"stable preference name","value":"fact or preference to remember"}`,
@@ -102,9 +120,15 @@ func contractForTool(tool ToolDef) toolContract {
 
 func genericInputHint(tool ToolDef) string {
 	name := strings.ToLower(tool.Name)
+	description := strings.ToLower(tool.Description)
 	switch {
+	case strings.Contains(name, ".get_") && strings.Contains(description, " by id"):
+		return `{"id":"record id from a list or search tool"}`
+	case strings.Contains(description, "date range") || strings.Contains(description, "over a period"):
+		return `{"start_date":"YYYY-MM-DD","end_date":"YYYY-MM-DD"}`
 	case strings.Contains(name, ".get_"):
-		return `{"id":"record id or stable lookup key"}`
+		// Dashboards, settings and summaries need no identifier.
+		return `{}`
 	case strings.Contains(name, ".list_"):
 		return `{"limit":number,"offset":number,"search":"optional filter","status":"optional filter"}`
 	case strings.Contains(name, "report"), strings.Contains(name, "series"), strings.Contains(name, "comparison"):
