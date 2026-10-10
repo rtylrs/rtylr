@@ -64,6 +64,7 @@ func (m *Module) GetSnipsService() *application.Service {
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	learner, _ := m.memoryService.(application.LessonLearner)
+	history, _ := m.memoryService.(handlers.DecisionHistory)
 	if err := hubcaretv1.RegisterCaretServiceServer(
 		api.NewCaretAPI(),
 		hubcaretv1.WithMux(mux),
@@ -77,6 +78,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 			Decision: &handlers.ToolDecisionHandler{Executors: m.toolExecutors, RequirePendingApproval: true},
 			Learner:  learner,
 			AI:       m.snipsService,
+			History:  history,
 		},
 		hubcaretv1.WithMux(mux),
 	); err != nil {

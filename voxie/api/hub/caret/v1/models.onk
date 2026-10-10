@@ -65,6 +65,9 @@ message ToolDecisionRequest {
   input: json
   decision: string
   mode: string
+  /// The chat the proposal came from. The outcome is recorded there so
+  /// Caret knows in later turns what was done or skipped.
+  session_id: string
 }
 
 message ToolDecisionResponse {

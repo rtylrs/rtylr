@@ -105,3 +105,25 @@ func TestMessageEndCarriesTheStoredReplyID(t *testing.T) {
 		t.Fatalf("message_end lacks the stored id:\n%s", rec.Body.String())
 	}
 }
+
+type recordingHistory struct{ notes []string }
+
+func (h *recordingHistory) EnsureSessionOwnership(context.Context, string, int) error { return nil }
+
+func (h *recordingHistory) StoreMessage(_ context.Context, _ string, _ int, role, content string, _ int) (any, error) {
+	h.notes = append(h.notes, role+": "+content)
+	return nil, nil
+}
+
+func TestDecisionsAreRecordedInTheirChat(t *testing.T) {
+	history := &recordingHistory{}
+	api := &RuntimeAPI{History: history}
+	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: 3, BusinessID: 1})
+	api.recordDecision(ctx, "s1", ToolDecisionResponse{Status: "success", Executed: true, Preview: "Create task \"Call Acme\" due Friday", Message: "Task created."})
+	api.recordDecision(ctx, "s1", ToolDecisionResponse{Status: "denied", Preview: "Delete product Latte"})
+	api.recordDecision(ctx, "", ToolDecisionResponse{Status: "success", Executed: true, Preview: "x"})
+	api.recordDecision(ctx, "s1", ToolDecisionResponse{Status: "error", Preview: "y"})
+	if len(history.notes) != 2 || history.notes[0] != `assistant: Done: Create task "Call Acme" due Friday. Task created.` || history.notes[1] != "assistant: Skipped at your request: Delete product Latte. No changes were made." {
+		t.Fatalf("notes = %q", history.notes)
+	}
+}

@@ -513,6 +513,9 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             input: call.input ?? {},
             decision,
             mode: call.mode ?? mode,
+            // Lets the server note the outcome in the chat for later turns.
+            session_id:
+              caret.tabs.find((tab) => tab.id === tabId)?.sessionId ?? "",
           }),
         });
 

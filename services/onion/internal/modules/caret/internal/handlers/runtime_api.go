@@ -24,6 +24,54 @@ type RuntimeAPI struct {
 	// Learner stores reply feedback; AI distills it into lessons.
 	Learner application.LessonLearner
 	AI      application.TextCompleter
+	// History records an approved or skipped action in its chat.
+	History DecisionHistory
+}
+
+// DecisionHistory is the part of the memory module that records a decided
+// action in the chat it came from.
+type DecisionHistory interface {
+	EnsureSessionOwnership(ctx context.Context, sessionID string, userID int) error
+	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
+}
+
+// recordDecision notes what happened to a proposal in its chat, so the next
+// turn's history says the action was done (or skipped) rather than pending.
+func (a *RuntimeAPI) recordDecision(ctx context.Context, sessionID string, resp ToolDecisionResponse) {
+	user, ok := authPkg.GetAuthUser(ctx)
+	sessionID = strings.TrimSpace(sessionID)
+	if a.History == nil || sessionID == "" || !ok || user == nil || user.UserID <= 0 {
+		return
+	}
+	note := decisionNote(resp)
+	if note == "" {
+		return
+	}
+	if err := a.History.EnsureSessionOwnership(ctx, sessionID, int(user.UserID)); err != nil {
+		return
+	}
+	if _, err := a.History.StoreMessage(ctx, sessionID, int(user.UserID), "assistant", note, len(note)/4); err != nil {
+		logger.Ctx(ctx).Warn("Could not record a tool decision in its chat", logger.Error(err))
+	}
+}
+
+func decisionNote(resp ToolDecisionResponse) string {
+	action := strings.TrimSpace(resp.Preview)
+	if action == "" {
+		action = resp.Tool.Name
+	}
+	switch {
+	case resp.Status == "denied":
+		return "Skipped at your request: " + action + ". No changes were made."
+	case resp.Executed:
+		note := "Done: " + action + "."
+		if message := strings.TrimSpace(resp.Message); message != "" && message != action {
+			note += " " + message
+		}
+		return note
+	default:
+		return ""
+	}
 }
 
 // RateReply records the caller's verdict on a reply in one of their chats and,
@@ -111,6 +159,7 @@ func (a *RuntimeAPI) DecideTool(ctx context.Context, req *hubcaretv1.ToolDecisio
 	if err != nil {
 		return nil, err
 	}
+	a.recordDecision(ctx, req.GetSessionId(), resp)
 	var output json.RawMessage
 	if resp.Output != nil {
 		if output, err = json.Marshal(resp.Output); err != nil {
