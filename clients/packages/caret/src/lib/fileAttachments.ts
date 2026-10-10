@@ -9,7 +9,9 @@ export const TEXT_FILE_ACCEPT = TEXT_EXTENSIONS.map((ext) => `.${ext}`).join(","
 export const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
 export const MAX_TEXT_FILES = 3;
 const MAX_TEXT_FILE_BYTES = 400 * 1024;
-const MAX_PDF_BYTES = 4 * 1024 * 1024;
+const MAX_PDF_BYTES = 2 * 1024 * 1024;
+/** The API accepts 4 MiB per request; leave room for the prompt. */
+export const MAX_ATTACHMENT_PAYLOAD_BYTES = 3.6 * 1024 * 1024;
 
 export interface CaretTextFile {
   name: string;
@@ -54,7 +56,7 @@ export async function readTextFiles(files: File[]): Promise<CaretTextFile[]> {
     files.map(async (file) => {
       if (isPDF(file)) {
         if (file.size > MAX_PDF_BYTES)
-          throw new Error(`${file.name} is larger than 4 MB.`);
+          throw new Error(`${file.name} is larger than 2 MB.`);
         const dataUrl = await readDataUrl(file);
         return {
           name: file.name,

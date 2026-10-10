@@ -3,7 +3,10 @@ import { useCaretStore } from "../stores/caretStore";
 import { consumeSse } from "../protocol/sse";
 import type { CaretStreamEvent } from "../protocol/events";
 import { readAuthToken } from "../lib/auth";
-import { readTextFiles } from "../lib/fileAttachments";
+import {
+  MAX_ATTACHMENT_PAYLOAD_BYTES,
+  readTextFiles,
+} from "../lib/fileAttachments";
 import { prepareCaretImages } from "../lib/imageAttachments";
 import type { CaretPageContext } from "../types/context";
 import type { CaretMode } from "../types/mode";
@@ -115,6 +118,17 @@ export function useCaretStream({
       try {
         const images = await prepareCaretImages(imageFiles);
         const texts = await readTextFiles(textFiles);
+        const payloadBytes =
+          images.reduce((total, image) => total + image.dataUrl.length, 0) +
+          texts.reduce(
+            (total, file) =>
+              total + file.text.length * 2 + (file.data_url?.length ?? 0),
+            0,
+          );
+        if (payloadBytes > MAX_ATTACHMENT_PAYLOAD_BYTES)
+          throw new Error(
+            "These attachments are too large to send together; attach fewer or smaller files.",
+          );
         store.addMessage(
           {
             id: `user-${Date.now()}`,

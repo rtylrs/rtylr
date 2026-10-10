@@ -19,7 +19,7 @@ type AttachedFile struct {
 }
 
 // maxAttachedDocumentBytes bounds a binary attachment before decoding.
-const maxAttachedDocumentBytes = 6 << 20
+const maxAttachedDocumentBytes = 3 << 20
 
 // ExtractAttachedFiles turns binary attachments into text, so the rest of
 // the turn only deals with text files.
@@ -72,7 +72,7 @@ func ValidateAttachedFiles(files []AttachedFile) error {
 			return errors.New("each attached file needs a name under 200 characters")
 		}
 		if len(file.DataURL) > maxAttachedDocumentBytes {
-			return fmt.Errorf("%s is larger than 4 MB", name)
+			return fmt.Errorf("%s is larger than 2 MB", name)
 		}
 		if len(file.Text) > maxAttachedFileBytes {
 			return fmt.Errorf("%s is larger than 400 KB; attach a smaller extract", name)
