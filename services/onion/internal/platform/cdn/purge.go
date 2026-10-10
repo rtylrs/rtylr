@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -37,7 +35,7 @@ func (c *CDN) purgeFileVariants(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
-	id := chi.URLParam(r, "id")
+	id := r.PathValue("id")
 	if id == "" {
 		id = strings.TrimSpace(r.URL.Query().Get("id"))
 	}

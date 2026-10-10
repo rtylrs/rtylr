@@ -1,20 +1,20 @@
 package http
 
 import (
-	"context"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/voxire/onion/internal/platform/observability"
 )
 
 func TestRouteParamNamesFromRequestDoesNotLogValues(t *testing.T) {
-	req := httptest.NewRequest("GET", "/businesses/42/users/7", nil)
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /businesses/{business_id}/users/{user_id}", func(http.ResponseWriter, *http.Request) {})
+	observability.SetRouteMux(mux)
+	t.Cleanup(func() { observability.SetRouteMux(nil) })
 
-	routeCtx := chi.NewRouteContext()
-	routeCtx.URLParams.Add("business_id", "42")
-	routeCtx.URLParams.Add("user_id", "7")
-	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeCtx))
+	req := httptest.NewRequest("GET", "/businesses/42/users/7", nil)
 
 	got := routeParamNamesFromRequest(req)
 	if len(got) != 2 {

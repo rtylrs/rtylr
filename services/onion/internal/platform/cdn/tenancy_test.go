@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
@@ -246,8 +245,8 @@ func TestSignDeliveryRejectsCrossTenantFile(t *testing.T) {
 func TestPurgeRejectsCrossTenantFile(t *testing.T) {
 	db := testutil.OpenDB(t)
 	c := &CDN{db: db, baseURL: "https://cdn.voxire.com"}
-	router := chi.NewRouter()
-	router.Method("PURGE", "/files/{id}", http.HandlerFunc(c.purgeFileVariants))
+	router := http.NewServeMux()
+	router.HandleFunc("PURGE /files/{id}", c.purgeFileVariants)
 
 	other := seedFile(t, db, tenantB, false)
 	seedDerivative(t, db, other)
@@ -481,13 +480,12 @@ func postSign(t *testing.T, c *CDN, req signDeliveryRequest, businessID int64) *
 	return rec
 }
 
-// withFileID injects the chi URL parameter and delivery scope a router would
-// normally have set before calling a delivery handler directly.
+// withFileID sets the path value and delivery scope a router would normally
+// have set before calling a delivery handler directly.
 func withFileID(r *http.Request, id string, scope readScope) *http.Request {
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("id", id)
-	ctx := context.WithValue(r.Context(), chi.RouteCtxKey, rctx)
-	return r.WithContext(withDeliveryScope(ctx, scope))
+	r = r.WithContext(withDeliveryScope(r.Context(), scope))
+	r.SetPathValue("id", id)
+	return r
 }
 
 func testJWT(t *testing.T, secret string, userID, businessID int64) string {

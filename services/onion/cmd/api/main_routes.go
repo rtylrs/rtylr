@@ -6,8 +6,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/organization/scopes"
 
-	"github.com/go-chi/chi/v5"
-
 	hrdashboardstats "github.com/voxire/onion/internal/modules/hr/hr_dashboard/stats"
 	"github.com/voxire/onion/internal/modules/organization/addons"
 	"github.com/voxire/onion/internal/modules/organization/team"
@@ -19,7 +17,6 @@ import (
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/storage"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
@@ -29,7 +26,7 @@ import (
 // setupRoutes registers every API route on r and returns the middlewares the
 // server should wrap it with. It does not apply them itself: the HTTP server
 // builds one chain so the Partials X-API-KEY bypass can sit outside it.
-func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
+func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFunc {
 	modules := initializeModules(ctx)
 
 	// Start the websocket bus with topic-level authorization backed by
@@ -174,9 +171,9 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 		http.IdempotencyMiddleware,
 	}
 
-	http.RegisterCacheRoutes(ctx, r)
-	http.RegisterStatusRoutes(ctx, r)
-	http.RegisterVersionRoutes(r)
+	http.RegisterCacheRoutes(ctx, mux)
+	http.RegisterStatusRoutes(ctx, mux)
+	http.RegisterVersionRoutes(mux)
 
 	// Consolidated CDN / Upload routes
 	cfg := platformConfig.GlobalConfig
@@ -202,23 +199,19 @@ func setupRoutes(ctx context.Context, r *chi.Mux) []http.MiddlewareFunc {
 			logger.Bool("fail_closed", failClosed),
 		)
 	}
-	cdnService.RegisterRoutes(r)
+	cdnService.RegisterRoutes(mux)
 
 	// oneKit contract services: every module's generated service servers
-	// register on one shared mux; the generated code owns every contract path.
-	// Runs before RegisterRoutes so module escape hatches (rate-limited or
-	// special routes) can reference the mux captured in RegisterAPI.
-	oneKitMux := stdhttp.NewServeMux()
-	http.AutoRegisterAPIs(ctx, oneKitMux, modules.apiRegistrars()...)
+	// register on the root mux; the generated code owns every contract path.
+	http.AutoRegisterAPIs(ctx, mux, modules.apiRegistrars()...)
 
-	// Modules that still use the Register* helpers fill a route table instead
-	// of a router. Routes no contract serves yet are mounted on the same mux.
+	// Modules that still use the Register* helpers fill a route table. Compat
+	// contracts serve its routes; the few they cannot (route middlewares, raw
+	// handlers) are mounted from the table on the same mux.
 	legacyRoutes := http.NewLegacyRoutes()
 	http.AutoRegisterRoutes(ctx, legacyRoutes, modules.routeRegistrars()...)
-	registerCompatContracts(oneKitMux, legacyRoutes)
-	legacyRoutes.Mount(oneKitMux, compatRoutes().Contains)
-	observability.SetRouteMux(oneKitMux)
-	http.MountOneKit(r, oneKitMux)
+	registerCompatContracts(mux, legacyRoutes)
+	legacyRoutes.Mount(mux, compatRoutes().Contains)
 
 	return middlewares
 }
@@ -227,8 +220,8 @@ type apiServer struct {
 	middlewares []http.MiddlewareFunc
 }
 
-func (a *apiServer) Setup(ctx context.Context, r *chi.Mux) {
-	a.middlewares = setupRoutes(ctx, r)
+func (a *apiServer) Setup(ctx context.Context, mux *stdhttp.ServeMux) {
+	a.middlewares = setupRoutes(ctx, mux)
 }
 
 func (a *apiServer) Middlewares() []http.MiddlewareFunc {

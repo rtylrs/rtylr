@@ -4,13 +4,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/go-chi/chi/v5"
 )
 
-func testRouter() *chi.Mux {
-	r := chi.NewRouter()
-	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
+func testRouter() *http.ServeMux {
+	r := http.NewServeMux()
+	r.HandleFunc("GET /ping", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("pong")); err != nil {
 			return

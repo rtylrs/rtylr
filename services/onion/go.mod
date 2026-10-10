@@ -5,7 +5,6 @@ go 1.26.0
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/allegro/bigcache/v3 v3.1.0
-	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
@@ -25,6 +24,7 @@ require (
 	github.com/fogleman/gg v1.3.0
 	github.com/getsentry/sentry-go v0.45.1
 	github.com/go-playground/validator/v10 v10.30.2
+	github.com/klauspost/compress v1.18.7
 	github.com/koyachi/go-nude v0.0.1
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	github.com/robfig/cron/v3 v3.0.1
@@ -68,7 +68,6 @@ require (
 	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
-	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/moby/sys/user v0.4.1 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect

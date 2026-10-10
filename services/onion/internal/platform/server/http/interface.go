@@ -2,12 +2,12 @@ package http
 
 import (
 	"context"
-
-	"github.com/go-chi/chi/v5"
+	"net/http"
 )
 
-type ChiRunMode interface {
-	Setup(ctx context.Context, r *chi.Mux)
+// RunMode registers a server's routes on the root ServeMux.
+type RunMode interface {
+	Setup(ctx context.Context, mux *http.ServeMux)
 }
 
 // MiddlewareProvider is implemented by runmodes that contribute HTTP
