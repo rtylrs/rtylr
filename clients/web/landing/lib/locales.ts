@@ -113,8 +113,6 @@ export const shippedLocales = (): Locale[] => LOCALES.filter((l) => l.shipped);
 export const LOCALISED_ROUTES: string[] = [
   '/',
   '/pricing/',
-  '/pos/',
-  '/erp/',
   '/contact/',
   '/legal/terms/',
   '/legal/privacy-policy/',

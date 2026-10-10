@@ -1,0 +1,267 @@
+// The rtylr workspace page: one long page with a section per area, each
+// pairing two-tone copy with that area's live demo.
+
+.page {
+  background: var(--bg-surface-a);
+}
+
+.muted {
+  color: rgba(19, 19, 19, 0.4);
+}
+
+// ── Hero ─────────────────────────────────────────────────────────────────────
+
+.hero {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 96px 32px 56px;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 18px;
+  color: rgba(19, 19, 19, 0.55);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.heroTitle {
+  max-width: 900px;
+  margin: 0 0 22px;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+}
+
+.heroSubtitle {
+  max-width: 620px;
+  margin: 0 0 30px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.6);
+}
+
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+// Fill and colour come from the global button rule (solid ink; outline for
+// the class containing "secondary").
+.ctaPrimary,
+.ctaSecondary {
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-family: var(--primary-font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// ── Sticky area nav ──────────────────────────────────────────────────────────
+
+.nav {
+  position: sticky;
+  top: 80px; // under the site header
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg-surface-a) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-block: 1px solid rgba(19, 19, 19, 0.06);
+}
+
+.navInner {
+  display: flex;
+  gap: 6px;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.navPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  color: rgba(19, 19, 19, 0.6);
+  font-size: 0.86rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.04);
+    color: var(--ink);
+  }
+}
+
+.navPillActive {
+  background: color-mix(in srgb, var(--area) 12%, #fff);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--area) 35%, transparent);
+}
+
+.areaDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--area);
+  flex-shrink: 0;
+}
+
+// ── Area sections ────────────────────────────────────────────────────────────
+
+.areas {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 24px 32px 40px;
+}
+
+.area {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 64px;
+  align-items: center;
+  padding: 88px 0;
+  border-bottom: 1px solid rgba(19, 19, 19, 0.06);
+  // Leaves room for the site header and the sticky area nav on #jump.
+  scroll-margin-top: 150px;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.areaFlip {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+
+  .areaCopy {
+    order: 2;
+  }
+}
+
+.areaLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: rgba(19, 19, 19, 0.6);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.areaTitle {
+  margin: 0 0 16px;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+
+.areaBody {
+  margin: 0 0 24px;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: rgba(19, 19, 19, 0.6);
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feature {
+  position: relative;
+  padding-inline-start: 18px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(19, 19, 19, 0.55);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.62em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--area);
+  }
+
+  strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
+
+// Soft panel holding the live demo, like the homepage showcase.
+.stage {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--bg-surface-b);
+  box-shadow: inset 0 0 0 1px rgba(19, 19, 19, 0.05);
+}
+
+.demo {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(19, 19, 19, 0.07),
+    0 16px 40px -20px rgba(19, 19, 19, 0.2);
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 960px) {
+  .area,
+  .areaFlip {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 64px 0;
+  }
+
+  .areaFlip .areaCopy {
+    order: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 64px 20px 40px;
+  }
+
+  .navInner,
+  .areas {
+    padding-inline: 20px;
+  }
+
+  .stage {
+    padding: 8px;
+  }
+
+  .demo {
+    aspect-ratio: 4 / 3;
+  }
+}

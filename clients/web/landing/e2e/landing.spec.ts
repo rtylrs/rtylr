@@ -82,7 +82,7 @@ test.describe('Landing page', () => {
   });
 
   test('no page asserts a price in its structured data', async ({ page }) => {
-    for (const path of ['', '/pricing', '/pos', '/legal/privacy-policy']) {
+    for (const path of ['', '/pricing', '/workspace', '/legal/privacy-policy']) {
       await page.goto(`${LANDING_URL}${path}`);
       const blocks = await page.locator('script[type="application/ld+json"]').all();
       for (const el of blocks) {

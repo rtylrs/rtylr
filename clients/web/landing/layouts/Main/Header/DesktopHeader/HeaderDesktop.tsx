@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 
 import { ASSETS, resolveAuthUrl } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
-import { localeFromPath, navPath } from '../../../../lib/locales';
+import { localeFromPath, navPath, navPathWithHash } from '../../../../lib/locales';
 import { FEATURE_LINKS, RESOURCE_LINKS, COMPANY_LINKS } from '../../../../lib/navLinks';
 import { LanguageSwitcher } from '../../../../components/LanguageSwitcher/LanguageSwitcher';
 import styles from './HeaderDesktop.module.scss';
@@ -210,7 +210,7 @@ const HeaderDesktop: React.FC = () => {
               {FEATURE_LINKS.map((item) => (
                 <Link
                   key={item.href}
-                  href={navPath(item.href, locale)}
+                  href={navPathWithHash(item.href, locale)}
                   className={styles['dropdown-item']}
                   onClick={closeDropdowns}
                 >

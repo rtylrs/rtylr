@@ -57,12 +57,7 @@ import type { FAQEntry } from './structured-data';
 export type FaqSection =
   | 'home'
   | 'pricing'
-  | 'pos'
-  | 'erp'
-  | 'crm'
-  | 'hr'
-  | 'finance'
-  | 'flow'
+  | 'workspace'
   | 'demo';
 
 interface Faq {
