@@ -51,6 +51,7 @@ function actionForTool(name: string): string {
     [/^knowledge\.country$/, "look up the country"],
     [/^utilities\./, "work it out"],
     [/^chats\./, "search past chats"],
+    [/^business\.find$/, "find it in your records"],
     [/^memory\.remember$/, "remember this"],
     [/^memory\.forget$/, "forget a memory"],
     [/^memory\.list$/, "check what it remembers"],

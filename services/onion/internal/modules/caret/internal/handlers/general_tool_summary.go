@@ -60,6 +60,9 @@ func generalToolSummary(name string, input, output map[string]any) (string, bool
 		return "Looked up \"" + text("word") + "\".", true
 	case "knowledge.country":
 		return "Looked up " + text("name") + ".", true
+	case "business.find":
+		query, _ := stringValue(input["query"])
+		return fmt.Sprintf("Found %s for %q.", plural(count("matches"), "record"), query), true
 	case "chats.search":
 		return fmt.Sprintf("Found %s in past chats.", plural(count("matches"), "mention")), true
 	case "chats.read":
