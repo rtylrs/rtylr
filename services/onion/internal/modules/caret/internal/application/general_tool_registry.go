@@ -13,4 +13,20 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The final URL, page title, description and up to 12,000 characters of text; long pages are trimmed around the query.",
 		Freshness:  "live at request time", SideEffect: "read-only; fetches one public page",
 	},
+	{
+		Name:        "places.geocode",
+		Description: "Look up a city or place by name: coordinates, country, timezone and population. Add a region after a comma to disambiguate, e.g. \"Paris, Texas\".",
+		Module:      "places", Scope: "read",
+		InputHint:  `{"name":"city or place"}`,
+		OutputHint: "Up to five matching places with coordinates, country, IANA timezone and population.",
+		Freshness:  "reference data", SideEffect: "read-only",
+	},
+	{
+		Name:        "weather.forecast",
+		Description: "Current weather and a daily forecast (up to 16 days) for a place: conditions, highs and lows, rain chance, wind, sunrise and sunset.",
+		Module:      "weather", Scope: "read",
+		InputHint:  `{"location":"city or place","days":3,"units":"celsius|fahrenheit"} or {"latitude":0,"longitude":0}`,
+		OutputHint: "Current conditions and one entry per day, in the place's local timezone.",
+		Freshness:  "live forecast", SideEffect: "read-only",
+	},
 }
