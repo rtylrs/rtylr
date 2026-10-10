@@ -28,6 +28,11 @@ func LearnFromChat(ctx context.Context, ai TextCompleter, learner ChatLearner, s
 	if err != nil || !ok {
 		return err
 	}
+	if personText(transcript) < minLearnablePersonRunes {
+		// Small talk and one-line questions rarely hold lasting facts; note
+		// the progress without a model call.
+		return learner.SaveLearnedFacts(ctx, session, userID, nil, nil, through)
+	}
 	reply, err := completeFocused(ctx, ai, BuildChatLearningPrompt(transcript, known), 0.2)
 	if err != nil {
 		return err
@@ -87,4 +92,19 @@ func ParseLearnedFacts(reply string) (personal, business []string) {
 		}
 	}
 	return personal, business
+}
+
+// minLearnablePersonRunes is how much the person must have written in a
+// stretch of chat before it is worth reading for facts.
+const minLearnablePersonRunes = 160
+
+// personText counts what the person (not Caret) wrote in a transcript.
+func personText(transcript string) int {
+	total := 0
+	for _, block := range strings.Split(transcript, "\n\n") {
+		if text, ok := strings.CutPrefix(strings.TrimSpace(block), "Person:"); ok {
+			total += len([]rune(strings.TrimSpace(text)))
+		}
+	}
+	return total
 }

@@ -23,7 +23,7 @@ func (f *fakeChatLearner) SaveLearnedFacts(_ context.Context, _ string, _ int, p
 }
 
 func TestLearnFromChatSavesBusinessAndPersonalFacts(t *testing.T) {
-	learner := &fakeChatLearner{transcript: "Person: we open at 7 in Hamra <b>", ok: true}
+	learner := &fakeChatLearner{transcript: "Person: we open at 7 in Hamra <b> and close at midnight on weekends; the Achrafieh branch opens later, at 9, because the morning crowd there is small, rent is high and most regulars come after work\n\nCaret: Noted.", ok: true}
 	var prompt string
 	ai := completerFunc(func(_ context.Context, p string) (string, error) {
 		prompt = p
@@ -48,10 +48,11 @@ func TestLearnFromChatSkipsChatsWithoutEnoughNewMessages(t *testing.T) {
 	}
 }
 
-func TestLearnFromChatRecordsProgressEvenWithNoFacts(t *testing.T) {
-	learner := &fakeChatLearner{transcript: "Person: hi", ok: true}
-	ai := completerFunc(func(context.Context, string) (string, error) { return "", nil })
-	if err := LearnFromChat(context.Background(), ai, learner, "s3", 3); err != nil || learner.through != 9 {
-		t.Fatalf("err=%v through=%d", err, learner.through)
+func TestLearnFromChatSkipsTheModelForSmallTalk(t *testing.T) {
+	learner := &fakeChatLearner{transcript: "Person: hi\n\nCaret: " + strings.Repeat("long reply ", 100), ok: true}
+	called := false
+	ai := completerFunc(func(context.Context, string) (string, error) { called = true; return "", nil })
+	if err := LearnFromChat(context.Background(), ai, learner, "s3", 3); err != nil || learner.through != 9 || called {
+		t.Fatalf("err=%v through=%d called=%v", err, learner.through, called)
 	}
 }

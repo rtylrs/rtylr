@@ -12,8 +12,8 @@ import (
 const (
 	learnedThroughKey = "learned_through_id"
 	// learnAfterMessages is how many new messages a chat needs before the
-	// next pass reads it for durable facts: two exchanges.
-	learnAfterMessages     = 4
+	// next pass reads it for durable facts: three exchanges.
+	learnAfterMessages     = 6
 	chatLearningInputBytes = 16000
 	// LearnedMemoryConfidence keeps learned facts above the visibility bar
 	// (0.7) but below facts the person stated or approved (1).
