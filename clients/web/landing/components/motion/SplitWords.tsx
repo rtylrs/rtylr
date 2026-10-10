@@ -11,6 +11,9 @@ interface SplitWordsProps {
   duration?: number;
   // 'mount' animates immediately; 'view' waits for the element to scroll in
   trigger?: 'mount' | 'view';
+  // Applied to every line after the first, e.g. to mute a follow-up line
+  // for the two-tone headline style.
+  restLinesClassName?: string;
 }
 
 // Per-word masked rise. Each word sits inside an overflow-hidden clip and
@@ -24,6 +27,7 @@ export const SplitWords: React.FC<SplitWordsProps> = ({
   stagger = 0.055,
   duration = 0.9,
   trigger = 'mount',
+  restLinesClassName,
 }): React.JSX.Element => {
   const Tag = motion[as];
   const lines = text.split('\n');
@@ -54,6 +58,7 @@ export const SplitWords: React.FC<SplitWordsProps> = ({
               <React.Fragment key={key}>
                 {wi > 0 && ' '}
                 <span
+                  className={li > 0 ? restLinesClassName : undefined}
                   style={{
                     display: 'inline-block',
                     overflow: 'hidden',

@@ -1,187 +1,305 @@
-// Clean, flat layout, no orbs, no timeline line, no glow.
-// Four bordered cells in a row with big step numbers and tight copy.
+// Three cards, each with a small live piece of rtylr on top and the step
+// copy underneath. The visuals play once when the row scrolls into view.
 
 .howItWorksSection {
-  padding: 120px 0;
+  padding: 128px 0;
   background: var(--bg-surface-b);
-  position: relative;
 }
 
 .container {
-  max-width: 1240px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 0 32px;
-  position: relative;
 }
 
-// ── Header ──────────────────────────────────────────────────────────────────
+// ── Header ───────────────────────────────────────────────────────────────────
 
 .header {
   max-width: 760px;
-  margin-bottom: 64px;
+  margin-bottom: 56px;
 }
 
 .eyebrow {
   display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
+  margin-bottom: 18px;
   color: rgba(19, 19, 19, 0.55);
-  margin-bottom: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .sectionTitle {
-  font-size: clamp(2.2rem, 4vw, 3.4rem);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.035em;
-  color: var(--ink);
   margin: 0;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-// ── Grid of steps, shared borders, no gaps ─────────────────────────────────
+.sectionTitleMuted {
+  color: rgba(19, 19, 19, 0.4);
+}
+
+// ── Cards ────────────────────────────────────────────────────────────────────
 
 .grid {
-  position: relative;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border: 1px solid var(--hairline);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-// Scroll-drawn accent line along the top edge of the grid.
-.gridProgress {
-  position: absolute;
-  top: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(19, 19, 19, 0.9), rgba(19, 19, 19, 0.35));
-  transform-origin: left;
-  z-index: 1;
-}
-
-.step {
-  position: relative;
+.card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 40px 32px;
-  border-inline-end: 1px solid var(--hairline);
-  transition: background 0.25s ease;
+  border-radius: 20px;
+  background: var(--bg-surface-a);
+  box-shadow:
+    0 0 0 1px rgba(19, 19, 19, 0.06),
+    0 1px 2px rgba(19, 19, 19, 0.03);
+  overflow: hidden;
+}
 
-  &:last-child {
-    border-inline-end: none;
-  }
+// Soft panel the visual sits on, like a screen inside the card.
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 210px;
+  margin: 8px 8px 0;
+  padding: 20px;
+  border-radius: 14px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #ffffff 0%, transparent 70%),
+    #f4f4f3;
+}
 
-  &:hover {
-    background: rgba(19, 19, 19, 0.025);
-
-    .stepNumber {
-      color: var(--ink);
-      border-color: var(--hairline-strong);
-    }
-  }
+.copy {
+  padding: 24px 24px 28px;
 }
 
 .stepNumber {
-  font-size: 0.82rem;
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-bottom: 14px;
+  border-radius: 7px;
+  background: rgba(19, 19, 19, 0.06);
+  color: var(--ink);
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  color: rgba(19, 19, 19, 0.4);
-  font-variant-numeric: tabular-nums;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--hairline);
-  transition:
-    color 0.25s ease,
-    border-color 0.25s ease;
 }
 
 .stepTitle {
-  font-size: 1.3rem;
+  margin: 0 0 8px;
+  font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--ink);
-  margin: 0;
-  line-height: 1.2;
 }
 
 .stepDescription {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: rgba(19, 19, 19, 0.6);
   margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(19, 19, 19, 0.6);
 }
 
-// ── Responsive ──────────────────────────────────────────────────────────────
+// ── Visuals (portal light theme, demo scale) ─────────────────────────────────
 
-@media (max-width: 1024px) {
+.visual {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 270px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  color: rgb(9, 9, 11);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fieldLabel {
+  color: rgba(9, 9, 11, 0.55);
+  font-weight: 500;
+}
+
+.input {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 11px;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor {
+  width: 1.5px;
+  height: 14px;
+  margin-inline-start: 1px;
+  background: rgb(9, 9, 11);
+  animation: blink 1s step-end infinite;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgb(9, 9, 11);
+  color: #fff;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.buttonDone {
+  background: #10b981;
+}
+
+.userMsg {
+  align-self: flex-end;
+  max-width: 88%;
+  padding: 7px 10px;
+  border-radius: 12px 12px 4px 12px;
+  background: rgb(9, 9, 11);
+  color: #fff;
+  line-height: 1.4;
+}
+
+.caretMsg {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.caretMark {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: #111214;
+  color: #f2f2ef;
+  flex-shrink: 0;
+}
+
+.setupList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 12px 12px 12px 4px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.setupItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(9, 9, 11, 0.4);
+  transition: color 0.3s ease;
+}
+
+.setupItemOn {
+  color: rgb(9, 9, 11);
+}
+
+.tick {
+  display: grid;
+  place-items: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1.5px rgba(9, 9, 11, 0.2);
+  color: #fff;
+  transition: background 0.25s ease;
+
+  .setupItemOn & {
+    background: #10b981;
+    box-shadow: none;
+  }
+}
+
+.invite {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.inviteName {
+  flex: 1;
+  font-weight: 500;
+}
+
+.access {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(9, 9, 11, 0.06);
+  color: rgba(9, 9, 11, 0.65);
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &[data-tone='green'] {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+  }
+
+  &[data-tone='amber'] {
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
   .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .step {
-    border-inline-end: 1px solid var(--hairline);
-    border-bottom: 1px solid var(--hairline);
-
-    &:last-child {
-      border-inline-end: 1px solid var(--hairline);
-    }
-
-    &:nth-child(2n) {
-      border-inline-end: none;
-    }
-
-    &:nth-last-child(-n + 2) {
-      border-bottom: none;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .howItWorksSection {
-    padding: 80px 0;
-  }
-
-  .container {
-    padding: 0 20px;
-  }
-
-  .header {
-    margin-bottom: 44px;
-  }
-
-  .step {
-    padding: 32px 24px;
-    gap: 14px;
-  }
-
-  .stepTitle {
-    font-size: 1.15rem;
-  }
-
-  .stepDescription {
-    font-size: 0.9rem;
+    grid-template-columns: 1fr;
+    max-width: 480px;
   }
 }
 
 @media (max-width: 560px) {
-  .grid {
-    grid-template-columns: 1fr;
+  .howItWorksSection {
+    padding: 88px 0;
   }
 
-  .step {
-    border-inline-end: none;
-    border-bottom: 1px solid var(--hairline);
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:nth-child(2n) {
-      border-inline-end: none;
-    }
+  .container {
+    padding: 0 20px;
   }
 }

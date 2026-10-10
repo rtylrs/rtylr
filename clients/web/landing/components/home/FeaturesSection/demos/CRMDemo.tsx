@@ -1,268 +1,114 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../../../lib/cn';
+import { PortalFrame, type PortalView } from './portal/PortalFrame';
+import { money, useDemoStep } from './portal/usePortalDemo';
+import styles from './portal/PortalDemo.module.scss';
+import local from './CRMDemo.module.scss';
 
-import { formatMoney } from '../../../../lib/formatMoney';
-
-type Segment = 'all' | 'vip' | 'regular' | 'atrisk' | 'new';
+type Status = 'active' | 'atRisk' | 'new';
 
 interface Customer {
-  initials: string;
   name: string;
-  segment: Exclude<Segment, 'all'>;
-  visits: number;
-  spend: number;
-  lastKey:
-    | 'yesterday'
-    | 'oneDayAgo'
-    | 'twoDaysAgo'
-    | 'threeDaysAgo'
-    | 'fiveDaysAgo'
-    | 'oneWeekAgo'
-    | 'threeWeeksAgo'
-    | 'oneMonthAgo';
+  initials: string;
+  color: string;
+  status: Status;
+  ltv: number;
+  activity: number; // index into home.features.demos.crm.activity
+  when: string;
 }
 
 const CUSTOMERS: Customer[] = [
-  {
-    initials: 'EA',
-    name: 'Eliza Alvarez',
-    segment: 'vip',
-    visits: 20,
-    spend: 4200,
-    lastKey: 'twoDaysAgo' as const,
-  },
-  {
-    initials: 'MB',
-    name: 'Marco Bianchi',
-    segment: 'vip',
-    visits: 15,
-    spend: 3100,
-    lastKey: 'oneDayAgo' as const,
-  },
-  {
-    initials: 'YK',
-    name: 'Yasmine Khoury',
-    segment: 'regular',
-    visits: 8,
-    spend: 890,
-    lastKey: 'fiveDaysAgo' as const,
-  },
-  { initials: 'TP', name: 'Tom Park', segment: 'regular', visits: 6, spend: 620, lastKey: 'oneWeekAgo' as const },
-  {
-    initials: 'SN',
-    name: 'Sofia Nour',
-    segment: 'atrisk',
-    visits: 12,
-    spend: 1440,
-    lastKey: 'threeWeeksAgo' as const,
-  },
-  {
-    initials: 'RD',
-    name: 'Rami Darwish',
-    segment: 'atrisk',
-    visits: 9,
-    spend: 970,
-    lastKey: 'oneMonthAgo' as const,
-  },
-  { initials: 'LW', name: 'Lily Wang', segment: 'new', visits: 1, spend: 48, lastKey: 'yesterday' as const },
-  { initials: 'JH', name: 'Jonas Hall', segment: 'new', visits: 2, spend: 95, lastKey: 'threeDaysAgo' as const },
+  { name: 'Voxire', initials: 'VX', color: '#09090b', status: 'active', ltv: 48200, activity: 0, when: '2h' },
+  { name: 'Northwind', initials: 'NW', color: '#3b82f6', status: 'active', ltv: 31900, activity: 1, when: '1d' },
+  { name: 'Lumen Studio', initials: 'LS', color: '#f59e0b', status: 'atRisk', ltv: 12400, activity: 2, when: '3w' },
+  { name: 'Harbor & Co', initials: 'HC', color: '#10b981', status: 'active', ltv: 9800, activity: 3, when: '2d' },
+  { name: 'Kite Labs', initials: 'KL', color: '#8b5cf6', status: 'new', ltv: 1200, activity: 5, when: '5h' },
+  { name: 'Atlas Freight', initials: 'AF', color: '#ef4444', status: 'atRisk', ltv: 7600, activity: 4, when: '1mo' },
+  { name: 'Orbit Media', initials: 'OM', color: '#64c5b9', status: 'active', ltv: 6400, activity: 1, when: '4d' },
 ];
 
-// labelKey matches home.features.demos.crm.segments.<labelKey> - one
-// translated set shared by the filter tabs and the row tier badge, so the
-// two cannot drift the way two copies of '★ VIP' eventually would.
-const SEGMENTS: { id: Segment; labelKey: string; color: string }[] = [
-  { id: 'all', labelKey: 'all', color: 'var(--ink)' },
-  { id: 'vip', labelKey: 'vip', color: '#b45309' },
-  { id: 'regular', labelKey: 'regular', color: '#2563eb' },
-  { id: 'atrisk', labelKey: 'atRisk', color: '#dc2626' },
-  { id: 'new', labelKey: 'new', color: '#16a34a' },
-];
+const TONE: Record<Status, string> = { active: 'green', atRisk: 'red', new: 'accent' };
+// Segment tabs, in order: All, Active, At risk, New.
+const FILTERS: (Status | null)[] = [null, 'active', 'atRisk', 'new'];
 
-const TIER: Record<Exclude<Segment, 'all'>, { labelKey: string; color: string; bg: string }> = {
-  vip: { labelKey: 'vip', color: '#b45309', bg: 'rgba(251,191,36,0.15)' },
-  regular: { labelKey: 'regular', color: '#2563eb', bg: 'rgba(96,165,250,0.15)' },
-  atrisk: { labelKey: 'atRisk', color: '#dc2626', bg: 'rgba(248,113,113,0.15)' },
-  new: { labelKey: 'new', color: '#16a34a', bg: 'rgba(52,211,153,0.15)' },
-};
-
-export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t, i18n } = useTranslation();
-  const [active, setActive] = useState<Segment>('all');
-
-  const visible = active === 'all' ? CUSTOMERS : CUSTOMERS.filter((c) => c.segment === active);
+export const CRMDemo = ({
+  isActive,
+  onNavigate,
+}: {
+  isActive: boolean;
+  onNavigate?: (view: PortalView) => void;
+}): React.JSX.Element => {
+  const { t } = useTranslation();
+  const step = useDemoStep(isActive, 3, 2200, 0);
+  const segments = t('home.features.demos.crm.segments', { returnObjects: true }) as string[];
+  const cols = t('home.features.demos.crm.cols', { returnObjects: true }) as string[];
+  const activity = t('home.features.demos.crm.activity', { returnObjects: true }) as string[];
+  const filter = FILTERS[step];
+  const rows = CUSTOMERS.filter((c) => !filter || c.status === filter);
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'var(--bg-surface-a)',
-        fontFamily: 'inherit',
-        fontSize: 13,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
+    <PortalFrame
+      onNavigate={onNavigate}
+      app="crm"
+      crumb={t('home.features.demos.crm.crumb', { returnObjects: true }) as string[]}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: '16px 20px 14px',
-          borderBottom: '1px solid var(--hairline)',
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 12,
-          }}
-        >
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
-            {t('home.features.demos.crm.customers')}
-          </span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12 }}>
-            {t('home.features.demos.crm.totalCount')}
-          </span>
-        </div>
-        {/* Segment tabs */}
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
-          {SEGMENTS.map((seg) => (
-            <button
-              key={seg.id}
-              onClick={() => setActive(seg.id)}
-              style={{
-                flexShrink: 0,
-                background: active === seg.id ? 'var(--bg-surface-b)' : 'transparent',
-                border: `1px solid ${active === seg.id ? 'var(--hairline-strong)' : 'var(--hairline)'}`,
-                borderRadius: 999,
-                padding: '5px 12px',
-                fontSize: 11,
-                fontWeight: 500,
-                color: active === seg.id ? seg.color : 'rgba(19,19,19,0.5)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {t(`home.features.demos.crm.segments.${seg.labelKey}`)}
-            </button>
+      <div className={styles.spread}>
+        <span className={styles.segmented}>
+          {segments.map((s, i) => (
+            <span key={s} className={cn(styles.segment, i === step && styles.segmentOn)}>
+              {s}
+            </span>
           ))}
-        </div>
+        </span>
+        <span className={styles.muted}>
+          {t('home.features.demos.crm.total', { count: rows.length })}
+        </span>
       </div>
 
-      {/* Column headers */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 70px 90px 70px',
-          padding: '8px 20px',
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: '0.1em',
-          color: 'rgba(19,19,19,0.45)',
-          textTransform: 'uppercase',
-          borderBottom: '1px solid var(--hairline)',
-          flexShrink: 0,
-        }}
-      >
-        <span>{t('home.features.demos.crm.table.customer')}</span>
-        <span style={{ textAlign: 'center' }}>{t('home.features.demos.crm.table.tier')}</span>
-        <span style={{ textAlign: 'end' }}>{t('home.features.demos.crm.table.spend')}</span>
-        <span style={{ textAlign: 'end' }}>{t('home.features.demos.crm.table.lastVisit')}</span>
-      </div>
-
-      {/* Rows */}
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <AnimatePresence mode="popLayout">
-          {visible.map((c) => {
-            const tier = TIER[c.segment];
-            return (
-              <motion.div
-                key={c.initials}
+      <table className={cn(styles.table, local.table)}>
+        <thead>
+          <tr>
+            <th>{cols[0]}</th>
+            <th>{cols[1]}</th>
+            <th className={styles.num}>{cols[2]}</th>
+            <th className={styles.num}>{cols[3]}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <AnimatePresence initial={false} mode="popLayout">
+            {rows.map((c) => (
+              <motion.tr
+                key={c.name}
                 layout
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.22 }}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 70px 90px 70px',
-                  padding: '10px 20px',
-                  borderBottom: '1px solid var(--hairline)',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div
-                    style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      background: tier.bg,
-                      border: `1px solid ${tier.color}44`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: tier.color,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {c.initials}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink)' }}>
-                      {c.name}
-                    </div>
-                    <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.5)' }}>
-                      {t('home.features.demos.crm.visitCount', { count: c.visits })}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <span
-                    style={{
-                      background: tier.bg,
-                      color: tier.color,
-                      borderRadius: 999,
-                      padding: '2px 7px',
-                      fontSize: 10,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {t(`home.features.demos.crm.segments.${tier.labelKey}`)}
+                <td>
+                  <span className={styles.row}>
+                    <span className={styles.avatar} style={{ background: c.color }}>
+                      {c.initials}
+                    </span>
+                    <span className={local.name}>{c.name}</span>
                   </span>
-                </div>
-                <div
-                  style={{
-                    textAlign: 'end',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: 'var(--ink)',
-                  }}
-                >
-                  {formatMoney(c.spend, i18n.language, 0)}
-                </div>
-                <div
-                  style={{
-                    textAlign: 'end',
-                    fontSize: 11,
-                    color: 'rgba(19,19,19,0.5)',
-                  }}
-                >
-                  {t(`home.features.demos.crm.relativeTime.${c.lastKey}`)}
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-    </div>
+                </td>
+                <td>
+                  <span className={styles.pill} data-tone={TONE[c.status]}>
+                    {t(`home.features.demos.crm.status.${c.status}`)}
+                  </span>
+                </td>
+                <td className={styles.num}>{money(c.ltv)}</td>
+                <td className={cn(styles.num, styles.muted)}>
+                  {activity[c.activity]} · {c.when}
+                </td>
+              </motion.tr>
+            ))}
+          </AnimatePresence>
+        </tbody>
+      </table>
+    </PortalFrame>
   );
 };

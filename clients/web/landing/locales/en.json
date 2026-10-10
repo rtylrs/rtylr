@@ -5,8 +5,8 @@
       "pricing": "Pricing",
       "resources": "Resources",
       "company": "Company",
-      "signIn": "Sign In",
-      "signUp": "Sign Up",
+      "signIn": "Sign in",
+      "signUp": "Get started",
       "featureLinks": {
         "pos": {
           "title": "POS",
@@ -53,7 +53,6 @@
       }
     },
     "cta": {
-      "startFree": "Start for free",
       "bookDemo": "Book a demo",
       "getStarted": "Get started",
       "seeItLive": "See it live"
@@ -113,31 +112,23 @@
   "faq": {
     "home": {
       "title": "Questions about rtylr",
-      "intro": "The six things buyers ask first. Answers are on the page, not hidden behind markup.",
+      "intro": "Quick answers to what people ask first.",
       "items": [
         {
           "question": "What is rtylr?",
-          "answer": "rtylr is the business suite for small and mid-sized companies. It brings sales, inventory, people, customers, finance and operations together on one shared data model, so a team stops stitching a register, a spreadsheet, an accounting tool and a task tracker together. Built for restaurants, retail and services businesses running 2 to 200 staff."
+          "answer": "rtylr is one workspace for running a business. Work, finance, customers, team, operations and sales share the same records, so an update in one place shows up everywhere else. Caret, the AI built into rtylr, can answer questions and get things done across all of it."
         },
         {
           "question": "How much does rtylr cost?",
           "answer": "rtylr has not published its prices yet. The Free plan is genuinely free, needs no card, and covers 10 team members at one location with the core rtylr suite, so you can run a location on it today. Pro and Scale are quoted: tell us your team size and how many locations you run. See rtylr.com/pricing for what each plan includes."
         },
         {
-          "question": "Can I start with one workflow?",
-          "answer": "Yes. You can start with the workflow that matters most to your business, while everything stays in one rtylr workspace and on one shared data model. The suite grows with you, without separate logins or exports."
-        },
-        {
-          "question": "Does rtylr replace my point-of-sale system?",
-          "answer": "Yes. rtylr POS is a full-service register for restaurants and retail. It handles tickets, splits, tips, modifiers, inventory counts, offline mode and receipt printing on certified hardware. It runs on iPad, Android tablet and desktop, and it syncs in real time with the rest of the platform, so a sale moves stock without an export."
+          "question": "What is Caret?",
+          "answer": "Caret is the AI assistant built into rtylr. Ask it about your business, like which invoices are overdue or how sales did this week, and it can act on the answer, like sending reminders or drafting an invoice. It also works as an everyday assistant for writing, research and questions about anything else."
         },
         {
           "question": "Is my data mine?",
           "answer": "Yes. Every rtylr account exports clean CSVs of customers, orders, staff, invoices and inventory at any time from the settings page, with no support ticket. Data lives in the EU or US region, your choice. See rtylr.com/trust for compliance detail and rtylr.com/legal/security for the security architecture."
-        },
-        {
-          "question": "What does rtylr replace?",
-          "answer": "For most businesses that adopt it: a register, an inventory sheet, a scheduling tool, a payroll export, a customer list and an accounting package. The claim rtylr makes is not that each of those is worse on its own. It is that running them separately means the same number is entered more than once, and the versions disagree."
         }
       ]
     },
@@ -473,353 +464,446 @@
     }
   },
   "home": {
-    "pricing": {
-      "badge": "Pricing",
-      "title": "One rtylr suite.\nOne connected workspace.",
-      "description": "One plan gives your team the rtylr suite, with the capabilities you need to run sales, inventory, people, customers, finance and operations. What changes is scale. Start free with no card."
-    },
     "meta": {
-      "title": "rtylr · One suite for your entire business.",
-      "description": "The rtylr suite for sales, inventory, people, customers, finance and operations. One connected workspace for modern teams. Powered by AI.",
+      "title": "rtylr · Run everything from one workspace",
+      "description": "rtylr is one workspace for running your business: work, finance, customers, team, operations and sales, with Caret, the AI built in. Free during the beta.",
       "ogSiteName": "Rtylr",
-      "keywords": "POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI",
-      "schemaDescription": "The rtylr suite brings sales, inventory, people, customers, finance and operations together on one shared data model, so a sale updates the business without an export."
+      "keywords": "business workspace, all-in-one business software, AI assistant, Caret, project management, invoicing, CRM, HR, inventory, point of sale, business analytics",
+      "schemaDescription": "rtylr brings work, finance, customers, team, operations and sales into one workspace on shared records, with Caret, an AI assistant that answers questions and gets work done across all of it."
     },
     "howItWorks": {
-      "eyebrow": "HOW IT WORKS",
-      "title": "How do you get\nfrom sign-up to live?",
+      "eyebrow": "How it works",
+      "title": "From sign-up to running.\nIn three steps.",
       "steps": [
         {
-          "title": "Sign up",
-          "description": "Email, password, done. No credit card. Your rtylr workspace is ready from minute one."
+          "title": "Create your workspace",
+          "description": "Sign up with your email. It's free during the beta and needs no card."
         },
         {
-          "title": "Configure Hub",
-          "description": "Locations, team, brand, tax, hardware. Hub is the one place you set everything else."
+          "title": "Let Caret set it up",
+          "description": "Describe your business and Caret drafts your workspace: areas, lists and settings, ready for you to adjust."
         },
         {
-          "title": "Set roles and permissions",
-          "description": "Give the floor team the tools they need, managers the people view, and your accountant the numbers. Each person sees the right part of the suite."
-        },
-        {
-          "title": "Go live",
-          "description": "Every department works from the same connected data model. No integration project."
+          "title": "Bring your team in",
+          "description": "Invite people and choose what each one sees, from the full picture to just their own work."
         }
-      ]
+      ],
+      "visuals": {
+        "email": "Work email",
+        "create": "Create workspace",
+        "created": "Workspace ready",
+        "brief": "We're a 12-person design studio. We invoice clients monthly and track projects.",
+        "areas": [
+          "Projects board",
+          "Monthly invoicing",
+          "Client list",
+          "Team and roles"
+        ],
+        "people": [
+          {
+            "name": "Marc Khoury",
+            "access": "Admin"
+          },
+          {
+            "name": "Lina Rahme",
+            "access": "Finance only"
+          },
+          {
+            "name": "Jad Daou",
+            "access": "Own work"
+          }
+        ]
+      }
     },
     "cta": {
-      "title": "It's your turn\nto build.",
-      "subtitle": "Free for up to 10 members. No credit card.\nLaunch your business in an afternoon."
+      "title": "Run everything from one place.\nStart free today.",
+      "subtitle": "Free during the beta. No card needed."
     },
     "products": {
-      "badge": "THE RTYLR SUITE",
-      "title": "One suite.\nOne shared data model.",
-      "subtitle": "Sales, inventory, people, customers, books and operations are designed to work together, so a sale updates the rest of your business without an export.",
-      "cardsTop": [
+      "badge": "The rtylr workspace",
+      "title": "Everything your business runs on.\nIn one place.",
+      "subtitle": "Work, money, customers, people and operations share one set of records, so an update in one place shows up everywhere else. No exports, no copy-paste.",
+      "areas": [
         {
-          "title": "Point of sale",
-          "description": "Tickets, tables, splits, tips, and every payment type. The register that keeps up with real service."
+          "label": "Work",
+          "title": "Projects and tasks.",
+          "body": "Boards, lists and recurring work, linked to the client, invoice or teammate it's about."
         },
         {
-          "title": "Inventory",
-          "description": "Recipe-linked depletion, supplier management, auto-reorder. Your shelves tell the database."
+          "label": "Finance",
+          "title": "Money, handled.",
+          "body": "Invoices, expenses, budgets and a live P&L that updates as you work."
         },
         {
-          "title": "People & payroll",
-          "description": "Scheduling, clock-in, payroll, time off, compliance. The people side, without the paperwork."
+          "label": "Customers",
+          "title": "Every relationship.",
+          "body": "Contacts, history, segments and follow-ups, all on one profile."
         },
         {
-          "title": "Customers & loyalty",
-          "description": "Profiles, segments, campaigns, and loyalty, fed live by every receipt your POS writes."
+          "label": "Team",
+          "title": "Your people.",
+          "body": "Schedules, time off, payroll and permissions, without the spreadsheets."
+        },
+        {
+          "label": "Operations",
+          "title": "Sales and stock.",
+          "body": "Point of sale, inventory and suppliers that stay in sync on their own."
+        },
+        {
+          "label": "Insights",
+          "title": "Answers, not dashboards.",
+          "body": "Live numbers across everything, and Caret to explain what changed."
         }
       ],
-      "cardsBottom": [
-        {
-          "title": "Books that close themselves",
-          "description": "Invoices, expenses, sales tax, and a live P&L. Every sale reconciles in real time."
-        },
-        {
-          "title": "Projects & tasks",
-          "description": "Kanban, automations, and tasks linked to the actual invoice, customer, or shift they belong to."
-        },
-        {
-          "title": "Analytics across everything",
-          "description": "Revenue trends, customer cohorts, labor margin. Every number stays current across the rtylr suite."
-        }
-      ],
-      "explore": "Explore →",
-      "exploreLabel": "Explore the {{capability}} workflow"
-    },
-    "integrations": {
-      "badge": "INTEGRATIONS",
-      "title": "Plugs into everything\nyou already run on.",
-      "description": "Stripe for payments. QuickBooks for your accountant. Slack for alerts. Connect in minutes. No API keys to chase. No engineer required.",
-      "footnote": "See the full directory for everything planned."
-    },
-    "truth": {
-      "badge": "Checkable",
-      "title": "What we can prove.",
-      "description": "Six claims you can verify from a browser tab or a terminal. Nothing here needs a sales call to confirm.",
-      "checkLabel": "Check it:",
-      "claims": [
-        {
-          "title": "One data model, no sync seams",
-          "body": "Sales, inventory, people, customers, finance and operations read and write the same records. A sale depletes stock and lands in the books as it happens, because there is no second system to sync."
-        },
-        {
-          "title": "Every page is readable by a machine",
-          "body": "Ask any URL on this site for Markdown instead of HTML and you get Markdown, with the correct Vary header. No scraping, no rendering, no JavaScript.",
-          "check": "curl -H \"Accept: text/markdown\" https://rtylr.com/pos/"
-        },
-        {
-          "title": "The whole site is indexed as data",
-          "body": "A machine-readable index of every page on the site, with titles and descriptions, generated at build time. It cannot drift from the site, because the site is what generates it.",
-          "check": "https://rtylr.com/pages.json"
-        },
-        {
-          "title": "One rtylr suite on every plan",
-          "body": "No add-on licensing. Plans differ by how many people and locations you run and the controls a larger team needs, not by buying separate pieces of the product.",
-          "check": "https://rtylr.com/pricing/"
-        },
-        {
-          "title": "The Free plan needs no card",
-          "body": "Ten team members at one location, the core rtylr suite, no payment method and no trial clock. It is a plan, not a countdown.",
-          "check": "https://rtylr.com/pricing/"
-        },
-        {
-          "title": "An OpenAPI document, published",
-          "body": "This site publishes a spec for its own endpoints as OpenAPI 3.1. It covers the marketing site, not the product API, and it is linked here so nobody has to guess which.",
-          "check": "https://rtylr.com/openapi.json"
-        }
-      ]
+      "explore": "Explore",
+      "exploreLabel": "Explore {{capability}}"
     },
     "hero": {
-      "announcePill": "BETA",
-      "announceText": "Caret AI is in beta. Describe your business, watch it build",
-      "title": "Run your entire business.\nFrom one rtylr workspace.",
-      "promptPlaceholder": "Describe your business. Caret AI drafts your rtylr workspace",
-      "caretLabel": "Caret AI",
-      "moreOptions": "More options",
-      "submit": "Start building",
-      "demoLinePrefix": "Talk with an expert and",
-      "demoLineLink": "book a demo",
-      "promptLabel": "Describe your business"
+      "announcePill": "Beta",
+      "announceText": "rtylr is in beta. Free while we build it with you",
+      "title": "Run everything.\nFrom one rtylr workspace.",
+      "promptPlaceholder": "Ask Caret anything about your work, or tell it what to get done",
+      "caretLabel": "Caret",
+      "moreOptions": "Try an example",
+      "submit": "Get started",
+      "demoLinePrefix": "Free during the beta. No card needed.",
+      "demoLineLink": "Create your account",
+      "promptLabel": "Ask Caret",
+      "promptExamples": [
+        "Draft an invoice for Voxire and send it Friday",
+        "What did we spend on suppliers last month?",
+        "Turn this meeting's notes into tasks for the team",
+        "Who on the team is off next week?",
+        "Summarize this week's sales in three lines"
+      ],
+      "productAlt": "Interactive preview of the rtylr workspace with the Caret assistant",
+      "portal": {
+        "apps": {
+          "home": "Home",
+          "insights": "Insights",
+          "flow": "Work",
+          "crm": "Customers",
+          "erp": "Operations",
+          "finance": "Finance",
+          "hr": "Team",
+          "pos": "Sales"
+        },
+        "home": {
+          "greeting": "Good morning, Sara",
+          "date": "Thursday, October 10",
+          "kpis": {
+            "revenue": "Revenue this month",
+            "tasks": "Open tasks",
+            "tasksNote": "2 due today",
+            "overdue": "Overdue invoices"
+          },
+          "today": "Today",
+          "tasks": [
+            "Send Q3 report",
+            "Follow up with Voxire",
+            "Approve October payroll",
+            "Review new supplier quote"
+          ],
+          "recent": "Recent activity",
+          "activity": [
+            "Voxire paid INV-1042",
+            "Lina started her shift",
+            "Printer paper is running low",
+            "New customer: Kite Labs"
+          ]
+        },
+        "caret": {
+          "label": "Caret assistant",
+          "greeting": "Morning, Sara. 3 invoices are overdue and printer paper is running low. What do you want to look at?",
+          "thinking": "Caret is thinking",
+          "placeholder": "Ask Caret anything…",
+          "suggestions": [
+            {
+              "q": "Which invoices are overdue?",
+              "a": "Three, $6,450 in total. Lumen Studio is the oldest at 21 days. I can send reminders to all three."
+            },
+            {
+              "q": "Who's working today?",
+              "a": "Four people are on shift right now. Lina starts at 10:30 and Jad joins at noon."
+            },
+            {
+              "q": "What's running low?",
+              "a": "Printer paper is down to 22 reams. I've drafted a reorder for 150 from your usual supplier."
+            },
+            {
+              "q": "How did we do this week?",
+              "a": "Revenue is $98,400, up 12%. Tuesday dipped because two large invoices moved to Wednesday."
+            }
+          ]
+        }
+      },
+      "floating": {
+        "caretName": "Caret",
+        "caretTime": "now",
+        "caretBody": "3 invoices are overdue this week. Want me to send the reminders?",
+        "taskDone": "Send Q3 report",
+        "taskOpen": "Follow up with Voxire",
+        "taskDue": "Fri",
+        "moneyLabel": "Expenses",
+        "moneyLeft": "72% of budget",
+        "moneyAmount": "$4,286.40",
+        "eventDay": "Friday",
+        "eventTitle": "Client call",
+        "eventTime": "10:00 – 10:45"
+      }
     },
     "features": {
-      "badge": "THE RTYLR SUITE",
-      "title": "What can the rtylr suite do?",
-      "titleAccent": "One connected operation.",
-      "openCta": "Explore the {{capability}} workflow",
-      "showLabel": "Show the {{capability}} workflow",
-      "chooseAppLabel": "Choose a suite capability",
+      "badge": "Inside rtylr",
+      "title": "See it working.",
+      "titleAccent": "Every part, one workspace.",
+      "openCta": "Explore {{capability}}",
       "items": [
         {
-          "title": "A register that keeps up with real service.",
-          "description": "Tickets, tables, splits, tips, and every payment type - card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn’t. < 200ms per checkout."
-        },
-        {
-          "title": "Inventory that counts itself.",
-          "description": "Recipe-linked depletion as sales ring up. Auto-reorder at threshold. Multi-location transfers with a full audit trail. Your shelves tell the database, not the other way around."
-        },
-        {
-          "title": "The people side, without the paperwork.",
-          "description": "Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions automatically. Compliance flags before they become violations."
-        },
-        {
-          "title": "Every customer, remembered.",
-          "description": "Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same connected workflow - no Mailchimp detour required."
-        },
-        {
-          "title": "A real P&L, in real time.",
-          "description": "Recurring invoices that collect themselves. Expenses captured at source. Sales tax by jurisdiction. A P&L that updates with every sale, not at month-end."
-        },
-        {
+          "label": "Work",
           "title": "Work that moves through one system.",
-          "description": "Kanban boards, automations, and tasks linked to the invoice, customer, or shift they’re actually about. Operations that don’t slip between tools."
+          "description": "Boards, lists and automations, with every task linked to the client, invoice or teammate it's actually about. Nothing slips between tools."
         },
         {
-          "title": "The dashboard that sees everything.",
-          "description": "Revenue trends, customer cohorts, product performance, labor margin. Every number stays current across the rtylr suite. No SQL, no nightly ETL."
+          "label": "Finance",
+          "title": "A live P&L, not a month-end scramble.",
+          "description": "Recurring invoices, expenses captured as they happen, and a P&L that updates with every sale and bill."
+        },
+        {
+          "label": "Customers",
+          "title": "Every customer, remembered.",
+          "description": "Each sale and conversation adds to the profile. Segment by spend, activity or tags, and follow up from the same place."
+        },
+        {
+          "label": "Team",
+          "title": "The people side, without the paperwork.",
+          "description": "Schedules, time off and payroll that pulls in hours automatically, with permissions so everyone sees the right part."
+        },
+        {
+          "label": "Operations",
+          "title": "Stock that keeps count for you.",
+          "description": "Inventory that moves as you sell, reorder points, suppliers and transfers between locations, with a full history."
+        },
+        {
+          "label": "Sales",
+          "title": "Checkout that feeds everything else.",
+          "description": "A point of sale that updates stock, revenue and the customer profile the moment a sale goes through."
+        },
+        {
+          "label": "Insights",
+          "title": "The numbers, always current.",
+          "description": "Revenue, customers and margins across the whole workspace, with Caret on hand to explain what changed and why."
         }
       ],
       "demos": {
-        "hr": {
-          "scheduleTitle": "Schedule",
-          "today": "Today · Mon 5 May",
-          "onShift_one": "{{count}} on shift",
-          "onShift_other": "{{count}} on shift",
-          "roles": {
-            "floorManager": "Floor Manager",
-            "barista": "Barista",
-            "chef": "Chef",
-            "server": "Server"
-          }
+        "frame": {
+          "caret": "Ask Caret"
         },
-        "pos": {
-          "menuLabel": "Menu · Dine-in",
-          "orderLabel": "Order · Table 4",
-          "addItems": "Add items…",
-          "total": "Total",
-          "charge": "Charge",
-          "chargeAmount": "Charge ${{amount}}",
-          "items": [
-            "Espresso",
-            "Latte",
-            "Cappuccino",
-            "Croissant",
-            "Orange Juice",
-            "Avo Toast",
-            "Greek Salad",
-            "Cheesecake"
+        "flow": {
+          "crumb": [
+            "Work",
+            "Website relaunch"
+          ],
+          "views": [
+            "Board",
+            "List",
+            "Calendar"
+          ],
+          "columns": [
+            "To do",
+            "In progress",
+            "Review",
+            "Done"
+          ],
+          "tasks": [
+            "Write homepage copy",
+            "Pick launch date",
+            "Design pricing page",
+            "Set up analytics",
+            "QA on mobile",
+            "Brief the sales team",
+            "Migrate blog posts"
+          ],
+          "tags": {
+            "design": "Design",
+            "web": "Web",
+            "ops": "Ops",
+            "sales": "Sales"
+          },
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
           ]
         },
-        "erp": {
-          "inventory": "Inventory",
-          "itemCount_one": "{{count}} item",
-          "itemCount_other": "{{count}} items",
-          "alertCount_one": "{{count}} alert",
-          "alertCount_other": "{{count}} alerts",
-          "table": {
-            "item": "Item",
-            "stock": "Stock",
-            "onHand": "On hand",
-            "status": "Status"
-          },
-          "status": {
-            "out": "Out",
-            "critical": "Critical",
-            "low": "Low",
-            "ok": "OK"
-          },
-          "items": [
-            "Olive Oil 5L",
-            "Flour 25kg",
-            "Espresso Beans",
-            "Atlantic Salmon",
-            "Truffle Oil",
-            "Heavy Cream",
-            "Sourdough"
+        "finance": {
+          "crumb": [
+            "Finance",
+            "Overview"
           ],
-          "units": {
-            "btl": "btl",
-            "bag": "bag",
-            "kg": "kg",
-            "L": "L",
-            "pcs": "pcs"
+          "kpis": [
+            "Revenue",
+            "Expenses",
+            "Net profit"
+          ],
+          "vsLast": "vs last month",
+          "chart": "Cash flow",
+          "months": [
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct"
+          ],
+          "in": "Money in",
+          "out": "Money out",
+          "invoices": "Invoices",
+          "status": {
+            "paid": "Paid",
+            "due": "Due",
+            "overdue": "Overdue",
+            "sent": "Reminder sent"
           }
         },
         "crm": {
-          "customers": "Customers",
-          "totalCount": "1,204 total",
-          "segments": {
-            "all": "All",
-            "vip": "★ VIP",
-            "regular": "Regular",
+          "crumb": [
+            "Customers",
+            "All customers"
+          ],
+          "segments": [
+            "All",
+            "Active",
+            "At risk",
+            "New"
+          ],
+          "cols": [
+            "Customer",
+            "Status",
+            "Lifetime value",
+            "Last activity"
+          ],
+          "status": {
+            "active": "Active",
             "atRisk": "At risk",
             "new": "New"
           },
-          "table": {
-            "customer": "Customer",
-            "tier": "Tier",
-            "spend": "Spend",
-            "lastVisit": "Last visit"
-          },
-          "visitCount_one": "{{count}} visit",
-          "visitCount_other": "{{count}} visits",
-          "relativeTime": {
-            "yesterday": "Yesterday",
-            "oneDayAgo": "1d ago",
-            "twoDaysAgo": "2d ago",
-            "threeDaysAgo": "3d ago",
-            "fiveDaysAgo": "5d ago",
-            "oneWeekAgo": "1w ago",
-            "threeWeeksAgo": "3w ago",
-            "oneMonthAgo": "1mo ago"
+          "activity": [
+            "Invoice paid",
+            "Call logged",
+            "Email opened",
+            "Quote sent",
+            "Meeting booked",
+            "Signed up"
+          ],
+          "total": "{{count}} customers"
+        },
+        "hr": {
+          "crumb": [
+            "Team",
+            "Schedule"
+          ],
+          "today": "Today",
+          "onShift_one": "{{count}} on shift",
+          "onShift_other": "{{count}} on shift",
+          "roles": {
+            "ops": "Operations lead",
+            "sales": "Account manager",
+            "support": "Support",
+            "finance": "Finance",
+            "design": "Designer"
           }
         },
-        "finance": {
-          "pnl": "P&L",
-          "monthLabel": "May 2026",
-          "profitable": "Profitable",
-          "metrics": {
-            "revenue": "Revenue",
-            "expenses": "Expenses",
-            "netProfit": "Net profit"
+        "erp": {
+          "crumb": [
+            "Operations",
+            "Inventory"
+          ],
+          "cols": [
+            "Item",
+            "Stock",
+            "On hand",
+            "Status"
+          ],
+          "status": {
+            "ok": "In stock",
+            "low": "Low",
+            "out": "Out of stock",
+            "reorder": "Reorder sent"
           },
-          "momSuffix": "MoM",
-          "months": {
-            "nov": "Nov",
-            "dec": "Dec",
-            "jan": "Jan",
-            "feb": "Feb",
-            "mar": "Mar",
-            "apr": "Apr",
-            "may": "May"
-          }
+          "alerts_one": "{{count}} alert",
+          "alerts_other": "{{count}} alerts"
         },
-        "flow": {
-          "breadcrumb": {
-            "workspaces": "Workspaces",
-            "operations": "Operations",
-            "sprint": "Weekly sprint"
-          },
-          "views": {
-            "board": "Board",
-            "list": "List",
-            "timeline": "Timeline"
-          },
-          "columns": {
-            "backlog": "Backlog",
-            "progress": "In progress",
-            "review": "Review",
-            "done": "Done"
-          },
-          "priorityHigh": "High",
-          "tasks": {
-            "t1": "Seasonal menu rollout, Q3",
-            "t2": "New supplier: Rossini",
-            "t3": "Friday covers, staffing plan",
-            "t4": "Redo brunch prep checklist",
-            "t5": "Email blast: Mother's Day",
-            "t6": "Espresso machine SLA",
-            "t7": "Q1 sales-tax filing",
-            "t8": "POS firmware v4.2"
-          },
-          "tags": {
-            "ops": "Ops",
-            "erp": "ERP",
-            "hr": "HR",
-            "kitchen": "Kitchen",
-            "crm": "CRM",
-            "vendor": "Vendor",
-            "finance": "Finance"
-          }
+        "pos": {
+          "crumb": [
+            "Sales",
+            "Checkout"
+          ],
+          "order": "Current order",
+          "total": "Total",
+          "charge": "Charge",
+          "paid": "Payment received",
+          "items": [
+            "Starter plan",
+            "Onboarding session",
+            "Extra seat",
+            "Priority support",
+            "Custom domain",
+            "Data import"
+          ]
         },
         "insights": {
-          "revenue": "Revenue",
-          "last7Days": "Last 7 days",
-          "kpis": {
-            "covers": "Covers",
-            "avgOrder": "Avg order",
-            "peakDay": "Peak day"
-          },
-          "vsPrefix": "vs {{day}}",
-          "days": {
-            "mon": "Mon",
-            "tue": "Tue",
-            "wed": "Wed",
-            "thu": "Thu",
-            "fri": "Fri",
-            "sat": "Sat",
-            "sun": "Sun"
-          },
-          "ranges": {
-            "7d": "7d",
-            "30d": "30d",
-            "90d": "90d"
-          }
+          "crumb": [
+            "Insights",
+            "Overview"
+          ],
+          "ranges": [
+            "7d",
+            "30d",
+            "90d"
+          ],
+          "kpis": [
+            "Revenue",
+            "New customers",
+            "Avg. order"
+          ],
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+            "Sun"
+          ],
+          "question": "Why was Tuesday slower?",
+          "answer": "Two large invoices moved to Wednesday, so Tuesday revenue dipped 18%. The week is still up 12%."
         }
       }
+    },
+    "connected": {
+      "eyebrow": "Connected",
+      "title": "One update.\nEverywhere at once.",
+      "subtitle": "Every part of rtylr reads and writes the same records, so a change in one place reaches the rest the moment it happens. No exports, no copy-paste.",
+      "events": [
+        {
+          "title": "A sale goes through.",
+          "effect": "Stock, revenue and the customer's profile update."
+        },
+        {
+          "title": "Lina clocks in.",
+          "effect": "Her hours land in payroll and the live numbers."
+        },
+        {
+          "title": "Voxire pays an invoice.",
+          "effect": "The account, the follow-up task and the P&L catch up."
+        },
+        {
+          "title": "Printer paper runs low.",
+          "effect": "A reorder task and a purchase order appear."
+        }
+      ]
     }
   },
   "pos": {

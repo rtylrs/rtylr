@@ -1,0 +1,337 @@
+// Shared look for the feature demos: the rtylr portal's light theme
+// (clients/app globals.css, [data-theme='light']) at demo scale.
+
+.frame {
+  --p-bg: #f8f8f8;
+  --p-surface: #ffffff;
+  --p-border: rgba(0, 0, 0, 0.08);
+  --p-text: rgb(9, 9, 11);
+  --p-muted: rgba(9, 9, 11, 0.5);
+  --p-dim: rgba(9, 9, 11, 0.65);
+  --p-hover: rgba(0, 0, 0, 0.04);
+  --p-green: #10b981;
+  --p-amber: #f59e0b;
+  --p-red: #ef4444;
+
+  position: absolute;
+  inset: 0;
+  display: flex;
+  background: var(--p-bg);
+  color: var(--p-text);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: start;
+  overflow: hidden;
+}
+
+// ── Chrome ───────────────────────────────────────────────────────────────────
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 44px;
+  padding: 10px 0;
+  flex-shrink: 0;
+}
+
+.railItem {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--p-muted);
+}
+
+.railButton {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: var(--p-hover);
+    color: var(--p-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p-text);
+    outline-offset: 1px;
+  }
+}
+
+.railActive,
+.railActive:hover {
+  background: var(--p-surface);
+  color: var(--p-accent);
+  box-shadow: 0 0 0 1px var(--p-border);
+}
+
+.railCaret {
+  margin-top: auto;
+  color: var(--p-text);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 6px 6px 6px 0;
+  border-radius: 12px;
+  background: var(--p-surface);
+  box-shadow: 0 0 0 1px var(--p-border);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 42px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--p-border);
+  flex-shrink: 0;
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--p-muted);
+  white-space: nowrap;
+}
+
+.crumbSep {
+  opacity: 0.6;
+}
+
+.crumbCurrent {
+  color: var(--p-text);
+  font-weight: 500;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iconBtn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  color: var(--p-dim);
+}
+
+.body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  overflow: hidden;
+}
+
+// ── Building blocks ──────────────────────────────────────────────────────────
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.muted {
+  color: var(--p-muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spread {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--p-hover);
+}
+
+.segment {
+  padding: 3px 9px;
+  border-radius: 6px;
+  color: var(--p-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.segmentOn {
+  background: var(--p-surface);
+  color: var(--p-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--p-border);
+}
+
+.card {
+  border-radius: 10px;
+  background: var(--p-surface);
+  box-shadow: 0 0 0 1px var(--p-border);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), 1fr);
+  gap: 10px;
+}
+
+.kpi {
+  composes: card;
+  padding: 11px 12px;
+}
+
+.kpiLabel {
+  color: var(--p-muted);
+  font-size: 11px;
+}
+
+.kpiValue {
+  margin-top: 3px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.delta {
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--p-green);
+}
+
+.deltaDown {
+  color: var(--p-red);
+}
+
+// Status pill. Tone comes from data-tone.
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: rgba(9, 9, 11, 0.06);
+  color: var(--p-dim);
+
+  &[data-tone='green'] {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+  }
+
+  &[data-tone='amber'] {
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+  }
+
+  &[data-tone='red'] {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+
+  &[data-tone='accent'] {
+    background: color-mix(in srgb, var(--p-accent) 12%, transparent);
+    color: color-mix(in srgb, var(--p-accent) 80%, #000);
+  }
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+}
+
+// Plain table: header row in muted caps-free text, hairline rows.
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+
+  th {
+    padding: 0 8px 7px;
+    color: var(--p-muted);
+    font-size: 11px;
+    font-weight: 500;
+    text-align: start;
+    border-bottom: 1px solid var(--p-border);
+  }
+
+  td {
+    padding: 7px 8px;
+    border-bottom: 1px solid var(--p-border);
+    white-space: nowrap;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .num {
+    text-align: end;
+  }
+}
+
+.bar {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(9, 9, 11, 0.07);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--p-text);
+    transition:
+      width 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+      background 0.4s ease;
+  }
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--p-text);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -2,9 +2,7 @@ import React from 'react';
 import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
-import DirectAnswer from '../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../components/FaqSection/FaqSection';
-import ProductTruthSection from '../components/home/ProductTruthSection/ProductTruthSection';
 import { useTranslation } from 'react-i18next';
 import { useFaq } from '../lib/faqs';
 import { webSiteSchema, organizationSchema, productSchema } from '../lib/structured-data';
@@ -12,8 +10,7 @@ import HeroSection from '../components/home/HeroSection/HeroSection';
 import ProductsSection from '../components/home/ProductsSection/ProductsSection';
 import FeaturesSection from '../components/home/FeaturesSection/FeaturesSection';
 import HowItWorksSection from '../components/home/HowItWorksSection/HowItWorksSection';
-import PricingSection from '../components/home/PricingSection/PricingSection';
-import IntegrationsSection from '../components/home/IntegrationsSection/IntegrationsSection';
+import ConnectedSection from '../components/home/ConnectedSection/ConnectedSection';
 import CTASection from '../components/home/CTASection/CTASection';
 import styles from './index.module.scss';
 
@@ -53,7 +50,6 @@ function useSeoProps() {
 
 const WebsiteContent = (): React.JSX.Element => {
   const faq = useFaq('home');
-  const { t } = useTranslation();
 
   return (
     <AppLayout>
@@ -63,10 +59,7 @@ const WebsiteContent = (): React.JSX.Element => {
           <ProductsSection />
           <FeaturesSection />
           <HowItWorksSection />
-          <PricingSection />
-          {/* Verifiable claims. See the component for what is in it and why. */}
-          <ProductTruthSection />
-          <IntegrationsSection />
+          <ConnectedSection />
           <FaqSection title={faq.title} intro={faq.intro} faqs={faq.items} />
           <CTASection />
         </div>
