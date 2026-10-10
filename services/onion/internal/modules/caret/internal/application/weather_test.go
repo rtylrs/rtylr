@@ -52,3 +52,28 @@ func TestGeocodeRejectsEmptyAndReportsNoMatch(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+func TestWeatherHistoryReadsPastDays(t *testing.T) {
+	executor := &AssistantToolExecutor{HTTP: fakePublicAPI(t, map[string]string{
+		weatherArchiveEndpoint: `{"daily":{"time":["2026-10-02"],"weather_code":[63],"temperature_2m_max":[24.1],"temperature_2m_min":[18.0],"precipitation_sum":[12.5],"wind_speed_10m_max":[30]}}`,
+	})}
+	output, _, err := executor.ExecuteCaretTool(context.Background(), "weather.history", map[string]any{"latitude": 33.9, "longitude": 35.5, "date": "2026-10-02"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := output["days"].([]map[string]any)[0]
+	if day["conditions"] != "rain" || day["precipitation_mm"] != 12.5 {
+		t.Fatalf("day = %#v", day)
+	}
+	if _, _, err := executor.ExecuteCaretTool(context.Background(), "weather.history", map[string]any{"latitude": 1.0, "longitude": 1.0, "date": "2099-01-01"}); err == nil {
+		t.Fatal("a future date was accepted")
+	}
+}
+
+func TestAirQualityAddsCategory(t *testing.T) {
+	executor := &AssistantToolExecutor{HTTP: fakePublicAPI(t, map[string]string{airQualityEndpoint: `{"current":{"us_aqi":120,"pm2_5":40}}`})}
+	output, _, err := executor.ExecuteCaretTool(context.Background(), "weather.air_quality", map[string]any{"lat": 1.0, "lon": 2.0})
+	if err != nil || output["current"].(map[string]any)["us_aqi_category"] != "unhealthy for sensitive groups" {
+		t.Fatalf("output = %#v, %v", output, err)
+	}
+}

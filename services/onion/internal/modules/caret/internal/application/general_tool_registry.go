@@ -125,4 +125,20 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "Price, 24-hour change and market cap.",
 		Freshness:  "live", SideEffect: "read-only",
 	},
+	{
+		Name:        "weather.history",
+		Description: "Observed daily weather for past dates at a place (conditions, high and low, rain, wind), back to 1940. Useful to check whether weather explains a busy or slow day.",
+		Module:      "weather", Scope: "read",
+		InputHint:  `{"location":"city","start_date":"YYYY-MM-DD","end_date":"YYYY-MM-DD"}`,
+		OutputHint: "One entry per day with conditions, temperatures in °C, precipitation and wind.",
+		Freshness:  "historical observations", SideEffect: "read-only",
+	},
+	{
+		Name:        "weather.air_quality",
+		Description: "Current air quality at a place: US and European AQI with category, PM2.5, PM10, ozone, NO2 and UV index.",
+		Module:      "weather", Scope: "read",
+		InputHint:  `{"location":"city"}`,
+		OutputHint: "Current air-quality readings and the US AQI category.",
+		Freshness:  "live", SideEffect: "read-only",
+	},
 }

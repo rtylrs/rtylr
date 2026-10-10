@@ -15,18 +15,9 @@ func init() {
 }
 
 func (e *AssistantToolExecutor) weatherForecast(ctx context.Context, input map[string]any) (map[string]any, error) {
-	lat, hasLat := inputNumber(input, "latitude", "lat")
-	lon, hasLon := inputNumber(input, "longitude", "lon", "lng")
-	label := ""
-	if !hasLat || !hasLon {
-		places, err := e.geocode(ctx, inputText(input, "location", "city", "place", "name"), 1)
-		if err != nil {
-			return nil, err
-		}
-		lat, lon, label = places[0].Latitude, places[0].Longitude, places[0].label()
-	}
-	if lat < -90 || lat > 90 || lon < -180 || lon > 180 {
-		return nil, errors.New("latitude or longitude is out of range")
+	lat, lon, label, err := e.coordinates(ctx, input)
+	if err != nil {
+		return nil, err
 	}
 	days := 3
 	if n, ok := inputNumber(input, "days"); ok {
@@ -109,6 +100,24 @@ func (e *AssistantToolExecutor) weatherForecast(ctx context.Context, input map[s
 		out["location"] = label
 	}
 	return out, nil
+}
+
+// coordinates reads latitude and longitude from the input, or geocodes a
+// place name.
+func (e *AssistantToolExecutor) coordinates(ctx context.Context, input map[string]any) (lat, lon float64, label string, err error) {
+	lat, hasLat := inputNumber(input, "latitude", "lat")
+	lon, hasLon := inputNumber(input, "longitude", "lon", "lng")
+	if !hasLat || !hasLon {
+		places, err := e.geocode(ctx, inputText(input, "location", "city", "place", "name"), 1)
+		if err != nil {
+			return 0, 0, "", err
+		}
+		lat, lon, label = places[0].Latitude, places[0].Longitude, places[0].label()
+	}
+	if lat < -90 || lat > 90 || lon < -180 || lon > 180 {
+		return 0, 0, "", errors.New("latitude or longitude is out of range")
+	}
+	return lat, lon, label, nil
 }
 
 // weatherCodeText names a WMO weather interpretation code.
