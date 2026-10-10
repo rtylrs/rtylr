@@ -101,3 +101,15 @@ func (m *Module) PendingCompaction(ctx context.Context, session string, userID i
 func (m *Module) SaveCompaction(ctx context.Context, session string, userID, previousThrough, newThrough int, summary string) error {
 	return m.memoryService.SaveCompaction(ctx, session, userID, application.CompactionWork{PreviousThrough: previousThrough, NewThrough: newThrough}, summary)
 }
+
+// PendingChatTitle returns the first exchange of a chat that should get a
+// written title. ok is false when it has one or the user renamed it.
+func (m *Module) PendingChatTitle(ctx context.Context, session string, userID int) (currentTitle, firstPrompt, firstReply string, ok bool, err error) {
+	work, ok, err := m.memoryService.PendingChatTitle(ctx, session, userID)
+	return work.CurrentTitle, work.FirstPrompt, work.FirstReply, ok, err
+}
+
+// SaveChatTitle stores a written title unless the chat was renamed meanwhile.
+func (m *Module) SaveChatTitle(ctx context.Context, session string, userID int, expectedTitle, title string) error {
+	return m.memoryService.SaveChatTitle(ctx, session, userID, expectedTitle, title)
+}

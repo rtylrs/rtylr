@@ -163,6 +163,9 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, w http.
 			logger.Int("user_id", userID))
 		return err
 	}
+	if titler, ok := h.MemoryService.(application.ChatTitler); ok && h.AiService != nil && h.AiService.IsAvailable() {
+		go h.titleChat(context.WithoutCancel(ctx), titler, sessionID, userID)
+	}
 	if !h.claimSessionSummary(sessionID) {
 		return nil
 	}
@@ -260,4 +263,42 @@ func (h *GenerateTextStreamHandler) compactConversation(ctx context.Context, com
 		logger.String("session_id", sessionID),
 		logger.Int("through_message_id", newThrough),
 		logger.Int("summary_bytes", len(summary)))
+}
+
+const chatTitleTimeout = 30 * time.Second
+
+// titleChat gives a chat a short written title after its first reply. It
+// runs after the reply is sent; a failure keeps the title derived from the
+// first message.
+func (h *GenerateTextStreamHandler) titleChat(ctx context.Context, titler application.ChatTitler, sessionID string, userID int) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Ctx(ctx).Error("panic while titling chat", logger.Any("panic", r))
+		}
+	}()
+	ctx, cancel := context.WithTimeout(ctx, chatTitleTimeout)
+	defer cancel()
+
+	current, prompt, reply, ok, err := titler.PendingChatTitle(ctx, sessionID, userID)
+	if err != nil || !ok {
+		return
+	}
+	tokens, err := h.AiService.GenerateTextStream(ctx, application.BuildChatTitlePrompt(prompt, reply))
+	if err != nil {
+		return
+	}
+	var raw strings.Builder
+	for token := range tokens {
+		if token.Error != "" {
+			return
+		}
+		raw.WriteString(token.Text)
+	}
+	title := application.CleanChatTitle(raw.String())
+	if title == "" {
+		return
+	}
+	if err := titler.SaveChatTitle(ctx, sessionID, userID, current, title); err != nil {
+		logger.Ctx(ctx).Warn("Failed to save chat title", logger.Error(err), logger.String("session_id", sessionID))
+	}
 }

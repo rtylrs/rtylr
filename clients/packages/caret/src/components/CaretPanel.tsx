@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import "../styles/index.css";
 import { caretTokens } from "../ui/tokens";
@@ -167,6 +167,21 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const retrySessions = useCallback((): void => {
     void refetchSessions();
   }, [refetchSessions]);
+  // When a reply finishes, refresh the chat list so a new chat shows up, and
+  // again shortly after, when the server has written the chat's title.
+  const wasStreaming = useRef(false);
+  useEffect(() => {
+    if (isStreaming) {
+      wasStreaming.current = true;
+      return;
+    }
+    if (!wasStreaming.current) return;
+    wasStreaming.current = false;
+    const sessionsKey = { queryKey: ["caret", "sessions", userId] };
+    void queryClient.invalidateQueries(sessionsKey);
+    const titled = setTimeout(() => void queryClient.invalidateQueries(sessionsKey), 4000);
+    return () => clearTimeout(titled);
+  }, [isStreaming, queryClient, userId]);
   const loadChat = useLoadCaretChat({ userId, apiBaseUrl });
   const setRecent = useChatsStore((s) => s.setRecent);
   const removeRecent = useChatsStore((s) => s.removeRecent);
