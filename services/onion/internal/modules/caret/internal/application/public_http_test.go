@@ -57,3 +57,20 @@ func TestGetPublicJSONRetriesOnceOnTransientFailure(t *testing.T) {
 		t.Fatalf("err=%v calls=%d", err, calls)
 	}
 }
+
+func TestGetPublicJSONCachesRepeatCalls(t *testing.T) {
+	calls := 0
+	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		calls++
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"rate":1.5}`))}, nil
+	})}
+	for i := 0; i < 3; i++ {
+		var out map[string]float64
+		if err := getPublicJSON(context.Background(), client, "https://api.example/rates?base=USD", &out); err != nil || out["rate"] != 1.5 {
+			t.Fatalf("call %d: %v %v", i, out, err)
+		}
+	}
+	if calls != 1 {
+		t.Fatalf("repeat calls hit the API %d times", calls)
+	}
+}

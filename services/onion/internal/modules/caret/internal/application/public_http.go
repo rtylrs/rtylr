@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -96,6 +97,9 @@ func getPublicJSON(ctx context.Context, client *http.Client, endpoint string, ou
 }
 
 func getPublicJSONWith(ctx context.Context, client *http.Client, endpoint string, out any, headers map[string]string) error {
+	if body, ok := publicCache.get(client, endpoint); ok {
+		return json.Unmarshal(body, out)
+	}
 	body, err := fetchPublicBody(ctx, client, endpoint, headers)
 	if errors.Is(err, errRetryable) {
 		// Public APIs hiccup; one quick retry clears most transient failures.
@@ -115,7 +119,54 @@ func getPublicJSONWith(ctx context.Context, client *http.Client, endpoint string
 	if err := json.Unmarshal(body, out); err != nil {
 		return errors.New("the service returned an invalid response")
 	}
+	publicCache.put(client, endpoint, body)
 	return nil
+}
+
+// publicCache keeps public API answers for a few minutes: parallel
+// sub-agents and follow-up rounds often ask for the same rate or forecast,
+// and the free APIs rate-limit repeat callers.
+var publicCache = &responseCache{ttl: 3 * time.Minute, max: 512, entries: map[cacheKey]cachedBody{}}
+
+type cacheKey struct {
+	client   *http.Client
+	endpoint string
+}
+
+type cachedBody struct {
+	body    []byte
+	expires time.Time
+}
+
+type responseCache struct {
+	mu      sync.Mutex
+	ttl     time.Duration
+	max     int
+	entries map[cacheKey]cachedBody
+}
+
+func (c *responseCache) get(client *http.Client, endpoint string) ([]byte, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	entry, ok := c.entries[cacheKey{client, endpoint}]
+	if !ok || time.Now().After(entry.expires) {
+		return nil, false
+	}
+	return entry.body, true
+}
+
+func (c *responseCache) put(client *http.Client, endpoint string, body []byte) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	now := time.Now()
+	if len(c.entries) >= c.max {
+		for key, entry := range c.entries {
+			if now.After(entry.expires) || len(c.entries) >= c.max {
+				delete(c.entries, key)
+			}
+		}
+	}
+	c.entries[cacheKey{client, endpoint}] = cachedBody{body: body, expires: now.Add(c.ttl)}
 }
 
 // errRetryable wraps a failure worth one more try: no response, a rate limit
