@@ -38,7 +38,7 @@ func DistillLessons(ctx context.Context, ai TextCompleter, learner LessonLearner
 	if err != nil || len(ids) == 0 {
 		return err
 	}
-	reply, err := ai.CompleteText(ctx, BuildLessonPrompt(lessons, feedback))
+	reply, err := completeFocused(ctx, ai, BuildLessonPrompt(lessons, feedback), 0.2)
 	if err != nil {
 		return err
 	}

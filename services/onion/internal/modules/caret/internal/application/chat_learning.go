@@ -28,7 +28,7 @@ func LearnFromChat(ctx context.Context, ai TextCompleter, learner ChatLearner, s
 	if err != nil || !ok {
 		return err
 	}
-	reply, err := ai.CompleteText(ctx, BuildChatLearningPrompt(transcript, known))
+	reply, err := completeFocused(ctx, ai, BuildChatLearningPrompt(transcript, known), 0.2)
 	if err != nil {
 		return err
 	}

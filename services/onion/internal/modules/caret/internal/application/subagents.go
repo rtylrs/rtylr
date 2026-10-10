@@ -178,7 +178,7 @@ func (e *SubAgentExecutor) run(parent context.Context, index, total int, task su
 	for step := 0; step <= maxSubAgentSteps; step++ {
 		final := step == maxSubAgentSteps
 		prompt := e.prompt(task, results.String(), final)
-		reply, err := e.AI.CompleteText(ctx, prompt)
+		reply, err := completeFocused(ctx, e.AI, prompt, 0.3)
 		if spent, ok := ctx.Value(subAgentUsageKey{}).(*atomic.Int64); ok {
 			// The same chars/4 estimate the stream uses for its own prompts.
 			spent.Add(int64((len(prompt) + len(reply)) / 4))

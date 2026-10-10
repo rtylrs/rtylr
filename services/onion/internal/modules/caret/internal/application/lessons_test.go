@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 type fakeLearner struct {
@@ -70,5 +72,24 @@ func TestDistillLessonsLeavesFeedbackPendingOnBadOutput(t *testing.T) {
 func TestShouldDistillLessons(t *testing.T) {
 	if !ShouldDistillLessons("down", 1) || !ShouldDistillLessons("correction", 1) || ShouldDistillLessons("up", 2) || !ShouldDistillLessons("up", 3) || ShouldDistillLessons("down", 0) {
 		t.Fatal("distillation trigger is wrong")
+	}
+}
+
+type optionsRecorder struct{ temperature *float64 }
+
+func (o *optionsRecorder) CompleteText(context.Context, string) (string, error) { return "", nil }
+
+func (o *optionsRecorder) CompleteTextWithOptions(_ context.Context, _ string, opts snips.CompletionOptions) (string, error) {
+	o.temperature = opts.Temperature
+	return "<lessons></lessons>", nil
+}
+
+func TestLearningPassesRunAtLowTemperature(t *testing.T) {
+	ai := &optionsRecorder{}
+	if err := DistillLessons(context.Background(), ai, &fakeLearner{feedback: "f", ids: []int64{1}}, 77); err != nil {
+		t.Fatal(err)
+	}
+	if ai.temperature == nil || *ai.temperature != 0.2 {
+		t.Fatalf("temperature = %v", ai.temperature)
 	}
 }
