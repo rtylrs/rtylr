@@ -41,6 +41,12 @@ func NewModule(ctx context.Context, memoryService application.MemoryService, quo
 		toolExecutors = append([]application.ToolExecutor{application.NewAssistantToolExecutor(profile, nil)}, toolExecutors...)
 	}
 
+	// Sub-agents call the same executors as the main reply (reads only); the
+	// list is resolved at call time because it includes the agent executor.
+	agents := &application.SubAgentExecutor{AI: snipsService}
+	toolExecutors = append(toolExecutors, agents)
+	agents.Executors = func() []application.ToolExecutor { return toolExecutors }
+
 	return &Module{
 		snipsService:   snipsService,
 		memoryService:  memoryService,

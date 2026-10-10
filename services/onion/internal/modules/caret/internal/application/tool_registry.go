@@ -31,6 +31,7 @@ var CoreTools = append(append([]ToolDef(nil), seedTools...), generalToolDefs...)
 var seedTools = []ToolDef{
 	{Name: "web.search", Description: "Search the public web or the news for current information. Returns results with snippets and source links (and publish dates for news). Query must contain public information only.", Module: "web", Scope: "read", InputHint: `{"query":"public search question","news":false,"recency":"optional day|week|month|year"}`},
 	{Name: "tools.search", Description: "Find more tools by describing what you need, e.g. \"list team members\" or \"unpaid invoices\". Covers HR and the team, CRM customers, POS and store orders, products and stock, finance, bookings, support, loyalty, Flow tasks, and insights. Returns matching tools with their inputs; call one next.", Module: "tools", Scope: "read", InputHint: `{"query":"what you need"}`},
+	{Name: "agents.run", Description: "Run up to four sub-agents in parallel, one per independent part of a bigger task (e.g. research each competitor, compare each option, check each question). Each works on its own with read-only tools (web search and pages, reference data, business reads) and returns a report with sources. Use it when parts don't depend on each other; give each a self-contained task.", Module: "agents", Scope: "read", InputHint: `{"tasks":[{"task":"self-contained instruction","context":"optional details it needs"}],"context":"optional background shared by all tasks"}`, OutputHint: "One report per task (status, findings, steps taken) and the combined web sources.", Freshness: "live at request time", SideEffect: "read-only; sub-agents can't change anything"},
 	{Name: "account.profile", Description: "Read the authenticated person's name and current business identity.", Module: "account", Scope: "read", InputHint: `{}`},
 	{Name: "utilities.calculate", Description: "Evaluate arithmetic exactly using numbers supplied by the user or verified results. Supports + - * / parentheses, percentages (\"15% of 200\"), pi, and sqrt, pow, round(x, places), min, max, abs, floor, ceil, ln, log10, exp.", Module: "utilities", Scope: "read", InputHint: `{"expression":"round((120 * 0.2) + pow(1.05, 3), 2)"}`},
 	{Name: "utilities.time", Description: "Get the current date and time in an IANA timezone.", Module: "utilities", Scope: "read", InputHint: `{"timezone":"Asia/Beirut"}`},
@@ -192,7 +193,7 @@ var seedTools = []ToolDef{
 }
 
 var promptExecutableTools = map[string]struct{}{
-	"web.search": {}, "tools.search": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
+	"web.search": {}, "tools.search": {}, "agents.run": {}, "account.profile": {}, "utilities.calculate": {}, "utilities.time": {},
 	"business.snapshot":                   {},
 	"business.get_kpis":                   {},
 	"memory.remember":                     {},

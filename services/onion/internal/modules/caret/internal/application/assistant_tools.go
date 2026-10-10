@@ -128,7 +128,12 @@ func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name strin
 		if strings.TrimSpace(query) == "" {
 			return nil, true, errors.New("describe the tool you need")
 		}
-		return toolSearchOutput(ModeAgent, truncateSearchText(query, 300)), true, nil
+		mode := ModeAgent
+		if IsSubAgent(ctx) {
+			// Sub-agents only read, so they only discover read tools.
+			mode = ModeAsk
+		}
+		return toolSearchOutput(mode, truncateSearchText(query, 300)), true, nil
 	case "utilities.calculate":
 		expression, _ := input["expression"].(string)
 		value, err := calculateArithmetic(expression)
