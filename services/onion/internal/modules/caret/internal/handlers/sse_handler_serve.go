@@ -40,6 +40,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 
 		return
 	}
+	// Attached PDFs become text before anything else sees the request.
+	if req.Files, err = application.ExtractAttachedFiles(req.Files); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	if h.AiService == nil || !h.AiService.IsAvailable() {
 		log.Warn("AI service not available")

@@ -1,6 +1,7 @@
 package application
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
@@ -12,6 +13,41 @@ import (
 type AttachedFile struct {
 	Name string `json:"name"`
 	Text string `json:"text"`
+	// DataURL carries a binary document (a PDF) whose text the server
+	// extracts; Text is empty then.
+	DataURL string `json:"data_url,omitempty"`
+}
+
+// maxAttachedDocumentBytes bounds a binary attachment before decoding.
+const maxAttachedDocumentBytes = 6 << 20
+
+// ExtractAttachedFiles turns binary attachments into text, so the rest of
+// the turn only deals with text files.
+func ExtractAttachedFiles(files []AttachedFile) ([]AttachedFile, error) {
+	out := make([]AttachedFile, len(files))
+	for i, file := range files {
+		out[i] = AttachedFile{Name: file.Name, Text: file.Text}
+		if file.DataURL == "" {
+			continue
+		}
+		mediaType, encoded, ok := strings.Cut(strings.TrimPrefix(file.DataURL, "data:"), ";base64,")
+		if !ok || mediaType != "application/pdf" {
+			return nil, fmt.Errorf("%s: only PDF documents can be sent as data", file.Name)
+		}
+		raw, err := base64.StdEncoding.DecodeString(encoded)
+		if err != nil {
+			return nil, fmt.Errorf("%s could not be decoded", file.Name)
+		}
+		text, err := extractPDFText(raw)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", file.Name, err)
+		}
+		if len(text) > maxAttachedFileBytes {
+			text = TruncateUTF8ToBytes(text, maxAttachedFileBytes)
+		}
+		out[i].Text = text
+	}
+	return out, nil
 }
 
 const (
@@ -34,6 +70,9 @@ func ValidateAttachedFiles(files []AttachedFile) error {
 		name := strings.TrimSpace(file.Name)
 		if name == "" || utf8.RuneCountInString(name) > 200 {
 			return errors.New("each attached file needs a name under 200 characters")
+		}
+		if len(file.DataURL) > maxAttachedDocumentBytes {
+			return fmt.Errorf("%s is larger than 4 MB", name)
 		}
 		if len(file.Text) > maxAttachedFileBytes {
 			return fmt.Errorf("%s is larger than 400 KB; attach a smaller extract", name)

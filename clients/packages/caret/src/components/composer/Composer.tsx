@@ -97,7 +97,7 @@ export const Composer: React.FC<ComposerProps> = ({
       );
       if (accepted.length !== files.length)
         setAttachmentError(
-          "Choose JPEG, PNG or WebP images, or text files such as CSV.",
+          "Choose JPEG, PNG or WebP images, PDFs, or text files such as CSV.",
         );
       else setAttachmentError(null);
       if (accepted.length === 0) return;

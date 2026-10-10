@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
@@ -85,4 +86,18 @@ func newTestPDF(t *testing.T, pageContents []string) []byte {
 	}
 	fmt.Fprintf(&buf, "trailer\n<< /Size %d /Root %d 0 R >>\nstartxref\n%d\n%%%%EOF\n", len(offsets), catalogID, xrefOffset)
 	return buf.Bytes()
+}
+
+func TestExtractAttachedPDF(t *testing.T) {
+	document := newTestPDF(t, []string{"BT /F1 12 Tf 72 720 Td (Invoice total 420) Tj ET"})
+	files, err := ExtractAttachedFiles([]AttachedFile{{Name: "invoice.pdf", DataURL: "data:application/pdf;base64," + base64.StdEncoding.EncodeToString(document)}, {Name: "a.txt", Text: "plain"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(files[0].Text, "Invoice total 420") || files[0].DataURL != "" || files[1].Text != "plain" {
+		t.Fatalf("files = %#v", files)
+	}
+	if _, err := ExtractAttachedFiles([]AttachedFile{{Name: "x.exe", DataURL: "data:application/octet-stream;base64,AAAA"}}); err == nil {
+		t.Fatal("a non-PDF document was accepted")
+	}
 }
