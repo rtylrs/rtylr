@@ -53,6 +53,9 @@ func WriteEvent(w io.Writer, flush func(), event StreamEvent) error {
 	if _, err := fmt.Fprintf(w, "data: %s\n\n", payload); err != nil {
 		return err
 	}
+	if recorder, ok := w.(*transcriptWriter); ok {
+		recorder.recordEvent(event)
+	}
 	if flush != nil {
 		flush()
 	}

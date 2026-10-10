@@ -1,5 +1,9 @@
 import { useCallback } from "react";
-import type { CaretImageAttachment, CaretMessage } from "../types/message";
+import type {
+  CaretImageAttachment,
+  CaretMessage,
+  ContentBlock,
+} from "../types/message";
 import { createMemoryClient } from "../lib/memoryClient";
 import type { ChatMessage } from "@voxire/voxie/hub/memory/v1/types";
 
@@ -25,14 +29,69 @@ function toCaretMessage(
   } catch {
     attachments = undefined;
   }
+  const stored = role === "assistant" ? storedBlocks(m.blocksJson, index) : [];
   return {
     id: `hist-${index}`,
     role,
-    blocks: [{ id: `hist-${index}-text`, type: "text", content: m.content }],
+    blocks:
+      stored.length > 0
+        ? stored
+        : [{ id: `hist-${index}-text`, type: "text", content: m.content }],
     createdAt: m.createdAt ?? new Date().toISOString(),
     content: m.content,
     attachments,
+    responseMs: m.responseMs && m.responseMs > 0 ? m.responseMs : undefined,
   };
+}
+
+const toolStatuses = new Set(["success", "error", "denied"]);
+
+/**
+ * Rebuild a saved reply's text and finished tool steps in the order they
+ * streamed. Anything malformed is skipped; an empty result falls back to the
+ * plain text.
+ */
+function storedBlocks(raw: string | undefined, index: number): ContentBlock[] {
+  if (!raw) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  const blocks: ContentBlock[] = [];
+  parsed.forEach((value: unknown, position) => {
+    if (!value || typeof value !== "object") return;
+    const block = value as Record<string, unknown>;
+    const id = `hist-${index}-${position}`;
+    if (block.type === "text" && typeof block.content === "string") {
+      if (block.content) blocks.push({ id, type: "text", content: block.content });
+      return;
+    }
+    if (
+      block.type === "tool_call" &&
+      typeof block.name === "string" &&
+      typeof block.status === "string" &&
+      toolStatuses.has(block.status)
+    ) {
+      blocks.push({
+        id,
+        type: "tool_call",
+        name: block.name,
+        input:
+          block.input && typeof block.input === "object"
+            ? (block.input as Record<string, unknown>)
+            : {},
+        status: block.status as "success" | "error" | "denied",
+        output: block.output,
+        summary: typeof block.summary === "string" ? block.summary : undefined,
+        error: typeof block.error === "string" ? block.error : undefined,
+      });
+    }
+  });
+  return blocks.some((block) => block.type === "text") ? blocks : [];
 }
 
 function isStoredImage(

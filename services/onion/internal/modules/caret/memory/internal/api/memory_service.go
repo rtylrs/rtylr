@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -62,6 +63,8 @@ func messageToProto(message domain.ConversationMessage) *hubmemoryv1.ChatMessage
 		Content:         message.Content,
 		CreatedAt:       message.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		AttachmentsJson: sessionImagesJSON(message.Metadata),
+		BlocksJson:      messageBlocksJSON(message.Metadata),
+		ResponseMs:      messageResponseMs(message.Metadata),
 		TokensUsed:      int32(message.TokensUsed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 }
@@ -240,4 +243,25 @@ func sessionImagesJSON(raw string) string {
 		return ""
 	}
 	return string(metadata["images"])
+}
+
+// messageBlocksJSON returns the reply's stored steps (text and tool calls).
+func messageBlocksJSON(raw string) string {
+	var metadata map[string]json.RawMessage
+	if json.Unmarshal([]byte(raw), &metadata) != nil {
+		return ""
+	}
+	return string(metadata["blocks"])
+}
+
+// messageResponseMs returns how long the reply took, capped to the contract's
+// int32 width (about 24 days, far beyond any real reply).
+func messageResponseMs(raw string) int32 {
+	var metadata struct {
+		ResponseMs int64 `json:"response_ms"`
+	}
+	if json.Unmarshal([]byte(raw), &metadata) != nil || metadata.ResponseMs <= 0 {
+		return 0
+	}
+	return int32(min(metadata.ResponseMs, math.MaxInt32)) // #nosec G115 -- clamped to int32 range above.
 }

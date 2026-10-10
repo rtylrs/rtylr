@@ -17,6 +17,8 @@ message ChatMessage {
   created_at: string
   tokens_used: int32
   attachments_json: string
+  blocks_json: string
+  response_ms: int32
 }
 
 message ListChatsRequest {
