@@ -15,6 +15,8 @@ export const EV_GENERATE_LEAD = 'generate_lead';
 export const EV_FORM_START = 'form_start';
 export const EV_CTA_CLICK = 'cta_click';
 export const EV_SIGNUP_CLICK = 'sign_up_click';
+// Homepage easter egg: the visitor caught the hiding Caret mascot.
+export const EV_MASCOT_CATCH = 'mascot_catch';
 
 export function track(name: string, params: Record<string, string | number | boolean> = {}): void {
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;

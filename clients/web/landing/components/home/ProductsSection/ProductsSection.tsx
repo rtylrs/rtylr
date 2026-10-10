@@ -65,6 +65,7 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
 
         <motion.div
           className={styles.grid}
+          data-mascot-spot="0.12"
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}

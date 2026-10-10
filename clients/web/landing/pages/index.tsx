@@ -12,6 +12,7 @@ import FeaturesSection from '../components/home/FeaturesSection/FeaturesSection'
 import HowItWorksSection from '../components/home/HowItWorksSection/HowItWorksSection';
 import ConnectedSection from '../components/home/ConnectedSection/ConnectedSection';
 import CTASection from '../components/home/CTASection/CTASection';
+import CaretMascotLoader from '../components/home/CaretMascot/CaretMascotLoader';
 import styles from './index.module.scss';
 
 /**
@@ -62,6 +63,7 @@ const WebsiteContent = (): React.JSX.Element => {
           <ConnectedSection />
           <FaqSection title={faq.title} intro={faq.intro} faqs={faq.items} />
           <CTASection />
+          <CaretMascotLoader />
         </div>
       </MainLayout>
     </AppLayout>

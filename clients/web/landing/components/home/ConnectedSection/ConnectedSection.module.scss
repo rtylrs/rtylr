@@ -86,6 +86,15 @@
   pointer-events: none;
 }
 
+// Invisible box the size of the core tile, for the mascot to peek from.
+.mascotSpot {
+  position: absolute;
+  width: 92px;
+  height: 92px;
+  margin: -46px 0 0 -46px;
+  pointer-events: none;
+}
+
 .core {
   position: absolute;
   display: grid;
