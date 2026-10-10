@@ -44,7 +44,11 @@ func WithWebSearchBudget(ctx context.Context) context.Context {
 
 func NewAssistantToolExecutor(profile AssistantProfileReader, web PublicWebSearcher) *AssistantToolExecutor {
 	if web == nil {
-		web = SearXNGWebSearch{Client: &http.Client{Timeout: 12 * time.Second}}
+		client := &http.Client{Timeout: 12 * time.Second}
+		web = FallbackWebSearch{
+			Primary:  SearXNGWebSearch{Client: client},
+			Fallback: BraveWebSearch{Client: client},
+		}
 	}
 	return &AssistantToolExecutor{Profile: profile, Web: web}
 }
@@ -267,9 +271,30 @@ func parseSearXNGResults(payload []byte, query string) (map[string]any, error) {
 	if err := json.Unmarshal(payload, &response); err != nil {
 		return nil, errors.New("web search returned an invalid response")
 	}
+	results := make([]webSearchResult, 0, len(response.Results))
+	for _, result := range response.Results {
+		snippet := strings.TrimSpace(result.Content)
+		if snippet == "" {
+			snippet = strings.TrimSpace(result.Suggestion)
+		}
+		results = append(results, webSearchResult{Title: result.Title, URL: result.URL, Snippet: snippet})
+	}
+	return searchSourcesOutput(results, query)
+}
+
+// webSearchResult is one hit from any search backend before validation.
+type webSearchResult struct {
+	Title   string
+	URL     string
+	Snippet string
+}
+
+// searchSourcesOutput keeps up to eight distinct https results and shapes them
+// as the web.search tool output.
+func searchSourcesOutput(results []webSearchResult, query string) (map[string]any, error) {
 	sources := make([]map[string]string, 0, 8)
 	seen := make(map[string]bool)
-	for _, result := range response.Results {
+	for _, result := range results {
 		if len(sources) == 8 {
 			break
 		}
@@ -284,14 +309,10 @@ func parseSearXNGResults(payload []byte, query string) (map[string]any, error) {
 		if title == "" {
 			title = parsedURL.Host
 		}
-		snippet := strings.TrimSpace(result.Content)
-		if snippet == "" {
-			snippet = strings.TrimSpace(result.Suggestion)
-		}
 		sources = append(sources, map[string]string{
 			"title":   title,
 			"url":     parsedURL.String(),
-			"snippet": truncateSearchText(snippet, 1200),
+			"snippet": truncateSearchText(strings.TrimSpace(result.Snippet), 1200),
 		})
 		seen[parsedURL.String()] = true
 	}
