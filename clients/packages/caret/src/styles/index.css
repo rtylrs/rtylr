@@ -206,10 +206,18 @@
   background: var(--caret-bg);
 }
 
-.caret-message-list,
 .caret-chat-list-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--caret-scrollbar) transparent;
+}
+
+/* The conversation still scrolls; it just has no visible bar. */
+.caret-message-list {
+  scrollbar-width: none;
+}
+
+.caret-message-list::-webkit-scrollbar {
+  display: none;
 }
 
 .caret-chat-row .caret-chat-actions {

@@ -28,6 +28,8 @@ export interface ChatListProps {
   onNew: () => void;
   onDelete?: (id: string) => void | Promise<void>;
   onTogglePin?: (id: string) => void;
+  /** Hide the list's own button when the host places New chat elsewhere. */
+  showNewChat?: boolean;
 }
 
 export const ChatList: React.FC<ChatListProps> = ({
@@ -41,6 +43,7 @@ export const ChatList: React.FC<ChatListProps> = ({
   onNew,
   onDelete,
   onTogglePin,
+  showNewChat = true,
 }) => {
   // Searching chats lives in the command palette, so this list only orders them.
   const filtered = useMemo(
@@ -90,7 +93,9 @@ export const ChatList: React.FC<ChatListProps> = ({
           </p>
         )}
       </div>
-      <NewChatButton onClick={onNew} label={labels?.newChat} />
+      {showNewChat && (
+        <NewChatButton onClick={onNew} label={labels?.newChat} />
+      )}
       <div
         className="caret-chat-list-scroll"
         style={{
