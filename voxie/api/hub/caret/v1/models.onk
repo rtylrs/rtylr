@@ -26,3 +26,54 @@ message CaretImageInput {
  name: string
  data_url: string
 }
+
+/// A tool contract as the runtime registry describes it.
+message CaretToolDef {
+  name: string
+  description: string
+  module: string
+  scope: string
+  requires_approval: bool
+  input_hint: string
+  output_hint: string
+  freshness: string
+  side_effect: string
+  approval_reason: string
+}
+
+message ListToolsRequest {
+  mode: string @query("mode")
+}
+
+message ListToolsResponse {
+  tools: CaretToolDef[]
+}
+
+message GetProviderStatusRequest {}
+
+message GetProviderStatusResponse {
+  available: bool
+  primary_provider: string
+  /// Provider name to availability.
+  providers: json
+}
+
+/// Approve or deny a pending tool call. input is the tool's JSON input.
+message ToolDecisionRequest {
+  tool_call_id: string
+  name: string
+  input: json
+  decision: string
+  mode: string
+}
+
+message ToolDecisionResponse {
+  tool_call_id: string
+  status: string
+  message: string
+  executed: bool
+  tool: CaretToolDef
+  preview: string
+  output: json
+  duration_ms: int64 @encode(number)
+}

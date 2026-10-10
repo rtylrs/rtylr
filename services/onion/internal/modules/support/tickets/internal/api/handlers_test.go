@@ -7,131 +7,73 @@ import (
 	"net/http"
 	"testing"
 
-	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
-
 	"github.com/voxire/onion/internal/modules/support/tickets/internal/domain"
+	onekithttp "github.com/voxire/onion/internal/platform/onekiterrors"
+	supportticketsv1 "github.com/voxire/voxie/gen/go/support/tickets/v1"
 )
 
-func TestGetTicketHandler_Validate_RequiresID(t *testing.T) {
-	h := &GetTicketHandler{}
-	req := &GetTicketRequest{ID: 0}
-	if err := h.Validate(context.Background(), req); err == nil {
-		t.Fatal("expected error when ID is zero")
+func statusOf(t *testing.T, err error) int {
+	t.Helper()
+	var oneKitErr *onekithttp.Error
+	if !errors.As(err, &oneKitErr) {
+		t.Fatalf("expected oneKit HTTP error, got %T: %v", err, err)
 	}
+	return int(oneKitErr.GetStatusCode())
 }
 
-func TestGetTicketHandler_Validate_HappyPath(t *testing.T) {
-	h := &GetTicketHandler{}
-	req := &GetTicketRequest{ID: 5}
-	if err := h.Validate(context.Background(), req); err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
+// Invalid input is rejected with 400 before the business lookup; valid input
+// gets past validation and, with no signed-in user, stops at 403.
+func TestTicketAPIValidatesBeforeAuth(t *testing.T) {
+	api := &TicketAPI{}
+	ctx := context.Background()
+	assignee := int64(5)
 
-func TestGetTicketHandler_Validate_LargeIDPasses(t *testing.T) {
-	h := &GetTicketHandler{}
-	req := &GetTicketRequest{ID: 999999}
-	if err := h.Validate(context.Background(), req); err != nil {
-		t.Errorf("unexpected error for large id: %v", err)
+	cases := []struct {
+		name string
+		call func() error
+		want int
+	}{
+		{"get without id", func() error { _, err := api.GetTicket(ctx, &supportticketsv1.GetTicketRequest{}); return err }, http.StatusBadRequest},
+		{"get with id", func() error {
+			_, err := api.GetTicket(ctx, &supportticketsv1.GetTicketRequest{Id: 9_007_199_254_740_993})
+			return err
+		}, http.StatusForbidden},
+		{"create without subject", func() error {
+			_, err := api.CreateTicket(ctx, &supportticketsv1.CreateTicketRequest{CustomerEmail: "a@b.co"})
+			return err
+		}, http.StatusBadRequest},
+		{"create with whitespace subject", func() error {
+			_, err := api.CreateTicket(ctx, &supportticketsv1.CreateTicketRequest{Subject: "  ", CustomerEmail: "a@b.co"})
+			return err
+		}, http.StatusBadRequest},
+		{"create without email", func() error {
+			_, err := api.CreateTicket(ctx, &supportticketsv1.CreateTicketRequest{Subject: "Help"})
+			return err
+		}, http.StatusBadRequest},
+		{"create with whitespace email", func() error {
+			_, err := api.CreateTicket(ctx, &supportticketsv1.CreateTicketRequest{Subject: "Help", CustomerEmail: "   "})
+			return err
+		}, http.StatusBadRequest},
+		{"create valid with optional fields", func() error {
+			_, err := api.CreateTicket(ctx, &supportticketsv1.CreateTicketRequest{
+				Subject: "Help", CustomerEmail: "a@b.co", Priority: "high", Channel: "email", AssignedTo: &assignee, Body: "hi",
+			})
+			return err
+		}, http.StatusForbidden},
+		{"update without id", func() error { _, err := api.UpdateTicket(ctx, &supportticketsv1.UpdateTicketRequest{}); return err }, http.StatusBadRequest},
+		{"update with id", func() error {
+			_, err := api.UpdateTicket(ctx, &supportticketsv1.UpdateTicketRequest{Id: 10, Subject: "Updated"})
+			return err
+		}, http.StatusForbidden},
+		{"list without user", func() error { _, err := api.ListTickets(ctx, &supportticketsv1.ListTicketsRequest{}); return err }, http.StatusForbidden},
 	}
-}
-
-func TestCreateTicketHandler_Validate_RequiresSubject(t *testing.T) {
-	h := &CreateTicketHandler{}
-	req := &CreateTicketRequest{Subject: "", CustomerEmail: "user@example.com"}
-	if err := h.Validate(context.Background(), req); err == nil {
-		t.Fatal("expected error when subject is empty")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := statusOf(t, tc.call()); got != tc.want {
+				t.Fatalf("status = %d, want %d", got, tc.want)
+			}
+		})
 	}
-}
-
-func TestCreateTicketHandler_Validate_RequiresCustomerEmail(t *testing.T) {
-	h := &CreateTicketHandler{}
-	req := &CreateTicketRequest{Subject: "Issue with order", CustomerEmail: ""}
-	if err := h.Validate(context.Background(), req); err == nil {
-		t.Fatal("expected error when customer email is empty")
-	}
-}
-
-func TestCreateTicketHandler_Validate_HappyPath(t *testing.T) {
-	h := &CreateTicketHandler{}
-	req := &CreateTicketRequest{
-		Subject:       "Issue with order",
-		CustomerEmail: "alice@example.com",
-	}
-	if err := h.Validate(context.Background(), req); err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
-
-func TestCreateTicketHandler_Validate_WhitespaceSubject(t *testing.T) {
-	h := &CreateTicketHandler{}
-	req := &CreateTicketRequest{Subject: "   ", CustomerEmail: "alice@example.com"}
-	if err := h.Validate(context.Background(), req); err == nil {
-		t.Fatal("expected error for whitespace-only subject")
-	}
-}
-
-func TestCreateTicketHandler_Validate_WhitespaceEmail(t *testing.T) {
-	h := &CreateTicketHandler{}
-	req := &CreateTicketRequest{Subject: "Some issue", CustomerEmail: "  \t  "}
-	if err := h.Validate(context.Background(), req); err == nil {
-		t.Fatal("expected error for whitespace-only email")
-	}
-}
-
-func TestCreateTicketHandler_Validate_BothEmpty(t *testing.T) {
-	h := &CreateTicketHandler{}
-	req := &CreateTicketRequest{}
-	if err := h.Validate(context.Background(), req); err == nil {
-		t.Fatal("expected error when both fields are empty")
-	}
-}
-
-func TestCreateTicketHandler_Validate_WithOptionalFields(t *testing.T) {
-	h := &CreateTicketHandler{}
-	req := &CreateTicketRequest{
-		Subject:       "Billing issue",
-		CustomerEmail: "bob@co.com",
-		CustomerName:  "Bob",
-		Priority:      "high",
-		Channel:       "email",
-	}
-	if err := h.Validate(context.Background(), req); err != nil {
-		t.Errorf("unexpected error with optional fields: %v", err)
-	}
-}
-
-func TestUpdateTicketHandler_Validate_RequiresID(t *testing.T) {
-	h := &UpdateTicketHandler{}
-	req := &UpdateTicketRequest{ID: 0}
-	if err := h.Validate(context.Background(), req); err == nil {
-		t.Fatal("expected error when ID is zero")
-	}
-}
-
-func TestUpdateTicketHandler_Validate_HappyPath(t *testing.T) {
-	h := &UpdateTicketHandler{}
-	req := &UpdateTicketRequest{ID: 10, Subject: "Updated subject"}
-	if err := h.Validate(context.Background(), req); err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
-
-func TestUpdateTicketHandler_Validate_NonZeroIDPasses(t *testing.T) {
-	h := &UpdateTicketHandler{}
-	req := &UpdateTicketRequest{ID: 1}
-	if err := h.Validate(context.Background(), req); err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
-
-func TestGetTicketHandler_Validate_NegativeIDFails(_ *testing.T) {
-	// ID is int64 and 0 is sentinel for "not provided"; negative technically non-zero
-	// but this documents the current behavior
-	h := &GetTicketHandler{}
-	req := &GetTicketRequest{ID: -1}
-	// -1 != 0 so validation should pass (documenting behavior)
-	_ = h.Validate(context.Background(), req)
 }
 
 func TestSupportTicketLookupError_MapsNotFound(t *testing.T) {
@@ -144,15 +86,9 @@ func TestSupportTicketLookupError_MapsNotFound(t *testing.T) {
 		{name: "wrapped missing ticket", err: fmt.Errorf("lookup: %w", domain.ErrTicketNotFound), want: http.StatusNotFound},
 		{name: "other failure", err: errors.New("connection reset"), want: http.StatusInternalServerError},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mapped := supportTicketLookupError(tt.err)
-			var oneKitErr *onekithttp.Error
-			if !errors.As(mapped, &oneKitErr) {
-				t.Fatalf("expected oneKit HTTP error, got %T: %v", mapped, mapped)
-			}
-			if got := int(oneKitErr.GetStatusCode()); got != tt.want {
+			if got := statusOf(t, supportTicketLookupError(tt.err)); got != tt.want {
 				t.Fatalf("status = %d, want %d", got, tt.want)
 			}
 		})
