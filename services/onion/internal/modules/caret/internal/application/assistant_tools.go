@@ -33,6 +33,22 @@ type PublicWebSearcher interface {
 type AssistantToolExecutor struct {
 	Profile AssistantProfileReader
 	Web     PublicWebSearcher
+	// HTTP reads public APIs and pages. It only dials public addresses.
+	HTTP *http.Client
+}
+
+// generalTool runs one tool that needs no business data: utilities, public
+// reference APIs and the web.
+type generalTool func(e *AssistantToolExecutor, ctx context.Context, input map[string]any) (map[string]any, error)
+
+// generalTools is filled by each tool's file, keyed by tool name.
+var generalTools = map[string]generalTool{}
+
+func registerGeneralTool(name string, run generalTool) {
+	if _, exists := generalTools[name]; exists {
+		panic("general tool registered twice: " + name)
+	}
+	generalTools[name] = run
 }
 
 // MaxWebSearchesPerMessage lets Caret refine a search (a narrower query, a
@@ -54,7 +70,14 @@ func NewAssistantToolExecutor(profile AssistantProfileReader, web PublicWebSearc
 			Fallback: BraveWebSearch{Client: client},
 		}
 	}
-	return &AssistantToolExecutor{Profile: profile, Web: web}
+	return &AssistantToolExecutor{Profile: profile, Web: web, HTTP: NewPublicHTTPClient(12 * time.Second)}
+}
+
+func (e *AssistantToolExecutor) httpClient() *http.Client {
+	if e.HTTP == nil {
+		e.HTTP = NewPublicHTTPClient(12 * time.Second)
+	}
+	return e.HTTP
 }
 
 func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
@@ -101,7 +124,12 @@ func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name strin
 		result, err := e.Web.Search(ctx, query)
 		return result, true, err
 	default:
-		return nil, false, nil
+		run, ok := generalTools[name]
+		if !ok {
+			return nil, false, nil
+		}
+		output, err := run(e, ctx, input)
+		return output, true, err
 	}
 }
 
