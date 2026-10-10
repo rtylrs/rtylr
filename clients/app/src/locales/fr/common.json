@@ -361,6 +361,7 @@
   },
   "caret": {
     "toggleHistory": "Afficher ou masquer la barre des conversations",
+    "installApp": "Installer Caret comme application",
     "welcome": "À quoi pensez-vous ?",
     "welcomeHint": "Posez une question, explorez une idée ou travaillez avec votre entreprise.",
     "composer": "Posez votre question à Caret…",
