@@ -1,6 +1,7 @@
 package application
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -109,7 +110,7 @@ func getPublicJSONWith(ctx context.Context, client *http.Client, endpoint string
 		return errors.New("the service did not respond")
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusNotFound {
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusNoContent {
 		return errNotFound
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -118,6 +119,9 @@ func getPublicJSONWith(ctx context.Context, client *http.Client, endpoint string
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxPublicResponseBytes+1))
 	if err != nil || len(body) > maxPublicResponseBytes {
 		return errors.New("the response was too large")
+	}
+	if len(bytes.TrimSpace(body)) == 0 {
+		return errNotFound
 	}
 	if err := json.Unmarshal(body, out); err != nil {
 		return errors.New("the service returned an invalid response")

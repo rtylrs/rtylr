@@ -23,8 +23,9 @@ const (
 // slowToolTimeouts lets the tools that do several steps of their own run
 // longer than a single read.
 var slowToolTimeouts = map[string]time.Duration{
-	"web.fetch":  25 * time.Second,
-	"agents.run": 150 * time.Second,
+	"web.fetch":     25 * time.Second,
+	"places.search": 26 * time.Second,
+	"agents.run":    150 * time.Second,
 }
 
 // ToolTimeout is how long one call of the named tool may run.

@@ -7,6 +7,7 @@ import (
 
 func TestDefineWordKeepsDefinitionsAndExamples(t *testing.T) {
 	executor := &AssistantToolExecutor{HTTP: fakePublicAPI(t, map[string]string{
+		wiktionaryEndpoint + "Terse": `{}`,
 		dictionaryEndpoint + "terse": `[{"word":"terse","phonetic":"/tɜːs/","meanings":[{"partOfSpeech":"adjective","definitions":[{"definition":"Brief.","example":"a terse reply"}],"synonyms":["curt"]}]}]`,
 	})}
 	output, _, err := executor.ExecuteCaretTool(context.Background(), "knowledge.define", map[string]any{"word": "Terse"})
@@ -19,20 +20,36 @@ func TestDefineWordKeepsDefinitionsAndExamples(t *testing.T) {
 	}
 }
 
-func TestCountryFactsAcceptsCodesAndPrefersExactNames(t *testing.T) {
+func TestDefineWordUsesWiktionaryInOtherLanguages(t *testing.T) {
 	executor := &AssistantToolExecutor{HTTP: fakePublicAPI(t, map[string]string{
-		countriesEndpoint + "alpha/LB":    `{"name":{"common":"Lebanon","official":"Lebanese Republic"},"cca2":"LB","capital":["Beirut"],"currencies":{"LBP":{"name":"Lebanese pound","symbol":"ل.ل"}},"languages":{"ara":"Arabic","fra":"French"},"population":5490000,"timezones":["UTC+02:00"],"idd":{"root":"+9","suffixes":["61"]}}`,
-		countriesEndpoint + "name/Guinea": `[{"name":{"common":"Papua New Guinea"},"cca2":"PG"},{"name":{"common":"Guinea"},"cca2":"GN"}]`,
+		wiktionaryEndpoint + "maison": `{"fr":[{"partOfSpeech":"Noun","definitions":[{"definition":"<a href=\"/wiki/house\">House</a>, home.","examples":["<i>une maison</i>"]}]}]}`,
 	})}
-	output, _, err := executor.ExecuteCaretTool(context.Background(), "knowledge.country", map[string]any{"country": "LB"})
+	output, _, err := executor.ExecuteCaretTool(context.Background(), "knowledge.define", map[string]any{"word": "maison", "language": "fr"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if output["capital"] != "Beirut" || output["dialing_code"] != "+961" || output["currencies"].([]string)[0] != "LBP (Lebanese pound, ل.ل)" {
-		t.Fatalf("output = %#v", output)
+	definition := output["meanings"].([]map[string]any)[0]["definitions"].([]map[string]string)[0]
+	if definition["definition"] != "House, home." || definition["example"] != "une maison" {
+		t.Fatalf("definition = %#v", definition)
 	}
-	output, _, err = executor.ExecuteCaretTool(context.Background(), "knowledge.country", map[string]any{"country": "Guinea"})
+}
+
+func TestCountryFactsFromTheEmbeddedTable(t *testing.T) {
+	e := &AssistantToolExecutor{}
+	for _, query := range []string{"LB", "lebanon", "LBN", "Lebanese Republic"} {
+		output, _, err := e.ExecuteCaretTool(context.Background(), "knowledge.country", map[string]any{"country": query})
+		if err != nil {
+			t.Fatalf("%q: %v", query, err)
+		}
+		if output["capital"] != "Beirut" || output["dialing_code"] != "+961" || output["country_code"] != "LB" {
+			t.Fatalf("%q = %#v", query, output)
+		}
+	}
+	output, _, err := e.ExecuteCaretTool(context.Background(), "knowledge.country", map[string]any{"country": "Guinea"})
 	if err != nil || output["country_code"] != "GN" {
-		t.Fatalf("exact match = %#v, %v", output, err)
+		t.Fatalf("exact name must win over partial matches: %#v %v", output, err)
+	}
+	if _, _, err := e.ExecuteCaretTool(context.Background(), "knowledge.country", map[string]any{"country": "Atlantis"}); err == nil {
+		t.Fatal("unknown country accepted")
 	}
 }

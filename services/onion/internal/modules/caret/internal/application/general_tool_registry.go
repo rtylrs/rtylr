@@ -63,10 +63,10 @@ var generalToolDefs = []ToolDef{
 	},
 	{
 		Name:        "knowledge.country",
-		Description: "Facts about a country: capital, currencies, languages, population, region, timezones and dialing code.",
+		Description: "Facts about a country: official name, ISO code, capital, currencies, languages, region, dialing code, area, neighbours and internet domain.",
 		Module:      "knowledge", Scope: "read",
 		InputHint:  `{"country":"Lebanon or an ISO code such as LB"}`,
-		OutputHint: "The country's official name, ISO code, capital, currencies, languages, population, region, timezones and dialing code.",
+		OutputHint: "The country's official name, ISO code, capital, currencies, languages, region, dialing code, area, neighbours and internet domain.",
 		Freshness:  "reference data", SideEffect: "read-only",
 	},
 	{

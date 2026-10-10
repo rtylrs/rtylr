@@ -74,6 +74,10 @@ func (e *AssistantToolExecutor) geocode(ctx context.Context, name string, count 
 		}
 		if len(filtered) > 0 {
 			results = filtered
+		} else if broader, err := e.geocode(ctx, qualifier, count); err == nil {
+			// "Hamra, Beirut": a neighbourhood the index lacks resolves to
+			// the city rather than a same-named place in another country.
+			return broader, nil
 		}
 	}
 	if len(results) == 0 {

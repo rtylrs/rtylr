@@ -2,106 +2,99 @@ package application
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"errors"
-	"net/url"
-	"sort"
 	"strings"
+	"sync"
 )
 
-var countriesEndpoint = "https://restcountries.com/v3.1/"
+// countriesData is a compact country table generated from mledoze/countries
+// (ODbL): names, codes, capitals, currencies, languages, region, dialing
+// code, area, borders and internet domain. These change rarely, so they ship
+// with the server instead of depending on an API.
+//
+//go:embed countries_data.json
+var countriesData []byte
 
-func init() {
-	registerGeneralTool("knowledge.country", (*AssistantToolExecutor).countryFacts)
+type countryFacts struct {
+	Name        string   `json:"name"`
+	Official    string   `json:"official"`
+	CCA2        string   `json:"cca2"`
+	CCA3        string   `json:"cca3"`
+	Capital     []string `json:"capital"`
+	Currencies  []string `json:"currencies"`
+	Languages   []string `json:"languages"`
+	Region      string   `json:"region"`
+	Subregion   string   `json:"subregion"`
+	DialingCode string   `json:"dialing_code"`
+	AreaKm2     float64  `json:"area_km2"`
+	Borders     []string `json:"borders"`
+	TLD         []string `json:"tld"`
+	Alt         []string `json:"alt"`
 }
 
-func (e *AssistantToolExecutor) countryFacts(ctx context.Context, input map[string]any) (map[string]any, error) {
+var (
+	countriesOnce sync.Once
+	countries     []countryFacts
+)
+
+func init() {
+	registerGeneralTool("knowledge.country", (*AssistantToolExecutor).countryFactsTool)
+}
+
+func loadCountries() []countryFacts {
+	countriesOnce.Do(func() {
+		_ = json.Unmarshal(countriesData, &countries)
+	})
+	return countries
+}
+
+// findCountry matches an ISO code, a common or official name, or a known
+// alternative spelling; a unique partial name match is accepted too.
+func findCountry(query string) (countryFacts, bool) {
+	q := strings.ToLower(strings.TrimSpace(query))
+	var partial []countryFacts
+	for _, country := range loadCountries() {
+		if q == strings.ToLower(country.CCA2) || q == strings.ToLower(country.CCA3) ||
+			q == strings.ToLower(country.Name) || q == strings.ToLower(country.Official) {
+			return country, true
+		}
+		for _, alt := range country.Alt {
+			if q == strings.ToLower(alt) {
+				return country, true
+			}
+		}
+		if len(q) >= 4 && strings.Contains(strings.ToLower(country.Name), q) {
+			partial = append(partial, country)
+		}
+	}
+	if len(partial) == 1 {
+		return partial[0], true
+	}
+	return countryFacts{}, false
+}
+
+func (e *AssistantToolExecutor) countryFactsTool(_ context.Context, input map[string]any) (map[string]any, error) {
 	query := inputText(input, "country", "name", "code", "query")
 	if query == "" || len([]rune(query)) > 80 {
 		return nil, errors.New("give a country name or ISO code")
 	}
-	fields := "?fields=name,cca2,capital,currencies,languages,population,region,subregion,timezones,idd"
-	endpoint := countriesEndpoint + "name/" + url.PathEscape(query) + fields
-	if len(query) == 2 || len(query) == 3 {
-		endpoint = countriesEndpoint + "alpha/" + url.PathEscape(query) + fields
+	country, ok := findCountry(query)
+	if !ok {
+		return nil, errors.New("no single country matches that name; try its full name or ISO code")
 	}
-	var countries []struct {
-		Name struct {
-			Common   string `json:"common"`
-			Official string `json:"official"`
-		} `json:"name"`
-		Code       string   `json:"cca2"`
-		Capital    []string `json:"capital"`
-		Currencies map[string]struct {
-			Name   string `json:"name"`
-			Symbol string `json:"symbol"`
-		} `json:"currencies"`
-		Languages  map[string]string `json:"languages"`
-		Population int64             `json:"population"`
-		Region     string            `json:"region"`
-		Subregion  string            `json:"subregion"`
-		Timezones  []string          `json:"timezones"`
-		IDD        struct {
-			Root     string   `json:"root"`
-			Suffixes []string `json:"suffixes"`
-		} `json:"idd"`
-	}
-	if err := decodeOneOrMany(ctx, e, endpoint, &countries); err != nil {
-		if errors.Is(err, errNotFound) {
-			return nil, errors.New("no country matches that name")
+	borders := make([]string, 0, len(country.Borders))
+	for _, code := range country.Borders {
+		if neighbour, ok := findCountry(code); ok {
+			borders = append(borders, neighbour.Name)
 		}
-		return nil, err
-	}
-	if len(countries) == 0 {
-		return nil, errors.New("no country matches that name")
-	}
-	// A name search can match several countries ("Guinea"); prefer an exact name.
-	best := countries[0]
-	for _, country := range countries {
-		if strings.EqualFold(country.Name.Common, query) || strings.EqualFold(country.Name.Official, query) {
-			best = country
-			break
-		}
-	}
-	currencies := []string{}
-	for code, currency := range best.Currencies {
-		currencies = append(currencies, code+" ("+currency.Name+", "+currency.Symbol+")")
-	}
-	languages := []string{}
-	for _, language := range best.Languages {
-		languages = append(languages, language)
-	}
-	sort.Strings(currencies)
-	sort.Strings(languages)
-	dialing := best.IDD.Root
-	if len(best.IDD.Suffixes) == 1 {
-		dialing += best.IDD.Suffixes[0]
 	}
 	return map[string]any{
-		"name": best.Name.Common, "official_name": best.Name.Official, "country_code": best.Code,
-		"capital": strings.Join(best.Capital, ", "), "currencies": currencies, "languages": languages,
-		"population": best.Population, "region": best.Region, "subregion": best.Subregion,
-		"timezones": best.Timezones, "dialing_code": dialing,
+		"name": country.Name, "official_name": country.Official, "country_code": country.CCA2,
+		"capital": strings.Join(country.Capital, ", "), "currencies": country.Currencies, "languages": country.Languages,
+		"region": country.Region, "subregion": country.Subregion, "dialing_code": country.DialingCode,
+		"area_km2": country.AreaKm2, "borders": borders, "internet_domain": strings.Join(country.TLD, ", "),
+		"note": "For population and other figures that change, check knowledge.wikipedia or the web.",
 	}, nil
-}
-
-// decodeOneOrMany reads an endpoint that answers with an object for one
-// match (alpha lookups) or an array (name searches).
-func decodeOneOrMany[T any](ctx context.Context, e *AssistantToolExecutor, endpoint string, out *[]T) error {
-	var raw any
-	if err := getPublicJSON(ctx, e.httpClient(), endpoint, &raw); err != nil {
-		return err
-	}
-	if _, isList := raw.([]any); !isList {
-		raw = []any{raw}
-	}
-	return remarshal(raw, out)
-}
-
-func remarshal(in, out any) error {
-	data, err := json.Marshal(in)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(data, out)
 }

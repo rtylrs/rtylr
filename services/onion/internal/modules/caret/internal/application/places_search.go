@@ -11,12 +11,14 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"time"
 )
 
 // overpassEndpoints are tried in order; public instances are often busy.
 var overpassEndpoints = []string{
 	"https://overpass-api.de/api/interpreter",
 	"https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+	"https://overpass.private.coffee/api/interpreter",
 }
 
 // placeCategories maps everyday words to OpenStreetMap tags.
@@ -67,7 +69,9 @@ func (e *AssistantToolExecutor) searchPlaces(ctx context.Context, input map[stri
 	if r, ok := inputNumber(input, "radius_m", "radius"); ok {
 		radius = math.Max(100, math.Min(r, 10000))
 	}
-	query := fmt.Sprintf(`[out:json][timeout:12];nwr(around:%.0f,%.5f,%.5f)["%s"="%s"]["name"];out center tags 40;`, radius, lat, lon, tag[0], tag[1])
+	// Nodes and ways only: relations make the query many times slower.
+	area := fmt.Sprintf(`(around:%.0f,%.5f,%.5f)["%s"="%s"]["name"]`, radius, lat, lon, tag[0], tag[1])
+	query := `[out:json][timeout:10];(node` + area + `;way` + area + `;);out center tags 40;`
 	var response struct {
 		Elements []struct {
 			Lat    float64 `json:"lat"`
@@ -81,7 +85,11 @@ func (e *AssistantToolExecutor) searchPlaces(ctx context.Context, input map[stri
 	}
 	var lastErr error
 	for _, endpoint := range overpassEndpoints {
-		if lastErr = e.postOverpass(ctx, endpoint, query, &response); lastErr == nil {
+		// A busy mirror hangs rather than failing, so each gets a short turn.
+		attempt, cancel := context.WithTimeout(ctx, 8*time.Second)
+		lastErr = e.postOverpass(attempt, endpoint, query, &response)
+		cancel()
+		if lastErr == nil {
 			break
 		}
 	}
