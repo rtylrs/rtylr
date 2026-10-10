@@ -53,4 +53,20 @@ var generalToolDefs = []ToolDef{
 		OutputHint: "The best article's title, description, summary and link, plus other matching titles.",
 		Freshness:  "encyclopedia; recent events may be missing", SideEffect: "read-only",
 	},
+	{
+		Name:        "knowledge.define",
+		Description: "Define an English word: meanings by part of speech, examples, synonyms and antonyms, and pronunciation.",
+		Module:      "knowledge", Scope: "read",
+		InputHint:  `{"word":"ubiquitous"}`,
+		OutputHint: "Up to three definitions per part of speech with examples, synonyms and antonyms.",
+		Freshness:  "reference data", SideEffect: "read-only",
+	},
+	{
+		Name:        "knowledge.country",
+		Description: "Facts about a country: capital, currencies, languages, population, region, timezones and dialing code.",
+		Module:      "knowledge", Scope: "read",
+		InputHint:  `{"country":"Lebanon or an ISO code such as LB"}`,
+		OutputHint: "The country's official name, ISO code, capital, currencies, languages, population, region, timezones and dialing code.",
+		Freshness:  "reference data", SideEffect: "read-only",
+	},
 }
