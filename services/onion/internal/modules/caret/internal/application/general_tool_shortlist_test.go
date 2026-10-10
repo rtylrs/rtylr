@@ -35,3 +35,19 @@ func TestAssistantPromptOffersObviousGeneralToolsForSmallTalk(t *testing.T) {
 		t.Fatal("weather.forecast was not offered for a weather question")
 	}
 }
+
+func TestGeneralToolsForArabicAndFrenchRequests(t *testing.T) {
+	for request, want := range map[string]string{
+		"كيف الطقس في بيروت بكرا؟":      "weather.forecast",
+		"حوّل ١٠٠ دولار لليرة":          "currency.convert",
+		"Quelle météo à Paris demain ?": "weather.forecast",
+	} {
+		found := false
+		for _, tool := range GeneralToolsForRequest(request) {
+			found = found || tool.Name == want
+		}
+		if !found {
+			t.Errorf("%q did not offer %s", request, want)
+		}
+	}
+}
