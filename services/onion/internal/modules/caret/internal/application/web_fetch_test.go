@@ -67,3 +67,20 @@ func TestWebFetchReturnsTextAndSource(t *testing.T) {
 		t.Fatalf("sources = %#v", output["sources"])
 	}
 }
+
+func TestExportableDocumentURL(t *testing.T) {
+	for raw, want := range map[string]string{
+		"https://docs.google.com/document/d/abc_123/edit?usp=sharing": "https://docs.google.com/document/d/abc_123/export?format=txt",
+		"https://docs.google.com/spreadsheets/d/XYZ/edit#gid=42":      "https://docs.google.com/spreadsheets/d/XYZ/export?format=csv&gid=42",
+		"https://docs.google.com/presentation/d/P1/edit":              "https://docs.google.com/presentation/d/P1/export/txt",
+		"https://example.com/document/d/abc/edit":                     "https://example.com/document/d/abc/edit",
+	} {
+		parsed, err := publicPageURL(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := exportableDocumentURL(parsed).String(); got != want {
+			t.Errorf("%s -> %s, want %s", raw, got, want)
+		}
+	}
+}

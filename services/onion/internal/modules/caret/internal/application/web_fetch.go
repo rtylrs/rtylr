@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -26,6 +27,7 @@ func (e *AssistantToolExecutor) fetchPage(ctx context.Context, input map[string]
 	if err != nil {
 		return nil, err
 	}
+	target = exportableDocumentURL(target)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target.String(), nil)
 	if err != nil {
 		return nil, errors.New("could not build the request")
@@ -108,7 +110,10 @@ func publicPageURL(raw string) (*url.URL, error) {
 	if host == "localhost" || strings.HasSuffix(host, ".localhost") || strings.HasSuffix(host, ".internal") || strings.HasSuffix(host, ".local") {
 		return nil, errPrivateAddress
 	}
-	parsed.Fragment = ""
+	if host != "docs.google.com" {
+		// Google Sheets keeps the tab in the fragment; others don't need it.
+		parsed.Fragment = ""
+	}
 	return parsed, nil
 }
 
@@ -259,4 +264,39 @@ func focusPageText(text, query string, limit int) string {
 		b.WriteString("[page continues]")
 	}
 	return strings.TrimSpace(b.String())
+}
+
+var googleDocumentPath = regexp.MustCompile(`^/(document|spreadsheets|presentation)/d/([A-Za-z0-9_-]+)`)
+
+// exportableDocumentURL turns a shared Google Docs, Sheets or Slides link
+// into its plain export, which reads as text instead of a JavaScript app.
+// Only documents shared publicly can be read this way.
+func exportableDocumentURL(target *url.URL) *url.URL {
+	if !strings.EqualFold(target.Hostname(), "docs.google.com") {
+		return target
+	}
+	match := googleDocumentPath.FindStringSubmatch(target.Path)
+	if match == nil {
+		return target
+	}
+	export := *target
+	export.RawQuery = ""
+	switch match[1] {
+	case "document":
+		export.Path = "/document/d/" + match[2] + "/export"
+		export.RawQuery = "format=txt"
+	case "spreadsheets":
+		export.Path = "/spreadsheets/d/" + match[2] + "/export"
+		query := url.Values{"format": {"csv"}}
+		if gid := target.Query().Get("gid"); gid != "" {
+			query.Set("gid", gid)
+		} else if strings.HasPrefix(target.Fragment, "gid=") {
+			query.Set("gid", strings.TrimPrefix(target.Fragment, "gid="))
+		}
+		export.RawQuery = query.Encode()
+	case "presentation":
+		export.Path = "/presentation/d/" + match[2] + "/export/txt"
+	}
+	export.Fragment = ""
+	return &export
 }
