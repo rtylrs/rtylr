@@ -19,7 +19,7 @@ var AssistantBaseTools = []string{ToolSearchName, "web.search", AgentsToolName, 
 func BuildAssistantPrompt(request, scope, context string, pageContext map[string]any, now time.Time) string {
 	var catalog strings.Builder
 	plannerContext := BuildRequestSystemContext(scope, pageContext)
-	tools := PromptToolsForRequest(ModeAgent, request, plannerContext)
+	tools := append(GeneralToolsForRequest(request), PromptToolsForRequest(ModeAgent, request, plannerContext)...)
 	seen := map[string]bool{}
 	for _, name := range AssistantBaseTools {
 		if tool, ok := ToolByName(name); ok {
