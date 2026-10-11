@@ -14,7 +14,7 @@ const MaxAssistantContextBytes = 72000
 // AssistantBaseTools are offered on every turn, whatever the request is
 // about: search the web, find more tools, delegate, remember, and the small
 // utilities that keep answers exact.
-var AssistantBaseTools = []string{ToolSearchName, "web.search", AgentsToolName, BusinessFindToolName, "memory.remember", "account.profile", "utilities.calculate", "utilities.time"}
+var AssistantBaseTools = []string{ToolSearchName, "web.search", BusinessFindToolName, "memory.remember", "account.profile", "utilities.calculate", "utilities.time"}
 
 func BuildAssistantPrompt(request, scope, context string, pageContext map[string]any, now time.Time) string {
 	return BuildAssistantPromptWithFiles(request, scope, context, nil, pageContext, now)
@@ -43,7 +43,11 @@ func BuildAssistantPromptFor(in AssistantPromptInput) string {
 	tools := append(RoutedToolsForRequest(request, in.Routes), GeneralToolsForRequest(request)...)
 	tools = append(tools, PromptToolsForRequest(ModeAgent, request, plannerContext)...)
 	seen := map[string]bool{}
-	for _, name := range AssistantBaseTools {
+	base := AssistantBaseTools
+	if AgentsRequested(request) {
+		base = append([]string{AgentsToolName}, base...)
+	}
+	for _, name := range base {
 		if tool, ok := ToolByName(name); ok {
 			tools = append(tools, tool)
 		}

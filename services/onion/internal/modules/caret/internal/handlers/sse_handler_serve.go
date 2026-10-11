@@ -136,6 +136,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(rw http.ResponseWriter, r *http.Re
 	req.SystemContext = prepared.Request.SystemContext
 	req.PageContext = prepared.Request.PageContext
 	ctx = snips.WithConversation(ctx, req.SessionID)
+	ctx = application.WithAgentsAllowed(ctx, application.AgentsRequested(req.Prompt))
 	if application.LooksLikeCorrection(req.Prompt) {
 		h.learnFromCorrection(ctx, req.SessionID, int(authUserID), req.Prompt)
 	}

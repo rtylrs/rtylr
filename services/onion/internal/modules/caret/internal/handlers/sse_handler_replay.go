@@ -178,6 +178,11 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			finalRound := round >= cachePlan.ContinuationBudget
 			results := renderer.toolResults[seenResults:]
 			seenResults = len(renderer.toolResults)
+			if !anyToolRan(results) {
+				// Every call this round was a repeat or blocked: the model is
+				// going in circles, so it answers from what it has.
+				finalRound = true
+			}
 			searchFailed := false
 			searchSucceeded := false
 			for _, result := range renderer.toolResults {
@@ -382,6 +387,17 @@ func (h *GenerateTextStreamHandler) drainProviderStreamFull(ctx context.Context,
 			}
 		}
 	}
+}
+
+// anyToolRan reports whether a round executed anything, as opposed to only
+// skipped repeats and blocked calls.
+func anyToolRan(results []streamToolExecution) bool {
+	for _, result := range results {
+		if result.Status == "success" || result.Status == "error" {
+			return true
+		}
+	}
+	return false
 }
 
 // maxContinuationBytes bounds a tool-loop follow-up prompt.
