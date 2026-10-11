@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Link, useLocation } from '@tanstack/react-router';
 import {
   Archive,
@@ -33,6 +34,13 @@ import type {
   SidebarPreferences,
 } from '../lib/sidebarPreferences';
 import { createDefaultSidebarPreferences, updatePreferencesCopy } from '../lib/sidebarPreferences';
+import {
+  isWithinSameList,
+  placementOver,
+  reorderGroupIds,
+  samePlacement,
+  type ItemPlacement,
+} from '../lib/sidebarDrag';
 
 const ICONS: Record<SidebarIconKey, React.ComponentType<{ size?: number; className?: string }>> = {
   archive: Archive,
@@ -218,7 +226,8 @@ const SidebarItemRow: React.FC<{
   isDragging: boolean;
   isDropTarget: boolean;
   onDragStart: (itemId: string) => void;
-  onDragOver: (itemId: string) => void;
+  /** `after` is true when the pointer is in the lower half of the row. */
+  onDragOver: (itemId: string, after: boolean) => void;
   onDrop: (itemId: string) => void;
   onDragEnd: () => void;
 }> = ({
@@ -252,64 +261,72 @@ const SidebarItemRow: React.FC<{
     className: cn('portal-nav-link flow-nav-row-link flow-focus-inset', active && 'is-active'),
     'aria-current': active ? ('page' as const) : undefined,
   };
+  const reduceMotion = useReducedMotion();
   return (
-    <div
-      className={cn(
-        'group relative rounded-lg',
-        isDragging && 'opacity-45',
-        isDropTarget && 'ring-1 ring-[var(--flow-border-focus)]'
-      )}
-      draggable
-      onDragStart={(event) => {
-        event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('text/plain', item.id);
-        onDragStart(item.id);
-      }}
-      onDragOver={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        event.dataTransfer.dropEffect = 'move';
-        onDragOver(item.id);
-      }}
-      onDrop={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        onDrop(item.id);
-      }}
-      onDragEnd={onDragEnd}
-    >
-      {item.url ? (
-        <a
-          {...linkProps}
-          href={item.url}
-          target={item.openInNewTab ? '_blank' : undefined}
-          rel={item.openInNewTab ? 'noreferrer' : undefined}
-        >
-          {content}
-        </a>
-      ) : (
-        <Link {...linkProps} to={item.route ?? '/flow'}>
-          {content}
-        </Link>
-      )}
-      <button
-        type="button"
-        aria-label={t('flow.sidebar.itemActions', { label })}
-        className="flow-reveal-on-hover absolute end-1 top-1 flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
-        style={{ color: 'var(--flow-text-muted)' }}
-        onClick={() => setActionsOpen((open) => !open)}
+    // The wrapper animates the row to its new place when a drag reorders the list.
+    // It is separate from the draggable element because motion components take
+    // over the `onDrag*` props for their own drag gesture, and native HTML5
+    // drag events must reach the inner element.
+    <motion.div layout="position" transition={{ duration: reduceMotion ? 0 : 0.16 }}>
+      <div
+        className={cn(
+          'group relative rounded-lg',
+          isDragging && 'opacity-45',
+          isDropTarget && 'ring-1 ring-[var(--flow-border-focus)]'
+        )}
+        draggable
+        onDragStart={(event) => {
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', item.id);
+          onDragStart(item.id);
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          event.dataTransfer.dropEffect = 'move';
+          const box = event.currentTarget.getBoundingClientRect();
+          onDragOver(item.id, event.clientY > box.top + box.height / 2);
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onDrop(item.id);
+        }}
+        onDragEnd={onDragEnd}
       >
-        <MoreHorizontal size={15} />
-      </button>
-      {actionsOpen && (
-        <SidebarItemActions
-          item={item}
-          groups={groups}
-          update={update}
-          onClose={() => setActionsOpen(false)}
-        />
-      )}
-    </div>
+        {item.url ? (
+          <a
+            {...linkProps}
+            href={item.url}
+            target={item.openInNewTab ? '_blank' : undefined}
+            rel={item.openInNewTab ? 'noreferrer' : undefined}
+          >
+            {content}
+          </a>
+        ) : (
+          <Link {...linkProps} to={item.route ?? '/flow'}>
+            {content}
+          </Link>
+        )}
+        <button
+          type="button"
+          aria-label={t('flow.sidebar.itemActions', { label })}
+          className="flow-reveal-on-hover absolute end-1 top-1 flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
+          style={{ color: 'var(--flow-text-muted)' }}
+          onClick={() => setActionsOpen((open) => !open)}
+        >
+          <MoreHorizontal size={15} />
+        </button>
+        {actionsOpen && (
+          <SidebarItemActions
+            item={item}
+            groups={groups}
+            update={update}
+            onClose={() => setActionsOpen(false)}
+          />
+        )}
+      </div>
+    </motion.div>
   );
 };
 
@@ -326,7 +343,7 @@ const SidebarGroup: React.FC<{
   dragState?: SidebarDragState;
   dropTarget?: SidebarDropTarget;
   onItemDragStart: (itemId: string) => void;
-  onItemDragOver: (groupId: string, itemId?: string) => void;
+  onItemDragOver: (groupId: string, itemId?: string, after?: boolean) => void;
   onItemDrop: (groupId: string, itemId?: string) => void;
   onGroupDragStart: (groupId: string) => void;
   onGroupDragOver: (groupId: string) => void;
@@ -354,6 +371,7 @@ const SidebarGroup: React.FC<{
 }) => {
   const { t } = useTranslation();
   const [groupActionsOpen, setGroupActionsOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
   const itemsById = useMemo(
     () =>
       new Map<string, SidebarItemPreference>(
@@ -378,11 +396,12 @@ const SidebarGroup: React.FC<{
   const isGroupDragging = dragState?.kind === 'group' && dragState.id === group.id;
   const isGroupDropTarget = dropTarget?.kind === 'group' && dropTarget.id === group.id;
   const isItemDropTarget = dropTarget?.kind === 'item' && dropTarget.groupId === group.id;
+  // No scale transform on a dragged group: the section is moved by a layout
+  // animation, which owns `transform`.
   const groupStyle = {
     background: isGroupDropTarget ? 'var(--accent-muted)' : undefined,
     opacity: isGroupDragging ? 0.5 : 1,
-    transform: isGroupDragging ? 'scale(0.98)' : undefined,
-    transition: 'background 160ms ease, opacity 160ms ease, transform 160ms ease',
+    transition: 'background 160ms ease, opacity 160ms ease',
   };
   const handleGroupDragOver = (event: React.DragEvent): void => {
     if (!dragState) return;
@@ -397,7 +416,9 @@ const SidebarGroup: React.FC<{
     onGroupDrop(group.id);
   };
   return (
-    <section
+    <motion.section
+      layout="position"
+      transition={{ duration: reduceMotion ? 0 : 0.16 }}
       className={cn(
         'relative flex flex-col gap-1',
         isGroupDropTarget && 'rounded-md shadow-[0_0_0_3px_var(--accent-muted)]'
@@ -551,7 +572,7 @@ const SidebarGroup: React.FC<{
                 isItemDropTarget && dropTarget?.kind === 'item' && dropTarget.id === item.id
               }
               onDragStart={onItemDragStart}
-              onDragOver={(itemId) => onItemDragOver(group.id, itemId)}
+              onDragOver={(itemId, after) => onItemDragOver(group.id, itemId, after)}
               onDrop={(itemId) => onItemDrop(group.id, itemId)}
               onDragEnd={onDragEnd}
             />
@@ -592,7 +613,7 @@ const SidebarGroup: React.FC<{
                 isItemDropTarget && dropTarget?.kind === 'item' && dropTarget.id === item.id
               }
               onDragStart={onItemDragStart}
-              onDragOver={(itemId) => onItemDragOver(group.id, itemId)}
+              onDragOver={(itemId, after) => onItemDragOver(group.id, itemId, after)}
               onDrop={(itemId) => onItemDrop(group.id, itemId)}
               onDragEnd={onDragEnd}
             />
@@ -607,7 +628,7 @@ const SidebarGroup: React.FC<{
           )}
         </nav>
       )}
-    </section>
+    </motion.section>
   );
 };
 
@@ -628,8 +649,41 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   const { t } = useTranslation();
   const [dragState, setDragState] = useState<SidebarDragState>();
   const [dropTarget, setDropTarget] = useState<SidebarDropTarget>();
-  const topItems = preferences.topLevelItemIds
-    .map((id) => preferences.items.find((item) => item.id === id))
+  // Where the dragged row would land (an item drag) or which group it would
+  // take the place of (a group drag). Both are previewed live, see `shown`.
+  const [placement, setPlacement] = useState<ItemPlacement>();
+  const [groupTargetId, setGroupTargetId] = useState<string>();
+  // A row that has just slid is still animating under the pointer; reading the
+  // pointer against it straight away would flip the order back and forth.
+  const settledAt = useRef(0);
+
+  // What is drawn: the stored preferences with the drag applied, so rows and
+  // groups sit in their new place (and slide there) while the pointer is still
+  // down. Nothing is saved until the drop.
+  const shown = useMemo((): SidebarPreferences => {
+    if (dragState?.kind === 'item' && placement) {
+      const source = preferences.items.find((item) => item.id === dragState.id)?.groupId;
+      // A row that changes list is unmounted and mounted again by React, and a
+      // browser drag does not survive its source node being replaced, so only
+      // moves within the same list are previewed. The rest keep the drop ring.
+      if (!isWithinSameList(source, placement)) return preferences;
+      return moveItemBetweenGroups(
+        preferences,
+        dragState.id,
+        placement.groupId,
+        placement.beforeItemId
+      );
+    }
+    if (dragState?.kind === 'group' && groupTargetId) {
+      const next = updatePreferencesCopy(preferences);
+      next.groupOrder = reorderGroupIds(next.groupOrder, dragState.id, groupTargetId);
+      return next;
+    }
+    return preferences;
+  }, [preferences, dragState, placement, groupTargetId]);
+  const previewing = shown !== preferences;
+  const topItems = shown.topLevelItemIds
+    .map((id) => shown.items.find((item) => item.id === id))
     .filter((item): item is SidebarItemPreference =>
       Boolean(item && item.visible && isAvailable(item, showPreviewRoutes))
     );
@@ -639,74 +693,98 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
     'builtin:today': todayFocusCount,
   };
   const groupsById = new Map<string, SidebarGroupPreference>(
-    preferences.groups.map((group): [string, SidebarGroupPreference] => [group.id, group])
+    shown.groups.map((group): [string, SidebarGroupPreference] => [group.id, group])
   );
-  const groups = preferences.groupOrder
+  const groups = shown.groupOrder
     .map((id) => groupsById.get(id))
     .filter((group): group is SidebarGroupPreference => Boolean(group && group.visible));
   const clearDrag = (): void => {
     setDragState(undefined);
     setDropTarget(undefined);
+    setPlacement(undefined);
+    setGroupTargetId(undefined);
+  };
+
+  // A drag that ends where the browser sends no `dragend` (the source row was
+  // replaced) would otherwise leave the preview stuck on screen. Pointer events
+  // are suppressed for the length of a native drag and resume when it is over.
+  useEffect(() => {
+    if (!dragState) return undefined;
+    const end = (): void => clearDrag();
+    window.addEventListener('dragend', end);
+    window.addEventListener('pointermove', end);
+    return () => {
+      window.removeEventListener('dragend', end);
+      window.removeEventListener('pointermove', end);
+    };
+  }, [dragState]);
+
+  const commitDrag = (): void => {
+    if (dragState?.kind === 'item' && placement) {
+      update((draft) =>
+        moveItemBetweenGroups(draft, dragState.id, placement.groupId, placement.beforeItemId)
+      );
+    } else if (dragState?.kind === 'group' && groupTargetId) {
+      update((draft) => {
+        const next = updatePreferencesCopy(draft);
+        next.groupOrder = reorderGroupIds(next.groupOrder, dragState.id, groupTargetId);
+        return next;
+      });
+    }
+    clearDrag();
+  };
+  const place = (next: ItemPlacement): void => {
+    if (samePlacement(placement, next)) return;
+    if (performance.now() < settledAt.current) return;
+    settledAt.current = performance.now() + 140;
+    setPlacement(next);
   };
   const onItemDragStart = (itemId: string): void => {
     setDragState({ kind: 'item', id: itemId });
     setDropTarget(undefined);
   };
-  const onItemDragOver = (groupId: string, itemId?: string): void => {
+  const onItemDragOver = (groupId: string, itemId?: string, after = false): void => {
     if (dragState?.kind !== 'item' || dragState.id === itemId) return;
-    setDropTarget(itemId ? { kind: 'item', id: itemId, groupId } : { kind: 'group', id: groupId });
-  };
-  const onItemDrop = (groupId: string, itemId?: string): void => {
-    if (dragState?.kind !== 'item' || dragState.id === itemId) {
-      clearDrag();
-      return;
+    if (itemId) {
+      const group = preferences.groups.find((candidate) => candidate.id === groupId);
+      place(placementOver(group?.itemIds ?? [], dragState.id, itemId, after, groupId));
+      setDropTarget({ kind: 'item', id: itemId, groupId });
+    } else {
+      place({ groupId });
+      setDropTarget({ kind: 'group', id: groupId });
     }
-    update((draft) => {
-      return moveItemBetweenGroups(draft, dragState.id, groupId, itemId);
-    });
-    clearDrag();
   };
-  const onTopItemDragOver = (itemId?: string): void => {
+  const onItemDrop = (_groupId: string, _itemId?: string): void => commitDrag();
+  const onTopItemDragOver = (itemId?: string, after = false): void => {
     if (dragState?.kind !== 'item' || dragState.id === itemId) return;
-    setDropTarget(itemId ? { kind: 'item', id: itemId } : { kind: 'top' });
-  };
-  const onTopItemDrop = (itemId?: string): void => {
-    if (dragState?.kind !== 'item' || dragState.id === itemId) {
-      clearDrag();
-      return;
+    if (itemId) {
+      place(placementOver(preferences.topLevelItemIds, dragState.id, itemId, after));
+      setDropTarget({ kind: 'item', id: itemId });
+    } else {
+      place({});
+      setDropTarget({ kind: 'top' });
     }
-    update((draft) => moveItemBetweenGroups(draft, dragState.id, undefined, itemId));
-    clearDrag();
   };
+  const onTopItemDrop = (_itemId?: string): void => commitDrag();
   const onGroupDragStart = (groupId: string): void => {
     setDragState({ kind: 'group', id: groupId });
     setDropTarget(undefined);
   };
   const onGroupDragOver = (groupId: string): void => {
     if (dragState?.kind !== 'group' || dragState.id === groupId) return;
+    if (performance.now() < settledAt.current) return;
+    settledAt.current = performance.now() + 140;
+    setGroupTargetId(groupId);
     setDropTarget({ kind: 'group', id: groupId });
   };
   const onGroupDrop = (groupId: string): void => {
-    if (!dragState || dragState.id === groupId) {
-      clearDrag();
-      return;
-    }
-    if (dragState.kind === 'item') {
+    // An item dropped on a group header has no row to sit before: it joins the end.
+    if (dragState?.kind === 'item' && !placement) {
       update((draft) => moveItemBetweenGroups(draft, dragState.id, groupId));
       clearDrag();
       return;
     }
-    update((draft) => {
-      const next = updatePreferencesCopy(draft);
-      const from = next.groupOrder.indexOf(dragState.id);
-      const to = next.groupOrder.indexOf(groupId);
-      if (from >= 0 && to >= 0) {
-        next.groupOrder.splice(from, 1);
-        next.groupOrder.splice(to, 0, dragState.id);
-      }
-      return next;
-    });
-    clearDrag();
+    commitDrag();
   };
 
   return (
@@ -737,7 +815,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
             groups={preferences.groups}
             update={update}
             isDragging={dragState?.kind === 'item' && dragState.id === item.id}
-            isDropTarget={dropTarget?.kind === 'item' && dropTarget.id === item.id}
+            isDropTarget={!previewing && dropTarget?.kind === 'item' && dropTarget.id === item.id}
             onDragStart={onItemDragStart}
             onDragOver={onTopItemDragOver}
             onDrop={onTopItemDrop}
@@ -750,7 +828,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
           <SidebarGroup
             key={group.id}
             group={group}
-            preferences={preferences}
+            preferences={shown}
             update={update}
             showPreviewRoutes={showPreviewRoutes}
             projects={projects}
@@ -759,7 +837,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
             onNewProject={onNewProject}
             canCreateProject={canCreateProject}
             dragState={dragState}
-            dropTarget={dropTarget}
+            dropTarget={previewing && dropTarget?.kind === 'item' ? undefined : dropTarget}
             onItemDragStart={onItemDragStart}
             onItemDragOver={onItemDragOver}
             onItemDrop={onItemDrop}
