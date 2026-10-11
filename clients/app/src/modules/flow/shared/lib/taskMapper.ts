@@ -39,6 +39,10 @@ export function apiTaskToTask(t: ApiTask): Task {
   const rawSection = (t as { sectionId?: number | string }).sectionId;
   const sectionId = rawSection == null || rawSection === 0 ? undefined : String(rawSection);
 
+  // sort_order is int64-as-string on the wire; 0 means "never arranged".
+  const rawOrder = (t as { sortOrder?: number | string }).sortOrder;
+  const sortOrder = rawOrder == null ? undefined : Number(rawOrder) || 0;
+
   return {
     id,
     projectId,
@@ -79,6 +83,7 @@ export function apiTaskToTask(t: ApiTask): Task {
     decisionNote: t.decisionNote,
     focusPin: t.focusPin,
     sectionId,
+    sortOrder,
     // `archived` is omitempty on the contract, so an unarchived task arrives
     // as `undefined`, not `false`. Normalise here so store consumers get a
     // concrete boolean and nobody is tempted to write `archived === false`

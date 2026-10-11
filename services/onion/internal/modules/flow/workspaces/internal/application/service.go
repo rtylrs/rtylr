@@ -404,6 +404,7 @@ type repository interface {
 	MarkNotificationRead(ctx context.Context, id, userID int64) error
 	MoveProject(ctx context.Context, input domain.MoveProjectInput) error
 	MoveTaskToColumn(ctx context.Context, taskID, columnID, actorID int64) error
+	MoveTaskToColumnOrdered(ctx context.Context, taskID, columnID, actorID int64, orderedTaskIDs []int64) error
 	PurgeProjectCascade(ctx context.Context, id, businessID int64) ([]string, error)
 	RecalcActualHours(ctx context.Context, taskID, actorID int64) error
 	RemoveProjectMember(ctx context.Context, input domain.RemoveProjectMemberInput) error

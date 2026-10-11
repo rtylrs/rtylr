@@ -516,8 +516,19 @@ export const flowApi = {
   deleteProjectColumn: (id: string) =>
     flowResult<{ message: string }>(() => projectV2.deleteProjectColumn({ id })),
 
-  moveTaskToColumn: (taskId: string, columnId: string) =>
-    flowResult<{ message: string }>(() => projectV2.moveTaskToColumn({ taskId, columnId })),
+  /**
+   * `orderedTaskIds` is the destination column's cards in their new order, the
+   * moved one included. Sent, the server stores that order with the move;
+   * omitted, only the column changes.
+   */
+  moveTaskToColumn: (taskId: string, columnId: string, orderedTaskIds?: readonly string[]) =>
+    flowResult<{ message: string }>(() =>
+      projectV2.moveTaskToColumn({
+        taskId,
+        columnId,
+        ...(orderedTaskIds?.length ? { orderedTaskIds: [...orderedTaskIds] } : {}),
+      })
+    ),
 
   createProject: (data: {
     name: string;

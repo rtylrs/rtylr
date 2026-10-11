@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/flow/workspaces/internal/domain"
@@ -140,26 +141,112 @@ WHERE flow_tasks.id = ?
   )`
 
 func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorID int64) error {
-	var sectionID sql.NullInt64
-	if columnID != 0 {
-		sectionID = sql.NullInt64{Int64: columnID, Valid: true}
-	}
-	res, err := r.pool.ExecContext(ctx, moveTaskToColumnSQL,
-		sectionID,
-		taskID,
-		actorID,
-		actorID,
-		actorID,
-		actorID,
-		actorID,
-		columnID,
-		columnID,
-	)
+	res, err := r.pool.ExecContext(ctx, moveTaskToColumnSQL, moveTaskToColumnArgs(taskID, columnID, actorID)...)
 	if err != nil {
 		logger.Ctx(ctx).Error("MoveTaskToColumn failed", logger.Error(err))
 		return err
 	}
 	return requireAffected(res)
+}
+
+// moveTaskAccessSQL is moveTaskToColumnSQL's WHERE clause as a SELECT, taking
+// the same arguments minus the leading section_id. The ordered path uses it to
+// tell "not permitted" from "nothing to change": a same-column reorder inside
+// the second the row was last touched updates zero rows, which the plain
+// affected-row check would misreport as unauthorized.
+var moveTaskAccessSQL = "SELECT 1 FROM flow_tasks " + moveTaskToColumnSQL[strings.Index(moveTaskToColumnSQL, "WHERE"):] + " FOR UPDATE"
+
+func moveTaskToColumnArgs(taskID, columnID, actorID int64) []any {
+	var sectionID sql.NullInt64
+	if columnID != 0 {
+		sectionID = sql.NullInt64{Int64: columnID, Valid: true}
+	}
+	return []any{sectionID, taskID, actorID, actorID, actorID, actorID, actorID, columnID, columnID}
+}
+
+// MoveTaskToColumnOrdered moves the task exactly like MoveTaskToColumn and, in
+// the same transaction, stores the card order: sort_order = index+1 for every
+// id in orderedTaskIDs. An empty list is the plain move. Every listed id must
+// belong to the moved task's project; if any does not, the whole call (move
+// included) is rolled back with ErrTaskOrderOutsideProject.
+//
+// Access control: the move statement keeps its own access check, and the
+// caller has already passed RequireTaskRole on taskID. Because every reordered
+// id is constrained to taskID's project, that check covers all of them.
+//
+// Only the moved task gets updated_at = NOW() (from the move statement); the
+// other cards keep their updated_at, since the column has ON UPDATE
+// CURRENT_TIMESTAMP and a bare sort_order change would otherwise bump it.
+func (r *Repository) MoveTaskToColumnOrdered(ctx context.Context, taskID, columnID, actorID int64, orderedTaskIDs []int64) error {
+	if len(orderedTaskIDs) == 0 {
+		return r.MoveTaskToColumn(ctx, taskID, columnID, actorID)
+	}
+	if err := domain.ValidateTaskOrder(taskID, orderedTaskIDs); err != nil {
+		return err
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	res, err := tx.ExecContext(ctx, moveTaskToColumnSQL, moveTaskToColumnArgs(taskID, columnID, actorID)...)
+	if err != nil {
+		logger.Ctx(ctx).Error("MoveTaskToColumnOrdered: move failed", logger.Error(err))
+		return err
+	}
+	if err := requireAffected(res); err != nil {
+		if !errors.Is(err, domain.ErrUnauthorized) {
+			return err
+		}
+		var one int
+		scanErr := tx.QueryRowContext(ctx, moveTaskAccessSQL, moveTaskToColumnArgs(taskID, columnID, actorID)[1:]...).Scan(&one)
+		if errors.Is(scanErr, sql.ErrNoRows) {
+			return domain.ErrUnauthorized
+		}
+		if scanErr != nil {
+			return scanErr
+		}
+	}
+
+	var projectID int64
+	if err := tx.QueryRowContext(ctx, "SELECT project_id FROM flow_tasks WHERE id = ?", taskID).Scan(&projectID); err != nil {
+		return err
+	}
+
+	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(orderedTaskIDs)), ",")
+	inArgs := make([]any, 0, len(orderedTaskIDs)+1)
+	for _, id := range orderedTaskIDs {
+		inArgs = append(inArgs, id)
+	}
+	inArgs = append(inArgs, projectID)
+
+	// RowsAffected only counts changed rows, so count the matches explicitly.
+	var matched int
+	countSQL := "SELECT COUNT(*) FROM flow_tasks WHERE id IN (" + placeholders + ") AND project_id = ? FOR UPDATE"
+	if err := tx.QueryRowContext(ctx, countSQL, inArgs...).Scan(&matched); err != nil {
+		return err
+	}
+	if matched != len(orderedTaskIDs) {
+		return domain.ErrTaskOrderOutsideProject
+	}
+
+	// Placeholders only; ids and positions are bound, never concatenated.
+	var cases strings.Builder
+	args := make([]any, 0, 3*len(orderedTaskIDs)+1)
+	for i, id := range orderedTaskIDs {
+		cases.WriteString(" WHEN ? THEN ?")
+		args = append(args, id, i+1)
+	}
+	args = append(args, inArgs...)
+	updateSQL := "UPDATE flow_tasks SET sort_order = CASE id" + cases.String() +
+		" END, updated_at = updated_at WHERE id IN (" + placeholders + ") AND project_id = ?"
+	if _, err := tx.ExecContext(ctx, updateSQL, args...); err != nil {
+		logger.Ctx(ctx).Error("MoveTaskToColumnOrdered: reorder failed", logger.Error(err))
+		return err
+	}
+	return tx.Commit()
 }
 
 func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {

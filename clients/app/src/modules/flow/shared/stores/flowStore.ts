@@ -184,6 +184,8 @@ export interface Task {
   updatedAt: string;
   identifier: string; // e.g. FLOW-123
   sectionId?: string;
+  /** Position within a board column once arranged by hand (1-based); 0 or absent until then. */
+  sortOrder?: number;
   /** Values keyed by CustomFieldDefinition.id */
   customFieldValues?: Record<string, string | number>;
   /** F-A: the custom status (flow.status.v2) applied to this task, if any.
