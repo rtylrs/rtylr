@@ -341,6 +341,34 @@ func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorI
 	return s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID)
 }
 
+// MoveTaskToColumnOrdered is MoveTaskToColumn plus the card's position: when
+// orderedTaskIDs is non-empty the move and the new sort_order of every listed
+// card are saved in one transaction. An empty list behaves exactly like
+// MoveTaskToColumn. Validation failures wrap domain.ErrInvalidTaskOrder or
+// domain.ErrTaskOrderOutsideProject.
+func (s *Service) MoveTaskToColumnOrdered(ctx context.Context, taskID, columnID, actorID int64, orderedTaskIDs []int64) error {
+	if err := domain.ValidateTaskOrder(taskID, orderedTaskIDs); err != nil {
+		return err
+	}
+	if len(orderedTaskIDs) == 0 {
+		return s.MoveTaskToColumn(ctx, taskID, columnID, actorID)
+	}
+
+	// Only the moved task's assignee is invalidated. The other reordered cards'
+	// assignees are not looked up: that would be one read per id (up to 500)
+	// for a position-only change, and my-tasks pages are ordered by their own
+	// rules, so a stale sort_order there heals when the short-lived cache expires.
+	existing, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		logger.Ctx(ctx).Error("MoveTaskToColumnOrdered: failed to read task, my-tasks cache left to expire",
+			logger.Error(err))
+	} else {
+		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
+	}
+
+	return s.repo.MoveTaskToColumnOrdered(ctx, taskID, columnID, actorID, orderedTaskIDs)
+}
+
 // GetColumnProject returns the project id of the given column, or 0 if
 // the lookup fails. Used by the realtime publish path that needs a topic
 // without the caller supplying the project id.

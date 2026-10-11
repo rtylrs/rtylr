@@ -315,6 +315,14 @@ message MoveTaskToColumnRequest {
   task_id: int64? @required @gt(0)
   /// column_id is the destination column identifier.
   column_id: int64
+  /// ordered_task_ids is the destination column's cards in the order they
+  /// should appear, including the moved task. When present the server stores
+  /// that order (flow_tasks.sort_order) in the same transaction as the move,
+  /// which is how a card dropped between two others stays between them and how
+  /// a card is reordered inside its own column. Omitted, the move changes the
+  /// column only and the order is left as it was. Every id must belong to the
+  /// moved task's project; at most 500 are accepted.
+  ordered_task_ids: int64[]
 }
 
 message MoveTaskToColumnResponse {

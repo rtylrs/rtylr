@@ -51,9 +51,15 @@ func (a *ProjectAPIV2) MoveTaskToColumn(ctx context.Context, req *flowprojectv2.
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	if err := a.Service.MoveTaskToColumn(ctx, req.GetTaskId(), req.GetColumnId(), authUser.UserID); err != nil {
+	if err := a.Service.MoveTaskToColumnOrdered(ctx, req.GetTaskId(), req.GetColumnId(), authUser.UserID, req.GetOrderedTaskIds()); err != nil {
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrInvalidTaskOrder) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid ordered_task_ids")
+		}
+		if errors.Is(err, domain.ErrTaskOrderOutsideProject) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "ordered_task_ids must belong to the task's project")
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to move task")
 	}
