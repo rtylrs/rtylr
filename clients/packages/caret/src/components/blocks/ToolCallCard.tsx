@@ -93,10 +93,9 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
   onApprove,
   onDeny,
 }) => {
-  const [open, setOpen] = useState(
-    call.status === "pending" || call.name === "web.search",
-  );
-  const action = actionForTool(call.name);
+  // Only an approval starts open; finished checks stay folded until asked.
+  const [open, setOpen] = useState(call.status === "pending");
+  const action = describeAction(call);
   const label = statusText(call.status, action);
   const isPending = call.status === "pending";
   const isRunning = call.status === "running" || call.status === "approved";
@@ -172,7 +171,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
             </div>
           )}
 
-          {!call.preview && (
+          {!call.preview && isPending && (
             <div style={{ ...summaryStyle, marginBottom: 8 }}>
               Caret will {action}. Review the request and confirm only if that
               is what you want.
@@ -188,6 +187,10 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
 
           {call.name === "web.search" && (
             <SearchResultsDetails output={call.output} />
+          )}
+
+          {call.name === "agents.run" && (
+            <AgentReportsDetails output={call.output} />
           )}
 
           {showFormMappingPlan && <FormMappingPlan output={call.output} />}
@@ -270,6 +273,70 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({
     </div>
   );
 };
+
+/** The card label, naming what was searched so a bad query is visible. */
+function describeAction(call: ToolCallBlock): string {
+  const action = actionForTool(call.name);
+  const query = call.input?.query;
+  if (call.name !== "web.search" || typeof query !== "string" || !query.trim())
+    return action;
+  const trimmed = query.trim();
+  const shown = trimmed.length > 60 ? `${trimmed.slice(0, 57)}...` : trimmed;
+  return `${action} for "${shown}"`;
+}
+
+interface AgentReport {
+  task: string;
+  status: string;
+  report: string;
+}
+
+function agentReports(output: unknown): AgentReport[] {
+  if (!output || typeof output !== "object") return [];
+  const reports = (output as Record<string, unknown>).reports;
+  if (!Array.isArray(reports)) return [];
+  return reports.flatMap((value: unknown) => {
+    if (!value || typeof value !== "object") return [];
+    const item = value as Record<string, unknown>;
+    if (typeof item.task !== "string") return [];
+    return [
+      {
+        task: item.task,
+        status: typeof item.status === "string" ? item.status : "",
+        report: typeof item.report === "string" ? item.report : "",
+      },
+    ];
+  });
+}
+
+/** One entry per sub-agent: its task, whether it finished, and its report. */
+function AgentReportsDetails({ output }: { output: unknown }) {
+  const reports = agentReports(output);
+  if (reports.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={detailLabelStyle}>sub-agents</div>
+      {reports.map((report, index) => (
+        <div
+          key={`${report.task}-${index}`}
+          style={{ ...summaryStyle, marginBottom: 6 }}
+        >
+          <div style={{ color: caretTokens.textDim }}>
+            {report.status === "done" ? "Done" : "Could not finish"}:{" "}
+            {report.task}
+          </div>
+          {report.report && (
+            <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>
+              {report.report.length > 600
+                ? `${report.report.slice(0, 597)}...`
+                : report.report}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function SearchResultsDetails({ output }: { output: unknown }) {
   const sources = searchOutputSources(output);

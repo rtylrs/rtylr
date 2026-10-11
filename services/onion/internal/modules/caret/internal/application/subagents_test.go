@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 )
 
 // scriptedCompleter answers each sub-agent from a script keyed by a word in
@@ -164,5 +165,26 @@ func TestSubAgentToolSearchHidesAgentsRun(t *testing.T) {
 		if tool["name"] == AgentsToolName {
 			t.Fatal("a sub-agent was offered agents.run")
 		}
+	}
+}
+
+func TestAgentsRunOnlyWhenAsked(t *testing.T) {
+	for request, want := range map[string]bool{
+		"What's happening in Saudi Arabia today?":         false,
+		"use sub-agents to compare these three suppliers": true,
+		"research these in parallel":                      true,
+		"check the news":                                  false,
+	} {
+		if got := AgentsRequested(request); got != want {
+			t.Errorf("AgentsRequested(%q) = %v", request, got)
+		}
+	}
+	agents := &SubAgentExecutor{}
+	ctx := WithAgentsAllowed(context.Background(), false)
+	if _, executed, err := agents.ExecuteCaretTool(ctx, AgentsToolName, map[string]any{"tasks": []any{"x"}}); !executed || err == nil {
+		t.Fatal("agents.run must refuse when the person didn't ask for sub-agents")
+	}
+	if strings.Contains(BuildAssistantPrompt("What's happening in Saudi Arabia today?", "", "", nil, time.Now()), `"agents.run"`) {
+		t.Fatal("agents.run is listed for a request that didn't ask for it")
 	}
 }

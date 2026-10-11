@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -72,6 +73,30 @@ func WithAgentRunBudget(ctx context.Context) context.Context {
 	return context.WithValue(ctx, agentRunBudgetKey{}, &atomic.Int32{})
 }
 
+type agentsAllowedKey struct{}
+
+// agentsRequestPattern matches a person asking for sub-agents or parallel
+// work. Without that ask Caret does the steps itself: sub-agents cost
+// several model calls and are slower for everyday questions.
+var agentsRequestPattern = regexp.MustCompile(`(?i)\b(sub[- ]?agents?|agents?|in parallel|parallel)\b|وكلاء|وكيل`)
+
+// AgentsRequested reports whether the request asks for sub-agents.
+func AgentsRequested(request string) bool {
+	return agentsRequestPattern.MatchString(request)
+}
+
+// WithAgentsAllowed records whether agents.run may run for this reply.
+func WithAgentsAllowed(ctx context.Context, allowed bool) context.Context {
+	return context.WithValue(ctx, agentsAllowedKey{}, allowed)
+}
+
+// agentsAllowed is true unless the reply recorded that the person didn't
+// ask for sub-agents.
+func agentsAllowed(ctx context.Context) bool {
+	allowed, ok := ctx.Value(agentsAllowedKey{}).(bool)
+	return !ok || allowed
+}
+
 // IsSubAgent reports whether ctx belongs to a sub-agent, which may only read.
 func IsSubAgent(ctx context.Context) bool {
 	_, ok := ctx.Value(subAgentKey{}).(bool)
@@ -98,6 +123,9 @@ func (e *SubAgentExecutor) ExecuteCaretTool(ctx context.Context, name string, in
 	}
 	if IsSubAgent(ctx) {
 		return nil, true, errors.New("sub-agents can't start more sub-agents")
+	}
+	if !agentsAllowed(ctx) {
+		return nil, true, errors.New("sub-agents run only when the person asks for them; do the lookups yourself")
 	}
 	if e == nil || e.AI == nil || e.Executors == nil {
 		return nil, true, errors.New("sub-agents are unavailable")

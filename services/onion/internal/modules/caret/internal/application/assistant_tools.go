@@ -154,6 +154,9 @@ func (e *AssistantToolExecutor) ExecuteCaretTool(ctx context.Context, name strin
 			// Sub-agents only read and can't start sub-agents of their own.
 			return toolSearchOutputExcluding(ModeAsk, truncateSearchText(query, 300), AgentsToolName), true, nil
 		}
+		if !agentsAllowed(ctx) {
+			return toolSearchOutputExcluding(ModeAgent, truncateSearchText(query, 300), AgentsToolName), true, nil
+		}
 		return toolSearchOutput(ModeAgent, truncateSearchText(query, 300)), true, nil
 	case "utilities.calculate":
 		expression, _ := input["expression"].(string)

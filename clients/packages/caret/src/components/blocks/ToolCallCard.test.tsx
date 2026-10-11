@@ -71,11 +71,54 @@ describe("ToolCallCard", () => {
     };
 
     render(<ToolCallCard call={call} />);
+    const toggle = screen.getByRole("button", {
+      name: /Completed: search the web/i,
+    });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByRole("link", { name: "Search result" })).toBeNull();
+    fireEvent.click(toggle);
 
     expect(
       screen.getByRole("link", { name: "Search result" }).getAttribute("href"),
     ).toBe("https://example.com/source");
     expect(screen.getByText("A short public snippet.")).not.toBeNull();
     expect(screen.queryByRole("link", { name: "Unsafe source" })).toBeNull();
+  });
+
+  it("names the search query and lists each sub-agent's report", () => {
+    const search: ToolCallBlock = {
+      id: "web-search-2",
+      type: "tool_call",
+      name: "web.search",
+      input: { query: "Saudi Arabia news today" },
+      status: "success",
+      output: { sources: [] },
+    };
+    const { unmount } = render(<ToolCallCard call={search} />);
+    expect(
+      screen.getByRole("button", {
+        name: 'Completed: search the web for "Saudi Arabia news today"',
+      }),
+    ).not.toBeNull();
+    unmount();
+
+    const agents: ToolCallBlock = {
+      id: "agents-1",
+      type: "tool_call",
+      name: "agents.run",
+      input: {},
+      status: "success",
+      output: {
+        reports: [
+          { task: "Compare supplier A", status: "done", report: "A is cheaper." },
+          { task: "Compare supplier B", status: "error", report: "" },
+        ],
+      },
+    };
+    render(<ToolCallCard call={agents} />);
+    fireEvent.click(screen.getByRole("button", { name: /work on it in parallel/i }));
+    expect(screen.getByText("Done: Compare supplier A")).not.toBeNull();
+    expect(screen.getByText("A is cheaper.")).not.toBeNull();
+    expect(screen.getByText("Could not finish: Compare supplier B")).not.toBeNull();
   });
 });

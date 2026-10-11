@@ -61,6 +61,12 @@ type streamEventRenderer struct {
 	// storedID is the saved reply's message id, sent with message_end.
 	storedID string
 	progress chan string
+	// statusBlock is the open thinking block progress lines go into, so one
+	// wait shows as one status rather than a stack of them.
+	statusBlock string
+	// failures counts errors per tool in this reply; a tool that keeps
+	// failing is blocked so the reply moves on instead of spinning.
+	failures map[string]int
 	// followUps are the next questions the model suggested, sent as their
 	// own event when the reply finishes rather than shown as text.
 	followUps []string
@@ -375,6 +381,12 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	}
 
 	requiresApproval := def.RequiresApproval || def.Scope == "write"
+	if requiresApproval && call.Name == "memory.remember" && len(r.inflight) > 0 {
+		// A memory proposal stops the reply until it is approved, so one made
+		// while lookups are still running would leave the person with no
+		// answer. It belongs at the end, after the answer.
+		return r.emitToolExecutionNotice(call, "skipped", "Answer first; propose a memory only at the end of the reply.", "")
+	}
 	if !requiresApproval && len(r.executors) == 0 {
 		return nil
 	}
@@ -405,6 +417,9 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 	ctx := r.ctx
 	if ctx == nil {
 		ctx = context.Background()
+	}
+	if r.failures[call.Name] >= maxToolFailures {
+		return r.emitToolExecutionNotice(call, "blocked", call.Name+" already failed twice in this reply; use another route or say what could not be checked.", "")
 	}
 	if err := r.toolState.Admit(call.Name, call.Input); err != nil {
 		if errors.Is(err, echoapp.ErrDuplicateToolCall) {
@@ -476,9 +491,14 @@ func (r *streamEventRenderer) startTool(ctx context.Context, tool *inflightTool)
 // keeping the stream alive meanwhile: heartbeats stop proxies from closing a
 // quiet connection, and progress the tools report is shown as status lines.
 // Only this goroutine writes to the stream.
-func (r *streamEventRenderer) awaitTools() error {
+func (r *streamEventRenderer) awaitTools() (err error) {
 	heartbeat := time.NewTicker(toolHeartbeatInterval)
 	defer heartbeat.Stop()
+	defer func() {
+		if closeErr := r.closeStatus(); err == nil {
+			err = closeErr
+		}
+	}()
 	for len(r.inflight) > 0 {
 		tool := r.inflight[0]
 		var outcome toolOutcome
@@ -529,6 +549,10 @@ func (r *streamEventRenderer) finishTool(tool *inflightTool, outcome toolOutcome
 		}
 	}
 	if execErr != nil {
+		if r.failures == nil {
+			r.failures = map[string]int{}
+		}
+		r.failures[call.Name]++
 		userError := userFacingToolError(execErr)
 		summary := summarizeToolResult(call.Name, call.Input, nil, "error", userError)
 		r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: "error", Summary: summary, Error: userError})
@@ -555,23 +579,36 @@ func (r *streamEventRenderer) finishTool(tool *inflightTool, outcome toolOutcome
 // toolHeartbeatInterval keeps a connection alive while a tool runs.
 var toolHeartbeatInterval = 10 * time.Second
 
-// emitStatus shows a one-line progress update as a thinking block.
+// maxToolFailures is how many errors one tool may return in a reply before
+// further calls to it are blocked.
+const maxToolFailures = 2
+
+// emitStatus adds a progress line to the open status block, starting one if
+// needed; closeStatus ends it once the tools it describes are done.
 func (r *streamEventRenderer) emitStatus(message string) error {
 	message = strings.TrimSpace(message)
 	if message == "" || r.plannerOnly {
 		return nil
 	}
-	blockID := newCaretBlockID("thinking")
-	for _, event := range []StreamEvent{
-		{Type: EventThinkingStart, MessageID: r.messageID, BlockID: blockID},
-		{Type: EventThinkingDelta, MessageID: r.messageID, BlockID: blockID, Delta: message},
-		{Type: EventThinkingEnd, MessageID: r.messageID, BlockID: blockID},
-	} {
-		if err := WriteEvent(r.w, r.flush, event); err != nil {
+	delta := message
+	if r.statusBlock == "" {
+		r.statusBlock = newCaretBlockID("thinking")
+		if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventThinkingStart, MessageID: r.messageID, BlockID: r.statusBlock}); err != nil {
 			return err
 		}
+	} else {
+		delta = "\n" + message
 	}
-	return nil
+	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventThinkingDelta, MessageID: r.messageID, BlockID: r.statusBlock, Delta: delta})
+}
+
+func (r *streamEventRenderer) closeStatus() error {
+	if r.statusBlock == "" {
+		return nil
+	}
+	blockID := r.statusBlock
+	r.statusBlock = ""
+	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventThinkingEnd, MessageID: r.messageID, BlockID: blockID})
 }
 
 func (r *streamEventRenderer) emitToolExecutionNotice(call ToolCallMarker, status, summary, errorMessage string) error {
