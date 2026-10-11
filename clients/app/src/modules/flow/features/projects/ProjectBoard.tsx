@@ -2,6 +2,8 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useClickOutside } from '@voxire/utils';
+import { createPortal } from 'react-dom';
+import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +31,14 @@ import {
   resolveDropTarget,
   type ColumnRect,
 } from './boardDrag';
+import {
+  insertionIndex,
+  isSamePlace,
+  orderBoardTasks,
+  orderedIdsAfterDrop,
+  type CardSlot,
+  type DropSlot,
+} from './boardOrder';
 import { useCurrentProject } from './useCurrentProject';
 import {
   useCanEditTask,
@@ -41,6 +51,74 @@ import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
+
+/** What the board renders while a card is being dragged. */
+interface DragView {
+  taskId: string;
+  /** Where the card started: its column and its place among that column's cards. */
+  source: DropSlot;
+  /** Where it would land now, or null while the pointer is outside every column. */
+  slot: DropSlot | null;
+  /** The card's height, so the placeholder holds exactly the space it will fill. */
+  height: number;
+}
+
+/** The floating copy of the card that follows the pointer. */
+interface GhostInfo {
+  task: Task;
+  width: number;
+}
+
+/** Everything one drag gesture needs, captured when the pointer goes down. */
+interface DragSession {
+  pointerId: number;
+  taskId: string;
+  task: Task;
+  source: DropSlot;
+  /** Cards can only be reordered when the board is not split into swimlanes. */
+  reorder: boolean;
+  startX: number;
+  startY: number;
+  x: number;
+  y: number;
+  /** Where inside the card the pointer grabbed it, so the copy does not jump. */
+  offsetX: number;
+  offsetY: number;
+  width: number;
+  height: number;
+  /** Each column's card ids in display order, as they were when the drag began. */
+  columnIds: Map<string, string[]>;
+  /** Each column's card centres, measured against the list's own top edge. */
+  slots: Map<string, CardSlot[]>;
+  slot: DropSlot | null;
+  active: boolean;
+  cleanup: () => void;
+}
+
+/**
+ * The card being dragged stays mounted but leaves the layout. A touch pointer
+ * keeps targeting the node it went down on, so that node must not be unmounted
+ * or re-parented while the drag is in progress.
+ */
+const HIDDEN_CARD_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  visibility: 'hidden',
+  pointerEvents: 'none',
+  width: '100%',
+};
+
+const sameSlot = (a: DropSlot | null, b: DropSlot | null): boolean =>
+  a === b || (a !== null && b !== null && a.columnId === b.columnId && a.index === b.index);
+
+/** Card centres of one column list, relative to the top of its scrollable content. */
+const measureSlots = (list: HTMLElement | null | undefined): CardSlot[] => {
+  if (!list) return [];
+  const origin = list.getBoundingClientRect().top - list.scrollTop;
+  return [...list.querySelectorAll<HTMLElement>('[data-board-card]')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { id: el.dataset.boardCard ?? '', mid: r.top - origin + r.height / 2 };
+  });
+};
 
 // ── Group-by (swimlanes) ────────────────────────────────────────────────
 // "None" = plain kanban columns. Any other value partitions each column's
@@ -222,8 +300,13 @@ const ProjectBoard: React.FC = () => {
   const updateColumn = useUpdateColumn(projectId);
   const deleteColumn = useDeleteColumn(projectId);
 
-  const [dragOver, setDragOver] = useState<string | null>(null); // column id
-  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  // The live drag preview. `source` is where the card started; `slot` is where
+  // the pointer says it would land now, or null while it is outside every
+  // column (the placeholder then sits back at the source).
+  const [dragView, setDragView] = useState<DragView | null>(null);
+  const [ghost, setGhost] = useState<GhostInfo | null>(null);
+  const draggingTaskId = dragView?.taskId ?? null;
+  const dragOver = dragView?.slot?.columnId ?? null; // column id
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
   const [groupBy, setGroupByState] = useState<GroupKey>('none');
@@ -264,14 +347,10 @@ const ProjectBoard: React.FC = () => {
   );
 
   const columnRefs = useRef(new Map<string, HTMLDivElement | null>());
-  const dragRef = useRef<{
-    taskId: string;
-    sourceColumnId: string | null;
-    startX: number;
-    startY: number;
-    rects: ColumnRect[];
-    active: boolean;
-  } | null>(null);
+  const listRefs = useRef(new Map<string, HTMLDivElement | null>());
+  const ghostRef = useRef<HTMLDivElement | null>(null);
+  const justDraggedRef = useRef(false);
+  const dragRef = useRef<DragSession | null>(null);
 
   if (projectLoading && !project) {
     return (
@@ -308,12 +387,14 @@ const ProjectBoard: React.FC = () => {
     // board keys buckets on `String(col.id)`. Comparing against the raw number
     // matched `"5"` against `5` - always false - and made moved tasks vanish.
     const colKey = String(col.id);
-    return tasks.filter((t) => {
-      if (t.sectionId && String(t.sectionId) === colKey) return true;
-      // Unsectioned tasks go into first column.
-      if (colIndex === 0 && !t.sectionId) return true;
-      return false;
-    });
+    return orderBoardTasks(
+      tasks.filter((t) => {
+        if (t.sectionId && String(t.sectionId) === colKey) return true;
+        // Unsectioned tasks go into first column.
+        if (colIndex === 0 && !t.sectionId) return true;
+        return false;
+      })
+    );
   }
 
   // Pointer-based card drag (B1). HTML5 drag-and-drop never fired on touch, so
@@ -333,48 +414,179 @@ const ProjectBoard: React.FC = () => {
     return out;
   };
 
+  const positionGhost = (): void => {
+    const drag = dragRef.current;
+    const el = ghostRef.current;
+    if (!drag || !el) return;
+    el.style.transform = `translate3d(${drag.x - drag.offsetX}px, ${drag.y - drag.offsetY}px, 0) rotate(1.5deg) scale(1.02)`;
+  };
+
+  /** Which column, and which place in it, the pointer is over right now. */
+  const slotAt = (drag: DragSession, x: number, y: number): DropSlot | null => {
+    const columnId = columnIdAtPoint(measureColumns(), x, y);
+    if (columnId === null) return null;
+    const list = listRefs.current.get(columnId);
+    const slots = drag.slots.get(columnId) ?? [];
+    if (!list) return { columnId, index: slots.length };
+    const y0 = list.getBoundingClientRect().top - list.scrollTop;
+    return { columnId, index: insertionIndex(slots, drag.taskId, y - y0) };
+  };
+
+  const endSession = (): void => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    drag.cleanup();
+    dragRef.current = null;
+    setDragView(null);
+    setGhost(null);
+  };
+
+  const commitDrop = (drag: DragSession, slot: DropSlot | null): void => {
+    // Released outside every column: the drag is cancelled.
+    if (slot === null) return;
+    if (!drag.reorder) {
+      // Swimlanes: a card changes column but has no single place to take.
+      const target = resolveDropTarget(slot.columnId, drag.source.columnId);
+      if (target !== null) moveTask.mutate({ taskId: drag.taskId, columnId: target });
+      return;
+    }
+    if (isSamePlace(drag.source, slot)) return;
+    moveTask.mutate({
+      taskId: drag.taskId,
+      columnId: slot.columnId,
+      orderedTaskIds: orderedIdsAfterDrop(
+        drag.columnIds.get(slot.columnId) ?? [],
+        drag.taskId,
+        slot.index
+      ),
+    });
+  };
+
+  // Live card drag. Pointer events cover mouse, touch and pen in one path.
+  //
+  // The card under the pointer never moves in the DOM: a touch pointer keeps
+  // targeting the node it went down on, so re-parenting it mid-drag would end the
+  // gesture. It stays where it is, hidden; a placeholder shows where it would land and the
+  // cards around it slide aside; a floating copy follows the pointer. The
+  // listeners sit on `window` for the same reason, because the pointer is off
+  // the card almost at once.
   const handleDragPointerDown = (
     e: React.PointerEvent,
     taskId: string,
     sourceColumnId: string
   ): void => {
-    if (!canEdit) return;
+    if (!canEdit || dragRef.current) return;
+    const task = tasks.find((candidate) => candidate.id === taskId);
+    if (!task) return;
     e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current = {
+
+    const card = e.currentTarget as HTMLElement;
+    const cardRect = card.getBoundingClientRect();
+    const columnIds = new Map<string, string[]>();
+    const slots = new Map<string, CardSlot[]>();
+    columns.forEach((col, i) => {
+      const key = String(col.id);
+      columnIds.set(
+        key,
+        tasksForColumn(col, i).map((candidate) => candidate.id)
+      );
+      slots.set(key, measureSlots(listRefs.current.get(key)));
+    });
+    const sourceIndex = (columnIds.get(sourceColumnId) ?? []).indexOf(taskId);
+
+    const drag: DragSession = {
+      pointerId: e.pointerId,
       taskId,
-      sourceColumnId,
+      task,
+      source: { columnId: sourceColumnId, index: Math.max(0, sourceIndex) },
+      reorder: groupBy === 'none',
       startX: e.clientX,
       startY: e.clientY,
-      rects: measureColumns(),
+      x: e.clientX,
+      y: e.clientY,
+      offsetX: e.clientX - cardRect.left,
+      offsetY: e.clientY - cardRect.top,
+      width: cardRect.width,
+      height: cardRect.height,
+      columnIds,
+      slots,
+      slot: null,
       active: false,
+      cleanup: () => undefined,
     };
+    drag.slot = drag.source;
+
+    const previousCursor = document.body.style.cursor;
+    const previousSelect = document.body.style.userSelect;
+
+    const onMove = (ev: PointerEvent): void => {
+      if (ev.pointerId !== drag.pointerId) return;
+      drag.x = ev.clientX;
+      drag.y = ev.clientY;
+      if (!drag.active) {
+        if (!exceedsDragThreshold(ev.clientX - drag.startX, ev.clientY - drag.startY)) return;
+        drag.active = true;
+        document.body.style.cursor = 'grabbing';
+        document.body.style.userSelect = 'none';
+        setGhost({ task: drag.task, width: drag.width });
+        setDragView({
+          taskId: drag.taskId,
+          source: drag.source,
+          slot: drag.source,
+          height: drag.height,
+        });
+      }
+      if (ev.cancelable) ev.preventDefault();
+      positionGhost();
+      const slot = slotAt(drag, ev.clientX, ev.clientY);
+      if (!sameSlot(slot, drag.slot)) {
+        drag.slot = slot;
+        setDragView((view) => (view ? { ...view, slot } : view));
+      }
+    };
+    const onUp = (ev: PointerEvent): void => {
+      if (ev.pointerId !== drag.pointerId) return;
+      const { active, slot } = drag;
+      endSession();
+      if (!active) return;
+      // The click that follows a drag must not open the task.
+      justDraggedRef.current = true;
+      window.setTimeout(() => {
+        justDraggedRef.current = false;
+      }, 0);
+      commitDrop(drag, slot);
+    };
+    const onCancel = (ev: PointerEvent): void => {
+      if (ev.pointerId === drag.pointerId) endSession();
+    };
+    const onKey = (ev: KeyboardEvent): void => {
+      if (ev.key === 'Escape') endSession();
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onUp, true);
+    window.addEventListener('pointercancel', onCancel, true);
+    window.addEventListener('keydown', onKey);
+    drag.cleanup = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp, true);
+      window.removeEventListener('pointercancel', onCancel, true);
+      window.removeEventListener('keydown', onKey);
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousSelect;
+    };
+    dragRef.current = drag;
   };
 
-  const handleDragPointerMove = (e: React.PointerEvent): void => {
-    const drag = dragRef.current;
-    if (!drag) return;
-    if (!drag.active) {
-      if (!exceedsDragThreshold(e.clientX - drag.startX, e.clientY - drag.startY)) return;
-      drag.active = true;
-      setDraggingTaskId(drag.taskId);
-    }
-    if (e.cancelable) e.preventDefault();
-    setDragOver(columnIdAtPoint(drag.rects, e.clientX, e.clientY));
-  };
+  // The card's own pointer-up runs after the capture-phase listener above, so by
+  // then this already says whether the gesture was a drag.
+  const endCardPointer = (): boolean => justDraggedRef.current;
 
-  const endDrag = (e: React.PointerEvent): boolean => {
-    const drag = dragRef.current;
-    dragRef.current = null;
-    setDraggingTaskId(null);
-    setDragOver(null);
-    if (!drag?.active) return false;
-    const target = resolveDropTarget(
-      columnIdAtPoint(drag.rects, e.clientX, e.clientY),
-      drag.sourceColumnId
-    );
-    if (target !== null) moveTask.mutate({ taskId: drag.taskId, columnId: target });
-    return true;
+  /** The placeholder this column should show, if the dragged card would land in it. */
+  const placeholderFor = (columnId: string): { index: number; height: number } | null => {
+    if (!dragView) return null;
+    const at = dragView.slot ?? dragView.source;
+    return at.columnId === columnId ? { index: at.index, height: dragView.height } : null;
   };
 
   const handleAddColumn = () => {
@@ -484,10 +696,12 @@ const ProjectBoard: React.FC = () => {
               draggingTaskId={draggingTaskId}
               moveTargets={moveTargets}
               registerRef={(el) => columnRefs.current.set(String(col.id), el)}
+              registerList={(el) => listRefs.current.set(String(col.id), el)}
+              reorder={groupBy === 'none'}
+              placeholder={placeholderFor(String(col.id))}
               onMoveTask={(taskId, columnId) => moveTask.mutate({ taskId, columnId })}
               onDragPointerDown={handleDragPointerDown}
-              onDragPointerMove={handleDragPointerMove}
-              onDragPointerEnd={endDrag}
+              onDragPointerEnd={endCardPointer}
               onSelect={toggleSelectTask}
               onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true, String(col.id))}
               onRename={(name) =>
@@ -584,6 +798,31 @@ const ProjectBoard: React.FC = () => {
           });
         }}
       />
+      {ghost &&
+        createPortal(
+          // The copy that follows the pointer. It is positioned straight on the
+          // element by the move handler, so a drag costs no React render per move.
+          <div
+            ref={(el) => {
+              ghostRef.current = el;
+              if (el) positionGhost();
+            }}
+            aria-hidden="true"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: ghost.width,
+              zIndex: 1000,
+              pointerEvents: 'none',
+              willChange: 'transform',
+              filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.28))',
+            }}
+          >
+            <TaskCard task={ghost.task} />
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
@@ -602,9 +841,13 @@ const KanbanColumn: React.FC<{
   draggingTaskId: string | null;
   moveTargets: readonly MoveTarget[];
   registerRef: (el: HTMLDivElement | null) => void;
+  registerList: (el: HTMLDivElement | null) => void;
+  /** Whether cards can be placed (false in swimlane view, where a drag only changes column). */
+  reorder: boolean;
+  /** Where the dragged card would land in this column, when it would. */
+  placeholder: { index: number; height: number } | null;
   onMoveTask: (taskId: string, columnId: string) => void;
   onDragPointerDown: (e: React.PointerEvent, taskId: string, sourceColumnId: string) => void;
-  onDragPointerMove: (e: React.PointerEvent) => void;
   onDragPointerEnd: (e: React.PointerEvent) => boolean;
   onSelect: (id: string) => void;
   onAddTask: () => void;
@@ -622,9 +865,11 @@ const KanbanColumn: React.FC<{
   draggingTaskId,
   moveTargets,
   registerRef,
+  registerList,
+  reorder,
+  placeholder,
   onMoveTask,
   onDragPointerDown,
-  onDragPointerMove,
   onDragPointerEnd,
   onSelect,
   onAddTask,
@@ -673,6 +918,42 @@ const KanbanColumn: React.FC<{
     </>
   );
 
+  // The cards of one lane. While a card is being dragged it stays mounted but
+  // leaves the layout, and a placeholder holds the place it would take; the
+  // cards around the placeholder slide aside through TaskCard's layout animation.
+  const renderCards = (laneTasks: Task[]): React.ReactNode[] => {
+    const out: React.ReactNode[] = [];
+    let visible = 0;
+    const slotAt = (): React.ReactNode =>
+      placeholder && (
+        <DropPlaceholder key="drag-placeholder" height={placeholder.height} color={col.color} />
+      );
+    for (const task of laneTasks) {
+      const lifted = reorder && draggingTaskId === task.id;
+      if (!lifted) {
+        if (reorder && placeholder && placeholder.index === visible) out.push(slotAt());
+        visible += 1;
+      }
+      out.push(
+        <div key={task.id} data-board-card={task.id} style={lifted ? HIDDEN_CARD_STYLE : undefined}>
+          <TaskCard
+            task={task}
+            controls={renderCardControls(task.id, task.title)}
+            dimmed={!reorder && draggingTaskId === task.id}
+            selected={selectedTaskIds.includes(task.id)}
+            onSelect={() => onSelect(task.id)}
+            onDragPointerDown={
+              canEdit ? (e, id) => onDragPointerDown(e, id, String(col.id)) : undefined
+            }
+            onDragPointerEnd={onDragPointerEnd}
+          />
+        </div>
+      );
+    }
+    if (reorder && placeholder && placeholder.index >= visible) out.push(slotAt());
+    return out;
+  };
+
   // Total count for the column header pill (stays accurate regardless
   // of group-by - it's the sum of tasks across all lanes).
   const colTaskCount = lanes.reduce((n, l) => n + l.tasks.length, 0);
@@ -680,6 +961,7 @@ const KanbanColumn: React.FC<{
   return (
     <div
       ref={registerRef}
+      data-board-column={String(col.id)}
       // 296px, inside the 280-320 the board rule asks for. It was 248, which
       // squeezed a two-line title to the point that the card carried less than
       // the row beside it (rtylr#1078, S-08). The viewport clamp stays, so a
@@ -771,25 +1053,15 @@ const KanbanColumn: React.FC<{
       )}
 
       {/* Cards */}
-      <div className="flex flex-col gap-1.5 flex-1 min-h-[80px] overflow-y-auto">
+      <div
+        ref={registerList}
+        data-board-list
+        className="relative flex flex-col gap-1.5 flex-1 min-h-[80px] overflow-y-auto"
+      >
         {groupBy === 'none' ? (
           <>
-            {lanes[0]?.tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                controls={renderCardControls(task.id, task.title)}
-                dimmed={draggingTaskId === task.id}
-                selected={selectedTaskIds.includes(task.id)}
-                onSelect={() => onSelect(task.id)}
-                onDragPointerDown={
-                  canEdit ? (e, id) => onDragPointerDown(e, id, String(col.id)) : undefined
-                }
-                onDragPointerMove={onDragPointerMove}
-                onDragPointerEnd={onDragPointerEnd}
-              />
-            ))}
-            {colTaskCount === 0 && (
+            {renderCards(lanes[0]?.tasks ?? [])}
+            {colTaskCount === 0 && !placeholder && (
               // A sentence, not a second add control: the row above the cards is
               // already the way in, and this said "Add task" in hardcoded
               // English on a screen that ships in Arabic and French.
@@ -830,7 +1102,6 @@ const KanbanColumn: React.FC<{
                     onDragPointerDown={
                       canEdit ? (e, id) => onDragPointerDown(e, id, String(col.id)) : undefined
                     }
-                    onDragPointerMove={onDragPointerMove}
                     onDragPointerEnd={onDragPointerEnd}
                   />
                 ))}
@@ -853,6 +1124,26 @@ const KanbanColumn: React.FC<{
     </div>
   );
 };
+
+// ── Drag placeholder ────────────────────────────────────────────────────────
+
+/** The empty slot a dragged card would drop into, sized to the card. */
+const DropPlaceholder: React.FC<{ height: number; color: string }> = ({ height, color }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.12 }}
+    aria-hidden="true"
+    data-board-placeholder
+    className="shrink-0 rounded-lg"
+    style={{
+      height,
+      border: `1.5px dashed ${color}`,
+      background: withAlpha(color, 8),
+    }}
+  />
+);
 
 // ── Group-by picker ─────────────────────────────────────────────────────────
 
