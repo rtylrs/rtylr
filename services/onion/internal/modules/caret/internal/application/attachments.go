@@ -13,8 +13,8 @@ import (
 type AttachedFile struct {
 	Name string `json:"name"`
 	Text string `json:"text"`
-	// DataURL carries a binary document (a PDF) whose text the server
-	// extracts; Text is empty then.
+	// DataURL carries a binary document (a PDF, or a Word, Excel or
+	// PowerPoint file) whose text the server extracts; Text is empty then.
 	DataURL string `json:"data_url,omitempty"`
 }
 
@@ -31,14 +31,20 @@ func ExtractAttachedFiles(files []AttachedFile) ([]AttachedFile, error) {
 			continue
 		}
 		mediaType, encoded, ok := strings.Cut(strings.TrimPrefix(file.DataURL, "data:"), ";base64,")
-		if !ok || mediaType != "application/pdf" {
-			return nil, fmt.Errorf("%s: only PDF documents can be sent as data", file.Name)
+		isPDF := mediaType == "application/pdf"
+		if !ok || (!isPDF && !officeExtensions[fileExtension(file.Name)]) {
+			return nil, fmt.Errorf("%s: only PDF, Word, Excel and PowerPoint documents can be sent as data", file.Name)
 		}
 		raw, err := base64.StdEncoding.DecodeString(encoded)
 		if err != nil {
 			return nil, fmt.Errorf("%s could not be decoded", file.Name)
 		}
-		text, err := extractPDFText(raw)
+		var text string
+		if isPDF {
+			text, err = extractPDFText(raw)
+		} else {
+			text, err = extractOfficeText(file.Name, raw)
+		}
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", file.Name, err)
 		}

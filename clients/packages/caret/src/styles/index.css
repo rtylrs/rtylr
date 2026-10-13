@@ -276,6 +276,15 @@
   box-shadow: none !important;
 }
 
+.caret-composer.is-large:focus-within {
+  border-color: var(--caret-border-strong) !important;
+  background: var(--caret-surface) !important;
+  box-shadow:
+    0 1px 2px rgba(15, 15, 20, 0.06),
+    0 8px 20px -4px rgba(15, 15, 20, 0.13),
+    0 14px 28px -10px rgba(15, 15, 20, 0.18) !important;
+}
+
 .caret-composer textarea::placeholder {
   color: var(--caret-text-muted);
   opacity: 1;

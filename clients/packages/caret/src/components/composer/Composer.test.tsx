@@ -36,7 +36,7 @@ describe("Composer image attachments", () => {
     });
 
     expect(screen.getByRole("alert").textContent).toContain(
-      "Choose JPEG, PNG or WebP images, PDFs, or text files such as CSV.",
+      "Choose JPEG, PNG or WebP images, PDF, Word, Excel or PowerPoint files, or text files such as CSV.",
     );
     expect(screen.queryByRole("img", { name: "diagram.svg" })).toBeNull();
   });

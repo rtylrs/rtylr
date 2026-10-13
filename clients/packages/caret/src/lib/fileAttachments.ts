@@ -2,26 +2,37 @@
 const TEXT_EXTENSIONS = [
   "csv", "tsv", "txt", "md", "markdown", "json", "xml", "html", "htm", "log",
   "yaml", "yml", "ini", "sql", "js", "ts", "tsx", "jsx", "py", "go", "java",
-  "rb", "php", "css", "sh", "ics", "vcf", "srt", "pdf",
+  "rb", "php", "css", "sh", "ics", "vcf", "srt",
 ];
 
-export const TEXT_FILE_ACCEPT = TEXT_EXTENSIONS.map((ext) => `.${ext}`).join(",");
+/** Binary documents the server turns into text: PDF, Word, Excel, PowerPoint. */
+const DOCUMENT_EXTENSIONS = ["pdf", "docx", "xlsx", "pptx", "odt", "ods", "odp"];
+
+export const TEXT_FILE_ACCEPT = [...TEXT_EXTENSIONS, ...DOCUMENT_EXTENSIONS].map((ext) => `.${ext}`).join(",");
 export const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp";
 export const MAX_TEXT_FILES = 3;
 const MAX_TEXT_FILE_BYTES = 400 * 1024;
-const MAX_PDF_BYTES = 2 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 2 * 1024 * 1024;
 /** The API accepts 4 MiB per request; leave room for the prompt. */
 export const MAX_ATTACHMENT_PAYLOAD_BYTES = 3.6 * 1024 * 1024;
 
 export interface CaretTextFile {
   name: string;
   text: string;
-  /** A PDF is sent as data; the server extracts its text. */
+  /** A document (PDF, Word, Excel, PowerPoint) is sent as data; the server extracts its text. */
   data_url?: string;
 }
 
+function extensionOf(file: File): string {
+  return file.name.split(".").pop()?.toLowerCase() ?? "";
+}
+
 function isPDF(file: File): boolean {
-  return file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+  return file.type === "application/pdf" || extensionOf(file) === "pdf";
+}
+
+function isDocument(file: File): boolean {
+  return isPDF(file) || DOCUMENT_EXTENSIONS.includes(extensionOf(file));
 }
 
 function readDataUrl(file: File): Promise<string> {
@@ -44,8 +55,8 @@ export function isTextFile(file: File): boolean {
     file.type === "application/pdf"
   )
     return true;
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-  return TEXT_EXTENSIONS.includes(ext);
+  const ext = extensionOf(file);
+  return TEXT_EXTENSIONS.includes(ext) || DOCUMENT_EXTENSIONS.includes(ext);
 }
 
 /** Reads attached text files, enforcing the server's limits up front. */
@@ -54,14 +65,17 @@ export async function readTextFiles(files: File[]): Promise<CaretTextFile[]> {
     throw new Error(`Attach up to ${MAX_TEXT_FILES} files per message.`);
   return Promise.all(
     files.map(async (file) => {
-      if (isPDF(file)) {
-        if (file.size > MAX_PDF_BYTES)
+      if (isDocument(file)) {
+        if (file.size > MAX_DOCUMENT_BYTES)
           throw new Error(`${file.name} is larger than 2 MB.`);
         const dataUrl = await readDataUrl(file);
         return {
           name: file.name,
           text: "",
-          data_url: dataUrl.replace(/^data:[^;]*;/, "data:application/pdf;"),
+          // The server reads a PDF by its media type, an Office file by its name.
+          data_url: isPDF(file)
+            ? dataUrl.replace(/^data:[^;]*;/, "data:application/pdf;")
+            : dataUrl,
         };
       }
       if (file.size > MAX_TEXT_FILE_BYTES)
