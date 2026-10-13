@@ -241,6 +241,7 @@
   transition: opacity 0.12s;
 }
 
+.caret-chat-row.is-menu-open .caret-chat-actions,
 .caret-chat-row:hover .caret-chat-actions,
 .caret-chat-row:focus-within .caret-chat-actions {
   opacity: 1;
@@ -373,4 +374,13 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+.caret-panel-shell .caret-chat-menu button:focus-visible {
+  outline: none;
+}
+
+.caret-chat-menu button:hover,
+.caret-chat-menu button:focus {
+  background: var(--caret-hover) !important;
 }

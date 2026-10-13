@@ -156,3 +156,82 @@
 .caret-md a.caret-link:hover {
   text-decoration-color: currentColor;
 }
+
+/* Syntax colours for fenced code. Dark by default; light when the app is. */
+.caret-panel-shell {
+  --caret-syn-keyword: #ff7b72;
+  --caret-syn-string: #a5d6ff;
+  --caret-syn-number: #79c0ff;
+  --caret-syn-comment: #8b949e;
+  --caret-syn-title: #d2a8ff;
+  --caret-syn-builtin: #ffa657;
+  --caret-syn-tag: #7ee787;
+  --caret-syn-deleted: #ffa198;
+}
+:root[data-theme='light'] .caret-panel-shell {
+  --caret-syn-keyword: #cf222e;
+  --caret-syn-string: #0a3069;
+  --caret-syn-number: #0550ae;
+  --caret-syn-comment: #6e7781;
+  --caret-syn-title: #8250df;
+  --caret-syn-builtin: #953800;
+  --caret-syn-tag: #116329;
+  --caret-syn-deleted: #82071e;
+}
+.caret-md .hljs-keyword,
+.caret-md .hljs-doctag,
+.caret-md .hljs-selector-tag,
+.caret-md .hljs-template-tag {
+  color: var(--caret-syn-keyword, #ff7b72);
+}
+.caret-md .hljs-string,
+.caret-md .hljs-regexp,
+.caret-md .hljs-meta .hljs-string,
+.caret-md .hljs-template-variable {
+  color: var(--caret-syn-string, #a5d6ff);
+}
+.caret-md .hljs-number,
+.caret-md .hljs-literal,
+.caret-md .hljs-symbol,
+.caret-md .hljs-bullet,
+.caret-md .hljs-attr,
+.caret-md .hljs-attribute,
+.caret-md .hljs-selector-attr,
+.caret-md .hljs-selector-class,
+.caret-md .hljs-selector-id {
+  color: var(--caret-syn-number, #79c0ff);
+}
+.caret-md .hljs-comment,
+.caret-md .hljs-quote,
+.caret-md .hljs-meta {
+  color: var(--caret-syn-comment, #8b949e);
+}
+.caret-md .hljs-comment,
+.caret-md .hljs-quote {
+  font-style: italic;
+}
+.caret-md .hljs-title,
+.caret-md .hljs-section,
+.caret-md .hljs-selector-pseudo {
+  color: var(--caret-syn-title, #d2a8ff);
+}
+.caret-md .hljs-built_in,
+.caret-md .hljs-type,
+.caret-md .hljs-variable.language_,
+.caret-md .hljs-title.class_ {
+  color: var(--caret-syn-builtin, #ffa657);
+}
+.caret-md .hljs-name,
+.caret-md .hljs-tag,
+.caret-md .hljs-addition {
+  color: var(--caret-syn-tag, #7ee787);
+}
+.caret-md .hljs-deletion {
+  color: var(--caret-syn-deleted, #ffa198);
+}
+.caret-md .hljs-strong {
+  font-weight: 700;
+}
+.caret-md .hljs-emphasis {
+  font-style: italic;
+}

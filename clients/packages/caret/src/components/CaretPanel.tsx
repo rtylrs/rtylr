@@ -453,6 +453,66 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     ],
   );
 
+  // Optimistic edit of one chat in every cached list; returns an undo.
+  const patchChat = useCallback(
+    (id: string, patch: Partial<CaretChatSummary>): (() => void) => {
+      const queryKey = ["caret", "sessions", userId] as const;
+      const previousLists = queryClient.getQueriesData<CaretChatSummary[]>({
+        queryKey,
+      });
+      queryClient.setQueriesData<CaretChatSummary[]>({ queryKey }, (old) =>
+        old?.map((chat) => (chat.id === id ? { ...chat, ...patch } : chat)),
+      );
+      return () => {
+        for (const [key, list] of previousLists)
+          queryClient.setQueryData(key, list);
+      };
+    },
+    [queryClient, userId],
+  );
+
+  // Throws when the server refuses, so the rename dialog can say so.
+  const renameChat = useCallback(
+    async (id: string, title: string): Promise<void> => {
+      const undo = patchChat(id, { title });
+      try {
+        await createMemoryClient(apiBaseUrl).renameChat({
+          sessionId: id,
+          title,
+        });
+      } catch (err) {
+        undo();
+        throw err;
+      }
+      const openTab = useCaretStore
+        .getState()
+        .tabs.find((tab) => tab.sessionId === id);
+      if (openTab) caret.setTabTitle(title, openTab.id);
+      void queryClient.invalidateQueries({
+        queryKey: ["caret", "sessions", userId],
+      });
+    },
+    [apiBaseUrl, caret, patchChat, queryClient, userId],
+  );
+
+  const togglePinChat = useCallback(
+    (id: string): void => {
+      const chat = sessions.find((candidate) => candidate.id === id);
+      if (!chat) return;
+      const pinned = !chat.pinned;
+      const undo = patchChat(id, { pinned });
+      void createMemoryClient(apiBaseUrl)
+        .pinChat({ sessionId: id, pinned })
+        .then(() =>
+          queryClient.invalidateQueries({
+            queryKey: ["caret", "sessions", userId],
+          }),
+        )
+        .catch(undo);
+    },
+    [apiBaseUrl, patchChat, queryClient, sessions, userId],
+  );
+
   const [introPlaying, setIntroPlaying] = useState(false);
   useEffect(() => {
     if (!isOpen) return;
@@ -792,6 +852,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           onSelect={selectChat}
           onNew={newChat}
           onDelete={deleteChat}
+          onRename={renameChat}
+          onTogglePin={togglePinChat}
         />
       )}
 
@@ -877,6 +939,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               onSelect={selectChat}
               onNew={newChat}
               onDelete={deleteChat}
+              onRename={renameChat}
+              onTogglePin={togglePinChat}
               showNewChat={false}
             />
           </div>
