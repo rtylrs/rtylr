@@ -684,7 +684,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
       }
     : undefined;
   const composerWrapStyle: React.CSSProperties | undefined = isBig
-    ? { ...centerColStyle, paddingBottom: 20 }
+    ? { ...centerColStyle, paddingBottom: 30 }
     : undefined;
 
   const mainColumn = (

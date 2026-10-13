@@ -56,6 +56,9 @@ function voiceErrorMessage(error: string): string {
   }
 }
 
+const LARGE_COMPOSER_SHADOW =
+  "0 1px 2px rgba(15, 15, 20, 0.05), 0 6px 16px -4px rgba(15, 15, 20, 0.10), 0 12px 24px -10px rgba(15, 15, 20, 0.14)";
+
 export const Composer: React.FC<ComposerProps> = ({
   isStreaming,
   onSubmit,
@@ -97,7 +100,7 @@ export const Composer: React.FC<ComposerProps> = ({
       );
       if (accepted.length !== files.length)
         setAttachmentError(
-          "Choose JPEG, PNG or WebP images, PDFs, or text files such as CSV.",
+          "Choose JPEG, PNG or WebP images, PDF, Word, Excel or PowerPoint files, or text files such as CSV.",
         );
       else setAttachmentError(null);
       if (accepted.length === 0) return;
@@ -202,7 +205,7 @@ export const Composer: React.FC<ComposerProps> = ({
 
   return (
     <div
-      className="caret-composer"
+      className={isLarge ? "caret-composer is-large" : "caret-composer"}
       onDragEnter={(event) => {
         event.preventDefault();
         setDragging(true);
@@ -221,12 +224,12 @@ export const Composer: React.FC<ComposerProps> = ({
         margin: isLarge ? "0" : "10px 10px 11px",
         background: isLarge ? caretTokens.surface : caretTokens.surfaceRaised,
         border: `1px solid ${caretTokens.border}`,
-        borderRadius: isLarge ? 22 : caretRadius.xl,
-        padding: isLarge ? "8px 10px 8px 8px" : "8px 8px 8px 12px",
+        borderRadius: isLarge ? 28 : caretRadius.xl,
+        padding: isLarge ? "14px 14px 12px 20px" : "8px 8px 8px 12px",
         display: "flex",
         flexDirection: "column",
-        gap: 6,
-        boxShadow: "none",
+        gap: isLarge ? 8 : 6,
+        boxShadow: isLarge ? LARGE_COMPOSER_SHADOW : "none",
         outline: dragging ? `2px solid ${caretTokens.accent}` : undefined,
       }}
     >
@@ -445,9 +448,10 @@ export const Composer: React.FC<ComposerProps> = ({
         className="caret-composer-row"
         style={{
           display: "flex",
-          alignItems: isLarge ? "center" : "flex-end",
+          flexDirection: isLarge ? "column" : "row",
+          alignItems: isLarge ? "stretch" : "flex-end",
           minWidth: 0,
-          gap: isLarge ? 8 : 5,
+          gap: isLarge ? 6 : 5,
         }}
       >
         <textarea
@@ -481,10 +485,10 @@ export const Composer: React.FC<ComposerProps> = ({
             color: caretTokens.text,
             fontSize: isLarge ? 16 : 14,
             lineHeight: isLarge ? "24px" : "20px",
-            padding: isLarge ? "10px 3px" : "6px 3px",
+            padding: isLarge ? "4px 0" : "6px 3px",
             fontFamily: "inherit",
-            height: isLarge ? 44 : 32,
-            minHeight: isLarge ? 44 : 32,
+            height: isLarge ? 56 : 32,
+            minHeight: isLarge ? 56 : 32,
             maxHeight: isLarge ? 200 : 140,
             overflowY: "auto",
             boxSizing: "border-box",
@@ -499,15 +503,24 @@ export const Composer: React.FC<ComposerProps> = ({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: isLarge ? 5 : 3,
+            gap: isLarge ? 6 : 3,
             flexShrink: 0,
+            width: isLarge ? "100%" : undefined,
           }}
         >
           <ApprovalPicker />
-          <AttachButton
-            onFiles={addAttachments}
-            accept={`${IMAGE_ACCEPT},${TEXT_FILE_ACCEPT}`}
-          />
+          <span
+            style={{
+              display: "flex",
+              order: isLarge ? -1 : 0,
+              marginInlineEnd: isLarge ? "auto" : 0,
+            }}
+          >
+            <AttachButton
+              onFiles={addAttachments}
+              accept={`${IMAGE_ACCEPT},${TEXT_FILE_ACCEPT}`}
+            />
+          </span>
           {voiceEnabled && (
             <MicButton
               onTranscript={appendTranscript}
