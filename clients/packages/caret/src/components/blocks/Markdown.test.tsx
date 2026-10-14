@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import Markdown from './Markdown';
 
 describe('Markdown tables', () => {
@@ -60,5 +60,25 @@ describe('Markdown code highlighting', () => {
     await waitFor(() => expect(document.querySelector('.hljs-tag')).toBeTruthy());
     expect(document.querySelector('pre img')).toBeNull();
     expect(document.querySelector('pre code')?.textContent).toContain('<img src=x onerror=alert(1)>');
+  });
+});
+
+describe('Markdown code block copy button', () => {
+  it('copies the full text of a fenced block, even once highlighted', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    const code = 'def total(xs):\n    return sum(xs)  # sum';
+    render(<Markdown source={'```python\n' + code + '\n```'} />);
+
+    await waitFor(() => expect(document.querySelector('.hljs-keyword')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Copy code' }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(code));
+    expect(await screen.findByRole('button', { name: 'Copied' })).toBeTruthy();
+  });
+
+  it('does not add a copy button to inline code', () => {
+    render(<Markdown source="Call `summarize` first." />);
+    expect(screen.queryByRole('button', { name: 'Copy code' })).toBeNull();
   });
 });

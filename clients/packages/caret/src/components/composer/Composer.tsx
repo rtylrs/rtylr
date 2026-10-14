@@ -56,8 +56,8 @@ function voiceErrorMessage(error: string): string {
   }
 }
 
-const LARGE_COMPOSER_SHADOW =
-  "0 1px 2px rgba(15, 15, 20, 0.05), 0 6px 16px -4px rgba(15, 15, 20, 0.10), 0 12px 24px -10px rgba(15, 15, 20, 0.14)";
+// Keep in sync with `.caret-composer.is-large:focus-within` in index.css.
+const LARGE_COMPOSER_SHADOW = "0 1px 2px rgba(15, 15, 20, 0.05)";
 
 export const Composer: React.FC<ComposerProps> = ({
   isStreaming,
