@@ -13,7 +13,6 @@ const (
 	CRMAppURL      = "https://crm.rtylr.com"
 	FinanceAppURL  = "https://finance.rtylr.com"
 	FlowAppURL     = HubAppURL + "/flow"
-	MenuAppURL     = "https://menu.rtylr.com"
 	InsightsAppURL = HubAppURL + "/insights"
 	RecruitAppURL  = "https://recruit.rtylr.com"
 	DefaultAPIURL  = "https://api.voxire.com"

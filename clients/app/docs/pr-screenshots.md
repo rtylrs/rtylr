@@ -59,13 +59,13 @@ a new one. Four HR specs each carry their own copy; do not make it five.
 `localhost:5176/?redirect=<app>` **before making a single API request**, so the
 screen under test never renders:
 
-| Spec                        | Result           |
-| --------------------------- | ---------------- |
-| `hr-staff.spec.ts`          | 7 of 8 failed    |
-| `hr-payslip-search.spec.ts` | 5 of 5 failed    |
-| `dash.spec.ts`              | 1 of 2 failed    |
-| `flow-guards.spec.ts`       | 1 of 4 failed    |
-| `menu-public.spec.ts`       | passed (no auth) |
+| Spec                        | Result                                |
+| --------------------------- | ------------------------------------- |
+| `hr-staff.spec.ts`          | 7 of 8 failed                         |
+| `hr-payslip-search.spec.ts` | 5 of 5 failed                         |
+| `dash.spec.ts`              | 1 of 2 failed                         |
+| `flow-guards.spec.ts`       | 1 of 4 failed                         |
+| `menu-public.spec.ts`       | passed (public Portal route, no auth) |
 
 That is why the reference capture lived on the **public** menu at first.
 

@@ -34,9 +34,14 @@ vi.mock('./modules/flow/features/projects/ProjectBoard', () => ({
   default: () => <h1>Project {useParams({ strict: false }).projectId}</h1>,
 }));
 vi.mock('./modules/flow/features/Start', () => ({ default: () => <h1>Create in Flow</h1> }));
+vi.mock('./features/menu/Menu.tsx', () => ({ default: () => <h1>Admin menu</h1> }));
+vi.mock('./modules/public-menu/screens/Public/SlugLanding/SlugLanding', () => ({
+  default: () => <h1>Slug landing</h1>,
+}));
 const locales = path.resolve(import.meta.dirname, 'locales');
+const publicMenuLocales = path.resolve(import.meta.dirname, 'modules/public-menu/locales');
 beforeEach(async () => {
-  await initTestI18nFrom(locales);
+  await initTestI18nFrom(locales, 'en', [publicMenuLocales]);
   useSettingsModalStore.setState({ path: null });
   useUserStore.setState({
     user: { effectiveAccess: createEffectiveAccess('flow', { isOwner: true }) },
@@ -111,5 +116,20 @@ describe('Portal native app routes', () => {
     const router = await open('/webhooks');
     await vi.waitFor(() => expect(router.state.location.pathname).toBe('/automations/webhooks'));
     expect(useSettingsModalStore.getState().path).toBeNull();
+  });
+});
+
+describe('Public menu routes', () => {
+  it('serves the slug landing to an unauthenticated visitor without redirecting', async () => {
+    const router = await open('/some-business/menu');
+    expect(await screen.findByRole('heading', { name: 'Slug landing' })).toBeVisible();
+    // No bounce to the auth app: the location is left as visited.
+    expect(router.state.location.pathname).toBe('/some-business/menu');
+  });
+
+  it('leaves the authenticated admin /menu route untouched', async () => {
+    const router = await open('/menu');
+    expect(await screen.findByRole('heading', { name: 'Admin menu' })).toBeVisible();
+    expect(router.state.location.pathname).toBe('/menu');
   });
 });

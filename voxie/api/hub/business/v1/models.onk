@@ -18,7 +18,7 @@ message Business {
   plan: string
   /// When the record was created.
   created_at: string
-  /// URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+  /// URL-safe slug. Powers public surfaces like portal.rtylr.com/<business-slug>/menu. Reserved words are rejected.
   slug: string
 }
 

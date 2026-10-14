@@ -25,7 +25,9 @@ const APPS = [
   { name: 'hr', url: process.env.REAL_HR_URL ?? 'http://localhost:5180' },
   { name: 'erp', url: process.env.REAL_ERP_URL ?? 'http://localhost:5197/erp' },
   { name: 'finance', url: process.env.REAL_FINANCE_URL ?? 'http://localhost:5182' },
-  { name: 'menu', url: process.env.REAL_MENU_URL ?? 'http://localhost:5174' },
+  // The public menu is no longer a standalone app shell: it is mounted,
+  // unauthenticated, on the Portal root route. Its routes are covered by
+  // menu-public.spec.ts, which needs no real session.
   { name: 'recruit', url: process.env.REAL_RECRUIT_URL ?? 'http://localhost:5184' },
   {
     name: 'insights',

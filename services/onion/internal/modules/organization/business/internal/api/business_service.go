@@ -146,9 +146,15 @@ func (a *BusinessAPI) SetSlug(ctx context.Context, req *hubbusinessv1.SetSlugReq
 	}
 
 	slug := strings.ToLower(strings.TrimSpace(req.GetSlug()))
+	if domain.ReservedBusinessSlug(slug) {
+		return nil, onekiterrors.New(http.StatusConflict, "This slug is reserved.")
+	}
 	if err := a.Service.UpdateSlug(ctx, businessID, device.User.UserID, slug); err != nil {
 		if errors.Is(err, application.ErrBusinessNotOwned) {
 			return nil, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrSlugReserved) {
+			return nil, onekiterrors.New(http.StatusConflict, "This slug is reserved.")
 		}
 		if strings.Contains(err.Error(), "Duplicate") {
 			return nil, onekiterrors.New(http.StatusConflict, "That slug is taken.")
@@ -337,11 +343,16 @@ func (a *BusinessAPI) OnboardBusiness(ctx context.Context, req *hubbusinessv1.On
 }
 
 func (a *BusinessAPI) CheckBusinessNameExists(ctx context.Context, req *hubbusinessv1.CheckBusinessNameExistsRequest) (*hubbusinessv1.CheckBusinessNameExistsResponse, error) {
+	name := strings.TrimSpace(req.GetName())
+	if domain.ReservedBusinessSlug(name) {
+		return &hubbusinessv1.CheckBusinessNameExistsResponse{Exists: true}, nil
+	}
+
 	if a.UserService == nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Business name check is not configured")
 	}
 
-	exists, err := a.UserService.BusinessNameExists(ctx, req.GetName())
+	exists, err := a.UserService.BusinessNameExists(ctx, name)
 	if err != nil {
 		logger.Ctx(ctx).Error("business name exists check failed", logger.Error(err))
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to check business name")

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/organization/business/internal/application"
+	"github.com/voxire/onion/internal/modules/organization/business/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -32,9 +33,15 @@ func (h *SetSlugHandler) Serve(ctx context.Context, req *SetSlugRequest) (SetSlu
 		return SetSlugResponse{}, onekiterrors.New(http.StatusBadRequest, "No business attached to this user")
 	}
 	slug := strings.ToLower(strings.TrimSpace(req.Slug))
+	if domain.ReservedBusinessSlug(slug) {
+		return SetSlugResponse{}, onekiterrors.New(http.StatusConflict, "This slug is reserved.")
+	}
 	if err := h.Service.UpdateSlug(ctx, businessID, device.User.UserID, slug); err != nil {
 		if errors.Is(err, application.ErrBusinessNotOwned) {
 			return SetSlugResponse{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, application.ErrSlugReserved) {
+			return SetSlugResponse{}, onekiterrors.New(http.StatusConflict, "This slug is reserved.")
 		}
 		if strings.Contains(err.Error(), "Duplicate") {
 			return SetSlugResponse{}, onekiterrors.New(http.StatusConflict, "That slug is taken.")

@@ -42,6 +42,7 @@
     "senderEmail": "E-mail d'expédition",
     "publicSlug": "Identifiant public",
     "slugPlaceholder": "votre-entreprise",
+    "slugReserved": "Cet identifiant est réservé. Choisissez-en un autre.",
     "addressTitle": "Adresse de l'entreprise",
     "addressDescription": "Votre emplacement physique",
     "country": "Pays",

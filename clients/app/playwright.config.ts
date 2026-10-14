@@ -88,20 +88,18 @@ export default defineConfig({
     {
       command: 'pnpm dev --port 5197',
       url: 'http://localhost:5197',
-      env: { VITE_API_URL: 'http://localhost:9999/', VITE_API_BASE_URL: 'http://localhost:9999/' },
+      env: {
+        VITE_API_URL: 'http://localhost:9999/',
+        VITE_API_BASE_URL: 'http://localhost:9999/',
+        // The public menu's cart and checkout are opt-in; the ordering specs need them on.
+        VITE_ONLINE_ORDERING_ENABLED: 'true',
+      },
       reuseExistingServer: false,
       timeout: 120_000,
     },
     {
       command: 'pnpm dev:auth',
       url: 'http://localhost:5176',
-      env: { VITE_API_URL: 'http://localhost:9999/' },
-      reuseExistingServer: false,
-      timeout: 120_000,
-    },
-    {
-      command: 'pnpm dev:menu',
-      url: 'http://localhost:5174',
       env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: false,
       timeout: 120_000,

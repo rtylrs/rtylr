@@ -2,10 +2,14 @@ import { test, expect } from './fixtures';
 import { captureResponsivePair } from './support/screenshot';
 
 /**
- * Public menu e2e - /b/:businessId hits anonymous OneKit menu endpoints.
+ * Public menu e2e - /b/:businessId/menu hits anonymous OneKit menu endpoints.
+ *
+ * The public menu is no longer a separate build; it is mounted on the Portal's
+ * root route (unauthenticated), so this spec targets the Portal origin and sets
+ * no auth cookie.
  */
 
-const MENU_URL = process.env.MENU_URL ?? 'http://localhost:5174';
+const PORTAL_URL = process.env.PORTAL_URL ?? 'http://localhost:5197';
 
 async function stubPublicMenuAPIs(page: import('@playwright/test').Page): Promise<void> {
   await page.route('**/hub/business/v1/businesses/public*', (route) =>
@@ -45,7 +49,7 @@ test.describe('Public menu (POS-backed)', () => {
   });
 
   test('numeric business id renders menu items', async ({ page }) => {
-    await page.goto(`${MENU_URL}/b/42`);
+    await page.goto(`${PORTAL_URL}/b/42/menu`);
     // Stub data includes Cold Brew + Croissant - at least one should
     // appear. We don't assert both because menu layout components
     // rotate display order across redesigns.
@@ -78,7 +82,7 @@ test.describe('Public menu screenshots @screenshots', () => {
   });
 
   test('captures the public menu at desktop and at the 390px floor', async ({ page }) => {
-    await page.goto(`${MENU_URL}/b/42`);
+    await page.goto(`${PORTAL_URL}/b/42/menu`);
     await page.waitForTimeout(1500);
 
     const shots = await captureResponsivePair(page, 'menu-public');

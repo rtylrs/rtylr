@@ -39,11 +39,23 @@ rejected. The existing `.rtylr.com` auth cookie spans SSO and Portal.
 
 The migrated business modules render inside Portal. Finance, HR and Recruit administration use `/finance`, `/hr` and `/recruit`. POS is a separate web and native app at `clients/pos`, launched at `pos.rtylr.com`. Home includes Menu management. Each module registers its page navigation and settings beneath `/settings`.
 
-`clients/app` owns the Portal and public web entrypoints. `entrypoints/auth`, `entrypoints/menu` and `entrypoints/recruit` preserve SSO and public-site URLs as separate builds without separate workspace packages. POS remains at `clients/pos`, and MCP is at `clients/mcp`.
+`clients/app` owns the Portal and public web entrypoints. `entrypoints/auth` and `entrypoints/recruit` preserve SSO and public-careers URLs as separate builds without separate workspace packages. The public customer menu is no longer a separate build: it is mounted on the Portal's root route (see below). POS remains at `clients/pos`, and MCP is at `clients/mcp`.
 
 POS owns its terminal shell, settings, location selection, employee PIN authentication, cart and offline queues. The POS app-rail icon, Portal Home and the command launcher link to the standalone POS origin when the member has licensed POS access. Old Portal `/pos` bookmarks redirect to that origin; POS settings remain in POS. Menu and Recruit have no app-rail icons. Finance browser preferences are also partitioned by business; they are local preferences rather than server-backed business configuration.
 
 Query keys are prefixed by app. Portal refreshes the account authorization snapshot before rendering, and business selection reloads the workspace to clear old query state. Backend handlers remain authoritative for permissions.
+
+## Public customer menu
+
+The public, unauthenticated customer menu lives in `src/modules/public-menu`. It is registered on the Portal's `rootRoute`, so it bypasses `BusinessRoute` and `PortalShell` and needs no auth cookie. Its URL shapes are:
+
+- `/$slug/menu` - location picker
+- `/$slug/menu/$location` - a single location's menu
+- `/menu/checkout` - checkout
+- `/menu/order-status/$id` - order status
+- `/b/$businessId/menu` - POS-backed menu addressed by numeric business id
+
+Business slugs equal to a Portal route name would be shadowed by that route, so they are reserved: the backend business module rejects them and `clients/packages/config/src/publicMenu.ts` mirrors the list for the settings form. `/menu` (a single segment) is the authenticated admin editor; `/<slug>/menu` is the public page.
 
 ## Release order
 
@@ -52,7 +64,7 @@ Query keys are prefixed by app. Portal refreshes the account authorization snaps
 3. Enable the Dash-to-Portal and Insights-to-Portal edge rules, then retire their
    standalone deployment manifests. Insights deep links map beneath `/insights`.
    Flow moves with the same order: deploy Portal first, redirect Flow links beneath
-   `/flow`, then retire its Pages project and deployment manifest. CRM, ERP, Finance and HR follow the same sequence with their route prefixes. POS keeps its own Pages project, host and deployment manifest. Recruit keeps its public host; old `/admin` links redirect into Portal.
+   `/flow`, then retire its Pages project and deployment manifest. CRM, ERP, Finance and HR follow the same sequence with their route prefixes. POS keeps its own Pages project, host and deployment manifest. The public menu moves with Portal: it renders at `/<slug>/menu`, so retire its standalone Pages project and `menu.rtylr.com` host once the Portal release is verified. Recruit keeps its public host; old `/admin` links redirect into Portal.
 4. Promote Auth and shared-URL consumers, including Onion's generated email links.
 
 Do not activate the Dash redirect before Portal is deployed and reachable.

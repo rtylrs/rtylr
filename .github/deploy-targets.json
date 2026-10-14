@@ -36,19 +36,6 @@
     "node_version": "22"
   },
   {
-    "app": "menu",
-    "type": "pages",
-    "paths": [
-      "clients/app/entrypoints/menu/"
-    ],
-    "project_name": "rtylr-menu",
-    "working_directory": "clients/app",
-    "app_filter": "@rtylr/portal",
-    "build_script": "build:menu",
-    "dist_dir": "dist/menu",
-    "node_version": "22"
-  },
-  {
     "app": "recruit",
     "type": "pages",
     "paths": [

@@ -6,7 +6,6 @@
  *   landing  → rtylr.com
  *   auth     → sso.rtylr.com
  *   dash     → portal.rtylr.com
- *   menu     → menu.rtylr.com
  *   pos      → pos.rtylr.com
  *   api      → api.rtylr.com
  */
@@ -19,7 +18,6 @@ const LOCAL_URLS = {
   landing: 'http://localhost:4200',
   auth: 'http://localhost:5176',
   dash: 'http://localhost:5175',
-  menu: 'http://localhost:5177',
   pos: 'http://localhost:5178',
   api: 'https://api.voxire.com',
   status: 'https://status.rtylr.com',
@@ -29,7 +27,6 @@ const PROD_URLS = {
   landing: 'https://rtylr.com',
   auth: 'https://sso.rtylr.com',
   dash: 'https://portal.rtylr.com',
-  menu: 'https://menu.rtylr.com',
   pos: 'https://pos.rtylr.com',
   api: 'https://api.voxire.com',
   status: 'https://status.rtylr.com',

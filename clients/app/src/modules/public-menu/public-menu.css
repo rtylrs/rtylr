@@ -1,0 +1,49 @@
+/**
+ * Public menu base styles. The menu was its own Vite entrypoint with its own
+ * `globals.css`; the Portal already imports tailwind and the shared theme, so
+ * only the menu-specific rules live here. Nothing targets a bare `html`,
+ * `body`, `#root` or a Portal class, so it cannot restyle the admin app.
+ */
+
+/*
+ * Tokens the moved screens reference as `var(--menu-accent)`, etc. Namespaced
+ * with `--menu-` and unused elsewhere in the Portal.
+ */
+:root {
+  --menu-accent: #03aed2;
+  --menu-accent-text: #ffffff;
+  --menu-bg: #ffffff;
+}
+
+/* The Portal's globals set html/body/#root to overflow:hidden, so the layout
+ * wrapper owns its own scroll container. */
+.public-menu-root {
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--menu-bg, #ffffff);
+  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+}
+
+.public-menu-root *,
+.public-menu-root *::before,
+.public-menu-root *::after {
+  box-sizing: border-box;
+}
+
+.public-menu-root::-webkit-scrollbar,
+.public-menu-root ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.public-menu-root::-webkit-scrollbar-track,
+.public-menu-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.public-menu-root::-webkit-scrollbar-thumb,
+.public-menu-root ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}

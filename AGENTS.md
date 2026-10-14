@@ -9,7 +9,7 @@ This is `rtylrs/rtylr`, a pnpm monorepo. Inspect the current checkout, branch, s
 | Path               | Responsibility                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- |
 | `clients/`         | pnpm workspace root; every JavaScript/TypeScript package lives under it                      |
-| `clients/app/` | Single Portal package; business modules in `src/modules`, SSO and public Menu/Recruit entrypoints in `entrypoints/` |
+| `clients/app/` | Single Portal package; business modules and the public customer menu in `src/modules`, SSO and public Recruit entrypoints in `entrypoints/` |
 | `clients/web/landing/` | Next.js marketing site, public legal pages and localized copy; production uses static export |
 | `clients/pos/`     | POS frontend and native/Tauri code; web and native checks are separate                       |
 | `clients/web/docs/` | Product documentation site                                                                  |

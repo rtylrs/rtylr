@@ -97,6 +97,10 @@ func (s *Service) LookupBySlug(ctx context.Context, slug string) (domain.SlugLoo
 // The owner comes from the authenticated caller, so a business the caller does
 // not own is reported as not owned instead of being renamed.
 func (s *Service) UpdateSlug(ctx context.Context, businessID, ownerUserID int64, slug string) error {
+	slug = strings.ToLower(strings.TrimSpace(slug))
+	if domain.ReservedBusinessSlug(slug) {
+		return ErrSlugReserved
+	}
 	updated, err := s.repo.UpdateSlug(ctx, businessID, ownerUserID, slug)
 	if err != nil {
 		return err
@@ -120,6 +124,7 @@ func (s *Service) ListUserBusinesses(ctx context.Context, userID int64) ([]domai
 }
 
 var (
+	ErrSlugReserved             = domain.ErrSlugReserved
 	ErrSubBusinessNotOwned      = errors.New("parent business not found or not owned by user")
 	ErrSubBusinessNameEmpty     = errors.New("business name is required")
 	ErrBusinessNotOwned         = errors.New("business not found or not owned by user")

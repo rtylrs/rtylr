@@ -42,6 +42,7 @@
     "senderEmail": "Sender email",
     "publicSlug": "Public slug",
     "slugPlaceholder": "your-business",
+    "slugReserved": "This slug is reserved. Choose another one.",
     "addressTitle": "Business address",
     "addressDescription": "Your physical business location",
     "country": "Country",
