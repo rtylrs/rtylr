@@ -9,15 +9,21 @@ import { saveAs } from 'file-saver';
 import { useUserStore } from '../../shared/stores/userStore';
 import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 
-import { APP_URLS } from '@voxire/config';
+import { PORTAL_URL, buildPublicMenuUrl, buildPublicMenuUrlById } from '@voxire/config';
 
 function QrCode() {
   const { t } = useTranslation();
   const { user } = useUserStore();
-  const businessIdentifier =
-    user?.businessSlug || user?.business_slug || user?.businessId || user?.id || '';
-  const menuBaseUrl = (APP_URLS.menu ?? 'https://menu.rtylr.com').replace(/\/$/, '');
-  const initialUrl = businessIdentifier ? `${menuBaseUrl}/${businessIdentifier}` : menuBaseUrl;
+  const businessSlug = user?.businessSlug || user?.business_slug || '';
+  const businessId = user?.businessId ?? user?.id;
+  // A slug gives the canonical /<slug>/menu URL; without one the business is
+  // addressed by id in the POS-style /b/<id>/menu form.
+  const menuUrl = businessSlug
+    ? buildPublicMenuUrl(businessSlug)
+    : businessId != null
+      ? buildPublicMenuUrlById(businessId)
+      : PORTAL_URL;
+  const initialUrl = menuUrl;
 
   const [qrOptions, setQrOptions] = useState<QrOptions>({
     url: initialUrl,
@@ -35,13 +41,11 @@ function QrCode() {
   const qrRef = useRef(null);
 
   useEffect(() => {
-    if (businessIdentifier) {
-      setQrOptions((current) => ({
-        ...current,
-        url: `${menuBaseUrl}/${businessIdentifier}`,
-      }));
-    }
-  }, [businessIdentifier, menuBaseUrl]);
+    setQrOptions((current) => ({
+      ...current,
+      url: menuUrl,
+    }));
+  }, [menuUrl]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;

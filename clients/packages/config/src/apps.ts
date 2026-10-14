@@ -18,7 +18,9 @@ export const APP_URLS: Record<AppId, string> & {
 } = {
   dash: PORTAL_URL,
   auth: IS_LOCAL ? 'http://localhost:5176' : 'https://sso.rtylr.com',
-  menu: IS_LOCAL ? 'http://localhost:5174' : 'https://menu.rtylr.com',
+  // The public menu is served from the Portal origin (portal.rtylr.com/<slug>/menu),
+  // not a separate app host. Kept as a key because AppId still includes 'menu'.
+  menu: PORTAL_URL,
   pos: IS_LOCAL ? 'http://localhost:5178' : 'https://pos.rtylr.com',
   erp: `${PORTAL_URL}/erp`,
   hr: `${PORTAL_URL}/hr`,
@@ -38,7 +40,7 @@ export const RECRUIT_PUBLIC_URL = IS_LOCAL ? 'http://localhost:5184' : 'https://
 export const APP_CONFIG: Record<AppId, { name: string; devPort: number }> = {
   dash: { name: 'Home', devPort: 5175 },
   auth: { name: 'Auth', devPort: 5176 },
-  menu: { name: 'Menu', devPort: 5174 },
+  menu: { name: 'Menu', devPort: 5175 },
   pos: { name: 'POS', devPort: 5178 },
   erp: { name: 'ERP', devPort: 5175 },
   hr: { name: 'HR', devPort: 5175 },

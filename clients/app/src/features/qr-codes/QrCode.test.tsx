@@ -44,7 +44,10 @@ const html2canvasMock = vi.hoisted(() => vi.fn());
 vi.mock('html2canvas', () => ({ default: html2canvasMock }));
 
 import { toast } from 'sonner';
+import { PORTAL_URL } from '@voxire/config';
 import QrCode from './QrCode';
+
+const menuOrigin = PORTAL_URL.replace(/\/+$/, '');
 
 const mainQrProps = (): Record<string, unknown> | undefined =>
   qrState.renders.filter((props) => props.size === 250).at(-1);
@@ -86,5 +89,18 @@ describe('QrCode generator', () => {
 
     await waitFor(() => expect(saveAsMock).toHaveBeenCalledWith(expect.any(Blob), 'qr-code.png'));
     expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('encodes the QR payload as the Portal slug URL when a slug exists', () => {
+    render(<QrCode />);
+
+    expect(mainQrProps()?.value).toBe(`${menuOrigin}/acme/menu`);
+  });
+
+  it('falls back to the POS-style id URL when only a numeric id exists', () => {
+    userState.user = { businessId: 1 };
+    render(<QrCode />);
+
+    expect(mainQrProps()?.value).toBe(`${menuOrigin}/b/1/menu`);
   });
 });

@@ -16,10 +16,9 @@ One package, `@rtylr/portal`, owns the browser applications:
 | -------------- | ------------------ | ---- | -------------- |
 | Portal         | `pnpm dev`         | 5175 | `dist/portal`  |
 | SSO            | `pnpm dev:auth`    | 5176 | `dist/auth`    |
-| Public Menu    | `pnpm dev:menu`    | 5174 | `dist/menu`    |
 | Public Recruit | `pnpm dev:recruit` | 5184 | `dist/recruit` |
 
-Portal contains Home, Insights, Flow, CRM, ERP, Finance, HR, Recruit administration, Caret and Automations. Each business app uses a route prefix and shares authentication, business selection, theme, launcher and `/settings`. Menu management remains in Home. SSO and public Menu/careers retain their public hosts and separate builds. POS web and native remain in `clients/pos`; MCP is in `clients/mcp`.
+Portal contains Home, Insights, Flow, CRM, ERP, Finance, HR, Recruit administration, Caret and Automations. Each business app uses a route prefix and shares authentication, business selection, theme, launcher and `/settings`. Menu management remains in Home. The public customer menu is now served by the Portal at `/<slug>/menu` (and `/b/<id>/menu`), unauthenticated. SSO and public careers retain their public hosts and separate builds. POS web and native remain in `clients/pos`; MCP is in `clients/mcp`.
 
 Automations uses `/automations` and `/automations/new?id=…`, with legacy CRM links redirected. It retains the CRM automation API and `crm:automations:manage` permission. New workflows configure order-triggered emails and start paused; other saved definitions remain editable with their configuration preserved.
 
@@ -48,7 +47,7 @@ Automations uses `/automations` and `/automations/new?id=…`, with legacy CRM l
 - `src/features/`: Home and shared account/business administration.
 - `src/modules/`: business app features, routes, navigation and locale resources.
 - `src/shared/`: cross-module stores, hooks and service helpers.
-- `entrypoints/`: SSO and public Menu/Recruit bootstrap and build configuration.
+- `entrypoints/`: SSO and public Recruit bootstrap and build configuration.
 - `e2e/`, `test/`, `scripts/`: browser coverage, shared fixtures and repository gates.
 
 ## API Contracts (voxie)

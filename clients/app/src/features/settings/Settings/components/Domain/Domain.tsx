@@ -18,6 +18,7 @@ import {
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { useConfigStore } from '../../../../../shared/stores/configStore';
+import { buildPublicMenuUrl } from '@voxire/config';
 
 import {
   useCustomDomain,
@@ -39,7 +40,9 @@ const Domain: React.FC = () => {
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '') ?? 'your-business';
   const slug = websiteData?.slug || fallbackSlug;
-  const menuUrl = `menu.rtylr.com/${slug}`;
+  const publicMenuUrl = buildPublicMenuUrl(slug);
+  // The field shows the host-and-path form, without the scheme, as before.
+  const menuUrl = publicMenuUrl.replace(/^https?:\/\//, '');
 
   const configuredDomain = registeredDomain || '';
   const isConfigured = Boolean(configuredDomain && DOMAIN_REGEX.test(configuredDomain));
@@ -55,12 +58,13 @@ const Domain: React.FC = () => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(menuUrl);
+      // Copy the full URL so it can be pasted straight into a browser.
+      await navigator.clipboard.writeText(publicMenuUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       const el = document.createElement('input');
-      el.value = menuUrl;
+      el.value = publicMenuUrl;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
@@ -213,6 +217,8 @@ const Domain: React.FC = () => {
                           </tr>
                         </thead>
                         <tbody>
+                          {/* TODO(menu-move): custom domains pointed at the retired menu host no
+                              longer resolve to the public menu; this DNS instruction is stale. */}
                           <tr style={{ background: 'var(--dash-card)' }}>
                             <td
                               className="px-3 py-2.5 font-mono"

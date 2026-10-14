@@ -1,4 +1,5 @@
 import { createRecruitRoutes } from './modules/recruit/routes';
+import { createPublicMenuRoutes } from './modules/public-menu/routes';
 import React, { Suspense } from 'react';
 import { z } from 'zod';
 import {
@@ -358,6 +359,7 @@ const routeTree = rootRoute.addChildren([
   standalonePosRoute,
   standalonePosDeepLinkRoute,
   standalonePosSettingsRoute,
+  ...createPublicMenuRoutes(rootRoute),
   notFoundRoute,
 ]);
 

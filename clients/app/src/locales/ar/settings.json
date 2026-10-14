@@ -42,6 +42,7 @@
     "senderEmail": "بريد المُرسل",
     "publicSlug": "المعرّف العام",
     "slugPlaceholder": "your-business",
+    "slugReserved": "هذا المعرّف محجوز. اختر معرّفًا آخر.",
     "addressTitle": "عنوان النشاط",
     "addressDescription": "الموقع الفعلي لنشاطك",
     "country": "البلد",

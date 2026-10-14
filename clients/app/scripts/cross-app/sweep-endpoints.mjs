@@ -5,8 +5,8 @@
 // Idioms swept (see docs/cross-app/01-inventory.md):
 //   safeFetch  safe.get/post/put/patch/delete(...) on the SafeApi instance
 //   onekit     createOneKitClient(SomeServiceClient, app) generated methods
-//   axios      raw axios instances (apps/menu, and any api.get style caller
-//              whose client file creates an axios instance directly)
+//   axios      raw axios instances (the public menu module, and any api.get style
+//              caller whose client file creates an axios instance directly)
 //
 // Test files (*.test.ts, *.test.tsx) are excluded: mocks are not requests.
 

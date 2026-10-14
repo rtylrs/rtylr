@@ -29,8 +29,6 @@ var templateFuncs = template.FuncMap{
 			return config.FinanceAppURL
 		case "flow":
 			return config.FlowAppURL
-		case "menu":
-			return config.MenuAppURL
 		case "insights":
 			return config.InsightsAppURL
 		default:

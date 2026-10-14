@@ -74,7 +74,7 @@ sharing a database does not automatically keep every UI synchronized.
 
 ## Standalone POS and Caret follow-up
 
-POS remains a separate web/native app at `clients/pos`, launched from the POS app-rail icon, Home or the command launcher at `pos.rtylr.com`. Portal no longer imports the POS runtime or exposes POS settings. Legacy `/pos` bookmarks redirect to POS. Menu and Recruit do not appear in the app rail; their Portal administration remains available.
+POS remains a separate web/native app at `clients/pos`, launched from the POS app-rail icon, Home or the command launcher at `pos.rtylr.com`. Portal no longer imports the POS runtime or exposes POS settings. Legacy `/pos` bookmarks redirect to POS. Menu and Recruit do not appear in the app rail; their Portal administration remains available. The public customer menu is likewise served by Portal now, at `/<slug>/menu` and `/b/<id>/menu`; its standalone host and build are retired.
 
 The local Portal preview proxy was targeting `api.rtylr.com` (Cloudflare 530); switching it to `api.voxire.com` restores its health request. This is a local process configuration correction, not a production deployment.
 

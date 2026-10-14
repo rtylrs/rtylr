@@ -22,6 +22,7 @@ import {
   Button,
 } from '../../../../../shared/components/ui';
 import { cn } from '../../../../../shared/lib/utils';
+import { PORTAL_URL, isReservedBusinessSlug } from '@voxire/config';
 
 const INITIAL_FORM_DATA = {
   contactEmail: '',
@@ -96,8 +97,14 @@ const General: React.FC = () => {
   const isSlugDirty = slug !== initialSlug;
   const hasChanges = isFormDirty || isSlugDirty;
   const isSaving = updateBusiness.isPending || setSlug.isPending;
+  const isSlugReserved = isReservedBusinessSlug(slug);
+  // Portal owns the first path segment of a public menu URL, so a slug that
+  // collides with a Portal route is rejected server-side; mirror that here.
+  const portalHost = PORTAL_URL.replace(/^https?:\/\//, '').replace(/\/+$/, '');
 
   const handleSave = async (): Promise<void> => {
+    if (isSlugReserved) return;
+
     if (isFormDirty) {
       const formResult = await Promise.allSettled([
         updateBusiness.mutateAsync({ data: { ...formData, businessType } }),
@@ -171,17 +178,29 @@ const General: React.FC = () => {
                     className="text-xs whitespace-nowrap"
                     style={{ color: 'var(--dash-text-muted)' }}
                   >
-                    menu.rtylr.com/
+                    {portalHost}/
                   </span>
                   <Input
                     name="slug"
                     value={slug}
+                    aria-invalid={isSlugReserved}
                     placeholder={t('settings.general.slugPlaceholder')}
                     onChange={(e) =>
                       setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
                     }
                   />
+                  <span
+                    className="text-xs whitespace-nowrap"
+                    style={{ color: 'var(--dash-text-muted)' }}
+                  >
+                    /menu
+                  </span>
                 </div>
+                {isSlugReserved && (
+                  <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+                    {t('settings.general.slugReserved')}
+                  </p>
+                )}
                 <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
                   Lowercase letters, numbers, and hyphens. Up to 80 chars.
                 </p>
@@ -268,7 +287,7 @@ const General: React.FC = () => {
                     type="button"
                     className="rounded-full"
                     onClick={() => void handleSave()}
-                    disabled={isSaving || (isSlugDirty && !slug)}
+                    disabled={isSaving || (isSlugDirty && !slug) || isSlugReserved}
                   >
                     {isSaving ? t('common.saving') : t('common.saveChanges')}
                   </Button>
