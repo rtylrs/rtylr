@@ -22,7 +22,7 @@ permissions:
 jobs:
   release:
     name: Cut rtylr release
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     # Only the release itself is serialized; a slow ECS rollout must not hold
     # up the next release, and each target has its own deploy-<app> group.
     concurrency:
