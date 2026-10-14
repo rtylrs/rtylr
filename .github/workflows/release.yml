@@ -2,7 +2,7 @@ name: Release
 
 # One release per push to main: a single rtylr-v* tag whose assets contain only
 # the components that changed since the previous release. The same run then
-# deploys every target that a changed component feeds (.github/deploy-targets.json),
+# deploys every target whose own paths changed (.github/deploy-targets.json),
 # building the new tag through tryrtylr/pipelines. redeploy.yml re-ships an
 # existing tag by hand.
 
@@ -96,10 +96,6 @@ jobs:
           echo "Changed components: $(printf '%s' "$changed" | tr '\n' ' ')"
           echo "$changed" | sed '/^$/d' > components.txt
 
-      - name: Plan deployments
-        id: plan
-        run: .github/scripts/plan-deploys.sh components components.txt
-
       - name: Build release assets
         env:
           PREVIOUS: ${{ steps.version.outputs.previous }}
@@ -153,6 +149,10 @@ jobs:
               files_changed: $files_changed,
               files: ($files | split("\n") | map(select(length > 0)))
             }' > release-assets/release.json
+
+      - name: Plan deployments
+        id: plan
+        run: .github/scripts/plan-deploys.sh files changed-files.txt
 
       - name: Create GitHub release
         env:

@@ -2,7 +2,19 @@
   {
     "app": "portal",
     "type": "pages",
-    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "paths": [
+      "clients/app/",
+      "clients/packages/",
+      "voxie/",
+      "clients/package.json",
+      "clients/pnpm-lock.yaml",
+      "clients/pnpm-workspace.yaml"
+    ],
+    "ignore": [
+      "clients/app/entrypoints/",
+      "clients/app/docs/",
+      "clients/app/e2e/"
+    ],
     "project_name": "rtylr-portal",
     "working_directory": "clients/app",
     "app_filter": "@rtylr/portal",
@@ -13,7 +25,9 @@
   {
     "app": "auth",
     "type": "pages",
-    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "paths": [
+      "clients/app/entrypoints/auth/"
+    ],
     "project_name": "rtylr-auth",
     "working_directory": "clients/app",
     "app_filter": "@rtylr/portal",
@@ -24,7 +38,9 @@
   {
     "app": "menu",
     "type": "pages",
-    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "paths": [
+      "clients/app/entrypoints/menu/"
+    ],
     "project_name": "rtylr-menu",
     "working_directory": "clients/app",
     "app_filter": "@rtylr/portal",
@@ -35,7 +51,9 @@
   {
     "app": "recruit",
     "type": "pages",
-    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "paths": [
+      "clients/app/entrypoints/recruit/"
+    ],
     "project_name": "rtylr-recruit",
     "working_directory": "clients/app",
     "app_filter": "@rtylr/portal",
@@ -46,7 +64,13 @@
   {
     "app": "pos",
     "type": "pages",
-    "triggers": ["pos", "packages", "clients"],
+    "paths": [
+      "clients/pos/",
+      "clients/packages/",
+      "clients/package.json",
+      "clients/pnpm-lock.yaml",
+      "clients/pnpm-workspace.yaml"
+    ],
     "project_name": "rtylr-pos",
     "working_directory": "clients",
     "app_filter": "rtylr-pos",
@@ -57,7 +81,13 @@
   {
     "app": "landing",
     "type": "pages",
-    "triggers": ["landing", "packages", "clients"],
+    "paths": [
+      "clients/web/landing/",
+      "clients/packages/",
+      "clients/package.json",
+      "clients/pnpm-lock.yaml",
+      "clients/pnpm-workspace.yaml"
+    ],
     "project_name": "rtylr-landing",
     "working_directory": "clients/web/landing",
     "app_filter": "",
@@ -68,7 +98,13 @@
   {
     "app": "docs",
     "type": "pages",
-    "triggers": ["docs", "packages", "clients"],
+    "paths": [
+      "clients/web/docs/",
+      "clients/packages/",
+      "clients/package.json",
+      "clients/pnpm-lock.yaml",
+      "clients/pnpm-workspace.yaml"
+    ],
     "project_name": "rtylr-docs",
     "working_directory": "clients/web/docs",
     "app_filter": "",
@@ -79,7 +115,10 @@
   {
     "app": "onion-api",
     "type": "ecs",
-    "triggers": ["onion", "contracts"],
+    "paths": [
+      "services/onion/",
+      "voxie/"
+    ],
     "dockerfile": "services/onion/Dockerfile",
     "image_repository": "voxire/onion",
     "cluster": "voxire-prod",
@@ -91,7 +130,10 @@
   {
     "app": "onion-worker",
     "type": "ecs",
-    "triggers": ["onion", "contracts"],
+    "paths": [
+      "services/onion/",
+      "voxie/"
+    ],
     "dockerfile": "services/onion/Dockerfile.worker",
     "image_repository": "voxire/onion-worker",
     "cluster": "voxire-prod",
@@ -103,7 +145,9 @@
   {
     "app": "searxng",
     "type": "ecs",
-    "triggers": ["searxng"],
+    "paths": [
+      "services/searxng/"
+    ],
     "dockerfile": "services/searxng/Dockerfile",
     "image_repository": "voxire/searxng",
     "cluster": "voxire-prod",

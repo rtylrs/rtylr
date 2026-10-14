@@ -59,17 +59,17 @@ A push to `main` releases and deploys:
 1. `.github/workflows/release.yml` computes the next `rtylr-v*` version,
    attaches only the components that changed (per-component source archives
    plus a `release.json` manifest), and creates the tag and GitHub release.
-2. The same run picks the deploy targets those components feed, using
+2. The same run picks the deploy targets whose own paths changed, using
    `.github/deploy-targets.json`, and `.github/workflows/deploy.yml` builds the
    new tag through `tryrtylr/pipelines` and ships it — Pages apps and ECS
-   services through the same entrypoint. A change that touches no deployable
-   component (CI only, for example) cuts a release and deploys nothing.
+   services through the same entrypoint. A change that touches no target's paths
+   (CI only, for example) cuts a release and deploys nothing.
 3. To re-ship or roll back an existing tag, run `redeploy.yml` with the tag and
    a target name (or `all`).
 
-Each target in `deploy-targets.json` lists the components that trigger it and
-carries `working_directory` (for example `clients/app`) plus `dist_dir`, so one
-entrypoint serves every product. Adding an app is one entry in that file.
+Each target in `deploy-targets.json` lists the path prefixes that trigger it
+(with optional `ignore` prefixes) and carries `working_directory` (for example
+`clients/app`) plus `dist_dir`, so one entrypoint serves every product. Adding an app is one entry in that file.
 
 Deploys do not run database migrations; use `migrate-onion-database.yml`.
 

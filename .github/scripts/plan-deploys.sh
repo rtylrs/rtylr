@@ -4,18 +4,21 @@ set -euo pipefail
 # Picks the deploy targets for a release from .github/deploy-targets.json and
 # writes `pages=<json>` and `ecs=<json>` to $GITHUB_OUTPUT (or stdout).
 #
-#   plan-deploys.sh components <file>   targets triggered by the component names in <file>
+#   plan-deploys.sh files <file>        targets whose `paths` (minus `ignore`) match a changed file listed in <file>
 #   plan-deploys.sh app <name|all>      one named target, or every target
 
 targets="$(dirname "$0")/../deploy-targets.json"
-mode="${1:?usage: plan-deploys.sh components <file> | app <name|all>}"
+mode="${1:?usage: plan-deploys.sh files <file> | app <name|all>}"
 arg="${2:?missing argument}"
 
 case "$mode" in
-  components)
+  files)
     changed="$(jq -R . "$arg" | jq -sc 'map(select(length > 0))')"
-    selected="$(jq -c --argjson changed "$changed" \
-      'map(select(any(.triggers[]; . as $t | $changed | index($t))))' "$targets")"
+    selected="$(jq -c --argjson files "$changed" '
+      map(select(. as $t
+        | any($files[]; . as $f
+            | any($t.paths[]; . as $p | $f | startswith($p))
+              and (any(($t.ignore // [])[]; . as $i | $f | startswith($i)) | not))))' "$targets")"
     ;;
   app)
     if [ "$arg" = all ]; then
@@ -33,5 +36,5 @@ esac
 
 out="${GITHUB_OUTPUT:-/dev/stdout}"
 for type in pages ecs; do
-  echo "$type=$(jq -c --arg type "$type" 'map(select(.type == $type) | del(.triggers))' <<< "$selected")" >> "$out"
+  echo "$type=$(jq -c --arg type "$type" 'map(select(.type == $type) | del(.paths, .ignore))' <<< "$selected")" >> "$out"
 done
