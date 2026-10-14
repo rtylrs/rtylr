@@ -79,8 +79,11 @@ jobs:
       - name: Unit tests
         run: pnpm --filter @rtylr/portal test
 
+  # Pull requests and manual runs only: it is the slowest job, and a push to main
+  # has already passed it on the PR.
   e2e:
     name: End-to-end tests
+    if: github.event_name != 'push'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     defaults:
       run:
