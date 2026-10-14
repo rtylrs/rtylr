@@ -110,6 +110,51 @@
   overflow-x: auto;
   border: 1px solid var(--caret-border, rgba(255, 255, 255, 0.12));
 }
+.caret-md .caret-codeblock-frame {
+  position: relative;
+  margin: 8px 0;
+}
+.caret-md .caret-codeblock-frame > pre.caret-codeblock {
+  margin: 0;
+  /* Room for the copy button so it never covers the first line. */
+  padding-top: 10px;
+  padding-right: 10px;
+}
+.caret-md .caret-codeblock-copy {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid var(--caret-border, rgba(255, 255, 255, 0.12));
+  border-radius: 6px;
+  background: var(--caret-surface, #17181b);
+  color: var(--caret-text-muted, #b2b2ae);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s, background 0.12s;
+}
+.caret-md .caret-codeblock-frame:hover .caret-codeblock-copy,
+.caret-md .caret-codeblock-copy:focus-visible,
+.caret-md .caret-codeblock-frame.is-copied .caret-codeblock-copy {
+  opacity: 1;
+}
+.caret-md .caret-codeblock-copy:hover {
+  color: var(--caret-text, #f2f2ef);
+  background: var(--caret-surface-high, #1e2023);
+}
+/* No hover on touch screens, so keep the button visible there. */
+@media (hover: none) {
+  .caret-md .caret-codeblock-copy {
+    opacity: 1;
+  }
+}
 .caret-md .caret-table-wrap {
   width: 100%;
   overflow-x: auto;
