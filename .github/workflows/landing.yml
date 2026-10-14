@@ -1,7 +1,7 @@
 name: Landing
 
 # Every gate the landing has, run on pushes and pull requests. Releases are
-# cut by .github/workflows/release.yml; tryrtylr/deploy promotes a release tag.
+# cut and deployed by .github/workflows/release.yml.
 on:
   push:
     branches: [main]

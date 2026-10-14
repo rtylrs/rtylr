@@ -19,7 +19,7 @@ This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch,
 | `services/onion/`  | Go backend: modules, platform packages, sqlc, worker                                         |
 | `.github/`         | Release and deployment automation                                                            |
 
-Deployment repositories (`tryrtylr/deploy`, `tryrtylr/infra`, `tryrtylr/pipelines`) are separate. A frontend change does not establish that the backend supports a field, enforces a permission or implements a retention policy.
+Deployment repositories (`tryrtylr/infra`, `tryrtylr/pipelines`) are separate. A frontend change does not establish that the backend supports a field, enforces a permission or implements a retention policy.
 
 ## Scope and implementation
 

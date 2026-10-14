@@ -17,9 +17,8 @@ change a contract and every consumer with it.
 | `voxie/`               | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth.            |
 | `services/onion/`      | The Go backend: modules, platform packages, sqlc, worker.                                                           |
 
-`tryrtylr/deploy`, `tryrtylr/infra` and `tryrtylr/pipelines` stay separate:
-they are the release control plane, the infrastructure, and the reusable
-workflows.
+`tryrtylr/infra` and `tryrtylr/pipelines` stay separate: they are the
+infrastructure and the reusable build-and-deploy workflows.
 
 ## One workspace
 
@@ -55,20 +54,24 @@ The last line wires the committed hooks; git does not track `core.hooksPath`.
 
 ## Releases and deployment
 
-Nothing in this repository deploys itself:
+A push to `main` releases and deploys:
 
-1. A push to `main` cuts one release — `.github/workflows/release.yml` computes
-   the next `rtylr-v*` version, attaches only the components that changed
-   (per-component source archives plus a `release.json` manifest), and creates
-   the tag and GitHub release.
-2. A maintainer promotes one exact release in `tryrtylr/deploy` by editing the
-   app's manifest.
-3. `deploy` dispatches back here; `.github/workflows/deploy-release.yml` builds
-   the promoted tag through `tryrtylr/pipelines` and ships it — Pages apps and
-   ECS services through the same adapter.
+1. `.github/workflows/release.yml` computes the next `rtylr-v*` version,
+   attaches only the components that changed (per-component source archives
+   plus a `release.json` manifest), and creates the tag and GitHub release.
+2. The same run picks the deploy targets those components feed, using
+   `.github/deploy-targets.json`, and `.github/workflows/deploy.yml` builds the
+   new tag through `tryrtylr/pipelines` and ships it — Pages apps and ECS
+   services through the same entrypoint. A change that touches no deployable
+   component (CI only, for example) cuts a release and deploys nothing.
+3. To re-ship or roll back an existing tag, run `redeploy.yml` with the tag and
+   a target name (or `all`).
 
-Manifests carry `working_directory` (for example `clients/app`) plus
-`dist_dir`, so one adapter serves every product.
+Each target in `deploy-targets.json` lists the components that trigger it and
+carries `working_directory` (for example `clients/app`) plus `dist_dir`, so one
+entrypoint serves every product. Adding an app is one entry in that file.
+
+Deploys do not run database migrations; use `migrate-onion-database.yml`.
 
 Other workflows:
 

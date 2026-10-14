@@ -2,7 +2,7 @@ name: Onion images
 
 # Builds the ECS images without pushing or touching AWS, so the Dockerfiles,
 # in-tree contract generation and sqlc are exercised without credentials. The
-# real deploy path (ECR push + ECS update) is tryrtylr/deploy -> deploy-release.
+# real deploy path (ECR push + ECS update) is release.yml -> deploy.yml.
 
 on:
   pull_request:

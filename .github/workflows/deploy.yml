@@ -1,0 +1,75 @@
+name: Deploy release
+
+# Reusable: builds one immutable release tag and ships the selected targets
+# through tryrtylr/pipelines. Pages apps and ECS services share this entrypoint.
+# Callers (release.yml on a push to main, redeploy.yml by hand) pass the target
+# lists produced by .github/scripts/plan-deploys.sh.
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        description: GitHub release tag to build, for example rtylr-v6.1.2
+        required: true
+        type: string
+      version:
+        description: Release version without the tag prefix, used as the image tag
+        required: true
+        type: string
+      pages:
+        description: JSON array of Pages targets
+        required: true
+        type: string
+      ecs:
+        description: JSON array of ECS targets
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pages:
+    name: Deploy ${{ matrix.app }}
+    if: inputs.pages != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.pages) }}
+    concurrency:
+      group: deploy-${{ matrix.app }}
+      cancel-in-progress: false
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages-release.yml@main
+    with:
+      source_repository: tryrtylr/rtylr
+      source_ref: ${{ inputs.release_tag }}
+      app_filter: ${{ matrix.app_filter }}
+      build_script: ${{ matrix.build_script }}
+      dist_dir: ${{ matrix.dist_dir }}
+      working_directory: ${{ matrix.working_directory }}
+      project_name: ${{ matrix.project_name }}
+      node_version: ${{ matrix.node_version }}
+    secrets: inherit
+
+  ecs:
+    name: Deploy ${{ matrix.app }}
+    if: inputs.ecs != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.ecs) }}
+    concurrency:
+      group: deploy-${{ matrix.app }}
+      cancel-in-progress: false
+    uses: tryrtylr/pipelines/.github/workflows/deploy-ecs-release.yml@main
+    with:
+      source_repository: tryrtylr/rtylr
+      source_ref: ${{ inputs.release_tag }}
+      version: ${{ inputs.version }}
+      dockerfile: ${{ matrix.dockerfile }}
+      image_repository: ${{ matrix.image_repository }}
+      cluster: ${{ matrix.cluster }}
+      service: ${{ matrix.service }}
+      container: ${{ matrix.container }}
+      desired_count: ${{ matrix.desired_count }}
+      health_url: ${{ matrix.health_url }}
+    secrets: inherit

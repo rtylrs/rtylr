@@ -1,0 +1,115 @@
+[
+  {
+    "app": "portal",
+    "type": "pages",
+    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "project_name": "rtylr-portal",
+    "working_directory": "clients/app",
+    "app_filter": "@rtylr/portal",
+    "build_script": "build:portal",
+    "dist_dir": "dist/portal",
+    "node_version": "22"
+  },
+  {
+    "app": "auth",
+    "type": "pages",
+    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "project_name": "rtylr-auth",
+    "working_directory": "clients/app",
+    "app_filter": "@rtylr/portal",
+    "build_script": "build:auth",
+    "dist_dir": "dist/auth",
+    "node_version": "22"
+  },
+  {
+    "app": "menu",
+    "type": "pages",
+    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "project_name": "rtylr-menu",
+    "working_directory": "clients/app",
+    "app_filter": "@rtylr/portal",
+    "build_script": "build:menu",
+    "dist_dir": "dist/menu",
+    "node_version": "22"
+  },
+  {
+    "app": "recruit",
+    "type": "pages",
+    "triggers": ["rtylr", "packages", "clients", "contracts"],
+    "project_name": "rtylr-recruit",
+    "working_directory": "clients/app",
+    "app_filter": "@rtylr/portal",
+    "build_script": "build:recruit",
+    "dist_dir": "dist/recruit",
+    "node_version": "22"
+  },
+  {
+    "app": "pos",
+    "type": "pages",
+    "triggers": ["pos", "packages", "clients"],
+    "project_name": "rtylr-pos",
+    "working_directory": "clients",
+    "app_filter": "rtylr-pos",
+    "build_script": "build",
+    "dist_dir": "pos/dist",
+    "node_version": "22"
+  },
+  {
+    "app": "landing",
+    "type": "pages",
+    "triggers": ["landing", "packages", "clients"],
+    "project_name": "rtylr-landing",
+    "working_directory": "clients/web/landing",
+    "app_filter": "",
+    "build_script": "build",
+    "dist_dir": "dist/landing",
+    "node_version": "22"
+  },
+  {
+    "app": "docs",
+    "type": "pages",
+    "triggers": ["docs", "packages", "clients"],
+    "project_name": "rtylr-docs",
+    "working_directory": "clients/web/docs",
+    "app_filter": "",
+    "build_script": "docs:build",
+    "dist_dir": "out",
+    "node_version": "22"
+  },
+  {
+    "app": "onion-api",
+    "type": "ecs",
+    "triggers": ["onion", "contracts"],
+    "dockerfile": "services/onion/Dockerfile",
+    "image_repository": "voxire/onion",
+    "cluster": "voxire-prod",
+    "service": "api",
+    "container": "api",
+    "desired_count": "1",
+    "health_url": "https://api.voxire.com/health"
+  },
+  {
+    "app": "onion-worker",
+    "type": "ecs",
+    "triggers": ["onion", "contracts"],
+    "dockerfile": "services/onion/Dockerfile.worker",
+    "image_repository": "voxire/onion-worker",
+    "cluster": "voxire-prod",
+    "service": "worker",
+    "container": "worker",
+    "desired_count": "1",
+    "health_url": ""
+  },
+  {
+    "app": "searxng",
+    "type": "ecs",
+    "triggers": ["searxng"],
+    "dockerfile": "services/searxng/Dockerfile",
+    "image_repository": "voxire/searxng",
+    "cluster": "voxire-prod",
+    "service": "searxng",
+    "container": "searxng",
+    "desired_count": "1",
+    "health_url": ""
+  }
+]
