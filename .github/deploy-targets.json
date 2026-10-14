@@ -106,6 +106,9 @@
       "services/onion/",
       "voxie/"
     ],
+    "ignore": [
+      "services/onion/.github/"
+    ],
     "dockerfile": "services/onion/Dockerfile",
     "image_repository": "voxire/onion",
     "cluster": "voxire-prod",
@@ -120,6 +123,9 @@
     "paths": [
       "services/onion/",
       "voxie/"
+    ],
+    "ignore": [
+      "services/onion/.github/"
     ],
     "dockerfile": "services/onion/Dockerfile.worker",
     "image_repository": "voxire/onion-worker",
