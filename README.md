@@ -17,7 +17,7 @@ change a contract and every consumer with it.
 | `voxie/`               | API contracts (`.onk`) plus the generated Go and OpenAPI output. In-tree and the single source of truth.            |
 | `services/onion/`      | The Go backend: modules, platform packages, sqlc, worker.                                                           |
 
-`tryrtylr/infra` and `tryrtylr/pipelines` stay separate: they are the
+`rtylrs/infra` and `rtylrs/pipelines` stay separate: they are the
 infrastructure and the reusable build-and-deploy workflows.
 
 ## One workspace
@@ -61,7 +61,7 @@ A push to `main` releases and deploys:
    plus a `release.json` manifest), and creates the tag and GitHub release.
 2. The same run picks the deploy targets whose own paths changed, using
    `.github/deploy-targets.json`, and `.github/workflows/deploy.yml` builds the
-   new tag through `tryrtylr/pipelines` and ships it — Pages apps and ECS
+   new tag through `rtylrs/pipelines` and ships it — Pages apps and ECS
    services through the same entrypoint. A change that touches no target's paths
    (CI only, for example) cuts a release and deploys nothing.
 3. To re-ship or roll back an existing tag, run `redeploy.yml` with the tag and

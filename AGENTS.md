@@ -4,7 +4,7 @@ These instructions apply throughout this repository. Follow more specific `AGENT
 
 ## Repository map
 
-This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch, status and package scripts before making assumptions based on older layouts or sibling repositories.
+This is `rtylrs/rtylr`, a pnpm monorepo. Inspect the current checkout, branch, status and package scripts before making assumptions based on older layouts or sibling repositories.
 
 | Path               | Responsibility                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- |
@@ -19,7 +19,7 @@ This is `tryrtylr/rtylr`, a pnpm monorepo. Inspect the current checkout, branch,
 | `services/onion/`  | Go backend: modules, platform packages, sqlc, worker                                         |
 | `.github/`         | Release and deployment automation                                                            |
 
-Deployment repositories (`tryrtylr/infra`, `tryrtylr/pipelines`) are separate. A frontend change does not establish that the backend supports a field, enforces a permission or implements a retention policy.
+Deployment repositories (`rtylrs/infra`, `rtylrs/pipelines`) are separate. A frontend change does not establish that the backend supports a field, enforces a permission or implements a retention policy.
 
 ## Scope and implementation
 
@@ -96,7 +96,7 @@ pnpm filters are relative to the workspace root at `clients/`. Some aggregate sc
 
 - Keep secrets and customer data out of code, logs, fixtures and commits. Use synthetic test data and existing configuration mechanisms.
 - Optional analytics must respect both acceptance and withdrawal. Do not enable session recording through a generic analytics choice or add tracking that bypasses shared consent handling.
-- Consult `tryrtylr/vault` (`rtylr/legal/README.md`) when changing public policies, data collection, vendors, retention, billing promises or security claims. Keep localized policies consistent with actual behavior.
+- Consult `rtylrs/vault` (`rtylr/legal/README.md`) when changing public policies, data collection, vendors, retention, billing promises or security claims. Keep localized policies consistent with actual behavior.
 - Do not invent an operating entity, jurisdiction, certification, audit result, signed agreement, deletion guarantee or transfer safeguard. Clearly distinguish drafts and proposed controls from completed agreements and deployed controls.
 - Preserve existing customer commitments and required notice/versioning when changing terms. A page edit is not proof that customers received or accepted an amendment.
 - Respect repository and dependency licenses; do not relicense code or promise commercial/self-host rights without verifying authorization.
