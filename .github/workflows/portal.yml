@@ -33,7 +33,7 @@ permissions:
 jobs:
   checks:
     name: Typecheck and unit tests
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: clients
@@ -84,7 +84,7 @@ jobs:
   e2e:
     name: End-to-end tests
     if: github.event_name != 'push'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: clients

@@ -61,7 +61,7 @@ env:
 jobs:
   migrate:
     name: Migrate ${{ inputs.cluster }} from ${{ inputs.release_tag }}
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Verify the release exists
