@@ -11,6 +11,7 @@ on:
       - 'voxie/**'
       - '.github/workflows/onion-images.yml'
   push:
+    branches: [main]
     paths:
       - 'services/onion/**'
       - 'voxie/**'
