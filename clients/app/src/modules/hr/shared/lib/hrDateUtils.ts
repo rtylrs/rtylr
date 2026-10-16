@@ -6,10 +6,20 @@ export function formatDate(
 ): string {
   const d = new Date(dateIso);
   if (isNaN(d.getTime())) return '';
-  if (format === 'numeric') return d.toLocaleDateString('en-US');
+  if (format === 'numeric') return d.toLocaleDateString('en-US', { timeZone: 'UTC' });
   if (format === 'long')
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString('en-US', {
+      timeZone: 'UTC',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  return d.toLocaleDateString('en-US', {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export function daysBetween(startIso: string, endIso: string): number {

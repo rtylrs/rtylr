@@ -31,9 +31,12 @@ export function toLocalIso(date: Date): string {
 /**
  * Formats an ISO date string into a locale-aware display format.
  * Example: "2025-06-15" produces "Jun 15, 2025".
+ * Uses timeZone: 'UTC' to prevent bare YYYY-MM-DD strings (which parse as UTC midnight)
+ * from shifting to the previous day in timezones west of UTC.
  */
 export function formatDate(isoDate: string, locale = 'en-US'): string {
   return new Date(isoDate).toLocaleDateString(locale, {
+    timeZone: 'UTC',
     year: 'numeric',
     month: 'short',
     day: 'numeric',
