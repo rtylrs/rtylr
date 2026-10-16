@@ -121,8 +121,8 @@ recruit/recruit_v9_submission_audit.sql	internal/modules/recruit/sql/schema/recr
 insights/schema.sql	internal/modules/insights/sql/schema/insights/schema.sql
 insights/zz_settings_preferences.sql	internal/modules/insights/sql/schema/insights/zz_settings_preferences.sql
 oauth/schema.sql	internal/modules/organization/sql/schema/oauth/schema.sql
-ai/ai_views.sql	internal/modules/aiquery/sql/schema/ai/ai_views.sql
-ai/zz_ai_views_business_scope.sql	internal/modules/aiquery/sql/schema/ai/zz_ai_views_business_scope.sql
+ai/ai_views.sql	internal/modules/crm/sql/schema/crm/ai_views.sql|internal/modules/erp/sql/schema/erp/ai_views.sql|internal/modules/finance/sql/schema/finance/ai_views.sql|internal/modules/flow/sql/schema/flow/ai_views.sql|internal/modules/hr/sql/schema/hr/ai_views.sql|internal/modules/pos/sql/schema/pos/ai_views.sql
+ai/zz_ai_views_business_scope.sql	internal/modules/crm/sql/schema/crm/zz_ai_views_business_scope.sql|internal/modules/erp/sql/schema/erp/zz_ai_views_business_scope.sql|internal/modules/finance/sql/schema/finance/zz_ai_views_business_scope.sql|internal/modules/flow/sql/schema/flow/zz_ai_views_business_scope.sql|internal/modules/hr/sql/schema/hr/zz_ai_views_business_scope.sql|internal/modules/pos/sql/schema/pos/zz_ai_views_business_scope.sql
 migrations/console_stats_summary.sql	internal/modules/organization/console/sql/migrations/console_stats_summary.sql
 internal/modules/booking/appointments/sql/migration_20261004_schedule_lock.sql	internal/modules/booking/appointments/sql/migration_20261004_schedule_lock.sql
 internal/modules/pos/orders/sql/migration_20261004_order_sequences.sql	internal/modules/pos/orders/sql/migration_20261004_order_sequences.sql
