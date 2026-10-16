@@ -154,6 +154,9 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 	if err != nil {
 		return CreateRecruitCareerResponse{}, err
 	}
+	if req.IsPublished && !authPkg.HasAppPermission(authUser, authorization.AppRecruit, "recruit:jobs:publish") {
+		return CreateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
 		return CreateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
@@ -331,6 +334,12 @@ func recruitSalaryAmounts(minSalary, maxSalary float64) (money.Amount, money.Amo
 	salaryMax, err := money.FromFloat64(maxSalary)
 	if err != nil {
 		return 0, 0, onekiterrors.New(http.StatusBadRequest, "salary_max must be a valid monetary amount")
+	}
+	if minSalary < 0 || maxSalary < 0 {
+		return 0, 0, onekiterrors.New(http.StatusBadRequest, "salary range cannot be negative")
+	}
+	if maxSalary > 0 && minSalary > maxSalary {
+		return 0, 0, onekiterrors.New(http.StatusBadRequest, "salary_min cannot exceed salary_max")
 	}
 	return salaryMin, salaryMax, nil
 }

@@ -2,11 +2,14 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/domain"
@@ -277,6 +280,49 @@ func (h *SubmitApplicationHandler) Validate(_ context.Context, req *SubmitApplic
 	}
 	if req.Email == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Email is required")
+	}
+	return validateSubmissionFields(req)
+}
+
+const (
+	maxCandidateNameLen = 160
+	maxEmailLen         = 160
+	maxPhoneLen         = 40
+	maxResumeURLLen     = 500
+	maxCoverLetterLen   = 20000
+	maxAnswersJSONBytes = 64 * 1024
+)
+
+// validateSubmissionFields rejects input the columns cannot hold, so a
+// candidate gets a specific 400 instead of a generic failure that loses the
+// application, and the HR inbox never has to decode malformed answers.
+func validateSubmissionFields(req *SubmitApplicationRequest) error {
+	if utf8.RuneCountInString(req.CandidateName) > maxCandidateNameLen {
+		return onekiterrors.New(http.StatusBadRequest, "Name is too long")
+	}
+	if len(req.Email) > maxEmailLen {
+		return onekiterrors.New(http.StatusBadRequest, "Email is too long")
+	}
+	if addr, err := mail.ParseAddress(req.Email); err != nil || addr.Address != strings.TrimSpace(req.Email) {
+		return onekiterrors.New(http.StatusBadRequest, "Email is not valid")
+	}
+	if utf8.RuneCountInString(req.Phone) > maxPhoneLen {
+		return onekiterrors.New(http.StatusBadRequest, "Phone number is too long")
+	}
+	if len(req.ResumeURL) > maxResumeURLLen {
+		return onekiterrors.New(http.StatusBadRequest, "Resume link is too long")
+	}
+	if utf8.RuneCountInString(req.CoverLetter) > maxCoverLetterLen {
+		return onekiterrors.New(http.StatusBadRequest, "Cover letter is too long")
+	}
+	if req.AnswersJSON != "" {
+		if len(req.AnswersJSON) > maxAnswersJSONBytes {
+			return onekiterrors.New(http.StatusBadRequest, "Answers are too long")
+		}
+		var answers map[string]any
+		if err := json.Unmarshal([]byte(req.AnswersJSON), &answers); err != nil {
+			return onekiterrors.New(http.StatusBadRequest, "Answers must be a JSON object")
+		}
 	}
 	return nil
 }

@@ -134,6 +134,9 @@ func (h *UpdateSubmissionStatusHandler) Validate(_ context.Context, req *UpdateS
 	if req.Status == "" {
 		return onekiterrors.New(http.StatusBadRequest, "status is required")
 	}
+	if !domain.IsValidSubmissionStatus(req.Status) {
+		return onekiterrors.New(http.StatusBadRequest, "status must be one of: new, reviewed, interviewing, offered, hired, rejected")
+	}
 	return nil
 }
 
