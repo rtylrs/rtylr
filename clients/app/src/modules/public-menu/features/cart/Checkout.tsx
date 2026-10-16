@@ -12,7 +12,7 @@ import { menuOrderStatusPath } from '../../menuPaths';
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const { items, businessId, total, setItemNote, clearCart } = useCartStore();
+  const { items, businessId, currency = 'USD', total, setItemNote, clearCart } = useCartStore();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -22,10 +22,10 @@ const Checkout = (): React.JSX.Element => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const currency = 'USD';
-
   const formatPrice = (price: number): string =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(
+      price
+    );
 
   const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED !== 'false';
 
@@ -219,7 +219,7 @@ const Checkout = (): React.JSX.Element => {
                       </span>
                     </span>
                     <span style={{ fontSize: '15px', fontWeight: 600 }}>
-                      {formatPrice(item.unitPrice * item.quantity)}
+                      {formatPrice((Math.round(item.unitPrice * 100) * item.quantity) / 100)}
                     </span>
                   </div>
 

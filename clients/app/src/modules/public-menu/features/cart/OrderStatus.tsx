@@ -22,9 +22,14 @@ const STATUS_STEPS = ['received', 'preparing', 'ready', 'done'] as const;
 const STEP_FOR_STATUS: Record<string, number> = {
   pending: 0,
   confirmed: 0,
+  processing: 1,
   preparing: 1,
   held: 1,
   ready: 2,
+  shipped: 2,
+  delivered: 3,
+  completed: 3,
+  done: 3,
   served: 3,
   paid: 3,
 };

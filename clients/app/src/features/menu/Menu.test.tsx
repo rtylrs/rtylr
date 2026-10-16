@@ -16,8 +16,10 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
 }));
 
+const queryState = vi.hoisted(() => ({ isLoading: false }));
+
 vi.mock('../../shared/hooks/queries/useMenu', () => ({
-  useGetMenu: () => ({ isLoading: false }),
+  useGetMenu: () => queryState,
 }));
 
 vi.mock('../../shared/stores/userStore', () => ({
@@ -42,6 +44,7 @@ import Menu from './Menu';
 beforeEach(() => {
   menuState.items = [];
   menuState.status = 'success';
+  queryState.isLoading = false;
 });
 
 describe('Menu item pricing', () => {
@@ -105,5 +108,13 @@ describe('Menu item pricing', () => {
     menuState.items = [item(9.99)];
     render(<Menu />);
     expect(screen.getByText('$9.99')).toBeInTheDocument();
+  });
+
+  it('renders a spinner while menu query is loading', () => {
+    queryState.isLoading = true;
+    render(<Menu />);
+    expect(screen.getByTestId('spinner')).toBeInTheDocument();
+    expect(screen.queryByText('No POS menu items yet.')).not.toBeInTheDocument();
+    queryState.isLoading = false;
   });
 });

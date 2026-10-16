@@ -118,7 +118,12 @@ describe('OrderStatus progress copy', () => {
     ['confirmed', 'Order received!'],
     ['preparing', 'Being prepared...'],
     ['held', 'Being prepared...'],
+    ['processing', 'Being prepared...'],
     ['ready', 'Ready for pickup!'],
+    ['shipped', 'Ready for pickup!'],
+    ['delivered', 'Order complete!'],
+    ['completed', 'Order complete!'],
+    ['done', 'Order complete!'],
     ['served', 'Order complete!'],
     ['paid', 'Order complete!'],
   ])('renders the message for %s', async (backendStatus, message) => {

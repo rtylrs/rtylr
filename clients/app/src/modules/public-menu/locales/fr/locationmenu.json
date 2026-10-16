@@ -2,6 +2,7 @@
   "pageTitle": "Menu · rtylr",
   "allItems": "Menu",
   "loadFailedTitle": "Impossible de charger le menu",
+  "loadFailedDescription": "Une erreur s’est produite lors du chargement de ce menu. Veuillez réessayer plus tard.",
   "businessNotFoundTitle": "Commerce introuvable",
   "businessNotFoundDescription": "Ce commerce n'est plus actif ou le lien est incorrect.",
   "goBack": "Retour",
