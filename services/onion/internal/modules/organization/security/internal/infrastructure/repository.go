@@ -386,13 +386,24 @@ func (r *Repository) GetLoginHistory(ctx context.Context, userID int64, limit, o
 	return entries, total, nil
 }
 
+// InvalidateAllSessions revokes every refresh session and advances the user's
+// token epoch, which is what makes access tokens already in circulation (session
+// and OAuth) stop validating instead of living out their 24 hours.
 func (r *Repository) InvalidateAllSessions(ctx context.Context, userID int64) error {
-	// cross-schema write to user_sessions — sessions are owned by the auth module
-	err := r.queries.InvalidateAllSessions(ctx, userID)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to invalidate sessions", logger.Error(err))
+		return err
 	}
-	return err
+	defer func() { _ = tx.Rollback() }()
+	if _, err := tx.ExecContext(ctx, `UPDATE user_sessions SET revoked_at = NOW() WHERE user_id = ? AND revoked_at IS NULL`, userID); err != nil {
+		logger.Ctx(ctx).Error("Failed to invalidate sessions", logger.Error(err))
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE users SET token_epoch = token_epoch + 1 WHERE id = ?`, userID); err != nil {
+		logger.Ctx(ctx).Error("Failed to advance token epoch", logger.Error(err))
+		return err
+	}
+	return tx.Commit()
 }
 
 func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error {

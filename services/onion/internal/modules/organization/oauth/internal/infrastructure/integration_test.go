@@ -3,6 +3,9 @@ package infrastructure_test
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -312,5 +315,60 @@ func TestMarkAuthCodeUsed_NonExistentCodeIsNoOp(t *testing.T) {
 	err := repo.MarkAuthCodeUsed(ctx, "non-existent-code")
 	if err != nil {
 		t.Fatalf("MarkAuthCodeUsed on non-existent code returned error: %v", err)
+	}
+}
+
+func TestMCPClientMigrationUpgradesExistingGrants(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	var original struct{ redirect, scopes string }
+	if err := db.QueryRowContext(ctx, `SELECT redirect_uris, scopes FROM oauth_clients WHERE id = 'rtylr-mcp'`).Scan(&original.redirect, &original.scopes); err != nil {
+		t.Skipf("rtylr-mcp client is not seeded: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, `UPDATE oauth_clients SET redirect_uris = ?, scopes = ? WHERE id = 'rtylr-mcp'`, original.redirect, original.scopes)
+	})
+
+	if _, err := db.ExecContext(ctx, `UPDATE oauth_clients SET redirect_uris = '["http://127.0.0.1"]', scopes = 'flow:read flow:write crm:read crm:write finance:read finance:write erp:read erp:write' WHERE id = 'rtylr-mcp'`); err != nil {
+		t.Fatal(err)
+	}
+	userID := time.Now().UnixNano()
+	if _, err := db.ExecContext(ctx, `INSERT INTO oauth_tokens (access_token, refresh_token, client_id, user_id, scope, expires_at) VALUES ('at', ?, 'rtylr-mcp', ?, 'flow:read crm:write', ?)`, fmt.Sprintf("rt-%d", userID), userID, time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, `DELETE FROM oauth_tokens WHERE user_id = ?`, userID) })
+
+	raw, err := os.ReadFile("../../sql/migration_20261016_mcp_scopes_and_loopback.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, statement := range strings.Split(string(raw), ";") {
+		if strings.TrimSpace(statement) == "" {
+			continue
+		}
+		if _, err := db.ExecContext(ctx, statement); err != nil {
+			t.Fatalf("migration statement failed: %v\n%s", err, statement)
+		}
+	}
+
+	client, err := repo.GetClient(ctx, "rtylr-mcp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(client.RedirectURIs) != 1 || client.RedirectURIs[0] != "http://127.0.0.1/callback" {
+		t.Fatalf("redirect URIs = %v", client.RedirectURIs)
+	}
+	scopes := strings.Join(client.Scopes, " ")
+	if !strings.Contains(scopes, "pos:read") || !strings.Contains(scopes, "pos:write") {
+		t.Fatalf("client scopes = %q", scopes)
+	}
+	var tokenScope string
+	if err := db.QueryRowContext(ctx, `SELECT scope FROM oauth_tokens WHERE user_id = ?`, userID).Scan(&tokenScope); err != nil {
+		t.Fatal(err)
+	}
+	if tokenScope != "flow:read crm:write pos:read pos:write" {
+		t.Fatalf("token scope = %q", tokenScope)
 	}
 }
