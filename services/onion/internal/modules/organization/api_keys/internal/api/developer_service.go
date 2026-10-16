@@ -67,6 +67,9 @@ func (a *DeveloperAPI) CreateApiKey(ctx context.Context, req *hubdeveloperv1.Cre
 	}
 
 	id, rawKey, err := a.APIKeysService.Create(ctx, device.User.UserID, businessID, name, req.GetScopes())
+	if errors.Is(err, hubdeveloper.ErrInvalidAPIKey) {
+		return nil, onekiterrors.New(http.StatusBadRequest, strings.TrimPrefix(err.Error(), hubdeveloper.ErrInvalidAPIKey.Error()+": "))
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create API key")
 	}
@@ -91,6 +94,9 @@ func (a *DeveloperAPI) RevokeApiKey(ctx context.Context, req *hubdeveloperv1.Rev
 	}
 
 	if err := a.APIKeysService.Revoke(ctx, businessID, id); err != nil {
+		if errors.Is(err, hubdeveloper.ErrAPIKeyNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "API key not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to revoke API key")
 	}
 

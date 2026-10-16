@@ -98,7 +98,7 @@ func (a *GiftCardAPI) GetGiftCardByCode(ctx context.Context, req *posgiftcardv1.
 		if errors.Is(getErr, domain.ErrGiftCardNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Gift card not found")
 		}
-		logger.Ctx(ctx).Error("failed to fetch gift card", logger.Int("business_id", int(businessID)), logger.String("code", code), logger.Error(getErr))
+		logger.Ctx(ctx).Error("failed to fetch gift card", logger.Int("business_id", int(businessID)), logger.String("code", domain.MaskCode(code)), logger.Error(getErr))
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to fetch gift card")
 	}
 	return &posgiftcardv1.GetGiftCardByCodeResponse{GiftCard: toProtoGiftCard(*gc)}, nil
@@ -142,7 +142,7 @@ func (a *GiftCardAPI) RedeemGiftCard(ctx context.Context, req *posgiftcardv1.Red
 		if errors.Is(redeemErr, domain.ErrInvalidOrder) {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid gift card order reference")
 		}
-		logger.Ctx(ctx).Error("failed to redeem gift card", logger.Int("business_id", int(businessID)), logger.String("code", code), logger.Error(redeemErr))
+		logger.Ctx(ctx).Error("failed to redeem gift card", logger.Int("business_id", int(businessID)), logger.String("code", domain.MaskCode(code)), logger.Error(redeemErr))
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem gift card")
 	}
 	return &posgiftcardv1.RedeemGiftCardResponse{GiftCard: toProtoGiftCard(*gc), Message: "Gift card redeemed successfully"}, nil

@@ -56,6 +56,12 @@ func TestAuthRouteRateLimit_ShortSecretAndOracleRoutesAreLimited(t *testing.T) {
 		{path: "/common/auth/v1/email-exists", wantAllow: 20},
 		// 4-digit POS PIN.
 		{path: "/pos/user/v1/users/verify-pin", wantAllow: 5},
+		// Anonymous OAuth exchange and revocation, and the authorize redirect.
+		{path: "/common/oauth/v1/token", wantAllow: 30},
+		{path: "/common/oauth/v1/revoke", wantAllow: 30},
+		{path: "/oauth/authorize", wantAllow: 30},
+		// Current-password check behind a bearer token.
+		{path: "/hub/user/v1/users/password", wantAllow: 5},
 		// 6-digit TOTP, ±1 window, mints a 5-minute verified state.
 		{path: "/hub/security/v1/mfa/verify", wantAllow: 10},
 		{path: "/hub/security/v1/mfa/recovery", wantAllow: 10},

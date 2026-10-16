@@ -12,3 +12,6 @@ VALUES (?, ?, ?, ?, ?, ?);
 UPDATE hub_api_keys
 SET is_active = FALSE
 WHERE id = ? AND business_id = ?;
+
+-- name: APIKeyExists :one
+SELECT COUNT(*) FROM hub_api_keys WHERE id = ? AND business_id = ?;

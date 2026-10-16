@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -129,7 +130,7 @@ func TestCreate_HappyPathHashesAndStores(t *testing.T) {
 
 	id, raw, err := s.Create(context.Background(), 7, 7, domain.CreateAPIKeyInput{
 		Name:   "test key",
-		Scopes: []string{"read"},
+		Scopes: []string{"flow:read"},
 	})
 	if err != nil {
 		t.Fatalf("unexpected: %v", err)
@@ -189,3 +190,53 @@ var errSentinel = sentinelErr("repo failed")
 type sentinelErr string
 
 func (s sentinelErr) Error() string { return string(s) }
+
+type recordingKeyRepo struct {
+	created  bool
+	prefix   string
+	revokeEr error
+}
+
+func (r *recordingKeyRepo) List(context.Context, int64) ([]domain.APIKey, error) { return nil, nil }
+func (r *recordingKeyRepo) Create(_ context.Context, _, _ int64, _, _, keyPrefix string, _ []string) (int64, error) {
+	r.created = true
+	r.prefix = keyPrefix
+	return 1, nil
+}
+func (r *recordingKeyRepo) Revoke(context.Context, int64, int64) error { return r.revokeEr }
+
+func TestCreateRejectsUnknownScopesAndBadNames(t *testing.T) {
+	for name, input := range map[string]domain.CreateAPIKeyInput{
+		"unknown scope": {Name: "ci", Scopes: []string{"admin"}},
+		"blank name":    {Name: "   ", Scopes: []string{"upload"}},
+		"long name":     {Name: strings.Repeat("a", maxNameLength+1), Scopes: []string{"upload"}},
+	} {
+		repo := &recordingKeyRepo{}
+		_, _, err := (&Service{repo: repo}).Create(context.Background(), 1, 1, input)
+		if !errors.Is(err, domain.ErrInvalid) {
+			t.Errorf("%s: err = %v, want ErrInvalid", name, err)
+		}
+		if repo.created {
+			t.Errorf("%s: an invalid key reached the repository", name)
+		}
+	}
+}
+
+func TestCreateStoresAPrefixTheColumnCanHold(t *testing.T) {
+	repo := &recordingKeyRepo{}
+	if _, _, err := (&Service{repo: repo}).Create(context.Background(), 1, 1, domain.CreateAPIKeyInput{Name: " ci ", Scopes: []string{"upload", "flow:read"}}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	// hub_api_keys.key_prefix is varchar(32); a 16-character display prefix
+	// into the old varchar(10) failed every creation in strict SQL mode.
+	if len(repo.prefix) != 16 {
+		t.Fatalf("prefix = %q", repo.prefix)
+	}
+}
+
+func TestRevokePropagatesNotFound(t *testing.T) {
+	repo := &recordingKeyRepo{revokeEr: domain.ErrNotFound}
+	if err := (&Service{repo: repo}).Revoke(context.Background(), 1, 9); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("err = %v, want ErrNotFound", err)
+	}
+}
