@@ -30,24 +30,24 @@ func (s *Service) Get(ctx context.Context, businessID int64) (domain.CustomDomai
 	return s.repo.Get(ctx, businessID)
 }
 
+// Register records a pending claim. Only a verified claim by another business
+// blocks it: an unverified claim proves nothing, so it must not let someone
+// squat a domain they do not control.
 func (s *Service) Register(ctx context.Context, ownerID, businessID int64, rawDomain string) (domain.CustomDomain, error) {
 	domainName := strings.TrimSuffix(strings.ToLower(strings.TrimSpace(rawDomain)), ".")
 	if err := validateDomain(domainName); err != nil {
 		return domain.CustomDomain{}, err
 	}
-	if current, err := s.repo.GetByDomain(ctx, domainName); err == nil && current.BusinessID != businessID {
+	if holder, err := s.repo.GetVerifiedByDomain(ctx, domainName); err == nil && holder.BusinessID != businessID {
 		return domain.CustomDomain{}, domain.ErrConflict
 	} else if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		return domain.CustomDomain{}, err
 	}
 	if current, err := s.repo.Get(ctx, businessID); err == nil {
-		if current.Domain != domainName {
-			return domain.CustomDomain{}, domain.ErrConflict
-		}
-		if current.Status == domain.StatusVerified {
+		if current.Domain == domainName && current.Status == domain.StatusVerified {
 			return current, nil
 		}
-	} else if err != nil && !errors.Is(err, domain.ErrNotFound) {
+	} else if !errors.Is(err, domain.ErrNotFound) {
 		return domain.CustomDomain{}, err
 	}
 	tokenBytes := make([]byte, 24)
@@ -66,10 +66,18 @@ func (s *Service) Verify(ctx context.Context, businessID int64, token string) (d
 	if trimmedToken == "" || subtle.ConstantTimeCompare([]byte(trimmedToken), []byte(current.VerificationToken)) != 1 {
 		return domain.CustomDomain{}, domain.ErrInvalidToken
 	}
+	if current.Status == domain.StatusVerified {
+		return current, nil
+	}
+	if holder, err := s.repo.GetVerifiedByDomain(ctx, current.Domain); err == nil && holder.BusinessID != businessID {
+		return domain.CustomDomain{}, domain.ErrConflict
+	} else if err != nil && !errors.Is(err, domain.ErrNotFound) {
+		return domain.CustomDomain{}, err
+	}
 	if !s.dnsChallengeMatches(ctx, current.Domain, current.VerificationToken) {
 		return domain.CustomDomain{}, domain.ErrDNSVerificationFailed
 	}
-	if err := s.repo.Verify(ctx, businessID, token); err != nil {
+	if err := s.repo.Verify(ctx, businessID, current.VerificationToken); err != nil {
 		return domain.CustomDomain{}, err
 	}
 	return s.repo.Get(ctx, businessID)
@@ -115,6 +123,7 @@ func (s *Service) dnsChallengeMatches(ctx context.Context, domainName, token str
 		return false
 	}
 	for _, record := range records {
+		record = strings.Trim(strings.TrimSpace(record), `"`)
 		if subtle.ConstantTimeCompare([]byte(record), []byte(token)) == 1 {
 			return true
 		}
@@ -124,7 +133,7 @@ func (s *Service) dnsChallengeMatches(ctx context.Context, domainName, token str
 
 type repository interface {
 	Get(ctx context.Context, businessID int64) (domain.CustomDomain, error)
-	GetByDomain(ctx context.Context, domainName string) (domain.CustomDomain, error)
+	GetVerifiedByDomain(ctx context.Context, domainName string) (domain.CustomDomain, error)
 	Register(ctx context.Context, input domain.CustomDomain) (domain.CustomDomain, error)
 	Remove(ctx context.Context, businessID int64) error
 	Verify(ctx context.Context, businessID int64, token string) error

@@ -9,8 +9,10 @@ CREATE TABLE IF NOT EXISTS `custom_domains` (
   `verified_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `verified_domain` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (CASE WHEN `status` = 'verified' THEN `domain` ELSE NULL END) VIRTUAL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_custom_domains_domain` (`domain`),
+  UNIQUE KEY `uk_custom_domains_verified_domain` (`verified_domain`),
+  KEY `idx_custom_domains_domain` (`domain`),
   UNIQUE KEY `uk_custom_domains_business` (`business_id`),
   KEY `idx_custom_domains_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -2,13 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useCustomDomain, useRegisterCustomDomain, useUpdateBusiness } from './useBusiness';
+import {
+  useCustomDomain,
+  useRegisterCustomDomain,
+  useRemoveCustomDomain,
+  useUpdateBusiness,
+  useVerifyCustomDomain,
+} from './useBusiness';
 import { useConfigStore } from '../../stores/configStore';
 
 const mockConfigClient = vi.hoisted(() => ({
   updateConfig: vi.fn(),
   getCustomDomain: vi.fn(),
   registerCustomDomain: vi.fn(),
+  verifyCustomDomain: vi.fn(),
+  removeCustomDomain: vi.fn(),
 }));
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
@@ -155,7 +163,7 @@ describe('useCustomDomain', () => {
     const { result } = renderHook(() => useCustomDomain(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toBe('menu.acme.com');
+    expect(result.current.data).toMatchObject({ domain: 'menu.acme.com', status: 'pending' });
   });
 });
 
@@ -176,5 +184,53 @@ describe('useRegisterCustomDomain', () => {
     expect(mockConfigClient.registerCustomDomain).toHaveBeenCalledWith({ domain: 'menu.acme.com' });
     expect(mockConfigClient.updateConfig).not.toHaveBeenCalled();
     expect(mockToastSuccess).toHaveBeenCalled();
+  });
+});
+
+describe('useVerifyCustomDomain', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('sends the challenge token and refreshes the domain record', async () => {
+    mockConfigClient.verifyCustomDomain.mockResolvedValue({ domain: { status: 'verified' } });
+
+    const { result } = renderHook(() => useVerifyCustomDomain(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate('challenge-token');
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockConfigClient.verifyCustomDomain).toHaveBeenCalledWith({
+      verificationToken: 'challenge-token',
+    });
+    expect(mockToastSuccess).toHaveBeenCalled();
+  });
+
+  it('surfaces a failed verification instead of reporting success', async () => {
+    mockConfigClient.verifyCustomDomain.mockRejectedValue(new Error('dns mismatch'));
+
+    const { result } = renderHook(() => useVerifyCustomDomain(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate('challenge-token');
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(mockToastError).toHaveBeenCalled();
+    expect(mockToastSuccess).not.toHaveBeenCalled();
+  });
+});
+
+describe('useRemoveCustomDomain', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('removes the claim through the custom-domain RPC', async () => {
+    mockConfigClient.removeCustomDomain.mockResolvedValue({ message: 'ok' });
+
+    const { result } = renderHook(() => useRemoveCustomDomain(), { wrapper: createWrapper() });
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockConfigClient.removeCustomDomain).toHaveBeenCalledWith({});
   });
 });

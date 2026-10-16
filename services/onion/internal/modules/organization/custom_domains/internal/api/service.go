@@ -30,7 +30,8 @@ func (a *API) GetCustomDomain(ctx context.Context, _ *hubconfigv1.GetCustomDomai
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get custom domain")
 	}
-	return &hubconfigv1.GetCustomDomainResponse{Domain: payload(item, false)}, nil
+	device := authPkg.DeviceCtx(ctx)
+	return &hubconfigv1.GetCustomDomainResponse{Domain: payload(item, authPkg.IsBusinessAdmin(device.User))}, nil
 }
 
 func (a *API) RegisterCustomDomain(ctx context.Context, req *hubconfigv1.RegisterCustomDomainRequest) (*hubconfigv1.RegisterCustomDomainResponse, error) {
@@ -59,6 +60,9 @@ func (a *API) VerifyCustomDomain(ctx context.Context, req *hubconfigv1.VerifyCus
 	}
 	if errors.Is(err, domain.ErrNotFound) {
 		return nil, onekiterrors.New(http.StatusNotFound, "Custom domain not found")
+	}
+	if errors.Is(err, domain.ErrConflict) {
+		return nil, onekiterrors.New(http.StatusConflict, err.Error())
 	}
 	if errors.Is(err, domain.ErrDNSVerificationFailed) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Custom domain DNS record does not match")

@@ -4,7 +4,7 @@ import { businessClient, configClient } from '../../lib/clients';
 import { toast } from 'sonner';
 import { normalizeConfigData, useConfigStore } from '../../stores/configStore';
 import i18next from 'i18next';
-import type { UpdateConfigRequest } from '@voxire/voxie/hub/config/v1/types';
+import type { CustomDomain, UpdateConfigRequest } from '@voxire/voxie/hub/config/v1/types';
 
 export const useSetBusinessSlug = () => {
   const queryClient = useQueryClient();
@@ -32,9 +32,9 @@ export const useSetBusinessSlug = () => {
 export const useCustomDomain = () => {
   return useQuery({
     queryKey: ['custom-domain'],
-    queryFn: async () => {
+    queryFn: async (): Promise<CustomDomain | null> => {
       const res = await configClient.getCustomDomain({});
-      return res.domain?.domain ?? '';
+      return res.domain?.domain ? res.domain : null;
     },
   });
 };
@@ -48,7 +48,7 @@ export const useRegisterCustomDomain = () => {
       toast.success(
         i18next.t(
           'settings.domain.saved',
-          'Custom domain saved. DNS propagation may take up to 24 hours.'
+          'Domain saved. Add the DNS records below, then verify it.'
         )
       );
     },
@@ -57,6 +57,45 @@ export const useRegisterCustomDomain = () => {
         getOneKitErrorMessage(
           error,
           i18next.t('settings.domain.saveFailed', 'Failed to save the custom domain')
+        )
+      );
+    },
+  });
+};
+
+export const useVerifyCustomDomain = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (verificationToken: string) =>
+      configClient.verifyCustomDomain({ verificationToken }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-domain'] });
+      toast.success(i18next.t('settings.domain.verifiedToast', 'Domain verified'));
+    },
+    onError: (error: unknown) => {
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('settings.domain.verifyFailed', 'Failed to verify the custom domain')
+        )
+      );
+    },
+  });
+};
+
+export const useRemoveCustomDomain = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => configClient.removeCustomDomain({}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-domain'] });
+      toast.success(i18next.t('settings.domain.removedToast', 'Custom domain removed'));
+    },
+    onError: (error: unknown) => {
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('settings.domain.removeFailed', 'Failed to remove the custom domain')
         )
       );
     },

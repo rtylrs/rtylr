@@ -2,7 +2,7 @@ import { PageHeader } from '../../../../../shared/components/dash/PageHeader';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { Globe, Copy, Check, ChevronDown, ChevronUp, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Globe, Copy, Check, AlertCircle } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -18,22 +18,113 @@ import {
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { useConfigStore } from '../../../../../shared/stores/configStore';
-import { buildPublicMenuUrl } from '@voxire/config';
+import { PORTAL_URL, buildPublicMenuUrl } from '@voxire/config';
 
 import {
   useCustomDomain,
   useRegisterCustomDomain,
+  useRemoveCustomDomain,
+  useVerifyCustomDomain,
 } from '../../../../../shared/hooks/queries/useBusiness';
 import { toast } from 'sonner';
 
 const DOMAIN_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/;
+const DNS_TTL = '3600';
+const PORTAL_HOST = new URL(PORTAL_URL).hostname;
+
+interface DnsRecord {
+  type: string;
+  name: string;
+  value: string;
+}
+
+const CopyValue: React.FC<{ value: string }> = ({ value }) => {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error(t('common.copyFailed', 'Copy failed'));
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={t('settings.domain.copy')}
+      className="inline-flex items-center gap-1.5 font-mono break-all text-start"
+      style={{ color: 'var(--dash-text)' }}
+    >
+      <span>{value}</span>
+      {copied ? <Check size={12} className="shrink-0" /> : <Copy size={12} className="shrink-0" />}
+    </button>
+  );
+};
+
+const DnsTable: React.FC<{ records: DnsRecord[] }> = ({ records }) => {
+  const { t } = useTranslation();
+  const headers = [
+    t('settings.domain.colType'),
+    t('settings.domain.colName'),
+    t('settings.domain.colValue'),
+    t('settings.domain.colTtl'),
+  ];
+  return (
+    <div
+      className="rounded-lg overflow-x-auto text-xs"
+      style={{ border: '1px solid var(--dash-border)' }}
+    >
+      <table className="w-full">
+        <thead>
+          <tr style={{ background: 'var(--dash-hover)' }}>
+            {headers.map((h) => (
+              <th
+                key={h}
+                className="px-3 py-2 text-start font-semibold"
+                style={{
+                  color: 'var(--dash-text-muted)',
+                  borderBottom: '1px solid var(--dash-border)',
+                }}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {records.map((record) => (
+            <tr key={`${record.type}-${record.name}`} style={{ background: 'var(--dash-card)' }}>
+              <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--dash-text)' }}>
+                {record.type}
+              </td>
+              <td className="px-3 py-2.5">
+                <CopyValue value={record.name} />
+              </td>
+              <td className="px-3 py-2.5">
+                <CopyValue value={record.value} />
+              </td>
+              <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--dash-text-muted)' }}>
+                {DNS_TTL}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 const Domain: React.FC = () => {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
   const websiteData = useConfigStore((s) => s.websiteData) as { slug?: string } | undefined;
-  const { data: registeredDomain } = useCustomDomain();
+  const { data: customDomain } = useCustomDomain();
   const registerDomain = useRegisterCustomDomain();
+  const verifyDomain = useVerifyCustomDomain();
+  const removeDomain = useRemoveCustomDomain();
   const fallbackSlug =
     user?.businessName
       ?.toLowerCase()
@@ -44,11 +135,11 @@ const Domain: React.FC = () => {
   // The field shows the host-and-path form, without the scheme, as before.
   const menuUrl = publicMenuUrl.replace(/^https?:\/\//, '');
 
-  const configuredDomain = registeredDomain || '';
-  const isConfigured = Boolean(configuredDomain && DOMAIN_REGEX.test(configuredDomain));
+  const registeredDomain = customDomain?.domain ?? '';
+  const isVerified = customDomain?.status === 'verified';
+  const verificationToken = customDomain?.verificationToken ?? '';
 
   const [copied, setCopied] = useState(false);
-  const [dnsOpen, setDnsOpen] = useState(true);
   const [customDomainInput, setCustomDomainInput] = useState('');
 
   // The registered domain arrives with the query, after the input mounted.
@@ -83,6 +174,12 @@ const Domain: React.FC = () => {
     registerDomain.mutate(domain);
   };
 
+  const statusLabel = !registeredDomain
+    ? t('settings.domain.notConfigured')
+    : isVerified
+      ? t('settings.domain.statusVerified')
+      : t('settings.domain.statusPending');
+
   return (
     <>
       <HelmetContainer title={t('settings.domain.pageTitle')} />
@@ -110,7 +207,7 @@ const Domain: React.FC = () => {
                 <Input
                   readOnly
                   value={menuUrl}
-                  className="pl-8 cursor-default select-all"
+                  className="ps-8 cursor-default select-all"
                   style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                 />
               </div>
@@ -121,137 +218,68 @@ const Domain: React.FC = () => {
                 className={cn('shrink-0 gap-1.5 transition-all', copied && 'opacity-80')}
               >
                 {copied ? <Check size={13} /> : <Copy size={13} />}
-                {copied ? 'Copied' : 'Copy'}
+                {copied ? t('settings.domain.copied') : t('settings.domain.copy')}
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Section 2, Custom Domain */}
-        <div>
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle>{t('settings.domain.customTitle')}</CardTitle>
-                  <CardDescription>{t('settings.domain.customDescription')}</CardDescription>
-                </div>
-                <Badge variant={isConfigured ? 'default' : 'outline'}>
-                  {isConfigured
-                    ? t('settings.domain.configured')
-                    : t('settings.domain.notConfigured')}
-                </Badge>
+        <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>{t('settings.domain.customTitle')}</CardTitle>
+                <CardDescription>{t('settings.domain.customDescription')}</CardDescription>
               </div>
-            </CardHeader>
-            <CardContent className="pt-0 space-y-4">
-              {/* Domain input + connect button */}
-              <div className="space-y-1.5">
-                <Label htmlFor="custom-domain">{t('settings.domain.domainLabel')}</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="custom-domain"
-                    placeholder={t('settings.domain.domainPlaceholder')}
-                    value={customDomainInput}
-                    onChange={(e) => setCustomDomainInput(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    size="sm"
-                    onClick={handleConnectDomain}
-                    disabled={registerDomain.isPending}
-                    className="shrink-0"
-                  >
-                    {isConfigured
-                      ? t('settings.domain.updateDomain')
-                      : t('settings.domain.connectDomain')}
-                  </Button>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* DNS Instructions, collapsible */}
-              <div
-                className="rounded-xl overflow-hidden"
-                style={{ border: '1px solid var(--dash-border)' }}
-              >
-                {/* Collapsible header */}
-                <button
-                  type="button"
-                  onClick={() => setDnsOpen((o) => !o)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--dash-hover)]"
-                  style={{ color: 'var(--dash-text)' }}
+              <Badge variant={isVerified ? 'default' : 'outline'}>{statusLabel}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="custom-domain">{t('settings.domain.domainLabel')}</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="custom-domain"
+                  placeholder={t('settings.domain.domainPlaceholder')}
+                  value={customDomainInput}
+                  onChange={(e) => setCustomDomainInput(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  size="sm"
+                  onClick={handleConnectDomain}
+                  disabled={registerDomain.isPending}
+                  className="shrink-0"
                 >
-                  <span>{t('settings.domain.dnsTitle')}</span>
-                  {dnsOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                </button>
+                  {registeredDomain
+                    ? t('settings.domain.updateDomain')
+                    : t('settings.domain.connectDomain')}
+                </Button>
+              </div>
+            </div>
 
-                {dnsOpen && (
-                  <div
-                    className="px-4 pb-4 space-y-3"
-                    style={{ borderTop: '1px solid var(--dash-border)' }}
-                  >
-                    <p className="text-sm pt-3" style={{ color: 'var(--dash-text-muted)' }}>
-                      Add the following CNAME record in your DNS provider's dashboard (e.g.
-                      Cloudflare, Namecheap, GoDaddy):
+            {registeredDomain && (
+              <>
+                <Separator />
+
+                {!isVerified && verificationToken && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                      {t('settings.domain.verifyTitle')}
+                    </h3>
+                    <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                      {t('settings.domain.verifyIntro')}
                     </p>
-
-                    {/* DNS table */}
-                    <div
-                      className="rounded-lg overflow-hidden text-xs"
-                      style={{ border: '1px solid var(--dash-border)' }}
-                    >
-                      <table className="w-full">
-                        <thead>
-                          <tr style={{ background: 'var(--dash-hover)' }}>
-                            {['Type', 'Name', 'Value', 'TTL'].map((h) => (
-                              <th
-                                key={h}
-                                className="px-3 py-2 text-start font-semibold"
-                                style={{
-                                  color: 'var(--dash-text-muted)',
-                                  borderBottom: '1px solid var(--dash-border)',
-                                }}
-                              >
-                                {h}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {/* TODO(menu-move): custom domains pointed at the retired menu host no
-                              longer resolve to the public menu; this DNS instruction is stale. */}
-                          <tr style={{ background: 'var(--dash-card)' }}>
-                            <td
-                              className="px-3 py-2.5 font-mono"
-                              style={{ color: 'var(--dash-text)' }}
-                            >
-                              CNAME
-                            </td>
-                            <td
-                              className="px-3 py-2.5 font-mono"
-                              style={{ color: 'var(--dash-text)' }}
-                            >
-                              menu
-                            </td>
-                            <td
-                              className="px-3 py-2.5 font-mono"
-                              style={{ color: 'var(--dash-text)' }}
-                            >
-                              cname.rtylr.com
-                            </td>
-                            <td
-                              className="px-3 py-2.5 font-mono"
-                              style={{ color: 'var(--dash-text-muted)' }}
-                            >
-                              3600
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Propagation notice */}
+                    <DnsTable
+                      records={[
+                        {
+                          type: 'TXT',
+                          name: `_rtylr-challenge.${registeredDomain}`,
+                          value: verificationToken,
+                        },
+                      ]}
+                    />
                     <div
                       className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
                       style={{
@@ -261,30 +289,56 @@ const Domain: React.FC = () => {
                       }}
                     >
                       <AlertCircle size={13} className="shrink-0 mt-0.5 text-amber-500" />
-                      <span>{t('settings.domain.dnsPropagation')}</span>
+                      <span>
+                        {t('settings.domain.pendingNotice')} {t('settings.domain.dnsPropagation')}
+                      </span>
                     </div>
+                    <Button
+                      size="sm"
+                      onClick={() => verifyDomain.mutate(verificationToken)}
+                      disabled={verifyDomain.isPending}
+                    >
+                      {verifyDomain.isPending
+                        ? t('settings.domain.verifying')
+                        : t('settings.domain.verifyButton')}
+                    </Button>
                   </div>
                 )}
-              </div>
 
-              {/* SSL notice */}
-              <div
-                className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
-                style={{
-                  background: 'rgba(16,185,129,0.07)',
-                  border: '1px solid rgba(16,185,129,0.18)',
-                  color: 'var(--dash-text-muted)',
-                }}
-              >
-                <ShieldCheck size={13} className="shrink-0 mt-0.5 text-emerald-500" />
-                <span>
-                  SSL is automatically provisioned once your domain is verified. No manual
-                  certificate setup required.
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                {isVerified && (
+                  <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('settings.domain.verifiedNotice')}
+                  </p>
+                )}
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                    {t('settings.domain.routeTitle')}
+                  </h3>
+                  <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('settings.domain.routeIntro')}
+                  </p>
+                  <DnsTable
+                    records={[{ type: 'CNAME', name: registeredDomain, value: PORTAL_HOST }]}
+                  />
+                </div>
+
+                <div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeDomain.mutate()}
+                    disabled={removeDomain.isPending}
+                  >
+                    {removeDomain.isPending
+                      ? t('settings.domain.removing')
+                      : t('settings.domain.removeButton')}
+                  </Button>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </>
   );
