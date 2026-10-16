@@ -229,27 +229,6 @@ const toScheduleShiftUpdatePayload = (shift: Omit<ScheduleShift, 'id'> & { id?: 
   end_time: shift.end,
 });
 
-const toReviewPayload = (data: Omit<Review, 'id'>) => ({
-  staffId: data.staffId,
-  reviewerId: data.reviewerId,
-  period: data.period,
-  rating: data.overall,
-  goalsRating: data.goals,
-  valuesRating: data.values,
-  skillsRating: data.skills,
-  notes: data.notes,
-  status: data.status,
-});
-
-const toOneOnOnePayload = (data: Omit<OneOnOne, 'id'>) => ({
-  managerId: data.managerId,
-  staffId: data.reportId,
-  scheduledAt: data.scheduledAt,
-  notes: data.notes,
-  actionItems: data.topics.join('\n'),
-  status: data.status,
-});
-
 const toTrainingPayload = (task: Omit<OnboardingTask, 'id' | 'completed'>) => ({
   name: task.task,
   description: task.category,
@@ -310,18 +289,6 @@ export const hrExtras = {
   upsertTimesheet: (row: TimesheetRow) =>
     hrTransport.post<TimesheetRow>(`/hr/timesheets/${row.id}/submit`, {}),
 
-  // Reviews
-  listReviews: () => hrTransport.get<Review[]>('/hr/reviews'),
-  createReview: (data: Omit<Review, 'id'>) =>
-    hrTransport.post<Review>('/hr/reviews', toReviewPayload(data)),
-
-  // 1-on-1s
-  listOneOnOnes: () => hrTransport.get<OneOnOne[]>('/hr/one-on-ones'),
-  createOneOnOne: (data: Omit<OneOnOne, 'id'>) =>
-    hrTransport.post<OneOnOne>('/hr/one-on-ones', toOneOnOnePayload(data)),
-  updateOneOnOne: (id: number, patch: Partial<OneOnOne>) =>
-    hrTransport.post<{ success: boolean }>('/hr/one-on-ones', { id, ...patch }),
-
   // Onboarding
   listOnboarding: () => hrTransport.get<OnboardingTask[]>('/hr/training'),
   toggleOnboardingTask: (id: number) =>
@@ -362,8 +329,6 @@ export const hrExtras = {
     hrTransport.get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } }),
 
   // Training
-  listCourses: () =>
-    hrTransport.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }),
   listTrainingProgress: () =>
     hrTransport.get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } }),
   updateTrainingProgress: (id: number, progress: number) =>
@@ -373,8 +338,6 @@ export const hrExtras = {
 
   // Birthdays & anniversaries
   listBirthdays: () => hrTransport.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }),
-  listAnniversaries: () =>
-    hrTransport.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }),
 
   // Availability lives in shared/hooks/queries/useAvailability.ts, which calls
   // the hr.shift.v1 availability endpoints through the generated client. The

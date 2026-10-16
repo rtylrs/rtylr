@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr/hr_reports/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/hr_reports/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/csvsafe"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
@@ -198,17 +199,7 @@ func writeCSV(w http.ResponseWriter, rows []map[string]interface{}) {
 	}
 }
 
-func sanitizeCSVCell(value string) string {
-	if value == "" {
-		return value
-	}
-	switch value[0] {
-	case '=', '+', '-', '@', '\t', '\r':
-		return "'" + value
-	default:
-		return value
-	}
-}
+func sanitizeCSVCell(value string) string { return csvsafe.Cell(value) }
 
 func writeJSON(w http.ResponseWriter, rows []map[string]interface{}) {
 	w.Header().Set("Content-Type", "application/json")

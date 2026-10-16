@@ -6,6 +6,7 @@ import { EmptyState } from '@voxire/ui';
 import { Button } from '../../shared/components/ui';
 import type { ReportPayload } from '../../shared/schemas/reports';
 import { toLocalIso } from '../../shared/lib/dateUtils';
+import { escapeCsvValue } from '../../shared/lib/csv';
 
 interface ReportTableProps {
   report: ReportPayload;
@@ -15,14 +16,6 @@ interface ReportTableProps {
 }
 
 /* ── CSV helpers ──────────────────────────────────────────────── */
-
-function escapeCsvValue(val: unknown): string {
-  const str = val == null ? '' : String(val);
-  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
-}
 
 function downloadCsv(columns: string[], rows: Record<string, unknown>[], filename: string): void {
   const header = columns.map(escapeCsvValue).join(',');

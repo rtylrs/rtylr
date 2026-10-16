@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr/reviews/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr/reviews/internal/infrastructure/persistence/sqlc"
@@ -111,6 +112,14 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		status = "draft"
 	}
 
+	ids := []int64{input.StaffID}
+	if input.ReviewerID != 0 {
+		ids = append(ids, input.ReviewerID)
+	}
+	if err := r.requireStaff(ctx, businessID, ids...); err != nil {
+		return 0, err
+	}
+
 	res, err := r.queries.CreateReview(ctx, sqlc.CreateReviewParams{
 		OwnerID:      businessID,
 		BusinessID:   businessID,
@@ -129,4 +138,33 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+// requireStaff fails with ErrStaffNotFound unless every id is a staff member of
+// the business, so a review cannot point at another tenant's staff.
+func (r *Repository) requireStaff(ctx context.Context, businessID int64, ids ...int64) error {
+	unique := make(map[int64]struct{}, len(ids))
+	for _, id := range ids {
+		unique[id] = struct{}{}
+	}
+	args := make([]any, 0, len(unique)+1)
+	args = append(args, businessID)
+	placeholders := make([]string, 0, len(unique))
+	for id := range unique {
+		args = append(args, id)
+		placeholders = append(placeholders, "?")
+	}
+	var found int
+	err := r.pool.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM hr_staff WHERE business_id = ? AND id IN ("+strings.Join(placeholders, ",")+")",
+		args...,
+	).Scan(&found)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to verify review staff", logger.Error(err))
+		return err
+	}
+	if found != len(unique) {
+		return domain.ErrStaffNotFound
+	}
+	return nil
 }

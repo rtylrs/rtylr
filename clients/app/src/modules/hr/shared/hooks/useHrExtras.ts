@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
 import { BenefitServiceClient } from '@voxire/voxie/hr/benefit/v1/client';
+import { ReviewServiceClient } from '@voxire/voxie/hr/review/v1/client';
+import { OneOnOneServiceClient } from '@voxire/voxie/hr/one_on_one/v1/client';
+import { TrainingServiceClient } from '@voxire/voxie/hr/training/v1/client';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { hrExtras } from '../services/hrExtras';
@@ -17,6 +20,7 @@ import {
 } from '../schemas/shifts';
 import { timesheetRowSchema } from '../schemas/timesheets';
 import { reviewSchema, oneOnOneSchema } from '../schemas/reviews';
+import type { Review, OneOnOne } from '../schemas/reviews';
 import { onboardingTaskSchema, offboardingTaskSchema } from '../schemas/onboarding';
 import { documentItemSchema } from '../schemas/documents';
 import {
@@ -26,6 +30,14 @@ import {
 } from '../schemas/benefits';
 import type { MyBenefitEnrollment } from '../schemas/benefits';
 import { toTitleCase } from '../lib/hrStringUtils';
+import {
+  mapReview,
+  mapOneOnOne,
+  mapTrainingCourse,
+  buildAnniversaries,
+  reviewStatusToApi,
+  topicsToActionItems,
+} from '../lib/hrPeopleMappers';
 import { trainingCourseSchema, trainingProgressSchema } from '../schemas/training';
 import { birthdaySchema, anniversarySchema, myEmployeeSchema } from '../schemas/staff';
 import { hrSettingsSchema } from '../schemas/settings';
@@ -33,6 +45,19 @@ import { hrSettingsSchema } from '../schemas/settings';
 const staffClient = createOneKitClient(StaffServiceClient, 'hr');
 const departmentClient = createOneKitClient(DepartmentServiceClient, 'hr');
 const benefitClient = createOneKitClient(BenefitServiceClient, 'hr');
+const reviewClient = createOneKitClient(ReviewServiceClient, 'hr');
+const oneOnOneClient = createOneKitClient(OneOnOneServiceClient, 'hr');
+const trainingClient = createOneKitClient(TrainingServiceClient, 'hr');
+
+async function fetchStaffNames(): Promise<Map<number, string>> {
+  const res = await staffClient.listStaff({ search: '', departmentId: '', status: '' });
+  return new Map(
+    (res.staff ?? []).map((s) => [
+      Number(s.id),
+      `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim() || s.email || '',
+    ])
+  );
+}
 
 /**
  * The caller's own hr_employees.id - not the same id as the hub auth user id
@@ -200,9 +225,8 @@ export function useReviews() {
   return useQuery({
     queryKey: ['hr', 'reviews'],
     queryFn: async () => {
-      const res = await unwrap(hrExtras.listReviews());
-      const raw = res ?? [];
-      return z.array(reviewSchema).parse(Array.isArray(raw) ? raw : []);
+      const [res, names] = await Promise.all([reviewClient.listReviews({}), fetchStaffNames()]);
+      return z.array(reviewSchema).parse((res.reviews ?? []).map((r) => mapReview(r, names)));
     },
   });
 }
@@ -211,8 +235,18 @@ export function useCreateReview() {
   const { t } = useTranslation('hrCommon');
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Parameters<typeof hrExtras.createReview>[0]) =>
-      unwrap(hrExtras.createReview(data)),
+    mutationFn: (data: Omit<Review, 'id'>) =>
+      reviewClient.createReview({
+        staffId: String(data.staffId),
+        reviewerId: String(data.reviewerId),
+        period: data.period,
+        rating: data.overall,
+        goalsRating: data.goals,
+        valuesRating: data.values,
+        skillsRating: data.skills,
+        notes: data.notes,
+        status: reviewStatusToApi(data.status),
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hr', 'reviews'] }),
     onError: () => toast.error(t('hrErrors.createReview')),
   });
@@ -223,9 +257,10 @@ export function useOneOnOnes() {
   return useQuery({
     queryKey: ['hr', 'one-on-ones'],
     queryFn: async () => {
-      const res = await unwrap(hrExtras.listOneOnOnes());
-      const raw = res ?? [];
-      return z.array(oneOnOneSchema).parse(Array.isArray(raw) ? raw : []);
+      const [res, names] = await Promise.all([oneOnOneClient.listOneOnOnes({}), fetchStaffNames()]);
+      return z
+        .array(oneOnOneSchema)
+        .parse((res.oneOnOnes ?? []).map((item) => mapOneOnOne(item, names)));
     },
   });
 }
@@ -234,8 +269,15 @@ export function useCreateOneOnOne() {
   const { t } = useTranslation('hrCommon');
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Parameters<typeof hrExtras.createOneOnOne>[0]) =>
-      unwrap(hrExtras.createOneOnOne(data)),
+    mutationFn: (data: Omit<OneOnOne, 'id'>) =>
+      oneOnOneClient.createOneOnOne({
+        managerId: String(data.managerId),
+        staffId: String(data.reportId),
+        scheduledAt: data.scheduledAt,
+        notes: data.notes ?? '',
+        actionItems: topicsToActionItems(data.topics),
+        status: 'scheduled',
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hr', 'one-on-ones'] }),
     onError: () => toast.error(t('hrErrors.scheduleOneOnOne')),
   });
@@ -434,9 +476,8 @@ export function useTraining() {
   return useQuery({
     queryKey: ['hr', 'training', 'courses'],
     queryFn: async () => {
-      const res = await unwrap(hrExtras.listCourses());
-      const raw = res ?? [];
-      return z.array(trainingCourseSchema).parse(Array.isArray(raw) ? raw : []);
+      const res = await trainingClient.listTrainingCourses({});
+      return z.array(trainingCourseSchema).parse((res.courses ?? []).map(mapTrainingCourse));
     },
   });
 }
@@ -468,9 +509,8 @@ export function useAnniversaries() {
   return useQuery({
     queryKey: ['hr', 'anniversaries'],
     queryFn: async () => {
-      const res = await unwrap(hrExtras.listAnniversaries());
-      const raw = res ?? [];
-      return z.array(anniversarySchema).parse(Array.isArray(raw) ? raw : []);
+      const res = await staffClient.listStaff({ search: '', departmentId: '', status: '' });
+      return z.array(anniversarySchema).parse(buildAnniversaries(res.staff ?? [], new Date()));
     },
   });
 }
