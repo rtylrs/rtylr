@@ -89,9 +89,6 @@
     "staff": "Personnel",
     "viewer": "Observateur"
   },
-  "teamMembers": "Membres de l'équipe",
-  "allApps": "Toutes les applications",
-  "activityLog": "Journal d'activité",
   "toasts": {
     "twoFactorEnabled": "Authentification à deux facteurs activée",
     "twoFactorDisabled": "Authentification à deux facteurs désactivée",
@@ -219,7 +216,8 @@
     "hrLeaveSettings": "Politique de congés RH",
     "automations": "Automatisations",
     "automationWorkflows": "Workflows",
-    "newAutomation": "Nouvelle automatisation"
+    "newAutomation": "Nouvelle automatisation",
+    "permissions": "Permissions"
   },
   "launch": "Ouvrir",
   "pagination": {
