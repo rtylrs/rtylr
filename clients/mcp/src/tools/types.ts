@@ -28,8 +28,34 @@ export function err(message: string): ToolResult {
 
 export function apiErr(e: unknown): ToolResult {
   if (e && typeof e === 'object' && 'response' in e) {
-    const axiosErr = e as { response?: { data?: { message?: string } }; message: string };
-    return err(axiosErr.response?.data?.message ?? axiosErr.message);
+    const axiosErr = e as {
+      response?: {
+        data?: unknown;
+      };
+      message: string;
+    };
+    const data = axiosErr.response?.data;
+    if (data != null) {
+      if (typeof data === 'string' && data.trim()) {
+        return err(data.trim());
+      }
+      if (typeof data === 'object') {
+        const obj = data as Record<string, unknown>;
+        if (typeof obj.message === 'string' && obj.message.trim()) {
+          return err(obj.message.trim());
+        }
+        if (typeof obj.error === 'string' && obj.error.trim()) {
+          return err(obj.error.trim());
+        }
+        if (Array.isArray(obj.violations) && obj.violations.length > 0) {
+          return err(obj.violations.join(', '));
+        }
+        if (Array.isArray(obj.errors) && obj.errors.length > 0) {
+          return err(obj.errors.join(', '));
+        }
+      }
+    }
+    return err(axiosErr.message);
   }
   return err(String(e));
 }

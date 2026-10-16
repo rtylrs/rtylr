@@ -254,7 +254,13 @@ func (h *ToolDecisionHandler) logDecision(ctx context.Context, req *ToolDecision
 		logger.String("status", status),
 		logger.Bool("executed", executed),
 	}
-	if user, ok := authPkg.GetAuthUser(ctx); ok && user != nil {
+	device := authPkg.DeviceCtx(ctx)
+	user, ok := authPkg.GetAuthUser(ctx)
+	if (!ok || user == nil) && device.User != nil {
+		user = device.User
+		ok = true
+	}
+	if ok && user != nil {
 		fields = append(fields,
 			logger.Any("user_id", user.UserID),
 			logger.Any("business_id", user.BusinessID),

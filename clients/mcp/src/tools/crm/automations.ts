@@ -28,8 +28,20 @@ export const toggleAutomation: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.put(`/crm/automations/${encodeURIComponent(String(input.automation_id))}`, {
-        enabled: String(input.enabled) === 'true',
+      const enabled = String(input.enabled) === 'true';
+      const idStr = String(input.automation_id);
+      const listRes = await api.get('/crm/automations');
+      const automations: Array<Record<string, unknown>> = listRes.data?.automations ?? [];
+      const existing = automations.find((a) => String(a.id) === idStr);
+      if (!existing) {
+        return apiErr(new Error(`Automation ${idStr} not found`));
+      }
+      const res = await api.put(`/crm/automations/${encodeURIComponent(idStr)}`, {
+        name: existing.name,
+        trigger_type: existing.trigger_type,
+        trigger_config: existing.trigger_config ?? {},
+        actions: existing.actions ?? [],
+        is_active: enabled,
       });
       return ok(res.data);
     } catch (e) {

@@ -127,3 +127,25 @@ func TestDecisionsAreRecordedInTheirChat(t *testing.T) {
 		t.Fatalf("notes = %q", history.notes)
 	}
 }
+
+func TestStopReplyResolvesIdentityFromDeviceCtx(t *testing.T) {
+	api := &RuntimeAPI{}
+	device := authPkg.Device{
+		User: &authPkg.AuthUser{UserID: 42, BusinessID: 5},
+	}
+	ctx := device.Ctx(context.Background())
+
+	stopped := false
+	cancel := activeReplies.start(42, "s-42", func() {
+		stopped = true
+	})
+	defer cancel()
+
+	resp, err := api.StopReply(ctx, &hubcaretv1.StopReplyRequest{SessionId: "s-42"})
+	if err != nil {
+		t.Fatalf("StopReply error: %v", err)
+	}
+	if !resp.GetStopped() || !stopped {
+		t.Fatalf("expected reply to be stopped, got resp.Stopped=%v, stopped=%v", resp.GetStopped(), stopped)
+	}
+}

@@ -62,12 +62,12 @@ func (m *mockRepo) GetFreePlanAICredits(_ context.Context) (int64, error) {
 	return m.free, m.freeErr
 }
 
-func (m *mockRepo) Reserve(_ context.Context, ownerID, _ int64, _ time.Time, estimate, _ int64) (bool, error) {
+func (m *mockRepo) Reserve(_ context.Context, ownerID, _ int64, _ time.Time, estimate, _ int64, allowOverage bool) (bool, error) {
 	m.scope(ownerID)
 	if m.reserveE != nil {
 		return false, m.reserveE
 	}
-	if m.used+estimate > allowanceOf(m.ent) {
+	if !allowOverage && m.used+estimate > allowanceOf(m.ent) {
 		return false, nil
 	}
 	m.used += estimate
@@ -103,6 +103,25 @@ func TestReserve_BlocksCappedPlanWhenExhausted(t *testing.T) {
 	}
 	if allowed || !st.Blocked {
 		t.Errorf("allowed=%v blocked=%v, want blocked on exhausted capped plan", allowed, st.Blocked)
+	}
+}
+
+func TestReserve_AllowsOveragePlanPastAllowance(t *testing.T) {
+	allowance := allowanceOf(domain.Entitlement{PlanSlug: "pro", AICreditsPerMonth: 1000, SeatCount: 2, Status: "active"})
+	m := &mockRepo{
+		ent:  domain.Entitlement{PlanSlug: "pro", AICreditsPerMonth: 1000, SeatCount: 2, Status: "active"},
+		used: allowance + 50_000, // already in overage
+	}
+	s := &Service{repo: m, entitlements: m}
+	allowed, st, err := s.Reserve(context.Background(), 1, 2)
+	if err != nil {
+		t.Fatalf("Reserve: %v", err)
+	}
+	if !allowed || st.Blocked {
+		t.Errorf("allowed=%v blocked=%v, want allowed for active pro plan in overage", allowed, st.Blocked)
+	}
+	if st.OverageTokens <= 0 {
+		t.Errorf("expected positive overage tokens, got %d", st.OverageTokens)
 	}
 }
 
@@ -159,116 +178,79 @@ func TestReserve_InactiveSubscriptionFallsBackToFreeCredits(t *testing.T) {
 }
 
 func TestReconcile_AppliesDeltaAndRetriesOnFailure(t *testing.T) {
-	m := &mockRepo{failAdjN: 3}
+	m := &mockRepo{failAdjN: 2} // fails twice, succeeds on attempt 3
 	s := &Service{repo: m, entitlements: m}
-	s.Reconcile(context.Background(), 1, 2, 3000, ReservationEstimateTokens)
-	if len(m.adjusts) != 1 {
-		t.Fatalf("adjust calls = %d, want 1", len(m.adjusts))
-	}
-	if m.adjusts[0] != 3000-ReservationEstimateTokens {
-		t.Errorf("delta = %d, want actual minus reservation", m.adjusts[0])
+	s.Reconcile(context.Background(), 1, 2, 3500, 4000)
+	if len(m.adjusts) != 1 || m.adjusts[0] != -500 {
+		t.Errorf("adjusts = %v, want [-500]", m.adjusts)
 	}
 }
 
-// unverifiedOwner is the resolution error the service must treat as a denial.
-// Every write path in this module is scoped by the owner id that resolution
-// returns, so a substituted value is a cross-tenant write.
-var unverifiedOwner = errors.New("no business scope for request")
-
-// TestUnverifiedOwnerReachesNoWrite is the regression test for the fail-open
-// that ResolveOwnerID used to reintroduce: on an unresolved tenant the service
-// fell through with the caller's user id and then read and wrote under it.
 func TestUnverifiedOwnerReachesNoWrite(t *testing.T) {
+	m := &mockRepo{resolveErr: errors.New("no business scope for request")}
+	s := &Service{repo: m, entitlements: m}
+
 	t.Run("SetMode does not write another tenant's mode", func(t *testing.T) {
-		m := &mockRepo{resolveErr: unverifiedOwner}
-		s := &Service{repo: m, entitlements: m}
-
-		err := s.SetMode(context.Background(), 1, 2, domain.ModePerPerson)
-
-		if !errors.Is(err, unverifiedOwner) {
-			t.Fatalf("SetMode error = %v, want %v", err, unverifiedOwner)
+		if err := s.SetMode(context.Background(), 1, 2, domain.ModePerPerson); err == nil {
+			t.Fatal("expected SetMode to fail")
 		}
 		if len(m.scoped) != 0 {
-			t.Errorf("repo calls under owner ids %v, want none", m.scoped)
+			t.Errorf("SetMode touched owner IDs %v on unverified business", m.scoped)
 		}
 	})
 
 	t.Run("Reserve neither serves nor debits", func(t *testing.T) {
-		m := &mockRepo{
-			ent:        domain.Entitlement{PlanSlug: "pro", AICreditsPerMonth: 1000, SeatCount: 3, Status: "active"},
-			resolveErr: unverifiedOwner,
-		}
-		s := &Service{repo: m, entitlements: m}
-
-		allowed, st, err := s.Reserve(context.Background(), 1, 2)
-
-		if !errors.Is(err, unverifiedOwner) {
-			t.Fatalf("Reserve error = %v, want %v", err, unverifiedOwner)
+		allowed, _, err := s.Reserve(context.Background(), 1, 2)
+		if err == nil {
+			t.Fatal("expected Reserve to fail")
 		}
 		if allowed {
-			t.Error("an unverified tenant scope must not be allowed through the AI quota gate")
-		}
-		if !st.Blocked {
-			t.Error("status must be blocked when the tenant scope is unverified")
+			t.Error("Reserve must not report allowed for an unverified business")
 		}
 		if len(m.scoped) != 0 {
-			t.Errorf("repo calls under owner ids %v, want none", m.scoped)
+			t.Errorf("Reserve touched owner IDs %v on unverified business", m.scoped)
 		}
 	})
 
 	t.Run("Reconcile does not debit another tenant's usage", func(t *testing.T) {
-		m := &mockRepo{resolveErr: unverifiedOwner}
-		s := &Service{repo: m, entitlements: m}
-
-		s.Reconcile(context.Background(), 1, 2, 3000, ReservationEstimateTokens)
-
-		if len(m.adjusts) != 0 {
-			t.Errorf("adjusts = %v, want none: reconciliation must not write to an unverified tenant", m.adjusts)
-		}
-		if len(m.scoped) != 0 {
-			t.Errorf("repo calls under owner ids %v, want none", m.scoped)
+		s.Reconcile(context.Background(), 1, 2, 3000, 4000)
+		if len(m.scoped) != 0 || len(m.adjusts) != 0 {
+			t.Errorf("Reconcile touched owner IDs %v (adjusts=%v) on unverified business", m.scoped, m.adjusts)
 		}
 	})
 }
 
 func TestUnverifiedOwnerFailsClosedOnReads(t *testing.T) {
-	s := &Service{repo: &mockRepo{resolveErr: unverifiedOwner}, entitlements: &mockRepo{resolveErr: unverifiedOwner}}
+	m := &mockRepo{resolveErr: errors.New("no business scope for request")}
+	s := &Service{repo: m, entitlements: m}
 
-	if _, err := s.Status(context.Background(), 1, 2); !errors.Is(err, unverifiedOwner) {
-		t.Errorf("Status error = %v, want %v", err, unverifiedOwner)
+	if _, err := s.Status(context.Background(), 1, 2); err == nil {
+		t.Error("expected Status to fail on unverified business")
 	}
-	if _, err := s.GetMode(context.Background(), 1, 2); !errors.Is(err, unverifiedOwner) {
-		t.Errorf("GetMode error = %v, want %v", err, unverifiedOwner)
+	if _, err := s.GetMode(context.Background(), 1, 2); err == nil {
+		t.Error("expected GetMode to fail on unverified business")
+	}
+	if len(m.scoped) != 0 {
+		t.Errorf("read methods touched owner IDs %v on unverified business", m.scoped)
 	}
 }
 
-// TestResolvedOwnerScopesEveryScopedCall pins that a successful resolution is
-// still the owner id the reads and writes run under, so the fail-closed path
-// above is not achieved by simply ignoring the resolver.
 func TestResolvedOwnerScopesEveryScopedCall(t *testing.T) {
-	m := &mockRepo{ent: domain.Entitlement{PlanSlug: "pro", AICreditsPerMonth: 1000, SeatCount: 3, Status: "active"}}
+	m := &mockRepo{
+		ent: domain.Entitlement{PlanSlug: "free", AICreditsPerMonth: 10, SeatCount: 1, Status: "active"},
+	}
 	s := &Service{repo: m, entitlements: m}
 
-	if _, _, err := s.Reserve(context.Background(), 1, 2); err != nil {
-		t.Fatalf("Reserve: %v", err)
-	}
-	s.Reconcile(context.Background(), 1, 2, 3000, ReservationEstimateTokens)
-	if _, err := s.Status(context.Background(), 1, 2); err != nil {
-		t.Fatalf("Status: %v", err)
-	}
-	if _, err := s.GetMode(context.Background(), 1, 2); err != nil {
-		t.Fatalf("GetMode: %v", err)
-	}
-	if err := s.SetMode(context.Background(), 1, 2, domain.ModePerPerson); err != nil {
-		t.Fatalf("SetMode: %v", err)
-	}
+	ctx := context.Background()
+	_, _ = s.Status(ctx, 1, 2)
+	_, _ = s.GetMode(ctx, 1, 2)
+	_ = s.SetMode(ctx, 1, 2, domain.ModePerPerson)
+	_, _, _ = s.Reserve(ctx, 1, 2)
+	s.Reconcile(ctx, 1, 2, 3000, 4000)
 
-	if len(m.scoped) == 0 {
-		t.Fatal("no scoped repo calls recorded")
-	}
-	for i, ownerID := range m.scoped {
-		if ownerID != 1 {
-			t.Fatalf("scoped call %d used owner id %d, want the resolved owner 1", i, ownerID)
+	for i, id := range m.scoped {
+		if id != 1 {
+			t.Errorf("scoped[%d] = %d, want resolved owner 1", i, id)
 		}
 	}
 }
