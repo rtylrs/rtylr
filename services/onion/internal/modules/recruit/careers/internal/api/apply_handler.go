@@ -6,8 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 
@@ -58,6 +60,15 @@ func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Servic
 			return
 		}
 
+		if addr, parseErr := mail.ParseAddress(email); parseErr != nil || addr.Address != email || len(email) > maxEmailLen {
+			writeApplyError(w, http.StatusBadRequest, "email is not valid")
+			return
+		}
+		if utf8.RuneCountInString(name) > maxCandidateNameLen {
+			writeApplyError(w, http.StatusBadRequest, "name is too long")
+			return
+		}
+
 		jobIDStr := strings.TrimSpace(r.FormValue("job_id"))
 		var jobID int64
 		if jobIDStr != "" {
@@ -100,7 +111,7 @@ func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Servic
 			}
 
 			contentType := header.Header.Get("Content-Type")
-			if contentType == "" {
+			if contentType == "" || contentType == "application/octet-stream" {
 				// Fallback MIME detection from extension
 				fname := strings.ToLower(header.Filename)
 				switch {
@@ -113,27 +124,29 @@ func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Servic
 				}
 			}
 
-			if storage.AllowedResumeContentTypes[contentType] {
-				client, storageErr := storage.Default()
-				if storageErr == nil {
-					safeName := storage.SanitizeObjectKey(header.Filename)
-					key := fmt.Sprintf("voxire/applications/%d/%s-%s",
-						jobID,
-						uuid.NewString(),
-						safeName,
+			if !storage.AllowedResumeContentTypes[contentType] {
+				writeApplyError(w, http.StatusBadRequest, "Only PDF or Word CVs are accepted")
+				return
+			}
+			client, storageErr := storage.Default()
+			if storageErr == nil {
+				safeName := storage.SanitizeObjectKey(header.Filename)
+				key := fmt.Sprintf("voxire/applications/%d/%s-%s",
+					jobID,
+					uuid.NewString(),
+					safeName,
+				)
+
+				uploadCtx := r.Context()
+
+				uploadErr := client.Upload(uploadCtx, key, contentType, file)
+				if uploadErr != nil {
+					logger.Ctx(r.Context()).Warn("CV upload failed, proceeding without CV",
+						logger.Error(uploadErr),
+						logger.Any("applicant_email", email),
 					)
-
-					uploadCtx := r.Context()
-
-					uploadErr := client.Upload(uploadCtx, key, contentType, file)
-					if uploadErr != nil {
-						logger.Ctx(r.Context()).Warn("CV upload failed, proceeding without CV",
-							logger.Error(uploadErr),
-							logger.Any("applicant_email", email),
-						)
-					} else {
-						in.CVKey = key
-					}
+				} else {
+					in.CVKey = key
 				}
 			}
 		}

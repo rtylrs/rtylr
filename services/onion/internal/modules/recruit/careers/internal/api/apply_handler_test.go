@@ -63,6 +63,50 @@ func TestApplyHandlerRejectsMalformedJobID(t *testing.T) {
 	}
 }
 
+func TestApplyHandlerRejectsInvalidEmail(t *testing.T) {
+	body, contentType := newCareerMultipartBodyWithFields(t, 0, map[string]string{"email": "not-an-email"})
+	req := httptest.NewRequest(http.MethodPost, "/careers/apply", body)
+	req.Header.Set("Content-Type", contentType)
+	rec := httptest.NewRecorder()
+
+	ApplyHandler(context.Background(), nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+	}
+}
+
+// A CV that is not a PDF/Word document used to be dropped silently, so the
+// applicant believed it had been attached.
+func TestApplyHandlerRejectsUnsupportedCVType(t *testing.T) {
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	for key, value := range map[string]string{"name": "Ada", "email": "ada@example.com", "job_id": "4242"} {
+		if err := writer.WriteField(key, value); err != nil {
+			t.Fatalf("WriteField: %v", err)
+		}
+	}
+	part, err := writer.CreateFormFile("cv", "photo.png")
+	if err != nil {
+		t.Fatalf("CreateFormFile: %v", err)
+	}
+	if _, err := part.Write([]byte("png")); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/careers/apply", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	rec := httptest.NewRecorder()
+
+	ApplyHandler(context.Background(), nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+	}
+}
+
 func newCareerMultipartBody(t *testing.T, cvSize int) (*bytes.Buffer, string) {
 	t.Helper()
 	return newCareerMultipartBodyWithFields(t, cvSize, nil)

@@ -180,3 +180,16 @@ type SubmissionInput struct {
 	CoverLetter   string
 	AnswersJSON   string
 }
+
+// SubmissionStatuses is the hiring pipeline a submission moves through.
+var SubmissionStatuses = []string{"new", "reviewed", "interviewing", "offered", "hired", "rejected"}
+
+// IsValidSubmissionStatus reports whether status is one of SubmissionStatuses.
+func IsValidSubmissionStatus(status string) bool {
+	for _, s := range SubmissionStatuses {
+		if s == status {
+			return true
+		}
+	}
+	return false
+}
