@@ -35,10 +35,10 @@ INSERT INTO hr_timesheets (
     current_approval_level, total_minutes
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: SubmitTimesheet :exec
+-- name: SubmitTimesheet :execresult
 UPDATE hr_timesheets
 SET status = 'submitted', submitted_at = NOW(), current_approval_level = 1, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status IN ('draft', 'rejected');
 
 -- name: AdvanceApprovalLevel :execresult
 -- The status and level predicates make the increment conditional on the state

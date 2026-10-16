@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr/time_off/internal/domain"
@@ -139,6 +140,39 @@ func TestTimeOff_ApproveTimeOffRequest_UpdatesStatus(t *testing.T) {
 		if r.ID == id && r.Status != "rejected" {
 			t.Errorf("expected status rejected, got %s", r.Status)
 		}
+	}
+}
+
+func TestTimeOff_ApproveTimeOffRequest_OnlyDecidesPendingRequests(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateTimeOffRequest(context.Background(), domain.TimeOffInput{
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		StaffID:    timeOffStaffID,
+		Type:       "vacation",
+		StartDate:  "2026-11-01",
+		EndDate:    "2026-11-02",
+		DaysCount:  2.0,
+	})
+	if err != nil {
+		t.Fatalf("CreateTimeOffRequest: %v", err)
+	}
+	decide := func(status string) error {
+		return repo.ApproveTimeOffRequest(context.Background(), testutil.OwnerID, domain.TimeOffApprovalInput{
+			ID: id, Status: status, ApprovedBy: testutil.OwnerID,
+		})
+	}
+	if err := decide("approved"); err != nil {
+		t.Fatalf("first decision: %v", err)
+	}
+	if err := decide("rejected"); !errors.Is(err, domain.ErrTimeOffNotPending) {
+		t.Fatalf("second decision returned %v, want ErrTimeOffNotPending", err)
+	}
+	if err := repo.ApproveTimeOffRequest(context.Background(), testutil.OwnerID, domain.TimeOffApprovalInput{
+		ID: 987654321, Status: "approved",
+	}); !errors.Is(err, domain.ErrTimeOffNotPending) {
+		t.Fatalf("unknown request returned %v, want ErrTimeOffNotPending", err)
 	}
 }
 

@@ -118,10 +118,18 @@ func (r *Repository) SubmitTimesheet(ctx context.Context, businessID, timesheetI
 
 	qtx := r.queries.WithTx(tx)
 
-	if err := qtx.SubmitTimesheet(ctx, sqlc.SubmitTimesheetParams{ID: timesheetID, BusinessID: businessID}); err != nil {
+	submitResult, err := qtx.SubmitTimesheet(ctx, sqlc.SubmitTimesheetParams{ID: timesheetID, BusinessID: businessID})
+	if err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("failed to submit timesheet", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
 		return nil, err
+	}
+	if affected, affectedErr := submitResult.RowsAffected(); affectedErr != nil || affected == 0 {
+		_ = tx.Rollback()
+		if affectedErr != nil {
+			return nil, affectedErr
+		}
+		return nil, domain.ErrTimesheetAlreadySubmitted
 	}
 
 	if err := qtx.CreateApprovalAction(ctx, sqlc.CreateApprovalActionParams{

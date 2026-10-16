@@ -47,13 +47,16 @@ func (h *SubmitTimesheetHandler) Serve(ctx context.Context, _ *SubmitTimesheetRe
 		return SubmitTimesheetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")
 	}
 
-	ts, err := h.Service.SubmitTimesheet(ctx, businessID, id)
+	ts, err := h.Service.SubmitTimesheetForCaller(ctx, businessID, device.User.UserID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrTimesheetAlreadySubmitted) {
 			return SubmitTimesheetResponse{}, onekiterrors.New(http.StatusConflict, "Timesheet already submitted")
 		}
 		if errors.Is(err, domain.ErrTimesheetNotFound) {
 			return SubmitTimesheetResponse{}, onekiterrors.New(http.StatusNotFound, "Timesheet not found")
+		}
+		if errors.Is(err, domain.ErrTimesheetAccessDenied) {
+			return SubmitTimesheetResponse{}, onekiterrors.PermissionDenied()
 		}
 		logger.Ctx(ctx).Error("failed to submit timesheet", logger.Any("owner_id", device.User.UserID), logger.Any("timesheet_id", id), logger.Error(err))
 		return SubmitTimesheetResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to submit timesheet")

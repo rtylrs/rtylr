@@ -13,7 +13,7 @@ INSERT INTO hr_time_off_requests
 (owner_id, business_id, staff_id, type, start_date, end_date, days_count, reason, notes)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: ApproveTimeOffRequest :exec
+-- name: ApproveTimeOffRequest :execresult
 UPDATE hr_time_off_requests
-SET status = ?, approved_by = ?, approved_at = NOW(), notes = ?, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
+SET status = ?, approved_by = ?, approved_at = NOW(), notes = COALESCE(sqlc.narg('notes'), notes), updated_at = NOW()
+WHERE id = ? AND business_id = ? AND status = 'pending';
