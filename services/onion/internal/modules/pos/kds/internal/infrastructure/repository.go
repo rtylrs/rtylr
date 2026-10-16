@@ -90,29 +90,68 @@ func (r *Repository) getItemsForOrders(ctx context.Context, orderIDs []int64) (m
 }
 
 func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {
-	err := r.queries.UpdateKDSItemStatusByItemID(ctx, sqlc.UpdateKDSItemStatusByItemIDParams{
-		Status:     sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(input.Status), Valid: true},
-		ID:         input.ItemID,
-		BusinessID: input.BusinessID,
-	})
+	normStatus, err := domain.NormalizeItemStatus(input.Status)
+	if err != nil {
+		return err
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin transaction for KDS item update", logger.Error(err))
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx, `
+		UPDATE pos_order_items oi
+		JOIN pos_orders o ON o.id = oi.order_id
+		SET oi.status = ?
+		WHERE oi.id = ? AND o.business_id = ?`,
+		normStatus, input.ItemID, input.BusinessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update KDS item status", logger.Error(err))
 		return err
 	}
-	return nil
+
+	orderID := input.OrderID
+	if orderID == 0 {
+		_ = tx.QueryRowContext(ctx, `
+			SELECT oi.order_id FROM pos_order_items oi
+			JOIN pos_orders o ON o.id = oi.order_id
+			WHERE oi.id = ? AND o.business_id = ?`, input.ItemID, input.BusinessID).Scan(&orderID)
+	}
+
+	if orderID > 0 {
+		rows, qErr := tx.QueryContext(ctx, `SELECT status FROM pos_order_items WHERE order_id = ?`, orderID)
+		if qErr == nil {
+			var statuses []string
+			for rows.Next() {
+				var st sql.NullString
+				if scanErr := rows.Scan(&st); scanErr == nil && st.Valid {
+					statuses = append(statuses, st.String)
+				}
+			}
+			rows.Close()
+
+			newOrderStatus := domain.DeriveOrderStatusFromItemStatuses(statuses)
+			_, _ = tx.ExecContext(ctx, `
+				UPDATE pos_orders
+				SET status = ?, updated_at = NOW()
+				WHERE id = ? AND business_id = ?
+				  AND status NOT IN ('paid', 'refunded', 'voided', 'cancelled')`,
+				newOrderStatus, orderID, input.BusinessID)
+		}
+	}
+
+	return tx.Commit()
 }
 
 // UpdateItemStatusByItemID updates a KDS item status by item id alone, resolving the
 // owning order via join. BusinessID-scoped to prevent cross-tenant mutation.
 func (r *Repository) UpdateItemStatusByItemID(ctx context.Context, businessID, itemID int64, status string) error {
-	err := r.queries.UpdateKDSItemStatusByItemID(ctx, sqlc.UpdateKDSItemStatusByItemIDParams{
-		Status:     sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(status), Valid: true},
-		ID:         itemID,
+	return r.UpdateItemStatus(ctx, domain.UpdateItemStatusInput{
 		BusinessID: businessID,
+		ItemID:     itemID,
+		Status:     status,
 	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to update KDS item status by item id", logger.Error(err))
-		return err
-	}
-	return nil
 }

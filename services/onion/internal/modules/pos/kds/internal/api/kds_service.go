@@ -52,7 +52,12 @@ func (a *KDSAPI) UpdateKDSItemByID(ctx context.Context, req *poskdsv1.UpdateKDSI
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid item ID")
 	}
 
-	if updateErr := a.Service.UpdateItemStatusByItemID(ctx, businessID, req.GetItemId(), body.GetStatus()); updateErr != nil {
+	normStatus, normErr := domain.NormalizeItemStatus(body.GetStatus())
+	if normErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, normErr.Error())
+	}
+
+	if updateErr := a.Service.UpdateItemStatusByItemID(ctx, businessID, req.GetItemId(), normStatus); updateErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
 	}
 	return &poskdsv1.UpdateKDSItemByIDResponse{Message: "Item status updated"}, nil
@@ -74,12 +79,17 @@ func (a *KDSAPI) UpdateKDSItemStatus(ctx context.Context, req *poskdsv1.UpdateKD
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid item ID")
 	}
 
+	normStatus, normErr := domain.NormalizeItemStatus(body.GetStatus())
+	if normErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, normErr.Error())
+	}
+
 	if updateErr := a.Service.UpdateItemStatus(ctx, domain.UpdateItemStatusInput{
 		OwnerID:    device.User.UserID,
 		BusinessID: businessID,
 		OrderID:    req.GetOrderId(),
 		ItemID:     req.GetItemId(),
-		Status:     body.GetStatus(),
+		Status:     normStatus,
 	}); updateErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
 	}
