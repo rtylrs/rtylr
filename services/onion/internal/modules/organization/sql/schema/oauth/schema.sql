@@ -43,4 +43,4 @@ CREATE TABLE IF NOT EXISTS `oauth_tokens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO oauth_clients (id, name, redirect_uris, scopes, is_public) VALUES
-('rtylr-mcp', 'rtylr MCP Server', '["http://127.0.0.1"]', 'flow:read flow:write crm:read crm:write finance:read finance:write erp:read erp:write', 1);
+('rtylr-mcp', 'rtylr MCP Server', '["http://127.0.0.1/callback"]', 'flow:read flow:write crm:read crm:write finance:read finance:write erp:read erp:write pos:read pos:write', 1);

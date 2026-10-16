@@ -9,27 +9,31 @@ import { useIssueAuthCode } from './useOAuth';
 import { getEmailError } from '../../shared/lib/validation';
 import { authInputClass } from '../../shared/components/AuthField';
 
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
+
 function isAllowedOAuthRedirect(url: string): boolean {
   try {
-    const host = new URL(url).hostname.toLowerCase();
-    if (import.meta.env.DEV && (host === 'localhost' || host === '127.0.0.1')) {
-      return true;
-    }
-    return host === 'rtylr.com' || host.endsWith('.rtylr.com');
+    const { protocol, hostname } = new URL(url);
+    const host = hostname.toLowerCase();
+    // Native clients such as the MCP server receive the code on a loopback port.
+    if (protocol === 'http:' && LOOPBACK_HOSTS.has(host)) return true;
+    return protocol === 'https:' && (host === 'rtylr.com' || host.endsWith('.rtylr.com'));
   } catch {
     return false;
   }
 }
 
-const SCOPE_LABELS: Record<string, string> = {
-  'flow:read': 'View your projects and tasks',
-  'flow:write': 'Create and update projects and tasks',
-  'crm:read': 'View your customers and campaigns',
-  'crm:write': 'Create and update customers and campaigns',
-  'finance:read': 'View your invoices and expenses',
-  'finance:write': 'Create and update invoices and expenses',
-  'erp:read': 'View your inventory and suppliers',
-  'erp:write': 'Manage inventory and purchase orders',
+const SCOPE_LABEL_KEYS: Record<string, string> = {
+  'flow:read': 'auth.oauth.scopeFlowRead',
+  'flow:write': 'auth.oauth.scopeFlowWrite',
+  'crm:read': 'auth.oauth.scopeCrmRead',
+  'crm:write': 'auth.oauth.scopeCrmWrite',
+  'finance:read': 'auth.oauth.scopeFinanceRead',
+  'finance:write': 'auth.oauth.scopeFinanceWrite',
+  'erp:read': 'auth.oauth.scopeErpRead',
+  'erp:write': 'auth.oauth.scopeErpWrite',
+  'pos:read': 'auth.oauth.scopePosRead',
+  'pos:write': 'auth.oauth.scopePosWrite',
 };
 
 type Step = 'login' | 'consent';
@@ -63,18 +67,18 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
 
   const isInvalidRequest = useMemo(() => {
     if (!params.clientId || !params.redirectUri || !params.codeChallenge) {
-      return 'Invalid authorization request - missing required parameters.';
+      return t('auth.oauth.errMissingParams');
     }
     // An empty scope would render a consent screen approving no permissions
     // at all - the server must be told what access is being granted.
     if (scopes.length === 0) {
-      return 'Invalid authorization request - no scopes requested.';
+      return t('auth.oauth.errNoScopes');
     }
     if (!isAllowedOAuthRedirect(params.redirectUri)) {
-      return 'Invalid redirect URI - must belong to an authorized domain.';
+      return t('auth.oauth.errInvalidRedirect');
     }
     return null;
-  }, [params, scopes]);
+  }, [params, scopes, t]);
 
   useEffect((): void => {
     if (isInvalidRequest) {
@@ -111,19 +115,19 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
           // below would be handed undefined and, if it passed, the browser
           // would navigate to the string "undefined".
           if (data.redirectUrl === undefined || !isAllowedOAuthRedirect(data.redirectUrl)) {
-            setError('Redirect URI is not on an allowed domain.');
+            setError(t('auth.oauth.errRedirectNotAllowed'));
             return;
           }
           window.location.href = data.redirectUrl;
         },
-        onError: () => setError('Failed to authorize. Please try again.'),
+        onError: () => setError(t('auth.oauth.errAuthorizeFailed')),
       }
     );
   };
 
   const handleDeny = (): void => {
     if (!params.redirectUri || !isAllowedOAuthRedirect(params.redirectUri)) {
-      setError('Redirect URI is not on an allowed domain.');
+      setError(t('auth.oauth.errRedirectNotAllowed'));
       return;
     }
     const u = new URL(params.redirectUri);
@@ -135,10 +139,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
 
   if (step === 'login') {
     return (
-      <AuthShell
-        title={t('auth.oauth.signInToAuthorize')}
-        subtitle={`rtylr MCP is requesting access to your account`}
-      >
+      <AuthShell title={t('auth.oauth.signInToAuthorize')} subtitle={t('auth.oauth.requesting')}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -184,7 +185,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
             disabled={!isValid || loginMutation.isPending || !!isInvalidRequest}
             className="w-full rounded-lg bg-[#111] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {loginMutation.isPending ? 'Signing in…' : 'Continue'}
+            {loginMutation.isPending ? t('auth.oauth.signingIn') : t('auth.oauth.continue')}
           </button>
         </form>
       </AuthShell>
@@ -209,7 +210,11 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
               {scopes.map((scope) => (
                 <li key={scope} className="flex items-start gap-3 px-4 py-3">
                   <Check size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-                  <span className="text-sm text-[#444]">{SCOPE_LABELS[scope] ?? scope}</span>
+                  <span className="text-sm text-[#444]">
+                    {SCOPE_LABEL_KEYS[scope]
+                      ? t(SCOPE_LABEL_KEYS[scope])
+                      : t('auth.oauth.scopeUnknown', { scope })}
+                  </span>
                 </li>
               ))}
             </ul>

@@ -25,6 +25,8 @@ type AuthUser struct {
 	IP                 string                            `json:"ip"`
 	EffectiveAccess    *authorization.EffectiveAccess    `json:"effective_access,omitempty"`
 	ProvisioningStatus *authorization.ProvisioningStatus `json:"provisioning_status,omitempty"`
+	OAuthClientID      string                            `json:"oauth_client_id,omitempty"`
+	OAuthScopes        []string                          `json:"oauth_scopes,omitempty"`
 }
 
 // EffectiveAccessResolver supplies server-resolved tenant authorization for
@@ -61,6 +63,8 @@ type TokenClaims struct {
 	Platform       string
 	PlatformUserID int64
 	PlanID         int64
+	OAuthClientID  string
+	Scope          string
 	ExpiresAt      time.Time
 }
 

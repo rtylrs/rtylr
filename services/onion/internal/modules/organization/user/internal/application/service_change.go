@@ -139,6 +139,8 @@ type AccessTokenClaims struct {
 	PlatformUserID int64  `json:"platform_user_id,omitempty"`
 	PlanID         int64  `json:"plan_id,omitempty"`
 	TokenEpoch     int64  `json:"token_epoch,omitempty"`
+	Scope          string `json:"scope,omitempty"`
+	OAuthClientID  string `json:"cid,omitempty"`
 	jwt.RegisteredClaims
 }
 

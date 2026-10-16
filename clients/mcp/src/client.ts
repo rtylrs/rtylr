@@ -18,8 +18,15 @@ export function createClient(): AxiosInstance {
   _client.interceptors.response.use(
     (res) => res,
     async (err) => {
-      // On 401, refresh once; if that fails, invalidate the rejected token.
-      if (err.response?.status === 401 && !err.config._retried) {
+      // On 401 (or a 403 for a scope the stored token predates), refresh once;
+      // if that fails, invalidate the rejected token.
+      const status = err.response?.status;
+      const insufficientScope =
+        status === 403 &&
+        String(err.response?.headers?.["www-authenticate"] ?? "").includes(
+          "insufficient_scope",
+        );
+      if ((status === 401 || insufficientScope) && !err.config._retried) {
         const cfg = loadConfig();
         if (cfg?.refresh_token) {
           try {

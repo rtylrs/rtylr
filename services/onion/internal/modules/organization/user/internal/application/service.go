@@ -49,6 +49,7 @@ type Service struct {
 	emails              emailNotifications
 	validator           *Validator
 	JWT                 *jwtutils.JWTHelper
+	OAuthJWT            *jwtutils.JWTHelper
 	googleClientID      string
 	googleOAuthProvider *GoogleOAuthProvider
 	businessProvisioner BusinessProvisioner
@@ -108,6 +109,7 @@ func (s *Service) Initialize(ctx context.Context) bool {
 	}
 
 	s.JWT = jwtutils.NewJWTHelperWithDuration(jwtSecret, "onion-platform", jwtDuration)
+	s.OAuthJWT = jwtutils.NewJWTHelperWithDuration(jwtSecret, OAuthTokenIssuer, jwtDuration)
 
 	return true
 }
