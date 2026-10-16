@@ -35,10 +35,21 @@ type DecisionHistory interface {
 	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
 }
 
+func resolveAuthUser(ctx context.Context) (*authPkg.AuthUser, bool) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User != nil && device.User.UserID > 0 {
+		return device.User, true
+	}
+	if user, ok := authPkg.GetAuthUser(ctx); ok && user != nil && user.UserID > 0 {
+		return user, true
+	}
+	return nil, false
+}
+
 // recordDecision notes what happened to a proposal in its chat, so the next
 // turn's history says the action was done (or skipped) rather than pending.
 func (a *RuntimeAPI) recordDecision(ctx context.Context, sessionID string, resp ToolDecisionResponse) {
-	user, ok := authPkg.GetAuthUser(ctx)
+	user, ok := resolveAuthUser(ctx)
 	sessionID = strings.TrimSpace(sessionID)
 	if a.History == nil || sessionID == "" || !ok || user == nil || user.UserID <= 0 {
 		return
@@ -77,7 +88,7 @@ func decisionNote(resp ToolDecisionResponse) string {
 // RateReply records the caller's verdict on a reply in one of their chats and,
 // when it is worth it, starts a background pass that learns from it.
 func (a *RuntimeAPI) RateReply(ctx context.Context, req *hubcaretv1.RateReplyRequest) (*hubcaretv1.RateReplyResponse, error) {
-	user, ok := authPkg.GetAuthUser(ctx)
+	user, ok := resolveAuthUser(ctx)
 	if !ok || user == nil || user.UserID <= 0 {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -180,7 +191,7 @@ func (a *RuntimeAPI) DecideTool(ctx context.Context, req *hubcaretv1.ToolDecisio
 
 // StopReply ends the reply generating in one of the caller's chats.
 func (a *RuntimeAPI) StopReply(ctx context.Context, req *hubcaretv1.StopReplyRequest) (*hubcaretv1.StopReplyResponse, error) {
-	user, ok := authPkg.GetAuthUser(ctx)
+	user, ok := resolveAuthUser(ctx)
 	if !ok || user == nil || user.UserID <= 0 {
 		return nil, onekiterrors.PermissionDenied()
 	}

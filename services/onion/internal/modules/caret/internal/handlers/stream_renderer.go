@@ -539,9 +539,12 @@ func (r *streamEventRenderer) finishTool(tool *inflightTool, outcome toolOutcome
 	output, executed, duration, execErr := outcome.output, outcome.executed, outcome.duration, outcome.err
 	logToolCall(r.ctx, call.Name, executed, duration, execErr)
 	if execErr == nil && !executed {
-		// No executor claimed the tool; keep unsupported markers invisible rather
-		// than suggesting that an action ran.
-		return nil
+		if !tool.announced {
+			// No executor claimed the tool; keep unsupported markers invisible rather
+			// than suggesting that an action ran.
+			return nil
+		}
+		execErr = fmt.Errorf("tool %q is not available", call.Name)
 	}
 	if !tool.announced {
 		if err := WriteEvent(r.w, r.flush, tool.event); err != nil {

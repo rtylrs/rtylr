@@ -81,19 +81,22 @@ func (r *Repository) AddUsage(ctx context.Context, ownerID, bucketUserID int64, 
 	return err
 }
 
-// Reserve atomically adds the estimate to the usage bucket only when the
-// result stays within allowance, returning false when the bucket is exhausted.
-func (r *Repository) Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64) (bool, error) {
+// Reserve atomically adds the estimate to the usage bucket and increments request count.
+// For capped plans, it succeeds only when the result stays within allowance.
+// For overage plans, allowOverage is true and the reservation succeeds unconditionally.
+func (r *Repository) Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64, allowOverage bool) (bool, error) {
 	if err := r.queries.EnsureUsageRow(ctx, sqlc.EnsureUsageRowParams{
 		OwnerID: ownerID, UserID: bucketUserID, BillingMonth: month,
 	}); err != nil {
 		return false, err
 	}
 	res, err := r.queries.ReserveMonthlyTokens(ctx, sqlc.ReserveMonthlyTokensParams{
-		TokensUsed: estimate,
-		OwnerID:    ownerID, UserID: bucketUserID, BillingMonth: month,
-		TokensUsed_2: estimate,
-		TokensUsed_3: allowance,
+		Estimate:     estimate,
+		OwnerID:      ownerID,
+		UserID:       bucketUserID,
+		BillingMonth: month,
+		AllowOverage: allowOverage,
+		Allowance:    allowance,
 	})
 	if err != nil {
 		return false, err
@@ -107,9 +110,12 @@ func (r *Repository) Reserve(ctx context.Context, ownerID, bucketUserID int64, m
 
 // Adjust reconciles a prior reservation against actual usage. The delta may
 // be negative when the response used fewer tokens than reserved.
+// Tokens used is protected against going negative.
 func (r *Repository) Adjust(ctx context.Context, ownerID, bucketUserID int64, month time.Time, delta int64) error {
 	return r.queries.AdjustMonthlyTokenUsage(ctx, sqlc.AdjustMonthlyTokenUsageParams{
-		TokensUsed: delta,
-		OwnerID:    ownerID, UserID: bucketUserID, BillingMonth: month,
+		Delta:        delta,
+		OwnerID:      ownerID,
+		UserID:       bucketUserID,
+		BillingMonth: month,
 	})
 }

@@ -15,7 +15,7 @@ type repository interface {
 	SetMode(ctx context.Context, ownerID int64, mode domain.Mode) error
 	GetUsedTokens(ctx context.Context, ownerID, bucketUserID int64, month time.Time) (int64, error)
 	AddUsage(ctx context.Context, ownerID, bucketUserID int64, month time.Time, tokens int64) error
-	Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64) (bool, error)
+	Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64, allowOverage bool) (bool, error)
 	Adjust(ctx context.Context, ownerID, bucketUserID int64, month time.Time, delta int64) error
 }
 
@@ -197,7 +197,7 @@ func (s *Service) Reserve(ctx context.Context, businessID, userID int64) (bool, 
 		return false, buildStatus(ent, mode, allowance, used), nil
 	}
 
-	reserved, err := s.repo.Reserve(ctx, owner, bucketUser, monthStart(), ReservationEstimateTokens, allowance)
+	reserved, err := s.repo.Reserve(ctx, owner, bucketUser, monthStart(), ReservationEstimateTokens, allowance, overageAllowed)
 	if err != nil {
 		if allowsOverage(ent.PlanSlug) {
 			logger.Ctx(ctx).Error("quota reserve failed; failing open for overage plan",
