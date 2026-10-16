@@ -73,4 +73,6 @@ type Repository interface {
 	GetUserPasswordHash(ctx context.Context, userID int64) (string, error)
 	GetUserIDByEmail(ctx context.Context, email string) (int64, error)
 	GetUserBusinessID(ctx context.Context, userID int64) (businessID int64, err error)
+	// GetUserTokenEpoch is the revocation anchor access tokens must carry.
+	GetUserTokenEpoch(ctx context.Context, userID int64) (int64, error)
 }

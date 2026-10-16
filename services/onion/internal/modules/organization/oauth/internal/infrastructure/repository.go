@@ -164,6 +164,14 @@ func (r *Repository) GetUserIDByEmail(ctx context.Context, email string) (int64,
 	return userID, err
 }
 
+func (r *Repository) GetUserTokenEpoch(ctx context.Context, userID int64) (int64, error) {
+	epoch, err := r.queries.GetUserTokenEpoch(ctx, userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, domain.ErrUserNotFound
+	}
+	return epoch, err
+}
+
 func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64, error) {
 	businessID, err := r.queries.GetUserBusinessID(ctx, userID)
 	if errors.Is(err, sql.ErrNoRows) {
