@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -40,6 +41,16 @@ func (r *Repository) ListTimeOffRequests(ctx context.Context, businessID int64) 
 		t.OwnerID = row.OwnerID
 		t.BusinessID = row.BusinessID
 		t.StaffID = row.StaffID
+		switch v := row.StaffName.(type) {
+		case string:
+			t.StaffName = v
+		case []byte:
+			t.StaffName = string(v)
+		case nil:
+			t.StaffName = ""
+		default:
+			t.StaffName = fmt.Sprint(v)
+		}
 		t.Type = string(row.Type)
 		t.StartDate = row.StartDate
 		t.EndDate = row.EndDate
@@ -72,6 +83,18 @@ func (r *Repository) ListTimeOffRequests(ctx context.Context, businessID int64) 
 }
 
 func (r *Repository) CreateTimeOffRequest(ctx context.Context, input domain.TimeOffInput) (int64, error) {
+	var found int
+	err := r.pool.QueryRowContext(ctx,
+		"SELECT 1 FROM hr_staff WHERE id = ? AND business_id = ? LIMIT 1",
+		input.StaffID, input.BusinessID,
+	).Scan(&found)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, domain.ErrStaffNotFound
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to verify staff for time off request", logger.Error(err))
+		return 0, err
+	}
 	result, err := r.queries.CreateTimeOffRequest(ctx, sqlc.CreateTimeOffRequestParams{
 		OwnerID:    input.OwnerID,
 		BusinessID: input.BusinessID,
@@ -116,6 +139,3 @@ func parseDate(s string) time.Time {
 	}
 	return time.Time{}
 }
-
-// parseDecimal converts a DB decimal string to float64, logging corrupt
-// values instead of silently coercing them to 0.

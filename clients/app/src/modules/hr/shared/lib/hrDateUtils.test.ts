@@ -14,15 +14,16 @@ import {
 
 describe('formatDate', () => {
   it('formats short date by default', () => {
-    const result = formatDate('2024-06-15');
-    expect(result).toContain('2024');
+    expect(formatDate('2024-06-15')).toBe('Jun 15, 2024');
+  });
+  it('formats long date', () => {
+    expect(formatDate('2024-06-15', 'long')).toBe('June 15, 2024');
   });
   it('returns empty string for invalid date', () => {
     expect(formatDate('not-a-date')).toBe('');
   });
   it('formats numeric date', () => {
-    const result = formatDate('2024-06-15', 'numeric');
-    expect(result).toBeTruthy();
+    expect(formatDate('2024-06-15', 'numeric')).toBe('6/15/2024');
   });
 });
 

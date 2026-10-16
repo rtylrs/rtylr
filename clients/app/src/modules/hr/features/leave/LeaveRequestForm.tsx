@@ -67,8 +67,11 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const selectedBalance = useMemo(() => {
     if (!balances || form.leaveTypeId === '') return null;
     return (
-      balances.find((b) => b.employeeId === employeeId && b.leaveTypeId === form.leaveTypeId) ??
-      null
+      balances.find(
+        (b) =>
+          String(b.employeeId) === String(employeeId) &&
+          String(b.leaveTypeId) === String(form.leaveTypeId)
+      ) ?? null
     );
   }, [balances, form.leaveTypeId, employeeId]);
 
