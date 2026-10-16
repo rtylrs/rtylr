@@ -12,6 +12,7 @@ type OAuthTokenClaims struct {
 	UserID     int64  `json:"user_id"`
 	BusinessID int64  `json:"business_id,omitempty"`
 	Scope      string `json:"scope,omitempty"`
+	ClientID   string `json:"cid,omitempty"`
 	TokenEpoch int64  `json:"token_epoch,omitempty"`
 	jwt.RegisteredClaims
 }

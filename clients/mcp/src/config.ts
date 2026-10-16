@@ -6,7 +6,7 @@ export const API_BASE = process.env.RTYLR_API_URL ?? "https://api.voxire.com";
 export const OAUTH_CLIENT_ID = "rtylr-mcp";
 export const OAUTH_ISSUER = "rtylr";
 export const OAUTH_SCOPES =
-  "flow:read flow:write crm:read crm:write finance:read finance:write erp:read erp:write";
+  "flow:read flow:write crm:read crm:write finance:read finance:write erp:read erp:write pos:read pos:write";
 
 const CONFIG_DIR = join(homedir(), ".rtylr-mcp");
 const CONFIG_FILE = join(CONFIG_DIR, "config.json");
@@ -15,6 +15,7 @@ export interface StoredConfig {
   access_token: string;
   refresh_token: string;
   expires_at: number;
+  scope?: string;
 }
 
 export function loadConfig(): StoredConfig | null {

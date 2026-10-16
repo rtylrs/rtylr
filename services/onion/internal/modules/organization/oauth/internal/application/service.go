@@ -25,6 +25,8 @@ import (
 // be cached — those are security-sensitive single-use exchanges.
 const oauthClientTTL = 10 * time.Minute
 
+const accessTokenTTL = 24 * time.Hour
+
 type Service struct {
 	repo domain.Repository
 	jwt  *jwtutils.JWTHelper
@@ -34,7 +36,7 @@ func NewService(ctx context.Context, repo domain.Repository) *Service {
 	secret, _ := ctx.Value(jwtutils.JWTSecretKey).(string)
 	return &Service{
 		repo: repo,
-		jwt:  jwtutils.NewJWTHelperWithDuration(secret, "rtylr", 24*time.Hour),
+		jwt:  jwtutils.NewJWTHelperWithDuration(secret, "rtylr", accessTokenTTL),
 	}
 }
 
@@ -59,7 +61,7 @@ func (s *Service) ValidateAuthRequest(ctx context.Context, clientID, redirectURI
 		return nil, domain.ErrInvalidRedirectURI
 	}
 
-	if scope != "" && !isScopeAllowed(client.Scopes, scope) {
+	if len(strings.Fields(scope)) == 0 || !isScopeAllowed(client.Scopes, scope) {
 		return nil, domain.ErrInvalidScope
 	}
 
@@ -114,158 +116,146 @@ func (s *Service) IssueAuthCode(ctx context.Context, clientID string, userID int
 	return code, nil
 }
 
+// TokenGrant is the result of a successful token exchange.
+type TokenGrant struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresIn    int
+	Scope        string
+}
+
 // ExchangeCode exchanges an authorization code for access+refresh tokens.
-func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier, redirectURI string) (accessToken, refreshToken string, expiresIn int, err error) {
-	if err := s.validateTokenClient(ctx, clientID); err != nil {
-		return "", "", 0, err
+func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier, redirectURI string) (*TokenGrant, error) {
+	if _, err := s.validateTokenClient(ctx, clientID); err != nil {
+		return nil, err
 	}
 	authCode, err := s.repo.GetAuthCode(ctx, code)
 	if err != nil {
-		return "", "", 0, domain.ErrCodeNotFound
+		return nil, domain.ErrCodeNotFound
 	}
 
 	if authCode.ClientID != clientID {
-		return "", "", 0, domain.ErrCodeNotFound
+		return nil, domain.ErrCodeNotFound
 	}
 
 	if authCode.Used {
-		return "", "", 0, domain.ErrCodeUsed
+		return nil, domain.ErrCodeUsed
 	}
 
 	if time.Now().After(authCode.ExpiresAt) {
-		return "", "", 0, domain.ErrCodeExpired
+		return nil, domain.ErrCodeExpired
 	}
 
 	if authCode.RedirectURI != redirectURI {
-		return "", "", 0, domain.ErrInvalidRedirectURI
+		return nil, domain.ErrInvalidRedirectURI
 	}
 
 	if !verifyPKCE(codeVerifier, authCode.CodeChallenge, authCode.CodeChallengeMethod) {
-		return "", "", 0, domain.ErrCodeVerifierFailed
+		return nil, domain.ErrCodeVerifierFailed
 	}
 
 	// Consume atomically so two concurrent exchanges cannot both mint tokens.
 	if err := s.repo.ConsumeAuthCode(ctx, code); err != nil {
-		return "", "", 0, err
-	}
-
-	businessID, err := s.repo.GetUserBusinessID(ctx, authCode.UserID)
-	if err != nil {
-		return "", "", 0, err
+		return nil, err
 	}
 
 	tokenEpoch, err := s.repo.GetUserTokenEpoch(ctx, authCode.UserID)
 	if err != nil {
-		return "", "", 0, err
+		return nil, err
 	}
 
-	claims := &OAuthTokenClaims{
-		UserID:     authCode.UserID,
-		BusinessID: businessID,
-		Scope:      authCode.Scope,
-		TokenEpoch: tokenEpoch,
-	}
-
-	at, err := s.jwt.CreateJWT(claims)
-	if err != nil {
-		return "", "", 0, err
-	}
-
-	rt, err := generateRefreshToken()
-	if err != nil {
-		return "", "", 0, err
-	}
-
-	token := &domain.Token{
-		AccessToken:  at,
-		RefreshToken: rt,
-		ClientID:     clientID,
-		UserID:       authCode.UserID,
-		Scope:        authCode.Scope,
-		ExpiresAt:    time.Now().Add(24 * time.Hour),
-	}
-
-	if err := s.repo.SaveToken(ctx, token); err != nil {
-		return "", "", 0, err
-	}
-
-	return at, rt, int((24 * time.Hour).Seconds()), nil
+	return s.mintTokens(ctx, clientID, authCode.UserID, authCode.Scope, tokenEpoch)
 }
 
 // RefreshTokens exchanges a refresh token for a new access token.
-func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken string) (accessToken, newRefreshToken string, expiresIn int, err error) {
-	if err := s.validateTokenClient(ctx, clientID); err != nil {
-		return "", "", 0, err
+func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken string) (*TokenGrant, error) {
+	client, err := s.validateTokenClient(ctx, clientID)
+	if err != nil {
+		return nil, err
 	}
 	token, err := s.repo.GetTokenByRefresh(ctx, refreshToken)
 	if err != nil {
-		return "", "", 0, domain.ErrTokenNotFound
+		return nil, domain.ErrTokenNotFound
 	}
 
 	if token.Revoked {
-		return "", "", 0, domain.ErrTokenRevoked
+		return nil, domain.ErrTokenRevoked
 	}
 
 	if time.Now().After(token.ExpiresAt) {
-		return "", "", 0, domain.ErrTokenExpired
+		return nil, domain.ErrTokenExpired
 	}
 
 	if token.ClientID != clientID {
-		return "", "", 0, domain.ErrTokenNotFound
+		return nil, domain.ErrTokenNotFound
 	}
 
 	// A password change or reset bumps the epoch; the access token the
 	// refresh token was issued with records the epoch it was minted under.
 	currentEpoch, err := s.repo.GetUserTokenEpoch(ctx, token.UserID)
 	if err != nil {
-		return "", "", 0, err
+		return nil, err
 	}
 	if issuedEpoch(token.AccessToken) != currentEpoch {
 		_ = s.repo.RevokeToken(ctx, refreshToken)
-		return "", "", 0, domain.ErrTokenRevoked
+		return nil, domain.ErrTokenRevoked
+	}
+
+	// Scopes the client no longer offers are dropped, never kept alive.
+	scope := narrowScope(token.Scope, client.Scopes)
+	if scope == "" {
+		return nil, domain.ErrInvalidScope
 	}
 
 	// Atomic so two concurrent refreshes cannot both rotate the same token.
 	if err := s.repo.ConsumeRefreshToken(ctx, refreshToken); err != nil {
-		return "", "", 0, err
+		return nil, err
 	}
 
-	businessID, err := s.repo.GetUserBusinessID(ctx, token.UserID)
+	return s.mintTokens(ctx, clientID, token.UserID, scope, currentEpoch)
+}
+
+func (s *Service) mintTokens(ctx context.Context, clientID string, userID int64, scope string, tokenEpoch int64) (*TokenGrant, error) {
+	businessID, err := s.repo.GetUserBusinessID(ctx, userID)
 	if err != nil {
-		return "", "", 0, err
+		return nil, err
 	}
 
 	claims := &OAuthTokenClaims{
-		UserID:     token.UserID,
+		UserID:     userID,
 		BusinessID: businessID,
-		Scope:      token.Scope,
-		TokenEpoch: currentEpoch,
+		Scope:      scope,
+		ClientID:   clientID,
+		TokenEpoch: tokenEpoch,
 	}
 
 	at, err := s.jwt.CreateJWT(claims)
 	if err != nil {
-		return "", "", 0, err
+		return nil, err
 	}
 
 	rt, err := generateRefreshToken()
 	if err != nil {
-		return "", "", 0, err
+		return nil, err
 	}
 
-	newToken := &domain.Token{
+	if err := s.repo.SaveToken(ctx, &domain.Token{
 		AccessToken:  at,
 		RefreshToken: rt,
 		ClientID:     clientID,
-		UserID:       token.UserID,
-		Scope:        token.Scope,
-		ExpiresAt:    time.Now().Add(24 * time.Hour),
+		UserID:       userID,
+		Scope:        scope,
+		ExpiresAt:    time.Now().Add(accessTokenTTL),
+	}); err != nil {
+		return nil, err
 	}
 
-	if err := s.repo.SaveToken(ctx, newToken); err != nil {
-		return "", "", 0, err
-	}
-
-	return at, rt, int((24 * time.Hour).Seconds()), nil
+	return &TokenGrant{
+		AccessToken:  at,
+		RefreshToken: rt,
+		ExpiresIn:    int(accessTokenTTL.Seconds()),
+		Scope:        scope,
+	}, nil
 }
 
 // issuedEpoch reads the epoch embedded in an access token this service stored.
@@ -305,10 +295,22 @@ func redirectURIsEqual(a, b string) bool {
 	if errA != nil || errB != nil {
 		return false
 	}
-	return pa.Scheme == pb.Scheme &&
-		strings.EqualFold(pa.Host, pb.Host) &&
-		pa.Path == pb.Path &&
-		pa.RawQuery == pb.RawQuery
+	if pa.Scheme != pb.Scheme || pa.Path != pb.Path || pa.RawQuery != pb.RawQuery {
+		return false
+	}
+	// Native clients listen on an ephemeral loopback port (RFC 8252 7.3).
+	if pa.Scheme == "http" && isLoopbackHost(pa.Hostname()) && pa.Port() == "" {
+		return strings.EqualFold(pa.Hostname(), pb.Hostname()) && pb.User == nil
+	}
+	return strings.EqualFold(pa.Host, pb.Host)
+}
+
+func isLoopbackHost(host string) bool {
+	switch strings.ToLower(host) {
+	case "127.0.0.1", "::1", "localhost":
+		return true
+	}
+	return false
 }
 
 func isScopeAllowed(clientScopes []string, requested string) bool {
@@ -324,6 +326,20 @@ func isScopeAllowed(clientScopes []string, requested string) bool {
 	return true
 }
 
+func narrowScope(granted string, clientScopes []string) string {
+	allowed := make(map[string]struct{}, len(clientScopes))
+	for _, scope := range clientScopes {
+		allowed[scope] = struct{}{}
+	}
+	kept := make([]string, 0)
+	for _, scope := range strings.Fields(granted) {
+		if _, ok := allowed[scope]; ok {
+			kept = append(kept, scope)
+		}
+	}
+	return strings.Join(kept, " ")
+}
+
 func verifyPKCE(verifier, challenge, method string) bool {
 	if verifier == "" || challenge == "" || method != "S256" {
 		return false
@@ -337,17 +353,17 @@ func verifyPKCE(verifier, challenge, method string) bool {
 	return hmac.Equal([]byte(computed), []byte(challenge))
 }
 
-func (s *Service) validateTokenClient(ctx context.Context, clientID string) error {
+func (s *Service) validateTokenClient(ctx context.Context, clientID string) (*domain.Client, error) {
 	client, err := s.repo.GetClient(ctx, clientID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// The schema has no client-secret credential yet. Refuse private clients
 	// instead of treating an unauthenticated client_id as authentication.
 	if client == nil || !client.IsPublic {
-		return domain.ErrClientAuthenticationRequired
+		return nil, domain.ErrClientAuthenticationRequired
 	}
-	return nil
+	return client, nil
 }
 
 func generateRefreshToken() (string, error) {

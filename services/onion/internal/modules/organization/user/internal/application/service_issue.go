@@ -177,7 +177,11 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Acces
 
 	err := s.JWT.ValidateToken(ctx, tokenString, claims)
 	if err != nil {
-		return nil, err
+		oauthClaims, oauthErr := s.validateOAuthToken(ctx, tokenString)
+		if oauthErr != nil {
+			return nil, err
+		}
+		claims = oauthClaims
 	}
 
 	// Capture the epoch exactly as embedded at issuance: hydration refreshes
@@ -192,6 +196,27 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Acces
 		return nil, ErrInvalidCredentials
 	}
 
+	return claims, nil
+}
+
+// OAuthTokenIssuer is the issuer OAuth access tokens are signed with. It stays
+// distinct from the session issuer so endpoints that only accept session
+// tokens (websockets, uploads) reject them.
+const OAuthTokenIssuer = "rtylr"
+
+// validateOAuthToken accepts an OAuth access token. Such a token is always
+// scope-restricted, even if its scope claim is empty.
+func (s *Service) validateOAuthToken(ctx context.Context, tokenString string) (*AccessTokenClaims, error) {
+	if s.OAuthJWT == nil {
+		return nil, ErrInvalidCredentials
+	}
+	claims := &AccessTokenClaims{}
+	if err := s.OAuthJWT.ValidateToken(ctx, tokenString, claims); err != nil {
+		return nil, err
+	}
+	if claims.OAuthClientID == "" {
+		claims.OAuthClientID = OAuthTokenIssuer
+	}
 	return claims, nil
 }
 

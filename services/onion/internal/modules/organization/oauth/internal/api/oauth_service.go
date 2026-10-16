@@ -85,29 +85,29 @@ func (a *OauthAPI) Token(ctx context.Context, req *commonoauthv1.TokenRequest) (
 
 	switch grantType {
 	case "authorization_code":
-		at, rt, expiresIn, err := a.Service.ExchangeCode(ctx, req.GetClientId(), req.GetCode(), req.GetCodeVerifier(), req.GetRedirectUri())
+		grant, err := a.Service.ExchangeCode(ctx, req.GetClientId(), req.GetCode(), req.GetCodeVerifier(), req.GetRedirectUri())
 		if err != nil {
 			return nil, oauthTokenError(err)
 		}
-		return &commonoauthv1.TokenResponse{
-			AccessToken:  at,
-			RefreshToken: rt,
-			TokenType:    "Bearer",
-			ExpiresIn:    int32(expiresIn), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		}, nil
+		return tokenResponse(grant), nil
 	case "refresh_token":
-		at, rt, expiresIn, err := a.Service.RefreshTokens(ctx, req.GetClientId(), req.GetRefreshToken())
+		grant, err := a.Service.RefreshTokens(ctx, req.GetClientId(), req.GetRefreshToken())
 		if err != nil {
 			return nil, oauthTokenError(err)
 		}
-		return &commonoauthv1.TokenResponse{
-			AccessToken:  at,
-			RefreshToken: rt,
-			TokenType:    "Bearer",
-			ExpiresIn:    int32(expiresIn), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-		}, nil
+		return tokenResponse(grant), nil
 	default:
 		return nil, oauthStatusError(http.StatusBadRequest, "unsupported grant_type")
+	}
+}
+
+func tokenResponse(grant *application.TokenGrant) *commonoauthv1.TokenResponse {
+	return &commonoauthv1.TokenResponse{
+		AccessToken:  grant.AccessToken,
+		RefreshToken: grant.RefreshToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    int32(grant.ExpiresIn), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Scope:        grant.Scope,
 	}
 }
 

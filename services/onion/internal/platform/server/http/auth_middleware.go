@@ -54,8 +54,12 @@ func processTokenAuthentication(ctx context.Context, token, path, remoteAddr str
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,
+		OAuthClientID:  claims.OAuthClientID,
 		Token:          token,
 		IP:             remoteAddr,
+	}
+	if claims.OAuthClientID != "" {
+		authUser.OAuthScopes = authPkg.ParseOAuthScopes(claims.Scope)
 	}
 
 	if authSuccessLogsEnabled() {
@@ -126,6 +130,15 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 				writeUnauthorizedResponse(ctx, w, "Unauthorized")
 
 				return
+			}
+			if authUser.IsOAuthToken() {
+				if required, allowed := requiredOAuthScope(r.Method, path); !allowed {
+					writeInsufficientScope(ctx, w, "")
+					return
+				} else if required != "" && !authUser.HasOAuthScope(required) {
+					writeInsufficientScope(ctx, w, required)
+					return
+				}
 			}
 			if accessResolver != nil {
 				effectiveAccess, accessErr := accessResolver.GetEffectiveAccess(ctx, authUser.BusinessID, authUser.UserID)

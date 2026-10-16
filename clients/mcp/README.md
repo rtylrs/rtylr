@@ -64,7 +64,21 @@ On first use:
 3. The token is saved to `~/.rtylr-mcp/config.json` (readable only by you)
 4. Tokens refresh automatically
 
-To sign out and re-authorize, delete `~/.rtylr-mcp/config.json`.
+To sign out and re-authorize, delete `~/.rtylr-mcp/config.json`, or call the `auth_logout` tool, which also revokes the refresh token.
+
+### Scopes
+
+The token is limited to the permissions you approve on the consent screen. The server enforces them on every request:
+
+| Scope | Allows |
+|-------|--------|
+| `flow:read` / `flow:write` | Flow routes (`/flow/*`) |
+| `crm:read` / `crm:write` | CRM routes (`/crm/*`) |
+| `finance:read` / `finance:write` | Finance routes (`/finance/*`) |
+| `erp:read` / `erp:write` | ERP routes (`/erp/*`) |
+| `pos:read` / `pos:write` | POS routes (`/pos/*`) |
+
+`read` covers `GET` requests; `write` covers every method and implies `read`. Account, security and settings routes are never reachable with an OAuth token. A request outside the granted scopes returns `403` with `WWW-Authenticate: Bearer error="insufficient_scope"`. When a new release asks for a scope your saved grant lacks, the next tool call reopens the browser to approve it.
 
 ## Available tools
 

@@ -18,11 +18,18 @@ import {
 export async function getAccessToken(): Promise<string> {
   const cfg = loadConfig();
 
-  if (cfg?.access_token && cfg.expires_at > Date.now() + 5 * 60 * 1000) {
+  // A grant that predates a newly requested scope needs a fresh consent.
+  const needsConsent = cfg?.scope !== undefined && !hasAllRequestedScopes(cfg.scope);
+
+  if (
+    cfg?.access_token &&
+    !needsConsent &&
+    cfg.expires_at > Date.now() + 5 * 60 * 1000
+  ) {
     return cfg.access_token;
   }
 
-  if (cfg?.refresh_token) {
+  if (cfg?.refresh_token && !needsConsent) {
     try {
       return await refreshAccessToken(cfg.refresh_token);
     } catch {
@@ -65,6 +72,7 @@ async function doRefreshToken(refreshToken: string): Promise<string> {
     access_token: res.data.access_token,
     refresh_token: res.data.refresh_token ?? refreshToken,
     expires_at: Date.now() + res.data.expires_in * 1000,
+    scope: res.data.scope,
   };
   saveConfig(cfg);
   return cfg.access_token;
@@ -75,6 +83,12 @@ interface TokenResponse {
   refresh_token: string;
   token_type: string;
   expires_in: number;
+  scope?: string;
+}
+
+function hasAllRequestedScopes(granted: string): boolean {
+  const have = new Set(granted.split(/\s+/).filter(Boolean));
+  return OAUTH_SCOPES.split(" ").every((scope) => have.has(scope));
 }
 
 async function runPKCEFlow(): Promise<string> {
@@ -119,6 +133,7 @@ async function runPKCEFlow(): Promise<string> {
     access_token: res.data.access_token,
     refresh_token: res.data.refresh_token,
     expires_at: Date.now() + res.data.expires_in * 1000,
+    scope: res.data.scope,
   };
   saveConfig(cfg);
   process.stderr.write("Authorization successful. Token saved.\n");

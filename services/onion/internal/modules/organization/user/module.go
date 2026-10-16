@@ -87,6 +87,8 @@ func (v *userTokenValidator) ValidateTokenFull(ctx context.Context, token string
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,
+		OAuthClientID:  claims.OAuthClientID,
+		Scope:          claims.Scope,
 		ExpiresAt: func() time.Time {
 			if claims.ExpiresAt == nil {
 				return time.Time{}

@@ -136,3 +136,4 @@ internal/modules/store/internal/outbox/sql/migration_20261004_outbox.sql	interna
 internal/modules/support/internal/outbox/sql/migration_20261004_outbox.sql	internal/modules/support/internal/outbox/sql/migration_20261004_outbox.sql
 internal/modules/activity/sql/migration_20261004_fact_identity.sql	internal/modules/activity/sql/migration_20261004_fact_identity.sql
 internal/modules/pos/locations/sql/migration_20261004_location_locks.sql	internal/modules/pos/locations/sql/migration_20261004_location_locks.sql
+internal/modules/organization/oauth/sql/migration_20261016_mcp_scopes_and_loopback.sql	internal/modules/organization/oauth/sql/migration_20261016_mcp_scopes_and_loopback.sql

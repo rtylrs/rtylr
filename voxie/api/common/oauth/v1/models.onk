@@ -36,6 +36,8 @@ message TokenResponse {
   refresh_token: string
   token_type: string
   expires_in: int32
+  /// scope is the space-delimited set of scopes the access token carries.
+  scope: string
 }
 
 message RevokeRequest {

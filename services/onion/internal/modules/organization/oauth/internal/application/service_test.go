@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/voxire/onion/internal/modules/organization/oauth/internal/domain"
@@ -245,7 +246,7 @@ func TestIssueAuthCode_RequiresS256PKCE(t *testing.T) {
 
 func TestExchangeCode_CodeNotFoundReturnsError(t *testing.T) {
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, authCodeErr: errors.New("not found")})
-	_, _, _, err := s.ExchangeCode(context.Background(), "app1", "bad-code", "verifier", "https://example.com")
+	_, err := s.ExchangeCode(context.Background(), "app1", "bad-code", "verifier", "https://example.com")
 	if !errors.Is(err, domain.ErrCodeNotFound) {
 		t.Errorf("expected ErrCodeNotFound, got %v", err)
 	}
@@ -259,7 +260,7 @@ func TestExchangeCode_UsedCodeReturnsError(t *testing.T) {
 		ExpiresAt: time.Now().Add(10 * time.Minute),
 	}
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, authCode: code})
-	_, _, _, err := s.ExchangeCode(context.Background(), "app1", "used-code", "", "https://example.com")
+	_, err := s.ExchangeCode(context.Background(), "app1", "used-code", "", "https://example.com")
 	if !errors.Is(err, domain.ErrCodeUsed) {
 		t.Errorf("expected ErrCodeUsed, got %v", err)
 	}
@@ -273,7 +274,7 @@ func TestExchangeCode_ExpiredCodeReturnsError(t *testing.T) {
 		ExpiresAt: time.Now().Add(-1 * time.Minute),
 	}
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, authCode: code})
-	_, _, _, err := s.ExchangeCode(context.Background(), "app1", "expired", "", "https://example.com")
+	_, err := s.ExchangeCode(context.Background(), "app1", "expired", "", "https://example.com")
 	if !errors.Is(err, domain.ErrCodeExpired) {
 		t.Errorf("expected ErrCodeExpired, got %v", err)
 	}
@@ -281,7 +282,7 @@ func TestExchangeCode_ExpiredCodeReturnsError(t *testing.T) {
 
 func TestExchangeCode_RejectsPrivateClientWithoutAuthentication(t *testing.T) {
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: false}})
-	_, _, _, err := s.ExchangeCode(context.Background(), "app1", "code", "verifier", "https://example.com")
+	_, err := s.ExchangeCode(context.Background(), "app1", "code", "verifier", "https://example.com")
 	if !errors.Is(err, domain.ErrClientAuthenticationRequired) {
 		t.Fatalf("error = %v, want ErrClientAuthenticationRequired", err)
 	}
@@ -306,7 +307,7 @@ func TestExchangeCode_PropagatesIdentityLookupError(t *testing.T) {
 	verifier := "verifier"
 	hash := sha256.Sum256([]byte(verifier))
 	code.CodeChallenge = base64.RawURLEncoding.EncodeToString(hash[:])
-	_, _, _, err := s.ExchangeCode(context.Background(), "app1", code.Code, verifier, code.RedirectURI)
+	_, err := s.ExchangeCode(context.Background(), "app1", code.Code, verifier, code.RedirectURI)
 	if err == nil || err.Error() != "identity lookup failed" {
 		t.Fatalf("error = %v, want identity lookup failure", err)
 	}
@@ -320,17 +321,18 @@ func TestExchangeCode_EmbedsTheUsersTokenEpoch(t *testing.T) {
 		ClientID:            "app1",
 		UserID:              7,
 		RedirectURI:         "https://example.com/callback",
+		Scope:               "flow:read",
 		CodeChallenge:       base64.RawURLEncoding.EncodeToString(hash[:]),
 		CodeChallengeMethod: "S256",
 		ExpiresAt:           time.Now().Add(time.Minute),
 	}
 	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, authCode: code, tokenEpoch: 3}
 	s := newTestService(repo)
-	at, _, _, err := s.ExchangeCode(context.Background(), "app1", code.Code, verifier, code.RedirectURI)
+	grant, err := s.ExchangeCode(context.Background(), "app1", code.Code, verifier, code.RedirectURI)
 	if err != nil {
 		t.Fatalf("ExchangeCode: %v", err)
 	}
-	if got := issuedEpoch(at); got != 3 {
+	if got := issuedEpoch(grant.AccessToken); got != 3 {
 		t.Fatalf("access token epoch = %d, want 3: the auth middleware rejects tokens whose epoch differs from the user's", got)
 	}
 }
@@ -339,7 +341,7 @@ func TestExchangeCode_EmbedsTheUsersTokenEpoch(t *testing.T) {
 
 func TestRefreshTokens_TokenNotFoundReturnsError(t *testing.T) {
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, tokenErr: errors.New("not found")})
-	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "bad-refresh")
+	_, err := s.RefreshTokens(context.Background(), "app1", "bad-refresh")
 	if !errors.Is(err, domain.ErrTokenNotFound) {
 		t.Errorf("expected ErrTokenNotFound, got %v", err)
 	}
@@ -352,7 +354,7 @@ func TestRefreshTokens_RevokedTokenReturnsError(t *testing.T) {
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, token: token})
-	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	_, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
 	if !errors.Is(err, domain.ErrTokenRevoked) {
 		t.Errorf("expected ErrTokenRevoked, got %v", err)
 	}
@@ -361,14 +363,15 @@ func TestRefreshTokens_RevokedTokenReturnsError(t *testing.T) {
 func TestRefreshTokens_LostRotationRaceReturnsRevoked(t *testing.T) {
 	token := &domain.Token{
 		ClientID:  "app1",
+		Scope:     "flow:read",
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
 	s := newTestService(&mockRepo{
-		client:          &domain.Client{ID: "app1", IsPublic: true},
+		client:          &domain.Client{ID: "app1", IsPublic: true, Scopes: []string{"flow:read"}},
 		token:           token,
 		consumeTokenErr: domain.ErrTokenRevoked,
 	})
-	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	_, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
 	if !errors.Is(err, domain.ErrTokenRevoked) {
 		t.Errorf("expected ErrTokenRevoked, got %v", err)
 	}
@@ -387,7 +390,7 @@ func TestRefreshTokens_RejectsTokenIssuedBeforeAPasswordChange(t *testing.T) {
 	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, tokenEpoch: 2}
 	s := newTestService(repo)
 	repo.token = &domain.Token{ClientID: "app1", UserID: 7, AccessToken: epochToken(t, s, 1), ExpiresAt: time.Now().Add(time.Hour)}
-	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	_, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
 	if !errors.Is(err, domain.ErrTokenRevoked) {
 		t.Fatalf("expected ErrTokenRevoked, got %v", err)
 	}
@@ -397,14 +400,14 @@ func TestRefreshTokens_RejectsTokenIssuedBeforeAPasswordChange(t *testing.T) {
 }
 
 func TestRefreshTokens_CarriesTheCurrentEpochForward(t *testing.T) {
-	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, tokenEpoch: 2}
+	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true, Scopes: []string{"flow:read"}}, tokenEpoch: 2}
 	s := newTestService(repo)
-	repo.token = &domain.Token{ClientID: "app1", UserID: 7, AccessToken: epochToken(t, s, 2), ExpiresAt: time.Now().Add(time.Hour)}
-	at, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	repo.token = &domain.Token{ClientID: "app1", UserID: 7, Scope: "flow:read", AccessToken: epochToken(t, s, 2), ExpiresAt: time.Now().Add(time.Hour)}
+	grant, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
 	if err != nil {
 		t.Fatalf("RefreshTokens: %v", err)
 	}
-	if got := issuedEpoch(at); got != 2 {
+	if got := issuedEpoch(grant.AccessToken); got != 2 {
 		t.Fatalf("refreshed access token epoch = %d, want 2", got)
 	}
 }
@@ -416,7 +419,7 @@ func TestRefreshTokens_ExpiredTokenReturnsError(t *testing.T) {
 		ExpiresAt: time.Now().Add(-1 * time.Hour),
 	}
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, token: token})
-	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	_, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
 	if !errors.Is(err, domain.ErrTokenExpired) {
 		t.Errorf("expected ErrTokenExpired, got %v", err)
 	}
@@ -488,5 +491,92 @@ func TestVerifyPKCE_RejectsPartialChallengePrefix(t *testing.T) {
 	}
 	if !verifyPKCE(verifier, full, "S256") {
 		t.Fatal("the complete challenge must verify")
+	}
+}
+
+func TestValidateAuthRequest_RequiresAScope(t *testing.T) {
+	client := &domain.Client{ID: "app1", RedirectURIs: []string{"https://example.com/callback"}, Scopes: []string{"flow:read"}}
+	s := newTestService(&mockRepo{client: client})
+	for _, scope := range []string{"", "   "} {
+		if _, err := s.ValidateAuthRequest(context.Background(), "app1", "https://example.com/callback", scope); !errors.Is(err, domain.ErrInvalidScope) {
+			t.Errorf("scope %q: err = %v, want ErrInvalidScope", scope, err)
+		}
+	}
+}
+
+func tokenClaims(t *testing.T, accessToken string) *OAuthTokenClaims {
+	t.Helper()
+	claims := &OAuthTokenClaims{}
+	if _, _, err := jwt.NewParser().ParseUnverified(accessToken, claims); err != nil {
+		t.Fatalf("parse access token: %v", err)
+	}
+	return claims
+}
+
+func TestRefreshTokens_AccessTokenCarriesClientAndScope(t *testing.T) {
+	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true, Scopes: []string{"crm:read", "crm:write"}}, tokenEpoch: 1}
+	s := newTestService(repo)
+	repo.token = &domain.Token{ClientID: "app1", UserID: 7, Scope: "crm:read", AccessToken: epochToken(t, s, 1), ExpiresAt: time.Now().Add(time.Hour)}
+	grant, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	if err != nil {
+		t.Fatalf("RefreshTokens: %v", err)
+	}
+	claims := tokenClaims(t, grant.AccessToken)
+	if claims.ClientID != "app1" || claims.Scope != "crm:read" || grant.Scope != "crm:read" {
+		t.Fatalf("claims cid=%q scope=%q, grant scope=%q", claims.ClientID, claims.Scope, grant.Scope)
+	}
+}
+
+func TestRefreshTokens_DropsScopesTheClientNoLongerOffers(t *testing.T) {
+	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true, Scopes: []string{"crm:read"}}, tokenEpoch: 1}
+	s := newTestService(repo)
+	repo.token = &domain.Token{ClientID: "app1", UserID: 7, Scope: "crm:read finance:write", AccessToken: epochToken(t, s, 1), ExpiresAt: time.Now().Add(time.Hour)}
+	grant, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	if err != nil {
+		t.Fatalf("RefreshTokens: %v", err)
+	}
+	if grant.Scope != "crm:read" || repo.saved.Scope != "crm:read" {
+		t.Fatalf("scope = %q, stored %q, want crm:read", grant.Scope, repo.saved.Scope)
+	}
+}
+
+func TestRefreshTokens_RefusesATokenWhoseScopesAreAllWithdrawn(t *testing.T) {
+	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true, Scopes: []string{"crm:read"}}, tokenEpoch: 1}
+	s := newTestService(repo)
+	repo.token = &domain.Token{ClientID: "app1", UserID: 7, Scope: "finance:write", AccessToken: epochToken(t, s, 1), ExpiresAt: time.Now().Add(time.Hour)}
+	if _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token"); !errors.Is(err, domain.ErrInvalidScope) {
+		t.Fatalf("err = %v, want ErrInvalidScope", err)
+	}
+	if repo.saved != nil {
+		t.Fatal("a token was minted with no remaining scope")
+	}
+}
+
+func TestValidateAuthRequest_LoopbackClientsMayUseAnyPort(t *testing.T) {
+	client := &domain.Client{ID: "mcp", RedirectURIs: []string{"http://127.0.0.1/callback"}, Scopes: []string{"flow:read"}}
+	s := newTestService(&mockRepo{client: client})
+	for _, uri := range []string{"http://127.0.0.1:51234/callback", "http://127.0.0.1/callback"} {
+		if _, err := s.ValidateAuthRequest(context.Background(), "mcp", uri, "flow:read"); err != nil {
+			t.Errorf("%q: %v", uri, err)
+		}
+	}
+	for _, uri := range []string{
+		"http://127.0.0.1:51234/other",
+		"https://127.0.0.1:51234/callback",
+		"http://localhost:51234/callback",
+		"http://evil@127.0.0.1:51234/callback",
+		"http://127.0.0.1.evil.com:51234/callback",
+	} {
+		if _, err := s.ValidateAuthRequest(context.Background(), "mcp", uri, "flow:read"); !errors.Is(err, domain.ErrInvalidRedirectURI) {
+			t.Errorf("%q: err = %v, want ErrInvalidRedirectURI", uri, err)
+		}
+	}
+}
+
+func TestValidateAuthRequest_NonLoopbackClientsStayPortExact(t *testing.T) {
+	client := &domain.Client{ID: "app", RedirectURIs: []string{"https://app.example.com/callback"}, Scopes: []string{"flow:read"}}
+	s := newTestService(&mockRepo{client: client})
+	if _, err := s.ValidateAuthRequest(context.Background(), "app", "https://app.example.com:8443/callback", "flow:read"); !errors.Is(err, domain.ErrInvalidRedirectURI) {
+		t.Fatalf("err = %v, want ErrInvalidRedirectURI", err)
 	}
 }
