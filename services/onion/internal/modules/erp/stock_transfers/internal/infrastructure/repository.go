@@ -248,7 +248,21 @@ func (r *Repository) UpdateStockTransferStatus(ctx context.Context, businessID, 
 		}
 	}()
 	qtx := r.queries.WithTx(tx)
-	result, err := qtx.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
+	row, err := qtx.GetStockTransferForUpdate(ctx, sqlc.GetStockTransferForUpdateParams{BusinessID: businessID, ID: id})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrStockTransferNotFound
+	}
+	if err != nil {
+		return err
+	}
+	curStatus := domain.StockTransferStatus(row.Status.ErpStockTransfersStatus)
+	if err := domain.ValidateStockTransferStatusTransition(curStatus, status); err != nil {
+		return err
+	}
+	if curStatus == status {
+		return tx.Commit()
+	}
+	_, err = qtx.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
 		Status:     sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status), Valid: true},
 		BusinessID: businessID,
 		ID:         id,
@@ -256,20 +270,6 @@ func (r *Repository) UpdateStockTransferStatus(ctx context.Context, businessID, 
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
 		return err
-	}
-	changed, err := statusUpdateChanged(result)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to inspect stock transfer status update", logger.Error(err))
-		return err
-	}
-	if !changed {
-		_, err = qtx.GetStockTransferForUpdate(ctx, sqlc.GetStockTransferForUpdateParams{BusinessID: businessID, ID: id})
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.ErrStockTransferNotFound
-		}
-		if err != nil {
-			return err
-		}
 	}
 	if err = appendStockTransferAuditEvents(ctx, tx, events, id); err != nil {
 		return err
@@ -308,9 +308,12 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64, 
 	}
 	fromWH := row.FromWarehouseID
 	toWH := row.ToWarehouseID
-	curStatus := string(row.Status.ErpStockTransfersStatus)
-	if curStatus == string(domain.StockTransferStatusReceived) {
+	curStatus := domain.StockTransferStatus(row.Status.ErpStockTransfersStatus)
+	if curStatus == domain.StockTransferStatusReceived {
 		return tx.Commit()
+	}
+	if err := domain.ValidateStockTransferStatusTransition(curStatus, domain.StockTransferStatusReceived); err != nil {
+		return err
 	}
 	for _, warehouseID := range []int64{fromWH, toWH} {
 		if _, lookupErr := qtx.GetWarehouseReference(ctx, sqlc.GetWarehouseReferenceParams{

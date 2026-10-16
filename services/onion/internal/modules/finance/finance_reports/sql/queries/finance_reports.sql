@@ -25,7 +25,7 @@ WHERE a.business_id = sqlc.arg(business_id)
 SELECT COALESCE(SUM(
     CASE
         WHEN a.type = 'revenue' THEN CAST(l.credit AS DECIMAL(15,2)) - CAST(l.debit AS DECIMAL(15,2))
-        WHEN a.type = 'expense' THEN CAST(l.debit AS DECIMAL(15,2)) - CAST(l.credit AS DECIMAL(15,2))
+        WHEN a.type = 'expense' THEN CAST(l.credit AS DECIMAL(15,2)) - CAST(l.debit AS DECIMAL(15,2))
         ELSE 0
     END
 ), 0)

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/financejournal"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 var (
@@ -63,18 +64,18 @@ func (j *JournalEntry) IsDraft() bool {
 
 // TotalDebits returns the sum of all debit amounts across the entry's lines.
 func (j *JournalEntry) TotalDebits() float64 {
-	var total float64
+	var totalCents int64
 	for _, l := range j.Lines {
-		total += l.Debit
+		totalCents += money.DollarsToCents(l.Debit)
 	}
-	return total
+	return money.CentsToDollars(totalCents)
 }
 
 // TotalCredits returns the sum of all credit amounts across the entry's lines.
 func (j *JournalEntry) TotalCredits() float64 {
-	var total float64
+	var totalCents int64
 	for _, l := range j.Lines {
-		total += l.Credit
+		totalCents += money.DollarsToCents(l.Credit)
 	}
-	return total
+	return money.CentsToDollars(totalCents)
 }

@@ -9,6 +9,7 @@ var (
 	ErrStockTakeNotFound          = errors.New("stock take not found")
 	ErrStockTakeReferenceNotFound = errors.New("stock take reference not found in business")
 	ErrStockTakeIncomplete        = errors.New("every stock-take item requires a physical count")
+	ErrStockTakeAlreadyCompleted  = errors.New("stock take is already completed and cannot be modified")
 )
 
 type StockTakeStatus string

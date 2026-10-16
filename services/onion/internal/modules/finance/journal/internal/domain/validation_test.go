@@ -102,3 +102,13 @@ func TestValidateJournalEntryInput_EmptyLines(t *testing.T) {
 		t.Fatal("expected error for empty lines")
 	}
 }
+
+func TestValidateJournalEntryInput_BothDebitAndCreditPositive(t *testing.T) {
+	input := balanced("2026-01-01", []JournalLineInput{
+		{AccountID: 1, Debit: 100, Credit: 50},
+		{AccountID: 2, Credit: 50},
+	})
+	if err := ValidateJournalEntryInput(input); err == nil {
+		t.Fatal("expected error for line having both positive debit and credit")
+	}
+}

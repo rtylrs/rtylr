@@ -14,6 +14,8 @@ func stockTakeMutationError(err error) error {
 		return stockTakeStatusError(http.StatusNotFound, "Stock take not found")
 	case errors.Is(err, domain.ErrStockTakeReferenceNotFound):
 		return stockTakeStatusError(http.StatusNotFound, "Stock take reference not found")
+	case errors.Is(err, domain.ErrStockTakeAlreadyCompleted):
+		return stockTakeStatusError(http.StatusConflict, "Stock take is already completed")
 	case errors.Is(err, domain.ErrStockTakeIncomplete):
 		return stockTakeStatusError(http.StatusConflict, "Every stock-take item requires a physical count")
 	case errors.Is(err, stock.ErrInsufficientStock):

@@ -30,3 +30,36 @@ func (po PurchaseOrder) StatusLabel() string {
 		return string(po.Status)
 	}
 }
+
+// ValidatePOStatusTransition enforces lifecycle transitions between purchase order statuses.
+// Terminal statuses (received and cancelled) cannot transition to any other status.
+func ValidatePOStatusTransition(current, next PurchaseOrderStatus) error {
+	if current == next {
+		return nil
+	}
+	if current == POStatusReceived {
+		return ErrPurchaseOrderAlreadyReceived
+	}
+	if current == POStatusCancelled {
+		return ErrPurchaseOrderInvalidTransition
+	}
+	switch current {
+	case POStatusDraft:
+		if next == POStatusSent || next == POStatusApproved || next == POStatusCancelled {
+			return nil
+		}
+	case POStatusSent:
+		if next == POStatusApproved || next == POStatusCancelled {
+			return nil
+		}
+	case POStatusApproved:
+		if next == POStatusPartial || next == POStatusReceived || next == POStatusCancelled {
+			return nil
+		}
+	case POStatusPartial:
+		if next == POStatusReceived || next == POStatusCancelled {
+			return nil
+		}
+	}
+	return ErrPurchaseOrderInvalidTransition
+}

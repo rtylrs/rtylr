@@ -163,6 +163,14 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 			if unitPrice == 0 {
 				unitPrice = floatFromAny(item["price"])
 			}
+			taxRate := floatFromAny(item["tax_rate"])
+			if taxRate == 0 {
+				taxRate = floatFromAny(item["tax"])
+			}
+			discountPct := floatFromAny(item["discount_pct"])
+			if discountPct == 0 {
+				discountPct = floatFromAny(item["discount"])
+			}
 			total := floatFromAny(item["total"])
 			if total == 0 {
 				total = qty * unitPrice
@@ -173,8 +181,8 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 				Quantity:    fmtFloat(qty),
 				Unit:        nullableStringInput("unit"),
 				UnitPrice:   fmtFloat(unitPrice),
-				TaxRate:     nullableStringInput(fmtFloat(0)),
-				DiscountPct: nullableStringInput(fmtFloat(0)),
+				TaxRate:     nullableStringInput(fmtFloat(taxRate)),
+				DiscountPct: nullableStringInput(fmtFloat(discountPct)),
 				Total:       fmtFloat(total),
 				SortOrder:   sql.NullInt32{Int32: int32(i), Valid: true},
 			}); itemErr != nil {

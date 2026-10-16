@@ -43,6 +43,9 @@ func ValidateJournalEntryInput(input JournalEntryInput) error {
 		if line.Debit == 0 && line.Credit == 0 {
 			return fmt.Errorf("line[%d]: at least one of debit or credit must be non-zero", i)
 		}
+		if line.Debit > 0 && line.Credit > 0 {
+			return fmt.Errorf("line[%d]: a journal line cannot have both debit and credit", i)
+		}
 
 		debit, err := money.FromFloat64(line.Debit)
 		if err != nil {

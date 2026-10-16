@@ -10,5 +10,6 @@ WHERE business_id = sqlc.arg(business_id)
 SELECT COALESCE(SUM(amount), 0)
 FROM finance_expenses
 WHERE business_id = sqlc.arg(business_id)
+  AND status = 'approved'
   AND expense_date >= sqlc.arg(date_from)
   AND expense_date <= sqlc.arg(date_to);

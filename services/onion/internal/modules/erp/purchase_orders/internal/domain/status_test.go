@@ -92,3 +92,36 @@ func TestPurchaseOrder_StatusLabel_Cancelled(t *testing.T) {
 		t.Errorf("expected 'Cancelled', got %q", got)
 	}
 }
+
+func TestValidatePOStatusTransition(t *testing.T) {
+	cases := []struct {
+		current PurchaseOrderStatus
+		next    PurchaseOrderStatus
+		wantErr bool
+	}{
+		{POStatusDraft, POStatusDraft, false},
+		{POStatusDraft, POStatusSent, false},
+		{POStatusDraft, POStatusApproved, false},
+		{POStatusDraft, POStatusCancelled, false},
+		{POStatusDraft, POStatusReceived, true},
+		{POStatusSent, POStatusApproved, false},
+		{POStatusSent, POStatusCancelled, false},
+		{POStatusSent, POStatusDraft, true},
+		{POStatusApproved, POStatusPartial, false},
+		{POStatusApproved, POStatusReceived, false},
+		{POStatusApproved, POStatusCancelled, false},
+		{POStatusPartial, POStatusReceived, false},
+		{POStatusPartial, POStatusCancelled, false},
+		{POStatusReceived, POStatusDraft, true},
+		{POStatusReceived, POStatusCancelled, true},
+		{POStatusCancelled, POStatusDraft, true},
+		{POStatusCancelled, POStatusApproved, true},
+	}
+
+	for _, tc := range cases {
+		err := ValidatePOStatusTransition(tc.current, tc.next)
+		if (err != nil) != tc.wantErr {
+			t.Errorf("transition %s -> %s: got err=%v, wantErr=%v", tc.current, tc.next, err, tc.wantErr)
+		}
+	}
+}
