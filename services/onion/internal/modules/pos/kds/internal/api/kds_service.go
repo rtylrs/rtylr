@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -58,6 +59,9 @@ func (a *KDSAPI) UpdateKDSItemByID(ctx context.Context, req *poskdsv1.UpdateKDSI
 	}
 
 	if updateErr := a.Service.UpdateItemStatusByItemID(ctx, businessID, req.GetItemId(), normStatus); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrItemNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Item not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
 	}
 	return &poskdsv1.UpdateKDSItemByIDResponse{Message: "Item status updated"}, nil
@@ -91,6 +95,9 @@ func (a *KDSAPI) UpdateKDSItemStatus(ctx context.Context, req *poskdsv1.UpdateKD
 		ItemID:     req.GetItemId(),
 		Status:     normStatus,
 	}); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrItemNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Item not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
 	}
 	return &poskdsv1.UpdateKDSItemStatusResponse{Message: "Item status updated"}, nil

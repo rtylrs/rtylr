@@ -1,9 +1,13 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
+
+// ErrItemNotFound is returned when the KDS item does not exist in the business.
+var ErrItemNotFound = errors.New("kds item not found")
 
 // ValidItemStatuses lists all valid KDS item status values.
 var ValidItemStatuses = []string{"pending", "preparing", "ready", "served", "cancelled"}
