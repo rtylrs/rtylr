@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -80,9 +79,9 @@ func (h *ListFormFieldsHandler) Validate(_ context.Context, req *ListFormFieldsR
 }
 
 func (h *ListFormFieldsHandler) Serve(ctx context.Context, req *ListFormFieldsRequest) (ListFormFieldsResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return ListFormFieldsResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:view")
+	if permErr != nil {
+		return ListFormFieldsResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -135,9 +134,9 @@ func (h *CreateFormFieldHandler) Validate(_ context.Context, req *CreateFormFiel
 }
 
 func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormFieldRequest) (CreateFormFieldResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return CreateFormFieldResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return CreateFormFieldResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -203,9 +202,9 @@ func (h *UpdateFormFieldHandler) Validate(_ context.Context, req *UpdateFormFiel
 }
 
 func (h *UpdateFormFieldHandler) Serve(ctx context.Context, req *UpdateFormFieldRequest) (UpdateFormFieldResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return UpdateFormFieldResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return UpdateFormFieldResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -257,9 +256,9 @@ func (h *DeleteFormFieldHandler) Validate(_ context.Context, req *DeleteFormFiel
 }
 
 func (h *DeleteFormFieldHandler) Serve(ctx context.Context, req *DeleteFormFieldRequest) (DeleteFormFieldResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return DeleteFormFieldResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return DeleteFormFieldResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

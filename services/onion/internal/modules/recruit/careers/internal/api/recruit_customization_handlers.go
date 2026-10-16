@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/domain"
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/infrastructure"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -104,9 +103,9 @@ type GetCustomizationResponse struct {
 }
 
 func (h *GetCustomizationHandler) Serve(ctx context.Context, _ *GetCustomizationRequest) (GetCustomizationResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return GetCustomizationResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:view")
+	if permErr != nil {
+		return GetCustomizationResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -176,9 +175,9 @@ func (h *PutCustomizationHandler) Validate(_ context.Context, req *PutCustomizat
 }
 
 func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizationRequest) (PutCustomizationResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return PutCustomizationResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return PutCustomizationResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
