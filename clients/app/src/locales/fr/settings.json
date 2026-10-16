@@ -13,7 +13,9 @@
   "slogan": "Slogan",
   "businessType": {
     "noIndustriesMatchTitle": "Aucun secteur ne correspond à \"{{search}}\"",
-    "noIndustriesMatchDescription": "Essayez un autre terme de recherche."
+    "noIndustriesMatchDescription": "Essayez un autre terme de recherche.",
+    "searchPlaceholder": "Rechercher un secteur...",
+    "selected": "Sélectionné :"
   },
   "account": {
     "noLoginActivityTitle": "Aucune activité de connexion pour l'instant",
@@ -31,7 +33,12 @@
     "dnsPropagation": "La propagation DNS peut prendre jusqu’à 48 heures.",
     "invalid": "Saisissez un domaine valide, par exemple menu.yourbrand.com",
     "saved": "Domaine personnalisé enregistré. La propagation DNS peut prendre jusqu’à 24 heures.",
-    "saveFailed": "Échec de l'enregistrement du domaine personnalisé"
+    "saveFailed": "Échec de l'enregistrement du domaine personnalisé",
+    "menuUrlDescription": "Ceci est l’URL publique par défaut de votre menu, toujours disponible.",
+    "configured": "Configuré",
+    "notConfigured": "Non configuré",
+    "connectDomain": "Connecter le domaine",
+    "updateDomain": "Mettre à jour le domaine"
   },
   "general": {
     "pageTitle": "Paramètres généraux",
@@ -82,7 +89,12 @@
       "desktop": "Ordinateur",
       "unknown": "Inconnu"
     },
-    "loginHistoryStale": "Impossible d’actualiser l’historique des connexions. Les dernières données disponibles sont affichées."
+    "loginHistoryStale": "Impossible d’actualiser l’historique des connexions. Les dernières données disponibles sont affichées.",
+    "invalidateAllSessions": "Invalider toutes les sessions",
+    "invalidateSessionsConfirm": "Invalider les sessions",
+    "loadingLoginHistory": "Chargement de l’historique des connexions…",
+    "statusSuccessful": "Réussie",
+    "statusFailed": "Échouée"
   },
   "email": {
     "pageTitle": "Paramètres e-mail",
@@ -118,6 +130,26 @@
     "smtpVerified": "Connexion SMTP à {{host}}:{{port}} vérifiée",
     "smtpTestFailed": "Échec du test de connexion SMTP",
     "smtpHostUserRequired": "Un hôte SMTP et un utilisateur sont requis",
-    "smtpHostRequired": "Un hôte SMTP est requis"
+    "smtpHostRequired": "Un hôte SMTP est requis",
+    "useCustomSmtp": "Utiliser un serveur SMTP personnalisé",
+    "sendThroughCustomServer": "Envoyez des e-mails via votre propre serveur de messagerie",
+    "testConnection": "Tester la connexion"
+  },
+  "aiUsage": {
+    "tokens": "tokens",
+    "remaining": "restants",
+    "over": "en dépassement",
+    "resets": "Renouvellement le",
+    "allocation": "Répartition",
+    "ownerDescription": "Choisissez la manière dont votre équipe consomme le quota mensuel d’IA.",
+    "memberDescription": "Seul un propriétaire ou administrateur peut modifier la répartition des crédits d’IA.",
+    "loadingAllocation": "Chargement de la répartition…",
+    "limitReached": "Vous avez atteint la limite d’IA de ce mois. Mettez votre forfait à niveau pour continuer à utiliser Caret.",
+    "poolLabel": "Quota d’équipe partagé",
+    "poolDescription": "Tout le monde puise dans un quota mensuel unique.",
+    "perPersonLabel": "Par personne",
+    "perPersonDescription": "Le quota est réparti équitablement entre les postes.",
+    "loadFailed": "Impossible de charger l’utilisation de l’IA.",
+    "loadAllocationFailed": "Impossible de charger les paramètres de répartition de l’IA."
   }
 }

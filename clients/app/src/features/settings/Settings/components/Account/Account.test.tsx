@@ -85,7 +85,7 @@ describe('Account: login history empty state', () => {
     loginHistoryState.isLoading = true;
     render(<Account />);
 
-    expect(screen.getByText('Loading login history…')).toBeInTheDocument();
+    expect(screen.getByText('settings.accountPage.loadingLoginHistory')).toBeInTheDocument();
     expect(screen.queryByText('settings.account.noLoginActivityTitle')).not.toBeInTheDocument();
   });
 

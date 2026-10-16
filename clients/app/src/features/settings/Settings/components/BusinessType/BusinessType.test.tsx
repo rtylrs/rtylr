@@ -67,7 +67,7 @@ describe('BusinessType: search-empty state', () => {
   it('shows the illustration, title and a clear-search call-to-action when a search matches no industries', () => {
     render(<BusinessTypeSettings />);
 
-    fireEvent.change(screen.getByPlaceholderText('Search industries...'), {
+    fireEvent.change(screen.getByPlaceholderText('settings.businessType.searchPlaceholder'), {
       target: { value: 'no such industry' },
     });
 
@@ -81,7 +81,7 @@ describe('BusinessType: search-empty state', () => {
   it('clears the search query when the call-to-action is clicked', () => {
     render(<BusinessTypeSettings />);
 
-    const searchInput = screen.getByPlaceholderText('Search industries...');
+    const searchInput = screen.getByPlaceholderText('settings.businessType.searchPlaceholder');
     fireEvent.change(searchInput, { target: { value: 'no such industry' } });
     expect(screen.getByText('settings.businessType.noIndustriesMatchTitle')).toBeInTheDocument();
 
@@ -96,7 +96,7 @@ describe('BusinessType: search-empty state', () => {
   it('does not show the empty state when a search matches an industry', () => {
     render(<BusinessTypeSettings />);
 
-    fireEvent.change(screen.getByPlaceholderText('Search industries...'), {
+    fireEvent.change(screen.getByPlaceholderText('settings.businessType.searchPlaceholder'), {
       target: { value: 'restaurant' },
     });
 
@@ -111,7 +111,7 @@ describe('BusinessType: save', () => {
     render(<BusinessTypeSettings />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Restaurant' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.saveChanges' }));
 
     expect(businessStoreMock.setBusinessType).toHaveBeenCalledWith('restaurant');
     expect(updateBusinessMock.mutate).not.toHaveBeenCalled();

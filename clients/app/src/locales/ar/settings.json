@@ -13,7 +13,9 @@
   "slogan": "الشعار",
   "businessType": {
     "noIndustriesMatchTitle": "لا توجد مجالات مطابقة لـ \"{{search}}\"",
-    "noIndustriesMatchDescription": "جرّب كلمة بحث مختلفة."
+    "noIndustriesMatchDescription": "جرّب كلمة بحث مختلفة.",
+    "searchPlaceholder": "ابحث في القطاعات...",
+    "selected": "المحدد:"
   },
   "account": {
     "noLoginActivityTitle": "لا يوجد نشاط تسجيل دخول بعد",
@@ -31,7 +33,12 @@
     "dnsPropagation": "قد يستغرق انتشار تغييرات DNS حتى 48 ساعة.",
     "invalid": "أدخل نطاقًا صحيحًا، مثل menu.yourbrand.com",
     "saved": "تم حفظ النطاق المخصص. قد يستغرق انتشار DNS حتى 24 ساعة.",
-    "saveFailed": "فشل حفظ النطاق المخصص"
+    "saveFailed": "فشل حفظ النطاق المخصص",
+    "menuUrlDescription": "هذا هو الرابط العام الافتراضي لقائمتك، متاح دائماً.",
+    "configured": "تم الإعداد",
+    "notConfigured": "غير معد",
+    "connectDomain": "ربط النطاق",
+    "updateDomain": "تحديث النطاق"
   },
   "general": {
     "pageTitle": "الإعدادات العامة",
@@ -82,7 +89,12 @@
       "desktop": "حاسوب",
       "unknown": "غير معروف"
     },
-    "loginHistoryStale": "تعذر تحديث سجل تسجيل الدخول. يتم عرض آخر البيانات المتاحة."
+    "loginHistoryStale": "تعذر تحديث سجل تسجيل الدخول. يتم عرض آخر البيانات المتاحة.",
+    "invalidateAllSessions": "إنهاء جميع الجلسات",
+    "invalidateSessionsConfirm": "تأكيد إنهاء الجلسات",
+    "loadingLoginHistory": "جاري تحميل سجل الدخول…",
+    "statusSuccessful": "ناجح",
+    "statusFailed": "فاشل"
   },
   "email": {
     "pageTitle": "إعدادات البريد",
@@ -118,6 +130,26 @@
     "smtpVerified": "تم التحقق من الاتصال بـ {{host}}:{{port}}",
     "smtpTestFailed": "فشل اختبار اتصال SMTP",
     "smtpHostUserRequired": "مضيف SMTP واسم المستخدم مطلوبان",
-    "smtpHostRequired": "مضيف SMTP مطلوب"
+    "smtpHostRequired": "مضيف SMTP مطلوب",
+    "useCustomSmtp": "استخدام خادم SMTP مخصص",
+    "sendThroughCustomServer": "إرسال رسائل البريد الإلكتروني عبر خادمك الخاص",
+    "testConnection": "اختبار الاتصال"
+  },
+  "aiUsage": {
+    "tokens": "رمز",
+    "remaining": "متبقية",
+    "over": "تجاوز",
+    "resets": "يتجدد في",
+    "allocation": "توزيع الحصة",
+    "ownerDescription": "اختر كيفية استهلاك فريقك للحصة الشهرية للذكاء الاصطناعي.",
+    "memberDescription": "يمكن للمالك أو المشرف فقط تغيير طريقة توزيع أرصدة الذكاء الاصطناعي.",
+    "loadingAllocation": "جاري تحميل التوزيع…",
+    "limitReached": "لقد وصلت إلى حد الذكاء الاصطناعي لهذا الشهر. قم بترقية خطتك لمواصلة استخدام Caret.",
+    "poolLabel": "حصة الفريق المشتركة",
+    "poolDescription": "يستهلك الجميع من حصة شهرية موحدة.",
+    "perPersonLabel": "لكل شخص",
+    "perPersonDescription": "تُقسّم الحصة بالتساوي بين الأعضاء.",
+    "loadFailed": "تعذّر تحميل استخدام الذكاء الاصطناعي.",
+    "loadAllocationFailed": "تعذّر تحميل إعدادات توزيع الذكاء الاصطناعي."
   }
 }

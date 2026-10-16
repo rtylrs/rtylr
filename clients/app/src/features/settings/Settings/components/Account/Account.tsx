@@ -327,7 +327,9 @@ const Account: React.FC = () => {
                 Cancel
               </Button>
               <Button onClick={handleSave} disabled={!isEditing || updateProfile.isPending}>
-                {updateProfile.isPending ? 'Saving…' : 'Save changes'}
+                {updateProfile.isPending
+                  ? t('common.saving', 'Saving…')
+                  : t('common.saveChanges', 'Save changes')}
               </Button>
             </div>
           </CardContent>
@@ -354,7 +356,7 @@ const Account: React.FC = () => {
           onOpenChange={setConfirmInvalidateOpen}
           title={t('settings.accountPage.invalidateTitle')}
           description="This will sign you out of Dash and revoke every active session for your account."
-          confirmLabel="Invalidate sessions"
+          confirmLabel={t('settings.accountPage.invalidateSessionsConfirm', 'Invalidate sessions')}
           destructive
           isLoading={invalidateSessions.isPending}
           onConfirm={async () => {
@@ -415,7 +417,7 @@ const Account: React.FC = () => {
                   <TableRow>
                     <TableCell colSpan={6} className="py-10 text-center text-gray-500">
                       {isLoginHistoryLoading ? (
-                        'Loading login history…'
+                        t('settings.accountPage.loadingLoginHistory', 'Loading login history…')
                       ) : isLoginHistoryError ? (
                         <div className="flex flex-col items-center gap-2">
                           <span>
@@ -499,7 +501,9 @@ const Account: React.FC = () => {
                             }`}
                           >
                             {item.success ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-                            {item.success ? 'Successful' : 'Failed'}
+                            {item.success
+                              ? t('settings.accountPage.statusSuccessful', 'Successful')
+                              : t('settings.accountPage.statusFailed', 'Failed')}
                           </span>
                         </TableCell>
                         <TableCell
@@ -534,10 +538,10 @@ const Account: React.FC = () => {
                     disabled={loginHistoryPage === 1 || isLoginHistoryFetching}
                   >
                     <ChevronLeft size={14} className="rtl:rotate-180" />
-                    Previous
+                    {t('common.pagination.previous', 'Previous')}
                   </Button>
                   <span className="text-xs text-gray-500 whitespace-nowrap">
-                    Page {loginHistoryData.page}
+                    {t('common.pagination.page', { page: loginHistoryData.page })}
                   </span>
                   <Button
                     variant="outline"
@@ -545,7 +549,7 @@ const Account: React.FC = () => {
                     onClick={() => setLoginHistoryPage((page) => page + 1)}
                     disabled={!loginHistoryData.hasMore || isLoginHistoryFetching}
                   >
-                    Next
+                    {t('common.pagination.next', 'Next')}
                     <ChevronRight size={14} className="rtl:rotate-180" />
                   </Button>
                 </div>

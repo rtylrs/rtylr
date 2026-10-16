@@ -44,7 +44,7 @@ describe('Domain: registered domain', () => {
     render(<Domain />);
 
     expect(screen.getByDisplayValue('menu.acme.com')).toBeInTheDocument();
-    expect(screen.getByText('Configured')).toBeInTheDocument();
+    expect(screen.getByText('settings.domain.configured')).toBeInTheDocument();
   });
 });
 
@@ -55,7 +55,7 @@ describe('Domain: connect', () => {
     fireEvent.change(screen.getByLabelText('settings.domain.domainLabel'), {
       target: { value: ' Menu.Acme.COM ' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Connect Domain' }));
+    fireEvent.click(screen.getByRole('button', { name: 'settings.domain.connectDomain' }));
 
     // Pre-fix this called updateBusiness with {customDomain, website}; the
     // hook dropped customDomain and the page toasted a success it did not have.
@@ -68,7 +68,7 @@ describe('Domain: connect', () => {
     fireEvent.change(screen.getByLabelText('settings.domain.domainLabel'), {
       target: { value: 'not a domain' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Connect Domain' }));
+    fireEvent.click(screen.getByRole('button', { name: 'settings.domain.connectDomain' }));
 
     expect(registerState.mutate).not.toHaveBeenCalled();
     expect(toastError).toHaveBeenCalled();

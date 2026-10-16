@@ -222,7 +222,8 @@
   "launch": "Ouvrir",
   "pagination": {
     "previous": "Préc.",
-    "next": "Suiv."
+    "next": "Suiv.",
+    "page": "Page {{page}}"
   },
   "roleDescriptions": {
     "admin": "Gérer les accès à l’entreprise et les applications attribuées",

@@ -64,7 +64,7 @@ const BusinessTypeSettings: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Industry · rtylr" />
+      <HelmetContainer title={`${t('common.nav.industry')} · rtylr`} />
       <div className={cn('portal-management-page space-y-6', hasChanges && 'pb-24')}>
         <PageHeader
           title={t('common.nav.industry')}
@@ -79,7 +79,7 @@ const BusinessTypeSettings: React.FC = () => {
             style={{ color: 'var(--dash-text-dim)' }}
           />
           <Input
-            placeholder="Search industries..."
+            placeholder={t('settings.businessType.searchPlaceholder', 'Search industries...')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="ps-9"
@@ -117,7 +117,7 @@ const BusinessTypeSettings: React.FC = () => {
                             'px-3 py-2.5 rounded-lg text-sm text-start transition-all font-medium flex items-center gap-2'
                           )}
                           style={{
-                            background: isActive ? 'var(--dash-hover)' : 'var(--dash-hover)',
+                            background: isActive ? 'var(--dash-hover)' : 'transparent',
                             border: isActive
                               ? '1px solid rgba(69,131,196,0.35)'
                               : '1px solid transparent',
@@ -147,7 +147,7 @@ const BusinessTypeSettings: React.FC = () => {
               className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40"
             >
               <div
-                className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-full shadow-lg"
+                className="flex items-center gap-4 ps-4 pe-2 py-2 rounded-full shadow-lg"
                 style={{
                   background: 'var(--dash-card)',
                   border: '1px solid var(--dash-border)',
@@ -163,14 +163,14 @@ const BusinessTypeSettings: React.FC = () => {
                     <Check size={13} />
                   </span>
                   <p className="text-sm truncate" style={{ color: 'var(--dash-text-muted)' }}>
-                    Selected:{' '}
+                    {t('settings.businessType.selected', 'Selected:')}{' '}
                     <span style={{ color: 'var(--dash-text)', fontWeight: 600 }}>
                       {selectedLabel}
                     </span>
                   </p>
                 </div>
                 <Button onClick={handleSave} className="rounded-full">
-                  Save changes
+                  {t('common.saveChanges', 'Save changes')}
                 </Button>
               </div>
             </motion.div>
