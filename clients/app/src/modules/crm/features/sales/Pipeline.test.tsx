@@ -111,13 +111,16 @@ describe('Pipeline Board & Stage Moves', () => {
 
     fireEvent.click(nextButtons[0]);
 
-    expect(mocks.updateLeadMutate).toHaveBeenCalledWith({
-      id: 1,
-      data: {
-        stage: 'contacted',
-        companyName: 'Acme Corp',
+    expect(mocks.updateLeadMutate).toHaveBeenCalledWith(
+      {
+        id: 1,
+        data: {
+          stage: 'contacted',
+          companyName: 'Acme Corp',
+        },
       },
-    });
+      expect.any(Object)
+    );
   });
 
   it('allows marking an active lead as lost', () => {
@@ -128,13 +131,16 @@ describe('Pipeline Board & Stage Moves', () => {
 
     fireEvent.click(markLostButtons[0]);
 
-    expect(mocks.updateLeadMutate).toHaveBeenCalledWith({
-      id: 1,
-      data: {
-        stage: 'lost',
-        companyName: 'Acme Corp',
+    expect(mocks.updateLeadMutate).toHaveBeenCalledWith(
+      {
+        id: 1,
+        data: {
+          stage: 'lost',
+          companyName: 'Acme Corp',
+        },
       },
-    });
+      expect.any(Object)
+    );
   });
 
   it('does not display stage transition buttons on terminal stages (contracted, lost)', () => {
@@ -146,5 +152,21 @@ describe('Pipeline Board & Stage Moves', () => {
 
     const markLostButtons = screen.getAllByTitle('crm.pipeline.markLost');
     expect(markLostButtons.length).toBe(1);
+  });
+
+  it('moves the card back to its original stage when the update fails', () => {
+    mocks.updateLeadMutate.mockImplementation(
+      (_payload: unknown, options?: { onError?: () => void }) => options?.onError?.()
+    );
+    renderPipeline();
+
+    fireEvent.click(screen.getAllByTitle(/crm.pipeline.nextStage/)[0]);
+
+    const nextButtons = screen.getAllByTitle(/crm.pipeline.nextStage/);
+    expect(nextButtons).toHaveLength(1);
+    expect(nextButtons[0]).toHaveAttribute(
+      'title',
+      'crm.pipeline.nextStage: crm.leadStages.contacted'
+    );
   });
 });

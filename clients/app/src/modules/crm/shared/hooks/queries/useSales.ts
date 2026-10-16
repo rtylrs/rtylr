@@ -47,11 +47,14 @@ export const usePipeline = (): UseQueryResult<PipelineColumn[]> =>
       const res = await unwrap(crmApi.getSalesPipeline());
       // total_mrr arrives as a decimal string (money.Amount) — coerce or
       // stage sums concatenate strings.
-      return unwrapList<PipelineColumn>(res, 'pipeline', 'columns').map((column) => ({
-        ...column,
-        count: toFiniteNumber((column as any).count ?? (column as any).cnt),
-        totalMrr: toFiniteNumber((column as any).totalMrr ?? (column as any).total_mrr),
-      }));
+      return unwrapList<PipelineColumn>(res, 'pipeline', 'columns').map((column) => {
+        const raw = column as unknown as Record<string, unknown>;
+        return {
+          ...column,
+          count: toFiniteNumber(raw.count ?? raw.cnt),
+          totalMrr: toFiniteNumber(raw.totalMrr ?? raw.total_mrr),
+        };
+      });
     },
   });
 

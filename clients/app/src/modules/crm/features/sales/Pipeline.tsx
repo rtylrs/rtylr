@@ -250,13 +250,22 @@ const Pipeline: React.FC = () => {
 
   const handleMoveStage = (lead: Lead, nextStage: LeadStage): void => {
     setLoadedLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, stage: nextStage } : l)));
-    updateLead.mutate({
-      id: lead.id,
-      data: {
-        stage: nextStage,
-        companyName: lead.companyName ?? lead.company,
+    updateLead.mutate(
+      {
+        id: lead.id,
+        data: {
+          stage: nextStage,
+          companyName: lead.companyName ?? lead.company,
+        },
       },
-    });
+      {
+        onError: () => {
+          setLoadedLeads((prev) =>
+            prev.map((l) => (l.id === lead.id ? { ...l, stage: lead.stage } : l))
+          );
+        },
+      }
+    );
   };
 
   useEffect(() => {
