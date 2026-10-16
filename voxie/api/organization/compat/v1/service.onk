@@ -17,21 +17,21 @@ service ConsoleService {
   createResourceRow(PathTableBodyRequest) -> JsonResponse @post("/resources/{table}/rows") @body("body")
   updateResourceRow(PathTableIdBodyRequest) -> JsonResponse @put("/resources/{table}/rows/{id}") @body("body")
 
-  listResources(EmptyRequest) -> JsonResponse @get("/resources") @http
-  getResources(PathTableRequest) -> JsonResponse @get("/resources/{table}") @http
-  getResourcesRows(PathTableRequest) -> JsonResponse @get("/resources/{table}/rows") @http
-  getResourcesRows2(PathTableIdRequest) -> JsonResponse @get("/resources/{table}/rows/{id}") @http
+  listResources(EmptyRequest) -> EmptyResponse @get("/resources") @http
+  getResources(PathTableRequest) -> EmptyResponse @get("/resources/{table}") @http
+  getResourcesRows(PathTableRequest) -> EmptyResponse @get("/resources/{table}/rows") @http
+  getResourcesRows2(PathTableIdRequest) -> EmptyResponse @get("/resources/{table}/rows/{id}") @http
 }
 
 /// OAuth authorization redirect, served by its original handler.
 service OAuthService {
   base_path: "/oauth"
-  listAuthorize(EmptyRequest) -> JsonResponse @get("/authorize") @http
+  listAuthorize(EmptyRequest) -> EmptyResponse @get("/authorize") @http
 }
 
 /// Billing provider webhooks, served by their original handlers (they verify
 /// the raw body signature).
 service BillingWebhookService {
   base_path: "/subscriptions"
-  createPaddleWebhook(EmptyRequest) -> JsonResponse @post("/paddle-webhook") @http
+  createPaddleWebhook(EmptyRequest) -> EmptyResponse @post("/paddle-webhook") @http
 }

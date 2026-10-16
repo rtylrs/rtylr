@@ -2,6 +2,9 @@ package recruit.compat.v1
 
 message EmptyRequest {}
 
+/// Empty response for @http routes whose handler writes its own response.
+message EmptyResponse {}
+
 message JsonResponse {
   data: json @unwrap
 }
