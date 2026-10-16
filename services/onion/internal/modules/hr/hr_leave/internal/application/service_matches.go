@@ -183,25 +183,50 @@ func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month
 
 	var accrualErrs []error
 	for _, lt := range leaveTypes {
-		if lt.AccrualRule == "" || lt.AccrualRule == "none" || lt.AccrualAmount <= 0 {
+		if lt.AccrualRule == "" || lt.AccrualRule == domain.AccrualRuleNone || lt.AccrualAmount <= 0 {
 			continue
 		}
 
-		if lt.AccrualRule != "monthly" {
-			continue
-		}
-
-		for _, bal := range balancesByType[lt.ID] {
-			addErr := s.repo.AddToEntitledDays(ctx, ownerID, bal.EmployeeID, lt.ID, year, lt.AccrualAmount, month)
-			if addErr != nil {
-				wrappedErr := fmt.Errorf(
-					"add entitled days for owner %d, employee %d, leave type %d: %w",
-					ownerID, bal.EmployeeID, lt.ID, addErr,
-				)
-				accrualErrs = append(accrualErrs, wrappedErr)
-				logger.Ctx(ctx).Error("leave accrual: failed to add entitled days",
-					logger.Any("owner_id", ownerID), logger.Any("employee_id", bal.EmployeeID),
-					logger.Any("leave_type_id", lt.ID), logger.Error(wrappedErr))
+		switch lt.AccrualRule {
+		case domain.AccrualRuleMonthly:
+			for _, bal := range balancesByType[lt.ID] {
+				lastMonth := bal.LastAccrualMonth
+				if lastMonth < 0 {
+					lastMonth = 0
+				}
+				monthsOwed := month - lastMonth
+				if monthsOwed <= 0 {
+					continue
+				}
+				amount := float64(monthsOwed) * lt.AccrualAmount
+				addErr := s.repo.AddToEntitledDays(ctx, ownerID, bal.EmployeeID, lt.ID, year, amount, month)
+				if addErr != nil {
+					wrappedErr := fmt.Errorf(
+						"add entitled days for owner %d, employee %d, leave type %d: %w",
+						ownerID, bal.EmployeeID, lt.ID, addErr,
+					)
+					accrualErrs = append(accrualErrs, wrappedErr)
+					logger.Ctx(ctx).Error("leave accrual: failed to add entitled days",
+						logger.Any("owner_id", ownerID), logger.Any("employee_id", bal.EmployeeID),
+						logger.Any("leave_type_id", lt.ID), logger.Error(wrappedErr))
+				}
+			}
+		case domain.AccrualRuleAnnual:
+			for _, bal := range balancesByType[lt.ID] {
+				if bal.LastAccrualMonth > 0 {
+					continue
+				}
+				addErr := s.repo.AddToEntitledDays(ctx, ownerID, bal.EmployeeID, lt.ID, year, lt.AccrualAmount, 12)
+				if addErr != nil {
+					wrappedErr := fmt.Errorf(
+						"add annual entitled days for owner %d, employee %d, leave type %d: %w",
+						ownerID, bal.EmployeeID, lt.ID, addErr,
+					)
+					accrualErrs = append(accrualErrs, wrappedErr)
+					logger.Ctx(ctx).Error("leave accrual: failed to add annual entitled days",
+						logger.Any("owner_id", ownerID), logger.Any("employee_id", bal.EmployeeID),
+						logger.Any("leave_type_id", lt.ID), logger.Error(wrappedErr))
+				}
 			}
 		}
 	}
