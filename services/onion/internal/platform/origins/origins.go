@@ -18,6 +18,8 @@ var productionPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`^https://[a-z0-9-]+\.voxire\.tech$`),
 	regexp.MustCompile(`^https://rtylr\.com$`),
 	regexp.MustCompile(`^https://[a-z0-9-]+\.rtylr\.com$`),
+	regexp.MustCompile(`^https://voxhires\.com$`),
+	regexp.MustCompile(`^https://[a-z0-9-]+\.voxhires\.com$`),
 }
 
 // developmentPatterns additionally trust local dev servers on any port. They
@@ -36,6 +38,8 @@ var productionPatternStrings = []string{
 	"https://*.voxire.tech",
 	"https://rtylr.com",
 	"https://*.rtylr.com",
+	"https://voxhires.com",
+	"https://*.voxhires.com",
 }
 
 var developmentPatternStrings = []string{

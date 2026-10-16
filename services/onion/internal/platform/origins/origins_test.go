@@ -20,10 +20,13 @@ func TestAllowedOriginsRequireHTTPSForHostedDomains(t *testing.T) {
 		{origin: "https://dash.rtylr.com", want: true},
 		{origin: "https://voxire.com", want: true},
 		{origin: "https://api.voxire.tech", want: true},
+		{origin: "https://voxhires.com", want: true},
+		{origin: "https://careers.voxhires.com", want: true},
 		{origin: "http://rtylr.com", want: false},
 		{origin: "http://dash.rtylr.com", want: false},
 		{origin: "http://voxire.com", want: false},
 		{origin: "http://api.voxire.tech", want: false},
+		{origin: "http://voxhires.com", want: false},
 	}
 
 	for _, tc := range cases {
@@ -48,10 +51,13 @@ func TestAllowedPatternStringsUseWebSocketGlobSemantics(t *testing.T) {
 		{target: "https://dash.rtylr.com", want: true},
 		{target: "https://voxire.com", want: true},
 		{target: "https://api.voxire.tech", want: true},
+		{target: "https://voxhires.com", want: true},
+		{target: "https://careers.voxhires.com", want: true},
 		{target: "http://rtylr.com", want: false},
 		{target: "http://dash.rtylr.com", want: false},
 		{target: "http://voxire.com", want: false},
 		{target: "http://api.voxire.tech", want: false},
+		{target: "http://voxhires.com", want: false},
 	}
 
 	patterns := AllowedPatternStrings()
