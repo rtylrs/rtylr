@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/hr/reviews/internal/application"
@@ -52,6 +53,14 @@ func (a *ReviewAPI) CreateReview(ctx context.Context, req *hrreviewv1.CreateRevi
 		return nil, onekiterrors.New(http.StatusBadRequest, "period is required")
 	}
 
+	status, statusErr := domain.NormalizeStatus(req.GetStatus())
+	if statusErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "status must be draft, submitted or acknowledged")
+	}
+	if ratingErr := domain.ValidateRatings(req.GetRating(), req.GetGoalsRating(), req.GetValuesRating(), req.GetSkillsRating()); ratingErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "ratings must be between 0 and 5")
+	}
+
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -71,8 +80,11 @@ func (a *ReviewAPI) CreateReview(ctx context.Context, req *hrreviewv1.CreateRevi
 		ValuesRating: req.GetValuesRating(),
 		SkillsRating: req.GetSkillsRating(),
 		Notes:        req.GetNotes(),
-		Status:       req.GetStatus(),
+		Status:       status,
 	})
+	if errors.Is(err, domain.ErrStaffNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Staff member not found")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create review")
 	}

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -56,6 +57,11 @@ func (a *OneOnOneAPI) CreateOneOnOne(ctx context.Context, req *hroneononev1.Crea
 		return nil, onekiterrors.New(http.StatusBadRequest, "scheduledAt is not a valid date")
 	}
 
+	status, statusErr := domain.NormalizeStatus(req.GetStatus())
+	if statusErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "status must be scheduled, completed or cancelled")
+	}
+
 	businessID, errModel := resolveBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -66,9 +72,12 @@ func (a *OneOnOneAPI) CreateOneOnOne(ctx context.Context, req *hroneononev1.Crea
 		StaffID:     req.GetStaffId(),
 		ScheduledAt: req.GetScheduledAt(),
 		Notes:       req.GetNotes(),
-		ActionItems: req.GetActionItems(),
-		Status:      req.GetStatus(),
+		ActionItems: domain.NormalizeActionItems(req.GetActionItems()),
+		Status:      status,
 	})
+	if errors.Is(err, domain.ErrStaffNotFound) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Staff member not found")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create one-on-one")
 	}
