@@ -2,9 +2,11 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/organization/api_keys/internal/domain"
 	"github.com/voxire/onion/internal/modules/organization/api_keys/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -326,14 +328,14 @@ func TestList_KeysHaveNonZeroID(t *testing.T) {
 	}
 }
 
-func TestRevoke_NonExistent_NoError(t *testing.T) {
+func TestRevoke_NonExistent_IsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
 	err := repo.Revoke(ctx, testutil.OwnerID, 9999999)
-	if err != nil {
-		t.Fatalf("Revoke non-existent: %v", err)
+	if !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("Revoke non-existent = %v, want ErrNotFound", err)
 	}
 }
 
