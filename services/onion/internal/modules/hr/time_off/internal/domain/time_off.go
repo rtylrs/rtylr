@@ -1,14 +1,18 @@
 package domain
 
 import (
+	"errors"
 	"time"
 )
+
+var ErrStaffNotFound = errors.New("staff member not found in this business")
 
 type TimeOffRequest struct {
 	ID         int64
 	OwnerID    int64
 	BusinessID int64
 	StaffID    int64
+	StaffName  string
 	Type       string
 	StartDate  time.Time
 	EndDate    time.Time
@@ -21,6 +25,7 @@ type TimeOffRequest struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
+
 type TimeOffInput struct {
 	OwnerID    int64
 	BusinessID int64

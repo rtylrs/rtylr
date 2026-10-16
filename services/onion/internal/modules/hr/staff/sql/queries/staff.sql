@@ -47,9 +47,9 @@ ORDER BY start_time ASC LIMIT 1;
 
 -- name: ClockOut :exec
 UPDATE hr_shifts SET clock_out_at = NOW(), status = 'completed',
-       hours_worked = TIMESTAMPDIFF(MINUTE, clock_in_at, NOW()) / 60.0, updated_at = NOW()
-WHERE business_id = ? AND staff_id = ? AND date = CURDATE() AND clock_in_at IS NOT NULL AND clock_out_at IS NULL
-ORDER BY start_time ASC LIMIT 1;
+       hours_worked = GREATEST(0, (TIMESTAMPDIFF(MINUTE, clock_in_at, NOW()) - COALESCE(break_duration_minutes, 0)) / 60.0), updated_at = NOW()
+WHERE business_id = ? AND staff_id = ? AND clock_in_at IS NOT NULL AND clock_out_at IS NULL
+ORDER BY clock_in_at DESC LIMIT 1;
 
 -- cross-schema read from hr_departments — resolve department-managed reports for Flow visibility.
 -- name: ListManagedUserIDs :many

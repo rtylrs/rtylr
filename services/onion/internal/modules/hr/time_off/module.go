@@ -22,13 +22,21 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-// RegisterAPI is intentionally empty: the hr.time_off.v1 OneKit RPC surface
-// (listTimeOff/submitTimeOff) was removed after its only consumer — the dash
-// home PendingWidget — was deleted. HR surfaces read through hr/compat/v1 and
-// the approve REST route below.
 func (m *Module) RegisterAPI(_ *http.ServeMux) {}
 
 func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
+	serverHttp.RegisterGET[api.ListTimeOffRequest, []api.TimeOffEntryDTO](
+		ctx,
+		router,
+		api.ListTimeOffRoutes(),
+		&api.ListTimeOffHandler{Service: m.service},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.SubmitTimeOffRequest, api.TimeOffEntryDTO](
+		ctx,
+		router,
+		api.SubmitTimeOffRoutes(),
+		&api.SubmitTimeOffHandler{Service: m.service},
+	)
 	serverHttp.RegisterPOSTWithValidation[api.ApproveTimeOffRequest, api.ApproveTimeOffResponse](
 		ctx,
 		router,
