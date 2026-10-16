@@ -29,6 +29,16 @@ type fakeSecurityRepo struct {
 	invalidateCalls    int
 	recordedTwoFactor  bool
 	recordedVerifyFlag bool
+
+	lastCounter int64
+}
+
+func (f *fakeSecurityRepo) ConsumeTOTPCounter(_ context.Context, _, counter int64) (bool, error) {
+	if counter <= f.lastCounter {
+		return false, nil
+	}
+	f.lastCounter = counter
+	return true, nil
 }
 
 func (f *fakeSecurityRepo) GetSecuritySettings(context.Context, int64) (domain.SecuritySettings, error) {
@@ -362,4 +372,54 @@ func totpForTest(secret string, now time.Time) string {
 		uint32(sum[index+2])<<8 |
 		uint32(sum[index+3])
 	return fmt.Sprintf("%06d", value%1000000)
+}
+
+func TestVerifyMFARejectsAReplayedCode(t *testing.T) {
+	t.Setenv("MFA_ENCRYPTION_KEY", "test-step-up-key")
+	secret, err := randomTestSecret()
+	if err != nil {
+		t.Fatalf("randomTestSecret: %v", err)
+	}
+	stored, err := sealMFASecret(secret)
+	if err != nil {
+		t.Fatalf("sealMFASecret: %v", err)
+	}
+	repo := &fakeSecurityRepo{factorState: enrolledAgo(time.Minute), pendingSecret: []byte(stored)}
+	service := serviceWithRepo(repo)
+	mfaAttempts.reset(4250)
+
+	code := totpForTest(secret, time.Now())
+	if err := service.VerifyMFA(context.Background(), 4250, code); err != nil {
+		t.Fatalf("first use: %v", err)
+	}
+	repo.markedVerified, repo.recordedVerifyFlag = false, false
+	if err := service.VerifyMFA(context.Background(), 4250, code); !errors.Is(err, ErrMFAInvalidCode) {
+		t.Fatalf("replay error = %v, want ErrMFAInvalidCode", err)
+	}
+	if repo.recordedVerifyFlag {
+		t.Fatal("a replayed code refreshed the verified timestamp")
+	}
+}
+
+func TestVerifyMFARejectsAnOlderWindowAfterANewerOne(t *testing.T) {
+	t.Setenv("MFA_ENCRYPTION_KEY", "test-step-up-key")
+	secret, err := randomTestSecret()
+	if err != nil {
+		t.Fatalf("randomTestSecret: %v", err)
+	}
+	stored, err := sealMFASecret(secret)
+	if err != nil {
+		t.Fatalf("sealMFASecret: %v", err)
+	}
+	repo := &fakeSecurityRepo{factorState: enrolledAgo(time.Minute), pendingSecret: []byte(stored)}
+	service := serviceWithRepo(repo)
+	mfaAttempts.reset(4251)
+
+	now := time.Now()
+	if err := service.VerifyMFA(context.Background(), 4251, totpForTest(secret, now.Add(30*time.Second))); err != nil {
+		t.Fatalf("next-window code: %v", err)
+	}
+	if err := service.VerifyMFA(context.Background(), 4251, totpForTest(secret, now)); !errors.Is(err, ErrMFAInvalidCode) {
+		t.Fatalf("current-window code after a newer one = %v, want ErrMFAInvalidCode", err)
+	}
 }

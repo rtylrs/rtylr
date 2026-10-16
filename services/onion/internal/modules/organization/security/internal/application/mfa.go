@@ -65,7 +65,11 @@ func (s *Service) CompleteMFAEnrollment(ctx context.Context, userID int64, code 
 		return nil, ErrMFAEnrollmentMissing
 	}
 	secret, err := openMFASecret(string(stored))
-	if err != nil || !validTOTP(secret, code, time.Now()) {
+	if err != nil {
+		return nil, ErrMFAInvalidCode
+	}
+	counter, ok := matchTOTP(secret, code, time.Now())
+	if !ok {
 		return nil, ErrMFAInvalidCode
 	}
 	recoveryCodes := make([]string, 0, 8)
@@ -83,6 +87,10 @@ func (s *Service) CompleteMFAEnrollment(ctx context.Context, userID int64, code 
 		recoveryHashes = append(recoveryHashes, []byte(hash))
 	}
 	if err := s.repo.CompleteMFAEnrollment(ctx, userID, recoveryHashes); err != nil {
+		return nil, err
+	}
+	// The code that proved the new factor must not also pass a later verify.
+	if _, err := s.repo.ConsumeTOTPCounter(ctx, userID, counter); err != nil {
 		return nil, err
 	}
 	invalidateSecurityScope(ctx, userID)
@@ -111,7 +119,20 @@ func (s *Service) verifyMFAOnce(ctx context.Context, userID int64, code string) 
 		return ErrMFAInvalidCode
 	}
 	secret, err := openMFASecret(string(stored))
-	if err != nil || !validTOTP(secret, code, time.Now()) {
+	if err != nil {
+		return ErrMFAInvalidCode
+	}
+	counter, ok := matchTOTP(secret, code, time.Now())
+	if !ok {
+		return ErrMFAInvalidCode
+	}
+	// A TOTP is single-use: a code observed on the wire must not verify twice
+	// inside its validity window (RFC 6238 5.2).
+	fresh, err := s.repo.ConsumeTOTPCounter(ctx, userID, counter)
+	if err != nil {
+		return err
+	}
+	if !fresh {
 		return ErrMFAInvalidCode
 	}
 	return s.repo.MarkMFAVerified(ctx, userID)
@@ -159,16 +180,22 @@ func randomRecoveryCode() (string, error) {
 }
 
 func validTOTP(secret, code string, now time.Time) bool {
+	_, ok := matchTOTP(secret, code, now)
+	return ok
+}
+
+// matchTOTP returns the time-step counter the code was generated for.
+func matchTOTP(secret, code string, now time.Time) (int64, bool) {
 	code = strings.TrimSpace(code)
 	if len(code) != 6 {
-		return false
+		return 0, false
 	}
 	if _, err := strconv.Atoi(code); err != nil {
-		return false
+		return 0, false
 	}
 	decoded, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(strings.ToUpper(strings.TrimSpace(secret)))
 	if err != nil {
-		return false
+		return 0, false
 	}
 	current := now.Unix() / 30
 	for offset := int64(-1); offset <= 1; offset++ {
@@ -186,10 +213,10 @@ func validTOTP(secret, code string, now time.Time) bool {
 			uint32(digest[index+3])
 		candidate := fmt.Sprintf("%06d", value%1000000)
 		if hmac.Equal([]byte(candidate), []byte(code)) {
-			return true
+			return counter, true
 		}
 	}
-	return false
+	return 0, false
 }
 
 func mfaEncryptionKey() ([]byte, error) {

@@ -85,6 +85,9 @@ func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.Create
 		PermissionProfileAssignments: assignments,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrDelegationCeiling) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create group")
 	}
 
@@ -162,6 +165,9 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 		LicensedAppIDs:               req.GetLicensedAppIds(),
 		PermissionProfileAssignments: assignments,
 	}); err != nil {
+		if errors.Is(err, domain.ErrDelegationCeiling) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrGroupNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
 		}
@@ -184,7 +190,7 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 	if !businessOK {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -194,7 +200,10 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group id")
 	}
 
-	if err := a.Service.DeleteGroup(ctx, ownerID, businessID, groupID); err != nil {
+	if err := a.Service.DeleteGroup(ctx, actorID, ownerID, businessID, groupID); err != nil {
+		if errors.Is(err, domain.ErrDelegationCeiling) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrGroupNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
 		}
@@ -240,6 +249,9 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 	}
 
 	if err := a.Service.AddGroupMembers(ctx, ownerID, groupID, businessID, actorID, userIDs); err != nil {
+		if errors.Is(err, domain.ErrDelegationCeiling) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add members")
 	}
 
@@ -257,7 +269,7 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 	if !businessOK {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -268,7 +280,10 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid group or user id")
 	}
 
-	if err := a.Service.RemoveGroupMember(ctx, ownerID, businessID, groupID, userID); err != nil {
+	if err := a.Service.RemoveGroupMember(ctx, actorID, ownerID, businessID, groupID, userID); err != nil {
+		if errors.Is(err, domain.ErrDelegationCeiling) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrPermissionNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
 		}

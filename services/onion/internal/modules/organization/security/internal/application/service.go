@@ -40,6 +40,9 @@ type repository interface {
 	GetMFASecret(ctx context.Context, userID int64, active bool) ([]byte, error)
 	CompleteMFAEnrollment(ctx context.Context, userID int64, recoveryHashes [][]byte) error
 	MarkMFAVerified(ctx context.Context, userID int64) error
+	// ConsumeTOTPCounter records counter as used and reports false when that
+	// time step, or a later one, was already accepted for the active factor.
+	ConsumeTOTPCounter(ctx context.Context, userID, counter int64) (bool, error)
 	GetMFAFactorState(ctx context.Context, userID int64) (domain.MFAFactorState, error)
 	ListRecoveryCodes(ctx context.Context, userID int64) ([]domain.RecoveryCodeRow, error)
 	ConsumeRecoveryCode(ctx context.Context, userID, id int64) error

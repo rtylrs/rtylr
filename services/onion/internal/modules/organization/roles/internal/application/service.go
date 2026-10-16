@@ -24,6 +24,7 @@ type normalizedRepository interface {
 	ListAssignments(ctx context.Context, businessID int64, filter domain.AssignmentFilter) (domain.RoleAssignmentPage, error)
 	AssignRole(ctx context.Context, businessID, actorID int64, input domain.AssignRoleInput) (domain.RoleAssignment, error)
 	RemoveAssignment(ctx context.Context, businessID, actorID, assignmentID int64) error
+	GetAssignment(ctx context.Context, businessID, assignmentID int64) (domain.RoleAssignment, error)
 	PreviewPermissionImpact(ctx context.Context, businessID, roleID int64, permissions []string) (domain.PermissionImpact, error)
 	ListAudit(ctx context.Context, businessID int64, filter domain.AuditFilter) (domain.AuditPage, error)
 }
@@ -161,6 +162,16 @@ func (s *Service) AssignManagedRole(ctx context.Context, businessID, actorID int
 		invalidateRolesScope(ctx, businessID)
 	}
 	return assignment, err
+}
+
+func (s *Service) GetManagedAssignment(ctx context.Context, businessID, assignmentID int64) (domain.RoleAssignment, error) {
+	if s.normalizedRepo == nil {
+		return domain.RoleAssignment{}, domain.ErrAuthorizationSchemaUnavailable
+	}
+	if assignmentID <= 0 {
+		return domain.RoleAssignment{}, domain.ErrRoleNotFound
+	}
+	return s.normalizedRepo.GetAssignment(ctx, businessID, assignmentID)
 }
 
 func (s *Service) RemoveManagedAssignment(ctx context.Context, businessID, actorID, assignmentID int64) error {

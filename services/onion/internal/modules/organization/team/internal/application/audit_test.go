@@ -46,7 +46,7 @@ func TestDeleteGroup_RecordsAuditEntryWithGroupName(t *testing.T) {
 	recorder := &recordingAudit{}
 	s := NewService(context.Background(), &groupRepo{group: &domain.Group{ID: 7, Name: "Kitchen"}}).WithAuditRecorder(recorder)
 
-	if err := s.DeleteGroup(context.Background(), 1, 42, 7); err != nil {
+	if err := s.DeleteGroup(context.Background(), 1, 1, 42, 7); err != nil {
 		t.Fatalf("DeleteGroup: %v", err)
 	}
 	if len(recorder.events) != 1 {
@@ -63,7 +63,7 @@ func TestDeleteGroup_FailedChangeRecordsNothing(t *testing.T) {
 	recorder := &recordingAudit{}
 	s := NewService(context.Background(), &groupRepo{group: &domain.Group{ID: 7, Name: "Kitchen"}, deleteErr: errors.New("boom")}).WithAuditRecorder(recorder)
 
-	if err := s.DeleteGroup(context.Background(), 1, 42, 7); err == nil {
+	if err := s.DeleteGroup(context.Background(), 1, 1, 42, 7); err == nil {
 		t.Fatal("DeleteGroup succeeded, want the repository error")
 	}
 	if len(recorder.events) != 0 {
@@ -77,7 +77,7 @@ func TestRemoveGroupMember_AuditFailureDoesNotFailTheChange(t *testing.T) {
 	recorder := &recordingAudit{err: errors.New("outbox down")}
 	s := NewService(context.Background(), &groupRepo{group: &domain.Group{ID: 7, Name: "Kitchen"}}).WithAuditRecorder(recorder)
 
-	if err := s.RemoveGroupMember(context.Background(), 1, 42, 7, 99); err != nil {
+	if err := s.RemoveGroupMember(context.Background(), 1, 1, 42, 7, 99); err != nil {
 		t.Fatalf("RemoveGroupMember: %v", err)
 	}
 	if len(recorder.events) != 1 || recorder.events[0].Action != "group.member_removed" {

@@ -223,5 +223,5 @@ func (r *Repository) AssignRole(ctx context.Context, businessID, actorID int64, 
 	if err := tx.Commit(); err != nil {
 		return domain.RoleAssignment{}, normalizedSchemaError(err)
 	}
-	return r.getAssignment(ctx, businessID, assignmentID)
+	return r.GetAssignment(ctx, businessID, assignmentID)
 }
