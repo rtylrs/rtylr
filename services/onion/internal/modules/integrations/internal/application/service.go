@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/integrations/internal/domain"
@@ -46,12 +47,19 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Integrat
 	)
 }
 
+const maxConfigBytes = 8 << 10
+
 func (s *Service) Connect(ctx context.Context, businessID int64, provider string, config json.RawMessage) (int64, error) {
-	if provider == "" {
-		return 0, errors.New("provider is required")
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	if _, ok := domain.Providers[provider]; !ok {
+		return 0, domain.ErrInvalidProvider
 	}
-	if config == nil {
+	if len(config) == 0 {
 		config = json.RawMessage("{}")
+	}
+	var object map[string]json.RawMessage
+	if len(config) > maxConfigBytes || json.Unmarshal(config, &object) != nil || object == nil {
+		return 0, domain.ErrInvalidConfig
 	}
 	id, err := s.repo.Connect(ctx, businessID, provider, config)
 	if err != nil {
@@ -70,4 +78,54 @@ func (s *Service) Disconnect(ctx context.Context, businessID, integrationID int6
 	}
 	invalidateIntegrationsScope(ctx, businessID)
 	return nil
+}
+
+var secretKeyFragments = []string{"secret", "token", "key", "password", "passwd", "credential", "authorization", "private"}
+
+// RedactConfig masks secret-looking values anywhere in a stored config, so a
+// listing never hands credentials back to the browser.
+func RedactConfig(raw json.RawMessage) json.RawMessage {
+	if len(raw) == 0 {
+		return raw
+	}
+	var value any
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return json.RawMessage("{}")
+	}
+	redacted, err := json.Marshal(redactValue(value))
+	if err != nil {
+		return json.RawMessage("{}")
+	}
+	return redacted
+}
+
+func redactValue(value any) any {
+	switch typed := value.(type) {
+	case map[string]any:
+		for key, child := range typed {
+			if isSecretKey(key) {
+				typed[key] = "[redacted]"
+				continue
+			}
+			typed[key] = redactValue(child)
+		}
+		return typed
+	case []any:
+		for i, child := range typed {
+			typed[i] = redactValue(child)
+		}
+		return typed
+	default:
+		return value
+	}
+}
+
+func isSecretKey(key string) bool {
+	lower := strings.ToLower(key)
+	for _, fragment := range secretKeyFragments {
+		if strings.Contains(lower, fragment) {
+			return true
+		}
+	}
+	return false
 }

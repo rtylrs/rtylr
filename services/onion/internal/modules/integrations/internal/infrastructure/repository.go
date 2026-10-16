@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/integrations/internal/domain"
 	"github.com/voxire/onion/internal/modules/integrations/internal/infrastructure/persistence/sqlc"
@@ -48,7 +49,21 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Integ
 	return integrations, nil
 }
 
+// Connect records the integration, re-using an existing row for the provider
+// so connecting twice does not stack duplicates.
 func (r *Repository) Connect(ctx context.Context, businessID int64, provider string, config json.RawMessage) (int64, error) {
+	existing, err := r.queries.FindIntegrationByProvider(ctx, sqlc.FindIntegrationByProviderParams{BusinessID: businessID, Provider: provider})
+	if err == nil {
+		if err := r.queries.ReconnectIntegration(ctx, sqlc.ReconnectIntegrationParams{Config: config, ID: existing, BusinessID: businessID}); err != nil {
+			logger.Ctx(ctx).Error("Failed to reconnect integration", logger.Error(err))
+			return 0, err
+		}
+		return existing, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Error("Failed to look up integration", logger.Error(err))
+		return 0, err
+	}
 	res, err := r.queries.ConnectIntegration(ctx, sqlc.ConnectIntegrationParams{
 		OwnerID:    businessID,
 		BusinessID: businessID,
@@ -64,13 +79,20 @@ func (r *Repository) Connect(ctx context.Context, businessID int64, provider str
 }
 
 func (r *Repository) Disconnect(ctx context.Context, businessID, integrationID int64) error {
-	err := r.queries.DisconnectIntegration(ctx, sqlc.DisconnectIntegrationParams{
+	res, err := r.queries.DisconnectIntegration(ctx, sqlc.DisconnectIntegrationParams{
 		ID:         integrationID,
 		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to disconnect integration", logger.Error(err))
 		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrNotFound
 	}
 
 	return nil

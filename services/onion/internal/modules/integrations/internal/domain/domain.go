@@ -2,8 +2,18 @@ package domain
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 )
+
+var (
+	ErrNotFound        = errors.New("integration not found")
+	ErrInvalidProvider = errors.New("unsupported integration provider")
+	ErrInvalidConfig   = errors.New("integration config must be a JSON object")
+)
+
+// Providers lists the integrations a business can connect.
+var Providers = map[string]struct{}{"stripe": {}}
 
 type IntegrationStatus string
 
