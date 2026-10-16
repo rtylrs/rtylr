@@ -67,6 +67,9 @@ type Repository interface {
 	SaveToken(ctx context.Context, token *Token) error
 	GetTokenByRefresh(ctx context.Context, refreshToken string) (*Token, error)
 	RevokeToken(ctx context.Context, refreshToken string) error
+	// ConsumeRefreshToken atomically revokes a refresh token and reports
+	// ErrTokenRevoked when it was already revoked by another request.
+	ConsumeRefreshToken(ctx context.Context, refreshToken string) error
 	GetUserPasswordHash(ctx context.Context, userID int64) (string, error)
 	GetUserIDByEmail(ctx context.Context, email string) (int64, error)
 	GetUserBusinessID(ctx context.Context, userID int64) (businessID int64, err error)

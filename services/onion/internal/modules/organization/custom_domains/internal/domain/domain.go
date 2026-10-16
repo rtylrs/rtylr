@@ -9,6 +9,8 @@ var (
 	ErrConflict              = errorString("custom domain already belongs to another business")
 )
 
+const StatusVerified = "verified"
+
 type errorString string
 
 func (e errorString) Error() string { return string(e) }

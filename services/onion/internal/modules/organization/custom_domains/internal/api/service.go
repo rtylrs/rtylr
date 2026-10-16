@@ -34,7 +34,7 @@ func (a *API) GetCustomDomain(ctx context.Context, _ *hubconfigv1.GetCustomDomai
 }
 
 func (a *API) RegisterCustomDomain(ctx context.Context, req *hubconfigv1.RegisterCustomDomainRequest) (*hubconfigv1.RegisterCustomDomainResponse, error) {
-	device, businessID, err := deviceBusinessID(ctx)
+	device, businessID, err := adminBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (a *API) RegisterCustomDomain(ctx context.Context, req *hubconfigv1.Registe
 }
 
 func (a *API) VerifyCustomDomain(ctx context.Context, req *hubconfigv1.VerifyCustomDomainRequest) (*hubconfigv1.VerifyCustomDomainResponse, error) {
-	businessID, err := businessID(ctx)
+	_, businessID, err := adminBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (a *API) VerifyCustomDomain(ctx context.Context, req *hubconfigv1.VerifyCus
 }
 
 func (a *API) RemoveCustomDomain(ctx context.Context, _ *hubconfigv1.RemoveCustomDomainRequest) (*hubconfigv1.RemoveCustomDomainResponse, error) {
-	businessID, err := businessID(ctx)
+	_, businessID, err := adminBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +83,14 @@ func (a *API) RemoveCustomDomain(ctx context.Context, _ *hubconfigv1.RemoveCusto
 func businessID(ctx context.Context) (int64, error) {
 	_, id, err := deviceBusinessID(ctx)
 	return id, err
+}
+
+func adminBusinessID(ctx context.Context) (authPkg.Device, int64, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if !authPkg.IsBusinessAdmin(device.User) {
+		return authPkg.Device{}, 0, onekiterrors.PermissionDenied()
+	}
+	return deviceBusinessID(ctx)
 }
 
 func deviceBusinessID(ctx context.Context) (authPkg.Device, int64, error) {

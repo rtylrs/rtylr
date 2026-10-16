@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/voxire/onion/internal/modules/organization/custom_domains/internal/domain"
 )
 
 func TestValidateDomain(t *testing.T) {
@@ -72,5 +74,58 @@ func TestDNSChallengeMatches(t *testing.T) {
 				t.Fatalf("dnsChallengeMatches() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+type stubRepo struct {
+	current    domain.CustomDomain
+	registered bool
+}
+
+func (r *stubRepo) Get(context.Context, int64) (domain.CustomDomain, error) {
+	if r.current.Domain == "" {
+		return domain.CustomDomain{}, domain.ErrNotFound
+	}
+	return r.current, nil
+}
+
+func (r *stubRepo) GetByDomain(_ context.Context, name string) (domain.CustomDomain, error) {
+	if r.current.Domain == name {
+		return r.current, nil
+	}
+	return domain.CustomDomain{}, domain.ErrNotFound
+}
+
+func (r *stubRepo) Register(_ context.Context, input domain.CustomDomain) (domain.CustomDomain, error) {
+	r.registered = true
+	input.Status = "pending_verification"
+	return input, nil
+}
+
+func (r *stubRepo) Remove(context.Context, int64) error         { return nil }
+func (r *stubRepo) Verify(context.Context, int64, string) error { return nil }
+
+func TestRegisterKeepsVerifiedDomainVerified(t *testing.T) {
+	repo := &stubRepo{current: domain.CustomDomain{BusinessID: 1, Domain: "menu.example.com", Status: domain.StatusVerified, VerificationToken: "t"}}
+	got, err := NewService(context.Background(), repo).Register(context.Background(), 9, 1, "Menu.Example.com.")
+	if err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	if repo.registered {
+		t.Fatal("re-registering a verified domain must not rotate its challenge")
+	}
+	if got.Status != domain.StatusVerified {
+		t.Fatalf("status = %q, want verified", got.Status)
+	}
+}
+
+func TestRegisterRotatesChallengeForPendingDomain(t *testing.T) {
+	repo := &stubRepo{current: domain.CustomDomain{BusinessID: 1, Domain: "menu.example.com", Status: "pending_verification", VerificationToken: "old"}}
+	got, err := NewService(context.Background(), repo).Register(context.Background(), 9, 1, "menu.example.com")
+	if err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	if !repo.registered || got.VerificationToken == "old" {
+		t.Fatal("a pending domain should get a fresh challenge")
 	}
 }

@@ -40,8 +40,13 @@ func (s *Service) Register(ctx context.Context, ownerID, businessID int64, rawDo
 	} else if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		return domain.CustomDomain{}, err
 	}
-	if current, err := s.repo.Get(ctx, businessID); err == nil && current.Domain != domainName {
-		return domain.CustomDomain{}, domain.ErrConflict
+	if current, err := s.repo.Get(ctx, businessID); err == nil {
+		if current.Domain != domainName {
+			return domain.CustomDomain{}, domain.ErrConflict
+		}
+		if current.Status == domain.StatusVerified {
+			return current, nil
+		}
 	} else if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		return domain.CustomDomain{}, err
 	}

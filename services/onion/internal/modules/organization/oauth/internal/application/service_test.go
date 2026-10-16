@@ -15,17 +15,18 @@ import (
 )
 
 type mockRepo struct {
-	client       *domain.Client
-	authCode     *domain.AuthCode
-	token        *domain.Token
-	userID       int64
-	passwordHash string
-	businessID   int64
-	businessErr  error
-	clientErr    error
-	authCodeErr  error
-	tokenErr     error
-	err          error
+	client          *domain.Client
+	authCode        *domain.AuthCode
+	token           *domain.Token
+	userID          int64
+	passwordHash    string
+	businessID      int64
+	businessErr     error
+	clientErr       error
+	authCodeErr     error
+	tokenErr        error
+	consumeTokenErr error
+	err             error
 }
 
 func (m *mockRepo) GetClient(_ context.Context, _ string) (*domain.Client, error) {
@@ -51,6 +52,12 @@ func (m *mockRepo) GetTokenByRefresh(_ context.Context, _ string) (*domain.Token
 	return m.token, m.err
 }
 func (m *mockRepo) RevokeToken(_ context.Context, _ string) error { return m.err }
+func (m *mockRepo) ConsumeRefreshToken(_ context.Context, _ string) error {
+	if m.consumeTokenErr != nil {
+		return m.consumeTokenErr
+	}
+	return m.err
+}
 func (m *mockRepo) GetUserPasswordHash(_ context.Context, _ int64) (string, error) {
 	return m.passwordHash, m.err
 }
@@ -312,6 +319,22 @@ func TestRefreshTokens_RevokedTokenReturnsError(t *testing.T) {
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
 	s := newTestService(&mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, token: token})
+	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	if !errors.Is(err, domain.ErrTokenRevoked) {
+		t.Errorf("expected ErrTokenRevoked, got %v", err)
+	}
+}
+
+func TestRefreshTokens_LostRotationRaceReturnsRevoked(t *testing.T) {
+	token := &domain.Token{
+		ClientID:  "app1",
+		ExpiresAt: time.Now().Add(1 * time.Hour),
+	}
+	s := newTestService(&mockRepo{
+		client:          &domain.Client{ID: "app1", IsPublic: true},
+		token:           token,
+		consumeTokenErr: domain.ErrTokenRevoked,
+	})
 	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
 	if !errors.Is(err, domain.ErrTokenRevoked) {
 		t.Errorf("expected ErrTokenRevoked, got %v", err)
