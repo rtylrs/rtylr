@@ -7,7 +7,11 @@
     "secretDescription": "Use it to verify the X-Rtylr-Signature header on each delivery. Copy it now, you won't be able to see it again.",
     "copySecret": "Copy secret",
     "secretCopied": "Secret copied",
-    "secretCopyFailed": "Failed to copy secret to clipboard"
+    "secretCopyFailed": "Failed to copy secret to clipboard",
+    "rotateTitle": "Rotate signing secret?",
+    "rotateDescription": "The current secret stops signing deliveries immediately. Update your endpoint with the new secret to keep verifying them.",
+    "rotateConfirm": "Rotate secret",
+    "rotateFailed": "Failed to rotate the signing secret"
   },
   "apiKeys": {
     "emptyTitle": "No API keys yet",

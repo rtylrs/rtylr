@@ -75,3 +75,20 @@ export const useDeleteWebhook = () => {
     },
   });
 };
+
+export const useRotateWebhookSecret = () => {
+  return useMutation({
+    mutationFn: async (id: string): Promise<string> => {
+      const res = await developerClient.rotateWebhookSecret({ id });
+      return res.secret ?? '';
+    },
+    onError: (error: unknown) => {
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('developer.webhooks.rotateFailed', 'Failed to rotate the signing secret')
+        )
+      );
+    },
+  });
+};

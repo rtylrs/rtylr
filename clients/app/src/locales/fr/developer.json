@@ -7,7 +7,11 @@
     "secretDescription": "Utilisez-le pour vérifier l'en-tête X-Rtylr-Signature de chaque envoi. Copiez-le maintenant, vous ne pourrez plus le revoir.",
     "copySecret": "Copier le secret",
     "secretCopied": "Secret copié",
-    "secretCopyFailed": "Impossible de copier le secret dans le presse-papiers"
+    "secretCopyFailed": "Impossible de copier le secret dans le presse-papiers",
+    "rotateTitle": "Renouveler le secret de signature ?",
+    "rotateDescription": "Le secret actuel cesse immédiatement de signer les envois. Mettez à jour votre point de terminaison avec le nouveau secret pour continuer à les vérifier.",
+    "rotateConfirm": "Renouveler le secret",
+    "rotateFailed": "Échec du renouvellement du secret de signature"
   },
   "apiKeys": {
     "emptyTitle": "Aucune clé API pour l'instant",

@@ -116,6 +116,22 @@ func (r *Repository) Delete(ctx context.Context, businessID, webhookID int64) er
 	return nil
 }
 
+func (r *Repository) RotateSecret(ctx context.Context, businessID, webhookID int64, secret string) error {
+	res, err := r.queries.RotateWebhookSecret(ctx, sqlc.RotateWebhookSecretParams{Secret: secret, ID: webhookID, BusinessID: businessID})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to rotate webhook secret", logger.Error(err))
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrWebhookNotFound
+	}
+	return nil
+}
+
 func (r *Repository) Get(ctx context.Context, businessID, webhookID int64) (domain.Webhook, error) {
 	row, err := r.queries.GetWebhook(ctx, sqlc.GetWebhookParams{
 		ID:         webhookID,

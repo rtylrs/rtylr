@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, CheckCircle2, PauseCircle } from 'lucide-react';
+import { Trash2, CheckCircle2, PauseCircle, KeyRound } from 'lucide-react';
 import type { Webhook } from '../../hooks/queries/useWebhooks';
 
 export interface WebhookRowProps {
   webhook: Webhook;
   onDelete?: (id: string) => void;
+  onRotateSecret?: (id: string) => void;
 }
 
 // Holds the key, not the label: this map is built at module load, before
@@ -29,7 +30,7 @@ function formatRelative(iso?: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => {
+export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete, onRotateSecret }) => {
   const { t } = useTranslation();
   const meta = webhook.isActive ? STATUS_META.active : STATUS_META.paused;
   const Icon = meta.icon;
@@ -66,6 +67,17 @@ export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => 
           Last delivery {formatRelative(webhook.lastTriggeredAt)}
         </p>
       </div>
+      {onRotateSecret && (
+        <button
+          type="button"
+          className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)] shrink-0"
+          style={{ color: 'var(--dash-text-muted)' }}
+          onClick={() => onRotateSecret(webhook.id)}
+          aria-label={t('common.webhook.rotate')}
+        >
+          <KeyRound size={14} />
+        </button>
+      )}
       <button
         type="button"
         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/10 shrink-0"

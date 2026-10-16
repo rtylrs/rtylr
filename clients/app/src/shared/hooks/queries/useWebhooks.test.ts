@@ -2,12 +2,18 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useWebhooks, useCreateWebhook, useDeleteWebhook } from './useWebhooks';
+import {
+  useWebhooks,
+  useCreateWebhook,
+  useDeleteWebhook,
+  useRotateWebhookSecret,
+} from './useWebhooks';
 
 const mockDeveloperClient = vi.hoisted(() => ({
   listWebhooks: vi.fn(),
   createWebhook: vi.fn(),
   deleteWebhook: vi.fn(),
+  rotateWebhookSecret: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
@@ -124,5 +130,27 @@ describe('useWebhooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockDeveloperClient.deleteWebhook).toHaveBeenCalledWith({ id: '12' });
+  });
+});
+
+describe('useRotateWebhookSecret', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns the new signing secret from the rotate endpoint', async () => {
+    mockDeveloperClient.rotateWebhookSecret.mockResolvedValue({ secret: 'whsec_new' });
+    const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const { result } = renderHook(() => useRotateWebhookSecret(), {
+      wrapper: createWrapper(client),
+    });
+
+    let secret = '';
+    await act(async () => {
+      secret = await result.current.mutateAsync('7');
+    });
+
+    expect(mockDeveloperClient.rotateWebhookSecret).toHaveBeenCalledWith({ id: '7' });
+    expect(secret).toBe('whsec_new');
   });
 });

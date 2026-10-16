@@ -30,6 +30,12 @@ type mockRepo struct {
 	getErr    error
 	updateErr error
 	deleteErr error
+	rotateErr error
+	rotateGot struct {
+		businessID int64
+		id         int64
+		secret     string
+	}
 	createGot struct {
 		ownerID    int64
 		businessID int64
@@ -74,6 +80,13 @@ func (m *mockRepo) Update(_ context.Context, businessID, id int64, url string, e
 	m.updateGot.events = events
 	m.updateGot.isActive = isActive
 	return m.updateErr
+}
+
+func (m *mockRepo) RotateSecret(_ context.Context, businessID, id int64, secret string) error {
+	m.rotateGot.businessID = businessID
+	m.rotateGot.id = id
+	m.rotateGot.secret = secret
+	return m.rotateErr
 }
 
 func (m *mockRepo) Delete(_ context.Context, businessID, id int64) error {
@@ -281,5 +294,39 @@ func TestUpdateRejectsInvalidRegistrationBeforeStoring(t *testing.T) {
 	}
 	if m.updateGot.id != 0 {
 		t.Fatal("an invalid update reached the repository")
+	}
+}
+
+func TestRotateSecretStoresAndReturnsTheNewSecret(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	secret, err := s.RotateSecret(context.Background(), 7, 12)
+	if err != nil {
+		t.Fatalf("RotateSecret: %v", err)
+	}
+	if len(secret) != 64 || m.rotateGot.secret != secret || m.rotateGot.id != 12 || m.rotateGot.businessID != 7 {
+		t.Fatalf("secret=%q stored=%+v", secret, m.rotateGot)
+	}
+	other, _ := s.RotateSecret(context.Background(), 7, 12)
+	if other == secret {
+		t.Fatal("rotation returned the same secret twice")
+	}
+}
+
+func TestRotateSecretReportsAMissingWebhook(t *testing.T) {
+	s := &Service{repo: &mockRepo{rotateErr: domain.ErrWebhookNotFound}}
+	if _, err := s.RotateSecret(context.Background(), 7, 12); !errors.Is(err, domain.ErrWebhookNotFound) {
+		t.Fatalf("err = %v, want ErrWebhookNotFound", err)
+	}
+}
+
+func TestRotateSecretRequiresAnID(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	if _, err := s.RotateSecret(context.Background(), 7, 0); err == nil {
+		t.Fatal("expected an error for a missing id")
+	}
+	if m.rotateGot.secret != "" {
+		t.Fatal("a secret was written without an id")
 	}
 }
