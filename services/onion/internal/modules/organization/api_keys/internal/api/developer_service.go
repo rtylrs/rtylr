@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -205,12 +206,12 @@ func (a *DeveloperAPI) CreateWebhook(ctx context.Context, req *hubdeveloperv1.Cr
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	id, err := a.WebhooksService.Create(ctx, device.User.UserID, businessID, req.GetUrl(), req.GetEvents())
+	id, secret, err := a.WebhooksService.Create(ctx, device.User.UserID, businessID, req.GetUrl(), req.GetEvents())
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create webhook")
+		return nil, webhookError(err, "Failed to create webhook")
 	}
 
-	return &hubdeveloperv1.CreateWebhookResponse{Id: id, Message: "Webhook created"}, nil
+	return &hubdeveloperv1.CreateWebhookResponse{Id: id, Message: "Webhook created", Secret: secret}, nil
 }
 
 func (a *DeveloperAPI) UpdateWebhook(ctx context.Context, req *hubdeveloperv1.UpdateWebhookRequest) (*hubdeveloperv1.UpdateWebhookResponse, error) {
@@ -235,7 +236,7 @@ func (a *DeveloperAPI) UpdateWebhook(ctx context.Context, req *hubdeveloperv1.Up
 
 	webhook, err := a.WebhooksService.Update(ctx, businessID, id, req.GetUrl(), req.GetEvents(), req.GetIsActive())
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update webhook")
+		return nil, webhookError(err, "Failed to update webhook")
 	}
 
 	return &hubdeveloperv1.UpdateWebhookResponse{Webhook: toProtoWebhook(webhook)}, nil
@@ -258,10 +259,21 @@ func (a *DeveloperAPI) DeleteWebhook(ctx context.Context, req *hubdeveloperv1.De
 	}
 
 	if err := a.WebhooksService.Delete(ctx, businessID, id); err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete webhook")
+		return nil, webhookError(err, "Failed to delete webhook")
 	}
 
 	return &hubdeveloperv1.DeleteWebhookResponse{Message: "Webhook deleted"}, nil
+}
+
+func webhookError(err error, fallback string) error {
+	switch {
+	case errors.Is(err, hubdeveloper.ErrInvalidWebhook):
+		return onekiterrors.New(http.StatusBadRequest, strings.TrimPrefix(err.Error(), hubdeveloper.ErrInvalidWebhook.Error()+": "))
+	case errors.Is(err, hubdeveloper.ErrWebhookNotFound):
+		return onekiterrors.New(http.StatusNotFound, "Webhook not found")
+	default:
+		return onekiterrors.New(http.StatusInternalServerError, fallback)
+	}
 }
 
 func hasDeveloperPermission(user *authPkg.AuthUser) bool {

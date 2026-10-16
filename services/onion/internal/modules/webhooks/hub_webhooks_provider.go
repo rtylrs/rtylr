@@ -2,6 +2,7 @@ package webhooks
 
 import (
 	"context"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/application"
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
@@ -40,14 +41,14 @@ func (p *hubWebhooksProvider) List(ctx context.Context, businessID int64) ([]hub
 	return out, nil
 }
 
-func (p *hubWebhooksProvider) Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (int64, error) {
+func (p *hubWebhooksProvider) Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (int64, string, error) {
 	return p.service.Create(ctx, ownerID, businessID, url, events)
 }
 
 func (p *hubWebhooksProvider) Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (hubdeveloper.Webhook, error) {
 	webhook, err := p.service.Update(ctx, businessID, webhookID, url, events, isActive)
 	if err != nil {
-		return hubdeveloper.Webhook{}, err
+		return hubdeveloper.Webhook{}, publicError(err)
 	}
 
 	eventsOut := webhook.Events
@@ -66,7 +67,14 @@ func (p *hubWebhooksProvider) Update(ctx context.Context, businessID, webhookID 
 }
 
 func (p *hubWebhooksProvider) Delete(ctx context.Context, businessID, webhookID int64) error {
-	return p.service.Delete(ctx, businessID, webhookID)
+	return publicError(p.service.Delete(ctx, businessID, webhookID))
+}
+
+func publicError(err error) error {
+	if errors.Is(err, domain.ErrWebhookNotFound) {
+		return hubdeveloper.ErrWebhookNotFound
+	}
+	return err
 }
 
 // ListDeliveries adapts the module's delivery listing to the platform port.

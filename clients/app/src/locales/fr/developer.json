@@ -2,7 +2,12 @@
   "webhooks": {
     "emptyTitle": "Aucun webhook configuré",
     "emptyDescription": "Créez votre premier point de terminaison webhook pour commencer à recevoir des événements.",
-    "newWebhook": "Nouveau webhook"
+    "newWebhook": "Nouveau webhook",
+    "secretTitle": "Secret de signature de votre webhook",
+    "secretDescription": "Utilisez-le pour vérifier l'en-tête X-Rtylr-Signature de chaque envoi. Copiez-le maintenant, vous ne pourrez plus le revoir.",
+    "copySecret": "Copier le secret",
+    "secretCopied": "Secret copié",
+    "secretCopyFailed": "Impossible de copier le secret dans le presse-papiers"
   },
   "apiKeys": {
     "emptyTitle": "Aucune clé API pour l'instant",

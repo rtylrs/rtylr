@@ -2,7 +2,15 @@ package hubdeveloper
 
 import (
 	"context"
+	"errors"
 	"time"
+)
+
+var (
+	// ErrInvalidWebhook marks a registration the caller can correct: a bad
+	// URL or an unsupported event.
+	ErrInvalidWebhook  = errors.New("invalid webhook")
+	ErrWebhookNotFound = errors.New("webhook not found")
 )
 
 type APIKey struct {
@@ -69,7 +77,9 @@ type APIKeysProvider interface {
 
 type WebhooksProvider interface {
 	List(ctx context.Context, businessID int64) ([]Webhook, error)
-	Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (int64, error)
+	// Create registers a webhook and returns its signing secret, which is
+	// never readable again.
+	Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (id int64, secret string, err error)
 	Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (Webhook, error)
 	Delete(ctx context.Context, businessID, webhookID int64) error
 	// ListDeliveries returns a page of delivery attempts for the business,

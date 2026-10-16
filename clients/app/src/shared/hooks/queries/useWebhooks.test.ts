@@ -12,6 +12,7 @@ const mockDeveloperClient = vi.hoisted(() => ({
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
+  getOneKitErrorMessage: vi.fn((_err, fallback) => fallback),
 }));
 
 vi.mock('../../lib/clients', () => ({ developerClient: mockDeveloperClient }));
@@ -79,6 +80,7 @@ describe('useWebhooks', () => {
       url: 'https://example.com/wh',
       events: ['order_created'],
     });
+    expect(result.current.data).toEqual({ id: '1', secret: 'sec_123' });
   });
 
   it('rejects event names that the live dispatcher cannot publish', async () => {
