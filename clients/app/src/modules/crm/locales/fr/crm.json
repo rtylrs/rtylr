@@ -447,7 +447,9 @@
     "subtitle": "Suivez les affaires du premier contact à la signature",
     "addLead": "Ajouter un prospect",
     "addNewLead": "Ajouter un nouveau prospect",
-    "loadMore": "Charger plus de prospects"
+    "loadMore": "Charger plus de prospects",
+    "nextStage": "Étape suivante",
+    "markLost": "Marquer comme perdu"
   },
   "createCustomer": {
     "pageTitle": "Nouveau client",

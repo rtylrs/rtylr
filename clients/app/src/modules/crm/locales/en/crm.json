@@ -441,7 +441,9 @@
     "subtitle": "Track deals from cold outreach to closed contracts",
     "addLead": "Add lead",
     "addNewLead": "Add new lead",
-    "loadMore": "Load more leads"
+    "loadMore": "Load more leads",
+    "nextStage": "Next stage",
+    "markLost": "Mark lost"
   },
   "createCustomer": {
     "pageTitle": "New customer",

@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { AlertCircle, Plus, TrendingUp } from 'lucide-react';
+import { AlertCircle, ChevronRight, Plus, TrendingUp, X } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { motion } from 'motion/react';
-import { usePipeline, useLeads } from '../../shared/hooks/queries/useSales';
+import { usePipeline, useLeads, useUpdateLead } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
 import CreateLeadModal from './components/CreateLeadModal';
@@ -58,100 +58,178 @@ function initials(name: string | null | undefined): string {
 interface LeadCardProps {
   lead: Lead;
   onClick: () => void;
+  onMoveStage?: (lead: Lead, nextStage: LeadStage) => void;
+  isUpdating?: boolean;
 }
 
-const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
-  <motion.div
-    layout
-    initial={{ opacity: 0, y: 6 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -4 }}
-    onClick={onClick}
-    style={{
-      background: 'var(--hub-card)',
-      border: '1px solid var(--hub-border)',
-      borderRadius: '10px',
-      padding: '12px',
-      cursor: 'pointer',
-      transition: 'border-color 0.15s',
-    }}
-    onMouseEnter={(e) => {
-      (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-text-dim)';
-    }}
-    onMouseLeave={(e) => {
-      (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
-    }}
-  >
-    <div
+const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onMoveStage, isUpdating }) => {
+  const { t } = useTranslation();
+  const currentIndex = STAGES.indexOf(lead.stage);
+  const nextStage =
+    currentIndex >= 0 && currentIndex < STAGES.length - 2 ? STAGES[currentIndex + 1] : null;
+  const isTerminal = lead.stage === 'contracted' || lead.stage === 'lost';
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      onClick={onClick}
       style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        gap: '8px',
+        background: 'var(--hub-card)',
+        border: '1px solid var(--hub-border)',
+        borderRadius: '10px',
+        padding: '12px',
+        cursor: 'pointer',
+        transition: 'border-color 0.15s',
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-text-dim)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
       }}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: '8px',
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p
+            style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--hub-text)',
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {lead.companyName ?? lead.company ?? '—'}
+          </p>
+          <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
+            {lead.industry}
+          </p>
+        </div>
+        <div
           style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            color: 'var(--hub-text)',
-            margin: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            width: '24px',
+            height: '24px',
+            borderRadius: '6px',
+            background: 'rgba(59,130,246,0.15)',
+            color: 'var(--accent-fg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '10px',
+            fontWeight: 700,
+            flexShrink: 0,
           }}
         >
-          {lead.companyName ?? lead.company ?? '—'}
-        </p>
-        <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-          {lead.industry}
-        </p>
+          {initials(lead.assignedTo != null ? String(lead.assignedTo) : undefined)}
+        </div>
       </div>
       <div
         style={{
-          width: '24px',
-          height: '24px',
-          borderRadius: '6px',
-          background: 'rgba(59,130,246,0.15)',
-          color: 'var(--accent-fg)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '10px',
-          fontWeight: 700,
-          flexShrink: 0,
+          justifyContent: 'space-between',
+          marginTop: '10px',
         }}
       >
-        {initials(lead.assignedTo != null ? String(lead.assignedTo) : undefined)}
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: 600,
+            padding: '2px 7px',
+            borderRadius: '4px',
+            background: 'var(--hub-hover)',
+            color: 'var(--hub-text-muted)',
+          }}
+        >
+          {lead.source}
+        </span>
+        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
+          ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo
+        </span>
       </div>
-    </div>
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginTop: '10px',
-      }}
-    >
-      <span
-        style={{
-          fontSize: '10px',
-          fontWeight: 600,
-          padding: '2px 7px',
-          borderRadius: '4px',
-          background: 'var(--hub-hover)',
-          color: 'var(--hub-text-muted)',
-        }}
-      >
-        {lead.source}
-      </span>
-      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
-        ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo
-      </span>
-    </div>
-  </motion.div>
-);
+      {!isTerminal && onMoveStage && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '6px',
+            marginTop: '10px',
+            paddingTop: '8px',
+            borderTop: '1px solid var(--hub-border)',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            disabled={isUpdating}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveStage(lead, 'lost');
+            }}
+            title={t('crm.pipeline.markLost')}
+            aria-label={t('crm.pipeline.markLost')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 7px',
+              fontSize: '11px',
+              borderRadius: '5px',
+              background: 'transparent',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--crm-sales-lost, #ef4444)',
+              cursor: 'pointer',
+            }}
+          >
+            <X size={11} />
+            <span>{t('crm.leadStages.lost')}</span>
+          </button>
+          {nextStage && (
+            <button
+              type="button"
+              disabled={isUpdating}
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveStage(lead, nextStage);
+              }}
+              title={`${t('crm.pipeline.nextStage')}: ${t(`crm.leadStages.${nextStage}`)}`}
+              aria-label={`${t('crm.pipeline.nextStage')}: ${t(`crm.leadStages.${nextStage}`)}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '3px 8px',
+                fontSize: '11px',
+                fontWeight: 600,
+                borderRadius: '5px',
+                background: 'var(--hub-hover)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+                cursor: 'pointer',
+              }}
+            >
+              <span>{t(`crm.leadStages.${nextStage}`)}</span>
+              <ChevronRight size={11} />
+            </button>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+};
 
 const Pipeline: React.FC = () => {
   const { t } = useTranslation();
@@ -168,6 +246,27 @@ const Pipeline: React.FC = () => {
   const leadsError = hasQueryFailed(leadsQuery);
   const leadsLoading = leadsQuery.isPending && !leadsError;
   const [createOpen, setCreateOpen] = useState(false);
+  const updateLead = useUpdateLead();
+
+  const handleMoveStage = (lead: Lead, nextStage: LeadStage): void => {
+    setLoadedLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, stage: nextStage } : l)));
+    updateLead.mutate(
+      {
+        id: lead.id,
+        data: {
+          stage: nextStage,
+          companyName: lead.companyName ?? lead.company,
+        },
+      },
+      {
+        onError: () => {
+          setLoadedLeads((prev) =>
+            prev.map((l) => (l.id === lead.id ? { ...l, stage: lead.stage } : l))
+          );
+        },
+      }
+    );
+  };
 
   useEffect(() => {
     if (!fetchedLeads) return;
@@ -318,6 +417,8 @@ const Pipeline: React.FC = () => {
                         key={lead.id}
                         lead={lead}
                         onClick={() => navigate({ to: `/crm/sales/leads/${lead.id}` })}
+                        onMoveStage={handleMoveStage}
+                        isUpdating={updateLead.isPending}
                       />
                     ))}
                   </div>

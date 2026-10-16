@@ -13,6 +13,7 @@ import { unwrapList } from '../../lib/unwrapList';
 import type {
   PipelineColumn,
   Lead,
+  LeadStage,
   Touchpoint,
   SalesContact,
   Contract,
@@ -46,22 +47,49 @@ export const usePipeline = (): UseQueryResult<PipelineColumn[]> =>
       const res = await unwrap(crmApi.getSalesPipeline());
       // total_mrr arrives as a decimal string (money.Amount) — coerce or
       // stage sums concatenate strings.
-      return unwrapList<PipelineColumn>(res, 'pipeline', 'columns').map((column) => ({
-        ...column,
-        count: toFiniteNumber(column.count),
-        totalMrr: toFiniteNumber(column.totalMrr),
-      }));
+      return unwrapList<PipelineColumn>(res, 'pipeline', 'columns').map((column) => {
+        const raw = column as unknown as Record<string, unknown>;
+        return {
+          ...column,
+          count: toFiniteNumber(raw.count ?? raw.cnt),
+          totalMrr: toFiniteNumber(raw.totalMrr ?? raw.total_mrr),
+        };
+      });
     },
   });
 
 // ── Leads ─────────────────────────────────────────────────────────
 
-const parseLead = (lead: Lead): Lead => ({
-  ...lead,
-  id: toFiniteNumber(lead.id),
-  mrrPotential: lead.mrrPotential === undefined ? undefined : toFiniteNumber(lead.mrrPotential),
-  dealValue: lead.dealValue === undefined ? undefined : toFiniteNumber(lead.dealValue),
-});
+export const parseLead = (lead: Lead | (Record<string, unknown> & { id: unknown })): Lead => {
+  const raw = lead as Record<string, unknown>;
+  const createdAt = String(raw.createdAt ?? raw.created_at ?? '');
+  const updatedAt = String(raw.updatedAt ?? raw.updated_at ?? createdAt);
+  const companyName = String(raw.companyName ?? raw.company_name ?? raw.company ?? '');
+  const company = companyName;
+  const rawMrr = raw.mrrPotential ?? raw.mrr_potential ?? raw.dealValue ?? raw.deal_value;
+  const mrrPotential = rawMrr === undefined || rawMrr === null ? undefined : toFiniteNumber(rawMrr);
+  const dealValue = mrrPotential;
+  const rawAssigned = raw.assignedTo ?? raw.assigned_to;
+  const assignedTo =
+    rawAssigned === null || rawAssigned === undefined ? null : toFiniteNumber(rawAssigned);
+
+  return {
+    ...(lead as Lead),
+    id: toFiniteNumber(raw.id),
+    company,
+    companyName,
+    stage: (raw.stage as LeadStage) ?? 'cold',
+    industry: typeof raw.industry === 'string' ? raw.industry : '',
+    size: typeof raw.size === 'string' ? raw.size : '',
+    source: typeof raw.source === 'string' ? raw.source : '',
+    notes: typeof raw.notes === 'string' ? raw.notes : '',
+    assignedTo,
+    mrrPotential,
+    dealValue,
+    createdAt,
+    updatedAt,
+  };
+};
 
 export const useLeads = (limit = 100, offset = 0): UseQueryResult<Lead[]> =>
   useQuery<Lead[]>({
@@ -113,7 +141,17 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
     mutationFn: async (payload: UpdateLeadPayload): Promise<Lead> => {
       // The backend PUT replaces the record; merging over the cached lead
       // stops a stage-only update from wiping company/industry/etc. to "".
-      const cached = qc.getQueryData<Lead>(['crm-sales-lead', payload.id]);
+      let cached = qc.getQueryData<Lead>(['crm-sales-lead', payload.id]);
+      if (!cached) {
+        const leadQueries = qc.getQueriesData<Lead[]>({ queryKey: ['crm-sales-leads'] });
+        for (const [, leads] of leadQueries) {
+          const match = leads?.find((l) => l.id === payload.id);
+          if (match) {
+            cached = match;
+            break;
+          }
+        }
+      }
       const merged: UpdateLeadRequest = {
         company: payload.data.company ?? cached?.company,
         companyName: payload.data.companyName ?? cached?.companyName ?? cached?.company,

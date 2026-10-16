@@ -235,9 +235,6 @@ type UpdateLeadResponse struct {
 }
 
 func (h *UpdateLeadHandler) Validate(_ context.Context, req *UpdateLeadRequest) error {
-	if strings.TrimSpace(req.CompanyName) == "" {
-		return onekiterrors.New(http.StatusBadRequest, "company_name is required")
-	}
 	return nil
 }
 
