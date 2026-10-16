@@ -205,3 +205,44 @@ func TestAISurfaceMatcherDoesNotClaimNeighbouringPrefixes(t *testing.T) {
 		}
 	}
 }
+
+func TestHRPeopleRoutesRequireManagementPermissions(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		permission string
+	}{
+		{name: "reviews list", method: http.MethodGet, path: "/hr/review/v1/reviews", permission: "hr:employees:sensitive_view"},
+		{name: "reviews create", method: http.MethodPost, path: "/hr/review/v1/reviews", permission: "hr:employees:manage"},
+		{name: "one-on-ones list", method: http.MethodGet, path: "/hr/one_on_one/v1/one-on-ones", permission: "hr:employees:manage"},
+		{name: "one-on-ones create", method: http.MethodPost, path: "/hr/one_on_one/v1/one-on-ones", permission: "hr:employees:manage"},
+		{name: "courses list", method: http.MethodGet, path: "/hr/training/v1/courses", permission: "hr:employees:view"},
+		{name: "courses create", method: http.MethodPost, path: "/hr/training/v1/courses", permission: "hr:employees:manage"},
+		{name: "benefit plans list", method: http.MethodGet, path: "/hr/benefit/v1/benefits", permission: "hr:employees:view"},
+		{name: "benefit plan create", method: http.MethodPost, path: "/hr/benefit/v1/benefits", permission: "hr:employees:manage"},
+		{name: "dashboard layout update", method: http.MethodPut, path: "/hr/dashboard/v1/dashboard/widgets", permission: "hr:employees:manage"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			appID, permission, ok := featurePermissionForRequest(tt.method, tt.path)
+			if !ok || appID != "hr" || permission != tt.permission {
+				t.Fatalf("mapping = %s:%s,%t, want hr:%s,true", appID, permission, ok, tt.permission)
+			}
+		})
+	}
+}
+
+func TestHRSelfServiceRoutesStayUnmapped(t *testing.T) {
+	for _, tt := range []struct{ method, path string }{
+		{http.MethodGet, "/hr/benefit/v1/benefits/enrollments/mine"},
+		{http.MethodPost, "/hr/benefit/v1/benefits/enrollments"},
+		{http.MethodGet, "/hr/dashboard/v1/dashboard"},
+	} {
+		t.Run(tt.method+" "+tt.path, func(t *testing.T) {
+			if appID, permission, ok := featurePermissionForRequest(tt.method, tt.path); ok {
+				t.Fatalf("self-service route mapped to %s:%s", appID, permission)
+			}
+		})
+	}
+}

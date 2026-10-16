@@ -342,6 +342,30 @@ func hrFeaturePermission(method, path string) (string, bool) {
 		return "hr:schedules:manage", true
 	case strings.Contains(path, "/hr/role"):
 		return "hr:roles:manage", true
+	case strings.Contains(path, "/hr/review/"):
+		if method == http.MethodGet {
+			return "hr:employees:sensitive_view", true
+		}
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/one_on_one/"), strings.Contains(path, "/hr/one-on-ones"):
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/training/"):
+		if method == http.MethodGet {
+			return "hr:employees:view", true
+		}
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/benefit/"):
+		// Enrolling and listing one's own enrollments resolve the employee from
+		// the auth context, so they stay open to every employee.
+		if strings.Contains(path, "/benefits/enrollments") {
+			return "", false
+		}
+		if method == http.MethodGet {
+			return "hr:employees:view", true
+		}
+		return "hr:employees:manage", true
+	case strings.Contains(path, "/hr/dashboard/") && method != http.MethodGet:
+		return "hr:employees:manage", true
 	case strings.Contains(path, "/hr/employee"), strings.Contains(path, "/hr/staff"), strings.Contains(path, "/hr/attendance"):
 		if strings.Contains(path, "/sensitive") {
 			return "hr:employees:sensitive_view", true

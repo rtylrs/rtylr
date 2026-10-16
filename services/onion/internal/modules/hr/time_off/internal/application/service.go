@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr/time_off/internal/domain"
@@ -16,6 +17,8 @@ const (
 
 type repository interface {
 	ListTimeOffRequests(ctx context.Context, businessID int64) ([]domain.TimeOffRequest, error)
+	ListTimeOffRequestsForUser(ctx context.Context, businessID, userID int64) ([]domain.TimeOffRequest, error)
+	StaffBelongsToUser(ctx context.Context, businessID, userID, staffID int64) (bool, error)
 	CreateTimeOffRequest(ctx context.Context, input domain.TimeOffInput) (int64, error)
 	ApproveTimeOffRequest(ctx context.Context, businessID int64, input domain.TimeOffApprovalInput) error
 }
@@ -40,6 +43,23 @@ func (s *Service) ListTimeOffRequests(ctx context.Context, businessID int64) ([]
 		},
 		cacher.WithExpiry(ctx, timeOffTTL),
 	)
+}
+
+// ListTimeOffRequestsForUser lists only the requests of the user's own staff
+// records, for callers who may not see colleagues' leave.
+func (s *Service) ListTimeOffRequestsForUser(ctx context.Context, businessID, userID int64) ([]domain.TimeOffRequest, error) {
+	return cacher.Of[[]domain.TimeOffRequest]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(timeOffScope, businessID, fmt.Sprintf("list|user=%d", userID))+"|domain=v2",
+		func(ctx context.Context) ([]domain.TimeOffRequest, error) {
+			return s.repo.ListTimeOffRequestsForUser(ctx, businessID, userID)
+		},
+		cacher.WithExpiry(ctx, timeOffTTL),
+	)
+}
+
+// StaffBelongsToUser reports whether staffID is one of the user's own staff records.
+func (s *Service) StaffBelongsToUser(ctx context.Context, businessID, userID, staffID int64) (bool, error) {
+	return s.repo.StaffBelongsToUser(ctx, businessID, userID, staffID)
 }
 
 func (s *Service) SubmitTimeOffRequest(ctx context.Context, input domain.TimeOffInput) (int64, error) {
