@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/voxire/onion/internal/modules/organization/oauth/internal/domain"
@@ -153,10 +154,16 @@ func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier
 		return "", "", 0, err
 	}
 
+	tokenEpoch, err := s.repo.GetUserTokenEpoch(ctx, authCode.UserID)
+	if err != nil {
+		return "", "", 0, err
+	}
+
 	claims := &OAuthTokenClaims{
 		UserID:     authCode.UserID,
 		BusinessID: businessID,
 		Scope:      authCode.Scope,
+		TokenEpoch: tokenEpoch,
 	}
 
 	at, err := s.jwt.CreateJWT(claims)
@@ -207,6 +214,17 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 		return "", "", 0, domain.ErrTokenNotFound
 	}
 
+	// A password change or reset bumps the epoch; the access token the
+	// refresh token was issued with records the epoch it was minted under.
+	currentEpoch, err := s.repo.GetUserTokenEpoch(ctx, token.UserID)
+	if err != nil {
+		return "", "", 0, err
+	}
+	if issuedEpoch(token.AccessToken) != currentEpoch {
+		_ = s.repo.RevokeToken(ctx, refreshToken)
+		return "", "", 0, domain.ErrTokenRevoked
+	}
+
 	// Atomic so two concurrent refreshes cannot both rotate the same token.
 	if err := s.repo.ConsumeRefreshToken(ctx, refreshToken); err != nil {
 		return "", "", 0, err
@@ -221,6 +239,7 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 		UserID:     token.UserID,
 		BusinessID: businessID,
 		Scope:      token.Scope,
+		TokenEpoch: currentEpoch,
 	}
 
 	at, err := s.jwt.CreateJWT(claims)
@@ -247,6 +266,17 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 	}
 
 	return at, rt, int((24 * time.Hour).Seconds()), nil
+}
+
+// issuedEpoch reads the epoch embedded in an access token this service stored.
+// The signature is not checked: the value comes from our own table, and an
+// unreadable token yields zero, which fails closed once any epoch was bumped.
+func issuedEpoch(accessToken string) int64 {
+	claims := &OAuthTokenClaims{}
+	if _, _, err := jwt.NewParser().ParseUnverified(accessToken, claims); err != nil {
+		return 0
+	}
+	return claims.TokenEpoch
 }
 
 // RevokeToken marks a refresh token as revoked.

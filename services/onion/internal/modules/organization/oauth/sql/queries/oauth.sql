@@ -39,5 +39,8 @@ SELECT password_hash FROM users WHERE id = ?;
 -- name: GetUserIDByEmail :one
 SELECT id FROM users WHERE email = ? ORDER BY id ASC LIMIT 1;
 
+-- name: GetUserTokenEpoch :one
+SELECT token_epoch FROM users WHERE id = ?;
+
 -- name: GetUserBusinessID :one
 SELECT business_id FROM users WHERE id = ?;

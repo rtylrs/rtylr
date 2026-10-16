@@ -21,6 +21,9 @@ type mockRepo struct {
 	userID          int64
 	passwordHash    string
 	businessID      int64
+	tokenEpoch      int64
+	saved           *domain.Token
+	epochErr        error
 	businessErr     error
 	clientErr       error
 	authCodeErr     error
@@ -44,7 +47,10 @@ func (m *mockRepo) GetAuthCode(_ context.Context, _ string) (*domain.AuthCode, e
 }
 func (m *mockRepo) MarkAuthCodeUsed(_ context.Context, _ string) error { return m.err }
 func (m *mockRepo) ConsumeAuthCode(_ context.Context, _ string) error  { return m.err }
-func (m *mockRepo) SaveToken(_ context.Context, _ *domain.Token) error { return m.err }
+func (m *mockRepo) SaveToken(_ context.Context, token *domain.Token) error {
+	m.saved = token
+	return m.err
+}
 func (m *mockRepo) GetTokenByRefresh(_ context.Context, _ string) (*domain.Token, error) {
 	if m.tokenErr != nil {
 		return m.token, m.tokenErr
@@ -64,6 +70,10 @@ func (m *mockRepo) GetUserPasswordHash(_ context.Context, _ int64) (string, erro
 
 func (m *mockRepo) GetUserIDByEmail(_ context.Context, _ string) (int64, error) {
 	return m.userID, m.err
+}
+
+func (m *mockRepo) GetUserTokenEpoch(_ context.Context, _ int64) (int64, error) {
+	return m.tokenEpoch, m.epochErr
 }
 
 func (m *mockRepo) GetUserBusinessID(_ context.Context, _ int64) (int64, error) {
@@ -302,6 +312,29 @@ func TestExchangeCode_PropagatesIdentityLookupError(t *testing.T) {
 	}
 }
 
+func TestExchangeCode_EmbedsTheUsersTokenEpoch(t *testing.T) {
+	verifier := "verifier"
+	hash := sha256.Sum256([]byte(verifier))
+	code := &domain.AuthCode{
+		Code:                "code",
+		ClientID:            "app1",
+		UserID:              7,
+		RedirectURI:         "https://example.com/callback",
+		CodeChallenge:       base64.RawURLEncoding.EncodeToString(hash[:]),
+		CodeChallengeMethod: "S256",
+		ExpiresAt:           time.Now().Add(time.Minute),
+	}
+	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, authCode: code, tokenEpoch: 3}
+	s := newTestService(repo)
+	at, _, _, err := s.ExchangeCode(context.Background(), "app1", code.Code, verifier, code.RedirectURI)
+	if err != nil {
+		t.Fatalf("ExchangeCode: %v", err)
+	}
+	if got := issuedEpoch(at); got != 3 {
+		t.Fatalf("access token epoch = %d, want 3: the auth middleware rejects tokens whose epoch differs from the user's", got)
+	}
+}
+
 // ---- RefreshTokens ----
 
 func TestRefreshTokens_TokenNotFoundReturnsError(t *testing.T) {
@@ -338,6 +371,41 @@ func TestRefreshTokens_LostRotationRaceReturnsRevoked(t *testing.T) {
 	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
 	if !errors.Is(err, domain.ErrTokenRevoked) {
 		t.Errorf("expected ErrTokenRevoked, got %v", err)
+	}
+}
+
+func epochToken(t *testing.T, s *Service, epoch int64) string {
+	t.Helper()
+	at, err := s.jwt.CreateJWT(&OAuthTokenClaims{UserID: 7, TokenEpoch: epoch})
+	if err != nil {
+		t.Fatalf("CreateJWT: %v", err)
+	}
+	return at
+}
+
+func TestRefreshTokens_RejectsTokenIssuedBeforeAPasswordChange(t *testing.T) {
+	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, tokenEpoch: 2}
+	s := newTestService(repo)
+	repo.token = &domain.Token{ClientID: "app1", UserID: 7, AccessToken: epochToken(t, s, 1), ExpiresAt: time.Now().Add(time.Hour)}
+	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	if !errors.Is(err, domain.ErrTokenRevoked) {
+		t.Fatalf("expected ErrTokenRevoked, got %v", err)
+	}
+	if repo.saved != nil {
+		t.Fatal("a refresh token from before the password change minted a new token")
+	}
+}
+
+func TestRefreshTokens_CarriesTheCurrentEpochForward(t *testing.T) {
+	repo := &mockRepo{client: &domain.Client{ID: "app1", IsPublic: true}, tokenEpoch: 2}
+	s := newTestService(repo)
+	repo.token = &domain.Token{ClientID: "app1", UserID: 7, AccessToken: epochToken(t, s, 2), ExpiresAt: time.Now().Add(time.Hour)}
+	at, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	if err != nil {
+		t.Fatalf("RefreshTokens: %v", err)
+	}
+	if got := issuedEpoch(at); got != 2 {
+		t.Fatalf("refreshed access token epoch = %d, want 2", got)
 	}
 }
 
