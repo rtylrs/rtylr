@@ -35,7 +35,7 @@ type removeOnlyRepo struct{ removed bool }
 func (r *removeOnlyRepo) Get(context.Context, int64) (domain.CustomDomain, error) {
 	return domain.CustomDomain{}, domain.ErrNotFound
 }
-func (r *removeOnlyRepo) GetByDomain(context.Context, string) (domain.CustomDomain, error) {
+func (r *removeOnlyRepo) GetVerifiedByDomain(context.Context, string) (domain.CustomDomain, error) {
 	return domain.CustomDomain{}, domain.ErrNotFound
 }
 func (r *removeOnlyRepo) Register(context.Context, domain.CustomDomain) (domain.CustomDomain, error) {
@@ -63,5 +63,30 @@ func TestDomainMutationsRequireBusinessAdmin(t *testing.T) {
 	adminCtx := (&authPkg.Device{User: &authPkg.AuthUser{UserID: 6, BusinessID: 1, EffectiveAccess: &authorization.EffectiveAccess{IsAdmin: true}}}).Ctx(context.Background())
 	if _, err := api.RemoveCustomDomain(adminCtx, &hubconfigv1.RemoveCustomDomainRequest{}); err != nil || !repo.removed {
 		t.Fatalf("admin remove failed: err=%v removed=%v", err, repo.removed)
+	}
+}
+
+type fixedRepo struct {
+	removeOnlyRepo
+	item domain.CustomDomain
+}
+
+func (r *fixedRepo) Get(context.Context, int64) (domain.CustomDomain, error) { return r.item, nil }
+
+func TestGetCustomDomainShowsChallengeToAdminsOnly(t *testing.T) {
+	t.Cleanup(tenant.SetScopeResolver(resolvingScope{}))
+	repo := &fixedRepo{item: domain.CustomDomain{BusinessID: 1, Domain: "menu.example.com", VerificationToken: "challenge-token"}}
+	api := New(application.NewService(context.Background(), repo))
+
+	adminCtx := (&authPkg.Device{User: &authPkg.AuthUser{UserID: 6, BusinessID: 1, EffectiveAccess: &authorization.EffectiveAccess{IsAdmin: true}}}).Ctx(context.Background())
+	got, err := api.GetCustomDomain(adminCtx, &hubconfigv1.GetCustomDomainRequest{})
+	if err != nil || got.GetDomain().GetVerificationToken() != "challenge-token" {
+		t.Fatalf("admin view = %v, err %v", got.GetDomain(), err)
+	}
+
+	memberCtx := (&authPkg.Device{User: &authPkg.AuthUser{UserID: 5, BusinessID: 1, EffectiveAccess: &authorization.EffectiveAccess{}}}).Ctx(context.Background())
+	got, err = api.GetCustomDomain(memberCtx, &hubconfigv1.GetCustomDomainRequest{})
+	if err != nil || got.GetDomain().GetVerificationToken() != "" || got.GetDomain().GetDomain() != "menu.example.com" {
+		t.Fatalf("member view = %v, err %v", got.GetDomain(), err)
 	}
 }

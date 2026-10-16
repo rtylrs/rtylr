@@ -78,40 +78,49 @@ func TestDNSChallengeMatches(t *testing.T) {
 }
 
 type stubRepo struct {
-	current    domain.CustomDomain
-	registered bool
+	claims     []domain.CustomDomain
+	registered *domain.CustomDomain
+	verified   bool
+	verifyErr  error
 }
 
-func (r *stubRepo) Get(context.Context, int64) (domain.CustomDomain, error) {
-	if r.current.Domain == "" {
-		return domain.CustomDomain{}, domain.ErrNotFound
+func (r *stubRepo) Get(_ context.Context, businessID int64) (domain.CustomDomain, error) {
+	for _, claim := range r.claims {
+		if claim.BusinessID == businessID {
+			return claim, nil
+		}
 	}
-	return r.current, nil
+	return domain.CustomDomain{}, domain.ErrNotFound
 }
 
-func (r *stubRepo) GetByDomain(_ context.Context, name string) (domain.CustomDomain, error) {
-	if r.current.Domain == name {
-		return r.current, nil
+func (r *stubRepo) GetVerifiedByDomain(_ context.Context, name string) (domain.CustomDomain, error) {
+	for _, claim := range r.claims {
+		if claim.Domain == name && claim.Status == domain.StatusVerified {
+			return claim, nil
+		}
 	}
 	return domain.CustomDomain{}, domain.ErrNotFound
 }
 
 func (r *stubRepo) Register(_ context.Context, input domain.CustomDomain) (domain.CustomDomain, error) {
-	r.registered = true
+	r.registered = &input
 	input.Status = "pending_verification"
 	return input, nil
 }
 
-func (r *stubRepo) Remove(context.Context, int64) error         { return nil }
-func (r *stubRepo) Verify(context.Context, int64, string) error { return nil }
+func (r *stubRepo) Remove(context.Context, int64) error { return nil }
+func (r *stubRepo) Verify(context.Context, int64, string) error {
+	r.verified = r.verifyErr == nil
+	return r.verifyErr
+}
 
 func TestRegisterKeepsVerifiedDomainVerified(t *testing.T) {
-	repo := &stubRepo{current: domain.CustomDomain{BusinessID: 1, Domain: "menu.example.com", Status: domain.StatusVerified, VerificationToken: "t"}}
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 1, Domain: "menu.example.com", Status: domain.StatusVerified, VerificationToken: "t"}}}
 	got, err := NewService(context.Background(), repo).Register(context.Background(), 9, 1, "Menu.Example.com.")
 	if err != nil {
 		t.Fatalf("Register() error = %v", err)
 	}
-	if repo.registered {
+	if repo.registered != nil {
 		t.Fatal("re-registering a verified domain must not rotate its challenge")
 	}
 	if got.Status != domain.StatusVerified {
@@ -120,12 +129,88 @@ func TestRegisterKeepsVerifiedDomainVerified(t *testing.T) {
 }
 
 func TestRegisterRotatesChallengeForPendingDomain(t *testing.T) {
-	repo := &stubRepo{current: domain.CustomDomain{BusinessID: 1, Domain: "menu.example.com", Status: "pending_verification", VerificationToken: "old"}}
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 1, Domain: "menu.example.com", Status: "pending_verification", VerificationToken: "old"}}}
 	got, err := NewService(context.Background(), repo).Register(context.Background(), 9, 1, "menu.example.com")
 	if err != nil {
 		t.Fatalf("Register() error = %v", err)
 	}
-	if !repo.registered || got.VerificationToken == "old" {
+	if repo.registered == nil || got.VerificationToken == "old" {
 		t.Fatal("a pending domain should get a fresh challenge")
+	}
+}
+
+func TestRegisterIsNotBlockedByAnotherBusinessUnverifiedClaim(t *testing.T) {
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 2, Domain: "menu.example.com", Status: "pending_verification", VerificationToken: "squatter"}}}
+	if _, err := NewService(context.Background(), repo).Register(context.Background(), 9, 1, "menu.example.com"); err != nil {
+		t.Fatalf("an unverified claim blocked the real owner: %v", err)
+	}
+	if repo.registered == nil || repo.registered.BusinessID != 1 {
+		t.Fatalf("registered = %+v", repo.registered)
+	}
+}
+
+func TestRegisterIsBlockedByAnotherBusinessVerifiedClaim(t *testing.T) {
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 2, Domain: "menu.example.com", Status: domain.StatusVerified}}}
+	if _, err := NewService(context.Background(), repo).Register(context.Background(), 9, 1, "menu.example.com"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("err = %v, want ErrConflict", err)
+	}
+	if repo.registered != nil {
+		t.Fatal("a verified domain was claimed by another business")
+	}
+}
+
+func TestRegisterAnotherDomainReplacesThePendingClaim(t *testing.T) {
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 1, Domain: "old.example.com", Status: domain.StatusVerified}}}
+	if _, err := NewService(context.Background(), repo).Register(context.Background(), 9, 1, "new.example.com"); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	if repo.registered == nil || repo.registered.Domain != "new.example.com" {
+		t.Fatalf("registered = %+v", repo.registered)
+	}
+}
+
+func verifiableService(repo *stubRepo, records map[string][]string) *Service {
+	service := NewService(context.Background(), repo)
+	service.resolver = fakeTXTResolver{records: records}
+	return service
+}
+
+func TestVerifyRequiresTheDNSChallenge(t *testing.T) {
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 1, Domain: "menu.example.com", Status: "pending_verification", VerificationToken: "tok"}}}
+	if _, err := verifiableService(repo, nil).Verify(context.Background(), 1, "tok"); !errors.Is(err, domain.ErrDNSVerificationFailed) {
+		t.Fatalf("err = %v, want ErrDNSVerificationFailed", err)
+	}
+	if repo.verified {
+		t.Fatal("verified without a DNS record")
+	}
+}
+
+func TestVerifyRejectsAWrongToken(t *testing.T) {
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 1, Domain: "menu.example.com", VerificationToken: "tok"}}}
+	records := map[string][]string{"_rtylr-challenge.menu.example.com": {"tok"}}
+	if _, err := verifiableService(repo, records).Verify(context.Background(), 1, "other"); !errors.Is(err, domain.ErrInvalidToken) {
+		t.Fatalf("err = %v, want ErrInvalidToken", err)
+	}
+}
+
+func TestVerifyAcceptsAQuotedTXTRecord(t *testing.T) {
+	repo := &stubRepo{claims: []domain.CustomDomain{{BusinessID: 1, Domain: "menu.example.com", VerificationToken: "tok"}}}
+	records := map[string][]string{"_rtylr-challenge.menu.example.com": {`"tok"`}}
+	if _, err := verifiableService(repo, records).Verify(context.Background(), 1, "tok"); err != nil || !repo.verified {
+		t.Fatalf("err = %v verified = %v", err, repo.verified)
+	}
+}
+
+func TestVerifyLosesToAnotherBusinessThatVerifiedFirst(t *testing.T) {
+	repo := &stubRepo{claims: []domain.CustomDomain{
+		{BusinessID: 2, Domain: "menu.example.com", Status: domain.StatusVerified, VerificationToken: "theirs"},
+		{BusinessID: 1, Domain: "menu.example.com", Status: "pending_verification", VerificationToken: "tok"},
+	}}
+	records := map[string][]string{"_rtylr-challenge.menu.example.com": {"tok"}}
+	if _, err := verifiableService(repo, records).Verify(context.Background(), 1, "tok"); !errors.Is(err, domain.ErrConflict) {
+		t.Fatalf("err = %v, want ErrConflict", err)
+	}
+	if repo.verified {
+		t.Fatal("a second business verified an already verified domain")
 	}
 }
