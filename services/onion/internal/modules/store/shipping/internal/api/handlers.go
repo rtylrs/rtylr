@@ -71,6 +71,9 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if !ok {
 		return CreateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
+	if !authPkg.IsBusinessAdmin(authUser) {
+		return CreateResponse{}, onekiterrors.PermissionDenied()
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
 		return CreateResponse{}, onekiterrors.PermissionDenied()
@@ -109,6 +112,9 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if !ok {
 		return UpdateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
+	if !authPkg.IsBusinessAdmin(authUser) {
+		return UpdateResponse{}, onekiterrors.PermissionDenied()
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
 		return UpdateResponse{}, onekiterrors.PermissionDenied()
@@ -141,6 +147,9 @@ func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteRe
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return DeleteResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
+	}
+	if !authPkg.IsBusinessAdmin(authUser) {
+		return DeleteResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

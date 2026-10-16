@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/voxire/onion/internal/modules/erp/internal/stock"
 	"github.com/voxire/onion/internal/modules/erp/onlineorders/internal/application"
 	"github.com/voxire/onion/internal/modules/erp/onlineorders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -237,6 +238,9 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if err := h.Service.Update(ctx, businessID, req.ID, input); err != nil {
 		if errors.Is(err, domain.ErrInvalidStatus) {
 			return UpdateResponse{}, onekiterrors.New(http.StatusConflict, "Order status transition is not allowed")
+		}
+		if errors.Is(err, stock.ErrInsufficientStock) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusConflict, "Insufficient stock to confirm order")
 		}
 		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update order")
 	}
