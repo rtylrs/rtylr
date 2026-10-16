@@ -13,7 +13,7 @@ service CompatibilityService {
   overrideOrderVoid(PathIdBodyRequest) -> JsonResponse @post("/orders/{id}/void/override") @body("body")
   resumeOrder(PathIdBodyRequest) -> JsonResponse @put("/orders/{id}/resume") @body("body")
 
-  listWs(EmptyRequest) -> JsonResponse @get("/ws") @http
-  createPaymentsWebhook(EmptyRequest) -> JsonResponse @post("/payments/webhook") @http
-  createWsTicket(EmptyRequest) -> JsonResponse @post("/ws-ticket") @http
+  listWs(EmptyRequest) -> EmptyResponse @get("/ws") @http
+  createPaymentsWebhook(EmptyRequest) -> EmptyResponse @post("/payments/webhook") @http
+  createWsTicket(EmptyRequest) -> EmptyResponse @post("/ws-ticket") @http
 }

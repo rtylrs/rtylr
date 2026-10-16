@@ -104,5 +104,5 @@ service CompatibilityService {
   updateLocation(PathIdBodyRequest) -> JsonResponse @put("/locations/{id}") @body("body")
   updatePerformanceConfig(BodyRequest) -> JsonResponse @put("/performance/config") @body("body")
 
-  createReportsGenerate(EmptyRequest) -> JsonResponse @post("/reports/generate") @http
+  createReportsGenerate(EmptyRequest) -> EmptyResponse @post("/reports/generate") @http
 }

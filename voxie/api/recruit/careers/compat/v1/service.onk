@@ -6,5 +6,5 @@ service CompatibilityService {
 
   listCareers(EmptyRequest) -> JsonResponse @get("")
 
-  createApply(EmptyRequest) -> JsonResponse @post("/apply") @http @max_body("16MiB")
+  createApply(EmptyRequest) -> EmptyResponse @post("/apply") @http @max_body("16MiB")
 }
