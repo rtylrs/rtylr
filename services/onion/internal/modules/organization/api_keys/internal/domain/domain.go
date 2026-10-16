@@ -1,6 +1,14 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrNotFound = errors.New("api key not found")
+	ErrInvalid  = errors.New("invalid api key")
+)
 
 type APIKey struct {
 	ID         int64

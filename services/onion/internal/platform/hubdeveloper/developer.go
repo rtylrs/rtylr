@@ -11,6 +11,9 @@ var (
 	// URL or an unsupported event.
 	ErrInvalidWebhook  = errors.New("invalid webhook")
 	ErrWebhookNotFound = errors.New("webhook not found")
+	// ErrInvalidAPIKey marks a key request the caller can correct.
+	ErrInvalidAPIKey  = errors.New("invalid api key")
+	ErrAPIKeyNotFound = errors.New("api key not found")
 )
 
 type APIKey struct {

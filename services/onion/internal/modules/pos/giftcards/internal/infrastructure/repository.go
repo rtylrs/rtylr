@@ -166,7 +166,7 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin redeem transaction",
-			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", domain.MaskCode(input.Code)), logger.Error(err))
 		return nil, err
 	}
 	defer func() {
@@ -203,7 +203,7 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 			return nil, domain.ErrGiftCardNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to lock gift card for redeem",
-			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", domain.MaskCode(input.Code)), logger.Error(err))
 		return nil, err
 	}
 
@@ -238,7 +238,7 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 	}); err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to redeem gift card",
-			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", domain.MaskCode(input.Code)), logger.Error(err))
 		return nil, err
 	}
 
@@ -252,7 +252,7 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 	}
 	if err := tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit redeem transaction",
-			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", domain.MaskCode(input.Code)), logger.Error(err))
 		return nil, err
 	}
 

@@ -44,3 +44,13 @@ type RedeemInput struct {
 	Code    string
 	Amount  float64
 }
+
+// MaskCode keeps only the last four characters of a gift card code. The code
+// is the bearer credential for redemption, so it must not reach logs in full.
+func MaskCode(code string) string {
+	runes := []rune(code)
+	if len(runes) <= 4 {
+		return "****"
+	}
+	return "****" + string(runes[len(runes)-4:])
+}

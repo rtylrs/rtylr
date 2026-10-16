@@ -3,7 +3,10 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/organization/api_keys/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -16,7 +19,22 @@ const (
 	apiKeysTTL   = 5 * time.Minute
 	// #nosec G101 -- This is a public display prefix for generated API keys, not a secret.
 	apiKeyPrefix = "rtylr_api_k1_"
+
+	maxNameLength = 100
 )
+
+// allowedScopes are the scopes the dashboard offers when creating a key.
+var allowedScopes = map[string]struct{}{
+	"upload":        {},
+	"flow:read":     {},
+	"flow:write":    {},
+	"crm:read":      {},
+	"crm:write":     {},
+	"finance:read":  {},
+	"finance:write": {},
+	"erp:read":      {},
+	"erp:write":     {},
+}
 
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.APIKey, error)
@@ -49,8 +67,14 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.APIKey, 
 }
 
 func (s *Service) Create(ctx context.Context, ownerID, businessID int64, input domain.CreateAPIKeyInput) (int64, string, error) {
-	if input.Name == "" {
-		return 0, "", errors.New("name is required")
+	input.Name = strings.TrimSpace(input.Name)
+	if input.Name == "" || utf8.RuneCountInString(input.Name) > maxNameLength {
+		return 0, "", fmt.Errorf("%w: name is required and at most %d characters", domain.ErrInvalid, maxNameLength)
+	}
+	for _, scope := range input.Scopes {
+		if _, ok := allowedScopes[scope]; !ok {
+			return 0, "", fmt.Errorf("%w: unsupported scope %q", domain.ErrInvalid, scope)
+		}
 	}
 	secret, err := securekey.Generate(securekey.Options{
 		Prefix:           apiKeyPrefix,

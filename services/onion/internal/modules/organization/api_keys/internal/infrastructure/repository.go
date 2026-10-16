@@ -77,7 +77,15 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, name
 }
 
 func (r *Repository) Revoke(ctx context.Context, businessID, keyID int64) error {
-	err := r.queries.RevokeAPIKey(ctx, sqlc.RevokeAPIKeyParams{
+	exists, err := r.queries.APIKeyExists(ctx, sqlc.APIKeyExistsParams{ID: keyID, BusinessID: businessID})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to look up API key", logger.Error(err))
+		return err
+	}
+	if exists == 0 {
+		return domain.ErrNotFound
+	}
+	err = r.queries.RevokeAPIKey(ctx, sqlc.RevokeAPIKeyParams{
 		ID:         keyID,
 		BusinessID: businessID,
 	})

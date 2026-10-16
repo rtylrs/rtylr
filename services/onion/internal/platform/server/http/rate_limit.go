@@ -292,6 +292,16 @@ var authRouteLimiters = map[string]func(http.Handler) http.Handler{
 	"/hr/employees/invite/accept": PerRouteRateLimit(5, time.Minute),
 	"/hr/employees/invite/verify": PerRouteRateLimit(5, time.Minute),
 
+	// OAuth endpoints are anonymous. The code and refresh token are 256-bit, so
+	// this is a brake on replay loops and load, not a search-space bound; a
+	// native client makes a handful of calls per authorization.
+	"/common/oauth/v1/token":  PerRouteRateLimit(30, time.Minute),
+	"/common/oauth/v1/revoke": PerRouteRateLimit(30, time.Minute),
+	"/oauth/authorize":        PerRouteRateLimit(30, time.Minute),
+	// Re-proves the current password with bcrypt on every call, so a stolen
+	// bearer token must not be able to guess it at the global rate.
+	"/hub/user/v1/users/password": PerRouteRateLimit(5, time.Minute),
+
 	// --- short secrets, sized to their search space ---
 	// Anonymous and unauthenticated: a code here flips user_provisioning_states
 	// and activates authorization_business_members, so a sweep is an
