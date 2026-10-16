@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
+	"github.com/voxire/onion/internal/platform/csvsafe"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -195,7 +196,7 @@ func (h *ExportSubmissionsHandler) Serve(ctx context.Context, req *ExportSubmiss
 	}
 	writeRows := func(submissions []domain.Submission) error {
 		for _, submission := range submissions {
-			if err := w.Write([]string{
+			if err := w.Write(csvsafe.Row(
 				strconv.FormatInt(submission.ID, 10),
 				strconv.FormatInt(submission.CareerID, 10),
 				submission.CandidateName,
@@ -204,7 +205,7 @@ func (h *ExportSubmissionsHandler) Serve(ctx context.Context, req *ExportSubmiss
 				submission.ResumeURL,
 				submission.Status,
 				submission.CreatedAt.Format(time.RFC3339),
-			}); err != nil {
+			)); err != nil {
 				return err
 			}
 		}

@@ -87,9 +87,10 @@ func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, careers
 	// Resume upload flow — candidate presigns, browser PUTs direct to
 	// R2, HR fetches signed reads on demand. The presign endpoint is
 	// anonymous; the read endpoint requires auth (see module.go).
-	serverHttp.RegisterPOSTWithValidation[ResumeUploadURLRequest, ResumeUploadURLResponse](
+	serverHttp.RegisterPOSTWithValidationAndMiddleware[ResumeUploadURLRequest, ResumeUploadURLResponse](
 		ctx, router, ResumeUploadURLRoutes(),
 		&ResumeUploadURLHandler{CareersService: careersService},
+		serverHttp.PerRouteRateLimit(10, time.Minute),
 	)
 	serverHttp.RegisterGETWithValidation[ResumeDownloadURLRequest, ResumeDownloadURLResponse](
 		ctx, router, ResumeDownloadURLRoutes(),
