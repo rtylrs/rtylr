@@ -5,8 +5,12 @@ SELECT t.id, t.owner_id, t.business_id, t.staff_id, t.type, t.start_date, t.end_
 FROM hr_time_off_requests t
 LEFT JOIN hr_staff s ON s.id = t.staff_id AND s.business_id = t.business_id
 WHERE t.business_id = ?
-ORDER BY created_at DESC, id DESC
+  AND (sqlc.narg('only_user_id') IS NULL OR s.user_id = sqlc.narg('only_user_id'))
+ORDER BY t.created_at DESC, t.id DESC
 LIMIT 500;
+
+-- name: StaffBelongsToUser :one
+SELECT COUNT(*) FROM hr_staff WHERE id = ? AND business_id = ? AND user_id = ?;
 
 -- name: CreateTimeOffRequest :execresult
 INSERT INTO hr_time_off_requests

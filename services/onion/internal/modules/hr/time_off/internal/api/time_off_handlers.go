@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr/time_off/internal/application"
 	"github.com/voxire/onion/internal/modules/hr/time_off/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -31,6 +32,12 @@ type TimeOffEntryDTO struct {
 	CreatedAt string `json:"createdAt"`
 }
 
+// canManageTimeOff reports whether the caller may see and file time off for the
+// whole business; everyone else is limited to their own staff records.
+func canManageTimeOff(user *authPkg.AuthUser) bool {
+	return authPkg.HasAppPermission(user, authorization.AppHR, "hr:time_off:approve")
+}
+
 // ─── List ────────────────────────────────────────────────────────────────────
 
 type ListTimeOffRequest struct{}
@@ -46,7 +53,13 @@ func (h *ListTimeOffHandler) Serve(ctx context.Context, _ *ListTimeOffRequest) (
 	if bizErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	items, err := h.Service.ListTimeOffRequests(ctx, businessID)
+	var items []domain.TimeOffRequest
+	var err error
+	if canManageTimeOff(device.User) {
+		items, err = h.Service.ListTimeOffRequests(ctx, businessID)
+	} else {
+		items, err = h.Service.ListTimeOffRequestsForUser(ctx, businessID, device.User.UserID)
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list time off requests")
 	}
@@ -119,6 +132,15 @@ func (h *SubmitTimeOffHandler) Serve(ctx context.Context, req *SubmitTimeOffRequ
 	staffID := req.StaffID
 	if staffID == 0 {
 		staffID = req.StaffIDSnake
+	}
+	if !canManageTimeOff(device.User) {
+		owns, ownErr := h.Service.StaffBelongsToUser(ctx, businessID, device.User.UserID, staffID)
+		if ownErr != nil {
+			return TimeOffEntryDTO{}, onekiterrors.New(http.StatusInternalServerError, "Failed to submit time off request")
+		}
+		if !owns {
+			return TimeOffEntryDTO{}, onekiterrors.PermissionDenied()
+		}
 	}
 	startDate := req.StartDate
 	if startDate == "" {

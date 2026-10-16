@@ -28,7 +28,27 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListTimeOffRequests(ctx context.Context, businessID int64) ([]domain.TimeOffRequest, error) {
-	rows, err := r.queries.ListTimeOffRequests(ctx, businessID)
+	return r.listTimeOffRequests(ctx, businessID, sql.NullInt64{})
+}
+
+// ListTimeOffRequestsForUser returns only the requests of staff records linked
+// to the given platform user.
+func (r *Repository) ListTimeOffRequestsForUser(ctx context.Context, businessID, userID int64) ([]domain.TimeOffRequest, error) {
+	return r.listTimeOffRequests(ctx, businessID, sql.NullInt64{Int64: userID, Valid: true})
+}
+
+// StaffBelongsToUser reports whether the staff record is linked to the user.
+func (r *Repository) StaffBelongsToUser(ctx context.Context, businessID, userID, staffID int64) (bool, error) {
+	count, err := r.queries.StaffBelongsToUser(ctx, sqlc.StaffBelongsToUserParams{ID: staffID, BusinessID: businessID, UserID: sql.NullInt64{Int64: userID, Valid: true}})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to resolve staff ownership", logger.Error(err))
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *Repository) listTimeOffRequests(ctx context.Context, businessID int64, onlyUserID sql.NullInt64) ([]domain.TimeOffRequest, error) {
+	rows, err := r.queries.ListTimeOffRequests(ctx, sqlc.ListTimeOffRequestsParams{BusinessID: businessID, OnlyUserID: onlyUserID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list time off requests", logger.Error(err))
 		return nil, err

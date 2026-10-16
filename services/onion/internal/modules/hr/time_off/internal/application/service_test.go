@@ -14,10 +14,19 @@ type mockRepo struct {
 	listErr   error
 	createErr error
 	apvErr    error
+	owns      bool
 }
 
 func (m *mockRepo) ListTimeOffRequests(_ context.Context, _ int64) ([]domain.TimeOffRequest, error) {
 	return m.list, m.listErr
+}
+
+func (m *mockRepo) ListTimeOffRequestsForUser(_ context.Context, _, _ int64) ([]domain.TimeOffRequest, error) {
+	return m.list, m.listErr
+}
+
+func (m *mockRepo) StaffBelongsToUser(_ context.Context, _, _, _ int64) (bool, error) {
+	return m.owns, nil
 }
 
 func (m *mockRepo) CreateTimeOffRequest(_ context.Context, _ domain.TimeOffInput) (int64, error) {
