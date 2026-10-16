@@ -28,6 +28,9 @@ FROM oauth_tokens WHERE refresh_token = ?;
 -- name: RevokeToken :exec
 UPDATE oauth_tokens SET revoked = 1 WHERE refresh_token = ?;
 
+-- name: ConsumeRefreshToken :execresult
+UPDATE oauth_tokens SET revoked = 1 WHERE refresh_token = ? AND revoked = 0;
+
 -- cross-schema read from shared users table — password hash for resource owner password grant
 -- name: GetUserPasswordHash :one
 SELECT password_hash FROM users WHERE id = ?;

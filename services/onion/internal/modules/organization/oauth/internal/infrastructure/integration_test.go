@@ -180,6 +180,34 @@ func TestRevokeToken_SetsRevokedFlag(t *testing.T) {
 	}
 }
 
+func TestConsumeRefreshToken_OnlyFirstCallerWins(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	token := &domain.Token{
+		AccessToken:  "test-access-token-consume",
+		RefreshToken: "test-refresh-token-consume",
+		ClientID:     "test-client",
+		UserID:       testutil.OwnerID,
+		Scope:        "read",
+		ExpiresAt:    time.Now().Add(time.Hour),
+	}
+	if err := repo.SaveToken(ctx, token); err != nil {
+		t.Fatalf("SaveToken error: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM oauth_tokens WHERE refresh_token = ?", token.RefreshToken)
+	})
+
+	if err := repo.ConsumeRefreshToken(ctx, token.RefreshToken); err != nil {
+		t.Fatalf("first ConsumeRefreshToken error: %v", err)
+	}
+	if err := repo.ConsumeRefreshToken(ctx, token.RefreshToken); !errors.Is(err, domain.ErrTokenRevoked) {
+		t.Fatalf("second ConsumeRefreshToken = %v, want ErrTokenRevoked", err)
+	}
+}
+
 func TestGetUserIDByEmail_UnknownEmailErrors(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

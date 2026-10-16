@@ -131,6 +131,21 @@ func (r *Repository) RevokeToken(ctx context.Context, refreshToken string) error
 	return r.queries.RevokeToken(ctx, refreshToken)
 }
 
+func (r *Repository) ConsumeRefreshToken(ctx context.Context, refreshToken string) error {
+	res, err := r.queries.ConsumeRefreshToken(ctx, refreshToken)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrTokenRevoked
+	}
+	return nil
+}
+
 func (r *Repository) GetUserPasswordHash(ctx context.Context, userID int64) (string, error) {
 	// cross-schema read from shared users table — password hash for resource owner password grant
 	hash, err := r.queries.GetUserPasswordHash(ctx, userID)

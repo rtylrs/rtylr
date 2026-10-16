@@ -207,7 +207,8 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 		return "", "", 0, domain.ErrTokenNotFound
 	}
 
-	if err := s.repo.RevokeToken(ctx, refreshToken); err != nil {
+	// Atomic so two concurrent refreshes cannot both rotate the same token.
+	if err := s.repo.ConsumeRefreshToken(ctx, refreshToken); err != nil {
 		return "", "", 0, err
 	}
 
