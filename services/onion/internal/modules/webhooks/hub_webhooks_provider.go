@@ -45,6 +45,14 @@ func (p *hubWebhooksProvider) Create(ctx context.Context, ownerID, businessID in
 	return p.service.Create(ctx, ownerID, businessID, url, events)
 }
 
+func (p *hubWebhooksProvider) RotateSecret(ctx context.Context, businessID, webhookID int64) (string, error) {
+	secret, err := p.service.RotateSecret(ctx, businessID, webhookID)
+	if err != nil {
+		return "", publicError(err)
+	}
+	return secret, nil
+}
+
 func (p *hubWebhooksProvider) Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (hubdeveloper.Webhook, error) {
 	webhook, err := p.service.Update(ctx, businessID, webhookID, url, events, isActive)
 	if err != nil {

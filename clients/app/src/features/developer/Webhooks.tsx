@@ -26,6 +26,7 @@ import {
   useWebhooks,
   useCreateWebhook,
   useDeleteWebhook,
+  useRotateWebhookSecret,
   type Webhook,
 } from '../../shared/hooks/queries/useWebhooks';
 import { normalizeWebhookUrl, SUPPORTED_WEBHOOK_EVENTS } from '../../shared/lib/webhookUrl';
@@ -37,10 +38,12 @@ const Webhooks: React.FC = () => {
   const { data = [], isLoading } = useWebhooks();
   const create = useCreateWebhook();
   const remove = useDeleteWebhook();
+  const rotate = useRotateWebhookSecret();
   const [createOpen, setCreateOpen] = useState(false);
   const [url, setUrl] = useState('');
   const [events, setEvents] = useState<string[]>([]);
   const [toDelete, setToDelete] = useState<Webhook | null>(null);
+  const [toRotate, setToRotate] = useState<Webhook | null>(null);
   const [showSecret, setShowSecret] = useState<string | null>(null);
 
   const submitCreate = async () => {
@@ -108,6 +111,7 @@ const Webhooks: React.FC = () => {
                   key={w.id}
                   webhook={w}
                   onDelete={(id) => setToDelete(data.find((x) => x.id === id) ?? null)}
+                  onRotateSecret={(id) => setToRotate(data.find((x) => x.id === id) ?? null)}
                 />
               ))}
             </div>
@@ -209,6 +213,24 @@ const Webhooks: React.FC = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <ConfirmDialog
+          open={!!toRotate}
+          onOpenChange={(o) => !o && setToRotate(null)}
+          title={t('developer.webhooks.rotateTitle')}
+          description={t('developer.webhooks.rotateDescription')}
+          confirmLabel={t('developer.webhooks.rotateConfirm')}
+          isLoading={rotate.isPending}
+          onConfirm={async () => {
+            if (!toRotate) return;
+            try {
+              const secret = await rotate.mutateAsync(toRotate.id);
+              if (secret) setShowSecret(secret);
+            } catch {
+              // onError in hook handles toast
+            }
+          }}
+        />
 
         <ConfirmDialog
           open={!!toDelete}

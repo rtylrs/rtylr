@@ -24,6 +24,7 @@ type repository interface {
 	Get(ctx context.Context, businessID, webhookID int64) (domain.Webhook, error)
 	Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) error
 	Delete(ctx context.Context, businessID, webhookID int64) error
+	RotateSecret(ctx context.Context, businessID, webhookID int64, secret string) error
 	ListDeliveriesForBusiness(ctx context.Context, businessID int64, filter domain.DeliveryFilter) ([]domain.DeliveryRecord, int64, error)
 }
 
@@ -79,6 +80,23 @@ func (s *Service) Delete(ctx context.Context, businessID, webhookID int64) error
 	}
 	invalidateWebhooksScope(ctx, businessID)
 	return nil
+}
+
+// RotateSecret replaces the signing secret. Deliveries already queued are
+// signed with the new secret, since the secret is read at send time.
+func (s *Service) RotateSecret(ctx context.Context, businessID, webhookID int64) (string, error) {
+	if webhookID <= 0 {
+		return "", errors.New("webhook id is required")
+	}
+	secret, err := generateSecret()
+	if err != nil {
+		return "", err
+	}
+	if err := s.repo.RotateSecret(ctx, businessID, webhookID, secret); err != nil {
+		return "", err
+	}
+	invalidateWebhooksScope(ctx, businessID)
+	return secret, nil
 }
 
 func (s *Service) Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (domain.Webhook, error) {

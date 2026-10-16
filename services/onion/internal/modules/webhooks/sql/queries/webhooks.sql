@@ -20,3 +20,6 @@ WHERE id = ? AND business_id = ?;
 UPDATE hub_webhooks
 SET url = ?, events = ?, is_active = ?
 WHERE id = ? AND business_id = ?;
+
+-- name: RotateWebhookSecret :execresult
+UPDATE hub_webhooks SET secret = ? WHERE id = ? AND business_id = ?;

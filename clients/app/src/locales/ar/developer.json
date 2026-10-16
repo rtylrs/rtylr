@@ -7,7 +7,11 @@
     "secretDescription": "استخدمه للتحقق من ترويسة X-Rtylr-Signature في كل عملية إرسال. انسخه الآن، فلن تتمكن من رؤيته مرة أخرى.",
     "copySecret": "نسخ السر",
     "secretCopied": "تم نسخ السر",
-    "secretCopyFailed": "تعذر نسخ السر إلى الحافظة"
+    "secretCopyFailed": "تعذر نسخ السر إلى الحافظة",
+    "rotateTitle": "تجديد سر التوقيع؟",
+    "rotateDescription": "سيتوقف السر الحالي عن توقيع عمليات التسليم فوراً. حدّث نقطة النهاية لديك بالسر الجديد لتتمكن من التحقق منها.",
+    "rotateConfirm": "تجديد السر",
+    "rotateFailed": "تعذر تجديد سر التوقيع"
   },
   "apiKeys": {
     "emptyTitle": "لا توجد مفاتيح API بعد",

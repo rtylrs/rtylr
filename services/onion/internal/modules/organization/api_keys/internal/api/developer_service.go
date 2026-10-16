@@ -242,6 +242,30 @@ func (a *DeveloperAPI) UpdateWebhook(ctx context.Context, req *hubdeveloperv1.Up
 	return &hubdeveloperv1.UpdateWebhookResponse{Webhook: toProtoWebhook(webhook)}, nil
 }
 
+func (a *DeveloperAPI) RotateWebhookSecret(ctx context.Context, req *hubdeveloperv1.RotateWebhookSecretRequest) (*hubdeveloperv1.RotateWebhookSecretResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if !hasDeveloperPermission(device.User) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	id := req.GetId()
+	if id <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Webhook id is required")
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	secret, err := a.WebhooksService.RotateSecret(ctx, businessID, id)
+	if err != nil {
+		return nil, webhookError(err, "Failed to rotate webhook secret")
+	}
+
+	return &hubdeveloperv1.RotateWebhookSecretResponse{Secret: secret}, nil
+}
+
 func (a *DeveloperAPI) DeleteWebhook(ctx context.Context, req *hubdeveloperv1.DeleteWebhookRequest) (*hubdeveloperv1.DeleteWebhookResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if !hasDeveloperPermission(device.User) {

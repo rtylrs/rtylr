@@ -293,7 +293,8 @@
     "active": "Actif",
     "paused": "En pause",
     "failing": "En échec",
-    "delete": "Supprimer le webhook"
+    "delete": "Supprimer le webhook",
+    "rotate": "Renouveler le secret de signature"
   },
   "closeDialog": "Fermer la boîte de dialogue",
   "closePanel": "Fermer le panneau",

@@ -13,6 +13,7 @@ vi.mock('@voxire/components', () => ({
 const createMutateAsync = vi.hoisted(() =>
   vi.fn().mockResolvedValue({ id: '1', secret: 'whsec_once' })
 );
+const rotateMutateAsync = vi.hoisted(() => vi.fn().mockResolvedValue('whsec_rotated'));
 const webhooksData = vi.hoisted(() => ({
   data: [] as Webhook[],
   isLoading: false,
@@ -22,6 +23,7 @@ vi.mock('../../shared/hooks/queries/useWebhooks', () => ({
   useWebhooks: () => webhooksData,
   useCreateWebhook: () => ({ mutateAsync: createMutateAsync, isPending: false }),
   useDeleteWebhook: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useRotateWebhookSecret: () => ({ mutateAsync: rotateMutateAsync, isPending: false }),
 }));
 
 import Webhooks from './Webhooks';
@@ -31,6 +33,7 @@ beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locale
 beforeEach(() => {
   vi.clearAllMocks();
   createMutateAsync.mockResolvedValue({ id: '1', secret: 'whsec_once' });
+  rotateMutateAsync.mockResolvedValue('whsec_rotated');
   webhooksData.data = [];
   webhooksData.isLoading = false;
 });
@@ -113,5 +116,49 @@ describe('Webhooks empty state', () => {
     expect(
       screen.getByRole('button', { name: i18next.t('developer.webhooks.copySecret') })
     ).toBeInTheDocument();
+  });
+});
+
+describe('Webhooks secret rotation', () => {
+  const row: Webhook = {
+    id: '7',
+    url: 'https://api.example.com/hooks',
+    isActive: true,
+    events: ['order_created'],
+  };
+
+  it('asks for confirmation before rotating and then shows the new secret once', async () => {
+    webhooksData.data = [row];
+    render(<Webhooks />);
+
+    fireEvent.click(screen.getByRole('button', { name: i18next.t('common.webhook.rotate') }));
+    expect(rotateMutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByText(i18next.t('developer.webhooks.rotateTitle'))).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: i18next.t('developer.webhooks.rotateConfirm') })
+    );
+
+    await waitFor(() => expect(rotateMutateAsync).toHaveBeenCalledWith('7'));
+    expect(await screen.findByText('whsec_rotated')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: i18next.t('developer.webhooks.copySecret') })
+    ).toBeInTheDocument();
+  });
+
+  it('shows no secret when the rotation fails', async () => {
+    webhooksData.data = [row];
+    rotateMutateAsync.mockRejectedValue(new Error('boom'));
+    render(<Webhooks />);
+
+    fireEvent.click(screen.getByRole('button', { name: i18next.t('common.webhook.rotate') }));
+    fireEvent.click(
+      screen.getByRole('button', { name: i18next.t('developer.webhooks.rotateConfirm') })
+    );
+
+    await waitFor(() => expect(rotateMutateAsync).toHaveBeenCalled());
+    expect(
+      screen.queryByRole('button', { name: i18next.t('developer.webhooks.copySecret') })
+    ).not.toBeInTheDocument();
   });
 });

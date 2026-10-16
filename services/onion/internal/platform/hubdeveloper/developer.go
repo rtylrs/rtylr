@@ -82,6 +82,9 @@ type WebhooksProvider interface {
 	Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (id int64, secret string, err error)
 	Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (Webhook, error)
 	Delete(ctx context.Context, businessID, webhookID int64) error
+	// RotateSecret replaces the signing secret and returns the new one, which
+	// is never readable again.
+	RotateSecret(ctx context.Context, businessID, webhookID int64) (string, error)
 	// ListDeliveries returns a page of delivery attempts for the business,
 	// most recent first, with the total matching the filter.
 	ListDeliveries(ctx context.Context, businessID int64, filter DeliveryFilter) ([]Delivery, int64, error)
