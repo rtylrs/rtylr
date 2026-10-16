@@ -9,7 +9,7 @@
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "../../web/rtylr/node_modules/@testing-library/jest-dom/types/vitest.d.ts"
+    "../../app/node_modules/@testing-library/jest-dom/types/vitest.d.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -94,9 +94,6 @@
     "viewer": "المشاهد"
   },
   "close": "إغلاق",
-  "teamMembers": "أعضاء الفريق",
-  "allApps": "جميع التطبيقات",
-  "activityLog": "سجل النشاط",
   "toasts": {
     "twoFactorEnabled": "تم تفعيل المصادقة الثنائية",
     "twoFactorDisabled": "تم تعطيل المصادقة الثنائية",
@@ -223,7 +220,8 @@
     "hrLeaveSettings": "سياسة إجازات الموارد البشرية",
     "automations": "الأتمتة",
     "automationWorkflows": "سير العمل",
-    "newAutomation": "أتمتة جديدة"
+    "newAutomation": "أتمتة جديدة",
+    "permissions": "الأذونات"
   },
   "launch": "تشغيل",
   "pagination": {

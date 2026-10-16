@@ -216,7 +216,8 @@
     "hrLeaveSettings": "HR leave policy",
     "automations": "Automations",
     "automationWorkflows": "Workflows",
-    "newAutomation": "New automation"
+    "newAutomation": "New automation",
+    "permissions": "Permissions"
   },
   "launch": "Launch",
   "pagination": {
