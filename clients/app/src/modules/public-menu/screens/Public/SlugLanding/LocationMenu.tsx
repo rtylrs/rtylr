@@ -56,8 +56,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       setBusinessId(businessId);
     }
     if (location?.id) setLocationId(location.id);
-    if (menu?.business.currency && typeof setCurrency === 'function')
-      setCurrency(menu.business.currency);
+    if (menu?.business.currency) setCurrency(menu.business.currency);
   }, [
     businessId,
     cartBusinessId,
@@ -141,7 +140,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
         <EmptyState
           icon={UtensilsCrossed}
           title={t('locationmenu.loadFailedTitle')}
-          description={t('locationmenu.noItemsDescription')}
+          description={t('locationmenu.loadFailedDescription')}
           action={{
             label: t('locationmenu.backToBusiness', { businessName: biz.business.name }),
             onClick: () => void navigate({ to: menuHomePath(slug) }),

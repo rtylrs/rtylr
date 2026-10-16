@@ -2,6 +2,7 @@
   "pageTitle": "القائمة · rtylr",
   "allItems": "القائمة",
   "loadFailedTitle": "تعذّر تحميل القائمة",
+  "loadFailedDescription": "حدث خطأ أثناء تحميل هذه القائمة. يرجى المحاولة مرة أخرى لاحقًا.",
   "businessNotFoundTitle": "المتجر غير موجود",
   "businessNotFoundDescription": "هذا المتجر غير نشط أو الرابط غير صحيح.",
   "goBack": "رجوع",
