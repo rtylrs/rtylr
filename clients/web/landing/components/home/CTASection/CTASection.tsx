@@ -46,7 +46,7 @@ const CTASection: React.FC = (): React.JSX.Element => {
           {t('home.cta.subtitle')}
         </motion.p>
 
-        <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
+        <motion.div className={styles.ctaButtons} variants={blurFadeIn} data-mascot-spot="0.9">
           <motion.button
             type="button"
             onClick={handleGetStarted}

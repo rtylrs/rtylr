@@ -167,6 +167,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
           <div
             id="feature-stage"
             className={styles.stage}
+            data-mascot-spot="0.75"
             role="tabpanel"
             aria-labelledby={`tab-${FEATURES[activeIndex].id}`}
           >

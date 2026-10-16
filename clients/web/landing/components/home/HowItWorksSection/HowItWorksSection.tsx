@@ -164,6 +164,7 @@ const HowItWorksSection: React.FC = (): React.JSX.Element => {
         <motion.div
           ref={gridRef}
           className={styles.grid}
+          data-mascot-spot="0.5"
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}

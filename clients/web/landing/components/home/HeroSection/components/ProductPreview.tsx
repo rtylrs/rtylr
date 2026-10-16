@@ -45,6 +45,7 @@ const ProductPreview: React.FC<{ alt: string }> = ({ alt }) => {
       <FloatingCards progress={passProgress} />
       <motion.div
         className={styles.productWindow}
+        data-mascot-spot="0.8"
         style={reduceMotion ? undefined : { rotateX, scale }}
       >
         <div className={styles.productChrome} aria-hidden="true">

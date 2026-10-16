@@ -818,6 +818,15 @@
           "effect": "A reorder task and a purchase order appear."
         }
       ]
+    },
+    "mascot": {
+      "hint": "Psst… catch me",
+      "caught": "Caught me! {{count}} of {{goal}}",
+      "hiAgain": "Hi again 👋",
+      "foundTitle": "You found Caret!",
+      "foundBody": "Caret is the AI built into rtylr. It's much better at running your business than at hiding.",
+      "foundCta": "Meet Caret",
+      "close": "Close"
     }
   },
   "integrations": {

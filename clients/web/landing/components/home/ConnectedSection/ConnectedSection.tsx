@@ -89,6 +89,12 @@ const ConnectedSection: React.FC = (): React.JSX.Element => {
         </motion.div>
 
         <div className={styles.diagram} ref={boxRef} aria-hidden="true">
+          {/* Peek spot sits on the core tile, not the diagram box. */}
+          <span
+            className={styles.mascotSpot}
+            style={{ left: `${CENTER.x}%`, top: `${CENTER.y}%` }}
+            data-mascot-spot="0.5"
+          />
           <svg className={styles.lines} viewBox="0 0 100 100" preserveAspectRatio="none">
             {(Object.keys(NODES) as Area[]).map((id) => {
               const n = NODES[id];
