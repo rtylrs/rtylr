@@ -25,6 +25,13 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+func normalizeQuoteStatus(s string) string {
+	if s == "declined" {
+		return "rejected"
+	}
+	return s
+}
+
 func (r *Repository) List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Quote, error) {
 	rows, err := r.queries.ListQuotes(ctx, sqlc.ListQuotesParams{
 		BusinessID: businessID,
@@ -45,7 +52,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, limit, offset i
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.QuoteInput) (int64, error) {
-	status := input.Status
+	status := normalizeQuoteStatus(input.Status)
 	if status == "" {
 		status = "draft"
 	}
@@ -127,10 +134,11 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return domain.ErrQuoteNotEditable
 	}
 
+	nextStatus := normalizeQuoteStatus(input.Status)
 	result, err := r.queries.WithTx(tx).UpdateQuote(ctx, sqlc.UpdateQuoteParams{
 		CustomerName:  input.CustomerName,
 		CustomerEmail: nullableString(input.CustomerEmail),
-		Status:        sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(input.Status), Valid: input.Status != ""},
+		Status:        sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(nextStatus), Valid: nextStatus != ""},
 		Items:         rawJSON(input.Items),
 		Subtotal:      nullableString(fmtFloat(input.Subtotal)),
 		Tax:           nullableString(fmtFloat(input.Tax)),
@@ -174,8 +182,9 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 }
 
 func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
+	normalized := normalizeQuoteStatus(status)
 	result, err := r.queries.UpdateQuoteStatus(ctx, sqlc.UpdateQuoteStatusParams{
-		Status:     sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(status), Valid: status != ""},
+		Status:     sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(normalized), Valid: normalized != ""},
 		ID:         id,
 		BusinessID: businessID,
 	})

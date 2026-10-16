@@ -113,11 +113,13 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, businessID, 
 	if err != nil {
 		return err
 	}
-	if string(old.ErpPurchaseOrdersStatus) == status {
-		return nil
+	currentStatus := domain.PurchaseOrderStatus(old.ErpPurchaseOrdersStatus)
+	nextStatus := domain.PurchaseOrderStatus(status)
+	if err := domain.ValidatePOStatusTransition(currentStatus, nextStatus); err != nil {
+		return err
 	}
-	if old.ErpPurchaseOrdersStatus == sqlc.ErpPurchaseOrdersStatusReceived {
-		return domain.ErrPurchaseOrderAlreadyReceived
+	if currentStatus == nextStatus {
+		return nil
 	}
 	value := sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true}
 	var result sql.Result
@@ -177,6 +179,10 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 	}
 	if status.Valid && status.ErpPurchaseOrdersStatus == sqlc.ErpPurchaseOrdersStatus(domain.POStatusReceived) {
 		err = domain.ErrPurchaseOrderAlreadyReceived
+		return err
+	}
+	if status.Valid && status.ErpPurchaseOrdersStatus == sqlc.ErpPurchaseOrdersStatus(domain.POStatusCancelled) {
+		err = domain.ErrPurchaseOrderInvalidTransition
 		return err
 	}
 

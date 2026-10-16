@@ -16,6 +16,7 @@ const STATUS_FROM_API: Record<string, string> = {
   sent: 'Sent',
   accepted: 'Accepted',
   rejected: 'Declined',
+  declined: 'Declined',
   expired: 'Expired',
   converted: 'Converted',
 };

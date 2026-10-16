@@ -9,11 +9,13 @@ import (
 
 // ValidQuoteStatuses lists the statuses accepted by the quotes module.
 var ValidQuoteStatuses = map[string]struct{}{
-	"draft":    {},
-	"sent":     {},
-	"accepted": {},
-	"declined": {},
-	"expired":  {},
+	"draft":     {},
+	"sent":      {},
+	"accepted":  {},
+	"declined":  {},
+	"rejected":  {},
+	"expired":   {},
+	"converted": {},
 }
 
 // ValidateQuoteInput returns a non-nil error when the input violates a

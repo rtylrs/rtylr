@@ -145,7 +145,7 @@ const StockTransfers: React.FC = () => {
   const validItems = toStockTransferItems(newItems);
 
   const warehouseName = (id: string): string =>
-    warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
+    warehouses.find((w) => String(w.id) === String(id))?.name ?? `Warehouse #${id}`;
 
   const handleCreate = async (): Promise<void> => {
     if (warehousesError || productsError || warehousesLoading || productsLoading) {

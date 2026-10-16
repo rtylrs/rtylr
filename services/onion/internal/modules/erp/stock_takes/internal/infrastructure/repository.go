@@ -286,6 +286,12 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 		return err
 	}
 	alreadyCompleted := prior.Status.Valid && prior.Status.ErpStockTakesStatus == sqlc.ErpStockTakesStatus(domain.StockTakeStatusCompleted)
+	if alreadyCompleted {
+		if input.Status == domain.StockTakeStatusCompleted {
+			return nil
+		}
+		return domain.ErrStockTakeAlreadyCompleted
+	}
 
 	if !alreadyCompleted {
 		if err = updateStockTakeCounts(ctx, qtx, input.ID, input.Items, input.Status == domain.StockTakeStatusCompleted); err != nil {

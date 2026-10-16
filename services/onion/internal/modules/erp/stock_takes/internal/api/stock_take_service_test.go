@@ -20,6 +20,7 @@ func TestStockTakeMutationErrorMapsDomainFailures(t *testing.T) {
 		{name: "missing stock take", err: domain.ErrStockTakeNotFound, want: http.StatusNotFound},
 		{name: "missing reference", err: domain.ErrStockTakeReferenceNotFound, want: http.StatusNotFound},
 		{name: "incomplete count", err: domain.ErrStockTakeIncomplete, want: http.StatusConflict},
+		{name: "already completed", err: domain.ErrStockTakeAlreadyCompleted, want: http.StatusConflict},
 		{name: "insufficient stock", err: stock.ErrInsufficientStock, want: http.StatusConflict},
 	}
 

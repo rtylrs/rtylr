@@ -142,6 +142,29 @@ func (r *Repository) Post(ctx context.Context, businessID, id int64) error {
 	if entry.Status == "posted" {
 		return domain.ErrJournalEntryAlreadyPosted
 	}
+	if len(entry.Lines) < 2 {
+		return fmt.Errorf("%w: a journal entry must have at least two lines", domain.ErrInvalidJournalEntry)
+	}
+
+	var totalDebit, totalCredit money.Amount
+	for i, line := range entry.Lines {
+		if line.Debit > 0 && line.Credit > 0 {
+			return fmt.Errorf("%w: line[%d]: cannot have both debit and credit", domain.ErrInvalidJournalEntry, i)
+		}
+		debit, convErr := money.FromFloat64(line.Debit)
+		if convErr != nil {
+			return fmt.Errorf("%w: line[%d]: debit: %w", domain.ErrInvalidJournalEntry, i, convErr)
+		}
+		credit, convErr := money.FromFloat64(line.Credit)
+		if convErr != nil {
+			return fmt.Errorf("%w: line[%d]: credit: %w", domain.ErrInvalidJournalEntry, i, convErr)
+		}
+		totalDebit += debit
+		totalCredit += credit
+	}
+	if totalDebit != totalCredit || totalDebit <= 0 {
+		return fmt.Errorf("%w: journal entry is not balanced: total_debit=%s total_credit=%s", domain.ErrInvalidJournalEntry, totalDebit, totalCredit)
+	}
 
 	res, err := r.queries.PostJournalEntry(ctx, sqlc.PostJournalEntryParams{ID: id, BusinessID: businessID})
 	if err != nil {
