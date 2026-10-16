@@ -259,6 +259,22 @@ func (r *Repository) CompleteMFAEnrollment(ctx context.Context, userID int64, re
 	return tx.Commit()
 }
 
+func (r *Repository) ConsumeTOTPCounter(ctx context.Context, userID, counter int64) (bool, error) {
+	result, err := r.db.ExecContext(ctx, `
+		UPDATE user_mfa_enrollments
+		SET last_totp_counter = ?
+		WHERE user_id = ? AND method = 'totp' AND is_active = TRUE
+		  AND (last_totp_counter IS NULL OR last_totp_counter < ?)`, counter, userID, counter)
+	if err != nil {
+		return false, err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return rows == 1, nil
+}
+
 func (r *Repository) MarkMFAVerified(ctx context.Context, userID int64) error {
 	result, err := r.db.ExecContext(ctx, `
 		UPDATE user_provisioning_states

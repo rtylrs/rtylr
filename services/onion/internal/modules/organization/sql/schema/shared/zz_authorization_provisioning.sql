@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `user_mfa_enrollments` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `enrolled_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `revoked_at` timestamp NULL DEFAULT NULL,
+  `last_totp_counter` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_mfa_user_method_credential` (`user_id`,`method`,`credential_id`),
   KEY `idx_mfa_user_active` (`user_id`,`is_active`)

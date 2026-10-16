@@ -148,7 +148,10 @@ func (a *PermissionAPI) UpdateRole(ctx context.Context, req *hubpermissionv1.Upd
 	if perms == nil {
 		perms = []string{}
 	}
-	if !canDelegateRoleMutation(device.User, role.AppID, perms) {
+	// Both ends of the change must be within the actor's ceiling: the permissions
+	// being added, and the ones being taken away from the role's current holders.
+	if !canDelegateRoleMutation(device.User, role.AppID, perms) ||
+		!canDelegateRoleMutation(device.User, role.AppID, role.Permissions) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

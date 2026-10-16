@@ -138,3 +138,4 @@ internal/modules/activity/sql/migration_20261004_fact_identity.sql	internal/modu
 internal/modules/pos/locations/sql/migration_20261004_location_locks.sql	internal/modules/pos/locations/sql/migration_20261004_location_locks.sql
 internal/modules/organization/oauth/sql/migration_20261016_mcp_scopes_and_loopback.sql	internal/modules/organization/oauth/sql/migration_20261016_mcp_scopes_and_loopback.sql
 internal/modules/organization/custom_domains/sql/migration_20261016_unverified_claims.sql	internal/modules/organization/custom_domains/sql/migration_20261016_unverified_claims.sql
+internal/modules/organization/sql/migration_20261016_totp_replay_counter.sql	internal/modules/organization/sql/migration_20261016_totp_replay_counter.sql

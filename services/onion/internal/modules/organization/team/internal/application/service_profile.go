@@ -149,7 +149,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		LicensedAppIDs:               &input.LicensedAppIDs,
 		PermissionProfileAssignments: &input.PermissionProfileAssignments,
 		GroupIDs:                     &input.GroupIDs,
-	}); err != nil {
+	}, nil); err != nil {
 		return 0, "", err
 	}
 

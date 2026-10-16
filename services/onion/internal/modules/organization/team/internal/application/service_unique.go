@@ -71,7 +71,7 @@ func (s *Service) CreateGroup(ctx context.Context, actorID, ownerID, businessID 
 	input.BusinessID = businessID
 	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, domain.UpdatePermissionsInput{
 		LicensedAppIDs: &input.LicensedAppIDs, PermissionProfileAssignments: &input.PermissionProfileAssignments,
-	}); err != nil {
+	}, nil); err != nil {
 		return 0, err
 	}
 	groupID, err := s.repo.CreateGroup(ctx, ownerID, input)
@@ -99,9 +99,13 @@ func (s *Service) UpdateGroup(ctx context.Context, actorID, ownerID, businessID,
 		return errors.New("business and name are required")
 	}
 	input.BusinessID = businessID
+	group, err := s.repo.GetGroup(ctx, ownerID, businessID, groupID)
+	if err != nil {
+		return err
+	}
 	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, domain.UpdatePermissionsInput{
 		LicensedAppIDs: &input.LicensedAppIDs, PermissionProfileAssignments: &input.PermissionProfileAssignments,
-	}); err != nil {
+	}, &delegationCurrent{Grants: grantsOfGroupAssignments(group.PermissionProfileAssignments)}); err != nil {
 		return err
 	}
 	if err := s.repo.UpdateGroup(ctx, ownerID, businessID, groupID, input); err != nil {
@@ -112,7 +116,12 @@ func (s *Service) UpdateGroup(ctx context.Context, actorID, ownerID, businessID,
 	return nil
 }
 
-func (s *Service) DeleteGroup(ctx context.Context, ownerID, businessID, groupID int64) error {
+func (s *Service) DeleteGroup(ctx context.Context, actorID, ownerID, businessID, groupID int64) error {
+	if group, lookupErr := s.repo.GetGroup(ctx, ownerID, businessID, groupID); lookupErr == nil {
+		if err := s.enforceGroupMembershipDelegation(ctx, actorID, ownerID, businessID, group); err != nil {
+			return err
+		}
+	}
 	memberIDs := s.groupMemberIDs(ctx, ownerID, businessID, groupID)
 	description := "Deleted a group"
 	if group, lookupErr := s.repo.GetGroup(ctx, ownerID, businessID, groupID); lookupErr == nil && group != nil {
@@ -136,6 +145,9 @@ func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, busines
 	if err != nil {
 		return err
 	}
+	if err := s.enforceGroupMembershipDelegation(ctx, callerID, ownerID, businessID, group); err != nil {
+		return err
+	}
 	// businessID is the tenant the group's grants are resolved in; a membership
 	// row without it is invisible to the authorization snapshot readers.
 	if err := s.repo.AddGroupMembers(ctx, ownerID, groupID, businessID, callerID, userIDs); err != nil {
@@ -151,10 +163,13 @@ func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, busines
 	return nil
 }
 
-func (s *Service) RemoveGroupMember(ctx context.Context, ownerID, businessID, groupID, userID int64) error {
+func (s *Service) RemoveGroupMember(ctx context.Context, actorID, ownerID, businessID, groupID, userID int64) error {
 	group, err := s.repo.GetGroup(ctx, ownerID, businessID, groupID)
 	if err != nil {
 		return domain.ErrPermissionNotFound
+	}
+	if err := s.enforceGroupMembershipDelegation(ctx, actorID, ownerID, businessID, group); err != nil {
+		return err
 	}
 	if err := s.repo.RemoveGroupMember(ctx, ownerID, businessID, groupID, userID); err != nil {
 		return err

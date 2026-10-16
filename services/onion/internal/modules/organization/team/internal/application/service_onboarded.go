@@ -3,6 +3,8 @@ package application
 import (
 	"context"
 	"errors"
+	"sort"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/organization/team/internal/domain"
 	"github.com/voxire/onion/internal/platform/authorization"
@@ -45,7 +47,15 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	if !existing.IsActive || input.UserID == ownerID {
 		return domain.ErrForbidden
 	}
-	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, input); err != nil {
+	currentGroupIDs := make([]int64, 0, len(existing.Groups))
+	for _, group := range existing.Groups {
+		currentGroupIDs = append(currentGroupIDs, group.ID)
+	}
+	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, input, &delegationCurrent{
+		MemberType: existing.MemberType,
+		Grants:     grantsOfAssignments(existing.PermissionProfileAssignments),
+		GroupIDs:   currentGroupIDs,
+	}); err != nil {
 		return err
 	}
 
@@ -193,47 +203,212 @@ func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID in
 	return 0, domain.ErrForbidden
 }
 
-func (s *Service) enforceAuthorizationDelegation(ctx context.Context, actorID, ownerID, businessID int64, input domain.UpdatePermissionsInput) error {
+// delegationCurrent is what the target holds before an edit, so the ceiling
+// applies to what the edit takes away as well as to what it grants. nil means
+// the target is new.
+type delegationCurrent struct {
+	MemberType string
+	Grants     []roleGrant
+	GroupIDs   []int64
+}
+
+type roleGrantReader interface {
+	GetAuthorizationRoleGrant(ctx context.Context, businessID, roleID int64) (domain.AuthorizationRoleGrant, error)
+}
+
+type delegationStore interface {
+	roleGrantReader
+	GetGroup(ctx context.Context, ownerID, businessID, groupID int64) (*domain.Group, error)
+}
+
+// roleGrant is one role granted in one app with its scopes.
+type roleGrant struct {
+	AppID  string
+	RoleID int64
+	Scopes string
+}
+
+func grantsOfAssignments(assignments []authorization.RoleAssignment) []roleGrant {
+	var grants []roleGrant
+	for _, assignment := range assignments {
+		if assignment.GroupID != nil || assignment.Source != authorization.SourceExplicit {
+			continue
+		}
+		for _, roleID := range assignment.RoleIDs {
+			grants = append(grants, roleGrant{AppID: string(assignment.AppID), RoleID: roleID, Scopes: scopeSignature(assignment.Scopes)})
+		}
+	}
+	return grants
+}
+
+func grantsOfInputs(inputs []domain.AppRoleAssignmentInput) []roleGrant {
+	var grants []roleGrant
+	for _, input := range inputs {
+		for _, roleID := range input.RoleIDs {
+			grants = append(grants, roleGrant{AppID: input.AppID, RoleID: roleID, Scopes: scopeSignature(input.Scopes)})
+		}
+	}
+	return grants
+}
+
+func scopeSignature(scopes []authorization.Scope) string {
+	parts := make([]string, 0, len(scopes))
+	for _, scope := range scopes {
+		parts = append(parts, scope.Type+"="+scope.ID)
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, ",")
+}
+
+func diffGrants(current, next []roleGrant) (added, removed []roleGrant) {
+	have := make(map[roleGrant]struct{}, len(current))
+	for _, grant := range current {
+		have[grant] = struct{}{}
+	}
+	want := make(map[roleGrant]struct{}, len(next))
+	for _, grant := range next {
+		want[grant] = struct{}{}
+		if _, ok := have[grant]; !ok {
+			added = append(added, grant)
+		}
+	}
+	for _, grant := range current {
+		if _, ok := want[grant]; !ok {
+			removed = append(removed, grant)
+		}
+	}
+	return added, removed
+}
+
+// grantsWithinCeiling reports whether the actor may hand out, or take away,
+// every listed role grant.
+func grantsWithinCeiling(ctx context.Context, reader roleGrantReader, businessID int64, access *authorization.EffectiveAccess, grants []roleGrant) bool {
+	for _, grant := range grants {
+		role, err := reader.GetAuthorizationRoleGrant(ctx, businessID, grant.RoleID)
+		if err != nil || role.AppID != grant.AppID || !authorization.CanDelegatePermissions(access, authorization.AppID(role.AppID), role.Permissions) {
+			return false
+		}
+	}
+	return true
+}
+
+// delegationAccess resolves the actor's access. unrestricted is true for the
+// owner and business admins, who are not subject to a ceiling.
+func (s *Service) delegationAccess(ctx context.Context, actorID, ownerID, businessID int64) (access authorization.EffectiveAccess, unrestricted bool, err error) {
 	if actorID == ownerID {
-		return nil
+		return authorization.EffectiveAccess{}, true, nil
 	}
 	apps, err := s.GetOwnerApps(ctx, ownerID)
 	if err != nil {
-		return domain.ErrDelegationCeiling
+		return authorization.EffectiveAccess{}, false, domain.ErrDelegationCeiling
 	}
 	snapshot, found, err := s.repo.GetAuthorizationSnapshot(ctx, businessID, actorID, apps)
 	if err != nil || !found || !snapshot.MembershipActive {
-		return domain.ErrDelegationCeiling
+		return authorization.EffectiveAccess{}, false, domain.ErrDelegationCeiling
 	}
-	access := authorization.Resolve(snapshot)
-	if access.IsOwner || access.IsAdmin {
+	access = authorization.Resolve(snapshot)
+	return access, access.IsOwner || access.IsAdmin, nil
+}
+
+// enforceGroupMembershipDelegation applies the ceiling to adding someone to, or
+// removing someone from, a group: membership confers or strips the group's roles.
+func (s *Service) enforceGroupMembershipDelegation(ctx context.Context, actorID, ownerID, businessID int64, group *domain.Group) error {
+	access, unrestricted, err := s.delegationAccess(ctx, actorID, ownerID, businessID)
+	if err != nil {
+		return err
+	}
+	if unrestricted || group == nil {
 		return nil
 	}
-	if input.MemberType == "admin" {
+	if !grantsWithinCeiling(ctx, s.repo, businessID, &access, grantsOfGroupAssignments(group.PermissionProfileAssignments)) {
+		return domain.ErrDelegationCeiling
+	}
+	return nil
+}
+
+func grantsOfGroupAssignments(assignments []authorization.RoleAssignment) []roleGrant {
+	var grants []roleGrant
+	for _, assignment := range assignments {
+		for _, roleID := range assignment.RoleIDs {
+			grants = append(grants, roleGrant{AppID: string(assignment.AppID), RoleID: roleID, Scopes: scopeSignature(assignment.Scopes)})
+		}
+	}
+	return grants
+}
+
+func (s *Service) enforceAuthorizationDelegation(ctx context.Context, actorID, ownerID, businessID int64, input domain.UpdatePermissionsInput, current *delegationCurrent) error {
+	access, unrestricted, err := s.delegationAccess(ctx, actorID, ownerID, businessID)
+	if err != nil {
+		return err
+	}
+	if unrestricted {
+		return nil
+	}
+	return checkDelegation(ctx, s.repo, &access, ownerID, businessID, input, current)
+}
+
+// checkDelegation applies the ceiling of a non-admin actor to an edit.
+func checkDelegation(ctx context.Context, store delegationStore, access *authorization.EffectiveAccess, ownerID, businessID int64, input domain.UpdatePermissionsInput, current *delegationCurrent) error {
+	if input.MemberType == "admin" || (current != nil && current.MemberType == "admin" && input.MemberType != "" && input.MemberType != "admin") {
 		return domain.ErrDelegationCeiling
 	}
 	if input.LicensedAppIDs != nil && !containsString(access.DashPermissions, "hub:licenses:manage") {
 		return domain.ErrDelegationCeiling
 	}
-	if input.GroupIDs != nil && !containsString(access.DashPermissions, "hub:team:edit") {
-		return domain.ErrDelegationCeiling
+	if input.GroupIDs != nil {
+		if !containsString(access.DashPermissions, "hub:team:edit") {
+			return domain.ErrDelegationCeiling
+		}
+		var currentGroups []int64
+		if current != nil {
+			currentGroups = current.GroupIDs
+		}
+		for _, groupID := range changedGroupIDs(currentGroups, *input.GroupIDs) {
+			group, groupErr := store.GetGroup(ctx, ownerID, businessID, groupID)
+			if groupErr != nil || group == nil || !grantsWithinCeiling(ctx, store, businessID, access, grantsOfGroupAssignments(group.PermissionProfileAssignments)) {
+				return domain.ErrDelegationCeiling
+			}
+		}
 	}
-	if input.PermissionProfileAssignments == nil || len(*input.PermissionProfileAssignments) == 0 {
+	if input.PermissionProfileAssignments == nil {
 		return nil
-	}
-	if !containsString(access.DashPermissions, "hub:roles:edit") {
-		return domain.ErrDelegationCeiling
 	}
 	for _, assignment := range *input.PermissionProfileAssignments {
 		if len(assignment.RoleIDs) == 0 {
 			return domain.ErrDelegationCeiling
 		}
-		for _, profileID := range assignment.RoleIDs {
-			grant, grantErr := s.repo.GetAuthorizationRoleGrant(ctx, businessID, profileID)
-			if grantErr != nil || grant.AppID != assignment.AppID || !authorization.CanDelegatePermissions(&access, authorization.AppID(grant.AppID), grant.Permissions) {
-				return domain.ErrDelegationCeiling
-			}
-		}
+	}
+	var currentGrants []roleGrant
+	if current != nil {
+		currentGrants = current.Grants
+	}
+	added, removed := diffGrants(currentGrants, grantsOfInputs(*input.PermissionProfileAssignments))
+	if len(added) == 0 && len(removed) == 0 {
+		return nil
+	}
+	if !containsString(access.DashPermissions, "hub:roles:edit") {
+		return domain.ErrDelegationCeiling
+	}
+	if !grantsWithinCeiling(ctx, store, businessID, access, added) || !grantsWithinCeiling(ctx, store, businessID, access, removed) {
+		return domain.ErrDelegationCeiling
 	}
 	return nil
+}
+
+func changedGroupIDs(current, next []int64) []int64 {
+	seen := make(map[int64]int, len(current)+len(next))
+	for _, id := range current {
+		seen[id] |= 1
+	}
+	for _, id := range next {
+		seen[id] |= 2
+	}
+	var changed []int64
+	for id, mask := range seen {
+		if mask != 3 {
+			changed = append(changed, id)
+		}
+	}
+	sort.Slice(changed, func(i, j int) bool { return changed[i] < changed[j] })
+	return changed
 }

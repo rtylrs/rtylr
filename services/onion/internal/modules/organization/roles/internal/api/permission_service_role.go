@@ -27,6 +27,9 @@ func (a *PermissionAPI) DeleteRole(ctx context.Context, req *hubpermissionv1.Del
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	if err := a.requireRoleCeiling(ctx, device.User, businessID, id); err != nil {
+		return nil, err
+	}
 	if _, err := a.Service.ArchiveManagedRole(ctx, businessID, device.User.UserID, id, ""); err != nil {
 		return nil, roleAPIError(err, "Failed to archive role")
 	}
@@ -81,6 +84,9 @@ func (a *PermissionAPI) ArchiveRole(ctx context.Context, req *hubpermissionv1.Ar
 	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if err != nil {
 		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := a.requireRoleCeiling(ctx, device.User, businessID, req.GetId()); err != nil {
+		return nil, err
 	}
 	role, err := a.Service.ArchiveManagedRole(ctx, businessID, device.User.UserID, req.GetId(), req.GetReason())
 	if err != nil {
@@ -158,6 +164,13 @@ func (a *PermissionAPI) RemoveRoleAssignment(ctx context.Context, req *hubpermis
 	if err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	assignment, err := a.Service.GetManagedAssignment(ctx, businessID, req.GetId())
+	if err != nil {
+		return nil, roleAPIError(err, "Failed to get role assignment")
+	}
+	if err := a.requireRoleCeiling(ctx, device.User, businessID, assignment.RoleID); err != nil {
+		return nil, err
+	}
 	if err := a.Service.RemoveManagedAssignment(ctx, businessID, device.User.UserID, req.GetId()); err != nil {
 		return nil, roleAPIError(err, "Failed to revoke role assignment")
 	}
@@ -212,4 +225,18 @@ func (a *PermissionAPI) ListRoleAudit(ctx context.Context, req *hubpermissionv1.
 		Total:    page.Total,
 		NextPage: nextPage(page.Page, page.PageSize, page.Total),
 	}, nil
+}
+
+// requireRoleCeiling applies the grant-time delegation ceiling to anything that
+// takes a role's permissions away from its holders: revoking an assignment or
+// archiving the role strips exactly what assigning it conferred.
+func (a *PermissionAPI) requireRoleCeiling(ctx context.Context, user *authPkg.AuthUser, businessID, roleID int64) error {
+	role, err := a.Service.GetManagedRole(ctx, businessID, roleID)
+	if err != nil {
+		return roleAPIError(err, "Failed to get role")
+	}
+	if !canDelegateRoleMutation(user, role.AppID, role.Permissions) {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
 }

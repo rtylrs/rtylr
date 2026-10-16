@@ -165,7 +165,7 @@ func (r *Repository) loadAssignmentScopes(ctx context.Context, assignmentID int6
 	return scopes, rows.Err()
 }
 
-func (r *Repository) getAssignment(ctx context.Context, businessID, assignmentID int64) (domain.RoleAssignment, error) {
+func (r *Repository) GetAssignment(ctx context.Context, businessID, assignmentID int64) (domain.RoleAssignment, error) {
 	var assignment domain.RoleAssignment
 	var userID, groupID sql.NullInt64
 	err := r.pool.QueryRowContext(ctx, `
