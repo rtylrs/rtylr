@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/erp/categories/internal/application"
 	"github.com/voxire/onion/internal/modules/erp/categories/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
@@ -22,7 +23,7 @@ func NewCategoryAPI(service *application.Service) *CategoryAPI {
 }
 
 func (a *CategoryAPI) ListCategories(ctx context.Context, req *erpcategoryv1.ListCategoriesRequest) (*erpcategoryv1.ListCategoriesResponse, error) {
-	ownerID, err := categoryOwnerID(ctx)
+	ownerID, err := categoryOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func (a *CategoryAPI) ListCategories(ctx context.Context, req *erpcategoryv1.Lis
 }
 
 func (a *CategoryAPI) CreateCategory(ctx context.Context, req *erpcategoryv1.CreateCategoryRequest) (*erpcategoryv1.CreateCategoryResponse, error) {
-	ownerID, err := categoryOwnerID(ctx)
+	ownerID, err := categoryOwnerID(ctx, "erp:products:create")
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func (a *CategoryAPI) CreateCategory(ctx context.Context, req *erpcategoryv1.Cre
 }
 
 func (a *CategoryAPI) UpdateCategory(ctx context.Context, req *erpcategoryv1.UpdateCategoryRequest) (*erpcategoryv1.UpdateCategoryResponse, error) {
-	ownerID, err := categoryOwnerID(ctx)
+	ownerID, err := categoryOwnerID(ctx, "erp:products:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func (a *CategoryAPI) UpdateCategory(ctx context.Context, req *erpcategoryv1.Upd
 }
 
 func (a *CategoryAPI) DeleteCategory(ctx context.Context, req *erpcategoryv1.DeleteCategoryRequest) (*erpcategoryv1.DeleteCategoryResponse, error) {
-	ownerID, err := categoryOwnerID(ctx)
+	ownerID, err := categoryOwnerID(ctx, "erp:products:delete")
 	if err != nil {
 		return nil, err
 	}
@@ -87,10 +88,10 @@ func (a *CategoryAPI) DeleteCategory(ctx context.Context, req *erpcategoryv1.Del
 	return &erpcategoryv1.DeleteCategoryResponse{Message: "Category deleted successfully"}, nil
 }
 
-func categoryOwnerID(ctx context.Context) (int64, error) {
+func categoryOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, categoryStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

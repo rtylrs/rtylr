@@ -52,6 +52,10 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if !ok {
 		return ListResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
+	if !authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:branding:edit") &&
+		!authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:menus:view") {
+		return ListResponse{}, onekiterrors.PermissionDenied()
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
 		return ListResponse{}, onekiterrors.PermissionDenied()
@@ -93,8 +97,11 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 
 func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || !authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:branding:edit") {
+	if !ok {
 		return CreateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
+	}
+	if !authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:branding:edit") {
+		return CreateResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -133,8 +140,11 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 
 func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || !authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:branding:edit") {
+	if !ok {
 		return UpdateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
+	}
+	if !authPkg.HasAppPermission(authUser, authorization.AppMenu, "menu:branding:edit") {
+		return UpdateResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

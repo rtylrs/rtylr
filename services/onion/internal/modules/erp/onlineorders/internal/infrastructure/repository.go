@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/voxire/onion/internal/modules/erp/internal/outbox"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
+	"github.com/voxire/onion/internal/modules/erp/internal/outbox"
 	"github.com/voxire/onion/internal/modules/erp/internal/stock"
 	"github.com/voxire/onion/internal/modules/erp/onlineorders/internal/domain"
 	"github.com/voxire/onion/internal/modules/erp/onlineorders/internal/infrastructure/persistence/sqlc"
@@ -111,7 +112,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		Status:          sqlc.NullStoreOrdersStatus{StoreOrdersStatus: sqlc.StoreOrdersStatus("pending"), Valid: true},
 		Subtotal:        strconv.FormatFloat(input.Subtotal, 'f', 2, 64),
 		Tax:             strconv.FormatFloat(input.Tax, 'f', 2, 64),
-		ShippingCost:    "0.00",
+		ShippingCost:    strconv.FormatFloat(input.ShippingCost, 'f', 2, 64),
 		Total:           strconv.FormatFloat(input.Total, 'f', 2, 64),
 		ShippingAddress: nullJSON(input.ShippingAddress),
 		Notes:           sql.NullString{String: input.Notes, Valid: input.Notes != ""},
@@ -162,7 +163,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	return id, nil
 }
 
-func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, locationID, orderID, productID int64, quantity float64, entryType string) error {
+func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, businessID, locationID, orderID, productID int64, quantity float64, entryType string) error {
 	tracked, err := r.productTracksInventory(ctx, qtx, ownerID, productID)
 	if err != nil {
 		return err
@@ -173,6 +174,7 @@ func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx,
 
 	movement := stock.Movement{
 		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		LocationID:    locationID,
 		ProductID:     productID,
 		EntryType:     stock.EntrySale,
@@ -198,6 +200,12 @@ func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx,
 }
 
 func (r *Repository) priceOrderInput(ctx context.Context, qtx *sqlc.Queries, ownerID int64, input domain.StoreOrderInput) (domain.StoreOrderInput, error) {
+	if input.ShippingCost < 0 {
+		return domain.StoreOrderInput{}, domain.ErrInvalidAmount
+	}
+	if qtx == nil {
+		qtx = r.queries
+	}
 	if len(input.Items) == 0 {
 		// A zero-value order is retained for existing administrative workflows;
 		// the application layer rejects non-zero client totals without catalog
@@ -205,7 +213,14 @@ func (r *Repository) priceOrderInput(ctx context.Context, qtx *sqlc.Queries, own
 		input.Status = "pending"
 		return input, nil
 	}
-	var subtotalCents, taxCents int64
+	var subtotalCents, taxCents, shippingCents int64
+	if input.ShippingCost > 0 {
+		sc, err := decimalCents(strconv.FormatFloat(input.ShippingCost, 'f', 2, 64))
+		if err != nil || sc < 0 {
+			return domain.StoreOrderInput{}, domain.ErrInvalidAmount
+		}
+		shippingCents = sc
+	}
 	pricedItems := make([]domain.OrderItemInput, 0, len(input.Items))
 	for _, requested := range input.Items {
 		if requested.ProductID <= 0 {
@@ -246,8 +261,8 @@ func (r *Repository) priceOrderInput(ctx context.Context, qtx *sqlc.Queries, own
 	input.Items = pricedItems
 	input.Subtotal = domain.CentsToFloat(subtotalCents)
 	input.Tax = domain.CentsToFloat(taxCents)
-	input.ShippingCost = 0
-	input.Total = domain.CentsToFloat(subtotalCents + taxCents)
+	input.ShippingCost = domain.CentsToFloat(shippingCents)
+	input.Total = domain.CentsToFloat(subtotalCents + taxCents + shippingCents)
 	input.Status = "pending"
 	return input, nil
 }
@@ -309,11 +324,22 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		if listErr != nil {
 			return listErr
 		}
+		// Group line quantities by product ID and sort product IDs ascending to
+		// guarantee deterministic row locking and avoid deadlocks between concurrent orders.
+		qtyByProduct := make(map[int64]float64)
 		for _, item := range items {
-			if !item.ProductID.Valid || item.Quantity <= 0 {
-				continue
+			if item.ProductID.Valid && item.ProductID.Int64 > 0 && item.Quantity > 0 {
+				qtyByProduct[item.ProductID.Int64] += float64(item.Quantity)
 			}
-			if moveErr := r.applyStoreOrderItemStockTx(ctx, tx, qtx, current.OwnerID, locationID, id, item.ProductID.Int64, float64(item.Quantity), entryType); moveErr != nil {
+		}
+		productIDs := make([]int64, 0, len(qtyByProduct))
+		for pid := range qtyByProduct {
+			productIDs = append(productIDs, pid)
+		}
+		sort.Slice(productIDs, func(i, j int) bool { return productIDs[i] < productIDs[j] })
+
+		for _, pid := range productIDs {
+			if moveErr := r.applyStoreOrderItemStockTx(ctx, tx, qtx, current.OwnerID, businessID, locationID, id, pid, qtyByProduct[pid], entryType); moveErr != nil {
 				return moveErr
 			}
 		}
@@ -401,6 +427,9 @@ func validateOrderStatusTransition(current, next string) error {
 	// deducted order can only be reopened through cancellation, which returns
 	// the stock (cancelled/refunded -> confirmed re-applies a single sale).
 	if next == "pending" {
+		return domain.ErrInvalidStatus
+	}
+	if current == "completed" && next != "cancelled" && next != "refunded" {
 		return domain.ErrInvalidStatus
 	}
 	return nil

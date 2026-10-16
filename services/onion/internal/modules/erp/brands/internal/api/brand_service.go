@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/erp/brands/internal/application"
 	"github.com/voxire/onion/internal/modules/erp/brands/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpbrandv1 "github.com/voxire/voxie/gen/go/erp/brand/v1"
@@ -22,7 +23,7 @@ func NewBrandAPI(service *application.Service) *BrandAPI {
 }
 
 func (a *BrandAPI) ListBrands(ctx context.Context, req *erpbrandv1.ListBrandsRequest) (*erpbrandv1.ListBrandsResponse, error) {
-	ownerID, err := brandOwnerID(ctx)
+	ownerID, err := brandOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func (a *BrandAPI) ListBrands(ctx context.Context, req *erpbrandv1.ListBrandsReq
 }
 
 func (a *BrandAPI) CreateBrand(ctx context.Context, req *erpbrandv1.CreateBrandRequest) (*erpbrandv1.CreateBrandResponse, error) {
-	ownerID, err := brandOwnerID(ctx)
+	ownerID, err := brandOwnerID(ctx, "erp:products:create")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (a *BrandAPI) CreateBrand(ctx context.Context, req *erpbrandv1.CreateBrandR
 }
 
 func (a *BrandAPI) UpdateBrand(ctx context.Context, req *erpbrandv1.UpdateBrandRequest) (*erpbrandv1.UpdateBrandResponse, error) {
-	ownerID, err := brandOwnerID(ctx)
+	ownerID, err := brandOwnerID(ctx, "erp:products:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func (a *BrandAPI) UpdateBrand(ctx context.Context, req *erpbrandv1.UpdateBrandR
 }
 
 func (a *BrandAPI) DeleteBrand(ctx context.Context, req *erpbrandv1.DeleteBrandRequest) (*erpbrandv1.DeleteBrandResponse, error) {
-	ownerID, err := brandOwnerID(ctx)
+	ownerID, err := brandOwnerID(ctx, "erp:products:delete")
 	if err != nil {
 		return nil, err
 	}
@@ -89,10 +90,10 @@ func (a *BrandAPI) DeleteBrand(ctx context.Context, req *erpbrandv1.DeleteBrandR
 	return &erpbrandv1.DeleteBrandResponse{Message: "Brand deleted successfully"}, nil
 }
 
-func brandOwnerID(ctx context.Context) (int64, error) {
+func brandOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, brandStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

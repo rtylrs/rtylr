@@ -219,7 +219,7 @@ func crmFeaturePermission(method, path string) (string, bool) {
 
 func erpFeaturePermission(method, path string) (string, bool) {
 	switch {
-	case strings.Contains(path, "/erp/product"), strings.Contains(path, "/erp/variant"):
+	case strings.Contains(path, "/erp/product"), strings.Contains(path, "/erp/variant"), strings.Contains(path, "/erp/category"), strings.Contains(path, "/erp/brand"):
 		if method == http.MethodGet {
 			return "erp:products:view", true
 		}
