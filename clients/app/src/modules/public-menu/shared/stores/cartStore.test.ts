@@ -128,4 +128,25 @@ describe('cartStore', () => {
   it('itemCount returns 0 for an empty cart', () => {
     expect(getState().itemCount()).toBe(0);
   });
+
+  it('addItem supports explicit quantity', () => {
+    getState().addItem({ menuItemId: 1, name: 'Burger', unitPrice: 10, quantity: 3 });
+    expect(getState().items[0].quantity).toBe(3);
+    getState().addItem({ menuItemId: 1, name: 'Burger', unitPrice: 10, quantity: 2 });
+    expect(getState().items[0].quantity).toBe(5);
+  });
+
+  it('total rounds to exact cents avoiding floating-point precision issues', () => {
+    getState().addItem({ menuItemId: 1, name: 'Item 1', unitPrice: 19.99, quantity: 3 });
+    getState().addItem({ menuItemId: 2, name: 'Item 2', unitPrice: 4.95, quantity: 1 });
+    expect(getState().total()).toBe(64.92);
+  });
+
+  it('setCurrency updates currency and clearCart resets it to USD', () => {
+    expect(getState().currency).toBe('USD');
+    getState().setCurrency('EUR');
+    expect(getState().currency).toBe('EUR');
+    getState().clearCart();
+    expect(getState().currency).toBe('USD');
+  });
 });

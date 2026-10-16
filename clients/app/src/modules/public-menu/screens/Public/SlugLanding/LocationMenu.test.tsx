@@ -89,6 +89,7 @@ const cartStoreMock = vi.hoisted(() => ({
     cartStoreMock.businessId = id;
   }),
   setLocationId: vi.fn(),
+  setCurrency: vi.fn(),
   addItem: vi.fn(),
   updateQuantity: vi.fn(),
 }));

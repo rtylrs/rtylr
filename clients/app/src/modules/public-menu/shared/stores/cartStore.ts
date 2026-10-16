@@ -13,12 +13,14 @@ interface CartState {
   items: CartItem[];
   businessId: number;
   locationId?: number;
-  addItem: (item: Omit<CartItem, 'quantity' | 'notes'>) => void;
+  currency: string;
+  addItem: (item: Omit<CartItem, 'quantity' | 'notes'> & { quantity?: number }) => void;
   removeItem: (menuItemId: number) => void;
   updateQuantity: (menuItemId: number, qty: number) => void;
   setItemNote: (menuItemId: number, note: string) => void;
   setBusinessId: (id: number) => void;
   setLocationId: (id?: number) => void;
+  setCurrency: (currency: string) => void;
   clearCart: () => void;
   total: () => number;
   itemCount: () => number;
@@ -30,19 +32,30 @@ export const useCartStore = create<CartState>()(
       items: [],
       businessId: 0,
       locationId: undefined,
+      currency: 'USD',
 
       addItem: (item) => {
+        const addQty = item.quantity && item.quantity > 0 ? item.quantity : 1;
         set((state) => {
           const existing = state.items.find((i) => i.menuItemId === item.menuItemId);
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.menuItemId === item.menuItemId ? { ...i, quantity: i.quantity + 1 } : i
+                i.menuItemId === item.menuItemId ? { ...i, quantity: i.quantity + addQty } : i
               ),
             };
           }
           return {
-            items: [...state.items, { ...item, quantity: 1, notes: '' }],
+            items: [
+              ...state.items,
+              {
+                menuItemId: item.menuItemId,
+                name: item.name,
+                unitPrice: item.unitPrice,
+                quantity: addQty,
+                notes: '',
+              },
+            ],
           };
         });
       },
@@ -79,12 +92,20 @@ export const useCartStore = create<CartState>()(
         set({ locationId: id });
       },
 
+      setCurrency: (currency) => {
+        set({ currency: currency || 'USD' });
+      },
+
       clearCart: () => {
-        set({ items: [], businessId: 0, locationId: undefined });
+        set({ items: [], businessId: 0, locationId: undefined, currency: 'USD' });
       },
 
       total: () => {
-        return get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+        const cents = get().items.reduce(
+          (sum, i) => sum + Math.round(i.unitPrice * 100) * i.quantity,
+          0
+        );
+        return cents / 100;
       },
 
       itemCount: () => {

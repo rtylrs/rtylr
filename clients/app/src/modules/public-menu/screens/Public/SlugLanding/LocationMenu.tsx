@@ -41,6 +41,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     clearCart,
     setBusinessId,
     setLocationId,
+    setCurrency,
     addItem,
     updateQuantity,
     businessId: cartBusinessId,
@@ -55,7 +56,18 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       setBusinessId(businessId);
     }
     if (location?.id) setLocationId(location.id);
-  }, [businessId, cartBusinessId, location?.id, clearCart, setBusinessId, setLocationId]);
+    if (menu?.business.currency && typeof setCurrency === 'function')
+      setCurrency(menu.business.currency);
+  }, [
+    businessId,
+    cartBusinessId,
+    location?.id,
+    menu?.business.currency,
+    clearCart,
+    setBusinessId,
+    setLocationId,
+    setCurrency,
+  ]);
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!menu) return [];
@@ -117,8 +129,24 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   }
   if (menuError) {
     return (
-      <div style={{ padding: 32, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600 }}>{t('locationmenu.loadFailedTitle')}</h1>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 20px',
+        }}
+      >
+        <EmptyState
+          icon={UtensilsCrossed}
+          title={t('locationmenu.loadFailedTitle')}
+          description={t('locationmenu.noItemsDescription')}
+          action={{
+            label: t('locationmenu.backToBusiness', { businessName: biz.business.name }),
+            onClick: () => void navigate({ to: menuHomePath(slug) }),
+          }}
+        />
       </div>
     );
   }

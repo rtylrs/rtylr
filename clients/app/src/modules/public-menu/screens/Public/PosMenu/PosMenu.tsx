@@ -36,7 +36,7 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   const businessId = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 
   const { data, isLoading, isError } = usePublicMenu(businessId);
-  const { clearCart, setBusinessId, addItem } = useCartStore();
+  const { clearCart, setBusinessId, setCurrency, addItem } = useCartStore();
 
   // GridLayout expects a category-grouped list. POS menu items are
   // ERP products today, so we bucket everything into one "Menu" group.
@@ -74,21 +74,16 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     if (businessId == null) return;
     clearCart();
     setBusinessId(businessId);
+    if (data?.business.currency) {
+      setCurrency(data.business.currency);
+    }
     cartItems.forEach((item) => {
       addItem({
         menuItemId: Number(item.id),
         name: item.name,
         unitPrice: item.price,
+        quantity: item.quantity,
       });
-      // Sync quantity > 1 - addItem always sets qty=1 on first add,
-      // so we call it (qty-1) more times for items already at higher qty.
-      for (let i = 1; i < item.quantity; i++) {
-        addItem({
-          menuItemId: Number(item.id),
-          name: item.name,
-          unitPrice: item.price,
-        });
-      }
     });
     void navigate({ to: menuCheckoutPath() });
   };

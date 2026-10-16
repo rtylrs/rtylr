@@ -45,13 +45,15 @@ const Menu: React.FC = () => {
     deleteBanner,
     deleteMenuItem,
   } = useMenuStore();
-  useGetMenu(userId as string);
+  const { isLoading: isMenuLoading } = useGetMenu(userId as string);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has('menuId')) {
-      url.searchParams.append('menuId', menuId as string);
-      window.history.replaceState({}, '', url.toString());
+    if (menuId) {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has('menuId')) {
+        url.searchParams.append('menuId', menuId as string);
+        window.history.replaceState({}, '', url.toString());
+      }
     }
   }, [menuId]);
 
@@ -303,7 +305,7 @@ const Menu: React.FC = () => {
     });
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || isMenuLoading) {
     return (
       <div className="flex justify-center items-center h-[80vh]">
         <Spinner />
