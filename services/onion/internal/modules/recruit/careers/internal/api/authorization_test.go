@@ -65,6 +65,50 @@ func TestRecruitCareerOperationsRequireExactPermissionBeforeServiceAccess(t *tes
 			_, err := (&UpdateRecruitCareerHandler{}).Serve(publishCtx, &UpdateRecruitCareerRequest{IsPublished: true})
 			return err
 		}},
+		{"branding read", "recruit:jobs:view", func() error {
+			_, err := (&GetCustomizationHandler{}).Serve(ctx, &GetCustomizationRequest{})
+			return err
+		}},
+		{"branding write", "recruit:jobs:manage", func() error {
+			_, err := (&PutCustomizationHandler{}).Serve(ctx, &PutCustomizationRequest{})
+			return err
+		}},
+		{"sections list", "recruit:jobs:view", func() error {
+			_, err := (&ListSectionsHandler{}).Serve(ctx, &ListSectionsRequest{})
+			return err
+		}},
+		{"sections create", "recruit:jobs:manage", func() error {
+			_, err := (&CreateSectionHandler{}).Serve(ctx, &CreateSectionRequest{})
+			return err
+		}},
+		{"sections update", "recruit:jobs:manage", func() error {
+			_, err := (&UpdateSectionHandler{}).Serve(ctx, &UpdateSectionRequest{})
+			return err
+		}},
+		{"sections delete", "recruit:jobs:manage", func() error {
+			_, err := (&DeleteSectionHandler{}).Serve(ctx, &DeleteSectionRequest{})
+			return err
+		}},
+		{"sections reorder", "recruit:jobs:manage", func() error {
+			_, err := (&ReorderSectionsHandler{}).Serve(ctx, &ReorderSectionsRequest{})
+			return err
+		}},
+		{"form fields list", "recruit:jobs:view", func() error {
+			_, err := (&ListFormFieldsHandler{}).Serve(ctx, &ListFormFieldsRequest{})
+			return err
+		}},
+		{"form fields create", "recruit:jobs:manage", func() error {
+			_, err := (&CreateFormFieldHandler{}).Serve(ctx, &CreateFormFieldRequest{})
+			return err
+		}},
+		{"form fields update", "recruit:jobs:manage", func() error {
+			_, err := (&UpdateFormFieldHandler{}).Serve(ctx, &UpdateFormFieldRequest{})
+			return err
+		}},
+		{"form fields delete", "recruit:jobs:manage", func() error {
+			_, err := (&DeleteFormFieldHandler{}).Serve(ctx, &DeleteFormFieldRequest{})
+			return err
+		}},
 		{"jobs delete", "recruit:jobs:manage", func() error {
 			_, err := (&DeleteRecruitCareerHandler{}).Serve(ctx, &DeleteRecruitCareerRequest{})
 			return err

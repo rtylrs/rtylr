@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/recruit/careers/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -72,9 +71,9 @@ type ListSectionsResponse struct {
 }
 
 func (h *ListSectionsHandler) Serve(ctx context.Context, _ *ListSectionsRequest) (ListSectionsResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return ListSectionsResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:view")
+	if permErr != nil {
+		return ListSectionsResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -121,9 +120,9 @@ func (h *CreateSectionHandler) Validate(_ context.Context, req *CreateSectionReq
 }
 
 func (h *CreateSectionHandler) Serve(ctx context.Context, req *CreateSectionRequest) (CreateSectionResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return CreateSectionResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return CreateSectionResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -193,9 +192,9 @@ func (h *UpdateSectionHandler) Validate(_ context.Context, req *UpdateSectionReq
 }
 
 func (h *UpdateSectionHandler) Serve(ctx context.Context, req *UpdateSectionRequest) (UpdateSectionResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return UpdateSectionResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return UpdateSectionResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -249,9 +248,9 @@ func (h *DeleteSectionHandler) Validate(_ context.Context, req *DeleteSectionReq
 }
 
 func (h *DeleteSectionHandler) Serve(ctx context.Context, req *DeleteSectionRequest) (DeleteSectionResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return DeleteSectionResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return DeleteSectionResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -292,9 +291,9 @@ func (h *ReorderSectionsHandler) Validate(_ context.Context, req *ReorderSection
 }
 
 func (h *ReorderSectionsHandler) Serve(ctx context.Context, req *ReorderSectionsRequest) (ReorderSectionsResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return ReorderSectionsResponse{}, onekiterrors.PermissionDenied()
+	authUser, permErr := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if permErr != nil {
+		return ReorderSectionsResponse{}, permErr
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
