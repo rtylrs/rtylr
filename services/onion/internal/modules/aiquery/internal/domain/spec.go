@@ -26,8 +26,9 @@ const (
 // each mapped to the columns it may select/filter/group by. owner_id and
 // business_id are intentionally absent — neither is ever selectable, and
 // business_id is always injected as the tenant filter, so a spec cannot narrow
-// or widen its own scope. Keep this in lockstep with
-// sql/ai_views.sql and sql/zz_ai_views_business_scope.sql.
+// or widen its own scope. Each view is defined by the module that owns its base
+// table (ai_views.sql and zz_ai_views_business_scope.sql in that module's
+// schema directory); keep this list in lockstep with those definitions.
 var allowedViews = map[string]map[string]struct{}{
 	"ai_products":   set("id", "name", "sku", "category_id", "brand_id", "supplier_id", "cost_price", "sale_price", "compare_at_price", "currency", "stock_quantity", "low_stock_threshold", "reorder_quantity", "is_active", "track_inventory", "lead_time_days", "created_at", "updated_at"),
 	"ai_customers":  set("id", "first_name", "last_name", "email", "phone", "city", "country", "loyalty_points", "total_spent", "visit_count", "last_visit_at", "loyalty_tier", "is_active", "created_at", "updated_at"),
