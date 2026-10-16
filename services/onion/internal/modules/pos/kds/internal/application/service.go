@@ -35,6 +35,7 @@ func NewService(_ context.Context, repo repository) *Service {
 
 func invalidateKDSScope(ctx context.Context, businessID int64) {
 	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(kdsScope, businessID))
+	cacher.InvalidateScope(ctx, cacheKeys.OrdersList(businessID))
 }
 
 func (s *Service) ListActiveOrders(ctx context.Context, businessID int64) ([]domain.KDSOrder, error) {
@@ -79,6 +80,13 @@ func (s *Service) UpdateItemStatus(ctx context.Context, input domain.UpdateItemS
 		Type:     "pos:kds:item:updated",
 		EntityID: input.ItemID,
 	})
+	if input.OrderID > 0 {
+		wsbus.Publish(wsbus.Event{
+			Topic:    "business:" + strconv.FormatInt(input.BusinessID, 10),
+			Type:     "pos:order:updated",
+			EntityID: input.OrderID,
+		})
+	}
 	return nil
 }
 
