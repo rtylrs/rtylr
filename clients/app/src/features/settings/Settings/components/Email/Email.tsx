@@ -335,10 +335,10 @@ const Email: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                  Use custom SMTP server
+                  {t('settings.email.useCustomSmtp')}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  Send emails through your own mail server
+                  {t('settings.email.sendThroughCustomServer')}
                 </p>
               </div>
               <ToggleSwitch id="smtp-toggle" checked={useSmtp} onChange={setUseSmtp} />
@@ -407,7 +407,7 @@ const Email: React.FC = () => {
 
                 <div className="flex items-center gap-2 justify-end pt-1">
                   <Button variant="outline" size="sm" onClick={handleTestSmtp}>
-                    Test Connection
+                    {t('settings.email.testConnection')}
                   </Button>
                   <Button size="sm" onClick={handleSaveSmtp}>
                     Save changes

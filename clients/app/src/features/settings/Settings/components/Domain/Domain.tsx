@@ -96,9 +96,7 @@ const Domain: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>{t('settings.domain.menuUrlTitle')}</CardTitle>
-            <CardDescription>
-              This is the default public URL for your menu, always available.
-            </CardDescription>
+            <CardDescription>{t('settings.domain.menuUrlDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             <Label className="mb-1.5 block">{t('settings.domain.menuLink')}</Label>
@@ -139,7 +137,9 @@ const Domain: React.FC = () => {
                   <CardDescription>{t('settings.domain.customDescription')}</CardDescription>
                 </div>
                 <Badge variant={isConfigured ? 'default' : 'outline'}>
-                  {isConfigured ? 'Configured' : 'Not configured'}
+                  {isConfigured
+                    ? t('settings.domain.configured')
+                    : t('settings.domain.notConfigured')}
                 </Badge>
               </div>
             </CardHeader>
@@ -161,7 +161,9 @@ const Domain: React.FC = () => {
                     disabled={registerDomain.isPending}
                     className="shrink-0"
                   >
-                    Connect Domain
+                    {isConfigured
+                      ? t('settings.domain.updateDomain')
+                      : t('settings.domain.connectDomain')}
                   </Button>
                 </div>
               </div>

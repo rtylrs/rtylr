@@ -226,7 +226,8 @@
   "launch": "تشغيل",
   "pagination": {
     "previous": "السابق",
-    "next": "التالي"
+    "next": "التالي",
+    "page": "الصفحة {{page}}"
   },
   "roleDescriptions": {
     "admin": "إدارة صلاحيات الوصول إلى النشاط والتطبيقات المسنَدة",

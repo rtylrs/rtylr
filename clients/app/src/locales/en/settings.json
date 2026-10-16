@@ -13,7 +13,9 @@
   "slogan": "Slogan",
   "businessType": {
     "noIndustriesMatchTitle": "No industries match \"{{search}}\"",
-    "noIndustriesMatchDescription": "Try a different search term."
+    "noIndustriesMatchDescription": "Try a different search term.",
+    "searchPlaceholder": "Search industries...",
+    "selected": "Selected:"
   },
   "account": {
     "noLoginActivityTitle": "No login activity yet",
@@ -31,7 +33,12 @@
     "dnsPropagation": "DNS changes can take up to 48 hours to propagate.",
     "invalid": "Enter a valid domain, for example menu.yourbrand.com",
     "saved": "Custom domain saved. DNS propagation may take up to 24 hours.",
-    "saveFailed": "Failed to save the custom domain"
+    "saveFailed": "Failed to save the custom domain",
+    "menuUrlDescription": "This is the default public URL for your menu, always available.",
+    "configured": "Configured",
+    "notConfigured": "Not configured",
+    "connectDomain": "Connect Domain",
+    "updateDomain": "Update Domain"
   },
   "general": {
     "pageTitle": "General settings",
@@ -82,7 +89,12 @@
       "desktop": "Desktop",
       "unknown": "Unknown"
     },
-    "loginHistoryStale": "Unable to refresh login history. Showing the last available data."
+    "loginHistoryStale": "Unable to refresh login history. Showing the last available data.",
+    "invalidateAllSessions": "Invalidate all sessions",
+    "invalidateSessionsConfirm": "Invalidate sessions",
+    "loadingLoginHistory": "Loading login history…",
+    "statusSuccessful": "Successful",
+    "statusFailed": "Failed"
   },
   "email": {
     "pageTitle": "Email settings",
@@ -118,6 +130,26 @@
     "smtpVerified": "SMTP connection to {{host}}:{{port}} verified",
     "smtpTestFailed": "Failed to test the SMTP connection",
     "smtpHostUserRequired": "An SMTP host and user are required",
-    "smtpHostRequired": "An SMTP host is required"
+    "smtpHostRequired": "An SMTP host is required",
+    "useCustomSmtp": "Use custom SMTP server",
+    "sendThroughCustomServer": "Send emails through your own mail server",
+    "testConnection": "Test Connection"
+  },
+  "aiUsage": {
+    "tokens": "tokens",
+    "remaining": "remaining",
+    "over": "over",
+    "resets": "Resets",
+    "allocation": "Allocation",
+    "ownerDescription": "Choose how your team consumes the monthly AI allowance.",
+    "memberDescription": "Only an owner or admin can change how AI credits are allocated.",
+    "loadingAllocation": "Loading allocation…",
+    "limitReached": "You've reached this month's AI limit. Upgrade your plan to keep using Caret.",
+    "poolLabel": "Shared team pool",
+    "poolDescription": "Everyone draws from one monthly allowance.",
+    "perPersonLabel": "Per person",
+    "perPersonDescription": "The allowance is split evenly across seats.",
+    "loadFailed": "Unable to load AI usage.",
+    "loadAllocationFailed": "Unable to load AI allocation settings."
   }
 }

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../../shared/components/dash/PageHeader';
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { Sparkles, Users, User } from 'lucide-react';
+import { Users, User } from 'lucide-react';
 import { Button } from '../../../../shared/components/ui';
 import {
   useAiUsage,
@@ -15,17 +15,28 @@ import { canManageDash } from '../../../../shared/utils/canManageDash';
 
 const fmt = (n: number): string => (n ?? 0).toLocaleString();
 
-const MODES: { id: AiQuotaMode; label: string; description: string; icon: typeof Users }[] = [
+const MODES: {
+  id: AiQuotaMode;
+  labelKey: string;
+  descKey: string;
+  defaultLabel: string;
+  defaultDesc: string;
+  icon: typeof Users;
+}[] = [
   {
     id: 'pool',
-    label: 'Shared team pool',
-    description: 'Everyone draws from one monthly allowance.',
+    labelKey: 'settings.aiUsage.poolLabel',
+    descKey: 'settings.aiUsage.poolDescription',
+    defaultLabel: 'Shared team pool',
+    defaultDesc: 'Everyone draws from one monthly allowance.',
     icon: Users,
   },
   {
     id: 'per_person',
-    label: 'Per person',
-    description: 'The allowance is split evenly across seats.',
+    labelKey: 'settings.aiUsage.perPersonLabel',
+    descKey: 'settings.aiUsage.perPersonDescription',
+    defaultLabel: 'Per person',
+    defaultDesc: 'The allowance is split evenly across seats.',
     icon: User,
   },
 ];
@@ -58,7 +69,7 @@ const AiUsage: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="AI usage · rtylr" />
+      <HelmetContainer title={`${t('common.nav.aiUsage')} · rtylr`} />
       <div className="portal-management-page space-y-5 max-w-2xl">
         <PageHeader
           title={t('common.nav.aiUsage')}
@@ -72,22 +83,22 @@ const AiUsage: React.FC = () => {
         >
           {usageLoading ? (
             <p className="text-sm" style={{ color: 'var(--dash-text-dim)' }}>
-              Loading…
+              {t('common.loading', 'Loading…')}
             </p>
           ) : usageUnavailable ? (
             <div role="alert" className="space-y-3">
               <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                Unable to load AI usage.
+                {t('settings.aiUsage.loadFailed')}
               </p>
               <Button variant="outline" size="sm" onClick={() => void refetchUsage()}>
-                Refresh
+                {t('common.refresh', 'Refresh')}
               </Button>
             </div>
           ) : (
             <>
               <div className="flex items-baseline justify-between mb-2">
                 <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                  {fmt(used)} / {fmt(allowance)} tokens
+                  {fmt(used)} / {fmt(allowance)} {t('settings.aiUsage.tokens', 'tokens')}
                 </span>
                 <span
                   className="text-[11px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wider"
@@ -104,19 +115,22 @@ const AiUsage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between mt-2 text-[11px]">
                 <span style={{ color: 'var(--dash-text-dim)' }}>
-                  {fmt(usage.remainingTokens)} remaining
-                  {over > 0 ? ` · ${fmt(over)} over` : ''}
+                  {fmt(usage.remainingTokens)} {t('settings.aiUsage.remaining', 'remaining')}
+                  {over > 0 ? ` · ${fmt(over)} ${t('settings.aiUsage.over', 'over')}` : ''}
                 </span>
                 {usage.periodEnd && (
                   <span style={{ color: 'var(--dash-text-dim)' }}>
-                    Resets {new Date(usage.periodEnd).toLocaleDateString()}
+                    {t('settings.aiUsage.resets', 'Resets')}{' '}
+                    {new Date(usage.periodEnd).toLocaleDateString()}
                   </span>
                 )}
               </div>
               {usage.blocked && (
                 <p className="text-xs mt-3" style={{ color: '#ef4444' }}>
-                  You&apos;ve reached this month&apos;s AI limit. Upgrade your plan to keep using
-                  Caret.
+                  {t(
+                    'settings.aiUsage.limitReached',
+                    "You've reached this month's AI limit. Upgrade your plan to keep using Caret."
+                  )}
                 </p>
               )}
             </>
@@ -129,24 +143,30 @@ const AiUsage: React.FC = () => {
           style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <h2 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-            Allocation
+            {t('settings.aiUsage.allocation', 'Allocation')}
           </h2>
           <p className="text-xs mt-0.5 mb-3" style={{ color: 'var(--dash-text-dim)' }}>
             {isOwner
-              ? 'Choose how your team consumes the monthly AI allowance.'
-              : 'Only an owner or admin can change how AI credits are allocated.'}
+              ? t(
+                  'settings.aiUsage.ownerDescription',
+                  'Choose how your team consumes the monthly AI allowance.'
+                )
+              : t(
+                  'settings.aiUsage.memberDescription',
+                  'Only an owner or admin can change how AI credits are allocated.'
+                )}
           </p>
           {modeLoading ? (
             <p className="text-sm" style={{ color: 'var(--dash-text-dim)' }}>
-              Loading allocation…
+              {t('settings.aiUsage.loadingAllocation', 'Loading allocation…')}
             </p>
           ) : modeUnavailable ? (
             <div role="alert" className="space-y-3">
               <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                Unable to load AI allocation settings.
+                {t('settings.aiUsage.loadAllocationFailed')}
               </p>
               <Button variant="outline" size="sm" onClick={() => void refetchMode()}>
-                Refresh
+                {t('common.refresh', 'Refresh')}
               </Button>
             </div>
           ) : (
@@ -164,9 +184,9 @@ const AiUsage: React.FC = () => {
                     onClick={() => updateMode.mutate(m.id)}
                     className="text-start rounded-lg p-3 transition-colors disabled:cursor-default"
                     style={{
-                      background: active ? 'var(--dash-hover)' : 'var(--dash-hover)',
+                      background: active ? 'var(--dash-hover)' : 'transparent',
                       border: active
-                        ? '1px solid var(--dash-border)'
+                        ? '1px solid var(--dash-text)'
                         : '1px solid var(--dash-border)',
                       opacity: !isOwner && !active ? 0.6 : 1,
                     }}
@@ -177,11 +197,11 @@ const AiUsage: React.FC = () => {
                         style={{ color: active ? 'var(--dash-text)' : 'var(--dash-text-muted)' }}
                       />
                       <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                        {m.label}
+                        {t(m.labelKey, m.defaultLabel)}
                       </span>
                     </div>
                     <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
-                      {m.description}
+                      {t(m.descKey, m.defaultDesc)}
                     </p>
                   </button>
                 );

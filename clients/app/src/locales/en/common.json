@@ -222,7 +222,8 @@
   "launch": "Launch",
   "pagination": {
     "previous": "Prev",
-    "next": "Next"
+    "next": "Next",
+    "page": "Page {{page}}"
   },
   "roleDescriptions": {
     "admin": "Manage business access and assigned applications",
