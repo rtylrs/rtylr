@@ -115,7 +115,7 @@ func (r *Repository) CreateTimeOffRequest(ctx context.Context, input domain.Time
 }
 
 func (r *Repository) ApproveTimeOffRequest(ctx context.Context, businessID int64, input domain.TimeOffApprovalInput) error {
-	err := r.queries.ApproveTimeOffRequest(ctx, sqlc.ApproveTimeOffRequestParams{
+	result, err := r.queries.ApproveTimeOffRequest(ctx, sqlc.ApproveTimeOffRequestParams{
 		Status:     sqlc.NullHrTimeOffRequestsStatus{HrTimeOffRequestsStatus: sqlc.HrTimeOffRequestsStatus(input.Status), Valid: input.Status != ""},
 		ApprovedBy: sql.NullInt64{Int64: input.ApprovedBy, Valid: input.ApprovedBy != 0},
 		Notes:      sql.NullString{String: input.Notes, Valid: input.Notes != ""},
@@ -125,6 +125,13 @@ func (r *Repository) ApproveTimeOffRequest(ctx context.Context, businessID int64
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update time off request", logger.Error(err))
 		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrTimeOffNotPending
 	}
 
 	return nil

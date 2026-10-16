@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+var ErrTimeOffNotPending = errors.New("time off request not found or already decided")
+
 var ErrStaffNotFound = errors.New("staff member not found in this business")
 
 type TimeOffRequest struct {

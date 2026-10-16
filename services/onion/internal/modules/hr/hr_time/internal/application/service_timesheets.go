@@ -46,6 +46,15 @@ func (s *Service) ListTimesheetsForCaller(ctx context.Context, businessID, calle
 	return s.ListTimesheets(ctx, businessID, params)
 }
 
+// SubmitTimesheetForCaller submits a timesheet on behalf of its employee or of
+// a manager who may view every timesheet; anyone else in the business is denied.
+func (s *Service) SubmitTimesheetForCaller(ctx context.Context, businessID, callerUserID, timesheetID int64) (*domain.TimesheetRecord, error) {
+	if _, err := s.GetTimesheetForCaller(ctx, businessID, callerUserID, timesheetID); err != nil {
+		return nil, err
+	}
+	return s.SubmitTimesheet(ctx, businessID, timesheetID)
+}
+
 func (s *Service) SubmitTimesheet(ctx context.Context, businessID, timesheetID int64) (*domain.TimesheetRecord, error) {
 	ts, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
 	if err != nil {

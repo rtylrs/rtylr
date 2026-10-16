@@ -224,6 +224,9 @@ func (h *ApproveTimeOffHandler) Serve(ctx context.Context, req *ApproveTimeOffRe
 		ID: req.ID, Status: req.Status, ApprovedBy: device.User.UserID, Notes: req.Notes,
 	}
 	if err := h.Service.ApproveTimeOffRequest(ctx, businessID, input); err != nil {
+		if errors.Is(err, domain.ErrTimeOffNotPending) {
+			return ApproveTimeOffResponse{}, onekiterrors.New(http.StatusConflict, "Time off request not found or already decided")
+		}
 		return ApproveTimeOffResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update time off request")
 	}
 	return ApproveTimeOffResponse{Success: true}, nil
