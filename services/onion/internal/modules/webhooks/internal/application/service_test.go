@@ -3,10 +3,12 @@ package application
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/domain"
 	"github.com/voxire/onion/internal/platform/eventbus"
+	"github.com/voxire/onion/internal/platform/hubdeveloper"
 )
 
 type mockRepo struct {
@@ -92,17 +94,20 @@ func TestList_Delegates(t *testing.T) {
 func TestCreate_HappyPathPopulatesSecretAndEvents(t *testing.T) {
 	m := &mockRepo{createID: 50}
 	s := &Service{repo: m}
-	id, err := s.Create(context.Background(), 7, 7, "https://hooks", []string{"order.paid"})
+	id, secret, err := s.Create(context.Background(), 7, 7, "https://hooks.example.com/in", []string{"order_created"})
 	if err != nil || id != 50 {
 		t.Fatalf("err=%v id=%d", err, id)
 	}
-	if m.createGot.url != "https://hooks" || m.createGot.ownerID != 7 {
+	if secret != m.createGot.secret {
+		t.Errorf("returned secret %q is not the stored secret %q", secret, m.createGot.secret)
+	}
+	if m.createGot.url != "https://hooks.example.com/in" || m.createGot.ownerID != 7 {
 		t.Errorf("repo got %+v", m.createGot)
 	}
 	if len(m.createGot.secret) != 64 {
 		t.Errorf("expected 64-char hex secret, got %d", len(m.createGot.secret))
 	}
-	if len(m.createGot.events) != 1 || m.createGot.events[0] != "order.paid" {
+	if len(m.createGot.events) != 1 || m.createGot.events[0] != "order_created" {
 		t.Errorf("events: %v", m.createGot.events)
 	}
 }
@@ -110,7 +115,7 @@ func TestCreate_HappyPathPopulatesSecretAndEvents(t *testing.T) {
 func TestCreate_NilEventsNormalizedToEmpty(t *testing.T) {
 	m := &mockRepo{createID: 1}
 	s := &Service{repo: m}
-	if _, err := s.Create(context.Background(), 1, 1, "https://x", nil); err != nil {
+	if _, _, err := s.Create(context.Background(), 1, 1, "https://x.example.com", nil); err != nil {
 		t.Fatalf("unexpected: %v", err)
 	}
 	if m.createGot.events == nil || len(m.createGot.events) != 0 {
@@ -121,7 +126,7 @@ func TestCreate_NilEventsNormalizedToEmpty(t *testing.T) {
 func TestCreate_PropagatesRepoError(t *testing.T) {
 	want := errors.New("db down")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), 1, 1, "https://x", nil); !errors.Is(err, want) {
+	if _, _, err := s.Create(context.Background(), 1, 1, "https://x.example.com", nil); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -153,7 +158,7 @@ func TestGenerateSecret_HexAndUnique(t *testing.T) {
 
 func TestCreate_RequiresURL(t *testing.T) {
 	s := &Service{}
-	if _, err := s.Create(context.Background(), 1, 1, "", nil); err == nil {
+	if _, _, err := s.Create(context.Background(), 1, 1, "", nil); err == nil {
 		t.Fatalf("expected error for empty url")
 	}
 }
@@ -215,3 +220,66 @@ func TestListDeliveriesPropagatesAFailure(t *testing.T) {
 }
 
 var errListDeliveries = errors.New("listing failed")
+
+func TestRegistrationValidation(t *testing.T) {
+	for name, tc := range map[string]struct {
+		url    string
+		events []string
+		ok     bool
+	}{
+		"https":             {url: "https://hooks.example.com/in", events: []string{"order_created"}, ok: true},
+		"http":              {url: "http://hooks.example.com", ok: true},
+		"padded":            {url: "  https://hooks.example.com  ", ok: true},
+		"empty":             {url: "  "},
+		"javascript":        {url: "javascript:alert(1)"},
+		"ftp":               {url: "ftp://hooks.example.com"},
+		"no host":           {url: "https:///path"},
+		"credentials":       {url: "https://user:pw@hooks.example.com"},
+		"localhost":         {url: "http://localhost:8080/hook"},
+		"loopback":          {url: "http://127.0.0.1/hook"},
+		"metadata":          {url: "http://169.254.169.254/latest/meta-data"},
+		"private":           {url: "http://10.0.0.5/hook"},
+		"ipv6 loopback":     {url: "http://[::1]/hook"},
+		"too long":          {url: "https://hooks.example.com/" + strings.Repeat("a", 2048)},
+		"unsupported event": {url: "https://hooks.example.com", events: []string{"order.paid"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, _, err := validateRegistration(tc.url, tc.events)
+			if (err == nil) != tc.ok {
+				t.Fatalf("validateRegistration(%q) err = %v, ok want %v", tc.url, err, tc.ok)
+			}
+			if err != nil && !errors.Is(err, hubdeveloper.ErrInvalidWebhook) {
+				t.Fatalf("error %v does not wrap ErrInvalidWebhook", err)
+			}
+		})
+	}
+}
+
+func TestRegistrationTrimsURLAndDedupesEvents(t *testing.T) {
+	url, events, err := validateRegistration(" https://hooks.example.com ", []string{"order_created", " order_created"})
+	if err != nil || url != "https://hooks.example.com" || len(events) != 1 {
+		t.Fatalf("got %q %v %v", url, events, err)
+	}
+}
+
+func TestCreateRejectsInvalidRegistrationBeforeStoring(t *testing.T) {
+	m := &mockRepo{createID: 1}
+	s := &Service{repo: m}
+	if _, _, err := s.Create(context.Background(), 1, 1, "http://169.254.169.254/", nil); !errors.Is(err, hubdeveloper.ErrInvalidWebhook) {
+		t.Fatalf("err = %v, want ErrInvalidWebhook", err)
+	}
+	if m.createGot.url != "" {
+		t.Fatal("an invalid registration reached the repository")
+	}
+}
+
+func TestUpdateRejectsInvalidRegistrationBeforeStoring(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	if _, err := s.Update(context.Background(), 1, 5, "ftp://x.example.com", nil, true); !errors.Is(err, hubdeveloper.ErrInvalidWebhook) {
+		t.Fatalf("err = %v, want ErrInvalidWebhook", err)
+	}
+	if m.updateGot.id != 0 {
+		t.Fatal("an invalid update reached the repository")
+	}
+}

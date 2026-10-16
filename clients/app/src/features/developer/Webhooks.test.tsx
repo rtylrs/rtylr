@@ -10,7 +10,9 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-const createMutateAsync = vi.hoisted(() => vi.fn().mockResolvedValue({ id: '1' }));
+const createMutateAsync = vi.hoisted(() =>
+  vi.fn().mockResolvedValue({ id: '1', secret: 'whsec_once' })
+);
 const webhooksData = vi.hoisted(() => ({
   data: [] as Webhook[],
   isLoading: false,
@@ -28,7 +30,7 @@ beforeAll(() => initTestI18nFrom(path.resolve(import.meta.dirname, '../../locale
 
 beforeEach(() => {
   vi.clearAllMocks();
-  createMutateAsync.mockResolvedValue({ id: '1' });
+  createMutateAsync.mockResolvedValue({ id: '1', secret: 'whsec_once' });
   webhooksData.data = [];
   webhooksData.isLoading = false;
 });
@@ -96,5 +98,20 @@ describe('Webhooks empty state', () => {
         events: ['order_created'],
       })
     );
+  });
+
+  it('shows the signing secret once after creating a webhook', async () => {
+    render(<Webhooks />);
+    fireEvent.click(screen.getAllByRole('button', { name: 'New webhook' })[0]);
+    fireEvent.change(screen.getByLabelText('Endpoint URL'), {
+      target: { value: 'https://api.example.com/hooks' },
+    });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Create webhook' }));
+
+    expect(await screen.findByText('whsec_once')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: i18next.t('developer.webhooks.copySecret') })
+    ).toBeInTheDocument();
   });
 });

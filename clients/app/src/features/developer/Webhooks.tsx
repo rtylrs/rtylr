@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Webhook as WebhookIcon, Plus } from 'lucide-react';
+import { Webhook as WebhookIcon, Plus, Copy } from 'lucide-react';
 import { EmptyState } from '../../shared/components/dash/EmptyState';
 import {
   Button,
@@ -41,6 +41,7 @@ const Webhooks: React.FC = () => {
   const [url, setUrl] = useState('');
   const [events, setEvents] = useState<string[]>([]);
   const [toDelete, setToDelete] = useState<Webhook | null>(null);
+  const [showSecret, setShowSecret] = useState<string | null>(null);
 
   const submitCreate = async () => {
     const normalizedUrl = normalizeWebhookUrl(url);
@@ -55,11 +56,11 @@ const Webhooks: React.FC = () => {
       return;
     }
     try {
-      await create.mutateAsync({ url: normalizedUrl, events });
+      const created = await create.mutateAsync({ url: normalizedUrl, events });
       setUrl('');
       setEvents([]);
       setCreateOpen(false);
-      toast.success('Webhook created');
+      if (created?.secret) setShowSecret(created.secret);
     } catch {
       // onError in hook handles toast
     }
@@ -166,6 +167,44 @@ const Webhooks: React.FC = () => {
                 disabled={create.isPending || !url.trim() || events.length === 0}
               >
                 Create webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!showSecret} onOpenChange={(o) => !o && setShowSecret(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('developer.webhooks.secretTitle')}</DialogTitle>
+              <DialogDescription>{t('developer.webhooks.secretDescription')}</DialogDescription>
+            </DialogHeader>
+            <div className="px-6 pb-4">
+              <div
+                className="flex items-center gap-2 p-3 rounded-lg font-mono text-xs break-all"
+                style={{
+                  background: 'var(--dash-hover)',
+                  border: '1px solid var(--dash-border)',
+                  color: 'var(--dash-text)',
+                }}
+                dir="ltr"
+              >
+                {showSecret}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={async () => {
+                  if (!showSecret) return;
+                  try {
+                    await navigator.clipboard.writeText(showSecret);
+                    toast.success(t('developer.webhooks.secretCopied'));
+                  } catch {
+                    toast.error(t('developer.webhooks.secretCopyFailed'));
+                  }
+                }}
+              >
+                <Copy size={13} />
+                {t('developer.webhooks.copySecret')}
               </Button>
             </DialogFooter>
           </DialogContent>

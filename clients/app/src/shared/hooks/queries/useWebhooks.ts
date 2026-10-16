@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { developerClient } from '../../lib/clients';
 import { isSupportedWebhookEvent, normalizeWebhookUrl } from '../../lib/webhookUrl';
 import { toast } from 'sonner';
@@ -17,6 +18,8 @@ const webhookSchema = z.object({
 
 export type Webhook = z.infer<typeof webhookSchema>;
 
+export type CreatedWebhook = { id: string; secret: string };
+
 export const useWebhooks = () => {
   return useQuery<Webhook[]>({
     queryKey: ['webhooks'],
@@ -31,21 +34,27 @@ export const useWebhooks = () => {
 export const useCreateWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { url: string; events: string[] }) => {
+    mutationFn: async (payload: { url: string; events: string[] }): Promise<CreatedWebhook> => {
       const url = normalizeWebhookUrl(payload.url);
       if (!url) throw new Error('Webhook URL must be a valid HTTP(S) URL');
       if (payload.events.length === 0) throw new Error('At least one webhook event is required');
       if (payload.events.some((event) => !isSupportedWebhookEvent(event))) {
         throw new Error('Unsupported webhook event');
       }
-      return developerClient.createWebhook({ url, events: payload.events });
+      const res = await developerClient.createWebhook({ url, events: payload.events });
+      return { id: String(res.id), secret: res.secret ?? '' };
     },
     onSuccess: () => {
       toast.success(i18next.t('common.toasts.webhookCreated', 'Webhook created'));
       qc.invalidateQueries({ queryKey: ['webhooks'] });
     },
-    onError: () => {
-      toast.error(i18next.t('common.toasts.failedCreateWebhook', 'Failed to create webhook'));
+    onError: (error: unknown) => {
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('common.toasts.failedCreateWebhook', 'Failed to create webhook')
+        )
+      );
     },
   });
 };

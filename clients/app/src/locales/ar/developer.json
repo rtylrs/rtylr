@@ -2,7 +2,12 @@
   "webhooks": {
     "emptyTitle": "لا توجد ويب هوك مهيّأة",
     "emptyDescription": "أنشئ أول نقطة نهاية ويب هوك للبدء بتلقي الأحداث.",
-    "newWebhook": "ويب هوك جديد"
+    "newWebhook": "ويب هوك جديد",
+    "secretTitle": "سر توقيع الويب هوك الخاص بك",
+    "secretDescription": "استخدمه للتحقق من ترويسة X-Rtylr-Signature في كل عملية إرسال. انسخه الآن، فلن تتمكن من رؤيته مرة أخرى.",
+    "copySecret": "نسخ السر",
+    "secretCopied": "تم نسخ السر",
+    "secretCopyFailed": "تعذر نسخ السر إلى الحافظة"
   },
   "apiKeys": {
     "emptyTitle": "لا توجد مفاتيح API بعد",

@@ -40,6 +40,9 @@ message CreateWebhookRequest {
 message CreateWebhookResponse {
   id: int64
   message: string
+  /// secret signs every delivery (see the X-Rtylr-Signature header). It is
+  /// returned only here, once, and cannot be read back afterwards.
+  secret: string
 }
 
 message DeleteWebhookRequest {

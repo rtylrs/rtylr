@@ -2,7 +2,12 @@
   "webhooks": {
     "emptyTitle": "No webhooks configured",
     "emptyDescription": "Create your first webhook endpoint to start receiving events.",
-    "newWebhook": "New webhook"
+    "newWebhook": "New webhook",
+    "secretTitle": "Your webhook signing secret",
+    "secretDescription": "Use it to verify the X-Rtylr-Signature header on each delivery. Copy it now, you won't be able to see it again.",
+    "copySecret": "Copy secret",
+    "secretCopied": "Secret copied",
+    "secretCopyFailed": "Failed to copy secret to clipboard"
   },
   "apiKeys": {
     "emptyTitle": "No API keys yet",
