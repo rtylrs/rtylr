@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/organization/user/internal/domain"
+	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
 var (
@@ -12,6 +13,12 @@ var (
 	passwordUpper = regexp.MustCompile(`[A-Z]`)
 	passwordLower = regexp.MustCompile(`[a-z]`)
 	passwordDigit = regexp.MustCompile(`\d`)
+)
+
+// Column widths in users: email varchar(255) the RFC 5321 address limit is 254.
+const (
+	maxEmailLength    = 254
+	maxFullNameLength = 255
 )
 
 type Validator struct{}
@@ -26,7 +33,7 @@ func (v *Validator) ValidateEmail(email string) error {
 	}
 
 	email = strings.TrimSpace(strings.ToLower(email))
-	if !emailRegex.MatchString(email) {
+	if len(email) > maxEmailLength || !emailRegex.MatchString(email) {
 		return domain.ErrInvalidEmail
 	}
 
@@ -34,7 +41,7 @@ func (v *Validator) ValidateEmail(email string) error {
 }
 
 func (v *Validator) ValidatePassword(password string) error {
-	if len(password) < 8 {
+	if len(password) < 8 || len(password) > passwordutils.MaxPasswordBytes {
 		return domain.ErrInvalidPassword
 	}
 
@@ -58,7 +65,7 @@ func (v *Validator) ValidateFullName(fullName string) error {
 		return domain.ErrInvalidFullName
 	}
 
-	if len(strings.TrimSpace(fullName)) < 2 {
+	if len(strings.TrimSpace(fullName)) < 2 || len([]rune(fullName)) > maxFullNameLength {
 		return domain.ErrInvalidFullName
 	}
 
