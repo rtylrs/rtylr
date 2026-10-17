@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -11,12 +10,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/application"
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
-	"github.com/voxire/onion/internal/platform/storage"
 )
 
 const (
@@ -29,19 +26,20 @@ func ApplicationsRoutes() []string { return []string{"/voxhire/applications"} }
 
 // ApplicationsHandler accepts talent-pool applications from the
 // "Apply" form on hire.voxire.com. Multipart/form-data because the CV
-// is uploaded as a file. A stored CV is required: if upload storage is
-// unavailable or the file cannot be stored, the submission is rejected.
-func ApplicationsHandler(svc *application.Service) http.HandlerFunc {
+// is uploaded as a file. A CV must be attached. If it cannot be stored,
+// the application is still saved, flagged upload_failed, and the team is
+// alerted, so an applicant is never turned away by a storage fault.
+func ApplicationsHandler(svc TalentApplicationSubmitter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, maxApplicationMultipartBytes)
 		// #nosec G120 -- MaxBytesReader caps the complete request before parsing.
 		if err := r.ParseMultipartForm(maxResumeUploadBytes); err != nil {
 			var maxErr *http.MaxBytesError
 			if errors.As(err, &maxErr) {
-				writeApplyError(w, http.StatusRequestEntityTooLarge, "Upload is too large")
+				writeApplyCodeError(w, http.StatusRequestEntityTooLarge, applyCodeUploadTooLarge, "Upload is too large")
 				return
 			}
-			writeApplyError(w, http.StatusBadRequest, "Invalid multipart form")
+			writeApplyCodeError(w, http.StatusBadRequest, applyCodeInvalidForm, "Invalid multipart form")
 			return
 		}
 
@@ -49,17 +47,17 @@ func ApplicationsHandler(svc *application.Service) http.HandlerFunc {
 		email := strings.TrimSpace(r.FormValue("email"))
 
 		if fullName == "" {
-			writeApplyError(w, http.StatusBadRequest, "fullName is required")
+			writeApplyFieldError(w, http.StatusBadRequest, applyCodeMissingField, "fullName", "fullName is required")
 			return
 		}
 		if email == "" {
-			writeApplyError(w, http.StatusBadRequest, "email is required")
+			writeApplyFieldError(w, http.StatusBadRequest, applyCodeMissingField, "email", "email is required")
 			return
 		}
 
 		consent := strings.EqualFold(strings.TrimSpace(r.FormValue("consent")), "true")
 		if !consent {
-			writeApplyError(w, http.StatusBadRequest, "consent is required")
+			writeApplyFieldError(w, http.StatusBadRequest, applyCodeConsentRequired, "consent", "consent is required")
 			return
 		}
 
@@ -85,34 +83,35 @@ func ApplicationsHandler(svc *application.Service) http.HandlerFunc {
 			Consent:            consent,
 		}
 
+		if f, tooLong := firstTooLong(talentFieldLimits(in)); tooLong {
+			writeFieldTooLong(w, f)
+			return
+		}
+
 		file, header, fileErr := r.FormFile("cv")
 		if fileErr != nil {
-			writeApplyError(w, http.StatusBadRequest, "CV is required")
+			writeApplyFieldError(w, http.StatusBadRequest, applyCodeCVRequired, "cv", "CV is required")
 			return
 		}
 		defer file.Close()
 		if header.Size > maxResumeUploadBytes {
-			writeApplyError(w, http.StatusRequestEntityTooLarge, "CV must be 5 MB or smaller")
+			writeApplyFieldError(w, http.StatusRequestEntityTooLarge, applyCodeCVTooLarge, "cv", "CV must be 5 MB or smaller")
 			return
 		}
 
 		contentType := resumeContentType(header)
 		if !allowedVoxhireResumeContentType(contentType) {
-			writeApplyError(w, http.StatusBadRequest, "Only PDF or DOCX CVs are accepted")
+			writeApplyFieldError(w, http.StatusBadRequest, applyCodeCVUnsupportedType, "cv", "Only PDF or DOCX CVs are accepted")
 			return
 		}
 
-		client, storageErr := storage.Default()
-		if storageErr != nil {
-			logger.Ctx(r.Context()).Error("VoxHire CV storage unavailable",
-				logger.Error(storageErr),
-				logger.Any("applicant_email", email),
-			)
-			writeApplyError(w, http.StatusInternalServerError, "CV upload storage is unavailable")
+		if id, dup := recentDuplicate(r.Context(), func() (int64, error) {
+			return svc.RecentTalentApplication(r.Context(), email)
+		}, email); dup {
+			writeApplyDuplicate(w, id)
 			return
 		}
 
-		safeName := storage.SanitizeObjectKey(header.Filename)
 		trackSlug := slugify(in.Track)
 		if trackSlug == "" {
 			trackSlug = "unspecified"
@@ -121,38 +120,36 @@ func ApplicationsHandler(svc *application.Service) http.HandlerFunc {
 		key := fmt.Sprintf("voxhire/applications/%s/%s-%s",
 			trackSlug,
 			uuid.NewString(),
-			safeName,
+			cvObjectName(header.Filename),
 		)
 
-		if uploadErr := client.Upload(r.Context(), key, contentType, file); uploadErr != nil {
-			logger.Ctx(r.Context()).Error("VoxHire CV upload failed",
-				logger.Error(uploadErr),
-				logger.Any("applicant_email", email),
-			)
-			writeApplyError(w, http.StatusInternalServerError, "Failed to store CV")
-			return
+		if uploadErr := uploadCV(r.Context(), "VoxHire", key, contentType, file, email); uploadErr != nil {
+			in.CVUploadFailed = true
+			in.CVUploadError = truncateRunes(uploadErr.Error(), maxCVErrorLength)
+		} else {
+			in.CVKey = key
 		}
-		in.CVKey = key
 
 		id, err := svc.SubmitTalentApplication(r.Context(), in)
 		if err != nil {
 			logger.Ctx(r.Context()).Error("Failed to save VoxHire talent application",
 				logger.Error(err),
 				logger.Any("email", email),
+				logger.Bool("cv_upload_failed", in.CVUploadFailed),
 			)
-			writeApplyError(w, http.StatusInternalServerError, "Failed to submit application")
+			writeApplyCodeError(w, http.StatusInternalServerError, applyCodeSaveFailed,
+				"We could not save your application. Our team has been alerted.")
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(map[string]interface{}{
-			"id":      id,
-			"message": "Application received",
-			"status":  "success",
-		}); err != nil {
-			logger.Global().Error("Failed to encode application success response", logger.Error(err))
+		if in.CVUploadFailed {
+			logger.Ctx(r.Context()).Error("VoxHire talent application saved without CV",
+				logger.Any("application_id", id),
+				logger.Any("applicant_email", email),
+			)
 		}
+
+		writeApplySuccess(w, id, in.CVUploadFailed)
 	}
 }
 
@@ -183,12 +180,14 @@ func allowedVoxhireResumeContentType(contentType string) bool {
 	}
 }
 
+// writeApplyError writes a plain onekit error. The admin handlers still use
+// it; the public apply handlers use writeApplyCodeError, which adds a code.
 func writeApplyError(w http.ResponseWriter, code int, msg string) {
 	serverHttp.WriteOneKitError(context.Background(), w, onekiterrors.New(code, msg))
 }
 
 // slugify lowercases and turns whitespace + slashes into hyphens for
-// use in R2 object keys. Keeps alphanumeric and hyphens.
+// use in object keys. Keeps alphanumeric and hyphens.
 func slugify(s string) string {
 	s = strings.ToLower(strings.TrimSpace(s))
 	if s == "" {
