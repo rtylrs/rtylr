@@ -39,35 +39,6 @@ func TestApprovePurchaseOrder_ChangesStatusToApproved(t *testing.T) {
 	}
 }
 
-func TestUpdatePurchaseOrderStatus_SetsReceived(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, domain.PurchaseOrderInput{
-		SupplierID: fixtureSupplierID,
-		PONumber:   "PO-RECEIVED-001",
-		Items: []domain.PurchaseOrderItemInput{
-			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 5.0},
-		},
-	}, testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("CreatePurchaseOrder: %v", err)
-	}
-
-	if err := repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusReceived)); err != nil {
-		t.Fatalf("UpdatePurchaseOrderStatus: %v", err)
-	}
-
-	status, err := repo.GetPurchaseOrderStatus(ctx, testutil.OwnerID, id)
-	if err != nil {
-		t.Fatalf("GetPurchaseOrderStatus: %v", err)
-	}
-	if status != string(domain.POStatusReceived) {
-		t.Errorf("expected status=received, got %q", status)
-	}
-}
-
 func TestUpdatePurchaseOrderStatus_ReceivedIsTerminal(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
@@ -84,8 +55,8 @@ func TestUpdatePurchaseOrderStatus_ReceivedIsTerminal(t *testing.T) {
 		t.Fatalf("CreatePurchaseOrder: %v", err)
 	}
 
-	if err := repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusReceived)); err != nil {
-		t.Fatalf("UpdatePurchaseOrderStatus(received): %v", err)
+	if err := repo.ReceivePurchaseOrder(ctx, testutil.OwnerID, id, testutil.OwnerID, nil); err != nil {
+		t.Fatalf("ReceivePurchaseOrder: %v", err)
 	}
 
 	err = repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusDraft))
@@ -118,8 +89,8 @@ func TestApprovePurchaseOrder_ReceivedIsTerminal(t *testing.T) {
 		t.Fatalf("CreatePurchaseOrder: %v", err)
 	}
 
-	if err := repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusReceived)); err != nil {
-		t.Fatalf("UpdatePurchaseOrderStatus(received): %v", err)
+	if err := repo.ReceivePurchaseOrder(ctx, testutil.OwnerID, id, testutil.OwnerID, nil); err != nil {
+		t.Fatalf("ReceivePurchaseOrder: %v", err)
 	}
 
 	err = repo.ApprovePurchaseOrder(ctx, testutil.OwnerID, id)

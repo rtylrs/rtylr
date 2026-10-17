@@ -42,13 +42,11 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	}
 	delta = target - before
 	m.Change = delta
-	if _, _, err = applyKnown(ctx, q, m, before, target); err != nil {
+	if _, err = applyKnown(ctx, q, m, before, target); err != nil {
 		return before, 0, err
 	}
-	if delta < 0 {
-		if err := consumeCostLayersTx(ctx, tx, m, -delta); err != nil {
-			return before, 0, err
-		}
+	if err := settleLevelCostTx(ctx, tx, m, before, target); err != nil {
+		return before, 0, err
 	}
 	return before, delta, nil
 }
@@ -131,15 +129,49 @@ func SetTotalTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	}
 
 	m.Change = delta
-	if _, _, err = applyKnown(ctx, queries(tx), m, currentLocation, currentLocation+delta); err != nil {
+	if _, err = applyKnown(ctx, queries(tx), m, currentLocation, currentLocation+delta); err != nil {
 		return before, 0, err
 	}
-	if delta < 0 {
-		if err := consumeCostLayersTx(ctx, tx, m, -delta); err != nil {
-			return before, 0, err
-		}
+	if err := settleLevelCostTx(ctx, tx, m, currentLocation, currentLocation+delta); err != nil {
+		return before, 0, err
 	}
 	return before, delta, nil
+}
+
+// settleLevelCostTx keeps cost layers in step with an absolute level change:
+// a shrink depletes layers FIFO and a gain is valued at the product's cost.
+func settleLevelCostTx(ctx context.Context, tx DBTX, m Movement, before, after float64) error {
+	if after < before {
+		_, err := consumeCostLayersTx(ctx, tx, m, before-after)
+		return err
+	}
+	return openCostLayersTx(ctx, tx, m, inboundLayerQuantity(before, after), nil)
+}
+
+// LockProductLevelsTx locks every stock level row of a product in location
+// order. A caller that also locks the product row must call this first, so it
+// takes locks in the same level-then-product order as every stock movement.
+func LockProductLevelsTx(ctx context.Context, tx DBTX, ownerID, productID int64) error {
+	rows, err := tx.QueryContext(ctx, `
+		SELECT location_id
+		FROM stock_levels
+		WHERE owner_id = ? AND product_id = ?
+		ORDER BY location_id
+		FOR UPDATE`, ownerID, productID)
+	if err != nil {
+		return fmt.Errorf("stock_core: lock product levels: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var locationID int64
+		if err := rows.Scan(&locationID); err != nil {
+			return fmt.Errorf("stock_core: scan product level: %w", err)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("stock_core: iterate product levels: %w", err)
+	}
+	return nil
 }
 
 func nullInt(p *int64) sql.NullInt64 {

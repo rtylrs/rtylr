@@ -401,8 +401,9 @@ func TestReceivedStockTransfer_CannotBeReopenedOrMovedAgain(t *testing.T) {
 		domain.StockTransferStatusInTransit,
 		domain.StockTransferStatusCancelled,
 	} {
-		if err := repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, status); err != nil {
-			t.Fatalf("reopen received transfer as %q: %v", status, err)
+		err := repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, status)
+		if !errors.Is(err, domain.ErrInvalidStockTransferTransition) {
+			t.Fatalf("reopen received transfer as %q error = %v, want ErrInvalidStockTransferTransition", status, err)
 		}
 
 		transfer, err := repo.GetByID(ctx, testutil.OwnerID, id)
@@ -566,5 +567,88 @@ func TestListStockTransfers_ScopedToOwner(t *testing.T) {
 		if tr.OwnerID == testutil.OwnerID {
 			t.Errorf("other-owner list contains ownerID=%d record", testutil.OwnerID)
 		}
+	}
+}
+
+// TestReceiveStockTransfer_RepeatedProductLinesMoveTogether pins the fix for a
+// transfer listing one product on two lines: the ledger keeps one movement per
+// transfer, product and location, so the second line used to be dropped. It
+// also checks the moved units keep their cost at the destination.
+func TestReceiveStockTransfer_RepeatedProductLinesMoveTogether(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const mainLocation, secondaryLocation int64 = 8002, 8003
+
+	result, err := db.ExecContext(ctx, `
+		INSERT INTO erp_products (owner_id, business_id, name, cost_price, track_inventory)
+		VALUES (?, ?, 'transfer-repeated-lines', 9.00, TRUE)`, testutil.OwnerID, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("insert product: %v", err)
+	}
+	productID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("read product id: %v", err)
+	}
+	t.Cleanup(func() {
+		for _, query := range []string{
+			"DELETE FROM inventory_cost_layers WHERE owner_id = ? AND product_id = ?",
+			"DELETE FROM stock_ledger WHERE owner_id = ? AND product_id = ?",
+			"DELETE FROM stock_levels WHERE owner_id = ? AND product_id = ?",
+		} {
+			_, _ = db.ExecContext(ctx, query, testutil.OwnerID, productID)
+		}
+	})
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO stock_levels (owner_id, business_id, location_id, product_id, on_hand)
+		VALUES (?, ?, ?, ?, 10)`, testutil.OwnerID, testutil.OwnerID, mainLocation, productID); err != nil {
+		t.Fatalf("seed stock: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO inventory_cost_layers (owner_id, business_id, product_id, location_id, quantity_remaining, unit_cost, reference_type)
+		VALUES (?, ?, ?, ?, 10, 2.00, 'purchase_order')`, testutil.OwnerID, testutil.OwnerID, productID, mainLocation); err != nil {
+		t.Fatalf("seed cost layer: %v", err)
+	}
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: productID, Quantity: 2},
+			{ProductID: productID, Quantity: 3},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CreateStockTransfer: %v", err)
+	}
+	if err := repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, domain.StockTransferStatusReceived); err != nil {
+		t.Fatalf("receive transfer: %v", err)
+	}
+
+	onHand := func(location int64) float64 {
+		t.Helper()
+		var quantity float64
+		if err := db.QueryRowContext(ctx,
+			"SELECT on_hand FROM stock_levels WHERE owner_id = ? AND product_id = ? AND location_id = ?",
+			testutil.OwnerID, productID, location).Scan(&quantity); err != nil {
+			t.Fatalf("read on_hand at %d: %v", location, err)
+		}
+		return quantity
+	}
+	if got := onHand(mainLocation); got != 5 {
+		t.Errorf("source on_hand = %v, want 5", got)
+	}
+	if got := onHand(secondaryLocation); got != 5 {
+		t.Errorf("destination on_hand = %v, want 5", got)
+	}
+	var layered, value float64
+	if err := db.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(quantity_remaining), 0), COALESCE(SUM(quantity_remaining * unit_cost), 0)
+		FROM inventory_cost_layers WHERE owner_id = ? AND product_id = ? AND location_id = ?`,
+		testutil.OwnerID, productID, secondaryLocation).Scan(&layered, &value); err != nil {
+		t.Fatalf("read destination layers: %v", err)
+	}
+	if layered != 5 || value != 10 {
+		t.Errorf("destination layers = %v units worth %v, want 5 worth 10", layered, value)
 	}
 }

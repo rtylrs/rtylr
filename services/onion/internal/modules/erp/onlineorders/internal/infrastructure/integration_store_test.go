@@ -353,15 +353,9 @@ func seedStoreOrderStock(t *testing.T, db *sql.DB, onHand, unitCost float64) (pr
 	}, onHand); err != nil {
 		t.Fatalf("seed stock: %v", err)
 	}
+	// SetTotalTx opens the matching cost layer at the product's cost price.
 	if err := tx.Commit(); err != nil {
 		t.Fatalf("commit stock seed: %v", err)
-	}
-
-	if _, err := db.ExecContext(ctx, `
-		INSERT INTO inventory_cost_layers (owner_id, business_id, product_id, location_id, quantity_remaining, unit_cost, reference_type)
-		VALUES (?, ?, ?, ?, ?, ?, 'test_seed')`,
-		testutil.OwnerID, testutil.BusinessID, productID, locationID, onHand, unitCost); err != nil {
-		t.Fatalf("seed cost layer: %v", err)
 	}
 
 	return productID, locationID
