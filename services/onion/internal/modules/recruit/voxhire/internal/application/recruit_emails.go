@@ -28,10 +28,17 @@ func safeReplyTo(email string) string {
 
 // notifyCareerApplication emails the team when a candidate applies to a
 // specific opening through hire.voxire.com.
-func (s *Service) notifyCareerApplication(ctx context.Context, id int64, app domain.CareerApplicationInput) {
+func (s *Service) notifyCareerApplication(ctx context.Context, id int64, app domain.CareerApplicationInput, notice submissionNotice) {
 	salaryLine := "-"
 	if app.SalaryExpectation > 0 {
 		salaryLine = fmt.Sprintf("$%.0f", app.SalaryExpectation)
+	}
+	cvLine := "Not attached"
+	switch {
+	case app.CVKey != "":
+		cvLine = fmt.Sprintf("Stored at S3 key: <code>%s</code>", html.EscapeString(app.CVKey))
+	case app.CVUploadFailed:
+		cvLine = "Upload FAILED, not stored"
 	}
 
 	emailHTML := fmt.Sprintf(`
@@ -39,28 +46,31 @@ func (s *Service) notifyCareerApplication(ctx context.Context, id int64, app dom
   <div style="background:#111118;border-radius:12px;padding:32px;color:#f0f0f6;">
     <h2 style="font-size:20px;font-weight:600;margin:0 0 4px 0;color:#63c6bd;">New application</h2>
     <p style="font-size:13px;color:rgba(240,240,246,0.55);margin:0 0 28px 0;">Application #%d via hire.voxire.com (job #%d)</p>
-
+    %s
     <table style="width:100%%;border-collapse:collapse;">
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;width:160px;">Name</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;font-weight:500;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Email</td><td style="padding:8px 0;font-size:15px;"><a href="mailto:%s" style="color:#63c6bd;text-decoration:none;">%s</a></td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Phone</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Location</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Salary expectation</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">CV</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
     </table>
   </div>
 </div>`,
 		id,
 		app.JobID,
+		notice.bannerHTML(),
 		html.EscapeString(app.Name),
 		html.EscapeString(app.Email), html.EscapeString(app.Email),
 		html.EscapeString(orDash(app.Phone)),
 		html.EscapeString(orDash(app.Location)),
 		salaryLine,
+		cvLine,
 	)
 
-	subject := fmt.Sprintf("[VoxHire] New application from %s", crlfStripper.Replace(app.Name))
+	subject := notice.subjectPrefix() + fmt.Sprintf("[VoxHire] New application from %s", crlfStripper.Replace(app.Name))
 
-	if _, err := sendNotificationEmail(ctx, emailPkg.SendParams{
+	if _, err := s.send(ctx, emailPkg.SendParams{
 		To:      notifyEmails,
 		Subject: subject,
 		HTML:    emailHTML,

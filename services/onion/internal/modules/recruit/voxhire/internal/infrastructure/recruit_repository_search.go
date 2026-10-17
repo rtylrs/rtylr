@@ -198,13 +198,25 @@ func (r *Repository) CreateCareerApplication(ctx context.Context, in domain.Care
 		SalaryExpectation: sqlNullDecimal(in.SalaryExpectation),
 		WorkHistory:       sqlNullString(in.WorkHistory), Education: sqlNullString(in.Education),
 		ExperienceSummary: sqlNullString(in.ExperienceSummary), CoverLetter: sqlNullString(in.CoverLetter),
-		CvKey: sqlNullString(in.CVKey),
+		CvKey:              sqlNullString(in.CVKey),
+		CvProcessingStatus: domain.SubmissionCVStatus(in.CVUploadFailed),
+		CvProcessingError:  sql.NullString{String: in.CVUploadError, Valid: in.CVUploadFailed && in.CVUploadError != ""},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert voxhire career application", logger.Error(err))
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+// FindRecentCareerApplicationID returns the newest application from email to
+// jobID in the last 10 minutes, or 0 when there is none.
+func (r *Repository) FindRecentCareerApplicationID(ctx context.Context, jobID int64, email string) (int64, error) {
+	id, err := r.queries.FindRecentCareerApplicationID(ctx, sqlc.FindRecentCareerApplicationIDParams{JobID: jobID, Email: email})
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	return id, err
 }
 
 const candidateUnionSQL = `

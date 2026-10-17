@@ -23,6 +23,9 @@ type mockRepo struct {
 	reviewID    int64
 	reviewInput domain.ApplicationReviewInput
 	reviewErr   error
+
+	careerAppID  int64
+	careerAppErr error
 }
 
 func (m *mockRepo) CreateCompanyLead(_ context.Context, _ domain.CompanyLeadInput) (int64, error) {
@@ -173,6 +176,14 @@ func (m *mockRepo) AddShortlistItem(_ context.Context, in domain.ShortlistItemIn
 }
 
 func (m *mockRepo) CreateCareerApplication(_ context.Context, _ domain.CareerApplicationInput) (int64, error) {
+	return m.careerAppID, m.careerAppErr
+}
+
+func (m *mockRepo) FindRecentTalentApplicationID(_ context.Context, _ string) (int64, error) {
+	return 0, nil
+}
+
+func (m *mockRepo) FindRecentCareerApplicationID(_ context.Context, _ int64, _ string) (int64, error) {
 	return 0, nil
 }
 
