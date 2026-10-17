@@ -22,8 +22,23 @@ type CompanyLeadInput struct {
 	AgencyOptIn  bool
 }
 
+// CV processing states written at submission time. upload_failed marks an
+// application saved without its CV; it has no cv_key, so the CV worker skips it.
+const (
+	CVStatusPending      = "pending"
+	CVStatusUploadFailed = "upload_failed"
+)
+
+func SubmissionCVStatus(cvUploadFailed bool) string {
+	if cvUploadFailed {
+		return CVStatusUploadFailed
+	}
+	return CVStatusPending
+}
+
 // TalentApplicationInput is what the service accepts when an application arrives.
-// CVKey is set after a successful R2 upload (handler-level concern).
+// CVKey is set after a successful upload; when it fails, CVUploadFailed and
+// CVUploadError are set instead.
 type TalentApplicationInput struct {
 	FullName           string
 	Email              string
@@ -45,4 +60,6 @@ type TalentApplicationInput struct {
 	Pitch              string
 	Consent            bool
 	CVKey              string
+	CVUploadFailed     bool
+	CVUploadError      string
 }

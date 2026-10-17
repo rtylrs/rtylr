@@ -251,6 +251,8 @@ type CareerApplicationInput struct {
 	ExperienceSummary string
 	CoverLetter       string
 	CVKey             string
+	CVUploadFailed    bool
+	CVUploadError     string
 }
 
 // CVProcessingTarget is a stored CV that the worker can download,
