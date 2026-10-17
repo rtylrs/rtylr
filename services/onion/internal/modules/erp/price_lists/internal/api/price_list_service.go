@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/erp/price_lists/internal/application"
 	"github.com/voxire/onion/internal/modules/erp/price_lists/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erppricelistv1 "github.com/voxire/voxie/gen/go/erp/price_list/v1"
@@ -22,6 +23,9 @@ func NewPriceListAPI(service *application.Service) *PriceListAPI {
 }
 
 func (a *PriceListAPI) ListPriceLists(ctx context.Context, _ *erppricelistv1.ListPriceListsRequest) (*erppricelistv1.ListPriceListsResponse, error) {
+	if err := requirePriceListPermission(ctx, "erp:price_lists:view"); err != nil {
+		return nil, err
+	}
 	ownerID, err := priceListOwnerID(ctx)
 	if err != nil {
 		return nil, err
@@ -38,6 +42,9 @@ func (a *PriceListAPI) ListPriceLists(ctx context.Context, _ *erppricelistv1.Lis
 }
 
 func (a *PriceListAPI) CreatePriceList(ctx context.Context, req *erppricelistv1.CreatePriceListRequest) (*erppricelistv1.CreatePriceListResponse, error) {
+	if err := requirePriceListPermission(ctx, "erp:price_lists:manage"); err != nil {
+		return nil, err
+	}
 	ownerID, err := priceListOwnerID(ctx)
 	if err != nil {
 		return nil, err
@@ -78,6 +85,14 @@ func priceListOwnerID(ctx context.Context) (int64, error) {
 		return 0, onekiterrors.PermissionDenied()
 	}
 	return ownerID, nil
+}
+
+func requirePriceListPermission(ctx context.Context, permission string) error {
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || !authPkg.HasAppPermission(user, authorization.AppERP, permission) {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
 }
 
 func priceListStatusError(status int, message string) error {
