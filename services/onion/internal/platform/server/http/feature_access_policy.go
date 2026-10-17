@@ -130,6 +130,16 @@ func hubFeaturePermission(method, path string) (string, bool) {
 
 func financeFeaturePermission(method, path string) (string, bool) {
 	switch {
+	case strings.HasPrefix(path, "/finance/account"), strings.HasPrefix(path, "/finance/journal"), strings.HasPrefix(path, "/finance/statement"), strings.HasPrefix(path, "/finance/bill"):
+		if method == http.MethodGet {
+			return "finance:accounts:view", true
+		}
+		return "finance:accounts:manage", true
+	case strings.HasPrefix(path, "/finance/expense-categor"):
+		if method == http.MethodGet {
+			return "finance:expenses:view", true
+		}
+		return "finance:expenses:create", true
 	case strings.HasPrefix(path, "/finance/invoices"):
 		if strings.HasSuffix(path, "/send") {
 			return "finance:invoices:send", true
@@ -140,6 +150,7 @@ func financeFeaturePermission(method, path string) (string, bool) {
 		if method == http.MethodPost {
 			return "finance:invoices:create", true
 		}
+		return "finance:invoices:create", true
 	case strings.HasPrefix(path, "/finance/quote"), strings.HasPrefix(path, "/finance/quotes"):
 		if method == http.MethodGet {
 			return "finance:quotes:view", true
@@ -167,6 +178,7 @@ func financeFeaturePermission(method, path string) (string, bool) {
 		if method == http.MethodGet {
 			return "finance:bank_feeds:view", true
 		}
+		return "finance:bank_feeds:manage", true
 	case strings.HasPrefix(path, "/finance/reconciliation"):
 		return "finance:reconciliation:manage", true
 	case strings.HasPrefix(path, "/finance/report"), strings.HasPrefix(path, "/finance/dashboard"):
@@ -184,6 +196,10 @@ func financeFeaturePermission(method, path string) (string, bool) {
 
 func crmFeaturePermission(method, path string) (string, bool) {
 	switch {
+	case strings.Contains(path, "/crm/segment"):
+		return "crm:segments:manage", true
+	case strings.Contains(path, "/crm/template"):
+		return "crm:templates:manage", true
 	case strings.Contains(path, "/crm/campaign"):
 		if strings.HasSuffix(path, "/send") {
 			return "crm:campaigns:send", true
@@ -194,13 +210,20 @@ func crmFeaturePermission(method, path string) (string, bool) {
 		if method == http.MethodPost {
 			return "crm:campaigns:create", true
 		}
+		return "crm:campaigns:manage", true
 	case strings.Contains(path, "/crm/loyalty"):
 		return "crm:loyalty:manage", true
 	case strings.Contains(path, "/crm/automation"):
 		return "crm:automations:manage", true
+	case strings.Contains(path, "/crm/feedback"):
+		return "crm:customers:view", true
+	case strings.Contains(path, "/crm/settings"):
+		return "crm:customers:edit", true
+	case strings.Contains(path, "/crm/dashboard"):
+		return "crm:customers:view", true
 	case strings.HasSuffix(path, "/crm/customers/export"):
 		return "crm:customers:export", true
-	case strings.Contains(path, "/crm/segment"), strings.Contains(path, "/crm/customer"), strings.Contains(path, "/crm/sales"):
+	case strings.Contains(path, "/crm/customer"), strings.Contains(path, "/crm/sales"):
 		if method == http.MethodGet {
 			return "crm:customers:view", true
 		}

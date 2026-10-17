@@ -15,6 +15,39 @@ func TestCustomerExportUsesCanonicalPermission(t *testing.T) {
 	}
 }
 
+func TestFinanceAndCRMFeatureRoutesUseCanonicalPermissions(t *testing.T) {
+	for _, request := range []struct {
+		method, path string
+		app          authorization.AppID
+		permission   string
+	}{
+		{http.MethodGet, "/finance/account/v1/accounts", authorization.AppFinance, "finance:accounts:view"},
+		{http.MethodPut, "/finance/account/v1/accounts/9", authorization.AppFinance, "finance:accounts:manage"},
+		{http.MethodPost, "/finance/bill/v1/bills", authorization.AppFinance, "finance:accounts:manage"},
+		{http.MethodGet, "/finance/journal/v1/journal-entries", authorization.AppFinance, "finance:accounts:view"},
+		{http.MethodPost, "/finance/journal/v1/journal-entries", authorization.AppFinance, "finance:accounts:manage"},
+		{http.MethodGet, "/finance/statement/v1/balance-sheet", authorization.AppFinance, "finance:accounts:view"},
+		{http.MethodPut, "/finance/bank_account/v1/bank-accounts/9", authorization.AppFinance, "finance:bank_feeds:manage"},
+		{http.MethodGet, "/finance/expense-categories", authorization.AppFinance, "finance:expenses:view"},
+		{http.MethodPut, "/finance/expense-categories", authorization.AppFinance, "finance:expenses:create"},
+		{http.MethodPut, "/finance/invoices/9", authorization.AppFinance, "finance:invoices:create"},
+		{http.MethodGet, "/crm/dashboard", authorization.AppCRM, "crm:customers:view"},
+		{http.MethodDelete, "/crm/campaign/v1/campaigns/9", authorization.AppCRM, "crm:campaigns:manage"},
+		{http.MethodPut, "/crm/campaigns/9/status", authorization.AppCRM, "crm:campaigns:manage"},
+		{http.MethodGet, "/crm/segment/v1/segments", authorization.AppCRM, "crm:segments:manage"},
+		{http.MethodPost, "/crm/template/v1/templates", authorization.AppCRM, "crm:templates:manage"},
+		{http.MethodGet, "/crm/feedback", authorization.AppCRM, "crm:customers:view"},
+		{http.MethodPut, "/crm/settings", authorization.AppCRM, "crm:customers:edit"},
+	} {
+		t.Run(request.method+" "+request.path, func(t *testing.T) {
+			app, permission, ok := featurePermissionForRequest(request.method, request.path)
+			if !ok || app != request.app || permission != request.permission {
+				t.Fatalf("mapping = %s:%s,%t, want %s:%s,true", app, permission, ok, request.app, request.permission)
+			}
+		})
+	}
+}
+
 func TestPOSCatalogAndMenuAdministrationUseSeparatePermissions(t *testing.T) {
 	for _, request := range []struct {
 		method, path string
