@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/crm/feedback/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/feedback/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmfeedbackv1 "github.com/voxire/voxie/gen/go/crm/feedback/v1"
@@ -22,7 +23,7 @@ func NewFeedbackAPI(service *application.Service) *FeedbackAPI {
 
 func (a *FeedbackAPI) ListFeedback(ctx context.Context, req *crmfeedbackv1.ListFeedbackRequest) (*crmfeedbackv1.ListFeedbackResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppCRM, "crm:customers:view") {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -115,7 +116,7 @@ func (a *FeedbackAPI) CreateFeedback(ctx context.Context, req *crmfeedbackv1.Cre
 	}
 
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppCRM, "crm:customers:edit") {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
