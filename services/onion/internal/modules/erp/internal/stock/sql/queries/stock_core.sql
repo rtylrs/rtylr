@@ -41,7 +41,7 @@ SELECT on_hand FROM stock_levels
 UPDATE stock_levels SET on_hand = ?
  WHERE owner_id = ? AND location_id = ? AND product_id = ?;
 
--- name: InsertStockLedgerEntry :exec
+-- name: InsertStockLedgerEntry :execresult
 INSERT INTO stock_ledger
  (owner_id, business_id, location_id, product_id, entry_type, quantity_change, quantity_before, quantity_after,
   reference_id, reference_type, transfer_group, channel, note, employee_id, created_by)

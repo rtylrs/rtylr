@@ -121,13 +121,13 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, businessID, 
 	if currentStatus == nextStatus {
 		return nil
 	}
-	value := sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true}
-	var result sql.Result
-	if status == string(domain.POStatusReceived) {
-		result, err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{Status: value, BusinessID: businessID, ID: id})
-	} else {
-		result, err = qtx.UpdatePurchaseOrderStatus(ctx, sqlc.UpdatePurchaseOrderStatusParams{Status: value, BusinessID: businessID, ID: id})
+	if nextStatus == domain.POStatusReceived || nextStatus == domain.POStatusPartial {
+		// These statuses record stock arriving; only ReceivePurchaseOrder
+		// moves the stock that goes with them.
+		return domain.ErrPurchaseOrderInvalidTransition
 	}
+	value := sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true}
+	result, err := qtx.UpdatePurchaseOrderStatus(ctx, sqlc.UpdatePurchaseOrderStatusParams{Status: value, BusinessID: businessID, ID: id})
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 	receivedByID := make(map[int64]float64, len(submitted))
 	for _, item := range submitted {
 		if item.QuantityReceived < 0 {
-			err = fmt.Errorf("received quantity for item %d must not be negative", item.ID)
+			err = fmt.Errorf("%w: item %d must not be negative", domain.ErrInvalidReceivedQuantity, item.ID)
 			return err
 		}
 		receivedByID[item.ID] = item.QuantityReceived
@@ -245,14 +245,14 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			var ok bool
 			qty, ok = receivedByID[it.ID]
 			if !ok {
-				err = fmt.Errorf("missing received quantity for item %d", it.ID)
+				err = fmt.Errorf("%w: missing quantity for item %d", domain.ErrInvalidReceivedQuantity, it.ID)
 				return err
 			}
 			// Bound the received quantity by the stored ordered quantity, not
 			// by the request's quantity_ordered, so a submitted value cannot
 			// inflate stock beyond what was actually ordered.
 			if qty > ordered {
-				err = fmt.Errorf("received quantity for item %d cannot exceed the ordered quantity %v", it.ID, ordered)
+				err = fmt.Errorf("%w: item %d cannot exceed the ordered quantity %v", domain.ErrInvalidReceivedQuantity, it.ID, ordered)
 				return err
 			}
 		}
@@ -261,7 +261,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		}
 		delta := qty - previous
 		if delta < 0 {
-			err = fmt.Errorf("received quantity for item %d cannot decrease from %v", it.ID, previous)
+			err = fmt.Errorf("%w: item %d cannot decrease from %v", domain.ErrInvalidReceivedQuantity, it.ID, previous)
 			return err
 		}
 		receiptLines = append(receiptLines, purchaseOrderReceiptLine{item: it, delta: delta})
@@ -274,49 +274,55 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		return err
 	}
 
-	legacyEntries := make([]purchaseOrderInventoryLedgerEntry, 0, len(receiptLines))
-	for _, line := range receiptLines {
-		if line.delta == 0 {
-			continue
+	receipts, err := groupReceiptLinesByProduct(receiptLines)
+	if err != nil {
+		return err
+	}
+	legacyEntries := make([]purchaseOrderInventoryLedgerEntry, 0, len(receipts))
+	if len(receipts) > 0 {
+		// Every delivery is its own receipt so the ledger, which allows one
+		// movement per reference and product, records a second partial
+		// delivery instead of discarding it as a duplicate of the first.
+		result, insertErr := tx.ExecContext(ctx, `
+			INSERT INTO erp_purchase_order_receipts (owner_id, business_id, purchase_order_id, received_by)
+			VALUES (?, ?, ?, ?)`, businessID, businessID, poID, createdBy)
+		if insertErr != nil {
+			return insertErr
 		}
-		it := line.item
-		delta := line.delta
-
-		before, after, merr := stock.ApplyMovementTx(ctx, tx, stock.Movement{
-			OwnerID:       businessID,
-			LocationID:    locID,
-			ProductID:     it.ProductID,
-			EntryType:     stock.EntryPurchase,
-			Change:        delta,
-			ReferenceID:   &poID,
-			ReferenceType: "purchase_order",
-			Channel:       "erp",
-			Note:          fmt.Sprintf("received from purchase order %d", poID),
-			CreatedBy:     &createdBy,
-		})
-		if merr != nil {
-			err = merr
-			return err
+		receiptID, idErr := result.LastInsertId()
+		if idErr != nil {
+			return idErr
 		}
-
-		legacyEntries = append(legacyEntries, purchaseOrderInventoryLedgerEntry{
-			OwnerID:        createdBy,
-			BusinessID:     businessID,
-			ProductID:      it.ProductID,
-			QuantityChange: strconv.FormatFloat(delta, 'f', -1, 64),
-			QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
-			QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
-			ReferenceID:    poID,
-			CreatedBy:      createdBy,
-			Notes:          fmt.Sprintf("received from purchase order %d", poID),
-		})
-
-		if _, err = tx.ExecContext(ctx, `
-			INSERT INTO inventory_cost_layers
-			(owner_id, business_id, product_id, location_id, quantity_remaining, unit_cost, reference_id, reference_type)
-			VALUES (?, ?, ?, ?, ?, ?, ?, 'purchase_order')`,
-			businessID, businessID, it.ProductID, locID, delta, it.UnitCost, poID); err != nil {
-			return err
+		note := fmt.Sprintf("received from purchase order %d", poID)
+		for _, receipt := range receipts {
+			unitCost := receipt.unitCost
+			before, after, merr := stock.ApplyMovementTx(ctx, tx, stock.Movement{
+				OwnerID:       businessID,
+				LocationID:    locID,
+				ProductID:     receipt.productID,
+				EntryType:     stock.EntryPurchase,
+				Change:        receipt.quantity,
+				ReferenceID:   &receiptID,
+				ReferenceType: "purchase_order_receipt",
+				Channel:       "erp",
+				Note:          note,
+				CreatedBy:     &createdBy,
+				UnitCost:      &unitCost,
+			})
+			if merr != nil {
+				return merr
+			}
+			legacyEntries = append(legacyEntries, purchaseOrderInventoryLedgerEntry{
+				OwnerID:        createdBy,
+				BusinessID:     businessID,
+				ProductID:      receipt.productID,
+				QuantityChange: strconv.FormatFloat(receipt.quantity, 'f', -1, 64),
+				QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
+				QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
+				ReferenceID:    poID,
+				CreatedBy:      createdBy,
+				Notes:          note,
+			})
 		}
 	}
 	if err = insertPurchaseOrderInventoryLedger(ctx, tx, legacyEntries); err != nil {
@@ -340,6 +346,45 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		return err
 	}
 	return tx.Commit()
+}
+
+type productReceipt struct {
+	productID int64
+	quantity  float64
+	unitCost  float64
+}
+
+// groupReceiptLinesByProduct folds the received deltas into one movement per
+// product, in ascending product order so stock rows are always locked in the
+// same order. Lines for the same product are costed at their weighted
+// average.
+func groupReceiptLinesByProduct(lines []purchaseOrderReceiptLine) ([]productReceipt, error) {
+	byProduct := make(map[int64]*productReceipt, len(lines))
+	order := make([]int64, 0, len(lines))
+	for _, line := range lines {
+		if line.delta <= 0 {
+			continue
+		}
+		unitCost, err := strconv.ParseFloat(line.item.UnitCost, 64)
+		if err != nil {
+			return nil, fmt.Errorf("unit cost for item %d: %w", line.item.ID, err)
+		}
+		receipt, ok := byProduct[line.item.ProductID]
+		if !ok {
+			receipt = &productReceipt{productID: line.item.ProductID}
+			byProduct[line.item.ProductID] = receipt
+			order = append(order, line.item.ProductID)
+		}
+		total := receipt.unitCost*receipt.quantity + unitCost*line.delta
+		receipt.quantity += line.delta
+		receipt.unitCost = total / receipt.quantity
+	}
+	sort.Slice(order, func(i, j int) bool { return order[i] < order[j] })
+	receipts := make([]productReceipt, 0, len(order))
+	for _, productID := range order {
+		receipts = append(receipts, *byProduct[productID])
+	}
+	return receipts, nil
 }
 
 func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {

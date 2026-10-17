@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/erp/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
 const poCacheTTL = 5 * time.Minute
@@ -121,4 +122,6 @@ func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, businessID, id 
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
 	cacher.InvalidateTypedScope[[]domain.PurchaseOrder](ctx, fmt.Sprintf("purchase_orders:%d:*", businessID))
+	// Receiving changes stock, which product and inventory views cache.
+	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(businessID))
 }

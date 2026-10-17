@@ -341,11 +341,11 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64, 
 		return err
 	}
 
-	type line struct {
-		productID int64
-		qty       float64
-	}
-	lines := make([]line, 0, len(items))
+	// A product listed on two lines moves once with the summed quantity: the
+	// ledger keeps one movement per transfer, product and location, so a
+	// second movement would be dropped as a duplicate of the first.
+	quantities := make(map[int64]float64, len(items))
+	productIDs := make([]int64, 0, len(items))
 	for _, it := range items {
 		if it.ProductID <= 0 {
 			return domain.ErrInvalidStockTransfer
@@ -358,33 +358,29 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64, 
 		if q <= 0 || math.IsNaN(q) || math.IsInf(q, 0) {
 			return domain.ErrInvalidStockTransfer
 		}
-		lines = append(lines, line{productID: it.ProductID, qty: q})
+		if _, seen := quantities[it.ProductID]; !seen {
+			productIDs = append(productIDs, it.ProductID)
+		}
+		quantities[it.ProductID] += q
 	}
-	sort.Slice(lines, func(i, j int) bool { return lines[i].productID < lines[j].productID })
+	sort.Slice(productIDs, func(i, j int) bool { return productIDs[i] < productIDs[j] })
 
 	group := id
-	for _, l := range lines {
+	for _, productID := range productIDs {
+		qty := quantities[productID]
 		out := stock.Movement{
-			OwnerID: businessID, LocationID: fromLoc, ProductID: l.productID,
-			EntryType: stock.EntryTransferOut, Change: -l.qty,
+			OwnerID: businessID, LocationID: fromLoc, ProductID: productID,
+			EntryType: stock.EntryTransferOut, Change: -qty,
 			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
 			Channel: "erp", Note: "stock transfer",
 		}
 		in := stock.Movement{
-			OwnerID: businessID, LocationID: toLoc, ProductID: l.productID,
-			EntryType: stock.EntryTransferIn, Change: l.qty,
+			OwnerID: businessID, LocationID: toLoc, ProductID: productID,
+			EntryType: stock.EntryTransferIn, Change: qty,
 			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
 			Channel: "erp", Note: "stock transfer", AllowNegative: true,
 		}
-		// Acquire location row locks in ascending location_id order to avoid deadlocks.
-		first, second := out, in
-		if toLoc < fromLoc {
-			first, second = in, out
-		}
-		if _, _, err = stock.ApplyMovementTx(ctx, tx, first); err != nil {
-			return err
-		}
-		if _, _, err = stock.ApplyMovementTx(ctx, tx, second); err != nil {
+		if _, _, err = stock.TransferTx(ctx, tx, out, in); err != nil {
 			return err
 		}
 	}

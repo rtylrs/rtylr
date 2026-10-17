@@ -13,6 +13,7 @@ var (
 	ErrPurchaseOrderSelfApproval      = errors.New("purchase order creator cannot approve the purchase order")
 	ErrPurchaseOrderInvalidTransition = errors.New("purchase order cannot be approved from its current status")
 	ErrPurchaseOrderReferenceNotFound = errors.New("purchase order reference not found in business")
+	ErrInvalidReceivedQuantity        = errors.New("invalid received quantity")
 )
 
 type PurchaseOrderStatus string

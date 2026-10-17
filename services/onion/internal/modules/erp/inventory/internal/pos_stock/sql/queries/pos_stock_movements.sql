@@ -23,6 +23,9 @@ LIMIT 100;
 -- name: UpdateStockLedgerTransferGroup :exec
 UPDATE stock_ledger SET transfer_group = ? WHERE id = ? AND business_id = ?;
 
+-- name: LinkStockLedgerTransferIn :exec
+UPDATE stock_ledger SET transfer_group = ?, reference_id = ? WHERE id = ? AND business_id = ?;
+
 -- cross-schema read from erp_products — validate inventory-tracked product
 -- name: InventoryProductExists :one
 SELECT 1 AS exists_flag

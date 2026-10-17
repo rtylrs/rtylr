@@ -58,6 +58,9 @@ type Movement struct {
 	EmployeeID    *int64
 	TransferGroup *int64
 	AllowNegative bool
+	// UnitCost values inbound stock for the FIFO cost layers. Nil uses the
+	// product's cost price.
+	UnitCost *float64
 }
 
 func fmtQty(v float64) string { return strconv.FormatFloat(v, 'f', -1, 64) }

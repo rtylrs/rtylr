@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/erp/onlineorders/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
 const (
@@ -24,8 +25,7 @@ func NewService(_ context.Context, repo repository) *Service {
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.StoreOrder, error) {
-	cacheKey := "store_orders:" + strconv.FormatInt(businessID, 10) + "|domain=v2"
-	return cacher.Of[[]domain.StoreOrder]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.StoreOrder, error) {
+	return cacher.Of[[]domain.StoreOrder]().GetOrComputeSingle(ctx, storeOrdersCacheKey(businessID), func(ctx context.Context) ([]domain.StoreOrder, error) {
 		return s.repo.List(ctx, businessID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
 }
@@ -113,9 +113,15 @@ func validateOrder(input domain.StoreOrderInput) error {
 	return nil
 }
 
+func storeOrdersCacheKey(businessID int64) string {
+	return "store_orders:" + strconv.FormatInt(businessID, 10) + "|domain=v2"
+}
+
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	prefix := "store_orders:" + strconv.FormatInt(businessID, 10)
-	cacher.Of[[]domain.StoreOrder]().Invalidate(ctx, []string{prefix})
+	// Invalidate deletes exact keys, so it must be the key List caches under.
+	cacher.Of[[]domain.StoreOrder]().Invalidate(ctx, []string{storeOrdersCacheKey(businessID)})
+	// Confirming, cancelling or refunding an order moves stock.
+	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(businessID))
 }
 
 type repository interface {

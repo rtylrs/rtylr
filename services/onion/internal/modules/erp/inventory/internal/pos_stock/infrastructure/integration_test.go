@@ -278,3 +278,89 @@ func TestStockMovementsUseBusinessOwnerForMemberRequest(t *testing.T) {
 		t.Fatalf("ledger ownership = %d/%d", owner, businessID)
 	}
 }
+
+func TestStockMovements_TransferStockPairsLegsAndCarriesCost(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := configuredStockRepository(db)
+	ctx := context.Background()
+
+	result, err := db.ExecContext(ctx, `INSERT INTO pos_locations (owner_id, business_id, name) VALUES (?, ?, 'Transfer destination')`, fixtureOwnerID, fixtureBusinessID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	destinationBranchID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err = db.ExecContext(ctx, `
+		INSERT INTO erp_products (owner_id, business_id, name, cost_price, track_inventory)
+		VALUES (?, ?, 'pos-transfer-cost', 9.00, TRUE)`, fixtureOwnerID, fixtureBusinessID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	productID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		for _, query := range []string{
+			"DELETE FROM inventory_cost_layers WHERE owner_id = ? AND product_id = ?",
+			"DELETE FROM stock_ledger WHERE owner_id = ? AND product_id = ?",
+			"DELETE FROM stock_levels WHERE owner_id = ? AND product_id = ?",
+		} {
+			_, _ = db.ExecContext(ctx, query, fixtureOwnerID, productID)
+		}
+		_, _ = db.ExecContext(ctx, "DELETE FROM stock_locations WHERE source_table = 'pos_locations' AND source_id = ?", destinationBranchID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM pos_locations WHERE id = ?", destinationBranchID)
+	})
+
+	if _, err := repo.ReceiveStock(ctx, domain.ReceiveStockInput{BusinessID: fixtureBusinessID, OwnerID: fixtureOwnerID, BranchID: fixtureBranchID, ProductID: productID, Quantity: 5}); err != nil {
+		t.Fatalf("ReceiveStock: %v", err)
+	}
+	inID, err := repo.TransferStock(ctx, domain.TransferStockInput{
+		BusinessID: fixtureBusinessID, OwnerID: fixtureOwnerID,
+		FromBranchID: fixtureBranchID, ToBranchID: destinationBranchID,
+		ProductID: productID, Quantity: 3,
+	})
+	if err != nil {
+		t.Fatalf("TransferStock: %v", err)
+	}
+
+	var entryType string
+	var group, reference sql.NullInt64
+	if err := db.QueryRowContext(ctx, "SELECT entry_type, transfer_group, reference_id FROM stock_ledger WHERE id = ?", inID).Scan(&entryType, &group, &reference); err != nil {
+		t.Fatalf("read inbound leg: %v", err)
+	}
+	if entryType != "transfer_in" || !group.Valid || !reference.Valid || group.Int64 != reference.Int64 {
+		t.Fatalf("inbound leg = %s group=%v reference=%v, want transfer_in referencing its group", entryType, group, reference)
+	}
+	var outType string
+	var outGroup sql.NullInt64
+	if err := db.QueryRowContext(ctx, "SELECT entry_type, transfer_group FROM stock_ledger WHERE id = ?", group.Int64).Scan(&outType, &outGroup); err != nil {
+		t.Fatalf("read outbound leg: %v", err)
+	}
+	if outType != "transfer_out" || outGroup.Int64 != group.Int64 {
+		t.Fatalf("outbound leg = %s group=%v, want transfer_out in group %d", outType, outGroup, group.Int64)
+	}
+
+	branchStock := func(branchID int64) (onHand, layered, value float64) {
+		t.Helper()
+		if err := db.QueryRowContext(ctx, `
+			SELECT sl.on_hand,
+			       COALESCE((SELECT SUM(quantity_remaining) FROM inventory_cost_layers c WHERE c.owner_id = sl.owner_id AND c.product_id = sl.product_id AND c.location_id = sl.location_id), 0),
+			       COALESCE((SELECT SUM(quantity_remaining * unit_cost) FROM inventory_cost_layers c WHERE c.owner_id = sl.owner_id AND c.product_id = sl.product_id AND c.location_id = sl.location_id), 0)
+			FROM stock_levels sl
+			JOIN stock_locations l ON l.id = sl.location_id
+			WHERE sl.owner_id = ? AND sl.product_id = ? AND l.source_table = 'pos_locations' AND l.source_id = ?`,
+			fixtureOwnerID, productID, branchID).Scan(&onHand, &layered, &value); err != nil {
+			t.Fatalf("read branch %d stock: %v", branchID, err)
+		}
+		return onHand, layered, value
+	}
+	if onHand, layered, value := branchStock(fixtureBranchID); onHand != 2 || layered != 2 || value != 18 {
+		t.Errorf("source branch = %v on hand, %v layered worth %v; want 2, 2, 18", onHand, layered, value)
+	}
+	if onHand, layered, value := branchStock(destinationBranchID); onHand != 3 || layered != 3 || value != 27 {
+		t.Errorf("destination branch = %v on hand, %v layered worth %v; want 3, 3, 27", onHand, layered, value)
+	}
+}

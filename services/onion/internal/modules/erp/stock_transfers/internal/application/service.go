@@ -107,4 +107,6 @@ func (s *Service) UpdateStockTransferStatus(ctx context.Context, businessID, id 
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
 	cacher.InvalidateTypedScope[stockTransfersPageResult](ctx, cacheKeys.ScopedPrefix("stock_transfers", businessID))
+	// Receiving a transfer moves stock, which product and inventory views cache.
+	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(businessID))
 }

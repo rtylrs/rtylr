@@ -18,6 +18,12 @@ func purchaseOrderMutationError(err error, fallback string) error {
 		return purchaseOrderStatusError(http.StatusConflict, "Received purchase orders cannot be reopened")
 	case errors.Is(err, stock.ErrInsufficientStock):
 		return purchaseOrderStatusError(http.StatusConflict, "Insufficient stock")
+	case errors.Is(err, domain.ErrPurchaseOrderInvalidTransition):
+		return purchaseOrderStatusError(http.StatusConflict, "The purchase order cannot move to that status")
+	case errors.Is(err, domain.ErrInvalidReceivedQuantity):
+		return purchaseOrderStatusError(http.StatusBadRequest, err.Error())
+	case errors.Is(err, domain.ErrInvalidPurchaseOrder):
+		return purchaseOrderStatusError(http.StatusBadRequest, "Invalid purchase order")
 	default:
 		return purchaseOrderStatusError(http.StatusInternalServerError, fallback)
 	}

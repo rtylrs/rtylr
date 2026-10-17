@@ -25,6 +25,12 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 	defer tx.Rollback()
 
 	qtx := r.queries.WithTx(tx)
+	if input.StockQuantitySet || input.FieldPresent(domain.ProductFieldStockQuantity) {
+		// Stock rows before the product row, the order every movement uses.
+		if err := stock.LockProductLevelsTx(ctx, tx, ownerID, id); err != nil {
+			return err
+		}
+	}
 	locked, err := qtx.GetProductForUpdate(ctx, sqlc.GetProductForUpdateParams{BusinessID: ownerID, ID: id})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.ErrProductNotFound

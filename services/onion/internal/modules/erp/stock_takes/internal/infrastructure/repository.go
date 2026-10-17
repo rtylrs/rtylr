@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/erp/internal/outbox"
@@ -419,6 +420,8 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 	if err != nil {
 		return err
 	}
+	// Lock stock rows in product order, like every other multi-product writer.
+	sort.Slice(items, func(i, j int) bool { return items[i].ProductID < items[j].ProductID })
 
 	var locID int64
 	if warehouseID.Valid && warehouseID.Int64 > 0 {

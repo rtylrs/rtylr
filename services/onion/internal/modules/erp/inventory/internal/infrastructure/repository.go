@@ -43,14 +43,15 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 
 	qtx := r.queries.WithTx(tx)
 
-	// Lock the product while verifying tenancy so a movement can never create
-	// stock rows for another business's catalog entry.
+	// Verify tenancy so a movement can never create stock rows for another
+	// business's catalog entry. No row lock here: ApplyMovementTx locks the
+	// stock level before the product, and taking the product first would
+	// invert that order and deadlock against concurrent sales.
 	var ownedProductID int64
 	err = tx.QueryRowContext(ctx, `
 		SELECT id
 		FROM erp_products
-		WHERE id = ? AND owner_id = ? AND business_id = ?
-		FOR UPDATE`, productID, ownerID, ownerID).Scan(&ownedProductID)
+		WHERE id = ? AND owner_id = ? AND business_id = ?`, productID, ownerID, ownerID).Scan(&ownedProductID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return sql.ErrNoRows
 	}

@@ -127,48 +127,72 @@ func (r *Repository) TransferStock(ctx context.Context, input domain.TransferSto
 	}
 	defer rollbackOnError(tx, &err)
 
-	outID, err := r.applyMovementTx(ctx, tx, movementInput{
-		BusinessID:  input.BusinessID,
-		OwnerID:     input.OwnerID,
-		BranchID:    input.FromBranchID,
-		ProductID:   input.ProductID,
-		EntryType:   stock.EntryTransferOut,
-		DisplayType: "transfer_out",
-		Change:      -input.Quantity,
-		Note:        stringPtrValue(input.Note),
-		EmployeeID:  input.EmployeeID,
-	})
-	if err != nil {
+	if err = r.ensureInventoryProduct(ctx, tx, input.BusinessID, input.ProductID); err != nil {
 		return 0, err
 	}
-	transferGroup := outID
+	fromLocationID, err := stock.POSBranchLocationID(ctx, tx, ownerID, input.BusinessID, input.FromBranchID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to resolve POS transfer source location", logger.Error(err))
+		return 0, err
+	}
+	toLocationID, err := stock.POSBranchLocationID(ctx, tx, ownerID, input.BusinessID, input.ToBranchID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to resolve POS transfer destination location", logger.Error(err))
+		return 0, err
+	}
+
+	note := stringPtrValue(input.Note)
+	outID, inID, err := stock.TransferTx(ctx, tx, stock.Movement{
+		OwnerID:       ownerID,
+		BusinessID:    input.BusinessID,
+		LocationID:    fromLocationID,
+		ProductID:     input.ProductID,
+		EntryType:     stock.EntryTransferOut,
+		Change:        -input.Quantity,
+		ReferenceType: "pos_stock_movement",
+		Channel:       "pos",
+		Note:          note,
+		EmployeeID:    input.EmployeeID,
+		CreatedBy:     input.EmployeeID,
+	}, stock.Movement{
+		OwnerID:       ownerID,
+		BusinessID:    input.BusinessID,
+		LocationID:    toLocationID,
+		ProductID:     input.ProductID,
+		EntryType:     stock.EntryTransferIn,
+		Change:        input.Quantity,
+		ReferenceType: "pos_stock_transfer",
+		Channel:       "pos",
+		Note:          note,
+		EmployeeID:    input.EmployeeID,
+		CreatedBy:     input.EmployeeID,
+	})
+	if errors.Is(err, stock.ErrInsufficientStock) {
+		err = domain.ErrInsufficientStock
+		return 0, err
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to apply POS stock transfer", logger.Error(err))
+		return 0, err
+	}
+
+	// The outbound row's id groups the pair; the inbound row also references it.
 	qtx := r.queries.WithTx(tx)
 	if err = qtx.UpdateStockLedgerTransferGroup(ctx, sqlc.UpdateStockLedgerTransferGroupParams{
-		TransferGroup: sql.NullInt64{Int64: transferGroup, Valid: true},
+		TransferGroup: sql.NullInt64{Int64: outID, Valid: true},
 		ID:            outID,
 		BusinessID:    input.BusinessID,
 	}); err != nil {
 		logger.Ctx(ctx).Error("Failed to mark POS transfer out group", logger.Error(err))
 		return 0, err
 	}
-
-	inID, err := r.applyMovementTx(ctx, tx, movementInput{
-		BusinessID:     input.BusinessID,
-		OwnerID:        input.OwnerID,
-		BranchID:       input.ToBranchID,
-		ProductID:      input.ProductID,
-		EntryType:      stock.EntryTransferIn,
-		DisplayType:    "transfer_in",
-		Change:         input.Quantity,
-		Note:           stringPtrValue(input.Note),
-		EmployeeID:     input.EmployeeID,
-		TransferGroup:  &transferGroup,
-		AllowNegative:  false,
-		ReferenceType:  "pos_stock_transfer",
-		ReferenceID:    &outID,
-		SkipProductLog: true,
-	})
-	if err != nil {
+	if err = qtx.LinkStockLedgerTransferIn(ctx, sqlc.LinkStockLedgerTransferInParams{
+		TransferGroup: sql.NullInt64{Int64: outID, Valid: true},
+		ReferenceID:   sql.NullInt64{Int64: outID, Valid: true},
+		ID:            inID,
+		BusinessID:    input.BusinessID,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to link POS transfer in", logger.Error(err))
 		return 0, err
 	}
 
