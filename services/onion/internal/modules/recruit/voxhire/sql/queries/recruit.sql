@@ -162,8 +162,15 @@ WHERE a.id = ?;
 -- name: CreateCareerApplication :execresult
 INSERT INTO voxire_career_applications (
     job_id, name, email, phone, location, salary_expectation,
-    work_history, education, experience_summary, cover_letter, cv_key, status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new');
+    work_history, education, experience_summary, cover_letter, cv_key, status,
+    cv_processing_status, cv_processing_error
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?);
+
+-- name: FindRecentCareerApplicationID :one
+SELECT id FROM voxire_career_applications
+WHERE job_id = ? AND email = ? AND created_at >= NOW() - INTERVAL 10 MINUTE
+ORDER BY id DESC
+LIMIT 1;
 
 -- name: InsertApplicationEvent :exec
 INSERT INTO voxhire_application_events (application_id, kind, title, detail)

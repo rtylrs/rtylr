@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/domain"
 	"github.com/voxire/onion/internal/modules/recruit/voxhire/internal/infrastructure/persistence/sqlc"
@@ -65,10 +66,22 @@ func (r *Repository) CreateTalentApplication(ctx context.Context, input domain.T
 		Pitch:              sql.NullString{String: input.Pitch, Valid: input.Pitch != ""},
 		Consent:            input.Consent,
 		CvKey:              sql.NullString{String: input.CVKey, Valid: input.CVKey != ""},
+		CvProcessingStatus: domain.SubmissionCVStatus(input.CVUploadFailed),
+		CvProcessingError:  sql.NullString{String: input.CVUploadError, Valid: input.CVUploadFailed && input.CVUploadError != ""},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert voxhire talent application", logger.Error(err))
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+// FindRecentTalentApplicationID returns the newest talent application from
+// email in the last 10 minutes, or 0 when there is none.
+func (r *Repository) FindRecentTalentApplicationID(ctx context.Context, email string) (int64, error) {
+	id, err := r.queries.FindRecentTalentApplicationID(ctx, email)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	return id, err
 }

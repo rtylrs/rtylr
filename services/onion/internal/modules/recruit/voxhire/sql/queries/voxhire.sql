@@ -35,5 +35,12 @@ INSERT INTO voxhire_talent_applications (
     pitch,
     consent,
     cv_key,
-    cv_processing_status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending');
+    cv_processing_status,
+    cv_processing_error
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: FindRecentTalentApplicationID :one
+SELECT id FROM voxhire_talent_applications
+WHERE email = ? AND created_at >= NOW() - INTERVAL 10 MINUTE
+ORDER BY id DESC
+LIMIT 1;
