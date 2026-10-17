@@ -219,7 +219,7 @@ func (r *Repository) ProcessDue(ctx context.Context, now time.Time) ([]int64, er
 		  AND template.business_id = r.business_id
 		WHERE r.is_active = TRUE
 		  AND r.next_invoice_date <= ?
-		  AND (r.end_date IS NULL OR r.end_date >= ?)
+		  AND (r.end_date IS NULL OR r.end_date >= DATE(?))
 		ORDER BY r.next_invoice_date ASC, r.id ASC
 		LIMIT 100`, now, now)
 	if err != nil {
@@ -301,7 +301,7 @@ func (r *Repository) generateDue(ctx context.Context, id, businessID int64, now 
 		FROM finance_recurring_invoices
 		WHERE id = ? AND business_id = ? AND is_active = TRUE
 		  AND next_invoice_date <= ?
-		  AND (end_date IS NULL OR end_date >= ?)
+		  AND (end_date IS NULL OR end_date >= DATE(?))
 		FOR UPDATE`, id, businessID, now, now).Scan(
 		&schedule.templateID, &schedule.frequency, &schedule.nextDate, &schedule.endDate,
 	)
