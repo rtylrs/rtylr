@@ -22,6 +22,8 @@ var sendNotificationEmail = emailPkg.Send
 type repository interface {
 	CreateCompanyLead(ctx context.Context, input domain.CompanyLeadInput) (int64, error)
 	CreateTalentApplication(ctx context.Context, input domain.TalentApplicationInput) (int64, error)
+	FindRecentTalentApplicationID(ctx context.Context, email string) (int64, error)
+	FindRecentCareerApplicationID(ctx context.Context, jobID int64, email string) (int64, error)
 
 	// Recruiter-admin surface.
 	CreateAdmin(ctx context.Context, email, passwordHash, name string) (int64, error)
@@ -58,6 +60,16 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	// sendEmail overrides sendNotificationEmail for one service instance, so
+	// tests can capture emails without racing on the package variable.
+	sendEmail func(context.Context, emailPkg.SendParams) (string, error)
+}
+
+func (s *Service) send(ctx context.Context, p emailPkg.SendParams) (string, error) {
+	if s.sendEmail != nil {
+		return s.sendEmail(ctx, p)
+	}
+	return sendNotificationEmail(ctx, p)
 }
 
 func NewService(_ context.Context, repo repository) *Service {
@@ -81,17 +93,26 @@ func (s *Service) SubmitCompanyLead(ctx context.Context, input domain.CompanyLea
 }
 
 // SubmitTalentApplication persists a talent application and fires a
-// notification email in the background.
+// notification email in the background. If the insert fails the email still
+// goes out, flagged as not saved, because it is then the only record left.
 func (s *Service) SubmitTalentApplication(ctx context.Context, input domain.TalentApplicationInput) (int64, error) {
 	id, err := s.repo.CreateTalentApplication(ctx, input)
 	if err != nil {
+		go s.notifyTalentApplication(context.WithoutCancel(ctx), 0, input, noticeNotSaved)
 		return 0, err
 	}
 
 	// See SubmitCompanyLead: the notification must outlive the request.
-	go s.notifyTalentApplication(context.WithoutCancel(ctx), id, input)
+	go s.notifyTalentApplication(context.WithoutCancel(ctx), id, input, noticeForSaved(input.CVUploadFailed))
 
 	return id, nil
+}
+
+// RecentTalentApplication returns the ID of an application the same email
+// submitted in the last few minutes, or 0. Applicants who were shown an error
+// resubmit; this keeps those retries from creating duplicate rows.
+func (s *Service) RecentTalentApplication(ctx context.Context, email string) (int64, error) {
+	return s.repo.FindRecentTalentApplicationID(ctx, email)
 }
 
 func (s *Service) notifyCompanyLead(ctx context.Context, id int64, lead domain.CompanyLeadInput) {
@@ -141,7 +162,7 @@ func (s *Service) notifyCompanyLead(ctx context.Context, id int64, lead domain.C
 
 	subject := fmt.Sprintf("[VoxHire] New hiring inquiry from %s", lead.CompanyName)
 
-	if _, err := sendNotificationEmail(ctx, emailPkg.SendParams{
+	if _, err := s.send(ctx, emailPkg.SendParams{
 		To:      notifyEmails,
 		Subject: subject,
 		HTML:    emailHTML,
@@ -155,10 +176,13 @@ func (s *Service) notifyCompanyLead(ctx context.Context, id int64, lead domain.C
 	}
 }
 
-func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app domain.TalentApplicationInput) {
+func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app domain.TalentApplicationInput, notice submissionNotice) {
 	cvLine := "Not attached"
-	if app.CVKey != "" {
-		cvLine = fmt.Sprintf("Stored at R2 key: <code>%s</code>", html.EscapeString(app.CVKey))
+	switch {
+	case app.CVKey != "":
+		cvLine = fmt.Sprintf("Stored at S3 key: <code>%s</code>", html.EscapeString(app.CVKey))
+	case app.CVUploadFailed:
+		cvLine = "Upload FAILED, not stored"
 	}
 
 	emailHTML := fmt.Sprintf(`
@@ -166,7 +190,7 @@ func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app dom
   <div style="background:#111118;border-radius:12px;padding:32px;color:#f0f0f6;">
     <h2 style="font-size:20px;font-weight:600;margin:0 0 4px 0;color:#63c6bd;">New VoxHire talent application</h2>
     <p style="font-size:13px;color:rgba(240,240,246,0.55);margin:0 0 28px 0;">Application #%d via hire.voxire.com</p>
-
+    %s
     <table style="width:100%%;border-collapse:collapse;">
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;width:160px;">Name</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;font-weight:500;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Email</td><td style="padding:8px 0;font-size:15px;"><a href="mailto:%s" style="color:#63c6bd;text-decoration:none;">%s</a></td></tr>
@@ -207,6 +231,7 @@ func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app dom
   </div>
 </div>`,
 		id,
+		notice.bannerHTML(),
 		html.EscapeString(app.FullName),
 		html.EscapeString(app.Email), html.EscapeString(app.Email),
 		html.EscapeString(orDash(app.Phone)),
@@ -230,9 +255,9 @@ func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app dom
 		html.EscapeString(app.FullName),
 	)
 
-	subject := fmt.Sprintf("[VoxHire] New talent application from %s (%s)", app.FullName, app.Track)
+	subject := notice.subjectPrefix() + fmt.Sprintf("[VoxHire] New talent application from %s (%s)", app.FullName, app.Track)
 
-	if _, err := sendNotificationEmail(ctx, emailPkg.SendParams{
+	if _, err := s.send(ctx, emailPkg.SendParams{
 		To:      notifyEmails,
 		Subject: subject,
 		HTML:    emailHTML,

@@ -386,9 +386,23 @@ func (s *Service) GetApplicationCVURL(ctx context.Context, id int64) (string, er
 func (s *Service) SubmitCareerApplication(ctx context.Context, in domain.CareerApplicationInput) (int64, error) {
 	id, err := s.repo.CreateCareerApplication(ctx, in)
 	if err != nil {
+		// The email is the only record left: send it flagged as not saved.
+		s.notifyCareerApplicationAsync(ctx, 0, in, noticeNotSaved)
 		return 0, err
 	}
 
+	s.notifyCareerApplicationAsync(ctx, id, in, noticeForSaved(in.CVUploadFailed))
+
+	return id, nil
+}
+
+// RecentCareerApplication returns the ID of an application the same email
+// sent to jobID in the last few minutes, or 0. See RecentTalentApplication.
+func (s *Service) RecentCareerApplication(ctx context.Context, jobID int64, email string) (int64, error) {
+	return s.repo.FindRecentCareerApplicationID(ctx, jobID, email)
+}
+
+func (s *Service) notifyCareerApplicationAsync(ctx context.Context, id int64, in domain.CareerApplicationInput, notice submissionNotice) {
 	// Detach from the request context — the goroutine outlives the handler — but
 	// bound it, so a stalled email provider cannot hold the goroutine forever.
 	go func() {
@@ -400,8 +414,6 @@ func (s *Service) SubmitCareerApplication(ctx context.Context, in domain.CareerA
 
 		notifyCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), careerApplicationNotifyTimeout)
 		defer cancel()
-		s.notifyCareerApplication(notifyCtx, id, in)
+		s.notifyCareerApplication(notifyCtx, id, in, notice)
 	}()
-
-	return id, nil
 }
