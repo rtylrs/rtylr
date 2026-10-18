@@ -12,7 +12,9 @@ describe('ERP responsive controls', () => {
     const receiving = source('features/purchasing/Receiving.tsx');
     const quickAdjust = source('shared/components/QuickStockAdjust.tsx');
 
-    expect(receiving).toContain('className="h-11 w-11 rounded flex items-center justify-center"');
+    expect(receiving).toContain(
+      'className="h-11 w-11 rounded flex items-center justify-center disabled:opacity-40"'
+    );
     expect(receiving).toContain(
       'className="h-11 w-11 rounded-lg flex items-center justify-center"'
     );

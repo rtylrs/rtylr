@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from '@tanstack/react-router';
 import { PackageCheck, Check, X as XIcon, Plus, Minus } from 'lucide-react';
@@ -11,10 +11,13 @@ import {
 } from './usePurchaseOrders';
 import type { PurchaseOrder } from './usePurchaseOrders';
 import { useSuppliers } from '../suppliers/useSuppliers';
+import { useAllProducts } from '../products/useProducts';
+import { displayPurchaseOrderStatus, purchaseOrderLabel } from './purchaseOrderStatusUtils';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '../../shared/lib/apiErrorMessage';
 import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 
@@ -22,10 +25,11 @@ const ACCENT = 'var(--erp-accent)';
 
 interface ReceiveLine {
   id?: string;
-  sku: string;
-  name: string;
+  productId: string;
   expected: number;
   received: number;
+  // Already booked into stock; the server refuses to lower a line below it.
+  previouslyReceived: number;
 }
 
 const Receiving: React.FC = () => {
@@ -36,6 +40,11 @@ const Receiving: React.FC = () => {
   const supplierNameById = new Map((supplierResult?.suppliers ?? []).map((s) => [s.id, s.name]));
   const updateStatus = useUpdatePurchaseOrderStatus();
   const { t } = useTranslation('erp');
+  const { data: products = [] } = useAllProducts();
+  const productById = useMemo(
+    () => new Map(products.map((product) => [product.id ?? '', product])),
+    [products]
+  );
   const open = orders.filter(
     (o) => o.status === 'sent' || o.status === 'approved' || o.status === 'partial'
   );
@@ -57,13 +66,19 @@ const Receiving: React.FC = () => {
     setLines(
       (orderDetail.items ?? []).map((item) => ({
         id: item.id,
-        sku: item.productId ?? '',
-        name: `Product #${item.productId ?? ''}`,
+        productId: item.productId ?? '',
         expected: item.quantityOrdered ?? 0,
         received: item.quantityReceived ?? item.quantityOrdered ?? 0,
+        previouslyReceived: item.quantityReceived ?? 0,
       }))
     );
   }, [selectedId, orderDetail]);
+
+  // Names are looked up at render time so they appear once the catalog loads.
+  const productName = (productId: string): string =>
+    productById.get(productId)?.name || t('erp.purchasing.productFallback', { id: productId });
+  const productSku = (productId: string): string => productById.get(productId)?.sku || productId;
+  const selectedOrder = open.find((order) => order.id === selectedId) ?? orderDetail ?? undefined;
 
   const closeDetails = (): void => {
     seededOrderId.current = null;
@@ -80,8 +95,11 @@ const Receiving: React.FC = () => {
   const adjust = (lineKey: string, delta: number) => {
     setLines((prev) =>
       prev.map((l) =>
-        (l.id ?? l.sku) === lineKey
-          ? { ...l, received: Math.min(l.expected, Math.max(0, l.received + delta)) }
+        (l.id ?? l.productId) === lineKey
+          ? {
+              ...l,
+              received: Math.min(l.expected, Math.max(l.previouslyReceived, l.received + delta)),
+            }
           : l
       )
     );
@@ -126,7 +144,8 @@ const Receiving: React.FC = () => {
           );
           closeDetails();
         },
-        onError: () => toast.error(t('erp.receiving.toast.updateFailed')),
+        onError: (error) =>
+          toast.error(apiErrorMessage(error, t('erp.receiving.toast.updateFailed'))),
       }
     );
   };
@@ -149,7 +168,9 @@ const Receiving: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              {t('erp.receiving.receiveFor', { id: selectedId })}
+              {t('erp.receiving.receiveFor', {
+                label: selectedOrder ? purchaseOrderLabel(selectedOrder) : `PO-${selectedId}`,
+              })}
             </h3>
             <button
               type="button"
@@ -173,7 +194,8 @@ const Receiving: React.FC = () => {
               </p>
             ) : (
               lines.map((line) => {
-                const lineKey = line.id ?? line.sku;
+                const lineKey = line.id ?? line.productId;
+                const name = productName(line.productId);
                 const variance = line.received - line.expected;
                 return (
                   <div
@@ -183,18 +205,20 @@ const Receiving: React.FC = () => {
                   >
                     <div className="flex-1">
                       <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        {line.name}
+                        {name}
                       </p>
                       <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
-                        {line.sku} / {t('erp.receiving.expected', { count: line.expected })}
+                        {productSku(line.productId)} /{' '}
+                        {t('erp.receiving.expected', { count: line.expected })}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => adjust(lineKey, -1)}
-                        aria-label={`Decrease received quantity for ${line.name}`}
-                        className="h-11 w-11 rounded flex items-center justify-center"
+                        disabled={line.received <= line.previouslyReceived}
+                        aria-label={t('erp.receiving.decrease', { name })}
+                        className="h-11 w-11 rounded flex items-center justify-center disabled:opacity-40"
                         style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                       >
                         <Minus size={16} />
@@ -208,8 +232,9 @@ const Receiving: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => adjust(lineKey, 1)}
-                        aria-label={`Increase received quantity for ${line.name}`}
-                        className="h-11 w-11 rounded flex items-center justify-center"
+                        disabled={line.received >= line.expected}
+                        aria-label={t('erp.receiving.increase', { name })}
+                        className="h-11 w-11 rounded flex items-center justify-center disabled:opacity-40"
                         style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                       >
                         <Plus size={16} />
@@ -282,7 +307,9 @@ const Receiving: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                  PO-{o.id} / {supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`}
+                  {purchaseOrderLabel(o)} /{' '}
+                  {supplierNameById.get(o.supplierId) ??
+                    t('erp.purchasing.supplierFallback', { id: o.supplierId ?? '' })}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
                   {t('erp.receiving.orderSummary', {
@@ -298,7 +325,9 @@ const Receiving: React.FC = () => {
                   color: ACCENT,
                 }}
               >
-                {o.status}
+                {t(
+                  `erp.purchasing.status.${displayPurchaseOrderStatus(o.status ?? '').toLowerCase()}`
+                )}
               </span>
             </button>
           ))}

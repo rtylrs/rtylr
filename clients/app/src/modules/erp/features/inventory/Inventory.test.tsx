@@ -16,7 +16,8 @@ vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
-vi.mock('@voxire/config', () => ({
+vi.mock('@voxire/config', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   cdnImageUrl: () => undefined,
 }));
 

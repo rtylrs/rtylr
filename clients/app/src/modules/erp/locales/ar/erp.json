@@ -225,7 +225,7 @@
   "receiving": {
     "title": "استلام البضائع",
     "description": "استلم العناصر من أوامر الشراء المفتوحة",
-    "receiveFor": "استلام عناصر أمر الشراء {{id}}",
+    "receiveFor": "استلام عناصر {{label}}",
     "closeDetails": "إغلاق تفاصيل الاستلام",
     "expected": "المتوقع {{count}}",
     "ok": "موافق",
@@ -247,7 +247,9 @@
       "completed": "اكتمل الاستلام، تم استلام جميع العناصر",
       "completedVariance": "اكتمل الاستلام مع فرق {{count}} وحدة",
       "updateFailed": "فشل تحديث حالة الاستلام"
-    }
+    },
+    "decrease": "تقليل الكمية المستلمة لـ {{name}}",
+    "increase": "زيادة الكمية المستلمة لـ {{name}}"
   },
   "reorder": {
     "empty": {
@@ -461,13 +463,57 @@
     "itemRequired": "مطلوب عنصر واحد على الأقل بمنتج وكمية",
     "draftCreated": "تم إنشاء مسودة أمر الشراء",
     "createFailed": "تعذر إنشاء أمر الشراء",
-    "statusUpdateFailed": "تعذر تحديث حالة أمر الشراء",
-    "approveFailed": "تعذر اعتماد أمر الشراء",
     "newOrder": "أمر جديد",
     "approve": "اعتماد",
     "send": "إرسال",
     "newPurchaseOrder": "أمر شراء جديد",
-    "cost": "التكلفة"
+    "cost": "التكلفة",
+    "columns": {
+      "order": "الأمر",
+      "supplier": "المورد",
+      "expected": "التسليم المتوقع",
+      "items": "العناصر",
+      "total": "الإجمالي",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "draft": "مسودة",
+      "sent": "مرسل",
+      "approved": "معتمد",
+      "partial": "مستلم جزئيًا",
+      "received": "مستلم",
+      "cancelled": "ملغى"
+    },
+    "itemsUnavailable": "تعذر تحميل تفاصيل العناصر",
+    "productFallback": "المنتج رقم {{id}}",
+    "supplierFallback": "المورد رقم {{id}}",
+    "toast": {
+      "approved": "تم اعتماد {{label}}",
+      "approveFailed": "تعذر اعتماد {{label}}",
+      "sent": "تم إرسال {{label}} إلى المورد",
+      "sendFailed": "تعذر إرسال {{label}}"
+    },
+    "form": {
+      "selectSupplier": "اختر المورد*",
+      "poNumber": "رقم أمر الشراء*",
+      "items": "العناصر *",
+      "addItem": "+ إضافة عنصر",
+      "removeItem": "إزالة العنصر",
+      "createDraft": "إنشاء مسودة"
+    },
+    "print": {
+      "button": "طباعة",
+      "title": "أمر الشراء {{label}}",
+      "orderDate": "تاريخ الأمر",
+      "unitCost": "تكلفة الوحدة",
+      "subtotal": "المجموع الفرعي",
+      "tax": "الضريبة",
+      "notes": "ملاحظات",
+      "popupBlocked": "اسمح بالنوافذ المنبثقة للطباعة",
+      "unavailable": "الطباعة غير متاحة",
+      "unavailableHint": "تعذر تحميل تفاصيل الأمر"
+    }
   },
   "dashboard": {
     "totalProducts": "إجمالي المنتجات",

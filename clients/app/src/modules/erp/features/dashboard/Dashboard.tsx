@@ -17,6 +17,7 @@ import { Link } from '@tanstack/react-router';
 import { useProducts } from '../products/useProducts';
 import { useActivity } from '../../shared/hooks/useActivity';
 import { timeAgo, formatCurrency } from '../../shared/lib/format';
+import { useErpCurrency } from '../../shared/hooks/useErpCurrency';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import { useDashboardStats } from '../../shared/hooks/queries/useDashboardStats';
@@ -86,6 +87,7 @@ const itemVariants: Variants = {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
+  const currency = useErpCurrency();
   const [quickAddOpen, setQuickAddOpen] = React.useState(false);
   const {
     data: dashboardStats,
@@ -271,7 +273,11 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="mt-auto">
             <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-              {isLoading ? '…' : inventoryValue == null ? '—' : formatCurrency(inventoryValue)}
+              {isLoading
+                ? '…'
+                : inventoryValue == null
+                  ? '—'
+                  : formatCurrency(inventoryValue, currency)}
             </p>
             <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
               active tracked stock at cost
@@ -474,7 +480,7 @@ const Dashboard: React.FC = () => {
                         className="text-xs font-semibold text-right"
                         style={{ color: 'var(--hub-text)' }}
                       >
-                        {formatCurrency(order.total ?? 0)}
+                        {formatCurrency(order.total ?? 0, currency)}
                       </p>
                       <div className="flex justify-end">
                         <span

@@ -9,6 +9,7 @@ import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatCurrency } from '../../shared/lib/format';
+import { useErpCurrency } from '../../shared/hooks/useErpCurrency';
 import StockBadge from '../../shared/components/StockBadge';
 import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
@@ -32,6 +33,7 @@ const inputStyle: React.CSSProperties = {
 
 const Variants: React.FC = () => {
   const { t } = useTranslation('erp');
+  const currency = useErpCurrency();
   const { data: variants = [], isLoading, isError, refetch } = useVariants();
   const createMut = useCreateVariant();
   const [showCreate, setShowCreate] = useState(false);
@@ -199,7 +201,7 @@ const Variants: React.FC = () => {
                   {v.stockQuantity}
                 </span>
                 <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {formatCurrency(v.salePrice ?? 0)}
+                  {formatCurrency(v.salePrice ?? 0, currency)}
                 </span>
                 <StockBadge stock={v.stockQuantity ?? 0} lowStock={10} />
               </div>

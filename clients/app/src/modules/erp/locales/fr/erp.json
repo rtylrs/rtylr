@@ -219,7 +219,7 @@
   "receiving": {
     "title": "Réception des marchandises",
     "description": "Recevez les articles des commandes ouvertes",
-    "receiveFor": "Recevoir les articles de BC-{{id}}",
+    "receiveFor": "Recevoir les articles de {{label}}",
     "closeDetails": "Fermer les détails de réception",
     "expected": "Attendu : {{count}}",
     "ok": "OK",
@@ -241,7 +241,9 @@
       "completed": "Réception terminée, tous les articles reçus",
       "completedVariance": "Réception terminée avec un écart de {{count}} unités",
       "updateFailed": "Échec de la mise à jour de la réception"
-    }
+    },
+    "decrease": "Diminuer la quantité reçue pour {{name}}",
+    "increase": "Augmenter la quantité reçue pour {{name}}"
   },
   "reorder": {
     "empty": {
@@ -446,13 +448,57 @@
     "itemRequired": "Au moins un article avec un produit et une quantité est requis",
     "draftCreated": "Brouillon de bon de commande créé",
     "createFailed": "Échec de la création du bon de commande",
-    "statusUpdateFailed": "Échec de la mise à jour du statut du bon de commande",
-    "approveFailed": "Échec de l'approbation du bon de commande",
     "newOrder": "Nouvelle commande",
     "approve": "Approuver",
     "send": "Envoyer",
     "newPurchaseOrder": "Nouveau bon de commande",
-    "cost": "Coût"
+    "cost": "Coût",
+    "columns": {
+      "order": "Commande",
+      "supplier": "Fournisseur",
+      "expected": "Prévue",
+      "items": "Articles",
+      "total": "Total",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "sent": "Envoyée",
+      "approved": "Approuvée",
+      "partial": "Partielle",
+      "received": "Reçue",
+      "cancelled": "Annulée"
+    },
+    "itemsUnavailable": "Impossible de charger le détail des articles",
+    "productFallback": "Produit n° {{id}}",
+    "supplierFallback": "Fournisseur n° {{id}}",
+    "toast": {
+      "approved": "{{label}} approuvé",
+      "approveFailed": "Échec de l'approbation de {{label}}",
+      "sent": "{{label}} envoyé au fournisseur",
+      "sendFailed": "Échec de l'envoi de {{label}}"
+    },
+    "form": {
+      "selectSupplier": "Choisir un fournisseur*",
+      "poNumber": "Numéro de commande*",
+      "items": "Articles *",
+      "addItem": "+ Ajouter un article",
+      "removeItem": "Retirer l'article",
+      "createDraft": "Créer le brouillon"
+    },
+    "print": {
+      "button": "Imprimer",
+      "title": "Bon de commande {{label}}",
+      "orderDate": "Date de commande",
+      "unitCost": "Coût unitaire",
+      "subtotal": "Sous-total",
+      "tax": "Taxe",
+      "notes": "Notes",
+      "popupBlocked": "Autorisez les fenêtres contextuelles pour imprimer",
+      "unavailable": "Impression indisponible",
+      "unavailableHint": "Le détail de la commande n'a pas pu être chargé"
+    }
   },
   "dashboard": {
     "totalProducts": "Total des produits",

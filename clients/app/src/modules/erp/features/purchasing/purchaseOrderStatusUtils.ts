@@ -1,8 +1,8 @@
-export type PurchaseOrderStatusCard = 'Draft' | 'Sent' | 'Approved' | 'Received';
+export type PurchaseOrderStatusCard = 'Draft' | 'Sent' | 'Approved' | 'Partial' | 'Received';
 
 export type PurchaseOrderFilter = PurchaseOrderStatusCard | 'All';
 
-export type PurchaseOrderDisplayStatus = PurchaseOrderStatusCard | 'Partial' | 'Cancelled';
+export type PurchaseOrderDisplayStatus = PurchaseOrderStatusCard | 'Cancelled';
 
 export function displayPurchaseOrderStatus(status: string): PurchaseOrderDisplayStatus {
   switch (status) {
@@ -39,8 +39,16 @@ export function getPurchaseOrderStatusCounts(
     Approved: purchaseOrders.filter(
       (order) => displayPurchaseOrderStatus(order.status ?? '') === 'Approved'
     ).length,
+    Partial: purchaseOrders.filter(
+      (order) => displayPurchaseOrderStatus(order.status ?? '') === 'Partial'
+    ).length,
     Received: purchaseOrders.filter(
       (order) => displayPurchaseOrderStatus(order.status ?? '') === 'Received'
     ).length,
   };
+}
+
+/** The number the business gave the order, or its id when it has none. */
+export function purchaseOrderLabel(order: { id?: string; poNumber?: string }): string {
+  return order.poNumber?.trim() || `PO-${order.id ?? ''}`;
 }
