@@ -18,7 +18,13 @@
     "recordFailed": "تعذّر تسجيل الدفع",
     "createFailed": "تعذّر حفظ الفاتورة",
     "prefillFromContract": "تعبئة من عقد موقّع",
-    "chooseContract": "اختر عقداً موقّعاً…"
+    "chooseContract": "اختر عقداً موقّعاً…",
+    "contractLine": "عقد",
+    "contractValue": {
+      "one_time": "{{amount}} لمرة واحدة",
+      "monthly": "{{amount}} / شهريًا",
+      "yearly": "{{amount}} / سنويًا"
+    }
   },
   "expenses": {
     "submit": "إرسال",

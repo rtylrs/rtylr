@@ -22,6 +22,7 @@ import type {
   CreateTouchpointRequest,
   CreateContactRequest,
   CreateContractRequest,
+  ContractBilling,
   SalesRep,
 } from '../../services/crmApi';
 
@@ -36,7 +37,7 @@ export type {
   LeadStage,
   TouchpointType,
   TouchpointOutcome,
-  ContractPlan,
+  ContractBilling,
   SalesRep,
 } from '../../services/crmApi';
 
@@ -281,7 +282,15 @@ export const useContacts = (
     queryKey: ['crm-sales-contacts', { leadId: leadId ?? 'all', limit, offset }],
     queryFn: async (): Promise<SalesContact[]> => {
       const res = await unwrap(crmApi.getContacts(leadId, limit, offset));
-      return unwrapList<SalesContact>(res, 'contacts');
+      return unwrapList<SalesContact>(res, 'contacts').map((contact) => {
+        const raw = contact as SalesContact & { customer_id?: unknown };
+        const customerId = raw.customerId ?? raw.customer_id;
+        return {
+          ...contact,
+          // 0 means "not captured yet", the same as null.
+          customerId: customerId ? toFiniteNumber(customerId) : null,
+        };
+      });
     },
   });
 
@@ -328,13 +337,37 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
 
 // ── Contracts ─────────────────────────────────────────────────────
 
-const parseContract = (contract: Contract): Contract => ({
-  ...contract,
-  id: toFiniteNumber(contract.id),
-  leadId: toFiniteNumber(contract.leadId),
-  mrr: toFiniteNumber(contract.mrr),
-  seats: toFiniteNumber(contract.seats),
-});
+const BILLINGS: ReadonlyArray<ContractBilling> = ['one_time', 'monthly', 'yearly'];
+
+/** Normalizes a contract from the wire: decimal strings, snake_case leftovers. */
+export const parseContract = (contract: Contract | Record<string, unknown>): Contract => {
+  const raw = contract as Record<string, unknown>;
+  const optionalString = (value: unknown): string | undefined =>
+    typeof value === 'string' && value !== '' ? value : undefined;
+  const optionalId = (value: unknown): number | null =>
+    value === null || value === undefined ? null : toFiniteNumber(value);
+  const billing = BILLINGS.find((b) => b === raw.billing) ?? 'monthly';
+  const mrr = toFiniteNumber(raw.mrr);
+  // A contract stored before value existed is a monthly one worth its MRR.
+  const value = toFiniteNumber(raw.value) || mrr;
+  return {
+    ...(contract as Contract),
+    id: toFiniteNumber(raw.id),
+    leadId: toFiniteNumber(raw.leadId ?? raw.lead_id),
+    plan: String(raw.plan ?? ''),
+    mrr,
+    seats: toFiniteNumber(raw.seats),
+    value,
+    billing,
+    startDate: optionalString(raw.startDate ?? raw.start_date),
+    endDate: optionalString(raw.endDate ?? raw.end_date),
+    customerId: optionalId(raw.customerId ?? raw.customer_id),
+    signedAt: String(raw.signedAt ?? raw.signed_at ?? ''),
+    signedBy: String(raw.signedByName ?? raw.signed_by_name ?? raw.signedBy ?? ''),
+    closedBy: optionalId(raw.closedBy ?? raw.closed_by),
+    notes: String(raw.notes ?? ''),
+  };
+};
 
 export const useContracts = (limit = 100, offset = 0): UseQueryResult<Contract[]> =>
   useQuery<Contract[]>({

@@ -26,7 +26,8 @@ func (r *Repository) ListSignedContracts(ctx context.Context, businessID int64, 
 	for _, row := range rows {
 		out = append(out, contractFromFields(
 			row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
-			int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+			int(row.Seats), contractTermsRow{row.Value, row.Billing, row.StartDate, row.EndDate, row.CustomerID},
+			row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
 			row.CreatedAt, row.UpdatedAt,
 		))
 	}
@@ -51,7 +52,8 @@ func (r *Repository) ListUnsignedContracts(ctx context.Context, businessID int64
 	for _, row := range rows {
 		out = append(out, contractFromFields(
 			row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
-			int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+			int(row.Seats), contractTermsRow{row.Value, row.Billing, row.StartDate, row.EndDate, row.CustomerID},
+			row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
 			row.CreatedAt, row.UpdatedAt,
 		))
 	}
@@ -65,7 +67,8 @@ func (r *Repository) CountUnsignedContracts(ctx context.Context, businessID int6
 func contractFromRow(row sqlc.ListContractsRow) domain.Contract {
 	return contractFromFields(
 		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
-		int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+		int(row.Seats), contractTermsRow{row.Value, row.Billing, row.StartDate, row.EndDate, row.CustomerID},
+		row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
 		row.CreatedAt, row.UpdatedAt,
 	)
 }
@@ -73,7 +76,8 @@ func contractFromRow(row sqlc.ListContractsRow) domain.Contract {
 func contractFromGetRow(row sqlc.GetContractRow) domain.Contract {
 	return contractFromFields(
 		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
-		int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+		int(row.Seats), contractTermsRow{row.Value, row.Billing, row.StartDate, row.EndDate, row.CustomerID},
+		row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
 		row.CreatedAt, row.UpdatedAt,
 	)
 }
@@ -82,6 +86,7 @@ func contractFromFields(
 	id, ownerID, businessID, leadID int64,
 	plan, mrr string,
 	seats int,
+	terms contractTermsRow,
 	signedAt sql.NullTime,
 	signedByName string,
 	closedBy sql.NullInt64,
@@ -96,6 +101,10 @@ func contractFromFields(
 		Plan:         plan,
 		MRR:          parseDecimalString(mrr),
 		Seats:        seats,
+		Value:        parseDecimalString(terms.value),
+		Billing:      domain.Billing(terms.billing),
+		StartDate:    datePtr(terms.startDate),
+		EndDate:      datePtr(terms.endDate),
 		SignedByName: signedByName,
 		Notes:        notes,
 		CreatedAt:    createdAt,
@@ -108,7 +117,28 @@ func contractFromFields(
 	if closedBy.Valid {
 		c.ClosedBy = &closedBy.Int64
 	}
+	if terms.customerID.Valid {
+		c.CustomerID = &terms.customerID.Int64
+	}
 	return c
+}
+
+// contractTermsRow carries the value, billing, term and customer columns,
+// which every contract query selects the same way.
+type contractTermsRow struct {
+	value      string
+	billing    sqlc.CrmContractsBilling
+	startDate  sql.NullTime
+	endDate    sql.NullTime
+	customerID sql.NullInt64
+}
+
+func datePtr(value sql.NullTime) *string {
+	if !value.Valid {
+		return nil
+	}
+	formatted := value.Time.Format("2006-01-02")
+	return &formatted
 }
 
 func parsePipelineMRR(v interface{}) money.Amount {

@@ -17,7 +17,12 @@ const mocks = vi.hoisted(() => ({
   isError: false,
 }));
 
+vi.mock('../../../../shared/hooks/queries/useBusinesses', () => ({
+  useBusinessCurrency: () => 'USD',
+}));
+
 vi.mock('../../shared/hooks/queries/useSales', () => ({
+  useSalesReps: () => ({ data: [] }),
   useContracts: () => ({
     data: contractsList,
     isLoading: false,

@@ -18,7 +18,13 @@
     "recordFailed": "Failed to record payment",
     "createFailed": "Failed to save invoice",
     "prefillFromContract": "Prefill from signed contract",
-    "chooseContract": "Choose a signed contract…"
+    "chooseContract": "Choose a signed contract…",
+    "contractLine": "Contract",
+    "contractValue": {
+      "one_time": "{{amount}} one-time",
+      "monthly": "{{amount}} / month",
+      "yearly": "{{amount}} / year"
+    }
   },
   "expenses": {
     "submit": "Submit",

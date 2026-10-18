@@ -51,10 +51,35 @@ func (r *Repository) UpdateContract(ctx context.Context, id, businessID int64, r
 	if err != nil {
 		return domain.Contract{}, err
 	}
+	terms, err := contractTermParams(req.Value, req.Billing, req.StartDate, req.EndDate)
+	if err != nil {
+		return domain.Contract{}, err
+	}
+	// An update that names no customer keeps the linked one, or links the
+	// customer the lead's contact has since become.
+	existing, err := r.GetContract(ctx, id, businessID)
+	if err != nil {
+		return domain.Contract{}, err
+	}
+	customerID := nullableInt64(req.CustomerID)
+	if !customerID.Valid {
+		customerID = nullableInt64(existing.CustomerID)
+	}
+	if !customerID.Valid {
+		customerID, err = leadCustomerID(ctx, r.queries, businessID, existing.LeadID)
+		if err != nil {
+			return domain.Contract{}, err
+		}
+	}
 	err = r.queries.UpdateContract(ctx, sqlc.UpdateContractParams{
 		Plan:         req.Plan,
 		Mrr:          req.MRR.String(),
 		Seats:        int32(seats),
+		Value:        terms.value,
+		Billing:      terms.billing,
+		StartDate:    terms.startDate,
+		EndDate:      terms.endDate,
+		CustomerID:   customerID,
 		SignedAt:     signedAt,
 		SignedByName: nullableString(req.SignedByName),
 		ClosedBy:     nullableInt64(req.ClosedBy),
@@ -231,4 +256,43 @@ func followUpDate(v interface{}) string {
 		return value.Format("2006-01-02")
 	}
 	return ""
+}
+
+// contractParams are a contract's value, billing and term as the queries
+// take them.
+type contractParams struct {
+	value     string
+	billing   sqlc.CrmContractsBilling
+	startDate sql.NullTime
+	endDate   sql.NullTime
+}
+
+func contractTermParams(value money.Amount, billing domain.Billing, startDate, endDate *string) (contractParams, error) {
+	start, err := nullableDatePtr(startDate)
+	if err != nil {
+		return contractParams{}, err
+	}
+	end, err := nullableDatePtr(endDate)
+	if err != nil {
+		return contractParams{}, err
+	}
+	if billing == "" {
+		billing = domain.BillingMonthly
+	}
+	return contractParams{
+		value:     value.String(),
+		billing:   sqlc.CrmContractsBilling(billing),
+		startDate: start,
+		endDate:   end,
+	}, nil
+}
+
+// leadCustomerID is the CRM customer the lead's primary (or first linked)
+// contact became, or NULL while no contact has been captured yet.
+func leadCustomerID(ctx context.Context, queries *sqlc.Queries, businessID, leadID int64) (sql.NullInt64, error) {
+	customerID, err := queries.GetLeadCustomerID(ctx, sqlc.GetLeadCustomerIDParams{LeadID: leadID, BusinessID: businessID})
+	if errors.Is(err, sql.ErrNoRows) {
+		return sql.NullInt64{}, nil
+	}
+	return customerID, err
 }

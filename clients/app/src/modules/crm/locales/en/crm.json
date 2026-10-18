@@ -108,13 +108,18 @@
     "emptyDescription": "Signed contracts will appear here once you close a deal.",
     "new": "New contract",
     "pageTitle": "Contracts",
-    "subtitle": "All signed contracts and their details",
+    "subtitle": "What each won deal bought, its value and its terms",
     "requiredFields": "Lead, signed date, and signed by are required",
     "createFailed": "Failed to create contract",
-    "totalMrr": "Total contracted MRR",
+    "totalMrr": "Monthly recurring revenue",
     "leadLabel": "Lead",
     "selectLead": "Select a lead...",
-    "repUserIdPlaceholder": "User ID of the sales rep"
+    "leadFallback": "Lead #{{id}}",
+    "inForce_one": "1 contract in force",
+    "inForce_other": "{{count}} contracts in force",
+    "loadMore": "Load more contracts",
+    "loadMoreLeads": "Load more leads",
+    "save": "Save contract"
   },
   "loyaltyMembers": {
     "loadFailedTitle": "Unable to load members",
@@ -345,7 +350,6 @@
     "touchpointFailed": "Failed to log touchpoint",
     "contactNameRequired": "Contact name is required",
     "addContactFailed": "Failed to add contact",
-    "saveContractFailed": "Failed to save contract",
     "notFound": "Lead not found.",
     "pageTitle": "Lead detail",
     "backToLeads": "Back to leads",
@@ -387,20 +391,10 @@
     "contractTitle": "Contract",
     "addContractAria": "Add contract",
     "noContract": "No contract yet.",
-    "mrr": "MRR",
-    "seats": "Seats",
-    "signed": "Signed",
     "signedBy": "Signed by",
     "closedBy": "Closed by",
-    "planLabel": "Plan",
-    "planFree": "Free",
-    "planPro": "Pro",
-    "planScale": "Scale",
-    "mrrUsd": "MRR ($)",
-    "signedAt": "Signed at",
     "signedByPlaceholder": "John Smith",
     "closedByLabel": "Closed by (rep user ID)",
-    "closedByPlaceholder": "User ID of the rep",
     "contractNotesPlaceholder": "Additional notes...",
     "deleteLead": "Delete lead",
     "add": "Add",
@@ -665,5 +659,39 @@
     "openCommandPalette": "Open command palette",
     "notifications": "Notifications",
     "noNotifications": "No new notifications"
+  },
+  "contractForm": {
+    "plan": "What was sold",
+    "planPlaceholder": "e.g. POS setup for 3 branches",
+    "planRequired": "Say what was sold",
+    "value": "Value ({{currency}})",
+    "valueLabel": "Value",
+    "valueRequired": "Enter the contract value",
+    "billing": "Billing",
+    "billingOption": {
+      "one_time": "One-time",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "valueBy": {
+      "one_time": "{{amount}} one-time",
+      "monthly": "{{amount}} / month",
+      "yearly": "{{amount}} / year"
+    },
+    "startDate": "Starts",
+    "endDate": "Ends",
+    "endBeforeStart": "The end date is before the start date",
+    "signedAt": "Signed on",
+    "term": "Term",
+    "openEnded": "open-ended",
+    "statusLabel": "Status",
+    "status": {
+      "draft": "Draft",
+      "signed": "Signed",
+      "ended": "Ended"
+    },
+    "customer": "Customer",
+    "viewCustomer": "View customer",
+    "draftHint": "Leave “Signed on” empty to keep it as a draft. Finance can invoice signed contracts."
   }
 }

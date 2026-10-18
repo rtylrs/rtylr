@@ -8,9 +8,13 @@ const contractClient = createOneKitClient(ContractServiceClient, 'finance');
 
 export interface SignedContract {
   id: string;
+  /** What was sold, as free text. */
   plan?: string;
   mrr?: string;
   seats?: number;
+  /** Charged per billing period (decimal string). */
+  value?: string;
+  billing?: 'one_time' | 'monthly' | 'yearly';
   signedAt?: string;
   signedByName?: string;
 }
@@ -37,6 +41,12 @@ export function useSignedContracts() {
           plan: c.plan,
           mrr: c.mrr,
           seats: c.seats,
+          // Contracts saved before value existed are monthly at their MRR.
+          value: c.value && Number(c.value) > 0 ? c.value : c.mrr,
+          billing:
+            c.billing === 'one_time' || c.billing === 'yearly' || c.billing === 'monthly'
+              ? c.billing
+              : 'monthly',
           signedAt: c.signedAt,
           signedByName: c.signedByName,
         }));

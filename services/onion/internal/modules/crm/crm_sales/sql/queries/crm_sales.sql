@@ -114,6 +114,7 @@ DELETE FROM crm_touchpoints WHERE id = ? AND business_id = ?;
 
 -- name: ListContracts :many
 SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,
+       value, billing, start_date, end_date, customer_id,
        signed_at, COALESCE(signed_by_name,'') AS signed_by_name, closed_by, COALESCE(notes,'') AS notes,
        created_at, updated_at
 FROM crm_contracts
@@ -126,23 +127,36 @@ SELECT COUNT(*) FROM crm_contracts WHERE business_id = ?;
 
 -- name: GetContract :one
 SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,
+       value, billing, start_date, end_date, customer_id,
        signed_at, COALESCE(signed_by_name,'') AS signed_by_name, closed_by, COALESCE(notes,'') AS notes,
        created_at, updated_at
 FROM crm_contracts WHERE id = ? AND business_id = ?;
 
 -- name: CreateContract :execresult
-INSERT INTO crm_contracts (owner_id, business_id, lead_id, plan, mrr, seats, signed_at, signed_by_name, closed_by, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO crm_contracts (owner_id, business_id, lead_id, plan, mrr, seats,
+                           value, billing, start_date, end_date, customer_id,
+                           signed_at, signed_by_name, closed_by, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateContract :exec
 UPDATE crm_contracts
-SET plan = ?, mrr = ?, seats = ?, signed_at = ?, signed_by_name = ?, closed_by = ?, notes = ?
+SET plan = ?, mrr = ?, seats = ?, value = ?, billing = ?, start_date = ?, end_date = ?,
+    customer_id = ?, signed_at = ?, signed_by_name = ?, closed_by = ?, notes = ?
 WHERE id = ? AND business_id = ?;
+
+-- name: GetLeadCustomerID :one
+-- The CRM customer a lead's contact became (contacts are captured into the
+-- customer directory), preferring the primary contact.
+SELECT customer_id FROM crm_contacts
+WHERE lead_id = ? AND business_id = ? AND customer_id IS NOT NULL
+ORDER BY is_primary DESC, id
+LIMIT 1;
 
 -- name: ListSignedContracts :many
 -- Signed-only variant backing crm.sales.v1's signed filter (#839): a caller
 -- asking for billable contracts must not page through drafts.
 SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,
+       value, billing, start_date, end_date, customer_id,
        signed_at, COALESCE(signed_by_name,'') AS signed_by_name, closed_by, COALESCE(notes,'') AS notes,
        created_at, updated_at
 FROM crm_contracts
@@ -152,6 +166,7 @@ LIMIT ? OFFSET ?;
 
 -- name: ListUnsignedContracts :many
 SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,
+       value, billing, start_date, end_date, customer_id,
        signed_at, COALESCE(signed_by_name,'') AS signed_by_name, closed_by, COALESCE(notes,'') AS notes,
        created_at, updated_at
 FROM crm_contracts

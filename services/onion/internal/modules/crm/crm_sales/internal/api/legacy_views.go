@@ -119,19 +119,24 @@ func payloadTouchpointList(values []domain.Touchpoint) []touchpointPayload {
 }
 
 type contractPayload struct {
-	ID           int64        `json:"id"`
-	OwnerID      int64        `json:"owner_id"`
-	BusinessID   int64        `json:"business_id"`
-	LeadID       int64        `json:"lead_id"`
-	Plan         string       `json:"plan"`
-	MRR          money.Amount `json:"mrr"`
-	Seats        int          `json:"seats"`
-	SignedAt     *string      `json:"signed_at"`
-	SignedByName string       `json:"signed_by_name"`
-	ClosedBy     *int64       `json:"closed_by"`
-	Notes        string       `json:"notes"`
-	CreatedAt    time.Time    `json:"created_at"`
-	UpdatedAt    time.Time    `json:"updated_at"`
+	ID           int64          `json:"id"`
+	OwnerID      int64          `json:"owner_id"`
+	BusinessID   int64          `json:"business_id"`
+	LeadID       int64          `json:"lead_id"`
+	Plan         string         `json:"plan"`
+	MRR          money.Amount   `json:"mrr"`
+	Seats        int            `json:"seats"`
+	Value        money.Amount   `json:"value"`
+	Billing      domain.Billing `json:"billing"`
+	StartDate    *string        `json:"start_date"`
+	EndDate      *string        `json:"end_date"`
+	CustomerID   *int64         `json:"customer_id"`
+	SignedAt     *string        `json:"signed_at"`
+	SignedByName string         `json:"signed_by_name"`
+	ClosedBy     *int64         `json:"closed_by"`
+	Notes        string         `json:"notes"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
 }
 
 func payloadContract(value domain.Contract) contractPayload { return contractPayload(value) }

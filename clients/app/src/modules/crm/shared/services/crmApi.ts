@@ -224,7 +224,8 @@ export type LeadStage =
 
 export type TouchpointType = 'phone' | 'email' | 'meeting';
 export type TouchpointOutcome = 'positive' | 'neutral' | 'negative' | 'no_answer';
-export type ContractPlan = 'free' | 'pro' | 'scale';
+/** How often a contract's value is charged. */
+export type ContractBilling = 'one_time' | 'monthly' | 'yearly';
 
 export interface Lead {
   id: number;
@@ -279,19 +280,32 @@ export interface SalesContact {
   role: string;
   phone: string;
   email: string;
+  // The CRM customer this contact was captured into, once it has been.
+  customerId?: number | null;
   createdAt: string;
 }
 
+/**
+ * What a won lead bought. `plan` is free text for what was sold; `value` is
+ * charged once or per `billing` period over the optional term. `mrr` is the
+ * server's monthly equivalent of value, kept for pipeline totals.
+ */
 export interface Contract {
   id: number;
   leadId: number;
   company: string;
-  plan: ContractPlan;
+  plan: string;
   mrr: number;
   seats: number;
+  value: number;
+  billing: ContractBilling;
+  startDate?: string;
+  endDate?: string;
+  customerId?: number | null;
+  // YYYY-MM-DD; absent while the contract is an unsigned draft.
   signedAt: string;
   signedBy: string;
-  closedBy: string;
+  closedBy: number | null;
   notes: string;
   createdAt: string;
 }
@@ -536,24 +550,18 @@ export interface UpdateContactRequest {
 
 export interface CreateContractRequest {
   leadId: number;
-  plan: ContractPlan;
-  mrr: number;
-  seats: number;
-  signedAt: string;
-  signedBy: string;
-  closedBy: string;
+  plan: string;
+  value: number;
+  billing: ContractBilling;
+  startDate?: string;
+  endDate?: string;
+  signedAt?: string;
+  signedBy?: string;
+  closedBy?: number | null;
   notes?: string;
 }
 
-export interface UpdateContractRequest {
-  plan?: ContractPlan;
-  mrr?: number;
-  seats?: number;
-  signedAt?: string;
-  signedBy?: string;
-  closedBy?: string;
-  notes?: string;
-}
+export type UpdateContractRequest = Partial<Omit<CreateContractRequest, 'leadId'>>;
 
 interface TouchpointMutationPayload {
   leadId: number;
@@ -576,9 +584,11 @@ function toTouchpointMutationPayload(data: CreateTouchpointRequest): TouchpointM
 }
 
 interface ContractMutationPayload {
-  plan?: ContractPlan;
-  mrr?: number;
-  seats?: number;
+  plan?: string;
+  value?: number;
+  billing?: ContractBilling;
+  startDate?: string;
+  endDate?: string;
   signedAt?: string;
   signedByName?: string;
   closedBy?: number;
@@ -594,9 +604,11 @@ export function toCreateContractPayload(
 ): CreateContractMutationPayload {
   return {
     leadId: data.leadId,
-    plan: data.plan,
-    mrr: data.mrr,
-    seats: data.seats,
+    plan: data.plan.trim(),
+    value: data.value,
+    billing: data.billing,
+    startDate: data.startDate?.trim() || undefined,
+    endDate: data.endDate?.trim() || undefined,
     signedAt: data.signedAt?.trim() || undefined,
     signedByName: data.signedBy?.trim() ?? '',
     closedBy: toOptionalFiniteNumber(data.closedBy),
@@ -606,9 +618,11 @@ export function toCreateContractPayload(
 
 export function toContractUpdatePayload(data: UpdateContractRequest): ContractMutationPayload {
   return {
-    plan: data.plan,
-    mrr: data.mrr,
-    seats: data.seats,
+    plan: data.plan?.trim(),
+    value: data.value,
+    billing: data.billing,
+    startDate: data.startDate?.trim() || undefined,
+    endDate: data.endDate?.trim() || undefined,
     signedAt: data.signedAt?.trim() || undefined,
     signedByName: data.signedBy?.trim(),
     closedBy: toOptionalFiniteNumber(data.closedBy),

@@ -128,14 +128,14 @@ const NewInvoice: React.FC = () => {
     ]);
 
   const prefillFromContract = (contract: SignedContract): void => {
-    const seats = contract.seats ?? 0;
-    const mrr = Number(contract.mrr ?? 0);
+    // One line for one billing period of the contract: the value it charges
+    // per period, under what was sold.
     setItems([
       {
         id: 'c1',
-        description: `${contract.plan ?? 'Subscription'} — ${seats} seat${seats === 1 ? '' : 's'}`,
+        description: contract.plan?.trim() || t('finance.invoices.contractLine'),
         quantity: 1,
-        unitPrice: mrr,
+        unitPrice: Number(contract.value ?? contract.mrr ?? 0),
         taxRate: settings.defaultTaxRate,
       },
     ]);
@@ -370,7 +370,10 @@ const NewInvoice: React.FC = () => {
                     <option value="">{t('finance.invoices.chooseContract')}</option>
                     {signedContracts.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {`${c.plan ?? 'Contract'} — ${c.mrr ?? '0'}/mo${c.signedAt ? ` (${c.signedAt})` : ''}`}
+                        {`${c.plan || t('finance.invoices.contractLine')} — ${t(
+                          `finance.invoices.contractValue.${c.billing ?? 'monthly'}`,
+                          { amount: c.value ?? c.mrr ?? '0' }
+                        )}${c.signedAt ? ` (${c.signedAt})` : ''}`}
                       </option>
                     ))}
                   </select>

@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 const (
@@ -324,6 +325,8 @@ func (s *Service) CreateContract(ctx context.Context, businessID int64, req doma
 	if req.Seats == 0 {
 		req.Seats = 1
 	}
+	req.Value, req.Billing = contractTerms(req.Value, req.Billing, req.MRR)
+	req.MRR = domain.MonthlyEquivalent(req.Value, req.Billing)
 	c, err := s.repo.CreateContract(ctx, businessID, req)
 	if err == nil {
 		invalidateCRMSalesScope(ctx, businessID)
@@ -338,6 +341,8 @@ func (s *Service) UpdateContract(ctx context.Context, id, businessID int64, req 
 	if req.Seats == 0 {
 		req.Seats = 1
 	}
+	req.Value, req.Billing = contractTerms(req.Value, req.Billing, req.MRR)
+	req.MRR = domain.MonthlyEquivalent(req.Value, req.Billing)
 	c, err := s.repo.UpdateContract(ctx, id, businessID, req)
 	if err == nil {
 		invalidateCRMSalesScope(ctx, businessID)
@@ -390,4 +395,16 @@ func (s *Service) listContractsBySignState(ctx context.Context, businessID int64
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
+}
+
+// contractTerms fills value and billing for a caller that still sends only
+// MRR, the old shape: a monthly contract worth that MRR.
+func contractTerms(value money.Amount, billing domain.Billing, mrr money.Amount) (money.Amount, domain.Billing) {
+	if billing == "" {
+		billing = domain.BillingMonthly
+	}
+	if value == 0 && mrr > 0 {
+		return mrr, domain.BillingMonthly
+	}
+	return value, billing
 }

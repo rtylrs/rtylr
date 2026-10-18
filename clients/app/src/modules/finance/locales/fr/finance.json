@@ -18,7 +18,13 @@
     "recordFailed": "Échec de l'enregistrement du paiement",
     "createFailed": "Échec de l'enregistrement de la facture",
     "prefillFromContract": "Préremplir depuis un contrat signé",
-    "chooseContract": "Choisir un contrat signé…"
+    "chooseContract": "Choisir un contrat signé…",
+    "contractLine": "Contrat",
+    "contractValue": {
+      "one_time": "{{amount}} en une fois",
+      "monthly": "{{amount}} / mois",
+      "yearly": "{{amount}} / an"
+    }
   },
   "expenses": {
     "submit": "Soumettre",

@@ -32,6 +32,10 @@ const contactsList: unknown[] = [];
 const contractsList: unknown[] = [];
 const queryErrors = { lead: false, touchpoints: false, contacts: false, contracts: false };
 
+vi.mock('../../../../shared/hooks/queries/useBusinesses', () => ({
+  useBusinessCurrency: () => 'USD',
+}));
+
 vi.mock('../../shared/hooks/queries/useSales', () => ({
   useSalesReps: () => ({ data: [] }),
   useCreateLead: () => ({ mutate: vi.fn(), isPending: false }),

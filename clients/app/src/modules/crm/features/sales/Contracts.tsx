@@ -6,87 +6,30 @@ import { AlertCircle, ChevronDown, ChevronUp, Plus, FileText } from 'lucide-reac
 import { AnimatePresence, motion } from 'motion/react';
 import { EmptyState } from '@voxire/ui';
 import { useContracts, useLeads, useCreateContract } from '../../shared/hooks/queries/useSales';
-import type { Contract, ContractPlan, Lead } from '../../shared/hooks/queries/useSales';
-import {
-  Button,
-  PageHeader,
-  SkeletonList,
-  Modal,
-  Input,
-  Select,
-  Textarea,
-} from '../../shared/components/ui';
+import type { Contract, Lead } from '../../shared/hooks/queries/useSales';
+import { Button, PageHeader, SkeletonList, Modal } from '../../shared/components/ui';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import { useBusinessCurrency } from '../../../../shared/hooks/queries/useBusinesses';
+import { formatMoney } from '../../../../shared/lib/money';
+import {
+  ContractFields,
+  ContractStatusBadge,
+  ContractSummary,
+  EMPTY_CONTRACT,
+  contractDraftIssue,
+  contractStatus,
+  formatContractValue,
+  toContractRequest,
+  type ContractDraft,
+} from './components/ContractForm';
 
-const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
-  free: { bg: 'rgba(107,114,128,0.12)', color: '#6b7280' },
-  pro: { bg: 'rgba(59,130,246,0.12)', color: 'var(--crm-accent)' },
-  scale: { bg: 'rgba(139,92,246,0.12)', color: '#8b5cf6' },
-};
-
-const DEFAULT_PLAN_COLORS = PLAN_COLORS.pro;
-
-function formatDate(value: string | null | undefined): string {
-  const normalized = value?.trim() ?? '';
-  if (!normalized) return '-';
-
-  // The API deliberately returns DATE columns as YYYY-MM-DD. Parsing that
-  // shape with `new Date(value)` treats it as UTC and shifts it backwards in
-  // western time zones, so construct a local calendar date for date-only input.
-  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalized);
-  const date = dateOnly
-    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
-    : new Date(normalized);
-  if (Number.isNaN(date.getTime())) return normalized;
-
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+function leadDisplayName(lead: Lead, fallback: string): string {
+  return lead.companyName?.trim() || lead.company?.trim() || fallback;
 }
-
-function getContractSigner(contract: Contract): string {
-  const wireContract = contract as Contract & {
-    signedByName?: string | null;
-    signed_by_name?: string | null;
-  };
-  return (
-    wireContract.signedByName?.trim() ||
-    wireContract.signed_by_name?.trim() ||
-    contract.signedBy ||
-    ''
-  );
-}
-
-function leadDisplayName(lead: Lead): string {
-  return lead.companyName?.trim() || lead.company?.trim() || `Lead #${lead.id}`;
-}
-
-const PlanBadge: React.FC<{ plan: ContractPlan | string }> = ({ plan }) => {
-  const colors = Object.prototype.hasOwnProperty.call(PLAN_COLORS, plan)
-    ? PLAN_COLORS[plan as ContractPlan]
-    : DEFAULT_PLAN_COLORS;
-  const label = plan || 'unknown';
-  return (
-    <span
-      style={{
-        fontSize: '11px',
-        fontWeight: 600,
-        padding: '2px 8px',
-        borderRadius: '6px',
-        background: colors.bg,
-        color: colors.color,
-        textTransform: 'capitalize',
-      }}
-    >
-      {label}
-    </span>
-  );
-};
 
 const Contracts: React.FC = () => {
   const { t } = useTranslation();
+  const currency = useBusinessCurrency();
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   // Set once a "Load more" page comes back empty.
@@ -145,60 +88,40 @@ const Contracts: React.FC = () => {
   const hasMoreLeadOptions = !leadExhausted && fetchedLeadOptions?.length === pageSize;
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [form, setForm] = useState({
-    leadId: '',
-    plan: 'pro' as ContractPlan,
-    mrr: '',
-    seats: '',
-    signedAt: '',
-    signedBy: '',
-    closedBy: '',
-    notes: '',
-  });
+  const [leadId, setLeadId] = useState('');
+  const [draft, setDraft] = useState<ContractDraft>(EMPTY_CONTRACT);
+  const draftIssue = contractDraftIssue(draft);
 
-  const totalMrr = contracts.reduce((sum, c) => sum + c.mrr, 0);
-  const trimmedSigner = form.signedBy.trim();
-  const hasRequiredFields = Boolean(form.leadId && form.signedAt.trim() && trimmedSigner);
+  // Monthly recurring revenue from contracts in force: signed and not ended.
+  const inForce = contracts.filter((c) => contractStatus(c) === 'signed');
+  const monthlyRecurring = inForce.reduce((sum, c) => sum + c.mrr, 0);
 
   const companyName = (contract: Contract): string => {
     const lead = loadedLeads.find((l) => l.id === contract.leadId);
-    return lead ? leadDisplayName(lead) : contract.company || `Lead #${contract.leadId}`;
+    const fallback = t('crm.contracts.leadFallback', { id: contract.leadId });
+    return lead ? leadDisplayName(lead, fallback) : contract.company || fallback;
+  };
+
+  const closeCreate = (): void => {
+    setCreateOpen(false);
+    setLeadId('');
+    setDraft(EMPTY_CONTRACT);
   };
 
   const handleSubmit = (): void => {
-    if (!hasRequiredFields) {
-      toast.error(t('crm.contracts.requiredFields'));
+    if (!leadId || draftIssue) {
+      toast.error(t(draftIssue ?? 'crm.contracts.requiredFields'));
       return;
     }
     createContract.mutate(
-      {
-        leadId: Number(form.leadId),
-        plan: form.plan,
-        mrr: Number(form.mrr),
-        seats: Number(form.seats),
-        signedAt: form.signedAt,
-        signedBy: trimmedSigner,
-        closedBy: form.closedBy,
-        notes: form.notes,
-      },
+      { leadId: Number(leadId), ...toContractRequest(draft) },
       {
         onSuccess: () => {
           setOffset(0);
           setExhausted(false);
           setLoadedContracts([]);
-          setCreateOpen(false);
-          setForm({
-            leadId: '',
-            plan: 'pro',
-            mrr: '',
-            seats: '',
-            signedAt: '',
-            signedBy: '',
-            closedBy: '',
-            notes: '',
-          });
+          closeCreate();
         },
-        onError: () => toast.error(t('crm.contracts.createFailed')),
       }
     );
   };
@@ -219,7 +142,7 @@ const Contracts: React.FC = () => {
         />
 
         {/* Total MRR banner */}
-        {contracts.length > 0 && hasCompleteContractSet && (
+        {inForce.length > 0 && hasCompleteContractSet && (
           <div
             style={{
               padding: '14px 20px',
@@ -249,10 +172,9 @@ const Contracts: React.FC = () => {
                 {t('crm.contracts.totalMrr')}
               </p>
               <p style={{ fontSize: '20px', fontWeight: 700, color: '#10b981', margin: 0 }}>
-                ${totalMrr.toLocaleString()}
-                <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--hub-text-muted)' }}>
-                  /mo
-                </span>
+                {t('crm.contractForm.valueBy.monthly', {
+                  amount: formatMoney(monthlyRecurring, currency),
+                })}
               </p>
             </div>
             <div style={{ marginLeft: 'auto' }}>
@@ -264,7 +186,7 @@ const Contracts: React.FC = () => {
                   textAlign: 'right',
                 }}
               >
-                {contracts.length} active contract{contracts.length !== 1 ? 's' : ''}
+                {t('crm.contracts.inForce', { count: inForce.length })}
               </p>
             </div>
           </div>
@@ -357,7 +279,7 @@ const Contracts: React.FC = () => {
                           >
                             {name}
                           </p>
-                          <PlanBadge plan={c.plan} />
+                          <ContractStatusBadge contract={c} />
                         </div>
                         <p
                           style={{
@@ -366,7 +288,7 @@ const Contracts: React.FC = () => {
                             margin: '2px 0 0',
                           }}
                         >
-                          Closed by {c.closedBy} · Signed {formatDate(c.signedAt)}
+                          {c.plan}
                         </p>
                       </div>
                       <div
@@ -386,12 +308,7 @@ const Contracts: React.FC = () => {
                               margin: 0,
                             }}
                           >
-                            ${c.mrr.toLocaleString()}/mo
-                          </p>
-                          <p
-                            style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: 0 }}
-                          >
-                            {c.seats} seats
+                            {formatContractValue(c, currency, t)}
                           </p>
                         </div>
                         {isExpanded ? (
@@ -417,52 +334,9 @@ const Contracts: React.FC = () => {
                             style={{
                               padding: '16px 20px 20px',
                               background: 'rgba(59,130,246,0.03)',
-                              display: 'grid',
-                              gridTemplateColumns: 'repeat(3, 1fr)',
-                              gap: '16px',
                             }}
                           >
-                            <DetailItem label={t('crm.leadDetail.planLabel')} value={c.plan} />
-                            <DetailItem
-                              label={t('crm.leadDetail.mrr')}
-                              value={`$${c.mrr.toLocaleString()}/mo`}
-                            />
-                            <DetailItem label={t('crm.leadDetail.seats')} value={String(c.seats)} />
-                            <DetailItem
-                              label={t('crm.leadDetail.signedAt')}
-                              value={formatDate(c.signedAt)}
-                            />
-                            <DetailItem
-                              label={t('crm.leadDetail.signedBy')}
-                              value={getContractSigner(c)}
-                            />
-                            <DetailItem label={t('crm.leadDetail.closedBy')} value={c.closedBy} />
-                            {c.notes && (
-                              <div style={{ gridColumn: '1 / -1' }}>
-                                <p
-                                  style={{
-                                    fontSize: '10px',
-                                    color: 'var(--hub-text-dim)',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.05em',
-                                    fontWeight: 600,
-                                    margin: '0 0 4px',
-                                  }}
-                                >
-                                  {t('crm.leadDetail.notesLabel')}
-                                </p>
-                                <p
-                                  style={{
-                                    fontSize: '13px',
-                                    color: 'var(--hub-text)',
-                                    margin: 0,
-                                    lineHeight: 1.5,
-                                  }}
-                                >
-                                  {c.notes}
-                                </p>
-                              </div>
-                            )}
+                            <ContractSummary contract={c} currency={currency} columns={3} />
                           </div>
                         </motion.div>
                       )}
@@ -477,7 +351,7 @@ const Contracts: React.FC = () => {
                     onClick={() => setOffset((current) => current + pageSize)}
                     disabled={isFetching}
                   >
-                    {isFetching ? 'Loading…' : 'Load more contracts'}
+                    {isFetching ? t('crmCommon.loading') : t('crm.contracts.loadMore')}
                   </Button>
                 </div>
               )}
@@ -488,20 +362,20 @@ const Contracts: React.FC = () => {
         {/* Create contract modal */}
         <Modal
           open={createOpen}
-          onClose={() => setCreateOpen(false)}
+          onClose={closeCreate}
           title={t('crm.contracts.new')}
           size="md"
           footer={
             <>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>
+              <Button variant="outline" onClick={closeCreate}>
                 {t('crmCommon.cancel')}
               </Button>
               <Button
                 variant="primary"
                 onClick={handleSubmit}
-                disabled={createContract.isPending || !hasRequiredFields}
+                disabled={createContract.isPending || !leadId || draftIssue !== null}
               >
-                {createContract.isPending ? 'Saving...' : 'Save contract'}
+                {createContract.isPending ? t('crm.states.saving') : t('crm.contracts.save')}
               </Button>
             </>
           }
@@ -521,8 +395,8 @@ const Contracts: React.FC = () => {
                 {t('crm.contracts.leadLabel')}
               </p>
               <select
-                value={form.leadId}
-                onChange={(e) => setForm((f) => ({ ...f, leadId: e.target.value }))}
+                value={leadId}
+                onChange={(e) => setLeadId(e.target.value)}
                 disabled={leadOptionsLoading}
                 style={{
                   width: '100%',
@@ -542,7 +416,7 @@ const Contracts: React.FC = () => {
                 </option>
                 {loadedLeads.map((l) => (
                   <option key={l.id} value={String(l.id)}>
-                    {leadDisplayName(l)}
+                    {leadDisplayName(l, t('crm.contracts.leadFallback', { id: l.id }))}
                   </option>
                 ))}
               </select>
@@ -574,61 +448,17 @@ const Contracts: React.FC = () => {
                     onClick={() => setLeadOffset((current) => current + pageSize)}
                     disabled={isFetchingLeadOptions}
                   >
-                    {isFetchingLeadOptions ? 'Loading…' : 'Load more leads'}
+                    {isFetchingLeadOptions
+                      ? t('crmCommon.loading')
+                      : t('crm.contracts.loadMoreLeads')}
                   </Button>
                 </div>
               )}
             </div>
-            <Select
-              label={t('crm.leadDetail.planLabel')}
-              value={form.plan}
-              onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value as ContractPlan }))}
-            >
-              <option value="free">{t('crm.leadDetail.planFree')}</option>
-              <option value="pro">{t('crm.leadDetail.planPro')}</option>
-              <option value="scale">{t('crm.leadDetail.planScale')}</option>
-            </Select>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <Input
-                label={t('crm.leadDetail.mrrUsd')}
-                type="number"
-                value={form.mrr}
-                onChange={(e) => setForm((f) => ({ ...f, mrr: e.target.value }))}
-                placeholder="500"
-              />
-              <Input
-                label={t('crm.leadDetail.seats')}
-                type="number"
-                value={form.seats}
-                onChange={(e) => setForm((f) => ({ ...f, seats: e.target.value }))}
-                placeholder="5"
-              />
-            </div>
-            <Input
-              label={t('crm.leadDetail.signedAt')}
-              type="date"
-              value={form.signedAt}
-              onChange={(e) => setForm((f) => ({ ...f, signedAt: e.target.value }))}
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <Input
-                label={t('crm.leadDetail.signedBy')}
-                value={form.signedBy}
-                onChange={(e) => setForm((f) => ({ ...f, signedBy: e.target.value }))}
-                placeholder={t('crm.leadDetail.signedByPlaceholder')}
-              />
-              <Input
-                label={t('crm.leadDetail.closedByLabel')}
-                value={form.closedBy}
-                onChange={(e) => setForm((f) => ({ ...f, closedBy: e.target.value }))}
-                placeholder={t('crm.contracts.repUserIdPlaceholder')}
-              />
-            </div>
-            <Textarea
-              label={t('crm.leadDetail.notesLabel')}
-              value={form.notes}
-              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-              placeholder={t('crm.leadDetail.contractNotesPlaceholder')}
+            <ContractFields
+              draft={draft}
+              onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+              currency={currency}
             />
           </div>
         </Modal>
@@ -636,27 +466,5 @@ const Contracts: React.FC = () => {
     </>
   );
 };
-
-const DetailItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div>
-    <p
-      style={{
-        fontSize: '10px',
-        color: 'var(--hub-text-dim)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        fontWeight: 600,
-        margin: '0 0 2px',
-      }}
-    >
-      {label}
-    </p>
-    <p
-      style={{ fontSize: '13px', color: 'var(--hub-text)', margin: 0, textTransform: 'capitalize' }}
-    >
-      {value || '-'}
-    </p>
-  </div>
-);
 
 export default Contracts;
