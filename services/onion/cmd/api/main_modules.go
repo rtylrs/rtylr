@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 
 	"context"
+	"crypto/sha256"
 
 	"github.com/voxire/onion/internal/modules/activity"
 	"github.com/voxire/onion/internal/modules/aiquery"
@@ -177,7 +178,10 @@ func initializeModules(ctx context.Context) *apiModules {
 	hrOvertimeModule := hr_overtime.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	hrPayrollModule := hr_payroll.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	hrTimeModule := hr_time.NewModule(ctx, dbclient.Pool(), hrCoreModule)
-	customersModule := customers.NewModule(ctx, dbclient.Pool()).WithReportingTimezone(businessModule.ReportingTimezone)
+	configModule := config.NewModule(ctx, dbclient.Pool())
+	customersModule := customers.NewModule(ctx, dbclient.Pool()).
+		WithReportingTimezone(businessModule.ReportingTimezone).
+		WithCampaignDelivery(crmCampaignSender(configModule, businessModule), crmUnsubscribeKey(platformConfig.GlobalConfig.JWTSecret), platformConfig.GlobalConfig.PublicAPIURL)
 	automationContacts := func(ctx context.Context, customerID, businessID int64) (automations.CustomerContact, bool, error) {
 		recipient, found, err := customersModule.ResolveEmailRecipient(ctx, businessID, customerID)
 		return automations.CustomerContact{Email: recipient.Email, Name: recipient.Name}, found, err
@@ -304,7 +308,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Careers:               careers.NewModule(ctx, dbclient.Pool()),
 		Categories:            categoriesModule,
 		Console:               consoleModule,
-		Config:                config.NewModule(ctx, dbclient.Pool()),
+		Config:                configModule,
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
 		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithRepReader(crmSalesReps(scopes.NewReader(dbclient.Pool()))).WithBusinessOwnerResolver(businessModule),
 		Customers:             customersModule,
@@ -429,4 +433,29 @@ func crmSalesReps(reader *scopes.Reader) func(context.Context, int64) ([]crmsale
 		}
 		return reps, nil
 	}
+}
+
+// crmCampaignSender is who a business's marketing email comes from: the email
+// settings' sender name (else the business name), postal address and
+// reply-to.
+func crmCampaignSender(settings *config.Module, businesses *business.Module) func(context.Context, int64) (customers.CampaignSender, error) {
+	return func(ctx context.Context, businessID int64) (customers.CampaignSender, error) {
+		sender, err := settings.CampaignSender(ctx, businessID)
+		if err != nil {
+			return customers.CampaignSender{}, err
+		}
+		if sender.Name == "" {
+			if sender.Name, err = businesses.GetBusinessName(ctx, businessID); err != nil {
+				return customers.CampaignSender{}, err
+			}
+		}
+		return customers.CampaignSender(sender), nil
+	}
+}
+
+// crmUnsubscribeKey derives the key that signs unsubscribe links from the
+// JWT secret, so links need no new secret yet cannot be used as tokens.
+func crmUnsubscribeKey(jwtSecret string) []byte {
+	key := sha256.Sum256([]byte("crm-unsubscribe:" + jwtSecret))
+	return key[:]
 }

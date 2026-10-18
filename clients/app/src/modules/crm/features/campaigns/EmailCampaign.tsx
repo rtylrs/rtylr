@@ -9,7 +9,7 @@ import {
   useCreateCampaign,
   useGetCampaign,
   useUpdateCampaign,
-  useUpdateCampaignStatus,
+  useCampaignAudience,
 } from '../../shared/hooks/queries/useCampaigns';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useTemplates } from '../../shared/hooks/queries/useTemplates';
@@ -17,6 +17,7 @@ import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shar
 import { EmailEditor } from '../../shared/components/crm';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import SendCampaignModal from './SendCampaignModal';
 
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
@@ -34,7 +35,6 @@ const EmailCampaign: React.FC = () => {
 
   const create = useCreateCampaign();
   const update = useUpdateCampaign();
-  const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
   const segmentsQuery = useListSegments();
   const templatesQuery = useTemplates();
@@ -52,7 +52,7 @@ const EmailCampaign: React.FC = () => {
   const [description, setDescription] = useState(search.description || '');
   const [body, setBody] = useState(search.body || '');
   const [previewOpen, setPreviewOpen] = useState(false);
-  const pending = create.isPending || update.isPending || updateStatus.isPending;
+  const pending = create.isPending || update.isPending;
 
   useEffect(() => {
     if (existingCampaign) {
@@ -64,12 +64,11 @@ const EmailCampaign: React.FC = () => {
       setBody(existingCampaign.body ?? '');
       return;
     }
-    if (!isEditing && !segmentId && segments.length > 0) {
+    if (!isEditing && !segmentId && search.segment) {
       // ?segment= preselects the audience the user navigated here from;
-      // otherwise fall back to the first segment.
-      const preselect =
-        (search.segment && segments.find((item) => item.id === search.segment)) || segments[0];
-      setSegmentId(preselect.id);
+      // otherwise the campaign goes to every customer who opted in.
+      const preselect = segments.find((item) => item.id === search.segment);
+      if (preselect) setSegmentId(preselect.id);
     }
   }, [existingCampaign, isEditing, segmentId, segments, search.segment]);
 
@@ -78,8 +77,11 @@ const EmailCampaign: React.FC = () => {
     if (!template) return;
     setSubject(template.subject || '');
     setBody(template.body);
-    toast.success(`Applied template: ${template.name}`);
+    toast.success(t('crm.campaignEditor.templateApplied', { name: template.name }));
   };
+
+  const [sendOpen, setSendOpen] = useState(false);
+  const audience = useCampaignAudience(segmentId ? Number(segmentId) : undefined);
 
   const handleSave = (send: boolean): void => {
     const payload = {
@@ -99,23 +101,14 @@ const EmailCampaign: React.FC = () => {
         }
         const id = savedCampaignId ?? result.campaignId ?? result.campaign_id;
         if (!id) {
-          toast.error(t('crm.campaigns.savedNotActivated'));
+          toast.error(t('crm.campaignSend.failed'));
           return;
         }
         if (!savedCampaignId) setCreatedId(id);
-        updateStatus.mutate(
-          { id, status: 'active' },
-          {
-            onSuccess: () => {
-              toast.success(t('crm.campaigns.activated'));
-              navigate({ to: '/crm/campaigns' });
-            },
-            onError: () => toast.error(t('crm.campaigns.savedNotActivated')),
-          }
-        );
+        setSendOpen(true);
       },
       onError: () => {
-        toast.error(send ? 'Failed to save or activate campaign' : 'Failed to save draft');
+        toast.error(t('crm.campaignEditor.saveFailed'));
       },
     };
 
@@ -164,25 +157,17 @@ const EmailCampaign: React.FC = () => {
                   disabled={pending || !name.trim()}
                 >
                   <Save size={13} />
-                  {pending ? 'Saving…' : 'Save draft'}
+                  {pending ? t('crm.states.saving') : t('crm.campaignEditor.saveDraft')}
                 </Button>
               )}
               {canWriteCampaign && canSendCampaigns && (
                 <Button
                   variant="primary"
                   onClick={() => handleSave(true)}
-                  disabled={
-                    pending ||
-                    !name.trim() ||
-                    !subject.trim() ||
-                    segmentsFailed ||
-                    segmentsQuery.isPending ||
-                    !fetchedSegments ||
-                    !segmentId
-                  }
+                  disabled={pending || !name.trim() || !subject.trim() || !body.trim()}
                 >
                   <Send size={13} />
-                  {pending ? 'Activating…' : 'Save & activate'}
+                  {t('crm.campaignEditor.saveAndSend')}
                 </Button>
               )}
             </>
@@ -263,12 +248,21 @@ const EmailCampaign: React.FC = () => {
                 {t('crm.campaignEditor.audience')}
               </h4>
               <Select value={segmentId} onChange={(event) => setSegmentId(event.target.value)}>
+                <option value="">{t('crm.campaignEditor.allCustomers')}</option>
                 {segments.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name} ({item.customerCount})
                   </option>
                 ))}
               </Select>
+              {audience.data && (
+                <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+                  {t('crm.campaignSend.reach', {
+                    count: audience.data.eligible,
+                    total: audience.data.total,
+                  })}
+                </p>
+              )}
               {segmentsFailed && (
                 <div role="alert" style={{ marginTop: '8px', fontSize: '12px' }}>
                   <span style={{ color: 'var(--hub-text-muted)' }}>{t('crmErrors.generic')} </span>
@@ -372,6 +366,13 @@ const EmailCampaign: React.FC = () => {
           </div>
         )}
       </div>
+      <SendCampaignModal
+        open={sendOpen}
+        onClose={() => setSendOpen(false)}
+        campaignId={savedCampaignId}
+        segmentId={segmentId ? Number(segmentId) : undefined}
+        onSent={() => navigate({ to: '/crm/campaigns' })}
+      />
     </>
   );
 };

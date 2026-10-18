@@ -32,8 +32,9 @@ func invalidateCustomerScope(ctx context.Context, businessID int64) {
 }
 
 type Service struct {
-	repo    repository
-	ownerOf BusinessOwnerResolver
+	repo     repository
+	ownerOf  BusinessOwnerResolver
+	delivery *CampaignDelivery
 }
 
 type BusinessOwnerResolver interface {
@@ -248,6 +249,12 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 }
 
 type repository interface {
+	ClaimCampaignForSend(ctx context.Context, businessID, campaignID int64) (domain.CampaignToSend, error)
+	ReleaseCampaignClaim(ctx context.Context, businessID, campaignID int64) error
+	CampaignAudience(ctx context.Context, businessID int64, segmentID *int64) ([]domain.AudienceMember, int, error)
+	RecordCampaignSends(ctx context.Context, businessID, campaignID int64, customerIDs []int64, audience int) error
+	UnsubscribeFromMarketing(ctx context.Context, businessID, customerID int64) error
+
 	SearchSalesContacts(context.Context, int64, string) ([]domain.SalesContact, error)
 	CaptureCustomerContact(ctx context.Context, event eventbus.Event, ownerID int64, contact crmcontract.CustomerContactCaptured) error
 	ApplyLoyaltyDelta(ctx context.Context, input domain.LoyaltyTransaction, delta int, tierFor func(int) string, onCommitted func()) error

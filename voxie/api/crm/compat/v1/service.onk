@@ -47,6 +47,11 @@ service CompatibilityService {
   updateCampaign(PathBodyRequest) -> JsonResponse @put("/campaigns/{id}") @body("body")
   updateCampaignStatus(PathBodyRequest) -> JsonResponse @put("/campaigns/{id}/status") @body("body")
   deleteCampaign(PathRequest) -> JsonResponse @delete("/campaigns/{id}")
+  getCampaignAudience(CampaignAudienceRequest) -> JsonResponse @get("/campaigns/audience")
+  sendCampaign(PathRequest) -> JsonResponse @post("/campaigns/{id}/send")
+  /// The unsubscribe page linked from marketing email; it writes HTML.
+  getUnsubscribe(EmptyRequest) -> EmptyResponse @get("/public/unsubscribe") @http
+  confirmUnsubscribe(EmptyRequest) -> EmptyResponse @post("/public/unsubscribe") @http
 
   listAutomations(EmptyRequest) -> JsonResponse @get("/automations")
   createAutomation(BodyRequest) -> JsonResponse @post("/automations") @body("body")

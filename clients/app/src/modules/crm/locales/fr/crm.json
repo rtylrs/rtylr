@@ -604,7 +604,12 @@
     "editEmailTitle": "Modifier la campagne e-mail",
     "newEmailTitle": "Nouvelle campagne e-mail",
     "editSmsTitle": "Modifier la campagne SMS",
-    "newSmsTitle": "Nouvelle campagne SMS"
+    "newSmsTitle": "Nouvelle campagne SMS",
+    "saveAndSend": "Enregistrer et envoyer…",
+    "saveDraft": "Enregistrer le brouillon",
+    "saveFailed": "Impossible d’enregistrer la campagne.",
+    "allCustomers": "Tous les clients",
+    "templateApplied": "Modèle appliqué : {{name}}"
   },
   "segmentBuilder": {
     "pageTitle": "Nouveau segment",
@@ -703,5 +708,23 @@
     "customer": "Client",
     "viewCustomer": "Voir le client",
     "draftHint": "Laissez « Signé le » vide pour garder un brouillon. Finance peut facturer les contrats signés."
+  },
+  "campaignSend": {
+    "title": "Envoyer cette campagne ?",
+    "sendNow": "Envoyer maintenant",
+    "sending": "Envoi…",
+    "confirm_one": "Envoyer à 1 client",
+    "confirm_many": "Envoyer à {{count}} clients",
+    "confirm_other": "Envoyer à {{count}} clients",
+    "reach_one": "Atteint 1 client ayant accepté l’e-mail marketing, sur {{total}} dans cette audience.",
+    "reach_many": "Atteint {{count}} clients ayant accepté l’e-mail marketing, sur {{total}} dans cette audience.",
+    "reach_other": "Atteint {{count}} clients ayant accepté l’e-mail marketing, sur {{total}} dans cette audience.",
+    "nobody": "Personne dans cette audience n’a encore accepté l’e-mail marketing. Les clients donnent leur accord à leur création ou depuis leur fiche.",
+    "footerNote": "Chaque e-mail inclut l’adresse de votre entreprise et un lien de désinscription. Les clients désinscrits sont exclus des prochaines campagnes.",
+    "audienceFailed": "Impossible de compter qui cette campagne atteint. Réessayez.",
+    "sent_one": "Envoyée à 1 client",
+    "sent_many": "Envoyée à {{count}} clients",
+    "sent_other": "Envoyée à {{count}} clients",
+    "failed": "Impossible d’envoyer la campagne."
   }
 }

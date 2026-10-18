@@ -176,7 +176,10 @@ type AppConfig struct {
 	FlociBucket      string
 
 	// CDN runmode (cmd/upload) — media/CDN service settings.
-	CDNBaseURL         string // public base for generated file URLs
+	CDNBaseURL string // public base for generated file URLs
+	// PublicAPIURL is this API's public origin, for links that leave the
+	// app, such as the unsubscribe link in a marketing email.
+	PublicAPIURL       string
 	CDNMaxUploadBytes  int64  // hard ceiling on a single upload
 	CDNMediaEnginePath string // path to the C++ media-engine binary
 	CDNAPIKey          string // bearer key for write endpoints; empty disables auth

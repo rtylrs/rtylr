@@ -172,6 +172,7 @@ func LoadAndValidate() (*AppConfig, error) {
 
 		// CDN public media base. UPLOAD_URL remains the deployment override.
 		CDNBaseURL:         envFirst("UPLOAD_URL", "CDN_BASE_URL"),
+		PublicAPIURL:       strings.TrimRight(envOrDefault("PUBLIC_API_URL", DefaultAPIURL), "/"),
 		CDNMaxUploadBytes:  int64(positiveEnvIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),

@@ -16,6 +16,7 @@ import (
 	"github.com/voxire/onion/internal/modules/crm/customers/internal/api"
 	"github.com/voxire/onion/internal/modules/crm/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/customers/internal/domain"
+	"github.com/voxire/onion/internal/platform/emailqueue"
 	"github.com/voxire/onion/internal/platform/eventbus"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	crmdashboardv1 "github.com/voxire/voxie/gen/go/crm/dashboard/v1"
@@ -26,6 +27,7 @@ import (
 type Module struct {
 	service    *application.Service
 	repository *moduleinfra.Repository
+	db         *sql.DB
 }
 
 type EmailRecipient struct {
@@ -38,7 +40,46 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
 		service:    application.NewService(ctx, repo),
 		repository: repo,
+		db:         db,
 	}
+}
+
+// CampaignSender is who a business's marketing email comes from.
+type CampaignSender struct {
+	Name    string
+	Address string
+	ReplyTo string
+}
+
+// WithCampaignDelivery lets email campaigns send: sender reads the business's
+// display name, postal address and reply-to; secret signs unsubscribe links,
+// which point at publicAPIURL. Emails go through the shared email queue.
+func (m *Module) WithCampaignDelivery(
+	sender func(context.Context, int64) (CampaignSender, error),
+	secret []byte,
+	publicAPIURL string,
+) *Module {
+	m.service.WithCampaignDelivery(application.CampaignDelivery{
+		Sender: func(ctx context.Context, businessID int64) (domain.CampaignSender, error) {
+			value, err := sender(ctx, businessID)
+			return domain.CampaignSender(value), err
+		},
+		Enqueue: func(ctx context.Context, email application.CampaignEmail) error {
+			return emailqueue.Enqueue(ctx, m.db, emailqueue.Job{
+				Priority:  emailqueue.PriorityNormal,
+				To:        email.To,
+				Subject:   email.Subject,
+				HTML:      email.HTML,
+				Text:      email.Text,
+				From:      email.From,
+				ReplyTo:   email.ReplyTo,
+				DedupeKey: email.DedupeKey,
+			})
+		},
+		UnsubscribeSecret: secret,
+		PublicAPIURL:      publicAPIURL,
+	})
+	return m
 }
 
 func (m *Module) WithBusinessOwnerResolver(resolve func(context.Context, int64) (int64, error)) *Module {
@@ -114,7 +155,9 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return []string{}
+	// The unsubscribe link in marketing email is opened by customers, who
+	// have no rtylr session; the signed token in the link authorizes it.
+	return api.UnsubscribeRoutes()
 }
 
 func (m *Module) WithReportingTimezone(read func(context.Context, int64) (string, error)) *Module {

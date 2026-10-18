@@ -123,6 +123,9 @@ export const crmCompatibilityClient = {
 
   // campaign/v1 declares no delete.
   deleteCampaign: restDelete((id) => `/crm/campaigns/${id}`),
+  getCampaignAudience: restGet('/crm/campaigns/audience'),
+  sendCampaign: (req: { id: string }) =>
+    unwrap(rest.post<unknown>(`/crm/campaigns/${encodeURIComponent(req.id)}/send`, {})),
 
   // ── Loyalty ──────────────────────────────────────────────────────────────
   getLoyaltyConfig: (...args: Parameters<typeof loyaltyClient.getLoyaltyConfig>) =>
