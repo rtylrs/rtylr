@@ -82,3 +82,26 @@ export function isBefore(a: string, b: string): boolean {
 export function isAfter(a: string, b: string): boolean {
   return new Date(a) > new Date(b);
 }
+
+const DISPLAY_DATE: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+};
+
+/**
+ * A calendar day for display, such as a birthday. Only the YYYY-MM-DD part
+ * counts: the server sends a stored date as UTC midnight, which a local
+ * formatter would show as the previous day west of Greenwich.
+ */
+export function formatDay(value: string, locale?: string): string {
+  const day = value.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return value;
+  return parseLocal(day).toLocaleDateString(locale, DISPLAY_DATE);
+}
+
+/** The local calendar day of an instant, such as a created-at timestamp. */
+export function formatInstantDate(value: string, locale?: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(locale, DISPLAY_DATE);
+}
