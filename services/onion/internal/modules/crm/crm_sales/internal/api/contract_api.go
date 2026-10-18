@@ -51,6 +51,11 @@ func contractToGen(c domain.Contract) *crmsalesv1.Contract {
 		Plan:         c.Plan,
 		Mrr:          c.MRR.String(),
 		Seats:        int32(c.Seats), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Value:        c.Value.String(),
+		Billing:      string(c.Billing),
+		StartDate:    c.StartDate,
+		EndDate:      c.EndDate,
+		CustomerId:   c.CustomerID,
 		SignedAt:     c.SignedAt,
 		SignedByName: c.SignedByName,
 		Notes:        c.Notes,
@@ -122,11 +127,19 @@ func (a *ContractAPI) CreateContract(ctx context.Context, req *crmsalesv1.Create
 	if mrr < 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
 	}
+	value, billing, err := genContractTerms(req.Value, req.Billing, req.StartDate, req.EndDate)
+	if err != nil {
+		return nil, err
+	}
 	c, err := a.Service.CreateContract(ctx, businessID, domain.CreateContractRequest{
 		LeadID:       req.GetLeadId(),
 		Plan:         req.GetPlan(),
 		MRR:          mrr,
 		Seats:        int(req.GetSeats()),
+		Value:        value,
+		Billing:      billing,
+		StartDate:    req.StartDate,
+		EndDate:      req.EndDate,
 		SignedAt:     req.SignedAt,
 		SignedByName: req.GetSignedByName(),
 		Notes:        req.GetNotes(),
@@ -183,6 +196,10 @@ func contractUpdateFromBody(body *crmsalesv1.UpdateContractBody, stored domain.C
 		Plan:         stored.Plan,
 		MRR:          stored.MRR,
 		Seats:        stored.Seats,
+		Value:        stored.Value,
+		Billing:      stored.Billing,
+		StartDate:    stored.StartDate,
+		EndDate:      stored.EndDate,
 		SignedAt:     stored.SignedAt,
 		SignedByName: stored.SignedByName,
 		ClosedBy:     stored.ClosedBy,
@@ -203,6 +220,27 @@ func contractUpdateFromBody(body *crmsalesv1.UpdateContractBody, stored domain.C
 			return domain.UpdateContractRequest{}, onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
 		}
 		domainReq.MRR = mrr
+		// A caller still on the MRR-only shape sets a monthly contract
+		// worth that amount; value and billing below win when sent.
+		domainReq.Value, domainReq.Billing = mrr, domain.BillingMonthly
+	}
+	if body.Value != nil || body.Billing != nil || body.StartDate != nil || body.EndDate != nil {
+		value, billing, err := genContractTerms(body.Value, body.Billing, body.StartDate, body.EndDate)
+		if err != nil {
+			return domain.UpdateContractRequest{}, err
+		}
+		if body.Value != nil {
+			domainReq.Value = value
+		}
+		if body.Billing != nil {
+			domainReq.Billing = billing
+		}
+		if body.StartDate != nil {
+			domainReq.StartDate = emptyAsNil(*body.StartDate)
+		}
+		if body.EndDate != nil {
+			domainReq.EndDate = emptyAsNil(*body.EndDate)
+		}
 	}
 	if seats := int(body.GetSeats()); seats != 0 {
 		// The repository stores seats as INT; larger values wrap negative (#836).
@@ -226,4 +264,32 @@ func contractUpdateFromBody(body *crmsalesv1.UpdateContractBody, stored domain.C
 		domainReq.Notes = body.GetNotes()
 	}
 	return domainReq, nil
+}
+
+// genContractTerms parses the optional value and billing of the generated
+// contract surface and validates them with the term dates.
+func genContractTerms(value, billing, startDate, endDate *string) (money.Amount, domain.Billing, error) {
+	var amount money.Amount
+	if value != nil && *value != "" {
+		parsed, err := money.FromString(*value)
+		if err != nil {
+			return 0, "", onekiterrors.New(http.StatusBadRequest, "value must be a decimal number")
+		}
+		amount = parsed
+	}
+	var period domain.Billing
+	if billing != nil {
+		period = domain.Billing(*billing)
+	}
+	if err := validateContractTerms(amount, period, startDate, endDate); err != nil {
+		return 0, "", err
+	}
+	return amount, period, nil
+}
+
+func emptyAsNil(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
 }

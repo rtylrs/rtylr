@@ -111,13 +111,19 @@
     "emptyDescription": "Les contrats signés apparaîtront ici une fois une affaire conclue.",
     "new": "Nouveau contrat",
     "pageTitle": "Contrats",
-    "subtitle": "Tous les contrats signés et leurs détails",
+    "subtitle": "Ce que chaque affaire gagnée a acheté, sa valeur et ses conditions",
     "requiredFields": "Le prospect, la date de signature et le signataire sont obligatoires",
     "createFailed": "Échec de la création du contrat",
-    "totalMrr": "MRR total sous contrat",
+    "totalMrr": "Revenu mensuel récurrent",
     "leadLabel": "Prospect",
     "selectLead": "Sélectionner un prospect...",
-    "repUserIdPlaceholder": "ID utilisateur du commercial"
+    "leadFallback": "Prospect n° {{id}}",
+    "inForce_one": "1 contrat en vigueur",
+    "inForce_many": "{{count}} contrats en vigueur",
+    "inForce_other": "{{count}} contrats en vigueur",
+    "loadMore": "Charger plus de contrats",
+    "loadMoreLeads": "Charger plus de prospects",
+    "save": "Enregistrer le contrat"
   },
   "loyaltyMembers": {
     "loadFailedTitle": "Impossible de charger les membres",
@@ -354,7 +360,6 @@
     "touchpointFailed": "Échec de l’enregistrement du point de contact",
     "contactNameRequired": "Le nom du contact est obligatoire",
     "addContactFailed": "Échec de l’ajout du contact",
-    "saveContractFailed": "Échec de l’enregistrement du contrat",
     "notFound": "Prospect introuvable.",
     "pageTitle": "Détail du prospect",
     "backToLeads": "Retour aux prospects",
@@ -396,20 +401,10 @@
     "contractTitle": "Contrat",
     "addContractAria": "Ajouter un contrat",
     "noContract": "Aucun contrat pour l’instant.",
-    "mrr": "MRR",
-    "seats": "Sièges",
-    "signed": "Signé le",
     "signedBy": "Signé par",
     "closedBy": "Conclu par",
-    "planLabel": "Formule",
-    "planFree": "Gratuite",
-    "planPro": "Pro",
-    "planScale": "Scale",
-    "mrrUsd": "MRR ($)",
-    "signedAt": "Signé le",
     "signedByPlaceholder": "Jean Martin",
     "closedByLabel": "Conclu par (ID utilisateur du commercial)",
-    "closedByPlaceholder": "ID utilisateur du commercial",
     "contractNotesPlaceholder": "Notes supplémentaires...",
     "deleteLead": "Supprimer le prospect",
     "add": "Ajouter",
@@ -674,5 +669,39 @@
     "openCommandPalette": "Ouvrir la palette de commandes",
     "notifications": "Notifications",
     "noNotifications": "Aucune nouvelle notification"
+  },
+  "contractForm": {
+    "plan": "Ce qui a été vendu",
+    "planPlaceholder": "ex. Installation de caisse pour 3 succursales",
+    "planRequired": "Indiquez ce qui a été vendu",
+    "value": "Montant ({{currency}})",
+    "valueLabel": "Montant",
+    "valueRequired": "Saisissez le montant du contrat",
+    "billing": "Facturation",
+    "billingOption": {
+      "one_time": "En une fois",
+      "monthly": "Mensuelle",
+      "yearly": "Annuelle"
+    },
+    "valueBy": {
+      "one_time": "{{amount}} en une fois",
+      "monthly": "{{amount}} / mois",
+      "yearly": "{{amount}} / an"
+    },
+    "startDate": "Début",
+    "endDate": "Fin",
+    "endBeforeStart": "La date de fin précède la date de début",
+    "signedAt": "Signé le",
+    "term": "Durée",
+    "openEnded": "sans fin",
+    "statusLabel": "Statut",
+    "status": {
+      "draft": "Brouillon",
+      "signed": "Signé",
+      "ended": "Terminé"
+    },
+    "customer": "Client",
+    "viewCustomer": "Voir le client",
+    "draftHint": "Laissez « Signé le » vide pour garder un brouillon. Finance peut facturer les contrats signés."
   }
 }

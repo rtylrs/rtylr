@@ -135,12 +135,14 @@ describe('crmApi', () => {
   it('maps contract creation fields and omits invalid optional ids', async () => {
     crmApi.createContract({
       leadId: 7,
-      plan: 'pro',
-      mrr: 125,
-      seats: 4,
+      plan: '  POS setup for 3 branches  ',
+      value: 1200,
+      billing: 'yearly',
+      startDate: '2026-11-01',
+      endDate: '',
       signedAt: '2026-08-16',
       signedBy: '  Jane Doe  ',
-      closedBy: '',
+      closedBy: null,
       notes: 'signed',
     });
     await Promise.resolve();
@@ -148,9 +150,11 @@ describe('crmApi', () => {
     // POST /crm/sales/contracts and receives the payload directly.
     expect(mockClients.compatibility.createContract).toHaveBeenCalledWith({
       lead_id: 7,
-      plan: 'pro',
-      mrr: 125,
-      seats: 4,
+      plan: 'POS setup for 3 branches',
+      value: 1200,
+      billing: 'yearly',
+      start_date: '2026-11-01',
+      end_date: undefined,
       signed_at: '2026-08-16',
       signed_by_name: 'Jane Doe',
       closed_by: undefined,
@@ -158,14 +162,16 @@ describe('crmApi', () => {
     });
     expect(
       toContractUpdatePayload({
-        plan: 'scale',
+        plan: 'Monthly support',
         signedBy: 'Jane Doe',
-        closedBy: 'not-a-user-id',
+        closedBy: Number.NaN,
       })
     ).toEqual({
-      plan: 'scale',
-      mrr: undefined,
-      seats: undefined,
+      plan: 'Monthly support',
+      value: undefined,
+      billing: undefined,
+      startDate: undefined,
+      endDate: undefined,
       signedAt: undefined,
       signedByName: 'Jane Doe',
       closedBy: undefined,
@@ -174,12 +180,12 @@ describe('crmApi', () => {
     expect(
       toCreateContractPayload({
         leadId: 1,
-        plan: 'free',
-        mrr: 0,
-        seats: 1,
+        plan: 'Setup',
+        value: 0,
+        billing: 'one_time',
         signedAt: '',
         signedBy: '',
-        closedBy: '12',
+        closedBy: 12,
       })
     ).toMatchObject({ leadId: 1, signedAt: undefined, signedByName: '', closedBy: 12 });
   });

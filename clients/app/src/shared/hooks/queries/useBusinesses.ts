@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { businessClient, userClient } from '../../lib/clients';
 import { useConfigStore } from '../../stores/configStore';
 import { useUserStore } from '../../stores/userStore';
+import { DEFAULT_CURRENCY } from '../../lib/money';
 
 export interface OwnedBusiness {
   id: number;
@@ -155,3 +156,23 @@ export const useOnboardBusiness = () =>
   useMutation({
     mutationFn: (name: string) => businessClient.onboardBusiness({ name }),
   });
+
+/**
+ * The active business's currency (ISO 4217), for formatting money that apps
+ * store without a currency of their own. Falls back to the documented
+ * default while loading, or when the caller cannot read the business.
+ */
+export function useBusinessCurrency(): string {
+  const businessId = useUserStore((state) => state.user?.businessId);
+  const { data } = useQuery({
+    queryKey: ['businesses', businessId, 'currency'],
+    queryFn: async () => {
+      const response = await businessClient.getBusiness({ businessId: String(businessId) });
+      return response.business?.currency ?? '';
+    },
+    enabled: Boolean(businessId),
+    staleTime: 30 * 60_000,
+    retry: false,
+  });
+  return data || DEFAULT_CURRENCY;
+}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
@@ -77,14 +78,18 @@ func CreateContractRoutes() []string { return []string{"/crm/sales/contracts"} }
 type CreateContractHandler struct{ Service *application.Service }
 
 type CreateContractRequest struct {
-	LeadID       int64        `json:"lead_id"`
-	Plan         string       `json:"plan"`
-	MRR          money.Amount `json:"mrr"`
-	Seats        int          `json:"seats"`
-	SignedAt     *string      `json:"signed_at"`
-	SignedByName string       `json:"signed_by_name"`
-	ClosedBy     *int64       `json:"closed_by"`
-	Notes        string       `json:"notes"`
+	LeadID       int64          `json:"lead_id"`
+	Plan         string         `json:"plan"`
+	MRR          money.Amount   `json:"mrr"`
+	Seats        int            `json:"seats"`
+	Value        money.Amount   `json:"value"`
+	Billing      domain.Billing `json:"billing"`
+	StartDate    *string        `json:"start_date"`
+	EndDate      *string        `json:"end_date"`
+	SignedAt     *string        `json:"signed_at"`
+	SignedByName string         `json:"signed_by_name"`
+	ClosedBy     *int64         `json:"closed_by"`
+	Notes        string         `json:"notes"`
 }
 
 type CreateContractResponse struct {
@@ -97,6 +102,9 @@ func (h *CreateContractHandler) Validate(_ context.Context, req *CreateContractR
 	}
 	if req.MRR < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
+	}
+	if err := validateContractTerms(req.Value, req.Billing, req.StartDate, req.EndDate); err != nil {
+		return err
 	}
 	// The repository stores seats as INT; larger values wrap negative (#836).
 	// Zero stays allowed until the product decides seats are mandatory.
@@ -125,6 +133,10 @@ func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRe
 		Plan:         req.Plan,
 		MRR:          req.MRR,
 		Seats:        req.Seats,
+		Value:        req.Value,
+		Billing:      req.Billing,
+		StartDate:    req.StartDate,
+		EndDate:      req.EndDate,
 		SignedAt:     req.SignedAt,
 		SignedByName: req.SignedByName,
 		ClosedBy:     req.ClosedBy,
@@ -199,13 +211,17 @@ func UpdateContractRoutes() []string { return []string{"/crm/sales/contracts/{id
 type UpdateContractHandler struct{ Service *application.Service }
 
 type UpdateContractRequest struct {
-	Plan         string       `json:"plan"`
-	MRR          money.Amount `json:"mrr"`
-	Seats        int          `json:"seats"`
-	SignedAt     *string      `json:"signed_at"`
-	SignedByName string       `json:"signed_by_name"`
-	ClosedBy     *int64       `json:"closed_by"`
-	Notes        string       `json:"notes"`
+	Plan         string         `json:"plan"`
+	MRR          money.Amount   `json:"mrr"`
+	Seats        int            `json:"seats"`
+	Value        money.Amount   `json:"value"`
+	Billing      domain.Billing `json:"billing"`
+	StartDate    *string        `json:"start_date"`
+	EndDate      *string        `json:"end_date"`
+	SignedAt     *string        `json:"signed_at"`
+	SignedByName string         `json:"signed_by_name"`
+	ClosedBy     *int64         `json:"closed_by"`
+	Notes        string         `json:"notes"`
 }
 
 type UpdateContractResponse struct {
@@ -218,6 +234,9 @@ func (h *UpdateContractHandler) Validate(_ context.Context, req *UpdateContractR
 	}
 	if req.MRR < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
+	}
+	if err := validateContractTerms(req.Value, req.Billing, req.StartDate, req.EndDate); err != nil {
+		return err
 	}
 	// The repository stores seats as INT; larger values wrap negative (#836).
 	// Zero stays allowed until the product decides seats are mandatory.
@@ -251,6 +270,10 @@ func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRe
 		Plan:         req.Plan,
 		MRR:          req.MRR,
 		Seats:        req.Seats,
+		Value:        req.Value,
+		Billing:      req.Billing,
+		StartDate:    req.StartDate,
+		EndDate:      req.EndDate,
 		SignedAt:     req.SignedAt,
 		SignedByName: req.SignedByName,
 		ClosedBy:     req.ClosedBy,
@@ -265,4 +288,35 @@ func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRe
 	}
 
 	return UpdateContractResponse{Contract: payloadContract(contract)}, nil
+}
+
+// validateContractTerms rejects a negative value, an unknown billing period,
+// and dates that are not YYYY-MM-DD or end before they start. Billing may be
+// empty for callers that still send only MRR.
+func validateContractTerms(value money.Amount, billing domain.Billing, startDate, endDate *string) error {
+	if value < 0 {
+		return onekiterrors.New(http.StatusBadRequest, "value must not be negative")
+	}
+	if billing != "" && !billing.IsValid() {
+		return onekiterrors.New(http.StatusBadRequest, "billing must be one_time, monthly or yearly")
+	}
+	var start, end time.Time
+	for _, field := range []struct {
+		name  string
+		value *string
+		into  *time.Time
+	}{{"start_date", startDate, &start}, {"end_date", endDate, &end}} {
+		if field.value == nil || *field.value == "" {
+			continue
+		}
+		parsed, err := time.Parse("2006-01-02", *field.value)
+		if err != nil {
+			return onekiterrors.New(http.StatusBadRequest, field.name+" must be YYYY-MM-DD")
+		}
+		*field.into = parsed
+	}
+	if !start.IsZero() && !end.IsZero() && end.Before(start) {
+		return onekiterrors.New(http.StatusBadRequest, "end_date must not be before start_date")
+	}
+	return nil
 }

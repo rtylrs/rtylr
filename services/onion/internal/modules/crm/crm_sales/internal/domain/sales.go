@@ -181,6 +181,37 @@ type CreateTouchpointRequest struct {
 	NextFollowUp *string
 }
 
+// Billing is how often a contract's value is charged.
+type Billing string
+
+const (
+	BillingOneTime Billing = "one_time"
+	BillingMonthly Billing = "monthly"
+	BillingYearly  Billing = "yearly"
+)
+
+func (b Billing) IsValid() bool {
+	return b == BillingOneTime || b == BillingMonthly || b == BillingYearly
+}
+
+// MonthlyEquivalent is the contract's recurring revenue per month: the value
+// itself when billed monthly, a twelfth of it when yearly, and nothing for a
+// one-time sale. Contracts keep it as MRR for pipeline totals and readers
+// that predate value and billing.
+func MonthlyEquivalent(value money.Amount, billing Billing) money.Amount {
+	switch billing {
+	case BillingMonthly:
+		return value
+	case BillingYearly:
+		return value / 12
+	default:
+		return 0
+	}
+}
+
+// Contract records what a won lead bought. Plan is free text for what was
+// sold; Value is charged once or per Billing period over the optional term
+// from StartDate to EndDate (YYYY-MM-DD).
 type Contract struct {
 	ID           int64
 	OwnerID      int64
@@ -189,6 +220,11 @@ type Contract struct {
 	Plan         string
 	MRR          money.Amount
 	Seats        int
+	Value        money.Amount
+	Billing      Billing
+	StartDate    *string
+	EndDate      *string
+	CustomerID   *int64
 	SignedAt     *string
 	SignedByName string
 	ClosedBy     *int64
@@ -202,6 +238,11 @@ type CreateContractRequest struct {
 	Plan         string
 	MRR          money.Amount
 	Seats        int
+	Value        money.Amount
+	Billing      Billing
+	StartDate    *string
+	EndDate      *string
+	CustomerID   *int64
 	SignedAt     *string
 	SignedByName string
 	ClosedBy     *int64
@@ -212,6 +253,11 @@ type UpdateContractRequest struct {
 	Plan         string
 	MRR          money.Amount
 	Seats        int
+	Value        money.Amount
+	Billing      Billing
+	StartDate    *string
+	EndDate      *string
+	CustomerID   *int64
 	SignedAt     *string
 	SignedByName string
 	ClosedBy     *int64

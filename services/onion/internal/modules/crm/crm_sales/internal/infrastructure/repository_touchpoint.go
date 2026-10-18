@@ -154,6 +154,18 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		return domain.Contract{}, err
 	}
 
+	terms, err := contractTermParams(req.Value, req.Billing, req.StartDate, req.EndDate)
+	if err != nil {
+		return domain.Contract{}, err
+	}
+	customerID := nullableInt64(req.CustomerID)
+	if !customerID.Valid {
+		customerID, err = leadCustomerID(ctx, r.queries.WithTx(tx), businessID, req.LeadID)
+		if err != nil {
+			return domain.Contract{}, err
+		}
+	}
+
 	result, err := r.queries.WithTx(tx).CreateContract(ctx, sqlc.CreateContractParams{
 		OwnerID:      ownerID,
 		BusinessID:   businessID,
@@ -161,6 +173,11 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		Plan:         plan,
 		Mrr:          req.MRR.String(),
 		Seats:        int32(seats),
+		Value:        terms.value,
+		Billing:      terms.billing,
+		StartDate:    terms.startDate,
+		EndDate:      terms.endDate,
+		CustomerID:   customerID,
 		SignedAt:     signedAt,
 		SignedByName: nullableString(req.SignedByName),
 		ClosedBy:     nullableInt64(req.ClosedBy),

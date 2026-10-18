@@ -1,7 +1,7 @@
 package crm.sales.v1
 
-/// Contract is a signed sales agreement: the plan a customer bought, what it
-/// costs monthly, and who signed. This domain contracts the read surface that
+/// Contract is a sales agreement: what a customer bought, what it costs and
+/// how often it is billed, its term, and who signed. This domain contracts the read surface that
 /// other apps need; create/update stay on CRM's legacy surface until that
 /// migration happens.
 ///
@@ -14,14 +14,26 @@ message Contract {
   /// lead_id is the CRM lead this contract closes; absent for contracts
   /// recorded without a lead.
   lead_id: int64?
-  /// plan is what was bought, as CRM displays it (e.g. "pro", "enterprise").
+  /// plan is what was sold, as free text (e.g. "Annual maintenance").
   plan: string
-  /// mrr is monthly recurring revenue as a decimal string, because money
-  /// crosses the wire as text to avoid float drift. Currency is the
-  /// business's reporting currency.
+  /// mrr is the monthly equivalent of value as a decimal string, because
+  /// money crosses the wire as text to avoid float drift: value when billed
+  /// monthly, a twelfth when yearly, "0.00" for a one-time sale. Currency is
+  /// the business's reporting currency.
   mrr: string
   /// seats is how many users the contract covers.
   seats: int32
+  /// value is what is charged per billing period (decimal string).
+  value: string
+  /// billing is one_time, monthly or yearly.
+  billing: string
+  /// start_date is when the contract's term starts (YYYY-MM-DD).
+  start_date: string?
+  /// end_date is when the term ends (YYYY-MM-DD); absent for open-ended.
+  end_date: string?
+  /// customer_id is the CRM customer the contract belongs to, linked from
+  /// the lead's contact.
+  customer_id: int64?
   /// signed_at is when the customer signed (ISO-8601); absent on unsigned
   /// drafts. Presence of this field is what makes a contract billable.
   signed_at: string?
@@ -85,6 +97,15 @@ message CreateContractRequest {
   mrr: string @required
   /// seats is how many users the contract covers.
   seats: int32 @gte(0)
+  /// value is what is charged per billing period (decimal string); when
+  /// absent the contract is monthly and worth mrr.
+  value: string?
+  /// billing is one_time, monthly or yearly; monthly when absent.
+  billing: string?
+  /// start_date is when the term starts (YYYY-MM-DD).
+  start_date: string?
+  /// end_date is when the term ends (YYYY-MM-DD).
+  end_date: string?
   /// signed_at completes the signature at creation time; absent means an
   /// unsigned draft.
   signed_at: string?
@@ -117,6 +138,14 @@ message UpdateContractBody {
   mrr: string
   /// seats replaces the covered user count.
   seats: int32
+  /// value replaces what is charged per billing period (decimal string).
+  value: string?
+  /// billing replaces the billing period: one_time, monthly or yearly.
+  billing: string?
+  /// start_date replaces when the term starts (YYYY-MM-DD).
+  start_date: string?
+  /// end_date replaces when the term ends (YYYY-MM-DD).
+  end_date: string?
   /// signed_at records the signature; setting it on an unsigned draft makes
   /// the contract billable. Already-signed contracts keep their original
   /// timestamp unless explicitly replaced here.

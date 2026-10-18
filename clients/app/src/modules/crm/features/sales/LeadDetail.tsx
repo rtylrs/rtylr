@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import {
   Phone,
   Mail,
@@ -37,11 +37,19 @@ import type {
   LeadStage,
   TouchpointType,
   TouchpointOutcome,
-  ContractPlan,
 } from '../../shared/hooks/queries/useSales';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 import { followUpStatus, formatDay } from '../../shared/lib/dateUtils';
 import LeadFormModal from './components/LeadFormModal';
+import {
+  ContractFields,
+  ContractSummary,
+  EMPTY_CONTRACT,
+  contractDraftIssue,
+  toContractRequest,
+  type ContractDraft,
+} from './components/ContractForm';
+import { useBusinessCurrency } from '../../../../shared/hooks/queries/useBusinesses';
 import {
   Button,
   Card,
@@ -247,35 +255,20 @@ const LeadDetail: React.FC = () => {
   const [deleteContactId, setDeleteContactId] = useState<number | null>(null);
 
   // Contract form
+  const currency = useBusinessCurrency();
   const [contractOpen, setContractOpen] = useState(false);
-  const [contractForm, setContractForm] = useState({
-    plan: 'pro' as ContractPlan,
-    mrr: '',
-    seats: '',
-    signedAt: '',
-    signedBy: '',
-    closedBy: '',
-    notes: '',
-  });
+  const [contractDraft, setContractDraft] = useState<ContractDraft>(EMPTY_CONTRACT);
+  const contractIssue = contractDraftIssue(contractDraft);
 
   const submitContract = (): void => {
-    if (!leadId || !contractForm.signedAt || !contractForm.signedBy) return;
+    if (!leadId || contractIssue) return;
     createContract.mutate(
-      {
-        leadId,
-        plan: contractForm.plan,
-        mrr: Number(contractForm.mrr),
-        seats: Number(contractForm.seats),
-        signedAt: contractForm.signedAt,
-        signedBy: contractForm.signedBy,
-        closedBy: contractForm.closedBy,
-        notes: contractForm.notes,
-      },
+      { leadId, ...toContractRequest(contractDraft) },
       {
         onSuccess: () => {
           setContractOpen(false);
+          setContractDraft(EMPTY_CONTRACT);
         },
-        onError: () => toast.error(t('crm.leadDetail.saveContractFailed')),
       }
     );
   };
@@ -865,6 +858,15 @@ const LeadDetail: React.FC = () => {
                         {c.email}
                       </p>
                     )}
+                    {c.customerId ? (
+                      <Link
+                        to="/crm/customers/$id"
+                        params={{ id: String(c.customerId) }}
+                        style={{ fontSize: '11px', color: 'var(--crm-accent)' }}
+                      >
+                        {t('crm.contractForm.viewCustomer')}
+                      </Link>
+                    ) : null}
                   </div>
                   <button
                     type="button"
@@ -932,46 +934,7 @@ const LeadDetail: React.FC = () => {
                   {t('crmCommon.loading')}
                 </p>
               ) : contract ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        background: 'rgba(16,185,129,0.12)',
-                        color: '#10b981',
-                        textTransform: 'capitalize',
-                      }}
-                    >
-                      {contract.plan}
-                    </span>
-                  </div>
-                  <InfoRow
-                    label={t('crm.leadDetail.mrr')}
-                    value={`$${contract.mrr.toLocaleString()}/mo`}
-                  />
-                  <InfoRow label={t('crm.leadDetail.seats')} value={String(contract.seats)} />
-                  <InfoRow
-                    label={t('crm.leadDetail.signed')}
-                    value={formatDate(contract.signedAt)}
-                  />
-                  <InfoRow label={t('crm.leadDetail.signedBy')} value={contract.signedBy} />
-                  <InfoRow label={t('crm.leadDetail.closedBy')} value={contract.closedBy} />
-                  {contract.notes && (
-                    <p
-                      style={{
-                        fontSize: '12px',
-                        color: 'var(--hub-text-muted)',
-                        margin: '4px 0 0',
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {contract.notes}
-                    </p>
-                  )}
-                </div>
+                <ContractSummary contract={contract} currency={currency} columns={1} />
               ) : (
                 <>
                   {!contractOpen && (
@@ -987,65 +950,16 @@ const LeadDetail: React.FC = () => {
                         exit={{ opacity: 0, y: -4 }}
                         style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
                       >
-                        <Select
-                          label={t('crm.leadDetail.planLabel')}
-                          value={contractForm.plan}
-                          onChange={(e) =>
-                            setContractForm((f) => ({ ...f, plan: e.target.value as ContractPlan }))
-                          }
-                        >
-                          <option value="free">{t('crm.leadDetail.planFree')}</option>
-                          <option value="pro">{t('crm.leadDetail.planPro')}</option>
-                          <option value="scale">{t('crm.leadDetail.planScale')}</option>
-                        </Select>
-                        <Input
-                          label={t('crm.leadDetail.mrrUsd')}
-                          type="number"
-                          value={contractForm.mrr}
-                          onChange={(e) => setContractForm((f) => ({ ...f, mrr: e.target.value }))}
-                          placeholder="500"
+                        <ContractFields
+                          draft={contractDraft}
+                          onChange={(patch) => setContractDraft((d) => ({ ...d, ...patch }))}
+                          currency={currency}
                         />
-                        <Input
-                          label={t('crm.leadDetail.seats')}
-                          type="number"
-                          value={contractForm.seats}
-                          onChange={(e) =>
-                            setContractForm((f) => ({ ...f, seats: e.target.value }))
-                          }
-                          placeholder="5"
-                        />
-                        <Input
-                          label={t('crm.leadDetail.signedAt')}
-                          type="date"
-                          value={contractForm.signedAt}
-                          onChange={(e) =>
-                            setContractForm((f) => ({ ...f, signedAt: e.target.value }))
-                          }
-                        />
-                        <Input
-                          label={t('crm.leadDetail.signedBy')}
-                          value={contractForm.signedBy}
-                          onChange={(e) =>
-                            setContractForm((f) => ({ ...f, signedBy: e.target.value }))
-                          }
-                          placeholder={t('crm.leadDetail.signedByPlaceholder')}
-                        />
-                        <Input
-                          label={t('crm.leadDetail.closedByLabel')}
-                          value={contractForm.closedBy}
-                          onChange={(e) =>
-                            setContractForm((f) => ({ ...f, closedBy: e.target.value }))
-                          }
-                          placeholder={t('crm.leadDetail.closedByPlaceholder')}
-                        />
-                        <Textarea
-                          label={t('crm.leadDetail.notesLabel')}
-                          value={contractForm.notes}
-                          onChange={(e) =>
-                            setContractForm((f) => ({ ...f, notes: e.target.value }))
-                          }
-                          placeholder={t('crm.leadDetail.contractNotesPlaceholder')}
-                        />
+                        {contractIssue && contractDraft !== EMPTY_CONTRACT && (
+                          <p style={{ fontSize: '11px', color: '#ef4444', margin: 0 }}>
+                            {t(contractIssue)}
+                          </p>
+                        )}
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                           <Button variant="ghost" onClick={() => setContractOpen(false)}>
                             {t('crmCommon.cancel')}
@@ -1053,10 +967,12 @@ const LeadDetail: React.FC = () => {
                           <Button
                             variant="primary"
                             onClick={submitContract}
-                            disabled={createContract.isPending}
+                            disabled={createContract.isPending || contractIssue !== null}
                             style={{ padding: '6px 12px', fontSize: '12px' }}
                           >
-                            {createContract.isPending ? 'Saving...' : 'Save'}
+                            {createContract.isPending
+                              ? t('crm.states.saving')
+                              : t('crmCommon.save')}
                           </Button>
                         </div>
                       </motion.div>
