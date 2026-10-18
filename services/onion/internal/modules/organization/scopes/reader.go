@@ -130,6 +130,21 @@ func (r *Reader) BusinessUsers(ctx context.Context, businessID int64, userIDs []
 	return result, nil
 }
 
+// ActiveBusinessUsers lists the owner and active members of the business,
+// for pickers such as a deal's assigned rep. Unlike BusinessUsers it leaves
+// out former members, who can no longer be assigned work. This grants no access.
+func (r *Reader) ActiveBusinessUsers(ctx context.Context, businessID int64) ([]BusinessUser, error) {
+	rows, err := r.queries.ActiveBusinessUsers(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]BusinessUser, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, BusinessUser{row.ID, row.Name, row.Email})
+	}
+	return result, nil
+}
+
 // AccountByEmail resolves an invitation target. Missing accounts return sql.ErrNoRows.
 func (r *Reader) AccountByEmail(ctx context.Context, email string) (int64, error) {
 	return r.queries.AccountByEmail(ctx, email)

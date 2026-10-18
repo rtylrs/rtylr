@@ -243,6 +243,14 @@ export interface Lead {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  // YYYY-MM-DD follow-up set on the latest touchpoint; absent when none.
+  nextFollowUp?: string;
+}
+
+/** A teammate a lead can be assigned to. */
+export interface SalesRep {
+  id: number;
+  name: string;
 }
 
 export interface PipelineColumn {
@@ -308,7 +316,8 @@ export interface UpdateLeadRequest {
   source?: string;
   stage?: LeadStage;
   mrrPotential?: number;
-  assignedTo?: number;
+  // null unassigns the lead; undefined keeps the current rep.
+  assignedTo?: number | null;
   notes?: string;
 }
 
@@ -318,7 +327,7 @@ interface LeadMutationPayload {
   size?: string;
   source?: string;
   stage?: LeadStage;
-  assignedTo?: number;
+  assignedTo?: number | null;
   mrrPotential?: number;
   notes?: string;
 }
@@ -878,6 +887,7 @@ export const crmApi = {
   // Sales Pipeline
   getSalesPipeline: () =>
     compatResult<PipelineColumn[]>(() => crmCompatibilityClient.getSalesPipeline({})),
+  getSalesReps: () => compatResult<SalesRep[]>(() => crmCompatibilityClient.listSalesReps({})),
   getLeads: (limit?: number, offset?: number) =>
     compatResult<Lead[]>(() => crmCompatibilityClient.listLeads({ limit, offset })),
   getLead: (id: number) =>

@@ -58,6 +58,7 @@ const mockLeads: Lead[] = [
 ];
 
 vi.mock('../../shared/hooks/queries/useSales', () => ({
+  useSalesReps: () => ({ data: [] }),
   usePipeline: () => ({
     data: mockPipeline,
     isPending: false,

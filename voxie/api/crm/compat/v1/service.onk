@@ -55,6 +55,7 @@ service CompatibilityService {
 
 
   getSalesPipeline(EmptyRequest) -> JsonResponse @get("/sales/pipeline")
+  listSalesReps(EmptyRequest) -> JsonResponse @get("/sales/reps")
   listLeads(PageRequest) -> JsonResponse @get("/sales/leads")
   getLead(PathRequest) -> JsonResponse @get("/sales/leads/{id}")
   createLead(BodyRequest) -> JsonResponse @post("/sales/leads") @body("body")

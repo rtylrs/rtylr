@@ -13,6 +13,7 @@ import (
 type Repository struct {
 	queries      *sqlc.Queries
 	memberReader func(context.Context, int64, int64) (bool, error)
+	repReader    func(context.Context, int64) ([]domain.Rep, error)
 	db           *sql.DB
 }
 
@@ -134,6 +135,13 @@ func (r *Repository) ValidateLeadAssignee(ctx context.Context, businessID, userI
 	return nil
 }
 
+func (r *Repository) ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error) {
+	if r.repReader == nil {
+		return nil, errors.New("lead rep reader is not configured")
+	}
+	return r.repReader(ctx, businessID)
+}
+
 func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -222,5 +230,10 @@ func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID 
 
 func (r *Repository) WithMembershipReader(reader func(context.Context, int64, int64) (bool, error)) *Repository {
 	r.memberReader = reader
+	return r
+}
+
+func (r *Repository) WithRepReader(reader func(context.Context, int64) ([]domain.Rep, error)) *Repository {
+	r.repReader = reader
 	return r
 }

@@ -85,7 +85,24 @@
     "pageTitle": "Prospects",
     "searchPlaceholder": "Rechercher par entreprise...",
     "allSources": "Toutes les sources",
-    "viewLead": "Voir le prospect"
+    "viewLead": "Voir le prospect",
+    "allStages": "Toutes les étapes",
+    "followUpsDue": "Relances à faire",
+    "formerRep": "Ancien membre de l’équipe",
+    "columns": {
+      "company": "Entreprise",
+      "industry": "Secteur",
+      "stage": "Étape",
+      "source": "Source",
+      "rep": "Commercial",
+      "nextFollowUp": "Prochaine relance",
+      "value": "MRR potentiel",
+      "actions": "Actions"
+    },
+    "followUp": {
+      "overdue": "En retard",
+      "today": "Aujourd’hui"
+    }
   },
   "contracts": {
     "loadFailedTitle": "Impossible de charger les contrats",
@@ -396,7 +413,8 @@
     "deleteLead": "Supprimer le prospect",
     "add": "Ajouter",
     "adding": "Ajout...",
-    "logTouchpointTitle": "Enregistrer un point de contact"
+    "logTouchpointTitle": "Enregistrer un point de contact",
+    "followUpOn": "Relancer le {{date}}"
   },
   "dashboard": {
     "atRiskEmptyTitle": "Aucun client à risque pour le moment",
@@ -458,8 +476,11 @@
     "companySize": "Taille de l’entreprise",
     "sourcePlaceholder": "LinkedIn, recommandation...",
     "mrrPotentialUsd": "MRR potentiel ($)",
-    "userId": "ID utilisateur",
-    "notesPlaceholder": "Contexte sur ce prospect..."
+    "notesPlaceholder": "Contexte sur ce prospect...",
+    "editTitle": "Modifier le prospect",
+    "creating": "Création…",
+    "submit": "Créer le prospect",
+    "unassigned": "Non attribué"
   },
   "pipeline": {
     "pageTitle": "Pipeline commercial",

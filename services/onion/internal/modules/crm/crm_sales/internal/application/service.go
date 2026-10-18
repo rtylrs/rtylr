@@ -26,6 +26,7 @@ type repository interface {
 	CreateLead(ctx context.Context, businessID int64, req domain.CreateLeadRequest) (domain.Lead, error)
 	UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error)
 	ValidateLeadAssignee(ctx context.Context, businessID, userID int64) error
+	ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error)
 	DeleteLead(ctx context.Context, id, businessID int64) error
 	GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error)
 	ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
@@ -86,7 +87,8 @@ func normalizePagination(limit, offset int32) (int32, int32) {
 func (s *Service) ListLeads(ctx context.Context, businessID int64, limit, offset int32) (domain.LeadPage, error) {
 	limit, offset = normalizePagination(limit, offset)
 	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("leads|n=%d|o=%d", limit, offset))
-	return cacher.Of[domain.LeadPage]().GetOrComputeSingle(ctx, key+"|domain=v2",
+	// v3: leads carry NextFollowUp.
+	return cacher.Of[domain.LeadPage]().GetOrComputeSingle(ctx, key+"|domain=v3",
 		func(ctx context.Context) (domain.LeadPage, error) {
 			leads, err := s.repo.ListLeads(ctx, businessID, limit, offset)
 			if err != nil {
@@ -102,9 +104,15 @@ func (s *Service) ListLeads(ctx context.Context, businessID int64, limit, offset
 	)
 }
 
+// ListReps returns the teammates a lead can be assigned to. It is not
+// cached: membership changes outside this module would leave it stale.
+func (s *Service) ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error) {
+	return s.repo.ListReps(ctx, businessID)
+}
+
 func (s *Service) GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error) {
 	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("lead=%d", id))
-	return cacher.Of[domain.Lead]().GetOrComputeSingle(ctx, key+"|domain=v2",
+	return cacher.Of[domain.Lead]().GetOrComputeSingle(ctx, key+"|domain=v3",
 		func(ctx context.Context) (domain.Lead, error) {
 			return s.repo.GetLead(ctx, id, businessID)
 		},

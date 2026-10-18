@@ -33,6 +33,8 @@ const contractsList: unknown[] = [];
 const queryErrors = { lead: false, touchpoints: false, contacts: false, contracts: false };
 
 vi.mock('../../shared/hooks/queries/useSales', () => ({
+  useSalesReps: () => ({ data: [] }),
+  useCreateLead: () => ({ mutate: vi.fn(), isPending: false }),
   useLead: () => ({
     data: queryErrors.lead ? undefined : lead,
     isLoading: false,

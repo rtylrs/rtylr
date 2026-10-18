@@ -5,14 +5,20 @@ import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle, ChevronRight, Plus, TrendingUp, X } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { motion } from 'motion/react';
-import { usePipeline, useLeads, useUpdateLead } from '../../shared/hooks/queries/useSales';
+import {
+  usePipeline,
+  useLeads,
+  useSalesReps,
+  useUpdateLead,
+} from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
-import CreateLeadModal from './components/CreateLeadModal';
+import LeadFormModal from './components/LeadFormModal';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import { followUpStatus } from '../../shared/lib/dateUtils';
 
 // Ids only: evaluated at module load, before i18next has a language. Labels
-// come from crm.leadStages.<id>, shared with LeadDetail and CreateLeadModal.
+// come from crm.leadStages.<id>, shared with LeadDetail and LeadFormModal.
 const STAGES: LeadStage[] = [
   'cold',
   'contacted',
@@ -57,13 +63,16 @@ function initials(name: string | null | undefined): string {
 
 interface LeadCardProps {
   lead: Lead;
+  /** Assigned rep's name; the avatar is left out when unassigned. */
+  repName?: string;
   onClick: () => void;
   onMoveStage?: (lead: Lead, nextStage: LeadStage) => void;
   isUpdating?: boolean;
 }
 
-const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onMoveStage, isUpdating }) => {
+const LeadCard: React.FC<LeadCardProps> = ({ lead, repName, onClick, onMoveStage, isUpdating }) => {
   const { t } = useTranslation();
+  const followUp = lead.nextFollowUp ? followUpStatus(lead.nextFollowUp) : null;
   const currentIndex = STAGES.indexOf(lead.stage);
   const nextStage =
     currentIndex >= 0 && currentIndex < STAGES.length - 2 ? STAGES[currentIndex + 1] : null;
@@ -116,24 +125,39 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick, onMoveStage, isUpdat
           <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
             {lead.industry}
           </p>
+          {followUp && followUp !== 'upcoming' && (
+            <p
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                margin: '4px 0 0',
+                color: followUp === 'overdue' ? '#ef4444' : '#f59e0b',
+              }}
+            >
+              {t(`crm.leads.followUp.${followUp}`)}
+            </p>
+          )}
         </div>
-        <div
-          style={{
-            width: '24px',
-            height: '24px',
-            borderRadius: '6px',
-            background: 'rgba(59,130,246,0.15)',
-            color: 'var(--accent-fg)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '10px',
-            fontWeight: 700,
-            flexShrink: 0,
-          }}
-        >
-          {initials(lead.assignedTo != null ? String(lead.assignedTo) : undefined)}
-        </div>
+        {repName && (
+          <div
+            title={repName}
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '6px',
+              background: 'rgba(59,130,246,0.15)',
+              color: 'var(--accent-fg)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            {initials(repName)}
+          </div>
+        )}
       </div>
       <div
         style={{
@@ -247,6 +271,8 @@ const Pipeline: React.FC = () => {
   const leadsLoading = leadsQuery.isPending && !leadsError;
   const [createOpen, setCreateOpen] = useState(false);
   const updateLead = useUpdateLead();
+  const { data: reps = [] } = useSalesReps();
+  const repNames = useMemo(() => new Map(reps.map((rep) => [rep.id, rep.name])), [reps]);
 
   const handleMoveStage = (lead: Lead, nextStage: LeadStage): void => {
     setLoadedLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, stage: nextStage } : l)));
@@ -416,6 +442,9 @@ const Pipeline: React.FC = () => {
                       <LeadCard
                         key={lead.id}
                         lead={lead}
+                        repName={
+                          lead.assignedTo != null ? repNames.get(lead.assignedTo) : undefined
+                        }
                         onClick={() => navigate({ to: `/crm/sales/leads/${lead.id}` })}
                         onMoveStage={handleMoveStage}
                         isUpdating={updateLead.isPending}
@@ -486,7 +515,7 @@ const Pipeline: React.FC = () => {
           </div>
         )}
 
-        <CreateLeadModal open={createOpen} onClose={() => setCreateOpen(false)} />
+        <LeadFormModal open={createOpen} onClose={() => setCreateOpen(false)} />
       </div>
     </>
   );

@@ -34,6 +34,8 @@ const refetchLeads = vi.fn();
 const deleteLeadMutate = vi.fn();
 
 vi.mock('../../shared/hooks/queries/useSales', () => ({
+  useSalesReps: () => ({ data: [] }),
+  useUpdateLead: () => ({ mutate: vi.fn(), isPending: false }),
   useLeads: () => ({
     data: leadsList,
     isLoading: false,

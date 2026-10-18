@@ -85,6 +85,17 @@ type Lead struct {
 	Notes        string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	// NextFollowUp is the follow-up date (YYYY-MM-DD) set on the lead's
+	// latest touchpoint, or "" when that touchpoint set none. Logging a
+	// touchpoint replaces it, so the date always names the next step.
+	NextFollowUp string
+}
+
+// Rep is a teammate a lead can be assigned to: the business owner or an
+// active member.
+type Rep struct {
+	ID   int64
+	Name string
 }
 
 type CreateLeadRequest struct {

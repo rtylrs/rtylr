@@ -201,4 +201,5 @@ export const crmCompatibilityClient = {
   deleteTouchpoint: restDelete((id) => `/crm/sales/touchpoints/${id}`),
 
   getSalesPipeline: restGet('/crm/sales/pipeline'),
+  listSalesReps: restGet('/crm/sales/reps'),
 };

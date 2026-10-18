@@ -6,21 +6,12 @@ import { toast } from 'sonner';
 import { AlertCircle, Plus, Search, Trash2, UserPlus, Eye } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { EmptyState } from '@voxire/ui';
-import { useLeads, useDeleteLead } from '../../shared/hooks/queries/useSales';
+import { useLeads, useDeleteLead, useSalesReps } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList, ConfirmModal } from '../../shared/components/ui';
-import CreateLeadModal from './components/CreateLeadModal';
+import LeadFormModal from './components/LeadFormModal';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
-
-const STAGE_LABELS: Record<LeadStage, string> = {
-  cold: 'Cold',
-  contacted: 'Contacted',
-  demo_booked: 'Demo Booked',
-  demo_done: 'Demo Done',
-  proposal_sent: 'Proposal Sent',
-  contracted: 'Contracted',
-  lost: 'Lost',
-};
+import { followUpStatus, formatDay, type FollowUpStatus } from '../../shared/lib/dateUtils';
 
 const STAGE_COLORS: Record<LeadStage, { bg: string; color: string }> = {
   cold: { bg: 'rgba(107,114,128,0.12)', color: '#6b7280' },
@@ -44,6 +35,7 @@ const ALL_STAGES: Array<LeadStage | 'all'> = [
 ];
 
 const StageBadge: React.FC<{ stage: LeadStage }> = ({ stage }) => {
+  const { t } = useTranslation();
   const colors = STAGE_COLORS[stage];
   return (
     <span
@@ -57,7 +49,26 @@ const StageBadge: React.FC<{ stage: LeadStage }> = ({ stage }) => {
         whiteSpace: 'nowrap',
       }}
     >
-      {STAGE_LABELS[stage]}
+      {t(`crm.leadStages.${stage}`)}
+    </span>
+  );
+};
+
+const FOLLOW_UP_COLORS: Record<FollowUpStatus, string> = {
+  overdue: '#ef4444',
+  today: '#f59e0b',
+  upcoming: 'var(--hub-text-muted)',
+};
+
+const FollowUpCell: React.FC<{ date?: string }> = ({ date }) => {
+  const { t, i18n } = useTranslation();
+  if (!date) return <span style={{ color: 'var(--hub-text-dim)' }}>—</span>;
+  const status = followUpStatus(date);
+  return (
+    <span
+      style={{ color: FOLLOW_UP_COLORS[status], fontWeight: status === 'upcoming' ? 400 : 600 }}
+    >
+      {status === 'upcoming' ? formatDay(date, i18n.language) : t(`crm.leads.followUp.${status}`)}
     </span>
   );
 };
@@ -121,6 +132,9 @@ const Leads: React.FC = () => {
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<LeadStage | 'all'>('all');
   const [sourceFilter, setSourceFilter] = useState('all');
+  const [dueOnly, setDueOnly] = useState(false);
+  const { data: reps = [] } = useSalesReps();
+  const repNames = new Map(reps.map((rep) => [rep.id, rep.name]));
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
@@ -132,7 +146,9 @@ const Leads: React.FC = () => {
       .includes(search.toLowerCase());
     const matchStage = stageFilter === 'all' || l.stage === stageFilter;
     const matchSource = sourceFilter === 'all' || l.source === sourceFilter;
-    return matchSearch && matchStage && matchSource;
+    const matchDue =
+      !dueOnly || (!!l.nextFollowUp && followUpStatus(l.nextFollowUp) !== 'upcoming');
+    return matchSearch && matchStage && matchSource && matchDue;
   });
 
   const deleteTarget = deleteId !== null ? leads.find((l) => l.id === deleteId) : null;
@@ -219,7 +235,7 @@ const Leads: React.FC = () => {
           >
             {ALL_STAGES.map((s) => (
               <option key={s} value={s}>
-                {s === 'all' ? 'All stages' : STAGE_LABELS[s]}
+                {s === 'all' ? t('crm.leads.allStages') : t(`crm.leadStages.${s}`)}
               </option>
             ))}
           </select>
@@ -247,6 +263,25 @@ const Leads: React.FC = () => {
               </option>
             ))}
           </select>
+
+          {/* Follow-ups due today or overdue */}
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px',
+              color: 'var(--hub-text)',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={dueOnly}
+              onChange={(e) => setDueOnly(e.target.checked)}
+            />
+            {t('crm.leads.followUpsDue')}
+          </label>
         </div>
 
         {/* Table */}
@@ -292,13 +327,14 @@ const Leads: React.FC = () => {
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
                   {[
-                    'Company',
-                    'Industry',
-                    'Stage',
-                    'Source',
-                    'Assigned Rep',
-                    'MRR Potential',
-                    'Actions',
+                    t('crm.leads.columns.company'),
+                    t('crm.leads.columns.industry'),
+                    t('crm.leads.columns.stage'),
+                    t('crm.leads.columns.source'),
+                    t('crm.leads.columns.rep'),
+                    t('crm.leads.columns.nextFollowUp'),
+                    t('crm.leads.columns.value'),
+                    t('crm.leads.columns.actions'),
                   ].map((h, i) => (
                     <th
                       key={i}
@@ -375,7 +411,12 @@ const Leads: React.FC = () => {
                       <td
                         style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text)' }}
                       >
-                        {lead.assignedTo != null ? lead.assignedTo : '—'}
+                        {lead.assignedTo != null
+                          ? (repNames.get(lead.assignedTo) ?? t('crm.leads.formerRep'))
+                          : '—'}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '12px' }}>
+                        <FollowUpCell date={lead.nextFollowUp} />
                       </td>
                       <td
                         style={{
@@ -467,7 +508,7 @@ const Leads: React.FC = () => {
           )}
         </motion.div>
 
-        <CreateLeadModal open={createOpen} onClose={() => setCreateOpen(false)} />
+        <LeadFormModal open={createOpen} onClose={() => setCreateOpen(false)} />
 
         <ConfirmModal
           open={deleteId !== null}

@@ -105,3 +105,15 @@ export function formatInstantDate(value: string, locale?: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(locale, DISPLAY_DATE);
 }
+
+export type FollowUpStatus = 'overdue' | 'today' | 'upcoming';
+
+/**
+ * Where a YYYY-MM-DD follow-up date sits against the reader's today. Plain
+ * string comparison is exact for this format and avoids timezone shifts.
+ */
+export function followUpStatus(date: string, today = todayIso()): FollowUpStatus {
+  if (date < today) return 'overdue';
+  if (date === today) return 'today';
+  return 'upcoming';
+}

@@ -22,6 +22,7 @@ import type {
   CreateTouchpointRequest,
   CreateContactRequest,
   CreateContractRequest,
+  SalesRep,
 } from '../../services/crmApi';
 
 // ── Re-exports ────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ export type {
   TouchpointType,
   TouchpointOutcome,
   ContractPlan,
+  SalesRep,
 } from '../../services/crmApi';
 
 // ── Pipeline ──────────────────────────────────────────────────────
@@ -88,8 +90,27 @@ export const parseLead = (lead: Lead | (Record<string, unknown> & { id: unknown 
     dealValue,
     createdAt,
     updatedAt,
+    nextFollowUp:
+      typeof (raw.nextFollowUp ?? raw.next_follow_up) === 'string' &&
+      String(raw.nextFollowUp ?? raw.next_follow_up) !== ''
+        ? String(raw.nextFollowUp ?? raw.next_follow_up)
+        : undefined,
   };
 };
+
+/** Teammates a lead can be assigned to, for the rep picker and rep names. */
+export const useSalesReps = (): UseQueryResult<SalesRep[]> =>
+  useQuery<SalesRep[]>({
+    queryKey: ['crm-sales-reps'],
+    queryFn: async (): Promise<SalesRep[]> => {
+      const res = await unwrap(crmApi.getSalesReps());
+      return unwrapList<Record<string, unknown>>(res, 'reps').map((rep) => ({
+        id: toFiniteNumber(rep.id),
+        name: String(rep.name ?? ''),
+      }));
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
 export const useLeads = (limit = 100, offset = 0): UseQueryResult<Lead[]> =>
   useQuery<Lead[]>({
@@ -160,7 +181,11 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
         source: payload.data.source ?? cached?.source,
         stage: payload.data.stage ?? cached?.stage,
         mrrPotential: payload.data.mrrPotential ?? cached?.mrrPotential,
-        assignedTo: payload.data.assignedTo ?? cached?.assignedTo ?? undefined,
+        // Explicit null unassigns; only an omitted rep keeps the cached one.
+        assignedTo:
+          payload.data.assignedTo !== undefined
+            ? payload.data.assignedTo
+            : (cached?.assignedTo ?? undefined),
         notes: payload.data.notes ?? cached?.notes,
       };
       const res = await unwrap(crmApi.updateLead(payload.id, merged));

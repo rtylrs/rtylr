@@ -65,6 +65,15 @@ WHERE u.id IN (sqlc.slice('user_ids')) AND EXISTS (
  SELECT 1 FROM authorization_business_members m WHERE m.business_id = b.id AND m.user_id = u.id))
 );
 
+-- name: ActiveBusinessUsers :many
+SELECT u.id, COALESCE(u.full_name, '') AS name, u.email
+FROM users u
+JOIN businesses b ON b.id = sqlc.arg(business_id) AND COALESCE(b.is_active, TRUE) = TRUE
+WHERE b.owner_id = u.id OR EXISTS (
+  SELECT 1 FROM authorization_business_members m
+  WHERE m.business_id = b.id AND m.user_id = u.id AND m.status = 'active')
+ORDER BY name, u.id;
+
 -- name: AccountByEmail :one
 SELECT id FROM users WHERE email = ? LIMIT 1;
 

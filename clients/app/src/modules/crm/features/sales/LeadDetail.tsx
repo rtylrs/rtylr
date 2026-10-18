@@ -31,6 +31,7 @@ import {
   useDeleteContact,
   useContracts,
   useCreateContract,
+  useSalesReps,
 } from '../../shared/hooks/queries/useSales';
 import type {
   LeadStage,
@@ -39,6 +40,8 @@ import type {
   ContractPlan,
 } from '../../shared/hooks/queries/useSales';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import { followUpStatus, formatDay } from '../../shared/lib/dateUtils';
+import LeadFormModal from './components/LeadFormModal';
 import {
   Button,
   Card,
@@ -112,11 +115,18 @@ function formatDate(iso: string): string {
   });
 }
 
+const OUTCOME_LABEL_KEYS: Record<TouchpointOutcome, string> = {
+  positive: 'crm.leadDetail.outcomePositive',
+  neutral: 'crm.leadDetail.outcomeNeutral',
+  negative: 'crm.leadDetail.outcomeNegative',
+  no_answer: 'crm.leadDetail.outcomeNoAnswer',
+};
+
 const LeadDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const leadId = id ? Number(id) : undefined;
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const leadQuery = useLead(leadId);
   const touchpointsQuery = useLeadTouchpoints(leadId);
@@ -131,6 +141,10 @@ const LeadDetail: React.FC = () => {
   const contactsFailed = hasQueryFailed(contactsQuery);
   const contractsFailed = hasQueryFailed(contractsQuery);
   const updateLead = useUpdateLead();
+  const [editOpen, setEditOpen] = useState(false);
+  const { data: reps = [] } = useSalesReps();
+  const repName = (id: number | null | undefined): string | undefined =>
+    id != null ? reps.find((rep) => rep.id === id)?.name : undefined;
   const deleteLead = useDeleteLead();
   const createTouchpoint = useCreateTouchpoint();
   const deleteTouchpoint = useDeleteTouchpoint();
@@ -508,14 +522,16 @@ const LeadDetail: React.FC = () => {
                             }}
                           >
                             {OUTCOME_ICONS[tp.outcome]}
-                            {tp.outcome.replace('_', ' ')}
+                            {t(OUTCOME_LABEL_KEYS[tp.outcome])}
                           </span>
                           <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
                             {formatDate(tp.createdAt)}
                           </span>
-                          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
-                            · {tp.repName}
-                          </span>
+                          {tp.repName && (
+                            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+                              · {tp.repName}
+                            </span>
+                          )}
                         </div>
                         <p
                           style={{
@@ -535,7 +551,9 @@ const LeadDetail: React.FC = () => {
                               margin: '4px 0 0',
                             }}
                           >
-                            Follow up: {formatDate(tp.nextFollowUp)}
+                            {t('crm.leadDetail.followUpOn', {
+                              date: formatDay(tp.nextFollowUp, i18n.language),
+                            })}
                           </p>
                         )}
                       </div>
@@ -579,7 +597,21 @@ const LeadDetail: React.FC = () => {
                 >
                   {t('crm.leadDetail.infoTitle')}
                 </p>
-                <Edit2 size={13} style={{ color: 'var(--hub-text-dim)' }} />
+                <button
+                  type="button"
+                  aria-label={t('crm.createLead.editTitle')}
+                  onClick={() => setEditOpen(true)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    padding: '4px',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                    display: 'flex',
+                  }}
+                >
+                  <Edit2 size={13} />
+                </button>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <InfoRow
@@ -595,8 +627,27 @@ const LeadDetail: React.FC = () => {
                 />
                 <InfoRow
                   label={t('crm.leadDetail.assignedRep')}
-                  value={lead.assignedTo != null ? String(lead.assignedTo) : '—'}
+                  value={
+                    lead.assignedTo != null
+                      ? (repName(lead.assignedTo) ?? t('crm.leads.formerRep'))
+                      : t('crm.createLead.unassigned')
+                  }
                 />
+                <InfoRow
+                  label={t('crm.leadDetail.nextFollowUp')}
+                  value={
+                    lead.nextFollowUp
+                      ? followUpStatus(lead.nextFollowUp) === 'upcoming'
+                        ? formatDay(lead.nextFollowUp, i18n.language)
+                        : `${formatDay(lead.nextFollowUp, i18n.language)} · ${t(
+                            `crm.leads.followUp.${followUpStatus(lead.nextFollowUp)}`
+                          )}`
+                      : '—'
+                  }
+                />
+                {lead.notes && (
+                  <InfoRow label={t('crm.leadDetail.notesLabel')} value={lead.notes} />
+                )}
                 <div>
                   <p
                     style={{
@@ -1018,6 +1069,8 @@ const LeadDetail: React.FC = () => {
         </div>
 
         {/* Delete lead confirm */}
+        <LeadFormModal open={editOpen} onClose={() => setEditOpen(false)} lead={lead} />
+
         <ConfirmModal
           open={confirmDeleteLead}
           onClose={() => setConfirmDeleteLead(false)}

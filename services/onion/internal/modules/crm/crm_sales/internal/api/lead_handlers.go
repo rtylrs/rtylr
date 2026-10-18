@@ -332,3 +332,47 @@ func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (De
 
 	return DeleteLeadResponse{Success: true}, nil
 }
+
+// ---------------------------------------------------------------------------
+// Reps
+// ---------------------------------------------------------------------------
+
+func ListRepsRoutes() []string { return []string{"/crm/sales/reps"} }
+
+type (
+	ListRepsHandler  struct{ Service *application.Service }
+	ListRepsRequest  struct{}
+	ListRepsResponse struct {
+		Reps []repPayload `json:"reps"`
+	}
+	repPayload struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+)
+
+// Serve lists the teammates a lead can be assigned to, so the picker shows
+// names instead of asking for a numeric user ID.
+func (h *ListRepsHandler) Serve(ctx context.Context, _ *ListRepsRequest) (ListRepsResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ListRepsResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return ListRepsResponse{}, err
+	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListRepsResponse{}, onekiterrors.PermissionDenied()
+	}
+	reps, err := h.Service.ListReps(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list sales reps", logger.Any("business_id", businessID), logger.Error(err))
+		return ListRepsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list reps")
+	}
+	payload := make([]repPayload, 0, len(reps))
+	for _, rep := range reps {
+		payload = append(payload, repPayload{ID: rep.ID, Name: rep.Name})
+	}
+	return ListRepsResponse{Reps: payload}, nil
+}

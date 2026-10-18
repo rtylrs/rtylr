@@ -13,6 +13,11 @@ func RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, service
 		ctx, router, GetPipelineRoutes(), &GetPipelineHandler{Service: service},
 	)
 
+	// Assignable reps
+	serverHttp.RegisterGET[ListRepsRequest, ListRepsResponse](
+		ctx, router, ListRepsRoutes(), &ListRepsHandler{Service: service},
+	)
+
 	// Leads
 	serverHttp.RegisterGET[ListLeadsRequest, ListLeadsResponse](
 		ctx, router, ListLeadsRoutes(), &ListLeadsHandler{Service: service},
