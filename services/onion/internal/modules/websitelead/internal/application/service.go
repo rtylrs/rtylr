@@ -285,7 +285,7 @@ func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
       If your project is time-sensitive, reach the team on WhatsApp:
     </p>
 
-    <a href="https://wa.me/9613940708?text=Hi+Voxire%%2C+I+just+submitted+a+request+on+voxire.com"
+    <a href="https://wa.me/9613849744?text=Hi+Voxire%%2C+I+just+submitted+a+request+on+voxire.com"
        style="display:inline-block;background:#25d366;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
       WhatsApp Voxire
     </a>

@@ -130,7 +130,7 @@ export function organizationContactSchema(): Record<string, unknown> {
           '@type': 'ContactPoint',
           contactType: 'customer support',
           email: 'info@voxire.com',
-          telephone: '+961-3-940-708',
+          telephone: '+961-3-849-744',
           availableLanguage: ['English', 'Arabic', 'French'],
         },
       ],
@@ -353,7 +353,7 @@ export function organizationSchema(): Record<string, unknown> {
       '@type': 'ContactPoint',
       contactType: 'customer support',
       email: 'info@voxire.com',
-      telephone: '+961-3-940-708',
+      telephone: '+961-3-849-744',
       availableLanguage: ['English', 'Arabic', 'French'],
     },
   };

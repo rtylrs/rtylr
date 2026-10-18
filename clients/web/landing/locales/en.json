@@ -248,12 +248,12 @@
       "title": "Contact channels",
       "whatsapp": {
         "label": "Chat with us",
-        "value": "WhatsApp +961 3 940 708",
+        "value": "WhatsApp +961 3 849 744",
         "description": "Message us directly on WhatsApp."
       },
       "phone": {
         "label": "Call us",
-        "value": "+961 3 940 708",
+        "value": "+961 3 849 744",
         "description": "Monday to Friday, 9 am to 5 pm local time."
       },
       "email": {
@@ -1472,7 +1472,7 @@
       },
       "contactStrip": {
         "title": "Have a legal or compliance question?",
-        "body": "We’re happy to answer. Reach us at <infoMail>info@voxire.com</infoMail>, or via WhatsApp at +961 3 940 708."
+        "body": "We’re happy to answer. Reach us at <infoMail>info@voxire.com</infoMail>, or via WhatsApp at +961 3 849 744."
       }
     },
     "privacyPolicy": {
@@ -1648,7 +1648,7 @@
           "p2": "We commit to acknowledging receipt within 48 hours, working in good faith on a fix, and crediting you publicly once the issue is resolved (unless you prefer to remain anonymous). We do not take legal action against researchers acting in good faith under this policy."
         },
         "contact": {
-          "p1": "For security questions, reports, or compliance requests, email <secMail>security@voxire.com</secMail>. For urgent issues, WhatsApp +961 3 940 708."
+          "p1": "For security questions, reports, or compliance requests, email <secMail>security@voxire.com</secMail>. For urgent issues, WhatsApp +961 3 849 744."
         }
       },
       "contactStrip": {

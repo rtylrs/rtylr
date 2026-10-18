@@ -19,7 +19,7 @@
 - Onion `.env.example` is the operator index: every new `os.Getenv("X")` in non-test code must be documented there, checked by `python3 scripts/check_env_example.py`.
 - voxire: pnpm only for dependency changes (none expected). `npm run typecheck` and `pnpm build` must pass. All user-facing strings go through i18n; no new strings are expected.
 - Lead notification default recipients, exact: `info@voxire.com`, `sales@voxire.com`, `mohammad.saab@voxire.com`, `mohamad.homsi@voxire.com`, `amounehabed@gmail.com`. Newsletter notification default: `info@voxire.com`.
-- Company WhatsApp is `+961 3 940 708`, digits `9613940708`.
+- Company WhatsApp is `+961 3 849 744`, digits `9613849744`.
 - Rollout order is onion first, voxire second. Do not push the voxire commits until `POST https://api.voxire.com/newsletter` with `{}` returns `400 {"message":"email is required"}`.
 
 ---
@@ -720,7 +720,7 @@ func TestSubmit_AutoReplySpeaksForTheTeam(t *testing.T) {
 			t.Fatalf("notification still contains %q", banned)
 		}
 	}
-	for _, want := range []string{"Thanks, Rania.", "24 hours", "wa.me/9613940708"} {
+	for _, want := range []string{"Thanks, Rania.", "24 hours", "wa.me/9613849744"} {
 		if !strings.Contains(reply.HTML, want) {
 			t.Fatalf("reply missing %q", want)
 		}
@@ -799,7 +799,7 @@ func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
       If your project is time-sensitive, reach the team on WhatsApp:
     </p>
 
-    <a href="https://wa.me/9613940708?text=Hi+Voxire%%2C+I+just+submitted+a+request+on+voxire.com"
+    <a href="https://wa.me/9613849744?text=Hi+Voxire%%2C+I+just+submitted+a+request+on+voxire.com"
        style="display:inline-block;background:#25d366;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
       WhatsApp Voxire
     </a>

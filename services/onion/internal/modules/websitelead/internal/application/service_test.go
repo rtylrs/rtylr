@@ -170,7 +170,7 @@ func TestSubmit_AutoReplySpeaksForTheTeam(t *testing.T) {
 			t.Fatalf("notification still contains %q", banned)
 		}
 	}
-	for _, want := range []string{"Thanks, Rania.", "24 hours", "wa.me/9613940708"} {
+	for _, want := range []string{"Thanks, Rania.", "24 hours", "wa.me/9613849744"} {
 		if !strings.Contains(reply.HTML, want) {
 			t.Fatalf("reply missing %q", want)
 		}

@@ -36,8 +36,8 @@ interface ContactFormErrors {
 const ROUTING = ['sales', 'support', 'security', 'partners', 'press'] as const;
 
 const CONTACT_CHANNELS = [
-  { icon: MessageCircle, id: 'whatsapp', href: 'https://wa.me/9613940708' },
-  { icon: Phone, id: 'phone', href: 'tel:+9613940708' },
+  { icon: MessageCircle, id: 'whatsapp', href: 'https://wa.me/9613849744' },
+  { icon: Phone, id: 'phone', href: 'tel:+9613849744' },
   { icon: Mail, id: 'email', href: 'mailto:info@voxire.com' },
 ];
 

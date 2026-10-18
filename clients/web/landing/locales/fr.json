@@ -230,12 +230,12 @@
       "whatsapp": {
         "label": "Discuter avec nous",
         "description": "Écrivez-nous directement sur WhatsApp.",
-        "value": "WhatsApp +961 3 940 708"
+        "value": "WhatsApp +961 3 849 744"
       },
       "phone": {
         "label": "Nous appeler",
         "description": "Du lundi au vendredi, de 9 h à 17 h, heure locale.",
-        "value": "+961 3 940 708"
+        "value": "+961 3 849 744"
       },
       "email": {
         "label": "Nous écrire",
@@ -584,7 +584,7 @@
       },
       "contactStrip": {
         "title": "Une question juridique ou de conformité ?",
-        "body": "Nous y répondrons volontiers. Écrivez-nous à <infoMail>info@voxire.com</infoMail>, ou contactez-nous sur WhatsApp au +961 3 940 708."
+        "body": "Nous y répondrons volontiers. Écrivez-nous à <infoMail>info@voxire.com</infoMail>, ou contactez-nous sur WhatsApp au +961 3 849 744."
       }
     },
     "privacyPolicy": {
@@ -760,7 +760,7 @@
           "p2": "Nous nous engageons à accuser réception sous 48 heures, à travailler de bonne foi à un correctif et à vous créditer publiquement une fois le problème résolu (sauf si vous préférez rester anonyme). Nous n’engageons pas de poursuites contre les chercheurs agissant de bonne foi dans le cadre de la présente politique."
         },
         "contact": {
-          "p1": "Pour toute question de sécurité, tout signalement ou toute demande de conformité, écrivez à <secMail>security@voxire.com</secMail>. Pour les urgences, WhatsApp au +961 3 940 708."
+          "p1": "Pour toute question de sécurité, tout signalement ou toute demande de conformité, écrivez à <secMail>security@voxire.com</secMail>. Pour les urgences, WhatsApp au +961 3 849 744."
         }
       },
       "contactStrip": {
