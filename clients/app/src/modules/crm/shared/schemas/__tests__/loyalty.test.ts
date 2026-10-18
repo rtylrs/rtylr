@@ -230,6 +230,30 @@ describe('loyalty schemas accept int64-as-string wire values (rtylr#942)', () =>
     });
   });
 
+  it('config: reads fields the wire omitted as their zero value', () => {
+    // A paused program with a 0% bronze discount: is_enabled and the zero
+    // discount are left out of the response entirely.
+    const result = loyaltyConfigSchema.parse({
+      id: '7',
+      pointsPerCurrencyUnit: 2,
+      currencyPerPoint: 0.01,
+      silverMin: '500',
+      goldMin: '1500',
+      platinumMin: '5000',
+      silverDiscountPct: 5,
+      pointsExpiryDays: '365',
+    });
+    expect(result).toMatchObject({
+      programEnabled: false,
+      pointsPerDollar: 2,
+      bronzeMin: 0,
+      bronzeDiscountPct: 0,
+      silverDiscountPct: 5,
+      goldDiscountPct: 0,
+      pointsExpiry: 365,
+    });
+  });
+
   it('transaction: parses points/balanceBefore/balanceAfter as wire strings', () => {
     const tx = {
       id: '1',

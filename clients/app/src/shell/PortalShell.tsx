@@ -155,7 +155,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
   const [caretMounted, setCaretMounted] = useState(caretOpen);
   const caretWidth = useCaretSettingsStore((state) => state.panelWidth);
   const { data: notifications = [] } = useNotifications();
-  const { data: addons = [], isError: addonsError } = useAddons();
+  const { data: addons = [] } = useAddons();
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const isInsights = pathname === '/insights' || pathname.startsWith('/insights/');
   const isAutomations = pathname === '/automations' || pathname.startsWith('/automations/');
@@ -237,12 +237,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             : isErp
               ? [...erpNavItems]
               : isCrm
-                ? [
-                    ...crmNavItems,
-                    ...(addonsError || isAddonEnabled(addons, 'sales_pipeline')
-                      ? crmSalesNavItems
-                      : []),
-                  ]
+                ? [...crmNavItems, ...crmSalesNavItems]
                 : [...rawNavItems, ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : [])].sort(
                     (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
                   )

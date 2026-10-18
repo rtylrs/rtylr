@@ -650,9 +650,5 @@
     "openCommandPalette": "فتح لوحة الأوامر",
     "notifications": "الإشعارات",
     "noNotifications": "لا إشعارات جديدة"
-  },
-  "addons": {
-    "loadFailedTitle": "تعذّر تحميل الإضافات.",
-    "loadFailedDescription": "تحقّق من اتصالك وحاول مرة أخرى. تبقى المبيعات غير متاحة حتى تُحمَّل قائمة الإضافات."
   }
 }

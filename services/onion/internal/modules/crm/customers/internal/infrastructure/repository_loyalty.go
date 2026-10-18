@@ -20,7 +20,7 @@ func (r *Repository) GetLoyaltyConfig(ctx context.Context, businessID int64) (do
 	row, err := r.queries.GetLoyaltyConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return domain.LoyaltyConfig{}, nil
+			return domain.DefaultLoyaltyConfig(businessID), nil
 		}
 
 		logger.Ctx(ctx).Error("Failed to get loyalty config", logger.Error(err))

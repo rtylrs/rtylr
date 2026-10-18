@@ -632,9 +632,5 @@
     "openCommandPalette": "Ouvrir la palette de commandes",
     "notifications": "Notifications",
     "noNotifications": "Aucune nouvelle notification"
-  },
-  "addons": {
-    "loadFailedTitle": "Impossible de charger vos modules.",
-    "loadFailedDescription": "Vérifiez votre connexion et réessayez. Les ventes restent indisponibles tant que la liste des modules n’est pas chargée."
   }
 }

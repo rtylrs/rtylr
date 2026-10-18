@@ -60,9 +60,18 @@ describe('unwrapList', () => {
     expect(() => unwrapList({ customers: 'not-an-array' }, 'customers')).toThrow(
       'Expected a list response with "customers"'
     );
-    expect(() => unwrapList({ customers: null }, 'customers')).toThrow(
-      'Expected a list response with "customers"'
-    );
+  });
+
+  // ── empty lists as the backend actually encodes them ──────────────────────
+
+  it('reads an envelope that omits the empty repeated field as an empty list', () => {
+    // ListCustomersResponse for a business with no customers yet.
+    expect(unwrapList({ total: '0', page: '1', page_size: '100' }, 'customers')).toStrictEqual([]);
+    expect(unwrapList({}, 'segments')).toStrictEqual([]);
+  });
+
+  it('reads a nil slice serialized as null as an empty list', () => {
+    expect(unwrapList({ leads: null, total: 0 }, 'leads')).toStrictEqual([]);
   });
 
   // ── typed generic ─────────────────────────────────────────────────────────
