@@ -99,7 +99,8 @@
     "followUp": {
       "overdue": "Overdue",
       "today": "Due today"
-    }
+    },
+    "unnamedTeammate": "Teammate #{{id}}"
   },
   "contracts": {
     "loadFailedTitle": "Unable to load contracts",

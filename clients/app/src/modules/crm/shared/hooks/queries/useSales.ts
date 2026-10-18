@@ -104,10 +104,12 @@ export const useSalesReps = (): UseQueryResult<SalesRep[]> =>
     queryKey: ['crm-sales-reps'],
     queryFn: async (): Promise<SalesRep[]> => {
       const res = await unwrap(crmApi.getSalesReps());
-      return unwrapList<Record<string, unknown>>(res, 'reps').map((rep) => ({
-        id: toFiniteNumber(rep.id),
-        name: String(rep.name ?? ''),
-      }));
+      return unwrapList<Record<string, unknown>>(res, 'reps').map((rep) => {
+        const id = toFiniteNumber(rep.id);
+        const name = String(rep.name ?? '').trim();
+        // The server sends no email for a teammate without a name on file.
+        return { id, name: name || i18next.t('crm.leads.unnamedTeammate', { id }) };
+      });
     },
     staleTime: 5 * 60 * 1000,
   });

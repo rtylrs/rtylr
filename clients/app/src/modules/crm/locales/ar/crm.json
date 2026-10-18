@@ -111,7 +111,8 @@
     "followUp": {
       "overdue": "متأخرة",
       "today": "مستحقة اليوم"
-    }
+    },
+    "unnamedTeammate": "عضو الفريق رقم {{id}}"
   },
   "contracts": {
     "loadFailedTitle": "تعذّر تحميل العقود",

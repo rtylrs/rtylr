@@ -414,8 +414,9 @@ func initializeModules(ctx context.Context) *apiModules {
 	}
 }
 
-// crmSalesReps lists the teammates a CRM lead can be assigned to. A member
-// with no name on file is shown by email so the picker never has a blank row.
+// crmSalesReps lists the teammates a CRM lead can be assigned to: id and
+// display name only. Any CRM viewer can read it, so a member with no name on
+// file is not shown by email; the client labels them by id instead.
 func crmSalesReps(reader *scopes.Reader) func(context.Context, int64) ([]crmsales.Rep, error) {
 	return func(ctx context.Context, businessID int64) ([]crmsales.Rep, error) {
 		users, err := reader.ActiveBusinessUsers(ctx, businessID)
@@ -424,11 +425,7 @@ func crmSalesReps(reader *scopes.Reader) func(context.Context, int64) ([]crmsale
 		}
 		reps := make([]crmsales.Rep, 0, len(users))
 		for _, user := range users {
-			name := user.Name
-			if name == "" {
-				name = user.Email
-			}
-			reps = append(reps, crmsales.Rep{ID: user.ID, Name: name})
+			reps = append(reps, crmsales.Rep{ID: user.ID, Name: user.Name})
 		}
 		return reps, nil
 	}
