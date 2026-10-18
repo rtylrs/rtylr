@@ -97,6 +97,17 @@ function pageOffset(page: number, pageSize: number): number {
   return Math.max(page - 1, 0) * pageSize;
 }
 
+/**
+ * Every product in the catalog, for pickers and name lookups that must not
+ * stop at the first page.
+ */
+export function useAllProducts() {
+  return useQuery<Product[]>({
+    queryKey: ['products', 'all'],
+    queryFn: () => fetchAllProducts(),
+  });
+}
+
 export function useProducts(filters?: ProductFilters) {
   const page = filters?.page ?? 1;
   const pageSize = filters?.pageSize ?? 50;

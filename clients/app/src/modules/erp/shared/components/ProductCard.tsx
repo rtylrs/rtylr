@@ -4,6 +4,7 @@ import { Package } from 'lucide-react';
 import { cdnImageUrl } from '@voxire/config';
 import type { Product } from '../../features/products/useProducts';
 import { formatCurrency } from '../lib/format';
+import { useErpCurrency } from '../hooks/useErpCurrency';
 import StockBadge from './StockBadge';
 
 interface ProductCardProps {
@@ -14,6 +15,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, compact }) => {
+  const currency = useErpCurrency();
   const imageUrl = cdnImageUrl((product as Product & { imageUrl?: string }).imageUrl);
   return (
     <div
@@ -70,7 +72,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
       <div className="flex items-center justify-between mt-3">
         <StockBadge stock={product.stockQuantity ?? 0} lowStock={product.lowStockThreshold} />
         <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-          {formatCurrency(product.salePrice ?? 0)}
+          {formatCurrency(product.salePrice ?? 0, currency)}
         </span>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initTestI18n } from '../../shared/testing/i18n';
 import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
@@ -11,11 +11,15 @@ import { createEffectiveAccess } from '../../../../../test/effectiveAccess';
 const mocks = vi.hoisted(() => ({
   effectiveAccess: undefined as unknown,
   approveMutate: vi.fn(),
+  products: [] as Array<{ id: string; name: string }>,
+  toastSuccess: vi.fn(),
+  toastError: vi.fn(),
 }));
 
 const sentOrder = {
   id: 'po1',
   supplierId: 's1',
+  poNumber: 'ACME-77',
   status: 'sent',
   total: 100,
   items: [],
@@ -69,7 +73,11 @@ vi.mock('../suppliers/useSuppliers', () => ({
 }));
 
 vi.mock('../products/useProducts', () => ({
-  useProducts: () => ({ data: { products: [] } }),
+  useAllProducts: () => ({ data: mocks.products }),
+}));
+
+vi.mock('sonner', () => ({
+  toast: { success: mocks.toastSuccess, error: mocks.toastError },
 }));
 
 vi.mock('../../shared/components/PrintPOButton', () => ({ default: () => null }));
@@ -77,6 +85,7 @@ vi.mock('../../shared/components/ExportButton', () => ({ default: () => null }))
 vi.mock('../../shared/components/PaginationControls', () => ({ default: () => null }));
 
 import Purchasing from './Purchasing';
+import { useSettings } from '../../shared/lib/settingsStore';
 
 beforeAll(async () => {
   await initTestI18n('en');
@@ -112,5 +121,44 @@ describe('Purchasing approval gating', () => {
     render(<Purchasing />);
 
     expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+  });
+});
+
+describe('Purchasing list and form', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.effectiveAccess = createEffectiveAccess('erp', { isAdmin: true });
+    mocks.products = [];
+    useSettings.getState().setCurrency('USD');
+  });
+
+  it('shows the business PO number, translated status and business currency', () => {
+    useSettings.getState().setCurrency('EUR');
+    render(<Purchasing />);
+
+    expect(screen.getByText('ACME-77')).toBeInTheDocument();
+    expect(screen.getByText('€100.00')).toBeInTheDocument();
+    expect(screen.queryByText('$100.00')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Sent').length).toBeGreaterThan(0);
+  });
+
+  it('offers every catalog product in the line-item picker, not just the first page', () => {
+    mocks.products = Array.from({ length: 75 }, (_, i) => ({ id: `p${i}`, name: `Product ${i}` }));
+    render(<Purchasing />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'New Order' }));
+    const picker = screen.getAllByRole('combobox')[1];
+    expect(within(picker).getByRole('option', { name: 'Product 74' })).toBeInTheDocument();
+    expect(within(picker).getAllByRole('option')).toHaveLength(76);
+  });
+
+  it('names the order by its PO number when approval succeeds', () => {
+    render(<Purchasing />);
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+
+    const [id, handlers] = mocks.approveMutate.mock.calls[0];
+    expect(id).toBe('po1');
+    handlers.onSuccess();
+    expect(mocks.toastSuccess).toHaveBeenCalledWith('ACME-77 approved');
   });
 });

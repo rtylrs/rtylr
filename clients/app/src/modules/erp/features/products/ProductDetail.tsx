@@ -26,6 +26,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatCurrency } from '../../shared/lib/format';
+import { useErpCurrency } from '../../shared/hooks/useErpCurrency';
 import { useCategories } from '../categories/useCategories';
 import { useBrands } from '../brands/useBrands';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
@@ -79,6 +80,7 @@ const MiniLineChart: React.FC<{ data: number[]; color: string; height?: number }
 
 const ProductDetail: React.FC = () => {
   const { t } = useTranslation();
+  const currency = useErpCurrency();
   const navigate = useNavigate();
   const { id } = useParams({ strict: false });
   const productId = id || undefined;
@@ -264,7 +266,7 @@ const ProductDetail: React.FC = () => {
                   {t('erp.products.costPrice')}
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: 'var(--hub-text)' }}>
-                  {formatCurrency(product.costPrice ?? 0)}
+                  {formatCurrency(product.costPrice ?? 0, currency)}
                 </p>
               </div>
               <div>
@@ -275,7 +277,7 @@ const ProductDetail: React.FC = () => {
                   {t('erp.products.salePrice')}
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: ACCENT }}>
-                  {formatCurrency(product.salePrice ?? 0)}
+                  {formatCurrency(product.salePrice ?? 0, currency)}
                 </p>
               </div>
               <div>

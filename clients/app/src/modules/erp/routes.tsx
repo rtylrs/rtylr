@@ -4,6 +4,7 @@ import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { ErrorBoundary } from '@voxire/ui';
 import { Spinner } from '@voxire/ui';
 import TrialBanner from './shared/components/TrialBanner';
+import ErpSettingsLoader from './shared/components/ErpSettingsLoader';
 import { getErpHomePath } from './navigation';
 import { useUserStore } from '../../shared/stores/userStore';
 
@@ -48,6 +49,7 @@ export function createErpRoutes<TParent extends AnyRoute>(parent: TParent) {
     component: () => (
       <AppFlagGuard flag={FLAG_KEYS.APP_ERP}>
         <ErrorBoundary>
+          <ErpSettingsLoader />
           <TrialBanner />
           <Outlet />
         </ErrorBoundary>

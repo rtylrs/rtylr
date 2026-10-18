@@ -1,7 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import { PurchaseOrderServiceClient } from '@voxire/voxie/erp/purchase_order/v1/client';
 import type {
   ApprovePurchaseOrderResponse,
@@ -12,6 +10,7 @@ import type {
   UpdatePurchaseOrderStatusRequest,
   UpdatePurchaseOrderStatusResponse,
 } from '@voxire/voxie/erp/purchase_order/v1/types';
+import { invalidateStockDerivedQueries } from '../../shared/lib/stockInvalidation';
 
 const purchaseOrderClient = createOneKitClient(PurchaseOrderServiceClient, 'erp');
 
@@ -78,32 +77,33 @@ export function useAllPurchaseOrders() {
   });
 }
 
+// Mutations leave error reporting to the screen that triggered them, which
+// knows the context; a hook-level toast on top of that showed every failure
+// twice.
 export function useCreatePurchaseOrder() {
-  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<CreatePurchaseOrderResponse, Error, CreatePurchaseOrderRequest>({
     mutationFn: (data) => purchaseOrderClient.createPurchaseOrder(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
-    onError: () => toast.error(t('erp.purchasing.createFailed')),
   });
 }
 
 export function useUpdatePurchaseOrderStatus() {
-  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<UpdatePurchaseOrderStatusResponse, Error, UpdatePurchaseOrderStatusRequest>({
     mutationFn: (data) => purchaseOrderClient.updatePurchaseOrderStatus(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
-    onError: () => toast.error(t('erp.purchasing.statusUpdateFailed')),
+    onSuccess: (_response, request) => {
+      void qc.invalidateQueries({ queryKey: ['purchase-orders'] });
+      // Receiving adds stock, so every stock-derived view is stale.
+      if (request.body?.status === 'received') invalidateStockDerivedQueries(qc);
+    },
   });
 }
 
 export function useApprovePurchaseOrder() {
-  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<ApprovePurchaseOrderResponse, Error, string>({
     mutationFn: (id) => purchaseOrderClient.approvePurchaseOrder({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
-    onError: () => toast.error(t('erp.purchasing.approveFailed')),
   });
 }

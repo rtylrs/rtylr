@@ -5,6 +5,7 @@ import Receiving from './Receiving';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 const mocks = vi.hoisted(() => ({
+  products: [] as Array<{ id: string; name: string; sku?: string }>,
   usePurchaseOrders: vi.fn(),
   usePurchaseOrder: vi.fn(),
   updateStatus: vi.fn(),
@@ -39,6 +40,10 @@ vi.mock('./usePurchaseOrders', () => ({
 
 vi.mock('../suppliers/useSuppliers', () => ({
   useSuppliers: () => ({ data: { suppliers: [] } }),
+}));
+
+vi.mock('../products/useProducts', () => ({
+  useAllProducts: () => ({ data: mocks.products }),
 }));
 
 vi.mock('sonner', () => ({
@@ -99,6 +104,7 @@ describe('Receiving empty state', () => {
 describe('Receiving line items', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.products = [];
     showOpenOrder();
     mocks.usePurchaseOrder.mockReturnValue({ data: null, isLoading: true, isError: false });
   });
@@ -188,5 +194,65 @@ describe('Receiving line items', () => {
     expect(mocks.toastSuccess).not.toHaveBeenCalled();
     expect(mocks.toastError).toHaveBeenCalledWith('Failed to update receipt status');
     expect(screen.getByRole('button', { name: 'Mark Received' })).toBeInTheDocument();
+  });
+});
+
+describe('Receiving a later delivery', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.products = [{ id: 'p1', name: 'Arabica beans', sku: 'ARB-1' }];
+    mocks.usePurchaseOrders.mockReturnValue({
+      data: { purchaseOrders: [{ ...openOrder, status: 'partial', poNumber: 'ACME-9' }] },
+      isLoading: false,
+    });
+    mocks.usePurchaseOrder.mockReturnValue({
+      data: {
+        id: 'po1',
+        items: [{ id: 'i1', productId: 'p1', quantityOrdered: 10, quantityReceived: 4 }],
+      },
+      isLoading: false,
+      isError: false,
+    });
+  });
+
+  it('names products from the catalog and labels the order by its PO number', () => {
+    render(<Receiving />);
+    fireEvent.click(screen.getByRole('button', { name: /ACME-9/ }));
+
+    expect(screen.getByText('Receive items for ACME-9')).toBeInTheDocument();
+    expect(screen.getByText('Arabica beans')).toBeInTheDocument();
+    expect(screen.getByText(/ARB-1/)).toBeInTheDocument();
+  });
+
+  it('cannot lower a line below what earlier deliveries already received', () => {
+    render(<Receiving />);
+    fireEvent.click(screen.getByRole('button', { name: /ACME-9/ }));
+
+    const decrease = screen.getByRole('button', {
+      name: 'Decrease received quantity for Arabica beans',
+    });
+    expect(decrease).toBeDisabled();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Increase received quantity for Arabica beans' })
+    );
+    expect(decrease).not.toBeDisabled();
+    fireEvent.click(decrease);
+    fireEvent.click(decrease);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mark Received' }));
+    const [request] = mocks.updateStatus.mock.calls[0];
+    expect(request.body.items).toEqual([{ id: 'i1', quantityOrdered: 10, quantityReceived: 4 }]);
+  });
+
+  it('shows the server reason when a receipt is rejected', () => {
+    render(<Receiving />);
+    fireEvent.click(screen.getByRole('button', { name: /ACME-9/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mark Received' }));
+
+    const [, handlers] = mocks.updateStatus.mock.calls[0];
+    act(() =>
+      handlers.onError({ body: JSON.stringify({ message: 'invalid received quantity: item 1' }) })
+    );
+    expect(mocks.toastError).toHaveBeenCalledWith('invalid received quantity: item 1');
   });
 });

@@ -10,6 +10,8 @@ import { fetchAllProducts, type Product } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import BarcodeSvg from '../../shared/components/BarcodeSvg';
+import { formatCurrency } from '../../shared/lib/format';
+import { useErpCurrency } from '../../shared/hooks/useErpCurrency';
 import { toast } from 'sonner';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
@@ -18,6 +20,7 @@ const ACCENT = 'var(--erp-accent)';
 
 const Barcodes: React.FC = () => {
   const { t } = useTranslation('erp');
+  const currency = useErpCurrency();
   const navigate = useNavigate();
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products', 'barcodes'],
@@ -166,7 +169,7 @@ const Barcodes: React.FC = () => {
                     <p className="text-[11px] font-bold text-black mb-1 truncate">{p.name}</p>
                     <BarcodeSvg value={p.barcode || p.sku || ''} width={200} height={50} />
                     <p className="text-[10px] text-black/60 mt-1">
-                      ${(p.salePrice ?? 0).toFixed(2)}
+                      {formatCurrency(p.salePrice ?? 0, currency)}
                     </p>
                   </div>
                 ))

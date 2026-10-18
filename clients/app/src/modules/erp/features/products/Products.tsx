@@ -29,6 +29,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PageHeader from '../../shared/components/PageHeader';
 import { formatCurrency } from '../../shared/lib/format';
+import { useErpCurrency } from '../../shared/hooks/useErpCurrency';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
@@ -39,6 +40,7 @@ const NO_PRODUCTS: Product[] = [];
 
 const Products: React.FC = () => {
   const { t } = useTranslation();
+  const currency = useErpCurrency();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
   const [filters, setFilters] = useState<ProductFilters>({});
@@ -394,7 +396,7 @@ const Products: React.FC = () => {
                     {p.stockQuantity}
                   </span>
                   <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {formatCurrency(p.salePrice ?? 0)}
+                    {formatCurrency(p.salePrice ?? 0, currency)}
                   </span>
                   <StockBadge stock={p.stockQuantity ?? 0} lowStock={p.lowStockThreshold ?? 0} />
                 </div>

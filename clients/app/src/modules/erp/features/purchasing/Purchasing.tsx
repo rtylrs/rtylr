@@ -24,21 +24,26 @@ import * as purchaseOrderQueries from './usePurchaseOrders';
 import {
   displayPurchaseOrderStatus,
   getPurchaseOrderStatusCounts,
+  purchaseOrderLabel,
   purchaseOrderStatusFilter,
   type PurchaseOrderFilter,
   type PurchaseOrderStatusCard,
 } from './purchaseOrderStatusUtils';
 import { useSuppliers } from '../suppliers/useSuppliers';
-import { useProducts } from '../products/useProducts';
+import { useAllProducts } from '../products/useProducts';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '../../shared/lib/apiErrorMessage';
 import { toIsoDate } from '../../shared/lib/dateUtils';
+import { formatCurrency, formatDate } from '../../shared/lib/format';
+import { useErpCurrency } from '../../shared/hooks/useErpCurrency';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { routeLabels } from '../../shared/lib/routeLabels';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 const ACCENT = 'var(--erp-accent)';
 
@@ -90,7 +95,11 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
 };
 
-const columns = ['Order', 'Supplier', 'Expected', 'Items', 'Total', 'Status', 'Actions'];
+const columns = ['order', 'supplier', 'expected', 'items', 'total', 'status', 'actions'] as const;
+
+export function purchaseOrderStatusLabel(t: TFunction, status: DisplayStatus): string {
+  return t(`erp.purchasing.status.${status.toLowerCase()}`);
+}
 
 const SkeletonTableRow: React.FC = () => (
   <div
@@ -124,6 +133,7 @@ function usePurchaseOrderIfAvailable(
 }
 
 const PurchaseOrderItemCount: React.FC<{ order: PurchaseOrder }> = ({ order }) => {
+  const { t } = useTranslation();
   const detailQuery = usePurchaseOrderIfAvailable(order.id ?? undefined);
   const detailItems = detailQuery.data?.items;
   const listItems = order.items;
@@ -133,7 +143,7 @@ const PurchaseOrderItemCount: React.FC<{ order: PurchaseOrder }> = ({ order }) =
   }
   if (detailQuery.isError || (!detailQuery.data && !listItems?.length)) {
     return (
-      <span title="Line-item details could not be loaded" style={{ color: 'var(--hub-text-dim)' }}>
+      <span title={t('erp.purchasing.itemsUnavailable')} style={{ color: 'var(--hub-text-dim)' }}>
         —
       </span>
     );
@@ -145,14 +155,17 @@ const PurchaseOrderItemCount: React.FC<{ order: PurchaseOrder }> = ({ order }) =
 const PurchaseOrderPrintAction: React.FC<{
   order: PurchaseOrder;
   supplierName: string;
-}> = ({ order, supplierName }) => {
+  productNameById: ReadonlyMap<string, string>;
+  currency: string;
+}> = ({ order, supplierName, productNameById, currency }) => {
+  const { t } = useTranslation();
   const detailQuery = usePurchaseOrderIfAvailable(order.id ?? undefined);
   const printableOrder = detailQuery.data ?? (order.items?.length ? order : null);
 
   if (detailQuery.isLoading && !printableOrder) {
     return (
       <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-        Loading…
+        {t('erpCommon.loading')}
       </span>
     );
   }
@@ -160,15 +173,22 @@ const PurchaseOrderPrintAction: React.FC<{
     return (
       <span
         className="text-[10px]"
-        title="Print requires the purchase-order detail response"
+        title={t('erp.purchasing.print.unavailableHint')}
         style={{ color: 'var(--hub-text-dim)' }}
       >
-        Print unavailable
+        {t('erp.purchasing.print.unavailable')}
       </span>
     );
   }
 
-  return <PrintPOButton order={printableOrder} supplierName={supplierName} />;
+  return (
+    <PrintPOButton
+      order={printableOrder}
+      supplierName={supplierName}
+      productNameById={productNameById}
+      currency={currency}
+    />
+  );
 };
 
 const Purchasing: React.FC = () => {
@@ -185,8 +205,13 @@ const Purchasing: React.FC = () => {
   const createMut = useCreatePurchaseOrder();
   const { data: supplierResult } = useSuppliers();
   const suppliers = supplierResult?.suppliers ?? [];
-  const { data: productResult } = useProducts();
-  const products = productResult?.products ?? [];
+  // The picker must offer the whole catalog, not the first page of it.
+  const { data: products = [] } = useAllProducts();
+  const productNameById = useMemo(
+    () => new Map(products.map((product) => [product.id ?? '', product.name ?? ''])),
+    [products]
+  );
+  const currency = useErpCurrency();
   const canApprovePO = canErpPermission('erp:purchasing:approve');
   const [showCreate, setShowCreate] = useState(false);
   const [newSupplierId, setNewSupplierId] = useState('');
@@ -204,6 +229,12 @@ const Purchasing: React.FC = () => {
       new Map((supplierResult?.suppliers ?? []).map((supplier) => [supplier.id, supplier.name])),
     [supplierResult?.suppliers]
   );
+  const supplierName = useCallback(
+    (supplierId: string | undefined) =>
+      supplierNameById.get(supplierId) ??
+      t('erp.purchasing.supplierFallback', { id: supplierId ?? '' }),
+    [supplierNameById, t]
+  );
 
   const filteredOrders = orders;
 
@@ -211,7 +242,7 @@ const Purchasing: React.FC = () => {
     (purchaseOrders: PurchaseOrder[]) =>
       purchaseOrders.map((o) => ({
         id: o.id,
-        supplier: supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`,
+        supplier: supplierName(o.supplierId),
         createdAt: o.createdAt,
         expectedDelivery: o.expectedDelivery ?? '',
         // List rows intentionally omit line items; leave the count unknown
@@ -220,7 +251,7 @@ const Purchasing: React.FC = () => {
         total: o.total,
         status: displayPurchaseOrderStatus(o.status ?? ''),
       })),
-    [supplierNameById]
+    [supplierName]
   );
   const exportable = useMemo(() => toExportRows(filteredOrders), [filteredOrders, toExportRows]);
   const getAllExportable = useCallback(async () => {
@@ -230,19 +261,23 @@ const Purchasing: React.FC = () => {
 
   const statusCounts = getPurchaseOrderStatusCounts(allOrders);
 
-  const handleApprove = (id: string): void => {
-    approveMut.mutate(id, {
-      onSuccess: () => toast.success(`PO-${id} approved`),
-      onError: () => toast.error(`Failed to approve PO-${id}`),
+  const handleApprove = (order: PurchaseOrder): void => {
+    const label = purchaseOrderLabel(order);
+    approveMut.mutate(order.id ?? '', {
+      onSuccess: () => toast.success(t('erp.purchasing.toast.approved', { label })),
+      onError: (error) =>
+        toast.error(apiErrorMessage(error, t('erp.purchasing.toast.approveFailed', { label }))),
     });
   };
 
-  const handleSend = (id: string): void => {
+  const handleSend = (order: PurchaseOrder): void => {
+    const label = purchaseOrderLabel(order);
     updateStatusMut.mutate(
-      { id, body: { status: 'sent' } },
+      { id: order.id ?? '', body: { status: 'sent' } },
       {
-        onSuccess: () => toast.success(`PO-${id} sent to supplier`),
-        onError: () => toast.error(`Failed to send PO-${id}`),
+        onSuccess: () => toast.success(t('erp.purchasing.toast.sent', { label })),
+        onError: (error) =>
+          toast.error(apiErrorMessage(error, t('erp.purchasing.toast.sendFailed', { label }))),
       }
     );
   };
@@ -277,8 +312,8 @@ const Purchasing: React.FC = () => {
       setNewExpectedDelivery(toIsoDate(new Date(Date.now() + 7 * 86400000)));
       setNewNotes('');
       setNewItems([{ productId: '', quantityOrdered: '', unitCost: '' }]);
-    } catch {
-      toast.error(t('erp.purchasing.createFailed'));
+    } catch (error) {
+      toast.error(apiErrorMessage(error, t('erp.purchasing.createFailed')));
     }
   };
 
@@ -312,7 +347,7 @@ const Purchasing: React.FC = () => {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {(Object.entries(statusCounts) as [PurchaseOrderStatusCard, number][]).map(
           ([status, count]) => {
             const sc = statusConfig[status];
@@ -346,7 +381,7 @@ const Purchasing: React.FC = () => {
                     {isLoadingAllOrders ? '…' : count}
                   </p>
                   <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {status}
+                    {purchaseOrderStatusLabel(t, status)}
                   </p>
                 </div>
               </button>
@@ -373,7 +408,7 @@ const Purchasing: React.FC = () => {
               className="text-[10px] font-semibold uppercase tracking-wider"
               style={{ color: 'var(--hub-text-dim)' }}
             >
-              {col}
+              {t(`erp.purchasing.columns.${col}`)}
             </span>
           ))}
         </div>
@@ -400,36 +435,36 @@ const Purchasing: React.FC = () => {
                       className="text-xs font-mono font-medium"
                       style={{ color: 'var(--hub-text)' }}
                     >
-                      PO-{order.id}
+                      {purchaseOrderLabel(order)}
                     </span>
                     <span
                       className="text-sm truncate pr-2"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
-                      {supplierNameById.get(order.supplierId) ?? `Supplier #${order.supplierId}`}
+                      {supplierName(order.supplierId)}
                     </span>
                     <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                      {order.expectedDelivery ?? ''}
+                      {order.expectedDelivery ? formatDate(order.expectedDelivery) : ''}
                     </span>
                     <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
                       <PurchaseOrderItemCount order={order} />
                     </span>
                     <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                      ${(order.total ?? 0).toFixed(2)}
+                      {formatCurrency(order.total ?? 0, currency)}
                     </span>
                     <span>
                       <span
                         className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                         style={{ background: sc.bg, color: sc.color }}
                       >
-                        {status}
+                        {purchaseOrderStatusLabel(t, status)}
                       </span>
                     </span>
                     <div className="flex items-center gap-1">
                       {status === 'Sent' && canApprovePO && (
                         <button
                           type="button"
-                          onClick={() => handleApprove(order.id ?? '')}
+                          onClick={() => handleApprove(order)}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{
                             background: 'color-mix(in srgb, var(--erp-info) 15%, transparent)',
@@ -442,7 +477,7 @@ const Purchasing: React.FC = () => {
                       {status === 'Draft' && (
                         <button
                           type="button"
-                          onClick={() => handleSend(order.id ?? '')}
+                          onClick={() => handleSend(order)}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{
                             background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
@@ -454,9 +489,9 @@ const Purchasing: React.FC = () => {
                       )}
                       <PurchaseOrderPrintAction
                         order={order}
-                        supplierName={
-                          supplierNameById.get(order.supplierId) ?? `Supplier #${order.supplierId}`
-                        }
+                        supplierName={supplierName(order.supplierId)}
+                        productNameById={productNameById}
+                        currency={currency}
                       />
                     </div>
                   </div>
@@ -490,7 +525,7 @@ const Purchasing: React.FC = () => {
                 color: 'var(--hub-text)',
               }}
             >
-              <option value="">Select supplier*</option>
+              <option value="">{t('erp.purchasing.form.selectSupplier')}</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -500,7 +535,7 @@ const Purchasing: React.FC = () => {
             <input
               value={newPoNumber}
               onChange={(e) => setNewPoNumber(e.target.value)}
-              placeholder="PO number*"
+              placeholder={t('erp.purchasing.form.poNumber')}
               className="w-full px-3 py-2 rounded-lg text-sm outline-none"
               style={{
                 background: 'var(--hub-input-bg)',
@@ -534,7 +569,7 @@ const Purchasing: React.FC = () => {
               className="text-[11px] font-semibold uppercase tracking-wide"
               style={{ color: 'var(--hub-text-muted)' }}
             >
-              Items *
+              {t('erp.purchasing.form.items')}
             </p>
             {newItems.map((item, idx) => (
               <div key={idx} className="flex gap-1 items-center">
@@ -600,6 +635,7 @@ const Purchasing: React.FC = () => {
                   type="button"
                   onClick={() => setNewItems((prev) => prev.filter((_, i) => i !== idx))}
                   disabled={newItems.length === 1}
+                  aria-label={t('erp.purchasing.form.removeItem')}
                   className="p-1 rounded disabled:opacity-30"
                   style={{ color: 'var(--hub-text-muted)' }}
                 >
@@ -618,7 +654,7 @@ const Purchasing: React.FC = () => {
               className="text-xs"
               style={{ color: 'var(--hub-text-muted)' }}
             >
-              + Add item
+              {t('erp.purchasing.form.addItem')}
             </button>
             <div className="flex gap-2 justify-end">
               <button
@@ -636,7 +672,9 @@ const Purchasing: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: ACCENT, color: 'var(--erp-accent-foreground)' }}
               >
-                {createMut.isPending ? 'Creating…' : 'Create Draft'}
+                {createMut.isPending
+                  ? t('erp.common.creating')
+                  : t('erp.purchasing.form.createDraft')}
               </button>
             </div>
           </div>

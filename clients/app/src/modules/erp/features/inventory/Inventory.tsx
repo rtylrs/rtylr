@@ -6,6 +6,8 @@ import { Package, Search, SearchX, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
 import { useDebounce } from '@voxire/utils';
+import { formatCurrency } from '../../shared/lib/format';
+import { useErpCurrency } from '../../shared/hooks/useErpCurrency';
 import {
   getProductStockStatus,
   type ProductStockStatus,
@@ -69,6 +71,7 @@ const SkeletonTableRow: React.FC = () => (
 
 const Inventory: React.FC = () => {
   const { t } = useTranslation();
+  const currency = useErpCurrency();
   const [search, setSearch] = useState('');
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -267,10 +270,10 @@ const Inventory: React.FC = () => {
                         {product.lowStockThreshold}
                       </span>
                       <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                        ${(product.costPrice ?? 0).toFixed(2)}
+                        {formatCurrency(product.costPrice ?? 0, currency)}
                       </span>
                       <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        ${(product.salePrice ?? 0).toFixed(2)}
+                        {formatCurrency(product.salePrice ?? 0, currency)}
                       </span>
                       <span>
                         <span

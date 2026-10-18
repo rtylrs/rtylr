@@ -217,7 +217,7 @@
   "receiving": {
     "title": "Goods Receiving",
     "description": "Receive items against open purchase orders",
-    "receiveFor": "Receive items for PO-{{id}}",
+    "receiveFor": "Receive items for {{label}}",
     "closeDetails": "Close receiving details",
     "expected": "Expected {{count}}",
     "ok": "OK",
@@ -239,7 +239,9 @@
       "completed": "Receipt completed, all items received",
       "completedVariance": "Receipt completed with {{count}} unit variance",
       "updateFailed": "Failed to update receipt status"
-    }
+    },
+    "decrease": "Decrease received quantity for {{name}}",
+    "increase": "Increase received quantity for {{name}}"
   },
   "reorder": {
     "empty": {
@@ -441,13 +443,57 @@
     "itemRequired": "At least one item with a product and quantity is required",
     "draftCreated": "Purchase order draft created",
     "createFailed": "Failed to create purchase order",
-    "statusUpdateFailed": "Failed to update purchase order status",
-    "approveFailed": "Failed to approve purchase order",
     "newOrder": "New Order",
     "approve": "Approve",
     "send": "Send",
     "newPurchaseOrder": "New Purchase Order",
-    "cost": "Cost"
+    "cost": "Cost",
+    "columns": {
+      "order": "Order",
+      "supplier": "Supplier",
+      "expected": "Expected",
+      "items": "Items",
+      "total": "Total",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "approved": "Approved",
+      "partial": "Partial",
+      "received": "Received",
+      "cancelled": "Cancelled"
+    },
+    "itemsUnavailable": "Line-item details could not be loaded",
+    "productFallback": "Product #{{id}}",
+    "supplierFallback": "Supplier #{{id}}",
+    "toast": {
+      "approved": "{{label}} approved",
+      "approveFailed": "Failed to approve {{label}}",
+      "sent": "{{label}} sent to supplier",
+      "sendFailed": "Failed to send {{label}}"
+    },
+    "form": {
+      "selectSupplier": "Select supplier*",
+      "poNumber": "PO number*",
+      "items": "Items *",
+      "addItem": "+ Add item",
+      "removeItem": "Remove item",
+      "createDraft": "Create draft"
+    },
+    "print": {
+      "button": "Print",
+      "title": "Purchase Order {{label}}",
+      "orderDate": "Order date",
+      "unitCost": "Unit cost",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "notes": "Notes",
+      "popupBlocked": "Allow pop-ups to print",
+      "unavailable": "Print unavailable",
+      "unavailableHint": "The order details could not be loaded"
+    }
   },
   "dashboard": {
     "totalProducts": "Total Products",

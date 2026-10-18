@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, Receipt } from 'lucide-react';
 
 import { useSupplierBills } from '../hooks/queries/useSupplierBills';
+import { formatCurrency } from '../lib/format';
+import { useErpCurrency } from '../hooks/useErpCurrency';
 
 interface SupplierBillHistoryProps {
   supplier: { id?: string };
@@ -12,6 +14,7 @@ interface SupplierBillHistoryProps {
  *  Finance is absent or unreachable; never shows a zero-bill claim. */
 const SupplierBillHistory: React.FC<SupplierBillHistoryProps> = ({ supplier }) => {
   const { t } = useTranslation();
+  const currency = useErpCurrency();
   const [open, setOpen] = useState(false);
   const crmSupplierId = supplier.id;
   const { data: bills } = useSupplierBills(crmSupplierId);
@@ -59,10 +62,7 @@ const SupplierBillHistory: React.FC<SupplierBillHistoryProps> = ({ supplier }) =
               >
                 {bill.status}
               </span>
-              <span>
-                {bill.currency ?? ''}
-                {(bill.amount ?? 0).toFixed(2)}
-              </span>
+              <span>{formatCurrency(bill.amount ?? 0, bill.currency || currency)}</span>
             </div>
           ))}
           {bills.length > 10 && (
