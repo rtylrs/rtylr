@@ -4,7 +4,6 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import {
   ArrowLeft,
   Mail,
@@ -14,6 +13,9 @@ import {
   Trash2,
   Download,
   Users,
+  Pencil,
+  MapPin,
+  Cake,
 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import {
@@ -43,12 +45,14 @@ import {
 import { useSupportEngagement } from '../../shared/hooks/queries/useSupportEngagement';
 import { useCustomerOutstandingBalance } from '../../shared/hooks/queries/useCustomerOutstandingBalance';
 import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
+import { formatDay, formatInstantDate } from '../../shared/lib/dateUtils';
+import EditCustomerModal from './EditCustomerModal';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 
 const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const newTagInputRef = useRef<HTMLInputElement>(null);
   const canEditCustomer = canCrmPermission('crm:customers:edit');
   const canExportCustomer = canCrmPermission('crm:customers:export');
@@ -73,6 +77,7 @@ const CustomerProfile: React.FC = () => {
   const { data: loyaltyConfig } = useLoyaltyConfig();
   const exportData = useExportCustomers();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [newTag, setNewTag] = useState('');
 
   const customer = fetched;
@@ -185,7 +190,7 @@ const CustomerProfile: React.FC = () => {
     award.mutate(
       { customerId: customer.id, points, reason },
       {
-        onSuccess: () => toast.success(`Awarded ${points} points`),
+        onSuccess: () => toast.success(t('crm.customerProfile.awarded', { count: points })),
         onError: () => toast.error(t('crm.customerProfile.awardFailed')),
       }
     );
@@ -199,7 +204,7 @@ const CustomerProfile: React.FC = () => {
     redeem.mutate(
       { customerId: customer.id, points, reason },
       {
-        onSuccess: () => toast.success(`Deducted ${points} points`),
+        onSuccess: () => toast.success(t('crm.customerProfile.deducted', { count: points })),
         onError: () => toast.error(t('crm.customerProfile.deductFailed')),
       }
     );
@@ -252,7 +257,7 @@ const CustomerProfile: React.FC = () => {
             marginBottom: '14px',
           }}
         >
-          <ArrowLeft size={12} /> Back
+          <ArrowLeft size={12} /> {t('crm.customerProfile.back')}
         </button>
 
         {/* Header card */}
@@ -300,10 +305,24 @@ const CustomerProfile: React.FC = () => {
                 <Phone size={12} />
                 {customer.phone}
               </span>
+              {customer.address && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <MapPin size={12} />
+                  {customer.address}
+                </span>
+              )}
+              {customer.dateOfBirth && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Cake size={12} />
+                  {formatDay(customer.dateOfBirth, i18n.language)}
+                </span>
+              )}
               {customer.createdAt && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Calendar size={12} />
-                  Since {customer.createdAt}
+                  {t('crm.customerProfile.since', {
+                    date: formatInstantDate(customer.createdAt, i18n.language),
+                  })}
                 </span>
               )}
             </div>
@@ -343,10 +362,18 @@ const CustomerProfile: React.FC = () => {
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {canEditCustomer && (
+              <Button variant="outline" onClick={() => setEditOpen(true)}>
+                <Pencil size={13} />
+                {t('crm.customerProfile.edit')}
+              </Button>
+            )}
             {canExportCustomer && (
               <Button variant="outline" onClick={handleExport} disabled={exportData.isPending}>
                 <Download size={13} />
-                {exportData.isPending ? 'Exporting…' : 'Export GDPR'}
+                {exportData.isPending
+                  ? t('crm.customerProfile.exporting')
+                  : t('crm.customerProfile.exportGdpr')}
               </Button>
             )}
             {canDeleteCustomer && (
@@ -366,7 +393,7 @@ const CustomerProfile: React.FC = () => {
                 style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
               >
                 <Trash2 size={13} />
-                {remove.isPending ? 'Deleting…' : 'Delete'}
+                {remove.isPending ? t('crm.customerProfile.deleting') : t('crmCommon.delete')}
               </Button>
             )}
           </div>
@@ -568,7 +595,9 @@ const CustomerProfile: React.FC = () => {
                   {customer.loyaltyPoints.toLocaleString()} pts
                 </span>
                 <span style={{ color: 'var(--hub-text-muted)' }}>
-                  {next !== null ? `${next} to next` : 'Max tier'}
+                  {next !== null
+                    ? t('crm.customerProfile.toNextTier', { count: next })
+                    : t('crm.customerProfile.maxTier')}
                 </span>
               </div>
               <div
@@ -607,12 +636,14 @@ const CustomerProfile: React.FC = () => {
           </div>
         </div>
 
+        <EditCustomerModal customer={customer} open={editOpen} onClose={() => setEditOpen(false)} />
+
         <ConfirmModal
           open={confirmDelete}
           onClose={() => setConfirmDelete(false)}
           onConfirm={handleDelete}
           title={t('crm.customers.deleteConfirmTitle')}
-          description={`Are you sure you want to delete ${customer.name}? This action cannot be undone.`}
+          description={t('crm.customerProfile.deleteConfirm', { name: customer.name })}
           confirmLabel={t('crmCommon.delete')}
           variant="danger"
         />
