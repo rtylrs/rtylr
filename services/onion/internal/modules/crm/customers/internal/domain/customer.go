@@ -128,6 +128,25 @@ type LoyaltyConfig struct {
 	UpdatedAt             time.Time
 }
 
+// DefaultLoyaltyConfig is what a business that never saved loyalty settings
+// sees: the crm_loyalty_config column defaults, with the program off so
+// nothing is earned until the owner turns it on. An all-zero config made the
+// settings screen fail to load and showed every tier threshold as 0.
+func DefaultLoyaltyConfig(businessID int64) LoyaltyConfig {
+	return LoyaltyConfig{
+		BusinessID:            businessID,
+		PointsPerCurrencyUnit: 1,
+		CurrencyPerPoint:      0.01,
+		SilverMin:             500,
+		GoldMin:               1500,
+		PlatinumMin:           5000,
+		SilverDiscountPct:     5,
+		GoldDiscountPct:       10,
+		PlatinumDiscountPct:   15,
+		PointsExpiryDays:      365,
+	}
+}
+
 type LoyaltyConfigInput struct {
 	OwnerID               int64
 	BusinessID            int64

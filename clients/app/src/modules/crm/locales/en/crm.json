@@ -626,9 +626,5 @@
     "openCommandPalette": "Open command palette",
     "notifications": "Notifications",
     "noNotifications": "No new notifications"
-  },
-  "addons": {
-    "loadFailedTitle": "Could not load your add-ons.",
-    "loadFailedDescription": "Check your connection and try again. Sales stays unavailable until the add-on list loads."
   }
 }

@@ -18,20 +18,25 @@ const legacyLoyaltyConfigSchema = z.object({
   redemptionRate: z.number(),
 });
 
+// The wire omits a field holding its zero value (false, 0), so an absent field
+// is that zero value, not a missing one: a paused program arrives with no
+// is_enabled at all. Requiring the field failed every paused config, and
+// substituting a default showed a saved 0% discount as 5%. The server sends
+// real defaults for a business that never saved settings.
 const backendLoyaltyConfigSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number).optional(),
-  isEnabled: z.boolean(),
-  pointsPerCurrencyUnit: z.number(),
-  currencyPerPoint: z.number(),
-  bronzeMin: finiteNumber.catch(0),
-  silverMin: finiteNumber.catch(500),
-  goldMin: finiteNumber.catch(1500),
-  platinumMin: finiteNumber.catch(5000),
-  bronzeDiscountPct: z.number().catch(0),
-  silverDiscountPct: z.number().catch(5),
-  goldDiscountPct: z.number().catch(10),
-  platinumDiscountPct: z.number().catch(15),
-  pointsExpiryDays: finiteNumber.catch(365),
+  isEnabled: z.boolean().default(false),
+  pointsPerCurrencyUnit: finiteNumber.default(0),
+  currencyPerPoint: finiteNumber.default(0),
+  bronzeMin: finiteNumber.default(0),
+  silverMin: finiteNumber.default(0),
+  goldMin: finiteNumber.default(0),
+  platinumMin: finiteNumber.default(0),
+  bronzeDiscountPct: finiteNumber.default(0),
+  silverDiscountPct: finiteNumber.default(0),
+  goldDiscountPct: finiteNumber.default(0),
+  platinumDiscountPct: finiteNumber.default(0),
+  pointsExpiryDays: finiteNumber.default(0),
   updatedAt: z.string().optional(),
 });
 
