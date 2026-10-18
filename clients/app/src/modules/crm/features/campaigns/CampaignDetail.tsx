@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, ArrowLeft, Mail, FileQuestion } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Mail, FileQuestion, Send } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 import { Breadcrumbs, Button, Card, SkeletonList } from '../../shared/components/ui';
 import { CampaignStatsCard } from '../../shared/components/crm';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import SendCampaignModal from './SendCampaignModal';
+
+// A campaign in one of these states has been sent or will not be.
+const FINISHED_STATUSES = ['sent', 'completed', 'cancelled'];
 
 function isNotFoundError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
@@ -26,6 +31,8 @@ const CampaignDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [sendOpen, setSendOpen] = useState(false);
+  const canSend = canCrmPermission('crm:campaigns:send');
   const campaignId = Number(id);
   const campaignQuery = useGetCampaign(campaignId);
   const statsQuery = useCampaignStats(campaignId);
@@ -106,7 +113,7 @@ const CampaignDetail: React.FC = () => {
             marginBottom: '14px',
           }}
         >
-          <ArrowLeft size={12} /> Back
+          <ArrowLeft size={12} /> {t('crm.customerProfile.back')}
         </button>
 
         <Card style={{ marginBottom: '20px' }}>
@@ -143,17 +150,32 @@ const CampaignDetail: React.FC = () => {
                 fontWeight: 600,
                 // Wire status is lowercase ('active'); comparing against the
                 // capitalized label left this pill permanently gray.
-                background:
-                  campaign.status.toLowerCase() === 'active'
-                    ? 'rgba(16,185,129,0.12)'
-                    : 'rgba(148,163,184,0.12)',
-                color: campaign.status.toLowerCase() === 'active' ? '#10b981' : '#94a3b8',
+                background: ['active', 'sent'].includes(campaign.status.toLowerCase())
+                  ? 'rgba(16,185,129,0.12)'
+                  : 'rgba(148,163,184,0.12)',
+                color: ['active', 'sent'].includes(campaign.status.toLowerCase())
+                  ? '#10b981'
+                  : '#94a3b8',
               }}
             >
               {campaign.status}
             </span>
+            {canSend &&
+              campaign.type === 'email' &&
+              !FINISHED_STATUSES.includes(campaign.status.toLowerCase()) && (
+                <Button variant="primary" onClick={() => setSendOpen(true)}>
+                  <Send size={13} />
+                  {t('crm.campaignSend.sendNow')}
+                </Button>
+              )}
           </div>
         </Card>
+        <SendCampaignModal
+          open={sendOpen}
+          onClose={() => setSendOpen(false)}
+          campaignId={campaignId}
+          segmentId={campaign.audienceSegmentId ?? undefined}
+        />
 
         {stats && (
           <>

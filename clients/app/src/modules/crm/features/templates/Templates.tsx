@@ -54,21 +54,14 @@ const Templates: React.FC = () => {
   };
 
   const applyTemplate = (template: (typeof templates)[number]) => {
-    if (template.channel === 'email') {
-      navigate({
-        to: '/crm/campaigns/email',
-        search: {
-          name: template.name,
-          subject: template.subject ?? '',
-          body: template.body,
-        },
-      });
-    } else {
-      navigate({
-        to: '/crm/campaigns/sms',
-        search: { name: template.name, body: template.body },
-      });
-    }
+    navigate({
+      to: '/crm/campaigns/email',
+      search: {
+        name: template.name,
+        subject: template.subject ?? '',
+        body: template.body,
+      },
+    });
   };
 
   const duplicate = (t: (typeof templates)[number]): void => {
@@ -252,13 +245,17 @@ const Templates: React.FC = () => {
                     >
                       <Copy size={11} /> Duplicate
                     </Button>
-                    <Button
-                      variant="primary"
-                      style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
-                      onClick={() => applyTemplate(template)}
-                    >
-                      {t('crm.templates.use')}
-                    </Button>
+                    {/* SMS campaigns cannot be sent until an SMS provider is
+                        connected, so only email templates start a campaign. */}
+                    {template.channel === 'email' && (
+                      <Button
+                        variant="primary"
+                        style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
+                        onClick={() => applyTemplate(template)}
+                      >
+                        {t('crm.templates.use')}
+                      </Button>
+                    )}
                   </div>
                 </div>
               );

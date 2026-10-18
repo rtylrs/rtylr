@@ -56,6 +56,10 @@ func CompatibilityServiceRoutes() []string {
 		"PUT /crm/campaigns/{id}",
 		"PUT /crm/campaigns/{id}/status",
 		"DELETE /crm/campaigns/{id}",
+		"GET /crm/campaigns/audience",
+		"POST /crm/campaigns/{id}/send",
+		"GET /crm/public/unsubscribe",
+		"POST /crm/public/unsubscribe",
 		"GET /crm/automations",
 		"POST /crm/automations",
 		"PUT /crm/automations/{id}",
@@ -385,6 +389,32 @@ func (s CompatibilityService) DeleteCampaign(ctx context.Context, req *crmcompat
 	return &crmcompatv1.JsonResponse{Data: data}, nil
 }
 
+func (s CompatibilityService) GetCampaignAudience(ctx context.Context, req *crmcompatv1.CampaignAudienceRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/campaigns/audience", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) SendCampaign(ctx context.Context, req *crmcompatv1.PathRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/crm/campaigns/{id}/send", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) GetUnsubscribe(w http.ResponseWriter, r *http.Request, _ *crmcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodGet, "/crm/public/unsubscribe")
+	return nil
+}
+
+func (s CompatibilityService) ConfirmUnsubscribe(w http.ResponseWriter, r *http.Request, _ *crmcompatv1.EmptyRequest) error {
+	s.Routes.ServeRoute(w, r, http.MethodPost, "/crm/public/unsubscribe")
+	return nil
+}
+
 func (s CompatibilityService) ListAutomations(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
 	data, err := s.serve(ctx, http.MethodGet, "/crm/automations", nil)
 	if err != nil {
@@ -576,7 +606,7 @@ func Routes() []string {
 // HTTPRoutes lists the routes served by @http methods: the original
 // handler runs, route middlewares included.
 func HTTPRoutes() []string {
-	return []string{}
+	return []string{"GET /crm/public/unsubscribe", "POST /crm/public/unsubscribe"}
 }
 
 // Register serves this package's contracts on mux from the route table,

@@ -594,7 +594,12 @@
     "editEmailTitle": "Edit email campaign",
     "newEmailTitle": "New email campaign",
     "editSmsTitle": "Edit SMS campaign",
-    "newSmsTitle": "New SMS campaign"
+    "newSmsTitle": "New SMS campaign",
+    "saveAndSend": "Save & send…",
+    "saveDraft": "Save draft",
+    "saveFailed": "Could not save the campaign.",
+    "allCustomers": "All customers",
+    "templateApplied": "Applied template: {{name}}"
   },
   "segmentBuilder": {
     "pageTitle": "New segment",
@@ -693,5 +698,20 @@
     "customer": "Customer",
     "viewCustomer": "View customer",
     "draftHint": "Leave “Signed on” empty to keep it as a draft. Finance can invoice signed contracts."
+  },
+  "campaignSend": {
+    "title": "Send this campaign?",
+    "sendNow": "Send now",
+    "sending": "Sending…",
+    "confirm_one": "Send to 1 customer",
+    "confirm_other": "Send to {{count}} customers",
+    "reach_one": "Reaches 1 customer who agreed to marketing email, of {{total}} in this audience.",
+    "reach_other": "Reaches {{count}} customers who agreed to marketing email, of {{total}} in this audience.",
+    "nobody": "No one in this audience has agreed to marketing email yet. Customers opt in when they are added, or from their profile.",
+    "footerNote": "Each email includes your business address and an unsubscribe link. Customers who unsubscribe are left out of future campaigns.",
+    "audienceFailed": "Could not count who this campaign reaches. Try again.",
+    "sent_one": "Sent to 1 customer",
+    "sent_other": "Sent to {{count}} customers",
+    "failed": "Could not send the campaign."
   }
 }

@@ -39,6 +39,8 @@ vi.mock('@voxire/components', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useCampaigns', () => ({
+  useCampaignAudience: () => ({ data: undefined, isPending: true, isError: false }),
+  useSendCampaign: () => ({ mutate: vi.fn(), isPending: false }),
   useGetCampaign: () => ({ ...mocks.campaign, refetch: mocks.refetchCampaign }),
   useCampaignStats: () => ({ ...mocks.stats, refetch: mocks.refetchStats }),
 }));

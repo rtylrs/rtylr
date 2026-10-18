@@ -193,6 +193,19 @@ func RegisterRoutes(ctx context.Context, router http.LegacyRouter, crmService *a
 		&DeleteLoyaltyTierHandler{CRMService: crmService},
 	)
 
+	// Campaign delivery: audience preview, send, and the public unsubscribe
+	// page every marketing email links to.
+	http.RegisterGET[GetCampaignAudienceRequest, GetCampaignAudienceResponse](
+		ctx, router, CampaignAudienceRoutes(), &GetCampaignAudienceHandler{CRMService: crmService},
+	)
+	http.RegisterPOST[SendCampaignRequest, SendCampaignResponse](
+		ctx, router, CampaignSendRoutes(), &SendCampaignHandler{CRMService: crmService},
+	)
+	for _, route := range UnsubscribeRoutes() {
+		router.Get(route, UnsubscribeHandler(crmService))
+		router.Post(route, UnsubscribeHandler(crmService))
+	}
+
 	// Campaign Stats
 	http.RegisterGETWithValidation[GetCampaignStatsRequest, GetCampaignStatsResponse](
 		ctx,

@@ -859,6 +859,16 @@ export const crmApi = {
   deleteCampaign: (id: number) =>
     compatResult<unknown>(() => crmCompatibilityClient.deleteCampaign({ id: String(id) })),
 
+  // Sending: who an email campaign reaches, and sending it now.
+  getCampaignAudience: (segmentId?: number) =>
+    compatResult<{ eligible?: number; total?: number }>(() =>
+      crmCompatibilityClient.getCampaignAudience(segmentId ? { segment_id: segmentId } : {})
+    ),
+  sendCampaign: (id: number) =>
+    compatResult<{ recipients?: number }>(() =>
+      crmCompatibilityClient.sendCampaign({ id: String(id) })
+    ),
+
   // Automations
   getAutomations: () =>
     compatResult<Automation[]>(() => crmCompatibilityClient.listAutomations({})),

@@ -543,25 +543,8 @@ const Campaigns: React.FC = () => {
           </div>
           {canCreateCampaigns && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => navigate({ to: '/crm/campaigns/sms' })}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 14px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  background: 'transparent',
-                  color: 'var(--hub-text)',
-                  border: '1px solid var(--hub-border)',
-                  cursor: 'pointer',
-                }}
-              >
-                <MessageSquare size={14} /> New SMS
-              </button>
+              {/* SMS campaigns return once an SMS provider is connected;
+                  until then nothing could deliver them. */}
               <button
                 type="button"
                 onClick={() => navigate({ to: '/crm/campaigns/email' })}

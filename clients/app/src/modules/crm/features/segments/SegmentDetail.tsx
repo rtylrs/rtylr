@@ -2,15 +2,7 @@ import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import {
-  AlertCircle,
-  ArrowLeft,
-  FileQuestion,
-  Mail,
-  MessageSquare,
-  PieChart,
-  Users,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, FileQuestion, Mail, PieChart, Users } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
@@ -185,18 +177,11 @@ const SegmentDetail: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: '6px' }}>
               <Button
-                variant="outline"
+                variant="primary"
                 onClick={() => navigate({ to: '/crm/campaigns/email', search: { segment: id } })}
               >
                 <Mail size={13} />
                 {t('crmCommon.email')}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => navigate({ to: '/crm/campaigns/sms', search: { segment: id } })}
-              >
-                <MessageSquare size={13} />
-                {t('crm.components.sms')}
               </Button>
             </div>
           </div>

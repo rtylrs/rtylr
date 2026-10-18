@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { getOneKitErrorMessage, unwrap } from '@voxire/api';
 import {
   useMutation,
   useQuery,
@@ -151,6 +151,48 @@ export const useUpdateCampaignStatus = (): UseMutationResult<
     },
     onError: (): void => {
       toast.error(t('crmErrors.generic'));
+    },
+  });
+};
+
+export interface CampaignAudience {
+  /** Customers with an email address who agreed to marketing email. */
+  eligible: number;
+  /** Everyone in the audience, consent or not. */
+  total: number;
+}
+
+/** Who an email campaign to the segment (or everyone) would reach now. */
+export const useCampaignAudience = (
+  segmentId: number | undefined,
+  enabled = true
+): UseQueryResult<CampaignAudience> =>
+  useQuery<CampaignAudience>({
+    queryKey: ['crm-campaign-audience', segmentId ?? 'all'],
+    queryFn: async (): Promise<CampaignAudience> => {
+      const res = await unwrap(crmApi.getCampaignAudience(segmentId));
+      return { eligible: Number(res?.eligible ?? 0), total: Number(res?.total ?? 0) };
+    },
+    enabled,
+  });
+
+/** Sends an email campaign now; resolves with how many emails were queued. */
+export const useSendCampaign = (): UseMutationResult<number, unknown, number> => {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation<number, unknown, number>({
+    mutationFn: async (id: number): Promise<number> => {
+      const res = await unwrap(crmApi.sendCampaign(id));
+      return Number(res?.recipients ?? 0);
+    },
+    onSuccess: (recipients: number, id: number): void => {
+      void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
+      void qc.invalidateQueries({ queryKey: ['crm-campaign', id] });
+      toast.success(t('crm.campaignSend.sent', { count: recipients }));
+    },
+    onError: (error: unknown): void => {
+      // The server explains what to fix, such as a missing postal address.
+      toast.error(getOneKitErrorMessage(error, t('crm.campaignSend.failed')));
     },
   });
 };

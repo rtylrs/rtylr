@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   createCampaign: vi.fn(),
   updateCampaign: vi.fn(),
-  updateCampaignStatus: vi.fn(),
+  sendCampaign: vi.fn(),
   effectiveAccess: null as unknown,
 }));
 
@@ -42,8 +42,13 @@ vi.mock('../../../../shared/stores/userStore', () => {
 vi.mock('../../shared/hooks/queries/useCampaigns', () => ({
   useCreateCampaign: () => ({ mutate: mocks.createCampaign, isPending: false }),
   useUpdateCampaign: () => ({ mutate: mocks.updateCampaign, isPending: false }),
-  useUpdateCampaignStatus: () => ({ mutate: mocks.updateCampaignStatus, isPending: false }),
   useGetCampaign: () => ({ data: undefined }),
+  useCampaignAudience: () => ({
+    data: { eligible: 3, total: 12 },
+    isPending: false,
+    isError: false,
+  }),
+  useSendCampaign: () => ({ mutate: mocks.sendCampaign, isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useSegments', () => ({
@@ -64,11 +69,6 @@ interface SaveCallbacks {
   onError: () => void;
 }
 
-interface StatusCallbacks {
-  onSuccess: () => void;
-  onError: () => void;
-}
-
 function renderEditor(): void {
   render(<EmailCampaign />);
 }
@@ -80,10 +80,13 @@ function fillRequiredFields(): void {
   fireEvent.change(screen.getByLabelText('crm.composer.subject'), {
     target: { value: 'Spring is here' },
   });
+  fireEvent.change(screen.getByLabelText('crm.composer.body'), {
+    target: { value: 'Hi {{first_name}}' },
+  });
 }
 
-function clickSaveAndActivate(): void {
-  fireEvent.click(screen.getByRole('button', { name: /Save & activate/ }));
+function clickSaveAndSend(): void {
+  fireEvent.click(screen.getByRole('button', { name: /crm\.campaignEditor\.saveAndSend/ }));
 }
 
 beforeEach(() => {
@@ -91,49 +94,54 @@ beforeEach(() => {
   mocks.effectiveAccess = createEffectiveAccess('crm', { isAdmin: true });
   segmentQuery.isError = false;
   segmentQuery.isLoading = false;
+  mocks.createCampaign.mockImplementation((_payload: unknown, callbacks: SaveCallbacks) => {
+    callbacks.onSuccess({ campaignId: 42 });
+  });
+  mocks.updateCampaign.mockImplementation((_payload: unknown, callbacks: SaveCallbacks) => {
+    callbacks.onSuccess({});
+  });
 });
 
-describe('EmailCampaign activation retry (B56-R05)', () => {
-  it('prevents campaign activation when the audience list failed to load', () => {
-    segmentQuery.isError = true;
+describe('EmailCampaign sending', () => {
+  it('saves the campaign, then asks before sending it to the opted-in audience', () => {
     renderEditor();
     fillRequiredFields();
 
-    expect(screen.getByRole('alert')).toHaveTextContent('crmErrors.generic');
-    expect(screen.getByRole('button', { name: /Save & activate/ })).toBeDisabled();
+    clickSaveAndSend();
+
+    // With no segment picked the campaign goes to every opted-in customer.
+    expect(mocks.createCampaign.mock.calls[0][0]).toMatchObject({
+      type: 'email',
+      audienceSegmentId: null,
+    });
+    expect(mocks.sendCampaign).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: /crm\.campaignSend\.confirm/ }));
+    expect(mocks.sendCampaign).toHaveBeenCalledWith(42, expect.anything());
   });
 
-  it('activates the campaign created by a failed attempt instead of creating a duplicate', () => {
-    mocks.createCampaign.mockImplementation((_payload: unknown, callbacks: SaveCallbacks) => {
-      callbacks.onSuccess({ campaignId: 42 });
-    });
-    mocks.updateCampaign.mockImplementation((_payload: unknown, callbacks: SaveCallbacks) => {
-      callbacks.onSuccess({});
-    });
-    mocks.updateCampaignStatus
-      .mockImplementationOnce((_payload: unknown, callbacks: StatusCallbacks) => {
-        callbacks.onError();
-      })
-      .mockImplementationOnce((_payload: unknown, callbacks: StatusCallbacks) => {
-        callbacks.onSuccess();
-      });
-
+  it('sends the campaign it already created instead of creating a duplicate', () => {
     renderEditor();
     fillRequiredFields();
 
-    clickSaveAndActivate();
-    expect(toast.error).toHaveBeenCalledWith('crm.campaigns.savedNotActivated');
-
-    // The campaign exists now; a second attempt must not create another one.
-    clickSaveAndActivate();
+    clickSaveAndSend();
+    fireEvent.click(screen.getByRole('button', { name: 'crmCommon.cancel' }));
+    clickSaveAndSend();
 
     expect(mocks.createCampaign).toHaveBeenCalledTimes(1);
     expect(mocks.updateCampaign).toHaveBeenCalledTimes(1);
     expect(mocks.updateCampaign.mock.calls[0][0]).toMatchObject({ id: 42 });
-    expect(mocks.updateCampaignStatus.mock.calls.map((call) => call[0])).toEqual([
-      { id: 42, status: 'active' },
-      { id: 42, status: 'active' },
-    ]);
-    expect(mocks.navigate).toHaveBeenCalledWith({ to: '/crm/campaigns' });
+  });
+
+  it('will not send without a message', () => {
+    renderEditor();
+    fireEvent.change(screen.getByLabelText('crm.campaignEditor.nameLabel'), {
+      target: { value: 'Spring promo' },
+    });
+    fireEvent.change(screen.getByLabelText('crm.composer.subject'), {
+      target: { value: 'Spring is here' },
+    });
+
+    expect(screen.getByRole('button', { name: /crm\.campaignEditor\.saveAndSend/ })).toBeDisabled();
+    expect(toast.error).not.toHaveBeenCalled();
   });
 });
