@@ -21,6 +21,7 @@ type leadPayload struct {
 	Notes        string           `json:"notes"`
 	CreatedAt    time.Time        `json:"created_at"`
 	UpdatedAt    time.Time        `json:"updated_at"`
+	NextFollowUp string           `json:"next_follow_up,omitempty"`
 }
 
 func payloadLead(value domain.Lead) leadPayload { return leadPayload(value) }

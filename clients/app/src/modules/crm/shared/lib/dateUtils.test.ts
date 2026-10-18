@@ -7,6 +7,8 @@ import {
   isBefore,
   isAfter,
   relativeDate,
+  followUpStatus,
+  formatDay,
 } from './dateUtils';
 
 describe('isToday', () => {
@@ -104,5 +106,21 @@ describe('relativeDate', () => {
     const result = relativeDate('2020-01-15T00:00:00.000Z');
     expect(result).toContain('2020');
     expect(result).toContain('Jan');
+  });
+});
+
+describe('followUpStatus', () => {
+  it('compares a YYYY-MM-DD follow-up against today', () => {
+    expect(followUpStatus('2026-10-17', '2026-10-18')).toBe('overdue');
+    expect(followUpStatus('2026-10-18', '2026-10-18')).toBe('today');
+    expect(followUpStatus('2026-10-19', '2026-10-18')).toBe('upcoming');
+  });
+});
+
+describe('formatDay', () => {
+  it('shows the stored calendar day even when it arrives as UTC midnight', () => {
+    // A local formatter reads 1990-05-14T00:00:00Z as 13 May west of UTC.
+    expect(formatDay('1990-05-14T00:00:00Z', 'en-US')).toBe('May 14, 1990');
+    expect(formatDay('1990-05-14', 'en-US')).toBe('May 14, 1990');
   });
 });

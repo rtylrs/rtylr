@@ -50,4 +50,11 @@ describe('parseLead wire normalization', () => {
     expect(lead.dealValue).toBeUndefined();
     expect(lead.companyName).toBe('');
   });
+
+  it('carries the next follow-up date, and leaves it out when there is none', () => {
+    expect(parseLead({ id: 1, stage: 'contacted', next_follow_up: '2026-10-25' })).toMatchObject({
+      nextFollowUp: '2026-10-25',
+    });
+    expect(parseLead({ id: 2, stage: 'contacted' }).nextFollowUp).toBeUndefined();
+  });
 });

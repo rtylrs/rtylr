@@ -52,6 +52,10 @@ func (m *mockRepo) ValidateLeadAssignee(_ context.Context, _, _ int64) error {
 	return m.err
 }
 
+func (m *mockRepo) ListReps(_ context.Context, _ int64) ([]domain.Rep, error) {
+	return []domain.Rep{{ID: 1, Name: "Dana Owner"}}, m.err
+}
+
 func (m *mockRepo) DeleteLead(_ context.Context, _, _ int64) error {
 	return m.err
 }

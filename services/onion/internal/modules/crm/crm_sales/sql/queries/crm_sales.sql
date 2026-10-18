@@ -1,20 +1,29 @@
 -- name: ListLeads :many
-SELECT id, owner_id, business_id, company_name, COALESCE(industry,'') AS industry, COALESCE(size,'') AS size,
-       source, stage, assigned_to, mrr_potential, COALESCE(notes,'') AS notes,
-       created_at, updated_at
-FROM crm_leads
-WHERE business_id = ?
-ORDER BY created_at DESC
+SELECT l.id, l.owner_id, l.business_id, l.company_name, COALESCE(l.industry,'') AS industry,
+       COALESCE(l.size,'') AS size, l.source, l.stage, l.assigned_to, l.mrr_potential,
+       COALESCE(l.notes,'') AS notes, l.created_at, l.updated_at,
+       -- The follow-up date on the latest touchpoint; logging a new touchpoint
+       -- replaces it, or clears it when the new one sets no follow-up.
+       CAST(COALESCE(DATE_FORMAT((SELECT t.next_follow_up FROM crm_touchpoints t
+             WHERE t.lead_id = l.id AND t.business_id = l.business_id
+             ORDER BY t.created_at DESC, t.id DESC LIMIT 1), '%Y-%m-%d'), '') AS CHAR) AS next_follow_up
+FROM crm_leads l
+WHERE l.business_id = ?
+ORDER BY l.created_at DESC
 LIMIT ? OFFSET ?;
 
 -- name: CountLeads :one
 SELECT COUNT(*) FROM crm_leads WHERE business_id = ?;
 
 -- name: GetLead :one
-SELECT id, owner_id, business_id, company_name, COALESCE(industry,'') AS industry, COALESCE(size,'') AS size,
-       source, stage, assigned_to, mrr_potential, COALESCE(notes,'') AS notes,
-       created_at, updated_at
-FROM crm_leads WHERE id = ? AND business_id = ?;
+SELECT l.id, l.owner_id, l.business_id, l.company_name, COALESCE(l.industry,'') AS industry,
+       COALESCE(l.size,'') AS size, l.source, l.stage, l.assigned_to, l.mrr_potential,
+       COALESCE(l.notes,'') AS notes, l.created_at, l.updated_at,
+       CAST(COALESCE(DATE_FORMAT((SELECT t.next_follow_up FROM crm_touchpoints t
+             WHERE t.lead_id = l.id AND t.business_id = l.business_id
+             ORDER BY t.created_at DESC, t.id DESC LIMIT 1), '%Y-%m-%d'), '') AS CHAR) AS next_follow_up
+FROM crm_leads l
+WHERE l.id = ? AND l.business_id = ?;
 
 -- name: CreateLead :execresult
 INSERT INTO crm_leads (owner_id, business_id, company_name, industry, size, source, stage, assigned_to, mrr_potential, notes)

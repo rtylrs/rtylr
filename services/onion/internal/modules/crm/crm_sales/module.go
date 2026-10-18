@@ -5,15 +5,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"net/http"
-
-	moduleinfra "github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure"
 
 	crmcontract "github.com/voxire/onion/internal/contracts/crm"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/api"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
+	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
+	moduleinfra "github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/eventbus"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	crmsalesv1 "github.com/voxire/voxie/gen/go/crm/sales/v1"
 )
 
@@ -88,5 +88,28 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) WithMembershipReader(reader func(context.Context, int64, int64) (bool, error)) *Module {
 	m.repository.WithMembershipReader(reader)
+	return m
+}
+
+// Rep is a teammate a lead can be assigned to.
+type Rep struct {
+	ID   int64
+	Name string
+}
+
+// WithRepReader supplies the business's assignable teammates (owner and
+// active members) for the lead rep picker.
+func (m *Module) WithRepReader(reader func(context.Context, int64) ([]Rep, error)) *Module {
+	m.repository.WithRepReader(func(ctx context.Context, businessID int64) ([]domain.Rep, error) {
+		reps, err := reader(ctx, businessID)
+		if err != nil {
+			return nil, err
+		}
+		result := make([]domain.Rep, 0, len(reps))
+		for _, rep := range reps {
+			result = append(result, domain.Rep(rep))
+		}
+		return result, nil
+	})
 	return m
 }

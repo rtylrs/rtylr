@@ -306,7 +306,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Console:               consoleModule,
 		Config:                config.NewModule(ctx, dbclient.Pool()),
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
-		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithBusinessOwnerResolver(businessModule),
+		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithRepReader(crmSalesReps(scopes.NewReader(dbclient.Pool()))).WithBusinessOwnerResolver(businessModule),
 		Customers:             customersModule,
 		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),
@@ -411,5 +411,22 @@ func initializeModules(ctx context.Context) *apiModules {
 			NewsletterEmails: platformConfig.GlobalConfig.NewsletterNotifyEmails,
 		}),
 		Workspaces: workspacesModule,
+	}
+}
+
+// crmSalesReps lists the teammates a CRM lead can be assigned to: id and
+// display name only. Any CRM viewer can read it, so a member with no name on
+// file is not shown by email; the client labels them by id instead.
+func crmSalesReps(reader *scopes.Reader) func(context.Context, int64) ([]crmsales.Rep, error) {
+	return func(ctx context.Context, businessID int64) ([]crmsales.Rep, error) {
+		users, err := reader.ActiveBusinessUsers(ctx, businessID)
+		if err != nil {
+			return nil, err
+		}
+		reps := make([]crmsales.Rep, 0, len(users))
+		for _, user := range users {
+			reps = append(reps, crmsales.Rep{ID: user.ID, Name: user.Name})
+		}
+		return reps, nil
 	}
 }

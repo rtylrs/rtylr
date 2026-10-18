@@ -61,6 +61,7 @@ func CompatibilityServiceRoutes() []string {
 		"PUT /crm/automations/{id}",
 		"DELETE /crm/automations/{id}",
 		"GET /crm/sales/pipeline",
+		"GET /crm/sales/reps",
 		"GET /crm/sales/leads",
 		"GET /crm/sales/leads/{id}",
 		"POST /crm/sales/leads",
@@ -418,6 +419,14 @@ func (s CompatibilityService) DeleteAutomation(ctx context.Context, req *crmcomp
 
 func (s CompatibilityService) GetSalesPipeline(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
 	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/pipeline", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &crmcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListSalesReps(ctx context.Context, req *crmcompatv1.EmptyRequest) (*crmcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/crm/sales/reps", nil)
 	if err != nil {
 		return nil, err
 	}

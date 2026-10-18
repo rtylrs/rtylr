@@ -76,7 +76,7 @@ func leadFromRow(row sqlc.ListLeadsRow) domain.Lead {
 	return leadFromFields(
 		row.ID, row.OwnerID, row.BusinessID, row.CompanyName, row.Industry, row.Size,
 		row.Source, row.Stage, row.AssignedTo, row.MrrPotential, row.Notes,
-		row.CreatedAt, row.UpdatedAt,
+		row.CreatedAt, row.UpdatedAt, row.NextFollowUp,
 	)
 }
 
@@ -84,7 +84,7 @@ func leadFromGetRow(row sqlc.GetLeadRow) domain.Lead {
 	return leadFromFields(
 		row.ID, row.OwnerID, row.BusinessID, row.CompanyName, row.Industry, row.Size,
 		row.Source, row.Stage, row.AssignedTo, row.MrrPotential, row.Notes,
-		row.CreatedAt, row.UpdatedAt,
+		row.CreatedAt, row.UpdatedAt, row.NextFollowUp,
 	)
 }
 
@@ -95,19 +95,21 @@ func leadFromFields(
 	mrrPotential sql.NullString,
 	notes string,
 	createdAt, updatedAt time.Time,
+	nextFollowUp interface{},
 ) domain.Lead {
 	l := domain.Lead{
-		ID:          id,
-		OwnerID:     ownerID,
-		BusinessID:  businessID,
-		CompanyName: companyName,
-		Industry:    industry,
-		Size:        size,
-		Source:      source,
-		Stage:       domain.LeadStage(stage),
-		Notes:       notes,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
+		ID:           id,
+		OwnerID:      ownerID,
+		BusinessID:   businessID,
+		CompanyName:  companyName,
+		Industry:     industry,
+		Size:         size,
+		Source:       source,
+		Stage:        domain.LeadStage(stage),
+		Notes:        notes,
+		CreatedAt:    createdAt,
+		UpdatedAt:    updatedAt,
+		NextFollowUp: followUpDate(nextFollowUp),
 	}
 	if assignedTo.Valid {
 		l.AssignedTo = &assignedTo.Int64
@@ -214,4 +216,19 @@ func touchpointFromFields(
 		tp.NextFollowUp = &s
 	}
 	return tp
+}
+
+// followUpDate reads the next_follow_up column, which the query formats as
+// YYYY-MM-DD ("" when the latest touchpoint set none). sqlc cannot type the
+// subquery, so the driver hands it over as bytes.
+func followUpDate(v interface{}) string {
+	switch value := v.(type) {
+	case []byte:
+		return string(value)
+	case string:
+		return value
+	case time.Time:
+		return value.Format("2006-01-02")
+	}
+	return ""
 }

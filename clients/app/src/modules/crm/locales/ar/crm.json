@@ -94,7 +94,25 @@
     "pageTitle": "العملاء المحتملون",
     "searchPlaceholder": "ابحث باسم الشركة...",
     "allSources": "كل المصادر",
-    "viewLead": "عرض العميل المحتمل"
+    "viewLead": "عرض العميل المحتمل",
+    "allStages": "كل المراحل",
+    "followUpsDue": "متابعات مستحقة",
+    "formerRep": "عضو سابق في الفريق",
+    "columns": {
+      "company": "الشركة",
+      "industry": "القطاع",
+      "stage": "المرحلة",
+      "source": "المصدر",
+      "rep": "المندوب المسؤول",
+      "nextFollowUp": "المتابعة التالية",
+      "value": "الإيراد الشهري المحتمل",
+      "actions": "الإجراءات"
+    },
+    "followUp": {
+      "overdue": "متأخرة",
+      "today": "مستحقة اليوم"
+    },
+    "unnamedTeammate": "عضو الفريق رقم {{id}}"
   },
   "contracts": {
     "loadFailedTitle": "تعذّر تحميل العقود",
@@ -423,7 +441,8 @@
     "deleteLead": "حذف العميل المحتمل",
     "add": "إضافة",
     "adding": "جارٍ الإضافة...",
-    "logTouchpointTitle": "تسجيل نقطة تواصل"
+    "logTouchpointTitle": "تسجيل نقطة تواصل",
+    "followUpOn": "المتابعة في {{date}}"
   },
   "dashboard": {
     "atRiskEmptyTitle": "لا يوجد عملاء معرضون للخطر حاليًا",
@@ -485,8 +504,11 @@
     "companySize": "حجم الشركة",
     "sourcePlaceholder": "لينكدإن، إحالة...",
     "mrrPotentialUsd": "الإيراد الشهري المتوقع (دولار)",
-    "userId": "معرّف المستخدم",
-    "notesPlaceholder": "معلومات عن هذا العميل المحتمل..."
+    "notesPlaceholder": "معلومات عن هذا العميل المحتمل...",
+    "editTitle": "تعديل العميل المحتمل",
+    "creating": "جارٍ الإنشاء…",
+    "submit": "إنشاء عميل محتمل",
+    "unassigned": "غير مُسنَد"
   },
   "pipeline": {
     "pageTitle": "مسار المبيعات",

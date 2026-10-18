@@ -82,7 +82,25 @@
     "pageTitle": "Leads",
     "searchPlaceholder": "Search by company...",
     "allSources": "All sources",
-    "viewLead": "View lead"
+    "viewLead": "View lead",
+    "allStages": "All stages",
+    "followUpsDue": "Follow-ups due",
+    "formerRep": "Former teammate",
+    "columns": {
+      "company": "Company",
+      "industry": "Industry",
+      "stage": "Stage",
+      "source": "Source",
+      "rep": "Assigned rep",
+      "nextFollowUp": "Next follow-up",
+      "value": "MRR potential",
+      "actions": "Actions"
+    },
+    "followUp": {
+      "overdue": "Overdue",
+      "today": "Due today"
+    },
+    "unnamedTeammate": "Teammate #{{id}}"
   },
   "contracts": {
     "loadFailedTitle": "Unable to load contracts",
@@ -387,7 +405,8 @@
     "deleteLead": "Delete lead",
     "add": "Add",
     "adding": "Adding...",
-    "logTouchpointTitle": "Log touchpoint"
+    "logTouchpointTitle": "Log touchpoint",
+    "followUpOn": "Follow up on {{date}}"
   },
   "dashboard": {
     "atRiskEmptyTitle": "No at-risk customers right now",
@@ -449,8 +468,11 @@
     "companySize": "Company size",
     "sourcePlaceholder": "LinkedIn, Referral...",
     "mrrPotentialUsd": "MRR potential ($)",
-    "userId": "User ID",
-    "notesPlaceholder": "Context about this lead..."
+    "notesPlaceholder": "Context about this lead...",
+    "editTitle": "Edit lead",
+    "creating": "Creating…",
+    "submit": "Create lead",
+    "unassigned": "Unassigned"
   },
   "pipeline": {
     "pageTitle": "Sales pipeline",
