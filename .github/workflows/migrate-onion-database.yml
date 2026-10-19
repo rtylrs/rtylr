@@ -3,7 +3,7 @@ name: Migrate Onion database
 # Applies the schema set from a released tag to a deployed database.
 #
 # Why this exists: nothing in the deploy path migrates. deploy.yml hands off to
-# rtylrs/pipelines/deploy-ecs-release.yml, which registers a task definition
+# deploy-ecs-release.yml, which registers a task definition
 # and updates a service and touches no SQL, and Dockerfile.migrate is the
 # self-host bootstrap image. This explicit operator-triggered workflow is the
 # supported way to apply migrations after a release is deployed.
