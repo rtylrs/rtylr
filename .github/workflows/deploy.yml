@@ -1,7 +1,7 @@
 name: Deploy release
 
 # Reusable: builds one immutable release tag and ships the selected targets
-# through rtylrs/pipelines. Pages apps and ECS services share this entrypoint.
+# through deploy-pages-release.yml and deploy-ecs-release.yml. Pages apps and ECS services share this entrypoint.
 # Callers (release.yml on a push to main, redeploy.yml by hand) pass the target
 # lists produced by .github/scripts/plan-deploys.sh.
 on:
@@ -38,7 +38,7 @@ jobs:
     concurrency:
       group: deploy-${{ matrix.app }}
       cancel-in-progress: false
-    uses: rtylrs/pipelines/.github/workflows/deploy-pages-release.yml@main
+    uses: ./.github/workflows/deploy-pages-release.yml
     with:
       source_repository: rtylrs/rtylr
       source_ref: ${{ inputs.release_tag }}
@@ -60,7 +60,7 @@ jobs:
     concurrency:
       group: deploy-${{ matrix.app }}
       cancel-in-progress: false
-    uses: rtylrs/pipelines/.github/workflows/deploy-ecs-release.yml@main
+    uses: ./.github/workflows/deploy-ecs-release.yml
     with:
       source_repository: rtylrs/rtylr
       source_ref: ${{ inputs.release_tag }}

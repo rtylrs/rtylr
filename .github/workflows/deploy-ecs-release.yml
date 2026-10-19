@@ -1,0 +1,254 @@
+# Copied from rtylrs/pipelines@main on 2026-10-19. rtylr is public, and a public
+# repository cannot call reusable workflows from a private one.
+
+name: Deploy a promoted ECS release
+
+# Builds an exact source release, pushes an immutable ECR tag, registers a new
+# ECS task definition with that tag, and waits for the service to stabilize.
+# Nothing in this workflow runs on a source-repository push.
+on:
+  workflow_call:
+    inputs:
+      source_repository:
+        description: Private source repository containing the release
+        required: true
+        type: string
+      source_ref:
+        description: GitHub release tag to checkout
+        required: true
+        type: string
+      version:
+        description: Immutable image tag
+        required: true
+        type: string
+      dockerfile:
+        description: Dockerfile relative to the source repository root
+        required: true
+        type: string
+      image_repository:
+        description: ECR repository path without the registry hostname
+        required: true
+        type: string
+      cluster:
+        description: ECS cluster name
+        required: true
+        type: string
+      service:
+        description: ECS service name
+        required: true
+        type: string
+      container:
+        description: Container name whose image should be updated
+        required: true
+        type: string
+      desired_count:
+        description: Desired ECS service count
+        required: false
+        default: "1"
+        type: string
+      health_url:
+        description: Optional HTTP health endpoint checked after stabilization
+        required: false
+        default: ""
+        type: string
+      ecr_registry:
+        description: ECR registry hostname
+        required: false
+        default: 101533649486.dkr.ecr.eu-west-1.amazonaws.com
+        type: string
+      runs_on:
+        description: Runner label
+        required: false
+        default: ubuntu-24.04
+        type: string
+    secrets:
+      PAT_TOKEN:
+        required: false
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: eu-west-1
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.service }} from ${{ inputs.source_ref }}
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: 45
+    steps:
+      - name: Verify GitHub release exists
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || github.token }}
+          SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+        run: gh api "repos/$SOURCE_REPOSITORY/releases/tags/$SOURCE_REF" --silent
+
+      - name: Checkout promoted source release
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source_repository }}
+          ref: ${{ inputs.source_ref }}
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+
+      - name: Verify generated contract reference
+        run: |
+          if [ -x ./scripts/check-voxie-ref.sh ]; then
+            ./scripts/check-voxie-ref.sh
+          fi
+
+      - name: Resolve source commit
+        id: source
+        run: echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Require AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+            exit 0
+          fi
+          echo 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be passed to the ECS deploy workflow' >&2
+          exit 1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      - name: Build and push immutable image
+        env:
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
+          IMAGE_REPOSITORY: ${{ inputs.image_repository }}
+          VERSION: ${{ inputs.version }}
+          DOCKERFILE: ${{ inputs.dockerfile }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$ECR_REGISTRY/$IMAGE_REPOSITORY:$VERSION"
+          docker buildx build \
+            --cache-from type=gha,scope="$IMAGE_REPOSITORY" \
+            --cache-to type=gha,scope="$IMAGE_REPOSITORY",mode=max \
+            -f "$DOCKERFILE" \
+            --build-arg VERSION="$VERSION" \
+            --build-arg COMMIT="$SOURCE_SHA" \
+            --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -t "$IMAGE_URI" \
+            --push \
+            .
+          echo "Pushed $IMAGE_URI"
+
+      - name: Render task definition with promoted image
+        id: task-definition
+        env:
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
+          IMAGE_REPOSITORY: ${{ inputs.image_repository }}
+          VERSION: ${{ inputs.version }}
+          CLUSTER: ${{ inputs.cluster }}
+          SERVICE: ${{ inputs.service }}
+          CONTAINER: ${{ inputs.container }}
+        run: |
+          set -euo pipefail
+          CURRENT_TASK_DEFINITION="$(aws ecs describe-services \
+            --cluster "$CLUSTER" \
+            --services "$SERVICE" \
+            --region "$AWS_REGION" \
+            --query 'services[0].taskDefinition' \
+            --output text)"
+          if [ -z "$CURRENT_TASK_DEFINITION" ] || [ "$CURRENT_TASK_DEFINITION" = "None" ]; then
+            echo "ECS service $SERVICE was not found in cluster $CLUSTER" >&2
+            exit 1
+          fi
+
+          # Clone the newest active revision, not the one the service happens to
+          # run: infra applies register revisions with new env/secrets, and when
+          # a deploy starts before the service has rolled to them, cloning the
+          # service's revision silently drops those changes (it lost
+          # GEMINI_API_KEY and the CDN variables on 2026-09-20).
+          TASK_DEFINITION_FAMILY="${CURRENT_TASK_DEFINITION##*/}"
+          TASK_DEFINITION_FAMILY="${TASK_DEFINITION_FAMILY%%:*}"
+          TASK_DEFINITION_ARN="$(aws ecs describe-task-definition \
+            --task-definition "$TASK_DEFINITION_FAMILY" \
+            --region "$AWS_REGION" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          aws ecs describe-task-definition \
+            --task-definition "$TASK_DEFINITION_ARN" \
+            --region "$AWS_REGION" \
+            --query taskDefinition > "$RUNNER_TEMP/task-definition.json"
+
+          IMAGE_URI="$ECR_REGISTRY/$IMAGE_REPOSITORY:$VERSION"
+          jq --exit-status \
+            --arg image "$IMAGE_URI" \
+            --arg container "$CONTAINER" \
+            'if any(.containerDefinitions[]; .name == $container)
+             then del(.taskDefinitionArn, .revision, .status, .requiresAttributes,
+                      .compatibilities, .registeredAt, .registeredBy)
+                  | .containerDefinitions |= map(
+                      if .name == $container then .image = $image else . end)
+             else error("container not found in the active task definition")
+             end' \
+            "$RUNNER_TEMP/task-definition.json" > "$RUNNER_TEMP/rendered-task-definition.json"
+
+          NEW_TASK_DEFINITION_ARN="$(aws ecs register-task-definition \
+            --cli-input-json "file://$RUNNER_TEMP/rendered-task-definition.json" \
+            --region "$AWS_REGION" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+          echo "arn=$NEW_TASK_DEFINITION_ARN" >> "$GITHUB_OUTPUT"
+
+      - name: Update ECS service
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          SERVICE: ${{ inputs.service }}
+          DESIRED_COUNT: ${{ inputs.desired_count }}
+          TASK_DEFINITION_ARN: ${{ steps.task-definition.outputs.arn }}
+        run: |
+          set -euo pipefail
+          aws ecs update-service \
+            --cluster "$CLUSTER" \
+            --service "$SERVICE" \
+            --task-definition "$TASK_DEFINITION_ARN" \
+            --desired-count "$DESIRED_COUNT" \
+            --region "$AWS_REGION" >/dev/null
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER" \
+            --services "$SERVICE" \
+            --region "$AWS_REGION"
+
+      - name: Check promoted service health
+        if: inputs.health_url != ''
+        env:
+          HEALTH_URL: ${{ inputs.health_url }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 36); do
+            if curl --fail --silent --show-error --max-time 10 "$HEALTH_URL" >/dev/null; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Health check not ready ($attempt/36); retrying"
+            sleep 5
+          done
+          echo "Health check failed: $HEALTH_URL" >&2
+          exit 1

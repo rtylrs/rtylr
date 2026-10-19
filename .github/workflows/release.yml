@@ -3,7 +3,7 @@ name: Release
 # One release per push to main: a single rtylr-v* tag whose assets contain only
 # the components that changed since the previous release. The same run then
 # deploys every target whose own paths changed (.github/deploy-targets.json),
-# building the new tag through rtylrs/pipelines. redeploy.yml re-ships an
+# building the new tag through deploy.yml. redeploy.yml re-ships an
 # existing tag by hand.
 
 on:
