@@ -102,6 +102,50 @@ message GetExpenseResponse {
   expense: Expense
 }
 
+message CreateExpenseCategoryRequest {
+  /// name labels the category; names are unique per business, ignoring case.
+  name: string @required
+  /// color is the swatch shown next to the category.
+  color: string
+}
+
+message CreateExpenseCategoryResponse {
+  /// category is the stored category.
+  category: ExpenseCategory
+  /// created is false when a category with the same name already existed and
+  /// was returned instead of inserting a duplicate.
+  created: bool
+}
+
+message UpdateExpenseCategoryBody {
+  /// name labels the category; names are unique per business, ignoring case.
+  name: string @required
+  /// color is the swatch shown next to the category.
+  color: string
+}
+
+message UpdateExpenseCategoryRequest {
+  /// id is the unique identifier for the category.
+  id: int64 @gt(0)
+  /// body carries updatable category fields bound from the HTTP payload.
+  body: UpdateExpenseCategoryBody
+}
+
+message UpdateExpenseCategoryResponse {
+  /// category is the stored category after the update.
+  category: ExpenseCategory
+}
+
+message DeleteExpenseCategoryRequest {
+  /// id is the unique identifier for the category.
+  id: int64 @gt(0)
+}
+
+message DeleteExpenseCategoryResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
 message ListExpenseCategoriesRequest {}
 
 message ListExpenseCategoriesResponse {

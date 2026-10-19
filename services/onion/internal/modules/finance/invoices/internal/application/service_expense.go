@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance/invoices/internal/domain"
-	"github.com/voxire/onion/internal/platform/cache/cacher"
-	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -104,17 +102,9 @@ func (s *Service) DeleteExpense(ctx context.Context, businessID, expenseID int64
 // Expense Categories
 // ---------------------------------------------------------------------------
 
+// ListExpenseCategories reads the table directly: the expenses module owns
+// category writes and cannot clear this module's cache scope.
 func (s *Service) ListExpenseCategories(ctx context.Context, businessID int64) ([]domain.ExpenseCategory, error) {
-	key := cacheKeys.Scoped(invoicesScope, businessID, "expense_cats")
-	return cacher.Of[[]domain.ExpenseCategory]().GetOrComputeSingle(ctx, key+"|domain=v2",
-		func(ctx context.Context) ([]domain.ExpenseCategory, error) {
-			return s.listExpenseCategoriesImpl(ctx, businessID)
-		},
-		cacher.WithExpiry(ctx, 10*time.Minute),
-	)
-}
-
-func (s *Service) listExpenseCategoriesImpl(ctx context.Context, businessID int64) ([]domain.ExpenseCategory, error) {
 	return s.repo.ListExpenseCategories(ctx, businessID)
 }
 

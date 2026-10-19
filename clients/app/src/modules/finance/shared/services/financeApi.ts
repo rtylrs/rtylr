@@ -171,12 +171,6 @@ const toExpenseMutationPayload = (data: Partial<Expense>): Partial<ExpenseMutati
   expenseDate: data.expenseDate,
 });
 
-const toExpenseCategoryMutationPayload = (data: Partial<ExpenseCategory>) => ({
-  name: data.name,
-  color: data.color,
-  icon: 'icon' in data ? (data as Partial<ExpenseCategory> & { icon?: string }).icon : undefined,
-});
-
 const toTaxConfigPayload = (data: TaxConfig) => ({
   name: data.name,
   rate: data.rate,
@@ -319,25 +313,6 @@ export const financeApi = {
 
   deleteExpense: (id: string) =>
     generatedResult<unknown>(() => expensesClient.deleteExpense({ id })),
-
-  // Expense Categories
-  getExpenseCategories: () =>
-    compatResult<ExpenseCategory[]>(() => financeCompatibilityClient.listExpenseCategories({})),
-
-  createExpenseCategory: (data: Partial<ExpenseCategory>) =>
-    compatResult<ExpenseCategory>(() =>
-      financeCompatibilityClient.createExpenseCategory(flat(toExpenseCategoryMutationPayload(data)))
-    ),
-
-  updateExpenseCategory: (id: number, data: Partial<ExpenseCategory>) =>
-    compatResult<unknown>(() =>
-      financeCompatibilityClient.updateExpenseCategory({ id: String(id), body: flat(data) })
-    ),
-
-  deleteExpenseCategory: (id: number) =>
-    compatResult<unknown>(() =>
-      financeCompatibilityClient.deleteExpenseCategory({ id: String(id) })
-    ),
 
   // P&L
   getPL: (period: string) =>

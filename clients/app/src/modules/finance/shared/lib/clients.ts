@@ -88,12 +88,6 @@ export const financeCompatibilityClient = {
   updateExpense: (...args: Parameters<typeof expensesClient.updateExpense>) =>
     expensesClient.updateExpense(...args),
 
-  // Expense categories: the read lives on expenses, the detail rows on report.
-  listExpenseCategories: (...args: Parameters<typeof reportClient.listExpenseCategoryDetails>) =>
-    reportClient.listExpenseCategoryDetails(...args),
-  createExpenseCategory: (...args: Parameters<typeof reportClient.createExpenseCategoryDetail>) =>
-    reportClient.createExpenseCategoryDetail(...args),
-
   // Invoices
   listInvoices: (...args: Parameters<typeof invoicesClient.listInvoices>) =>
     invoicesClient.listInvoices(...args),
@@ -165,19 +159,12 @@ export const financeCompatibilityClient = {
   getExpense: (...args: Parameters<typeof expensesClient.getExpense>) =>
     expensesClient.getExpense(...args),
 
-  // ── No contract declares these six ────────────────────────────────────────
+  // ── No contract declares these three ──────────────────────────────────────
   //
   // c6e4ce609 invented them along with the umbrella, and unlike the rest they
-  // have no service to dispatch to. They go over REST at the paths onion
-  // actually registers as literal handlers, which is verifiable:
-  // /finance/expense-categories, /finance/quotes/{id} and /finance/bank-feeds
-  // are all in onion's route table.
-
-  updateExpenseCategory: (req: { id: string; body?: unknown }) =>
-    unwrap(rest.put<unknown>('/finance/expense-categories', { id: req.id, ...(req.body ?? {}) })),
-
-  deleteExpenseCategory: (req: { id: string }) =>
-    unwrap(rest.delete<unknown>('/finance/expense-categories', { params: { id: req.id } })),
+  // have no service to dispatch to, so they go over REST. Expense category
+  // update/delete used to sit here too, at a /finance/expense-categories path
+  // onion never registered; they now live on finance.expenses.v1.
 
   updateQuote: (req: { id: string; body?: unknown }) =>
     unwrap(rest.put<unknown>(`/finance/quotes/${req.id}`, req.body ?? {})),

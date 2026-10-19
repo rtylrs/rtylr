@@ -5,7 +5,9 @@ import (
 	"errors"
 	"math"
 	"net/http"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/voxire/onion/internal/modules/finance/expenses/internal/application"
 	"github.com/voxire/onion/internal/modules/finance/expenses/internal/domain"
@@ -27,6 +29,13 @@ const (
 type ExpensesAPI struct {
 	Service *application.Service
 }
+
+// Registration only checks the interface at runtime, so a missing handler
+// would otherwise surface as a startup panic.
+var _ financeexpensesv1.ExpensesServiceServer = (*ExpensesAPI)(nil)
+
+// maxCategoryNameLength matches finance_expense_categories.name varchar(255).
+const maxCategoryNameLength = 255
 
 func NewExpensesAPI(service *application.Service) *ExpensesAPI {
 	return &ExpensesAPI{Service: service}
@@ -111,6 +120,9 @@ func (a *ExpensesAPI) CreateExpense(ctx context.Context, req *financeexpensesv1.
 		ExpenseDate:     expenseDate,
 	})
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrCategoryNotFound) {
+			return nil, expenseStatusError(http.StatusBadRequest, "Expense category not found")
+		}
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to create expense")
 	}
 	return &financeexpensesv1.CreateExpenseResponse{ExpenseId: id, Message: "Expense created successfully"}, nil
@@ -160,6 +172,8 @@ func (a *ExpensesAPI) UpdateExpense(ctx context.Context, req *financeexpensesv1.
 			return nil, expenseStatusError(http.StatusNotFound, "Expense not found")
 		case errors.Is(updateErr, domain.ErrApprovedExpenseImmutable):
 			return nil, expenseStatusError(http.StatusConflict, "Approved expenses cannot be edited")
+		case errors.Is(updateErr, domain.ErrCategoryNotFound):
+			return nil, expenseStatusError(http.StatusBadRequest, "Expense category not found")
 		}
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to update expense")
 	}
@@ -245,15 +259,109 @@ func (a *ExpensesAPI) ListExpenseCategories(ctx context.Context, _ *financeexpen
 	}
 	payloads := make([]*financeexpensesv1.ExpenseCategory, 0, len(categories))
 	for _, category := range categories {
-		payloads = append(payloads, &financeexpensesv1.ExpenseCategory{
-			Id:        category.ID,
-			OwnerId:   category.OwnerID,
-			Name:      category.Name,
-			Color:     category.Color,
-			CreatedAt: category.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		})
+		payloads = append(payloads, newCategoryPayload(category))
 	}
 	return &financeexpensesv1.ListExpenseCategoriesResponse{Categories: payloads}, nil
+}
+
+func (a *ExpensesAPI) CreateExpenseCategory(ctx context.Context, req *financeexpensesv1.CreateExpenseCategoryRequest) (*financeexpensesv1.CreateExpenseCategoryResponse, error) {
+	user, permissionErr := requireExpenseUserPermission(ctx, "finance:expenses:create")
+	if permissionErr != nil {
+		return nil, permissionErr
+	}
+	businessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	name, nameErr := categoryName(req.GetName())
+	if nameErr != nil {
+		return nil, nameErr
+	}
+	category, created, createErr := a.Service.CreateExpenseCategory(ctx, domain.ExpenseCategoryInput{
+		OwnerID:    user.UserID,
+		BusinessID: businessID,
+		Name:       name,
+		Color:      strings.TrimSpace(req.GetColor()),
+	})
+	if createErr != nil {
+		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to create expense category")
+	}
+	return &financeexpensesv1.CreateExpenseCategoryResponse{Category: newCategoryPayload(category), Created: created}, nil
+}
+
+func (a *ExpensesAPI) UpdateExpenseCategory(ctx context.Context, req *financeexpensesv1.UpdateExpenseCategoryRequest) (*financeexpensesv1.UpdateExpenseCategoryResponse, error) {
+	user, permissionErr := requireExpenseUserPermission(ctx, "finance:expenses:create")
+	if permissionErr != nil {
+		return nil, permissionErr
+	}
+	businessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	body := req.GetBody()
+	if body == nil {
+		return nil, expenseStatusError(http.StatusBadRequest, "Category body is required")
+	}
+	name, nameErr := categoryName(body.GetName())
+	if nameErr != nil {
+		return nil, nameErr
+	}
+	category, updateErr := a.Service.UpdateExpenseCategory(ctx, businessID, req.GetId(), domain.ExpenseCategoryInput{
+		BusinessID: businessID,
+		Name:       name,
+		Color:      strings.TrimSpace(body.GetColor()),
+	})
+	if updateErr != nil {
+		switch {
+		case errors.Is(updateErr, domain.ErrCategoryNotFound):
+			return nil, expenseStatusError(http.StatusNotFound, "Expense category not found")
+		case errors.Is(updateErr, domain.ErrCategoryNameTaken):
+			return nil, expenseStatusError(http.StatusConflict, "Another category already uses this name")
+		}
+		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to update expense category")
+	}
+	return &financeexpensesv1.UpdateExpenseCategoryResponse{Category: newCategoryPayload(category)}, nil
+}
+
+func (a *ExpensesAPI) DeleteExpenseCategory(ctx context.Context, req *financeexpensesv1.DeleteExpenseCategoryRequest) (*financeexpensesv1.DeleteExpenseCategoryResponse, error) {
+	if err := requireExpensePermission(ctx, "finance:expenses:create"); err != nil {
+		return nil, err
+	}
+	businessID, err := expenseBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if deleteErr := a.Service.DeleteExpenseCategory(ctx, businessID, req.GetId()); deleteErr != nil {
+		switch {
+		case errors.Is(deleteErr, domain.ErrCategoryNotFound):
+			return nil, expenseStatusError(http.StatusNotFound, "Expense category not found")
+		case errors.Is(deleteErr, domain.ErrCategoryInUse):
+			return nil, expenseStatusError(http.StatusConflict, "This category still has expenses and cannot be deleted")
+		}
+		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to delete expense category")
+	}
+	return &financeexpensesv1.DeleteExpenseCategoryResponse{Message: "Expense category deleted successfully"}, nil
+}
+
+func categoryName(raw string) (string, error) {
+	name := strings.TrimSpace(raw)
+	if name == "" {
+		return "", expenseStatusError(http.StatusBadRequest, "Category name is required")
+	}
+	if utf8.RuneCountInString(name) > maxCategoryNameLength {
+		return "", expenseStatusError(http.StatusBadRequest, "Category name is too long")
+	}
+	return name, nil
+}
+
+func newCategoryPayload(category domain.ExpenseCategory) *financeexpensesv1.ExpenseCategory {
+	return &financeexpensesv1.ExpenseCategory{
+		Id:        category.ID,
+		OwnerId:   category.OwnerID,
+		Name:      category.Name,
+		Color:     category.Color,
+		CreatedAt: category.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}
 }
 
 func newExpensePayload(expense domain.Expense) *financeexpensesv1.Expense {
