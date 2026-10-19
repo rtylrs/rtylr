@@ -618,3 +618,41 @@ func TestGetOverdueInvoices_FutureCutoffReturnsNone(t *testing.T) {
 		t.Errorf("expected 0 overdue before year 2000, got %d", len(overdue))
 	}
 }
+
+func TestSumExpensesAndTaxOwedCountApprovedOnly(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	businessID := int64(994102)
+
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_expenses WHERE business_id = ?", businessID)
+	})
+	for _, row := range []struct {
+		status string
+		amount float64
+	}{{"approved", 100}, {"pending", 40}, {"rejected", 7}} {
+		if _, err := db.ExecContext(ctx, `
+			INSERT INTO finance_expenses
+				(owner_id, business_id, description, amount, expense_date, is_tax_deductible, tax_amount, status)
+			VALUES (?, ?, 'status scoped', ?, '2026-03-10', TRUE, ?, ?)`,
+			businessID, businessID, row.amount, row.amount/10, row.status); err != nil {
+			t.Fatalf("insert %s expense: %v", row.status, err)
+		}
+	}
+
+	total, err := repo.SumExpenses(ctx, businessID, "2026-03-01", "2026-03-31")
+	if err != nil {
+		t.Fatalf("SumExpenses: %v", err)
+	}
+	if total != 100 {
+		t.Fatalf("expenses total = %v, want 100 (approved only)", total)
+	}
+	owed, err := repo.SumTaxOwed(ctx, businessID, "2026-03-01", "2026-03-31")
+	if err != nil {
+		t.Fatalf("SumTaxOwed: %v", err)
+	}
+	if owed != 10 {
+		t.Fatalf("tax owed = %v, want 10 (approved only)", owed)
+	}
+}

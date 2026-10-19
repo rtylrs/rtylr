@@ -478,3 +478,43 @@ func TestCountByCategory_UncategorisedBucket(t *testing.T) {
 		t.Errorf("expected at least 1 uncategorised expense, got %d", counts["uncategorised"])
 	}
 }
+
+func TestListPaginated_SameDateRowsNeverRepeatOrSkipAcrossPages(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	businessID := int64(994103)
+
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM finance_expenses WHERE business_id = ?", businessID)
+	})
+	const total = 7
+	for i := 0; i < total; i++ {
+		if _, err := repo.Create(ctx, domain.ExpenseInput{
+			OwnerID:     businessID,
+			BusinessID:  businessID,
+			Amount:      float64(10 + i),
+			Description: "same day",
+			ExpenseDate: time.Date(2026, 3, 10, 0, 0, 0, 0, time.UTC),
+		}); err != nil {
+			t.Fatalf("Create %d: %v", i, err)
+		}
+	}
+
+	seen := map[int64]bool{}
+	for offset := int32(0); offset < total; offset += 2 {
+		page, err := repo.ListPaginated(ctx, businessID, 2, offset)
+		if err != nil {
+			t.Fatalf("ListPaginated offset %d: %v", offset, err)
+		}
+		for _, e := range page {
+			if seen[e.ID] {
+				t.Fatalf("expense %d returned on two pages", e.ID)
+			}
+			seen[e.ID] = true
+		}
+	}
+	if len(seen) != total {
+		t.Fatalf("paged through %d expenses, want %d", len(seen), total)
+	}
+}

@@ -168,7 +168,7 @@ SELECT COALESCE(SUM(total),0) FROM finance_invoices WHERE business_id = ? AND st
 
 -- cross-schema read from expenses — include expense totals in invoice reporting.
 -- name: SumExpenses :one
-SELECT COALESCE(SUM(amount),0) FROM finance_expenses WHERE business_id = ? AND expense_date BETWEEN ? AND ?;
+SELECT COALESCE(SUM(amount),0) FROM finance_expenses WHERE business_id = ? AND status = 'approved' AND expense_date BETWEEN ? AND ?;
 
 -- name: SumTotalReceivable :one
 SELECT COALESCE(SUM(amount_due),0) FROM finance_invoices WHERE business_id = ? AND status IN ('sent','viewed','partial','overdue');
@@ -189,7 +189,7 @@ SELECT COALESCE(SUM(tax_amount),0) FROM finance_invoices WHERE business_id = ? A
 
 -- cross-schema read from expenses — calculate deductible expense tax in reporting.
 -- name: SumTaxOwed :one
-SELECT COALESCE(SUM(tax_amount),0) FROM finance_expenses WHERE business_id = ? AND is_tax_deductible = TRUE AND expense_date BETWEEN ? AND ?;
+SELECT COALESCE(SUM(tax_amount),0) FROM finance_expenses WHERE business_id = ? AND status = 'approved' AND is_tax_deductible = TRUE AND expense_date BETWEEN ? AND ?;
 
 -- name: ListInvoicesByCustomer :many
 -- Customer-filtered page backing crm.sales-style per-customer views; the

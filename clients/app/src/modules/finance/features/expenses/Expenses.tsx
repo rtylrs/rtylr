@@ -155,7 +155,10 @@ const Expenses: React.FC = () => {
   // year's rent and payroll under the label "Monthly Total" in all three
   // locales, disagreeing with the P&L screen that does scope by month.
   const monthlyTotal = allExpenses.reduce(
-    (sum, e) => (e.expenseDate.slice(0, 7) === currentMonthIso() ? sum + e.amount : sum),
+    (sum, e) =>
+      e.status !== 'rejected' && e.expenseDate.slice(0, 7) === currentMonthIso()
+        ? sum + e.amount
+        : sum,
     0
   );
 
