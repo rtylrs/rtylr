@@ -22,6 +22,14 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			response, err := NewExpensesAPI(application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))).CreateExpense(ctx, &financeexpensesv1.CreateExpenseRequest{Amount: 10, Currency: "USD", Description: "Authorization Probe", ExpenseDate: "2026-08-27"})
 			return response, err
 		}},
+		{Name: "finance expense categories create", App: authorization.AppFinance, Permission: "finance:expenses:create", Call: func(ctx context.Context) (any, error) {
+			response, err := NewExpensesAPI(application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))).CreateExpenseCategory(ctx, &financeexpensesv1.CreateExpenseCategoryRequest{Name: "Authorization Probe"})
+			return response, err
+		}},
+		{Name: "finance expense categories delete", App: authorization.AppFinance, Permission: "finance:expenses:create", Call: func(ctx context.Context) (any, error) {
+			response, err := NewExpensesAPI(application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))).DeleteExpenseCategory(ctx, &financeexpensesv1.DeleteExpenseCategoryRequest{Id: 1})
+			return response, err
+		}},
 		{Name: "finance expenses approve", App: authorization.AppFinance, Permission: "finance:expenses:approve", Call: func(ctx context.Context) (any, error) {
 			response, err := NewExpensesAPI(application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))).UpdateExpenseStatus(ctx, &financeexpensesv1.UpdateExpenseStatusRequest{Id: 1, Body: &financeexpensesv1.UpdateExpenseStatusBody{Status: "approved"}})
 			return response, err

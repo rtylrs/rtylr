@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/finance/expenses/internal/domain"
@@ -52,6 +53,59 @@ func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 
 func (m *mockRepo) ListCategories(_ context.Context, _ int64) ([]domain.ExpenseCategory, error) {
 	return m.catResult, m.catErr
+}
+
+func (m *mockRepo) GetCategoryByID(_ context.Context, _, id int64) (domain.ExpenseCategory, error) {
+	for _, c := range m.catResult {
+		if c.ID == id {
+			return c, nil
+		}
+	}
+	return domain.ExpenseCategory{}, domain.ErrCategoryNotFound
+}
+
+func (m *mockRepo) FindCategoryByName(_ context.Context, _ int64, name string) (domain.ExpenseCategory, error) {
+	for _, c := range m.catResult {
+		if strings.EqualFold(c.Name, name) {
+			return c, nil
+		}
+	}
+	return domain.ExpenseCategory{}, domain.ErrCategoryNotFound
+}
+
+func (m *mockRepo) CreateCategory(_ context.Context, input domain.ExpenseCategoryInput) (int64, error) {
+	id := int64(len(m.catResult) + 1)
+	m.catResult = append(m.catResult, domain.ExpenseCategory{ID: id, BusinessID: input.BusinessID, Name: input.Name, Color: input.Color})
+	return id, nil
+}
+
+func (m *mockRepo) UpdateCategory(_ context.Context, _, id int64, input domain.ExpenseCategoryInput) error {
+	for i := range m.catResult {
+		if m.catResult[i].ID == id {
+			m.catResult[i].Name, m.catResult[i].Color = input.Name, input.Color
+		}
+	}
+	return nil
+}
+
+func (m *mockRepo) CountExpensesInCategory(_ context.Context, _, id int64) (int64, error) {
+	var n int64
+	for _, e := range m.listResult {
+		if e.CategoryID != nil && *e.CategoryID == id {
+			n++
+		}
+	}
+	return n, nil
+}
+
+func (m *mockRepo) DeleteCategory(_ context.Context, _, id int64) error {
+	for i := range m.catResult {
+		if m.catResult[i].ID == id {
+			m.catResult = append(m.catResult[:i], m.catResult[i+1:]...)
+			return nil
+		}
+	}
+	return domain.ErrCategoryNotFound
 }
 
 func TestList_Delegates(t *testing.T) {

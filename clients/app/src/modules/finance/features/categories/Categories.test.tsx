@@ -5,7 +5,7 @@ import Categories from './Categories';
 import { initTestI18n } from '../../shared/testing/i18n';
 
 /**
- * finance.report.v1.CreateExpenseCategoryDetailRequest has no budget column and
+ * finance.expenses.v1.CreateExpenseCategoryRequest has no budget column and
  * the category list returns no budget/spent, so the UI must not collect or show
  * a budget it cannot persist or read back.
  */

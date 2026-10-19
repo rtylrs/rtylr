@@ -207,16 +207,87 @@ func (r *Repository) ListCategories(ctx context.Context, businessID int64) ([]do
 
 	cats := make([]domain.ExpenseCategory, 0, len(rows))
 	for _, row := range rows {
-		cats = append(cats, domain.ExpenseCategory{
-			ID:         row.ID,
-			OwnerID:    row.OwnerID,
-			BusinessID: row.BusinessID,
-			Name:       row.Name,
-			Color:      nullStr(row.Color),
-			CreatedAt:  nullTime(row.CreatedAt),
-		})
+		cats = append(cats, categoryFromRow(row.ID, row.OwnerID, row.BusinessID, row.Name, row.Color, row.CreatedAt))
 	}
 	return cats, nil
+}
+
+// GetCategoryByID returns the business's category with the given id, or
+// domain.ErrCategoryNotFound.
+func (r *Repository) GetCategoryByID(ctx context.Context, businessID, id int64) (domain.ExpenseCategory, error) {
+	row, err := r.queries.GetExpenseCategoryByID(ctx, sqlc.GetExpenseCategoryByIDParams{ID: id, BusinessID: businessID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ExpenseCategory{}, domain.ErrCategoryNotFound
+		}
+		return domain.ExpenseCategory{}, err
+	}
+	return categoryFromRow(row.ID, row.OwnerID, row.BusinessID, row.Name, row.Color, row.CreatedAt), nil
+}
+
+// FindCategoryByName returns the business's category whose name matches,
+// ignoring case, or domain.ErrCategoryNotFound.
+func (r *Repository) FindCategoryByName(ctx context.Context, businessID int64, name string) (domain.ExpenseCategory, error) {
+	row, err := r.queries.FindExpenseCategoryByName(ctx, sqlc.FindExpenseCategoryByNameParams{BusinessID: businessID, Name: name})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ExpenseCategory{}, domain.ErrCategoryNotFound
+		}
+		return domain.ExpenseCategory{}, err
+	}
+	return categoryFromRow(row.ID, row.OwnerID, row.BusinessID, row.Name, row.Color, row.CreatedAt), nil
+}
+
+func (r *Repository) CreateCategory(ctx context.Context, input domain.ExpenseCategoryInput) (int64, error) {
+	result, err := r.queries.CreateExpenseCategory(ctx, sqlc.CreateExpenseCategoryParams{
+		OwnerID:    input.OwnerID,
+		BusinessID: input.BusinessID,
+		Name:       input.Name,
+		Color:      nullableString(input.Color),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to create expense category", logger.Error(err))
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+func (r *Repository) UpdateCategory(ctx context.Context, businessID, id int64, input domain.ExpenseCategoryInput) error {
+	err := r.queries.UpdateExpenseCategory(ctx, sqlc.UpdateExpenseCategoryParams{
+		Name:       input.Name,
+		Color:      nullableString(input.Color),
+		ID:         id,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update expense category", logger.Error(err))
+	}
+	return err
+}
+
+// CountExpensesInCategory counts every expense filed under the category,
+// whatever its status.
+func (r *Repository) CountExpensesInCategory(ctx context.Context, businessID, id int64) (int64, error) {
+	return r.queries.CountExpensesInCategory(ctx, sqlc.CountExpensesInCategoryParams{
+		BusinessID: businessID,
+		CategoryID: sql.NullInt64{Int64: id, Valid: true},
+	})
+}
+
+func (r *Repository) DeleteCategory(ctx context.Context, businessID, id int64) error {
+	result, err := r.queries.DeleteExpenseCategory(ctx, sqlc.DeleteExpenseCategoryParams{ID: id, BusinessID: businessID})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to delete expense category", logger.Error(err))
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrCategoryNotFound
+	}
+	return nil
 }
 
 // SumByOwner returns the total expense amount for the given business, regardless
@@ -295,6 +366,17 @@ func expenseFromRow(row sqlc.FinanceExpense) domain.Expense {
 		e.CategoryID = &row.CategoryID.Int64
 	}
 	return e
+}
+
+func categoryFromRow(id, ownerID, businessID int64, name string, color sql.NullString, createdAt sql.NullTime) domain.ExpenseCategory {
+	return domain.ExpenseCategory{
+		ID:         id,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		Name:       name,
+		Color:      nullStr(color),
+		CreatedAt:  nullTime(createdAt),
+	}
 }
 
 func expenseFromGetRow(row sqlc.FinanceExpense) domain.Expense {

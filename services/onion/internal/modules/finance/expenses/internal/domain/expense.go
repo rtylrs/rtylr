@@ -8,6 +8,8 @@ import (
 var (
 	ErrExpenseNotFound          = errors.New("expense not found")
 	ErrCategoryNotFound         = errors.New("expense category not found")
+	ErrCategoryNameTaken        = errors.New("expense category name already in use")
+	ErrCategoryInUse            = errors.New("expense category still has expenses")
 	ErrInvalidStatusTransition  = errors.New("invalid expense status transition")
 	ErrApprovedExpenseImmutable = errors.New("approved expense is immutable")
 )
@@ -52,6 +54,14 @@ type ExpenseCategory struct {
 	Name       string
 	Color      string
 	CreatedAt  time.Time
+}
+
+// ExpenseCategoryInput carries the writable fields of a category.
+type ExpenseCategoryInput struct {
+	OwnerID    int64
+	BusinessID int64
+	Name       string
+	Color      string
 }
 
 type ExpenseInput struct {

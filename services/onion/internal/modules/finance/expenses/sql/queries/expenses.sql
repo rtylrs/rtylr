@@ -32,7 +32,38 @@ WHERE id = sqlc.arg(id)
 SELECT id, owner_id, business_id, name, color, created_at
 FROM finance_expense_categories
 WHERE business_id = ?
-ORDER BY name;
+ORDER BY name, id;
+
+-- name: GetExpenseCategoryByID :one
+SELECT id, owner_id, business_id, name, color, created_at
+FROM finance_expense_categories
+WHERE id = ? AND business_id = ?;
+
+-- The column collation is case-insensitive, so this matches "travel" to
+-- "Travel". The oldest row wins when earlier duplicates already exist.
+-- name: FindExpenseCategoryByName :one
+SELECT id, owner_id, business_id, name, color, created_at
+FROM finance_expense_categories
+WHERE business_id = ? AND name = ?
+ORDER BY id
+LIMIT 1;
+
+-- name: CreateExpenseCategory :execresult
+INSERT INTO finance_expense_categories (owner_id, business_id, name, color, icon)
+VALUES (?, ?, ?, ?, 'tag');
+
+-- name: UpdateExpenseCategory :exec
+UPDATE finance_expense_categories
+SET name = ?, color = ?
+WHERE id = ? AND business_id = ?;
+
+-- name: CountExpensesInCategory :one
+SELECT COUNT(*) FROM finance_expenses
+WHERE business_id = ? AND category_id = ?;
+
+-- name: DeleteExpenseCategory :execresult
+DELETE FROM finance_expense_categories
+WHERE id = ? AND business_id = ?;
 
 -- name: SumExpensesByBusiness :one
 SELECT COALESCE(SUM(CAST(amount AS DECIMAL(14,2))), 0) AS total
