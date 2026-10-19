@@ -111,6 +111,27 @@ describe('Expenses aggregates and load states', () => {
     expect(screen.getByText('$30')).toBeInTheDocument();
   });
 
+  it('leaves rejected expenses out of the monthly total', () => {
+    useExpensesMock.mockReturnValue({
+      ...resolvedQuery,
+      data: {
+        expenses: [
+          { ...allExpenses[0], id: '101', amount: 40, status: 'approved' },
+          { ...allExpenses[0], id: '102', amount: 15, status: 'pending' },
+          { ...allExpenses[0], id: '103', amount: 900, status: 'rejected' },
+        ],
+        hasMore: false,
+        page: 1,
+        pageSize: 25,
+      },
+    });
+
+    render(<Expenses />);
+
+    expect(screen.getByText('$55')).toBeInTheDocument();
+    expect(screen.queryByText('$955')).not.toBeInTheDocument();
+  });
+
   it('shows a retryable failure instead of asserting a zero monthly total', () => {
     useExpensesMock.mockReturnValue({
       isLoading: false,

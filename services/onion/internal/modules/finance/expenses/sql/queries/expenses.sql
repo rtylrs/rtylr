@@ -2,7 +2,7 @@
 SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor, payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
 FROM finance_expenses
 WHERE business_id = ?
-ORDER BY expense_date DESC
+ORDER BY expense_date DESC, id DESC
 LIMIT 500;
 
 -- name: GetExpenseByID :one
@@ -50,5 +50,5 @@ GROUP BY category_id;
 SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor, payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
 FROM finance_expenses
 WHERE business_id = ?
-ORDER BY expense_date DESC
+ORDER BY expense_date DESC, id DESC
 LIMIT ? OFFSET ?;

@@ -6,6 +6,7 @@ SELECT COALESCE(c.id, 0) AS cat_id,
 FROM finance_expenses e
 LEFT JOIN finance_expense_categories c ON c.id = e.category_id AND c.business_id = e.business_id
 WHERE e.business_id = ?
+  AND e.status = 'approved'
   AND e.expense_date BETWEEN ? AND ?
 GROUP BY c.id, c.name
 ORDER BY SUM(e.amount) DESC;
@@ -50,5 +51,6 @@ SELECT DATE(expense_date) AS day,
        COALESCE(SUM(amount), 0) AS amount
 FROM finance_expenses
 WHERE business_id = ?
+  AND status = 'approved'
   AND expense_date BETWEEN ? AND ?
 GROUP BY day;

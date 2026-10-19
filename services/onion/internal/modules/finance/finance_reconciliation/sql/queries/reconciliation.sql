@@ -100,6 +100,7 @@ LIMIT 201;
 SELECT e.id, e.description, COALESCE(e.vendor, '') AS vendor, e.amount, e.currency, e.expense_date
 FROM finance_expenses e
 WHERE e.business_id = ?
+  AND e.status <> 'rejected'
   AND NOT EXISTS (
       SELECT 1 FROM finance_reconciliation_matches m FORCE INDEX (idx_finance_reconciliation_business_target)
       WHERE m.business_id = e.business_id
