@@ -2,11 +2,12 @@ name: Migrate Onion database
 
 # Applies the schema set from a released tag to a deployed database.
 #
-# Why this exists: nothing in the deploy path migrates. deploy.yml hands off to
-# deploy-ecs-release.yml, which registers a task definition
-# and updates a service and touches no SQL, and Dockerfile.migrate is the
-# self-host bootstrap image. This explicit operator-triggered workflow is the
-# supported way to apply migrations after a release is deployed.
+# deploy.yml calls this before it ships the API and the worker, so a release's
+# migrations land before the code that reads them. Until it did, this ran only
+# by hand: the last manual run was 6.0.7, and for ten days every release that
+# added a column answered with a 500 wherever it read it (contracts, bank
+# accounts) while its migration sat unapplied. Run it by hand to migrate a
+# release again or to rehearse one with dry_run.
 #
 # A GitHub runner cannot reach the database directly: it lives on a private VPC
 # address with 3306 closed to the world. This works the same way the ECS deploy
@@ -15,8 +16,8 @@ name: Migrate Onion database
 # API service's own task definition, so nothing here needs to know a secret and
 # no credential is ever passed through the runner.
 #
-# dry_run defaults to true. The first run of this workflow cannot migrate
-# anything by accident; it renders the plan and stops.
+# Run by hand, dry_run defaults to true, so a manual run cannot migrate
+# anything by accident: it renders the plan and stops.
 
 on:
   workflow_dispatch:
@@ -45,6 +46,35 @@ on:
         required: false
         default: true
         type: boolean
+  workflow_call:
+    inputs:
+      release_tag:
+        description: Release tag whose schemas should be applied
+        required: true
+        type: string
+      cluster:
+        required: false
+        default: voxire-prod
+        type: string
+      service:
+        required: false
+        default: api
+        type: string
+      container:
+        required: false
+        default: api
+        type: string
+      dry_run:
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      PAT_TOKEN:
+        required: false
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
 
 concurrency:
   group: migrate-${{ inputs.cluster }}
@@ -279,11 +309,15 @@ jobs:
           if [ -n "$GROUP" ] && [ -n "$PREFIX" ]; then
             TASK_ID="${TASK_ARN##*/}"
             echo "--- migration log ---"
-            aws logs get-log-events \
+            # Say why the log could not be read; "not readable" alone left every
+            # run without its output and nothing to fix.
+            if ! aws logs get-log-events \
               --log-group-name "$GROUP" \
               --log-stream-name "$PREFIX/migrate/$TASK_ID" \
               --region "$AWS_REGION" \
-              --query 'events[].message' --output text 2>/dev/null || echo "(log stream not readable)"
+              --query 'events[].message' --output text 2>logs-error.txt; then
+              echo "(log stream $GROUP:$PREFIX/migrate/$TASK_ID not readable: $(head -c 400 logs-error.txt))"
+            fi
             echo "--- end ---"
           fi
 

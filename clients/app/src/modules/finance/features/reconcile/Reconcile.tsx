@@ -11,6 +11,7 @@ import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { useBankAccounts, useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { Link } from '@tanstack/react-router';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import LoadError from '../../shared/components/LoadError';
 import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 import { financeApi } from '../../shared/services/financeApi';
@@ -111,24 +112,19 @@ const Reconcile: React.FC = () => {
           <SkeletonRow />
         </div>
       ) : failed ? (
-        <div
-          role="alert"
-          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
-        >
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text)' }}>
-            {t('financeReconcile.loadFailed')}
-          </p>
-          <button
-            type="button"
-            style={{ ...ghostBtn, alignSelf: 'flex-start' }}
-            onClick={() => {
-              void accountsQuery.refetch();
-              void transactionsQuery.refetch();
-            }}
-          >
-            {t('financeCommon.refresh')}
-          </button>
-        </div>
+        <LoadError
+          title={
+            accountsQuery.isError
+              ? t('financeBankAccounts.loadFailedTitle')
+              : t('financeReconcile.loadFailedTitle')
+          }
+          message={t('financeReconcile.loadFailed')}
+          retrying={accountsQuery.isFetching || transactionsQuery.isFetching}
+          onRetry={() => {
+            void accountsQuery.refetch();
+            void transactionsQuery.refetch();
+          }}
+        />
       ) : noAccounts ? (
         <div
           style={{ ...cardStyle, padding: 24, display: 'flex', flexDirection: 'column', gap: 10 }}

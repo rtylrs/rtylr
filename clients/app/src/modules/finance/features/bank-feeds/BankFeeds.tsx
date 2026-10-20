@@ -8,6 +8,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import Modal from '../../shared/components/Modal';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import LoadError from '../../shared/components/LoadError';
 import {
   useBankAccounts,
   useBankTransactions,
@@ -42,6 +43,7 @@ const BankFeeds: React.FC = () => {
     data: accounts = [],
     isLoading,
     isError: accountsError,
+    isFetching: accountsFetching,
     refetch: refetchAccounts,
   } = accountsQuery;
   const createAccount = useCreateBankAccount();
@@ -127,12 +129,12 @@ const BankFeeds: React.FC = () => {
           <SkeletonRow />
         </div>
       ) : accountsError ? (
-        <div role="alert" style={{ ...cardStyle, padding: 20, color: 'var(--hub-text-muted)' }}>
-          <p style={{ margin: '0 0 12px' }}>{t('financeBankAccounts.loadFailed')}</p>
-          <button type="button" style={ghostBtn} onClick={() => void refetchAccounts()}>
-            {t('financeCommon.refresh')}
-          </button>
-        </div>
+        <LoadError
+          title={t('financeBankAccounts.loadFailedTitle')}
+          message={t('financeBankAccounts.loadFailed')}
+          retrying={accountsFetching}
+          onRetry={() => void refetchAccounts()}
+        />
       ) : accounts.length === 0 ? (
         <div
           style={{ ...cardStyle, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}

@@ -8,6 +8,7 @@
   "awaitingCount_other": "{{count}} transactions awaiting a match",
   "matching": "Matching…",
   "autoMatchAll": "Auto-match all",
+  "loadFailedTitle": "Bank transactions didn't load",
   "loadFailed": "Bank transactions could not be loaded, so nothing here can be matched yet.",
   "noAccountsTitle": "No bank account connected",
   "noAccountsDescription": "Reconciliation matches bank transactions to your invoices. Connect a bank account first, then its transactions show up here.",
