@@ -36,6 +36,14 @@ export {
 } from "./components/Dialog";
 
 export {
+  Popover,
+  PopoverTrigger,
+  PopoverAnchor,
+  PopoverClose,
+  PopoverContent,
+} from "./components/Popover";
+
+export {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,

@@ -12,20 +12,15 @@ func (a *API) ListLeads(ctx context.Context, req *crmsalesv1.ListLeadsRequest) (
 	if err != nil {
 		return nil, err
 	}
-	filter := domain.LeadFilter{
-		AssignedTo:    req.AssignedTo,
-		Source:        req.Source,
-		ImportBatchID: positivePtr(req.ImportId),
-		FollowUp:      domain.FollowUpWindow(req.FollowUp),
-		Search:        req.Search,
-		Sort:          domain.LeadSort(req.Sort),
-		Cursor:        req.Cursor,
-		Limit:         int(req.Limit),
+	filter, err := listQuery(req).filter()
+	if err != nil {
+		return nil, err
 	}
+	filter.Sort, filter.Cursor, filter.Limit = domain.LeadSort(req.Sort), req.Cursor, int(req.Limit)
 	for _, status := range splitList(req.Statuses) {
 		filter.Statuses = append(filter.Statuses, domain.LeadStatus(status))
 	}
-	page, err := a.Service.ListLeads(ctx, c.businessID, filter, a.callerDay(req.Today, 0))
+	page, err := a.Service.ListLeads(ctx, c.businessID, filter, a.callerDay(req.Today, req.UtcOffsetMinutes))
 	if err != nil {
 		return nil, fail(ctx, "list leads", err)
 	}
@@ -41,7 +36,11 @@ func (a *API) GetLeadStats(ctx context.Context, req *crmsalesv1.GetLeadStatsRequ
 	if err != nil {
 		return nil, err
 	}
-	stats, err := a.Service.LeadStats(ctx, c.businessID, req.AssignedTo, a.callerDay(req.Today, req.UtcOffsetMinutes))
+	filter, err := leadQuery(*req).filter()
+	if err != nil {
+		return nil, err
+	}
+	stats, err := a.Service.LeadStats(ctx, c.businessID, filter, a.callerDay(req.Today, req.UtcOffsetMinutes))
 	if err != nil {
 		return nil, fail(ctx, "load lead stats", err)
 	}
@@ -59,19 +58,30 @@ func (a *API) GetLeadStats(ctx context.Context, req *crmsalesv1.GetLeadStatsRequ
 	}, nil
 }
 
-func (a *API) ListLeadSources(ctx context.Context, _ *crmsalesv1.ListLeadSourcesRequest) (*crmsalesv1.ListLeadSourcesResponse, error) {
+func (a *API) ListLeadFacets(ctx context.Context, _ *crmsalesv1.ListLeadFacetsRequest) (*crmsalesv1.ListLeadFacetsResponse, error) {
 	c, err := a.caller(ctx, permView)
 	if err != nil {
 		return nil, err
 	}
-	sources, err := a.Service.ListLeadSources(ctx, c.businessID)
+	facets, err := a.Service.LeadFacets(ctx, c.businessID)
 	if err != nil {
-		return nil, fail(ctx, "list lead sources", err)
+		return nil, fail(ctx, "list lead facets", err)
 	}
-	if sources == nil {
-		sources = []string{}
+	return &crmsalesv1.ListLeadFacetsResponse{
+		Sources:    nonNil(facets.Sources),
+		Industries: nonNil(facets.Industries),
+		Sizes:      nonNil(facets.Sizes),
+		Countries:  nonNil(facets.Countries),
+		Cities:     nonNil(facets.Cities),
+	}, nil
+}
+
+// nonNil keeps empty lists as [] on the wire.
+func nonNil(values []string) []string {
+	if values == nil {
+		return []string{}
 	}
-	return &crmsalesv1.ListLeadSourcesResponse{Sources: sources}, nil
+	return values
 }
 
 func (a *API) GetLead(ctx context.Context, req *crmsalesv1.GetLeadRequest) (*crmsalesv1.GetLeadResponse, error) {

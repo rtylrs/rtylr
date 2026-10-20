@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Button, ConfirmModal, Modal } from '../../shared/components/ui';
 import {
   dateOf,
-  FOLLOW_UP_WINDOWS,
   formatRelative,
   LEAD_SORTS,
   LEAD_STATUSES,
@@ -18,27 +17,20 @@ import {
   telHref,
   WORKING_STATUSES,
 } from './data/model';
-import { DEFAULT_LEAD_FILTERS, useLeadFilters } from './data/leadFilters';
-import {
-  useDeleteLeads,
-  useLeadList,
-  useLeadSources,
-  useLeadStats,
-  useReps,
-  useUpdateLeads,
-} from './data/queries';
+import { activeLeadFilterGroups, NO_LEAD_FILTERS, useLeadFilters } from './data/leadFilters';
+import { useDeleteLeads, useLeadList, useLeadStats, useReps, useUpdateLeads } from './data/queries';
 import {
   DueDate,
   EmptyBlock,
   LeadStatusBadge,
   ListFooter,
   LoadFailed,
-  RepFilterSelect,
   RepName,
   SearchBox,
   StatTile,
   useRepNames,
 } from './components/common';
+import { LeadFilterChips, LeadFilterPopover } from './components/LeadFilters';
 import LeadFormModal from './components/LeadFormModal';
 import { ReasonPicker } from './components/ReasonPicker';
 
@@ -73,8 +65,7 @@ const Leads: React.FC = () => {
   const navigate = useNavigate();
   const { filters, setFilters } = useLeadFilters();
   const leads = useLeadList(filters);
-  const stats = useLeadStats(filters.rep);
-  const { data: sources = [] } = useLeadSources();
+  const stats = useLeadStats(filters);
   const { data: reps = [] } = useReps();
   const names = useRepNames();
   const updateLeads = useUpdateLeads();
@@ -102,12 +93,7 @@ const Leads: React.FC = () => {
   }, [stats.data]);
   const format = (value?: number) => new Intl.NumberFormat(i18n.language).format(value ?? 0);
   const activeTab = tabOf(filters.statuses);
-  const filtered =
-    filters.search !== '' ||
-    filters.source !== '' ||
-    filters.followUp !== '' ||
-    filters.rep !== 'all' ||
-    Boolean(filters.importId);
+  const filtered = filters.search !== '' || activeLeadFilterGroups(filters).length > 0;
 
   const allSelected = rows.length > 0 && rows.every((lead) => selected.has(lead.id ?? ''));
   const toggle = (id: string) =>
@@ -198,72 +184,53 @@ const Leads: React.FC = () => {
         ))}
       </div>
 
-      <div className="sales-filters">
-        <SearchBox
-          value={filters.search}
-          onChange={(search) => setFilters({ search })}
-          placeholder={t('crmSales.leads.searchPlaceholder')}
+      <div className="sales-toolbar">
+        <LeadFilterChips
+          filters={filters}
+          onChange={(change) => {
+            setFilters(change);
+            clearSelection();
+          }}
         />
-        <RepFilterSelect
-          value={filters.rep}
-          onChange={(rep) => setFilters({ rep })}
-          label={t('crmSales.fields.rep')}
-        />
-        <select
-          className="sales-select"
-          aria-label={t('crmSales.fields.source')}
-          value={filters.source}
-          onChange={(event) => setFilters({ source: event.target.value })}
-        >
-          <option value="">{t('crmSales.leads.allSources')}</option>
-          {sources.map((source) => (
-            <option key={source} value={source}>
-              {source}
-            </option>
-          ))}
-        </select>
-        <select
-          className="sales-select"
-          aria-label={t('crmSales.fields.followUp')}
-          value={filters.followUp}
-          onChange={(event) =>
-            setFilters({ followUp: event.target.value as typeof filters.followUp })
-          }
-        >
-          <option value="">{t('crmSales.leads.anyFollowUp')}</option>
-          {FOLLOW_UP_WINDOWS.map((window) => (
-            <option key={window} value={window}>
-              {t(`crmSales.followUpWindow.${window}`)}
-            </option>
-          ))}
-        </select>
-        <select
-          className="sales-select"
-          aria-label={t('crmSales.common.sortBy')}
-          value={filters.sort}
-          onChange={(event) => setFilters({ sort: event.target.value as typeof filters.sort })}
-        >
-          {LEAD_SORTS.map((sort) => (
-            <option key={sort} value={sort}>
-              {t(`crmSales.leads.sort.${sort}`)}
-            </option>
-          ))}
-        </select>
-        {filtered && (
-          <Button
-            variant="ghost"
-            onClick={() =>
-              setFilters({
-                ...DEFAULT_LEAD_FILTERS,
-                statuses: filters.statuses,
-                sort: filters.sort,
-              })
-            }
+        <div className="sales-toolbar-actions">
+          {filtered && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setFilters({ ...NO_LEAD_FILTERS, search: '' });
+                clearSelection();
+              }}
+            >
+              <X size={13} />
+              {t('crmSales.common.clearFilters')}
+            </Button>
+          )}
+          <SearchBox
+            value={filters.search}
+            onChange={(search) => setFilters({ search })}
+            placeholder={t('crmSales.leads.searchPlaceholder')}
+          />
+          <LeadFilterPopover
+            filters={filters}
+            onChange={(change) => {
+              setFilters(change);
+              clearSelection();
+            }}
+            total={total}
+          />
+          <select
+            className="sales-select"
+            aria-label={t('crmSales.common.sortBy')}
+            value={filters.sort}
+            onChange={(event) => setFilters({ sort: event.target.value as typeof filters.sort })}
           >
-            <X size={13} />
-            {t('crmSales.common.clearFilters')}
-          </Button>
-        )}
+            {LEAD_SORTS.map((sort) => (
+              <option key={sort} value={sort}>
+                {t(`crmSales.leads.sort.${sort}`)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="sales-card">

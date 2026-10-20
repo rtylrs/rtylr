@@ -122,7 +122,9 @@
     "overdue": "En retard",
     "today": "Aujourd'hui",
     "due": "À faire maintenant",
-    "upcoming": "À venir"
+    "upcoming": "À venir",
+    "scheduled": "Relance prévue",
+    "none": "Sans relance"
   },
   "leads": {
     "title": "Prospects",
@@ -567,5 +569,103 @@
     "stageInUse": "Une étape retirée contient encore des affaires. Déplacez-les d'abord.",
     "importClosed": "Cet import est terminé. Lancez-en un nouveau.",
     "badAssignee": "Cette personne ne fait pas partie de l'équipe de cette entreprise."
+  },
+  "filters": {
+    "button": "Filtrer",
+    "title": "Filtres",
+    "clearAll": "Tout effacer",
+    "close": "Fermer les filtres",
+    "showResults_one": "Afficher {{count}} prospect",
+    "showResults_many": "Afficher {{count}} prospects",
+    "showResults_other": "Afficher {{count}} prospects",
+    "sections": {
+      "contact": "Coordonnées",
+      "owner": "Responsable et source",
+      "company": "Entreprise",
+      "activity": "Activité",
+      "value": "Valeur",
+      "dates": "Dates"
+    },
+    "any": "Tous",
+    "has": "Renseigné",
+    "missing": "Manquant",
+    "contactedYes": "Contacté",
+    "contactedNo": "Jamais",
+    "contacted": "Contacté",
+    "unassigned": "Non attribué",
+    "searchOptions": "Rechercher",
+    "noOptions": "Rien à choisir pour l’instant",
+    "noMatches": "Aucun résultat",
+    "anyImport": "Tous les imports",
+    "import": "Import",
+    "anyFollowUp": "Toutes",
+    "attempts": "Tentatives d’appel",
+    "lastActivity": "Dernière activité",
+    "added": "Date d’ajout",
+    "min": "Min",
+    "max": "Max",
+    "from": "Du",
+    "to": "Au",
+    "selected_one": "{{count}} sélectionné",
+    "selected_many": "{{count}} sélectionnés",
+    "selected_other": "{{count}} sélectionnés",
+    "presence": {
+      "phone": {
+        "label": "Téléphone",
+        "yes": "Avec téléphone",
+        "no": "Sans téléphone"
+      },
+      "email": {
+        "label": "E-mail",
+        "yes": "Avec e-mail",
+        "no": "Sans e-mail"
+      },
+      "website": {
+        "label": "Site web",
+        "yes": "Avec site web",
+        "no": "Sans site web"
+      },
+      "linkedin": {
+        "label": "LinkedIn",
+        "yes": "Avec LinkedIn",
+        "no": "Sans LinkedIn"
+      },
+      "company": {
+        "label": "Entreprise",
+        "yes": "Avec entreprise",
+        "no": "Sans entreprise"
+      },
+      "value": {
+        "label": "Valeur saisie",
+        "yes": "Avec valeur",
+        "no": "Sans valeur"
+      },
+      "contacted": {
+        "label": "Contacté",
+        "yes": "Contacté",
+        "no": "Jamais contacté"
+      }
+    },
+    "chip": {
+      "reps": "Responsable : {{values}}",
+      "sources": "Source : {{values}}",
+      "industries": "Secteur : {{values}}",
+      "sizes": "Taille : {{values}}",
+      "countries": "Pays : {{values}}",
+      "cities": "Ville : {{values}}",
+      "billing": "Facturation : {{values}}",
+      "importId": "Import : {{values}}",
+      "followUp": "Relance : {{values}}",
+      "attempts": "Appels : {{values}}",
+      "value": "Valeur : {{values}}",
+      "created": "Ajouté : {{values}}",
+      "active": "Dernière activité : {{values}}",
+      "more": "{{values}} +{{count}}",
+      "remove": "Retirer le filtre : {{label}}",
+      "atLeast": "{{value}} ou plus",
+      "atMost": "jusqu’à {{value}}",
+      "since": "depuis le {{value}}",
+      "until": "jusqu’au {{value}}"
+    }
   }
 }

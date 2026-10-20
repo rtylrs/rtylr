@@ -32,7 +32,8 @@
 /* Native select arrows sit flush against the edge and differ per browser; draw
    one chevron for every CRM select. Inline background shorthands would reset
    the image, hence !important. */
-.portal-page.is-crm select:not([multiple]) {
+.portal-page.is-crm select:not([multiple]),
+.crm-popover select:not([multiple]) {
   appearance: none;
   background-image: var(--crm-select-chevron) !important;
   background-repeat: no-repeat !important;
@@ -41,7 +42,8 @@
   padding-inline-end: 32px !important;
   cursor: pointer;
 }
-[dir='rtl'] .portal-page.is-crm select:not([multiple]) {
+[dir='rtl'] .portal-page.is-crm select:not([multiple]),
+[dir='rtl'] .crm-popover select:not([multiple]) {
   background-position: left 10px center !important;
 }
 .portal-crm-button:not(:disabled):hover {

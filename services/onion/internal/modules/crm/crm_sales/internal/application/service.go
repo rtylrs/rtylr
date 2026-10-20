@@ -23,9 +23,9 @@ type repository interface {
 	ValidateAssignee(ctx context.Context, businessID, userID int64) error
 	ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error)
 
-	ListLeads(ctx context.Context, businessID int64, f domain.LeadFilter, today time.Time) (domain.LeadPage, error)
-	LeadStats(ctx context.Context, businessID int64, assignedTo *int64, today, dayStartUTC, monthStartUTC time.Time) (domain.LeadStats, error)
-	ListLeadSources(ctx context.Context, businessID int64) ([]string, error)
+	ListLeads(ctx context.Context, businessID int64, f domain.LeadFilter, day domain.CallerDay) (domain.LeadPage, error)
+	LeadStats(ctx context.Context, businessID int64, f domain.LeadFilter, day domain.CallerDay) (domain.LeadStats, error)
+	LeadFacets(ctx context.Context, businessID int64) (domain.LeadFacets, error)
 	GetLead(ctx context.Context, businessID, id int64) (domain.Lead, error)
 	CreateLead(ctx context.Context, businessID, ownerID int64, in domain.LeadInput) (domain.Lead, error)
 	UpdateLead(ctx context.Context, businessID, id int64, changes domain.LeadChanges) (domain.Lead, error)

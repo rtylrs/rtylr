@@ -121,7 +121,9 @@
     "overdue": "Overdue",
     "today": "Due today",
     "due": "Due now",
-    "upcoming": "Upcoming"
+    "upcoming": "Upcoming",
+    "scheduled": "Has a follow-up",
+    "none": "No follow-up"
   },
   "leads": {
     "title": "Leads",
@@ -552,5 +554,101 @@
     "stageInUse": "A stage you removed still has deals. Move them first.",
     "importClosed": "This import has finished. Start a new one.",
     "badAssignee": "That person isn't on this business's team."
+  },
+  "filters": {
+    "button": "Filter",
+    "title": "Filters",
+    "clearAll": "Clear all",
+    "close": "Close filters",
+    "showResults_one": "Show {{count}} lead",
+    "showResults_other": "Show {{count}} leads",
+    "sections": {
+      "contact": "Contact details",
+      "owner": "Owner and source",
+      "company": "Company",
+      "activity": "Activity",
+      "value": "Value",
+      "dates": "Dates"
+    },
+    "any": "Any",
+    "has": "Has",
+    "missing": "Missing",
+    "contactedYes": "Contacted",
+    "contactedNo": "Never",
+    "contacted": "Contacted",
+    "unassigned": "Unassigned",
+    "searchOptions": "Search",
+    "noOptions": "Nothing to pick yet",
+    "noMatches": "No matches",
+    "anyImport": "Any import",
+    "import": "Import",
+    "anyFollowUp": "Any",
+    "attempts": "Call attempts",
+    "lastActivity": "Last activity",
+    "added": "Date added",
+    "min": "Min",
+    "max": "Max",
+    "from": "From",
+    "to": "To",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "presence": {
+      "phone": {
+        "label": "Phone",
+        "yes": "Has phone",
+        "no": "No phone"
+      },
+      "email": {
+        "label": "Email",
+        "yes": "Has email",
+        "no": "No email"
+      },
+      "website": {
+        "label": "Website",
+        "yes": "Has website",
+        "no": "No website"
+      },
+      "linkedin": {
+        "label": "LinkedIn",
+        "yes": "Has LinkedIn",
+        "no": "No LinkedIn"
+      },
+      "company": {
+        "label": "Company",
+        "yes": "Has company",
+        "no": "No company"
+      },
+      "value": {
+        "label": "Value set",
+        "yes": "Has value",
+        "no": "No value"
+      },
+      "contacted": {
+        "label": "Contacted",
+        "yes": "Contacted",
+        "no": "Never contacted"
+      }
+    },
+    "chip": {
+      "reps": "Rep: {{values}}",
+      "sources": "Source: {{values}}",
+      "industries": "Industry: {{values}}",
+      "sizes": "Size: {{values}}",
+      "countries": "Country: {{values}}",
+      "cities": "City: {{values}}",
+      "billing": "Billing: {{values}}",
+      "importId": "Import: {{values}}",
+      "followUp": "Follow-up: {{values}}",
+      "attempts": "Calls: {{values}}",
+      "value": "Value: {{values}}",
+      "created": "Added: {{values}}",
+      "active": "Last activity: {{values}}",
+      "more": "{{values}} +{{count}}",
+      "remove": "Remove filter: {{label}}",
+      "atLeast": "{{value}} or more",
+      "atMost": "up to {{value}}",
+      "since": "since {{value}}",
+      "until": "until {{value}}"
+    }
   }
 }

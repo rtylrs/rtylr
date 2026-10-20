@@ -11,9 +11,13 @@ type CallerDay struct {
 
 // MonthStartUTC is the caller's first of the month, as a UTC instant.
 func (d CallerDay) MonthStartUTC() time.Time {
-	offset := d.Date.Sub(d.StartUTC)
-	first := time.Date(d.Date.Year(), d.Date.Month(), 1, 0, 0, 0, 0, time.UTC)
-	return first.Add(-offset)
+	return d.StartOf(time.Date(d.Date.Year(), d.Date.Month(), 1, 0, 0, 0, 0, time.UTC))
+}
+
+// StartOf is when one of the caller's calendar days began, as a UTC instant.
+func (d CallerDay) StartOf(date time.Time) time.Time {
+	day := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	return day.Add(d.StartUTC.Sub(d.Date))
 }
 
 // NewCallerDay reads the caller's date (YYYY-MM-DD) and UTC offset in

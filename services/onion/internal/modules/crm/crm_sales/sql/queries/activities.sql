@@ -32,13 +32,13 @@ LIMIT ?;
 -- name: CountCallsSince :one
 SELECT COUNT(*) FROM crm_touchpoints
 WHERE business_id = sqlc.arg('business_id') AND type = 'call' AND occurred_at >= sqlc.arg('since')
-  AND (sqlc.narg('created_by') IS NULL OR created_by = sqlc.narg('created_by'));
+  AND (CAST(sqlc.arg('filter_reps') AS UNSIGNED) = 0 OR created_by IN (sqlc.slice('reps')));
 
 -- name: CountConnectedCallsSince :one
 SELECT COUNT(*) FROM crm_touchpoints
 WHERE business_id = sqlc.arg('business_id') AND type = 'call' AND occurred_at >= sqlc.arg('since')
   AND outcome IN ('connected', 'callback', 'meeting_booked', 'not_interested')
-  AND (sqlc.narg('created_by') IS NULL OR created_by = sqlc.narg('created_by'));
+  AND (CAST(sqlc.arg('filter_reps') AS UNSIGNED) = 0 OR created_by IN (sqlc.slice('reps')));
 
 -- name: DeleteLeadActivities :exec
 DELETE FROM crm_touchpoints WHERE business_id = sqlc.arg('business_id') AND lead_id IN (sqlc.slice('lead_ids'));

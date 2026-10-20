@@ -106,6 +106,13 @@ func nullInt64s(values []int64) []sql.NullInt64 {
 	return out
 }
 
+func nullInt32(value *int32) sql.NullInt32 {
+	if value == nil {
+		return sql.NullInt32{}
+	}
+	return sql.NullInt32{Int32: *value, Valid: true}
+}
+
 func nullTime(value *time.Time) sql.NullTime {
 	if value == nil {
 		return sql.NullTime{}

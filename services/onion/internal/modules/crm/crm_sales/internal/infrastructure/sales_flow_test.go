@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 	"testing"
 	"time"
 
@@ -180,7 +181,7 @@ func TestLeadListPagesFiltersAndSorts(t *testing.T) {
 	var seen []int64
 	cursor := ""
 	for page := 0; page < 5; page++ {
-		result, err := svc.ListLeads(ctx, business, domain.LeadFilter{Source: batch, Limit: 3, Cursor: cursor}, today())
+		result, err := svc.ListLeads(ctx, business, domain.LeadFilter{Sources: []string{batch}, Limit: 3, Cursor: cursor}, today())
 		if err != nil {
 			t.Fatalf("ListLeads page %d: %v", page, err)
 		}
@@ -203,23 +204,23 @@ func TestLeadListPagesFiltersAndSorts(t *testing.T) {
 		}
 	}
 
-	byCompany, err := svc.ListLeads(ctx, business, domain.LeadFilter{Source: batch, Sort: domain.LeadSortCompany, Limit: 2}, today())
+	byCompany, err := svc.ListLeads(ctx, business, domain.LeadFilter{Sources: []string{batch}, Sort: domain.LeadSortCompany, Limit: 2}, today())
 	if err != nil || byCompany.Leads[0].ID != ids[6] || byCompany.Leads[1].ID != ids[5] {
 		t.Fatalf("company A-Z: %+v, %v", byCompany.Leads, err)
 	}
-	byFollowUp, err := svc.ListLeads(ctx, business, domain.LeadFilter{Source: batch, Sort: domain.LeadSortFollowUp, Limit: 3}, today())
+	byFollowUp, err := svc.ListLeads(ctx, business, domain.LeadFilter{Sources: []string{batch}, Sort: domain.LeadSortFollowUp, Limit: 3}, today())
 	if err != nil || byFollowUp.Leads[0].ID != ids[2] || byFollowUp.Leads[1].ID != ids[4] {
 		t.Fatalf("soonest follow-up first: %+v, %v", byFollowUp.Leads, err)
 	}
-	if _, err := svc.ListLeads(ctx, business, domain.LeadFilter{Source: batch, Sort: domain.LeadSortCompany, Cursor: byFollowUp.NextCursor}, today()); !errors.Is(err, domain.ErrInvalidCursor) {
+	if _, err := svc.ListLeads(ctx, business, domain.LeadFilter{Sources: []string{batch}, Sort: domain.LeadSortCompany, Cursor: byFollowUp.NextCursor}, today()); !errors.Is(err, domain.ErrInvalidCursor) {
 		t.Fatalf("a cursor from another sort: err = %v, want ErrInvalidCursor", err)
 	}
 
-	overdue, err := svc.ListLeads(ctx, business, domain.LeadFilter{Source: batch, FollowUp: domain.FollowUpOverdue}, today())
+	overdue, err := svc.ListLeads(ctx, business, domain.LeadFilter{Sources: []string{batch}, FollowUp: domain.FollowUpOverdue}, today())
 	if err != nil || overdue.Total != 1 || overdue.Leads[0].ID != ids[2] {
 		t.Fatalf("overdue: %+v, %v", overdue, err)
 	}
-	byPhone, err := svc.ListLeads(ctx, business, domain.LeadFilter{Source: batch, Search: "0100-003"}, today())
+	byPhone, err := svc.ListLeads(ctx, business, domain.LeadFilter{Sources: []string{batch}, Search: "0100-003"}, today())
 	if err != nil || byPhone.Total != 1 || byPhone.Leads[0].ID != ids[3] {
 		t.Fatalf("search by phone digits: %+v, %v", byPhone, err)
 	}
@@ -228,7 +229,7 @@ func TestLeadListPagesFiltersAndSorts(t *testing.T) {
 	if err != nil || updated != 3 {
 		t.Fatalf("UpdateLeads = %d, %v", updated, err)
 	}
-	disqualified, err := svc.ListLeads(ctx, business, domain.LeadFilter{Source: batch, Statuses: []domain.LeadStatus{domain.LeadDisqualified}}, today())
+	disqualified, err := svc.ListLeads(ctx, business, domain.LeadFilter{Sources: []string{batch}, Statuses: []domain.LeadStatus{domain.LeadDisqualified}}, today())
 	if err != nil || disqualified.Total != 3 || disqualified.Leads[0].DisqualifyReason != "Out of area" {
 		t.Fatalf("disqualified: %+v, %v", disqualified, err)
 	}
@@ -236,6 +237,127 @@ func TestLeadListPagesFiltersAndSorts(t *testing.T) {
 	if err != nil || deleted != 7 {
 		t.Fatalf("DeleteLeads = %d, %v", deleted, err)
 	}
+}
+
+func TestLeadFiltersNarrowListsAndStats(t *testing.T) {
+	svc, _ := newService(t)
+	ctx := context.Background()
+	source := unique(t, "Filters")
+	industry := unique(t, "Food, Beverage") // a comma must survive the filter
+	owner := actor
+	create := func(in domain.LeadInput) domain.Lead {
+		t.Helper()
+		in.Source = source
+		lead, err := svc.CreateLead(ctx, business, actor, in)
+		if err != nil {
+			t.Fatalf("CreateLead %+v: %v", in, err)
+		}
+		return lead
+	}
+	full := create(domain.LeadInput{
+		FirstName: "Full", Phone: "+1 555 0200 001", Email: "full@example.com", CompanyName: "Full Co",
+		Website: "full.example.com", LinkedIn: "linkedin.com/company/full", Industry: industry, Size: "11-50",
+		City: "Beirut", Country: "Lebanon", AssignedTo: &owner, Value: ptr(money.Amount(250000)), Billing: domain.BillingMonthly,
+	})
+	bare := create(domain.LeadInput{FirstName: "Bare", Email: "bare@example.com"})
+	mid := create(domain.LeadInput{
+		FirstName: "Mid", Phone: "+1 555 0200 003", CompanyName: "Mid Co", Industry: "Retail", City: "Tripoli",
+		Country: "Lebanon", Value: ptr(money.Amount(5000)),
+	})
+	if _, _, err := svc.LogActivity(ctx, business, actor, domain.ActivityInput{
+		LeadID: &mid.ID, Type: domain.ActivityCall, Outcome: domain.CallNoAnswer,
+		FollowUp: &domain.TaskInput{Type: domain.TaskCall, DueDate: "2026-10-27"},
+	}); err != nil {
+		t.Fatalf("LogActivity: %v", err)
+	}
+
+	ids := func(f domain.LeadFilter) []int64 {
+		t.Helper()
+		f.Sources = append(f.Sources, source)
+		page, err := svc.ListLeads(ctx, business, f, today())
+		if err != nil {
+			t.Fatalf("ListLeads %+v: %v", f, err)
+		}
+		if page.Total != int64(len(page.Leads)) {
+			t.Fatalf("total %d for %d leads", page.Total, len(page.Leads))
+		}
+		var out []int64
+		for _, lead := range page.Leads {
+			out = append(out, lead.ID)
+		}
+		slices.Sort(out)
+		return out
+	}
+	realToday := time.Now().UTC()
+	tomorrow := realToday.AddDate(0, 0, 1)
+	yesterday := realToday.AddDate(0, 0, -1)
+	cases := []struct {
+		name string
+		f    domain.LeadFilter
+		want []int64
+	}{
+		{"no filter", domain.LeadFilter{}, []int64{full.ID, bare.ID, mid.ID}},
+		{"has phone", domain.LeadFilter{HasPhone: domain.PresenceYes}, []int64{full.ID, mid.ID}},
+		{"no phone", domain.LeadFilter{HasPhone: domain.PresenceNo}, []int64{bare.ID}},
+		{"no email", domain.LeadFilter{HasEmail: domain.PresenceNo}, []int64{mid.ID}},
+		{"has website and linkedin", domain.LeadFilter{HasWebsite: domain.PresenceYes, HasLinkedIn: domain.PresenceYes}, []int64{full.ID}},
+		{"no company", domain.LeadFilter{HasCompany: domain.PresenceNo}, []int64{bare.ID}},
+		{"has value", domain.LeadFilter{HasValue: domain.PresenceYes}, []int64{full.ID, mid.ID}},
+		{"industry with a comma", domain.LeadFilter{Industries: []string{industry}}, []int64{full.ID}},
+		{"industries", domain.LeadFilter{Industries: []string{industry, "Retail"}}, []int64{full.ID, mid.ID}},
+		{"size", domain.LeadFilter{Sizes: []string{"11-50"}}, []int64{full.ID}},
+		{"city", domain.LeadFilter{Cities: []string{"Tripoli"}}, []int64{mid.ID}},
+		{"country", domain.LeadFilter{Countries: []string{"Lebanon"}}, []int64{full.ID, mid.ID}},
+		{"billing", domain.LeadFilter{Billing: []domain.Billing{domain.BillingMonthly}}, []int64{full.ID}},
+		{"rep", domain.LeadFilter{Reps: []int64{owner}}, []int64{full.ID}},
+		{"unassigned", domain.LeadFilter{Reps: []int64{0}}, []int64{bare.ID, mid.ID}},
+		{"rep or unassigned", domain.LeadFilter{Reps: []int64{owner, 0}}, []int64{full.ID, bare.ID, mid.ID}},
+		{"value range", domain.LeadFilter{ValueMin: ptr(money.Amount(1000)), ValueMax: ptr(money.Amount(10000))}, []int64{mid.ID}},
+		{"called at least once", domain.LeadFilter{AttemptsMin: ptr(int32(1))}, []int64{mid.ID}},
+		{"never called", domain.LeadFilter{AttemptsMax: ptr(int32(0))}, []int64{full.ID, bare.ID}},
+		{"contacted", domain.LeadFilter{Contacted: domain.PresenceYes}, []int64{mid.ID}},
+		{"never contacted", domain.LeadFilter{Contacted: domain.PresenceNo}, []int64{full.ID, bare.ID}},
+		{"active on the call day", domain.LeadFilter{ActiveFrom: &clock, ActiveTo: &clock}, []int64{mid.ID}},
+		{"follow-up scheduled", domain.LeadFilter{FollowUp: domain.FollowUpScheduled}, []int64{mid.ID}},
+		{"no follow-up", domain.LeadFilter{FollowUp: domain.FollowUpNone}, []int64{full.ID, bare.ID}},
+		{"created today", domain.LeadFilter{CreatedFrom: &realToday, CreatedTo: &realToday}, []int64{full.ID, bare.ID, mid.ID}},
+		{"created before today", domain.LeadFilter{CreatedTo: &yesterday}, nil},
+		{"created after today", domain.LeadFilter{CreatedFrom: &tomorrow}, nil},
+		{"search by phone", domain.LeadFilter{Search: "0200 003"}, []int64{mid.ID}},
+		{"combined", domain.LeadFilter{HasPhone: domain.PresenceYes, Countries: []string{"Lebanon"}, Contacted: domain.PresenceNo}, []int64{full.ID}},
+	}
+	for _, c := range cases {
+		want := slices.Clone(c.want)
+		slices.Sort(want)
+		if got := ids(c.f); !slices.Equal(got, want) {
+			t.Errorf("%s: got %v, want %v", c.name, got, want)
+		}
+	}
+
+	stats, err := svc.LeadStats(ctx, business, domain.LeadFilter{Sources: []string{source}, Countries: []string{"Lebanon"}}, today())
+	if err != nil {
+		t.Fatalf("LeadStats: %v", err)
+	}
+	if stats.ByStatus[domain.LeadNew] != 1 || stats.ByStatus[domain.LeadAttempting] != 1 || stats.FollowUpsOverdue != 0 {
+		t.Fatalf("filtered stats = %+v", stats)
+	}
+	if _, err := svc.ListLeads(ctx, business, domain.LeadFilter{HasPhone: "maybe"}, today()); !isValidation(err) {
+		t.Fatalf("a bad presence: err = %v, want a validation error", err)
+	}
+
+	facets, err := svc.LeadFacets(ctx, business)
+	if err != nil || !slices.Contains(facets.Industries, industry) || !slices.Contains(facets.Sources, source) ||
+		!slices.Contains(facets.Cities, "Tripoli") || !slices.Contains(facets.Sizes, "11-50") {
+		t.Fatalf("facets = %+v, %v", facets, err)
+	}
+	if _, err := svc.DeleteLeads(ctx, business, []int64{full.ID, bare.ID, mid.ID}); err != nil {
+		t.Fatalf("DeleteLeads: %v", err)
+	}
+}
+
+func isValidation(err error) bool {
+	var v *domain.ValidationError
+	return errors.As(err, &v)
 }
 
 func TestImportDedupesFillsAndUndoes(t *testing.T) {

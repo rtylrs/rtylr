@@ -181,63 +181,20 @@ func (s LeadSort) IsValid() bool {
 	return s == LeadSortNewest || s == LeadSortFollowUp || s == LeadSortActivity || s == LeadSortCompany
 }
 
-// FollowUpWindow narrows a list to work due in a window around today.
-type FollowUpWindow string
-
-const (
-	FollowUpAny      FollowUpWindow = ""
-	FollowUpOverdue  FollowUpWindow = "overdue"
-	FollowUpToday    FollowUpWindow = "today"
-	FollowUpDue      FollowUpWindow = "due"
-	FollowUpUpcoming FollowUpWindow = "upcoming"
-)
-
-func (w FollowUpWindow) IsValid() bool {
-	switch w {
-	case FollowUpAny, FollowUpOverdue, FollowUpToday, FollowUpDue, FollowUpUpcoming:
-		return true
-	}
-	return false
-}
-
-// Range is the window's inclusive date bounds relative to today; nil means
-// unbounded.
-func (w FollowUpWindow) Range(today time.Time) (from, to *time.Time) {
-	day := time.Date(today.Year(), today.Month(), today.Day(), 0, 0, 0, 0, time.UTC)
-	yesterday := day.AddDate(0, 0, -1)
-	tomorrow := day.AddDate(0, 0, 1)
-	switch w {
-	case FollowUpOverdue:
-		return nil, &yesterday
-	case FollowUpToday:
-		return &day, &day
-	case FollowUpDue:
-		return nil, &day
-	case FollowUpUpcoming:
-		return &tomorrow, nil
-	}
-	return nil, nil
-}
-
-// LeadFilter selects leads. AssignedTo 0 means unassigned; empty Statuses
-// means every status.
-type LeadFilter struct {
-	Statuses      []LeadStatus
-	AssignedTo    *int64
-	Source        string
-	ImportBatchID *int64
-	FollowUp      FollowUpWindow
-	Search        string
-	Sort          LeadSort
-	Cursor        string
-	Limit         int
-}
-
 // LeadPage is one page of a lead list. NextCursor is "" on the last page.
 type LeadPage struct {
 	Leads      []Lead
 	NextCursor string
 	Total      int64
+}
+
+// LeadFacets are the distinct values leads have, for the filter pickers.
+type LeadFacets struct {
+	Sources    []string
+	Industries []string
+	Sizes      []string
+	Countries  []string
+	Cities     []string
 }
 
 // LeadStats summarises prospecting for the leads page header.

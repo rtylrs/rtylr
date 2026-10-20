@@ -90,6 +90,14 @@ Every list is server-side: filters, search, sorting and cursor pagination
 (`(sort value, id)` keysets), with counts and stats from separate aggregate
 queries. Nothing loads a whole table into the browser.
 
+Leads filter on reps (or unassigned), source, import, industry, size,
+country, city, billing, follow-up window, whether phone, email, website,
+LinkedIn, company or value are filled in, whether the lead was ever worked,
+call attempts, value, date added and last activity. Every lead list query and
+the per-status count share one filter block in `leads.sql` (a test keeps them
+identical), so the tab counts always match the list. Text sets travel as JSON
+arrays, since values like "Food, Beverage" contain commas.
+
 Imports run in batches recorded in `crm_import_batches`. The browser parses the
 file, the user maps columns, and rows go up in chunks of 500. The server
 normalises email and phone, dedupes against the business's leads by email,
