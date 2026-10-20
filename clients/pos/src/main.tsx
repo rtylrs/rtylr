@@ -7,8 +7,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import i18next from './shared/services/api/i18next';
 import { Toaster } from 'sonner';
+import '@voxire/ui/toast.css';
 import { bootObservability } from '@voxire/observability';
 import './globals.css';
+import { useThemeStore } from './shared/stores/themeStore';
+
+const POSNotifications = () => {
+  const theme = useThemeStore((state) => state.theme);
+  return (
+    <div data-theme={theme}>
+      <Toaster className="rtylr-toaster" expand={false} offset={20} mobileOffset={16} />
+    </div>
+  );
+};
 
 const I18nGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isReady = () => i18next.isInitialized && i18next.hasLoadedNamespace('translation');
@@ -66,7 +77,7 @@ if (rootElement) {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <App />
-              <Toaster expand={false} richColors />
+              <POSNotifications />
             </BrowserRouter>
           </QueryClientProvider>
         </I18nGate>

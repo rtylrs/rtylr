@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
+import '@voxire/ui/toast.css';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { bootObservability } from '@voxire/observability';
@@ -25,7 +26,13 @@ if (rootElement) {
     <QueryClientProvider client={queryClient}>
       <CookiesProvider>
         <RouterProvider router={publicRecruitRouter} />
-        <Toaster expand={false} richColors position="top-center" />
+        <Toaster
+          className="rtylr-toaster"
+          expand={false}
+          position="top-center"
+          offset={20}
+          mobileOffset={16}
+        />
       </CookiesProvider>
     </QueryClientProvider>
   );
