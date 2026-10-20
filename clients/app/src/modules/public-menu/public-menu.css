@@ -18,6 +18,8 @@
 /* The Portal's globals set html/body/#root to overflow:hidden, so the layout
  * wrapper owns its own scroll container. */
 .public-menu-root {
+  /* The customer menu is always light, whatever the portal theme. */
+  color-scheme: light;
   height: 100dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

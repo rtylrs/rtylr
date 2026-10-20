@@ -88,6 +88,9 @@
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {
+  /* Native widgets (date/time picker icons and popups, select menus,
+     scrollbars) follow the theme instead of the browser's light default. */
+  color-scheme: dark;
   --dash-bg: #0a0a0a;
   --dash-surface: #111111;
   --dash-card: #161616;
@@ -105,6 +108,7 @@
 
 /* ── Light mode ──────────────────────────────────────────────── */
 :root[data-theme='light'] {
+  color-scheme: light;
   --dash-bg: #f8f8f8;
   --dash-surface: #ffffff;
   --dash-card: #ffffff;
