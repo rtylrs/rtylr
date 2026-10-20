@@ -1,10 +1,15 @@
 /* Sales screens: leads, deals, tasks, imports. Theme variables come from the
    portal; logical properties keep RTL correct. */
 
+/* Lists and boards use a wide screen; the portal caps pages at 1200px. */
+.portal-page > .sales-page {
+  max-width: 1600px;
+}
+
 .sales-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -17,12 +22,13 @@
 }
 .sales-header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
+  line-height: 1.25;
   color: var(--hub-text);
 }
 .sales-header p {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-size: 13px;
   color: var(--hub-text-muted);
 }
@@ -32,18 +38,38 @@
   flex-wrap: wrap;
 }
 
-/* Stat tiles */
+/* Stats: one strip of cells split by dividers, value and hint on one line */
 .sales-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-}
-.sales-stat {
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
   background: var(--hub-card);
   border: 1px solid var(--hub-border);
   border-radius: 10px;
-  padding: 12px 14px;
+  overflow: hidden;
+}
+.sales-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
+  padding: 9px 14px;
+  border: 0;
+  /* Each cell rules its left and top edges; the card clips the ones on its
+     own edges, so dividers fall only between cells however the grid wraps,
+     in either direction. */
+  box-shadow:
+    -1px 0 0 var(--hub-border),
+    0 -1px 0 var(--hub-border);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+button.sales-stat {
+  cursor: pointer;
+}
+button.sales-stat:hover {
+  background: var(--hub-hover);
 }
 .sales-stat-label {
   font-size: 11px;
@@ -51,20 +77,28 @@
   color: var(--hub-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-.sales-stat-value {
-  margin-top: 4px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--hub-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.sales-stat-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.sales-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--hub-text);
+  white-space: nowrap;
+}
 .sales-stat-hint {
-  margin-top: 2px;
   font-size: 12px;
   color: var(--hub-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .sales-stat.is-warning .sales-stat-value {
   color: #ef4444;
@@ -73,16 +107,70 @@
 /* Status tabs double as counts */
 .sales-tabs {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   overflow-x: auto;
   border-bottom: 1px solid var(--hub-border);
   scrollbar-width: none;
+}
+/* A list's status tabs, toolbar and active filter chips. Narrow: tabs, then
+   chips beside the toolbar. Wide: tabs beside the toolbar, chips below. The
+   grid sits inside the query container, which can't restyle itself. */
+.sales-listbar {
+  container-type: inline-size;
+}
+.sales-listbar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'tabs tabs'
+    'chips actions';
+  column-gap: 16px;
+  align-items: center;
+}
+.sales-listbar-grid > .sales-tabs {
+  grid-area: tabs;
+}
+.sales-listbar-grid > .sales-toolbar-actions {
+  grid-area: actions;
+  margin-top: 10px;
+}
+.sales-listbar-chips {
+  grid-area: chips;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 10px;
+}
+.sales-listbar-chips .sales-filter-chips {
+  flex: 0 1 auto;
+}
+@container (min-width: 1320px) {
+  .sales-listbar-grid {
+    grid-template-areas:
+      'tabs actions'
+      'chips chips';
+    align-items: end;
+  }
+  .sales-listbar-grid > .sales-toolbar-actions {
+    margin-top: 0;
+    padding-bottom: 4px;
+  }
+}
+@container (max-width: 640px) {
+  .sales-listbar-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'tabs'
+      'actions'
+      'chips';
+  }
 }
 .sales-tab {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -151,13 +239,7 @@
   flex: 1;
 }
 
-/* Leads toolbar: active filter chips, then search, Filter and sort at the end */
-.sales-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+/* Leads toolbar: search, Filter and sort */
 .sales-toolbar-actions {
   display: flex;
   align-items: center;
@@ -553,12 +635,12 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--hub-text-dim);
-  padding: 10px 12px;
+  padding: 9px 12px;
   border-bottom: 1px solid var(--hub-border);
   white-space: nowrap;
 }
 .sales-table td {
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--hub-border);
   color: var(--hub-text);
   vertical-align: middle;
@@ -574,6 +656,10 @@
 }
 .sales-table tbody tr.is-selected {
   background: var(--accent-muted, var(--hub-hover));
+}
+/* Phone numbers and emails read as one token; the table scrolls instead. */
+.sales-table bdi {
+  white-space: nowrap;
 }
 .sales-table .is-check {
   width: 36px;
@@ -705,8 +791,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 10px;
-  padding: 48px 16px;
+  gap: 8px;
+  padding: 32px 16px;
   color: var(--hub-text-muted);
 }
 .sales-empty h3 {
