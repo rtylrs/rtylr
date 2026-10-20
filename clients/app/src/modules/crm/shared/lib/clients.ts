@@ -50,9 +50,6 @@ const restPut = (path: (id: string) => string) => (req: { id: string; body?: unk
 const restDelete = (path: (id: string) => string) => (req: { id: string }) =>
   unwrap(rest.delete<unknown>(path(req.id)));
 
-const restGetById = (path: (id: string) => string) => (req: { id: string }) =>
-  unwrap(rest.get<unknown>(path(req.id)));
-
 /**
  * c6e4ce609 routed 62 of this app's calls through a single
  * `@voxire/voxie/crm/compat/v1` client. That module has never existed at any
@@ -65,10 +62,10 @@ const restGetById = (path: (id: string) => string) => (req: { id: string }) =>
  * `getLoyaltyTiers` is `listLoyaltyTiers`, and `getLoyaltyTransactions` is
  * `listLoyaltyTransactions`.
  *
- * The other 32 have no contract at all. Sales - contacts, leads, contracts,
- * touchpoints, pipeline - has none, nor do automations, the customer
- * import/export/merge/timeline endpoints, or loyalty members and rewards. Those
- * go over REST at paths verified against onion's router.
+ * The rest have no contract: automations, the customer import/export/merge/
+ * timeline endpoints, and loyalty members and rewards. Those go over REST at
+ * paths verified against onion's router. Sales has its own generated clients
+ * (crm.sales.v1).
  *
  * Delegation is lazy rather than bound at module load, so a partial test mock
  * does not crash the module on import.
@@ -181,28 +178,4 @@ export const crmCompatibilityClient = {
   createAutomation: restPost('/crm/automations'),
   updateAutomation: restPut((id) => `/crm/automations/${id}`),
   deleteAutomation: restDelete((id) => `/crm/automations/${id}`),
-
-  // ── Sales: no contract for any of it ─────────────────────────────────────
-  listContacts: restGet('/crm/sales/contacts'),
-  createContact: restPost('/crm/sales/contacts'),
-  updateContact: restPut((id) => `/crm/sales/contacts/${id}`),
-  deleteContact: restDelete((id) => `/crm/sales/contacts/${id}`),
-
-  listContracts: restGet('/crm/sales/contracts'),
-  getContract: restGetById((id) => `/crm/sales/contracts/${id}`),
-  createContract: restPost('/crm/sales/contracts'),
-  updateContract: restPut((id) => `/crm/sales/contracts/${id}`),
-
-  listLeads: restGet('/crm/sales/leads'),
-  getLead: restGetById((id) => `/crm/sales/leads/${id}`),
-  createLead: restPost('/crm/sales/leads'),
-  updateLead: restPut((id) => `/crm/sales/leads/${id}`),
-  deleteLead: restDelete((id) => `/crm/sales/leads/${id}`),
-
-  listTouchpoints: restGetById((id) => `/crm/sales/leads/${encodeURIComponent(id)}/touchpoints`),
-  createTouchpoint: restPost('/crm/sales/touchpoints'),
-  deleteTouchpoint: restDelete((id) => `/crm/sales/touchpoints/${id}`),
-
-  getSalesPipeline: restGet('/crm/sales/pipeline'),
-  listSalesReps: restGet('/crm/sales/reps'),
 };

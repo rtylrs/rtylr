@@ -5,47 +5,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { Upload, Check } from 'lucide-react';
 import { useImportCustomerRows } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, PageHeader, Select } from '../../shared/components/ui';
+import { parseCsv } from '../../shared/lib/csv';
 
 const REQUIRED = ['name', 'email', 'phone'];
-
-export function parseCsv(input: string): string[][] {
-  const records: string[][] = [];
-  let record: string[] = [];
-  let field = '';
-  let quoted = false;
-  for (let i = 0; i < input.length; i += 1) {
-    const char = input[i];
-    const next = input[i + 1];
-    if (char === '"') {
-      if (quoted && next === '"') {
-        field += '"';
-        i += 1;
-      } else {
-        quoted = !quoted;
-      }
-      continue;
-    }
-    if (char === ',' && !quoted) {
-      record.push(field.trim());
-      field = '';
-      continue;
-    }
-    if ((char === '\n' || char === '\r') && !quoted) {
-      if (char === '\r' && next === '\n') i += 1;
-      record.push(field.trim());
-      field = '';
-      if (record.some((value) => value !== '')) records.push(record);
-      record = [];
-      continue;
-    }
-    field += char;
-  }
-  if (field !== '' || record.length > 0) {
-    record.push(field.trim());
-    if (record.some((value) => value !== '')) records.push(record);
-  }
-  return records;
-}
 
 const ImportCustomers: React.FC = () => {
   const { t } = useTranslation();

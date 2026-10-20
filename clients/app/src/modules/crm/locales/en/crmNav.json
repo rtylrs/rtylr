@@ -8,7 +8,6 @@
   "templates": "Templates",
   "feedback": "Feedback",
   "settings": "Settings",
-  "pipeline": "Pipeline",
   "leads": "Leads",
   "contracts": "Contracts",
   "newCustomer": "New customer",
@@ -33,5 +32,13 @@
   "actions": {
     "importCustomersCsv": "Import customers from CSV",
     "loyaltyRewardsCatalog": "Loyalty rewards catalog"
+  },
+  "deals": "Deals",
+  "tasks": "Tasks",
+  "sections": {
+    "sales": "Sales",
+    "customers": "Customers",
+    "marketing": "Marketing",
+    "retention": "Retention"
   }
 }

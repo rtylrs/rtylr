@@ -27,9 +27,14 @@ const SegmentBuilder = React.lazy(() => import('./features/segments/SegmentBuild
 const SegmentDetail = React.lazy(() => import('./features/segments/SegmentDetail'));
 const Templates = React.lazy(() => import('./features/templates/Templates'));
 const Feedback = React.lazy(() => import('./features/feedback/Feedback'));
-const Pipeline = React.lazy(() => import('./features/sales/Pipeline'));
+const Deals = React.lazy(() => import('./features/sales/Deals'));
+const DealDetail = React.lazy(() => import('./features/sales/DealDetail'));
 const Leads = React.lazy(() => import('./features/sales/Leads'));
 const LeadDetail = React.lazy(() => import('./features/sales/LeadDetail'));
+const LeadImport = React.lazy(() => import('./features/sales/LeadImport'));
+const CallSession = React.lazy(() => import('./features/sales/CallSession'));
+const SalesTasks = React.lazy(() => import('./features/sales/Tasks'));
+const Pipelines = React.lazy(() => import('./features/sales/Pipelines'));
 const SalesContracts = React.lazy(() => import('./features/sales/Contracts'));
 
 function lazy(element: React.ReactNode): React.ReactNode {
@@ -223,31 +228,26 @@ export function createCrmRoutes<TParent extends AnyRoute>(parent: TParent) {
     component: () => <Navigate to="/settings/crm" replace />,
   });
 
-  // Sales pipeline. Core CRM, gated by canAccessCrmPath like every other CRM
-  // page; it used to also need a `sales_pipeline` add-on the catalog never had.
-  const salesRoute = createRoute({
-    getParentRoute: () => layoutRoute,
-    path: '/sales',
-    component: () => lazy(<Pipeline />),
-  });
-
-  const salesLeadsRoute = createRoute({
-    getParentRoute: () => layoutRoute,
-    path: '/sales/leads',
-    component: () => lazy(<Leads />),
-  });
-
-  const salesLeadDetailRoute = createRoute({
-    getParentRoute: () => layoutRoute,
-    path: '/sales/leads/$id',
-    component: () => lazy(<LeadDetail />),
-  });
-
-  const salesContractsRoute = createRoute({
-    getParentRoute: () => layoutRoute,
-    path: '/sales/contracts',
-    component: () => lazy(<SalesContracts />),
-  });
+  // Sales (docs/crm-model.md in services/onion): leads to qualify, deals in
+  // pipelines, the tasks that drive both, and the contracts deals close into.
+  const salesPages: Array<[string, React.ReactNode]> = [
+    ['/sales', <Deals key="deals" />],
+    ['/sales/deals/$id', <DealDetail key="deal" />],
+    ['/sales/leads', <Leads key="leads" />],
+    ['/sales/leads/import', <LeadImport key="import" />],
+    ['/sales/leads/call', <CallSession key="call" />],
+    ['/sales/leads/$id', <LeadDetail key="lead" />],
+    ['/sales/tasks', <SalesTasks key="tasks" />],
+    ['/sales/pipelines', <Pipelines key="pipelines" />],
+    ['/sales/contracts', <SalesContracts key="contracts" />],
+  ];
+  const salesRoutes = salesPages.map(([path, page]) =>
+    createRoute({
+      getParentRoute: () => layoutRoute,
+      path,
+      component: () => lazy(page),
+    })
+  );
 
   const catchAllRoute = createRoute({
     getParentRoute: () => layoutRoute,
@@ -278,10 +278,7 @@ export function createCrmRoutes<TParent extends AnyRoute>(parent: TParent) {
     templatesRoute,
     feedbackRoute,
     settingsRoute,
-    salesRoute,
-    salesLeadsRoute,
-    salesLeadDetailRoute,
-    salesContractsRoute,
+    ...salesRoutes,
     catchAllRoute,
   ]);
 }

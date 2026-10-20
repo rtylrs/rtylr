@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseCsv } from '../../../../features/customers/ImportCustomers';
+import { parseCsv } from '../../../lib/csv';
 
 describe('useCustomers & customer helpers', () => {
   it('parses CSV with quoted fields, escaped quotes, and multiline rows properly (RFC4180)', () => {

@@ -315,7 +315,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Console:               consoleModule,
 		Config:                configModule,
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
-		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithRepReader(crmSalesReps(scopes.NewReader(dbclient.Pool()))).WithBusinessOwnerResolver(businessModule),
+		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()).WithMembershipReader(scopes.NewReader(dbclient.Pool()).IsBusinessUser).WithRepReader(crmSalesReps(scopes.NewReader(dbclient.Pool()))),
 		Customers:             customersModule,
 		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),

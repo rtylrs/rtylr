@@ -1,9 +1,7 @@
 package crm.sales.v1
 
 /// Contract is a sales agreement: what a customer bought, what it costs and
-/// how often it is billed, its term, and who signed. This domain contracts the read surface that
-/// other apps need; create/update stay on CRM's legacy surface until that
-/// migration happens.
+/// how often it is billed, its term, and who signed. Winning a deal drafts one.
 ///
 /// A contract is "signed" when signed_at is present. Unsigned drafts exist so
 /// sales can stage terms before signature, and callers must treat the two
@@ -11,9 +9,12 @@ package crm.sales.v1
 message Contract {
   /// id is the unique identifier for the resource.
   id: int64
-  /// lead_id is the CRM lead this contract closes; absent for contracts
-  /// recorded without a lead.
+  /// lead_id is the lead the contract's deal came from; absent for deals
+  /// opened directly and contracts recorded without a deal.
   lead_id: int64?
+  /// deal_id is the won deal this contract records; absent for contracts
+  /// recorded without one.
+  deal_id: int64?
   /// plan is what was sold, as free text (e.g. "Annual maintenance").
   plan: string
   /// mrr is the monthly equivalent of value as a decimal string, because
@@ -86,20 +87,20 @@ message GetContractResponse {
   contract: Contract
 }
 
-/// CreateContractRequest stages a new contract from a won lead. Signing can
-/// happen now or later via update.
+/// CreateContractRequest drafts a contract, usually for a won deal. Signing
+/// can happen now or later via update.
 message CreateContractRequest {
-  /// lead_id links the contract to its winning lead.
-  lead_id: int64? @required @gt(0)
+  /// deal_id links the contract to the deal it records.
+  deal_id: int64? @gt(0)
+  /// customer_id is the CRM customer the contract belongs to; the deal's
+  /// customer when absent.
+  customer_id: int64? @gt(0)
   /// plan is what was bought, as CRM displays it.
   plan: string @required
-  /// mrr is monthly recurring revenue as a decimal string.
-  mrr: string @required
   /// seats is how many users the contract covers.
   seats: int32 @gte(0)
-  /// value is what is charged per billing period (decimal string); when
-  /// absent the contract is monthly and worth mrr.
-  value: string?
+  /// value is what is charged per billing period (decimal string).
+  value: string @required
   /// billing is one_time, monthly or yearly; monthly when absent.
   billing: string?
   /// start_date is when the term starts (YYYY-MM-DD).
@@ -121,8 +122,8 @@ message CreateContractResponse {
   contract: Contract
 }
 
-/// UpdateContractRequest amends an existing contract. Fields left absent keep
-/// their current values, except status-bearing fields which replace outright.
+/// UpdateContractRequest replaces a contract's terms. The customer is kept
+/// when the body names none.
 message UpdateContractRequest {
   /// id is the contract id path parameter.
   id: int64
@@ -134,21 +135,18 @@ message UpdateContractRequest {
 message UpdateContractBody {
   /// plan replaces what the contract says was bought.
   plan: string
-  /// mrr replaces monthly recurring revenue (decimal string).
-  mrr: string
   /// seats replaces the covered user count.
   seats: int32
   /// value replaces what is charged per billing period (decimal string).
-  value: string?
+  value: string
   /// billing replaces the billing period: one_time, monthly or yearly.
   billing: string?
   /// start_date replaces when the term starts (YYYY-MM-DD).
   start_date: string?
   /// end_date replaces when the term ends (YYYY-MM-DD).
   end_date: string?
-  /// signed_at records the signature; setting it on an unsigned draft makes
-  /// the contract billable. Already-signed contracts keep their original
-  /// timestamp unless explicitly replaced here.
+  /// signed_at records the signature (YYYY-MM-DD); setting it on an unsigned
+  /// draft makes the contract billable, and leaving it absent unsigns.
   signed_at: string?
   /// signed_by_name replaces the customer-side signer.
   signed_by_name: string
@@ -160,4 +158,1097 @@ message UpdateContractBody {
 message UpdateContractResponse {
   /// contract is the record after amendment.
   contract: Contract
+}
+
+// ---------------------------------------------------------------------------
+// Leads: prospects to qualify (docs/crm-model.md in services/onion).
+// Money crosses the wire as decimal strings. Dates are YYYY-MM-DD; instants
+// are Unix seconds.
+// ---------------------------------------------------------------------------
+
+/// Lead is a prospect to qualify: a person and the company they work for.
+message Lead {
+  /// id is the lead's identifier.
+  id: int64
+  /// first_name is the person's first name.
+  first_name: string
+  /// last_name is the person's last name.
+  last_name: string
+  /// job_title is the person's role at the company.
+  job_title: string
+  /// email is the person's email address, lowercased.
+  email: string
+  /// phone is the person's phone number as entered.
+  phone: string
+  /// company_name is the company the person works for.
+  company_name: string
+  /// website is the company's website.
+  website: string
+  /// linkedin is the person's LinkedIn profile.
+  linkedin: string
+  /// industry is the company's industry.
+  industry: string
+  /// size is the company's size band.
+  size: string
+  /// city is where the lead is.
+  city: string
+  /// country is where the lead is.
+  country: string
+  /// source is where the lead came from, e.g. "LinkedIn" or a list name.
+  source: string
+  /// status is new, attempting, connected, nurture, qualified or disqualified.
+  status: string
+  /// disqualify_reason says why a disqualified lead was dropped.
+  disqualify_reason: string
+  /// assigned_to is the rep working the lead.
+  assigned_to: int64?
+  /// value is the estimated deal value (decimal string), when known.
+  value: string?
+  /// billing is how often value would be charged: one_time, monthly or yearly.
+  billing: string
+  /// notes are free-text notes.
+  notes: string
+  /// attempt_count is how many calls have been logged.
+  attempt_count: int32
+  /// last_activity_at is when the lead was last worked.
+  last_activity_at: int64?
+  /// next_follow_up is the earliest open task's due date.
+  next_follow_up: string?
+  /// customer_id is the CRM customer the lead became on conversion.
+  customer_id: int64?
+  /// company_id is the company record created or matched on conversion.
+  company_id: int64?
+  /// deal_id is the deal opened on conversion.
+  deal_id: int64?
+  /// converted_at is when the lead was qualified.
+  converted_at: int64?
+  /// import_batch_id is the import that created the lead.
+  import_batch_id: int64?
+  /// created_at is when the lead was created.
+  created_at: int64
+  /// updated_at is when the lead was last changed.
+  updated_at: int64
+}
+
+/// LeadFields are a lead's editable fields.
+message LeadFields {
+  /// first_name is the person's first name.
+  first_name: string
+  /// last_name is the person's last name.
+  last_name: string
+  /// job_title is the person's role.
+  job_title: string
+  /// email is the person's email address.
+  email: string
+  /// phone is the person's phone number.
+  phone: string
+  /// company_name is the company; a lead needs it or a person's name.
+  company_name: string
+  /// website is the company's website.
+  website: string
+  /// linkedin is the person's LinkedIn profile.
+  linkedin: string
+  /// industry is the company's industry.
+  industry: string
+  /// size is the company's size band.
+  size: string
+  /// city is where the lead is.
+  city: string
+  /// country is where the lead is.
+  country: string
+  /// source is where the lead came from.
+  source: string
+  /// assigned_to is the rep to work the lead; absent leaves it unassigned.
+  assigned_to: int64?
+  /// value is the estimated deal value (decimal string).
+  value: string?
+  /// billing is one_time, monthly or yearly; one_time when absent.
+  billing: string
+  /// notes are free-text notes.
+  notes: string
+}
+
+/// ListLeadsRequest selects one page of leads. Filters combine with AND.
+message ListLeadsRequest {
+  /// statuses is a comma-separated list of statuses; all when empty.
+  statuses: string @query("statuses")
+  /// assigned_to filters to one rep's leads; 0 selects unassigned leads.
+  assigned_to: int64? @query("assigned_to")
+  /// source filters to one source.
+  source: string @query("source")
+  /// import_id filters to one import's leads.
+  import_id: int64? @query("import_id")
+  /// follow_up is overdue, today, due (overdue or today) or upcoming.
+  follow_up: string @query("follow_up")
+  /// search matches names, company, email and phone.
+  search: string @query("search")
+  /// sort is newest, follow_up, recent_activity or company.
+  sort: string @query("sort")
+  /// cursor continues from a previous page's next_cursor.
+  cursor: string @query("cursor")
+  /// limit is the page size, at most 200.
+  limit: int32 @query("limit")
+  /// today is the caller's date, which follow-up windows are relative to.
+  today: string @query("today")
+}
+
+/// ListLeadsResponse is one page of leads.
+message ListLeadsResponse {
+  /// leads is the page.
+  leads: Lead[]
+  /// next_cursor continues the list; empty on the last page.
+  next_cursor: string
+  /// total is how many leads match the filters.
+  total: int64 @encode(number)
+}
+
+/// GetLeadStatsRequest selects whose prospecting to summarise.
+message GetLeadStatsRequest {
+  /// assigned_to limits the stats to one rep; everyone when absent.
+  assigned_to: int64? @query("assigned_to")
+  /// today is the caller's date.
+  today: string @query("today")
+  /// utc_offset_minutes is the caller's offset from UTC, so "today" counts
+  /// start at the caller's midnight.
+  utc_offset_minutes: int32 @query("utc_offset_minutes")
+}
+
+/// LeadStatusCount is how many leads have one status.
+message LeadStatusCount {
+  /// status is the lead status.
+  status: string
+  /// count is how many leads have it.
+  count: int64 @encode(number)
+}
+
+/// GetLeadStatsResponse summarises prospecting.
+message GetLeadStatsResponse {
+  /// by_status counts leads per status.
+  by_status: LeadStatusCount[]
+  /// follow_ups_overdue counts worked leads with an overdue follow-up.
+  follow_ups_overdue: int64 @encode(number)
+  /// follow_ups_today counts worked leads with a follow-up due today.
+  follow_ups_today: int64 @encode(number)
+  /// calls_today counts calls logged since the caller's midnight.
+  calls_today: int64 @encode(number)
+  /// connected_today counts those calls that reached the person.
+  connected_today: int64 @encode(number)
+  /// converted_this_month counts leads qualified this calendar month.
+  converted_this_month: int64 @encode(number)
+}
+
+/// ListLeadSourcesRequest takes no parameters.
+message ListLeadSourcesRequest {}
+
+/// ListLeadSourcesResponse lists the sources leads have, for filters.
+message ListLeadSourcesResponse {
+  /// sources are the distinct non-empty sources.
+  sources: string[]
+}
+
+/// GetLeadRequest selects one lead.
+message GetLeadRequest {
+  /// id is the lead id.
+  id: int64 @gt(0)
+}
+
+/// GetLeadResponse returns one lead.
+message GetLeadResponse {
+  /// lead is the record.
+  lead: Lead
+}
+
+/// CreateLeadRequest adds a lead as new.
+message CreateLeadRequest {
+  /// lead holds the fields.
+  lead: LeadFields
+}
+
+/// CreateLeadResponse returns the created lead.
+message CreateLeadResponse {
+  /// lead is the record as stored.
+  lead: Lead
+}
+
+/// UpdateLeadRequest replaces a lead's fields and status.
+message UpdateLeadRequest {
+  /// id is the lead id.
+  id: int64 @gt(0)
+  /// body carries the new values.
+  body: UpdateLeadBody
+}
+
+/// UpdateLeadBody is a full edit of a lead.
+message UpdateLeadBody {
+  /// lead holds the fields.
+  lead: LeadFields
+  /// status is the new status; qualifying happens through conversion.
+  status: string
+  /// disqualify_reason is required when disqualifying.
+  disqualify_reason: string
+}
+
+/// UpdateLeadResponse returns the edited lead.
+message UpdateLeadResponse {
+  /// lead is the record as stored.
+  lead: Lead
+}
+
+/// DeleteLeadRequest removes an unconverted lead.
+message DeleteLeadRequest {
+  /// id is the lead id.
+  id: int64 @gt(0)
+}
+
+/// DeleteLeadResponse confirms the removal.
+message DeleteLeadResponse {
+  /// deleted is true once the lead is gone.
+  deleted: bool
+}
+
+/// UpdateLeadsRequest assigns or re-statuses many leads at once.
+message UpdateLeadsRequest {
+  /// ids are the leads to change, at most 1000.
+  ids: int64[] @min_items(1)
+  /// assign_to gives the leads to a rep.
+  assign_to: int64?
+  /// unassign takes the leads off whoever has them.
+  unassign: bool
+  /// status sets the leads' status instead.
+  status: string
+  /// disqualify_reason is required when disqualifying.
+  disqualify_reason: string
+}
+
+/// UpdateLeadsResponse reports how many leads changed.
+message UpdateLeadsResponse {
+  /// updated is how many leads changed.
+  updated: int64 @encode(number)
+}
+
+/// DeleteLeadsRequest removes many unconverted leads.
+message DeleteLeadsRequest {
+  /// ids are the leads to delete, at most 1000.
+  ids: int64[] @min_items(1)
+}
+
+/// DeleteLeadsResponse reports how many leads were removed.
+message DeleteLeadsResponse {
+  /// deleted is how many leads were removed; converted ones are kept.
+  deleted: int64 @encode(number)
+}
+
+/// ConvertLeadRequest qualifies a lead.
+message ConvertLeadRequest {
+  /// id is the lead id.
+  id: int64 @gt(0)
+  /// body says whether and how to open a deal.
+  body: ConvertLeadBody
+}
+
+/// ConvertLeadBody opens a deal for the qualified lead when create_deal is
+/// set; its fields default from the lead.
+message ConvertLeadBody {
+  /// create_deal opens a deal in the pipeline.
+  create_deal: bool
+  /// deal holds the deal's fields.
+  deal: DealFields?
+}
+
+/// ConvertLeadResponse returns the qualified lead and its deal.
+message ConvertLeadResponse {
+  /// lead is the qualified lead.
+  lead: Lead
+  /// deal is the opened deal, when one was asked for.
+  deal: Deal?
+}
+
+/// ListRepsRequest takes no parameters.
+message ListRepsRequest {}
+
+/// Rep is a teammate work can be assigned to.
+message Rep {
+  /// id is the user id.
+  id: int64
+  /// name is the teammate's display name.
+  name: string
+}
+
+/// ListRepsResponse lists the business's assignable teammates.
+message ListRepsResponse {
+  /// reps are the owner and active members.
+  reps: Rep[]
+}
+
+// ---------------------------------------------------------------------------
+// Activities and tasks
+// ---------------------------------------------------------------------------
+
+/// Activity is one logged touch: a call, email, meeting, SMS or note.
+message Activity {
+  /// id is the activity id.
+  id: int64
+  /// lead_id is the lead it was logged on.
+  lead_id: int64?
+  /// deal_id is the deal it was logged on.
+  deal_id: int64?
+  /// type is call, email, meeting, sms or note.
+  type: string
+  /// outcome is a call's disposition: connected, no_answer, voicemail, busy,
+  /// wrong_number, callback, meeting_booked or not_interested.
+  outcome: string
+  /// notes are what was said or done.
+  notes: string
+  /// duration_seconds is a call's length.
+  duration_seconds: int32?
+  /// created_by is who logged it.
+  created_by: int64
+  /// occurred_at is when the touch happened.
+  occurred_at: int64
+}
+
+/// SalesTaskFields create or edit a task.
+message SalesTaskFields {
+  /// lead_id attaches the task to a lead (creation only).
+  lead_id: int64?
+  /// deal_id attaches the task to a deal (creation only).
+  deal_id: int64?
+  /// title says what to do.
+  title: string
+  /// type is call, email, meeting or todo.
+  type: string
+  /// due_date is when it is due (YYYY-MM-DD).
+  due_date: string @required
+  /// assigned_to is who does it; the creator when absent.
+  assigned_to: int64?
+}
+
+/// SalesTask is a follow-up due on a date.
+message SalesTask {
+  /// id is the task id.
+  id: int64
+  /// lead_id is the lead it is about.
+  lead_id: int64?
+  /// deal_id is the deal it is about.
+  deal_id: int64?
+  /// title says what to do.
+  title: string
+  /// type is call, email, meeting or todo.
+  type: string
+  /// due_date is when it is due.
+  due_date: string
+  /// assigned_to is who does it.
+  assigned_to: int64?
+  /// completed_at is when it was done; absent while open.
+  completed_at: int64?
+  /// lead_name is the lead's person, for worklists.
+  lead_name: string
+  /// company_name is the lead's company.
+  company_name: string
+  /// phone is the lead's phone, so a call task can be dialled from the list.
+  phone: string
+  /// deal_title is the deal's title.
+  deal_title: string
+  /// created_at is when the task was created.
+  created_at: int64
+}
+
+/// LogActivityRequest logs a touch on a lead or a deal.
+message LogActivityRequest {
+  /// lead_id is the lead it was logged on.
+  lead_id: int64?
+  /// deal_id is the deal it was logged on.
+  deal_id: int64?
+  /// type is call, email, meeting, sms or note.
+  type: string @required
+  /// outcome is required for calls.
+  outcome: string
+  /// notes are what was said or done.
+  notes: string
+  /// duration_seconds is a call's length.
+  duration_seconds: int32?
+  /// occurred_at is when it happened; now when absent.
+  occurred_at: int64?
+  /// follow_up schedules the next touch as a task.
+  follow_up: SalesTaskFields?
+}
+
+/// LogActivityResponse returns the activity and any follow-up task.
+message LogActivityResponse {
+  /// activity is the logged touch.
+  activity: Activity
+  /// follow_up is the scheduled task.
+  follow_up: SalesTask?
+}
+
+/// ListLeadActivitiesRequest pages a lead's timeline, newest first.
+message ListLeadActivitiesRequest {
+  /// lead_id is the lead.
+  lead_id: int64 @gt(0)
+  /// cursor continues from a previous page.
+  cursor: string @query("cursor")
+  /// limit is the page size.
+  limit: int32 @query("limit")
+}
+
+/// ListDealActivitiesRequest pages a deal's timeline, including the work on
+/// the lead it came from.
+message ListDealActivitiesRequest {
+  /// deal_id is the deal.
+  deal_id: int64 @gt(0)
+  /// cursor continues from a previous page.
+  cursor: string @query("cursor")
+  /// limit is the page size.
+  limit: int32 @query("limit")
+}
+
+/// ListActivitiesResponse is one page of a timeline.
+message ListActivitiesResponse {
+  /// activities is the page, newest first.
+  activities: Activity[]
+  /// next_cursor continues the timeline; empty at its start.
+  next_cursor: string
+}
+
+/// DeleteActivityRequest removes a logged activity.
+message DeleteActivityRequest {
+  /// id is the activity id.
+  id: int64 @gt(0)
+}
+
+/// DeleteActivityResponse confirms the removal.
+message DeleteActivityResponse {
+  /// deleted is true once the activity is gone.
+  deleted: bool
+}
+
+/// ListSalesTasksRequest pages tasks.
+message ListSalesTasksRequest {
+  /// scope is open (earliest due first) or completed (latest first).
+  scope: string @query("scope")
+  /// assigned_to filters to one person's tasks; 0 selects unassigned.
+  assigned_to: int64? @query("assigned_to")
+  /// due is overdue, today, due or upcoming, for open tasks.
+  due: string @query("due")
+  /// lead_id filters to one lead's tasks.
+  lead_id: int64? @query("lead_id")
+  /// deal_id filters to one deal's tasks.
+  deal_id: int64? @query("deal_id")
+  /// cursor continues from a previous page.
+  cursor: string @query("cursor")
+  /// limit is the page size.
+  limit: int32 @query("limit")
+  /// today is the caller's date.
+  today: string @query("today")
+}
+
+/// ListSalesTasksResponse is one page of tasks.
+message ListSalesTasksResponse {
+  /// tasks is the page.
+  tasks: SalesTask[]
+  /// next_cursor continues the list; empty on the last page.
+  next_cursor: string
+}
+
+/// GetSalesTaskCountsRequest selects whose open work to count.
+message GetSalesTaskCountsRequest {
+  /// assigned_to limits the counts to one person; everyone when absent.
+  assigned_to: int64? @query("assigned_to")
+  /// today is the caller's date.
+  today: string @query("today")
+}
+
+/// GetSalesTaskCountsResponse counts open tasks by when they are due.
+message GetSalesTaskCountsResponse {
+  /// overdue counts tasks due before today.
+  overdue: int64 @encode(number)
+  /// due_today counts tasks due today.
+  due_today: int64 @encode(number)
+  /// upcoming counts tasks due after today.
+  upcoming: int64 @encode(number)
+}
+
+/// CreateSalesTaskRequest schedules a task.
+message CreateSalesTaskRequest {
+  /// task holds the fields.
+  task: SalesTaskFields
+}
+
+/// SalesTaskResponse returns a task.
+message SalesTaskResponse {
+  /// task is the record as stored.
+  task: SalesTask
+}
+
+/// UpdateSalesTaskRequest edits a task.
+message UpdateSalesTaskRequest {
+  /// id is the task id.
+  id: int64 @gt(0)
+  /// body carries the new values.
+  body: SalesTaskFields
+}
+
+/// CompleteSalesTaskRequest marks a task done or open again.
+message CompleteSalesTaskRequest {
+  /// id is the task id.
+  id: int64 @gt(0)
+  /// body says which.
+  body: CompleteSalesTaskBody
+}
+
+/// CompleteSalesTaskBody says whether the task is done.
+message CompleteSalesTaskBody {
+  /// done is true to complete, false to reopen.
+  done: bool
+}
+
+/// DeleteSalesTaskRequest removes a task.
+message DeleteSalesTaskRequest {
+  /// id is the task id.
+  id: int64 @gt(0)
+}
+
+/// DeleteSalesTaskResponse confirms the removal.
+message DeleteSalesTaskResponse {
+  /// deleted is true once the task is gone.
+  deleted: bool
+}
+
+// ---------------------------------------------------------------------------
+// Pipelines and deals
+// ---------------------------------------------------------------------------
+
+/// Stage is a step of a pipeline.
+message Stage {
+  /// id is the stage id.
+  id: int64
+  /// pipeline_id is the pipeline it belongs to.
+  pipeline_id: int64
+  /// name is what the stage is called.
+  name: string
+  /// position orders the stages.
+  position: int32
+  /// probability (0-100) is the chance a deal in the stage is won.
+  probability: int32
+  /// kind is open, won or lost.
+  kind: string
+}
+
+/// Pipeline is one sales motion's ordered stages.
+message Pipeline {
+  /// id is the pipeline id.
+  id: int64
+  /// name is what the pipeline is called.
+  name: string
+  /// is_default marks the business's default pipeline.
+  is_default: bool
+  /// stages are in order.
+  stages: Stage[]
+}
+
+/// StageFields describe a stage in a pipeline edit.
+message StageFields {
+  /// id keeps an existing stage; absent adds one.
+  id: int64?
+  /// name is what the stage is called.
+  name: string @required
+  /// probability (0-100); fixed at 100 for won and 0 for lost.
+  probability: int32
+  /// kind is open, won or lost; fixed once created.
+  kind: string @required
+}
+
+/// PipelineFields create or replace a pipeline. Stages left out are removed.
+message PipelineFields {
+  /// name is what the pipeline is called.
+  name: string @required
+  /// stages are in order; a pipeline needs open stages and one won and one
+  /// lost stage.
+  stages: StageFields[] @min_items(3)
+}
+
+/// ListPipelinesRequest takes no parameters.
+message ListPipelinesRequest {}
+
+/// ListPipelinesResponse lists the business's pipelines.
+message ListPipelinesResponse {
+  /// pipelines are in order, with their stages.
+  pipelines: Pipeline[]
+}
+
+/// CreatePipelineRequest adds a pipeline.
+message CreatePipelineRequest {
+  /// pipeline holds the fields.
+  pipeline: PipelineFields
+}
+
+/// PipelineResponse returns a pipeline.
+message PipelineResponse {
+  /// pipeline is the record as stored.
+  pipeline: Pipeline
+}
+
+/// UpdatePipelineRequest renames a pipeline and replaces its stages.
+message UpdatePipelineRequest {
+  /// id is the pipeline id.
+  id: int64 @gt(0)
+  /// body carries the new values.
+  body: PipelineFields
+}
+
+/// DeletePipelineRequest removes an empty pipeline.
+message DeletePipelineRequest {
+  /// id is the pipeline id.
+  id: int64 @gt(0)
+}
+
+/// DeletePipelineResponse confirms the removal.
+message DeletePipelineResponse {
+  /// deleted is true once the pipeline is gone.
+  deleted: bool
+}
+
+/// Deal is one opportunity in a pipeline.
+message Deal {
+  /// id is the deal id.
+  id: int64
+  /// pipeline_id is the deal's pipeline.
+  pipeline_id: int64
+  /// stage_id is the deal's stage.
+  stage_id: int64
+  /// title names the deal.
+  title: string
+  /// lead_id is the lead it came from.
+  lead_id: int64?
+  /// customer_id is the CRM customer the deal is with.
+  customer_id: int64?
+  /// company_id is the company record the deal is with.
+  company_id: int64?
+  /// contact_name is the person the deal is with.
+  contact_name: string
+  /// company_name is the company the deal is with.
+  company_name: string
+  /// value is what would be charged per billing period (decimal string).
+  value: string
+  /// billing is one_time, monthly or yearly.
+  billing: string
+  /// amount is the first-year value pipeline totals use (decimal string).
+  amount: string
+  /// expected_close_date is when the deal should close.
+  expected_close_date: string?
+  /// assigned_to is the rep who owns the deal.
+  assigned_to: int64?
+  /// source is where the deal came from.
+  source: string
+  /// status is open, won or lost.
+  status: string
+  /// lost_reason says why a lost deal was lost.
+  lost_reason: string
+  /// closed_at is when the deal was won or lost.
+  closed_at: int64?
+  /// notes are free-text notes.
+  notes: string
+  /// last_activity_at is when the deal was last worked.
+  last_activity_at: int64?
+  /// next_follow_up is the earliest open task's due date.
+  next_follow_up: string?
+  /// stage_changed_at is when the deal entered its stage.
+  stage_changed_at: int64
+  /// created_at is when the deal was opened.
+  created_at: int64
+}
+
+/// DealFields are a deal's editable fields.
+message DealFields {
+  /// title names the deal; the company or contact when empty.
+  title: string
+  /// pipeline_id places a new deal; the default pipeline when absent.
+  pipeline_id: int64?
+  /// stage_id places a new deal; the pipeline's first open stage when absent.
+  stage_id: int64?
+  /// contact_name is the person the deal is with.
+  contact_name: string
+  /// company_name is the company the deal is with.
+  company_name: string
+  /// value is what would be charged per billing period (decimal string).
+  value: string
+  /// billing is one_time, monthly or yearly.
+  billing: string
+  /// expected_close_date is when the deal should close.
+  expected_close_date: string
+  /// assigned_to is the rep who owns the deal.
+  assigned_to: int64?
+  /// source is where the deal came from.
+  source: string
+  /// notes are free-text notes.
+  notes: string
+}
+
+/// ListDealsRequest selects one page of deals for the table view.
+message ListDealsRequest {
+  /// pipeline_id filters to one pipeline.
+  pipeline_id: int64? @query("pipeline_id")
+  /// stage_id filters to one stage.
+  stage_id: int64? @query("stage_id")
+  /// statuses is a comma-separated list of open, won and lost; all when empty.
+  statuses: string @query("statuses")
+  /// assigned_to filters to one rep's deals; 0 selects unassigned deals.
+  assigned_to: int64? @query("assigned_to")
+  /// search matches the title, company and contact.
+  search: string @query("search")
+  /// sort is newest, close_date or value.
+  sort: string @query("sort")
+  /// cursor continues from a previous page.
+  cursor: string @query("cursor")
+  /// limit is the page size, at most 200.
+  limit: int32 @query("limit")
+}
+
+/// ListDealsResponse is one page of deals.
+message ListDealsResponse {
+  /// deals is the page.
+  deals: Deal[]
+  /// next_cursor continues the list; empty on the last page.
+  next_cursor: string
+  /// total is how many deals match the filters.
+  total: int64 @encode(number)
+}
+
+/// GetDealBoardRequest selects a pipeline's board.
+message GetDealBoardRequest {
+  /// pipeline_id is the pipeline; the default when absent.
+  pipeline_id: int64? @query("pipeline_id")
+  /// assigned_to filters to one rep's deals; 0 selects unassigned deals.
+  assigned_to: int64? @query("assigned_to")
+  /// search matches the title, company and contact.
+  search: string @query("search")
+}
+
+/// BoardColumn is a stage's header on the board.
+message BoardColumn {
+  /// stage is the column's stage.
+  stage: Stage
+  /// deals counts the stage's deals.
+  deals: int64 @encode(number)
+  /// amount is their first-year value (decimal string).
+  amount: string
+  /// weighted_amount is amount times the stage's probability.
+  weighted_amount: string
+}
+
+/// GetDealBoardResponse is a pipeline with its column totals. Each column's
+/// deals are paged with listStageDeals.
+message GetDealBoardResponse {
+  /// pipeline is the board's pipeline.
+  pipeline: Pipeline
+  /// columns are the stages in order with their totals.
+  columns: BoardColumn[]
+}
+
+/// ListStageDealsRequest pages one board column, newest first.
+message ListStageDealsRequest {
+  /// stage_id is the column's stage.
+  stage_id: int64 @gt(0)
+  /// assigned_to filters to one rep's deals; 0 selects unassigned deals.
+  assigned_to: int64? @query("assigned_to")
+  /// search matches the title, company and contact.
+  search: string @query("search")
+  /// cursor continues from a previous page.
+  cursor: string @query("cursor")
+  /// limit is the page size.
+  limit: int32 @query("limit")
+}
+
+/// ListStageDealsResponse is one page of a column.
+message ListStageDealsResponse {
+  /// deals is the page.
+  deals: Deal[]
+  /// next_cursor continues the column; empty at its end.
+  next_cursor: string
+}
+
+/// GetDealStatsRequest selects a pipeline's header stats.
+message GetDealStatsRequest {
+  /// pipeline_id is the pipeline; the default when absent.
+  pipeline_id: int64? @query("pipeline_id")
+  /// assigned_to limits the stats to one rep.
+  assigned_to: int64? @query("assigned_to")
+  /// today is the caller's date, for "this month".
+  today: string @query("today")
+  /// utc_offset_minutes is the caller's offset from UTC.
+  utc_offset_minutes: int32 @query("utc_offset_minutes")
+}
+
+/// GetDealStatsResponse summarises a pipeline.
+message GetDealStatsResponse {
+  /// open_deals counts open deals.
+  open_deals: int64 @encode(number)
+  /// open_amount is their first-year value (decimal string).
+  open_amount: string
+  /// weighted_amount is that value weighted by stage probability.
+  weighted_amount: string
+  /// won_this_month counts deals won this calendar month.
+  won_this_month: int64 @encode(number)
+  /// won_amount_this_month is their first-year value.
+  won_amount_this_month: string
+  /// win_rate is the share of deals closed in the last 90 days that were won
+  /// (0-100).
+  win_rate: float64
+  /// average_days_to_win is how long those won deals took.
+  average_days_to_win: float64
+  /// average_won_amount is their average first-year value.
+  average_won_amount: string
+}
+
+/// GetDealRequest selects one deal.
+message GetDealRequest {
+  /// id is the deal id.
+  id: int64 @gt(0)
+}
+
+/// GetDealResponse returns a deal and its contract.
+message GetDealResponse {
+  /// deal is the record.
+  deal: Deal
+  /// contract is the contract drafted when the deal was won.
+  contract: Contract?
+}
+
+/// CreateDealRequest opens a deal without a lead.
+message CreateDealRequest {
+  /// deal holds the fields.
+  deal: DealFields
+}
+
+/// DealResponse returns a deal.
+message DealResponse {
+  /// deal is the record as stored.
+  deal: Deal
+}
+
+/// UpdateDealRequest edits a deal's fields.
+message UpdateDealRequest {
+  /// id is the deal id.
+  id: int64 @gt(0)
+  /// body carries the new values.
+  body: DealFields
+}
+
+/// MoveDealRequest puts a deal in another open stage.
+message MoveDealRequest {
+  /// id is the deal id.
+  id: int64 @gt(0)
+  /// body names the stage.
+  body: MoveDealBody
+}
+
+/// MoveDealBody names the target stage.
+message MoveDealBody {
+  /// stage_id is an open stage, in the deal's pipeline or another.
+  stage_id: int64 @gt(0)
+}
+
+/// WinDealRequest closes a deal as won.
+message WinDealRequest {
+  /// id is the deal id.
+  id: int64 @gt(0)
+  /// body optionally drafts the contract.
+  body: WinDealBody
+}
+
+/// WinDealBody drafts the won deal's contract when contract is present; its
+/// fields default from the deal.
+message WinDealBody {
+  /// contract holds the contract's terms.
+  contract: ContractFields?
+}
+
+/// ContractFields are a drafted contract's terms.
+message ContractFields {
+  /// plan is what was sold; the deal title when empty.
+  plan: string
+  /// value is charged per billing period; the deal's value when empty.
+  value: string
+  /// billing is one_time, monthly or yearly; the deal's when empty.
+  billing: string
+  /// seats is how many users the contract covers.
+  seats: int32
+  /// start_date is when the term starts; today when absent.
+  start_date: string?
+  /// end_date is when the term ends.
+  end_date: string?
+  /// signed_at records the signature now (YYYY-MM-DD).
+  signed_at: string?
+  /// signed_by_name names the customer-side signer.
+  signed_by_name: string
+  /// notes are free-text notes.
+  notes: string
+}
+
+/// WinDealResponse returns the won deal and its contract.
+message WinDealResponse {
+  /// deal is the won deal.
+  deal: Deal
+  /// contract is the drafted contract.
+  contract: Contract?
+}
+
+/// LoseDealRequest closes a deal as lost.
+message LoseDealRequest {
+  /// id is the deal id.
+  id: int64 @gt(0)
+  /// body gives the reason.
+  body: LoseDealBody
+}
+
+/// LoseDealBody gives the reason.
+message LoseDealBody {
+  /// reason says why the deal was lost.
+  reason: string @required
+}
+
+/// ReopenDealRequest returns a closed deal to an open stage.
+message ReopenDealRequest {
+  /// id is the deal id.
+  id: int64 @gt(0)
+  /// body names the stage.
+  body: ReopenDealBody
+}
+
+/// ReopenDealBody names the stage to reopen into.
+message ReopenDealBody {
+  /// stage_id is an open stage; the pipeline's first when absent.
+  stage_id: int64?
+}
+
+/// DeleteDealRequest removes a deal without a contract.
+message DeleteDealRequest {
+  /// id is the deal id.
+  id: int64 @gt(0)
+}
+
+/// DeleteDealResponse confirms the removal.
+message DeleteDealResponse {
+  /// deleted is true once the deal is gone.
+  deleted: bool
+}
+
+// ---------------------------------------------------------------------------
+// Lead imports
+// ---------------------------------------------------------------------------
+
+/// LeadImport is one uploaded file's progress and outcome.
+message LeadImport {
+  /// id is the import id.
+  id: int64
+  /// file_name is the uploaded file's name.
+  file_name: string
+  /// total_rows is how many rows the file has.
+  total_rows: int32
+  /// created counts rows that became new leads.
+  created: int32
+  /// updated counts rows that filled in an existing lead.
+  updated: int32
+  /// skipped counts rows that duplicated an existing lead.
+  skipped: int32
+  /// failed counts rows that could not be imported.
+  failed: int32
+  /// status is running, completed or undone.
+  status: string
+  /// created_by is who started the import.
+  created_by: int64
+  /// created_at is when it started.
+  created_at: int64
+  /// completed_at is when it finished or was undone.
+  completed_at: int64?
+}
+
+/// StartLeadImportRequest opens an import before its rows are sent.
+message StartLeadImportRequest {
+  /// file_name is the uploaded file's name.
+  file_name: string
+  /// total_rows is how many rows will be sent, at most 200,000.
+  total_rows: int32 @gt(0)
+}
+
+/// LeadImportResponse returns an import.
+message LeadImportResponse {
+  /// import is the record.
+  import: LeadImport
+}
+
+/// ImportLeadRowsRequest sends one chunk of an import's rows.
+message ImportLeadRowsRequest {
+  /// id is the import id.
+  id: int64 @gt(0)
+  /// body carries the rows.
+  body: ImportLeadRowsBody
+}
+
+/// ImportLeadRow is one spreadsheet row.
+message ImportLeadRow {
+  /// row is the row's line in the file, echoed in results.
+  row: int32
+  /// lead holds the mapped fields.
+  lead: LeadFields
+}
+
+/// ImportLeadRowsBody is a chunk of at most 500 rows and how to handle them.
+message ImportLeadRowsBody {
+  /// rows are the chunk.
+  rows: ImportLeadRow[] @min_items(1)
+  /// duplicates is skip (default) or fill: fill only completes the missing
+  /// fields of the existing lead.
+  duplicates: string
+  /// assigned_to gives rows without a rep to this one.
+  assigned_to: int64?
+  /// source labels rows without a source.
+  source: string
+}
+
+/// ImportLeadRowResult reports one row back.
+message ImportLeadRowResult {
+  /// row is the row's line in the file.
+  row: int32
+  /// outcome is created, updated, skipped or failed.
+  outcome: string
+  /// lead_id is the created or matched lead.
+  lead_id: int64?
+  /// error says why a failed row was rejected.
+  error: string
+}
+
+/// ImportLeadRowsResponse reports the chunk's rows.
+message ImportLeadRowsResponse {
+  /// results are one per row.
+  results: ImportLeadRowResult[]
+}
+
+/// FinishLeadImportRequest marks an import complete.
+message FinishLeadImportRequest {
+  /// id is the import id.
+  id: int64 @gt(0)
+}
+
+/// ListLeadImportsRequest takes no parameters.
+message ListLeadImportsRequest {}
+
+/// ListLeadImportsResponse lists recent imports.
+message ListLeadImportsResponse {
+  /// imports are the 20 most recent.
+  imports: LeadImport[]
+}
+
+/// UndoLeadImportRequest removes an import's untouched leads.
+message UndoLeadImportRequest {
+  /// id is the import id.
+  id: int64 @gt(0)
+}
+
+/// UndoLeadImportResponse says what undoing removed and kept.
+message UndoLeadImportResponse {
+  /// removed counts leads deleted.
+  removed: int64 @encode(number)
+  /// kept counts leads kept because someone has worked them since.
+  kept: int64 @encode(number)
 }

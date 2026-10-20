@@ -4,228 +4,24 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
+	db           *sql.DB
 	queries      *sqlc.Queries
 	memberReader func(context.Context, int64, int64) (bool, error)
 	repReader    func(context.Context, int64) ([]domain.Rep, error)
-	db           *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{
-		queries: sqlc.New(db),
-		db:      db,
-	}
-}
-
-func (r *Repository) LinkCustomerToContact(ctx context.Context, businessID, contactID, customerID int64) error {
-	return r.queries.LinkCustomerToContact(ctx, sqlc.LinkCustomerToContactParams{
-		CustomerID: sql.NullInt64{Int64: customerID, Valid: true},
-		BusinessID: businessID,
-		ID:         contactID,
-	})
-}
-
-// ---------------------------------------------------------------------------
-// Leads
-// ---------------------------------------------------------------------------
-
-func (r *Repository) ListLeads(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Lead, error) {
-	rows, err := r.queries.ListLeads(ctx, sqlc.ListLeadsParams{
-		BusinessID: businessID,
-		Limit:      limit,
-		Offset:     offset,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	leads := make([]domain.Lead, 0, len(rows))
-	for _, row := range rows {
-		leads = append(leads, leadFromRow(row))
-	}
-	return leads, nil
-}
-
-func (r *Repository) CountLeads(ctx context.Context, businessID int64) (int64, error) {
-	return r.queries.CountLeads(ctx, businessID)
-}
-
-func (r *Repository) GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error) {
-	row, err := r.queries.GetLead(ctx, sqlc.GetLeadParams{ID: id, BusinessID: businessID})
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.Lead{}, domain.ErrLeadNotFound
-		}
-		return domain.Lead{}, err
-	}
-	return leadFromGetRow(row), nil
-}
-
-func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.CreateLeadRequest) (domain.Lead, error) {
-	businessID := ownerID
-	ownerID = ownerIDFromContext(ctx, ownerID)
-	source := req.Source
-	if source == "" {
-		source = "cold_email"
-	}
-	stage := req.Stage
-	if stage == "" {
-		stage = domain.LeadStageCold
-	}
-
-	result, err := r.queries.CreateLead(ctx, sqlc.CreateLeadParams{
-		OwnerID:      ownerID,
-		BusinessID:   businessID,
-		CompanyName:  req.CompanyName,
-		Industry:     nullableString(req.Industry),
-		Size:         nullableString(req.Size),
-		Source:       source,
-		Stage:        string(stage),
-		AssignedTo:   nullableInt64(req.AssignedTo),
-		MrrPotential: nullableDecimalString(req.MRRPotential),
-		Notes:        nullableString(req.Notes),
-	})
-	if err != nil {
-		return domain.Lead{}, err
-	}
-	id, err := result.LastInsertId()
-	if err != nil {
-		return domain.Lead{}, err
-	}
-	return r.GetLead(ctx, id, businessID)
-}
-
-func (r *Repository) UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
-	err := r.queries.UpdateLead(ctx, sqlc.UpdateLeadParams{
-		CompanyName:  req.CompanyName,
-		Industry:     nullableString(req.Industry),
-		Size:         nullableString(req.Size),
-		Source:       req.Source,
-		Stage:        string(req.Stage),
-		AssignedTo:   nullableInt64(req.AssignedTo),
-		MrrPotential: nullableDecimalString(req.MRRPotential),
-		Notes:        nullableString(req.Notes),
-		ID:           id,
-		BusinessID:   businessID,
-	})
-	if err != nil {
-		return domain.Lead{}, err
-	}
-	return r.GetLead(ctx, id, businessID)
-}
-
-func (r *Repository) ValidateLeadAssignee(ctx context.Context, businessID, userID int64) error {
-	if r.memberReader == nil {
-		return errors.New("lead assignee reader is not configured")
-	}
-	exists, err := r.memberReader(ctx, businessID, userID)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return domain.ErrInvalidLeadAssignee
-	}
-	return nil
-}
-
-func (r *Repository) ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error) {
-	if r.repReader == nil {
-		return nil, errors.New("lead rep reader is not configured")
-	}
-	return r.repReader(ctx, businessID)
-}
-
-func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error {
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
-			logger.Ctx(ctx).Error("failed to rollback delete lead tx", logger.Error(rollbackErr))
-		}
-	}()
-
-	// The sales tables intentionally do not use database foreign keys because
-	// they are shared with legacy installations. Delete dependent records in a
-	// transaction so the API's documented cascade is atomic and cannot leave
-	// contacts, touchpoints, or contracts orphaned when a lead is removed.
-	if err := ensureLeadInBusiness(ctx, tx, businessID, id); err != nil {
-		return err
-	}
-	for _, table := range []string{"crm_touchpoints", "crm_contacts", "crm_contracts"} {
-		// #nosec G202 -- This table list is a package-fixed set of tenant-owned dependent tables; values remain bound.
-		if _, err := tx.ExecContext(ctx, "DELETE FROM "+table+" WHERE lead_id = ? AND business_id = ?", id, businessID); err != nil {
-			return err
-		}
-	}
-
-	_, err = tx.ExecContext(ctx, "DELETE FROM crm_leads WHERE id = ? AND business_id = ?", id, businessID)
-	if err != nil {
-		return err
-	}
-	return tx.Commit()
-}
-
-func (r *Repository) GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error) {
-	rows, err := r.queries.GetPipeline(ctx, businessID)
-	if err != nil {
-		return nil, err
-	}
-
-	summaries := make([]domain.PipelineSummary, 0, len(rows))
-	for _, row := range rows {
-		summaries = append(summaries, domain.PipelineSummary{
-			Stage:    row.Stage,
-			Count:    int(row.Cnt),
-			TotalMRR: parsePipelineMRR(row.TotalMrr),
-		})
-	}
-	return summaries, nil
-}
-
-// ---------------------------------------------------------------------------
-// Contacts
-// ---------------------------------------------------------------------------
-
-func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID *int64, limit, offset int32) ([]domain.Contact, error) {
-	if leadID != nil {
-		rows, err := r.queries.ListContactsByLead(ctx, sqlc.ListContactsByLeadParams{
-			BusinessID: businessID,
-			LeadID:     *leadID,
-			Limit:      limit,
-			Offset:     offset,
-		})
-		if err != nil {
-			return nil, err
-		}
-		contacts := make([]domain.Contact, 0, len(rows))
-		for _, row := range rows {
-			contacts = append(contacts, contactFromLeadRow(row))
-		}
-		return contacts, nil
-	}
-
-	rows, err := r.queries.ListContacts(ctx, sqlc.ListContactsParams{
-		BusinessID: businessID,
-		Limit:      limit,
-		Offset:     offset,
-	})
-	if err != nil {
-		return nil, err
-	}
-	contacts := make([]domain.Contact, 0, len(rows))
-	for _, row := range rows {
-		contacts = append(contacts, contactFromRow(row))
-	}
-	return contacts, nil
+	return &Repository{db: db, queries: sqlc.New(db)}
 }
 
 func (r *Repository) WithMembershipReader(reader func(context.Context, int64, int64) (bool, error)) *Repository {
@@ -236,4 +32,188 @@ func (r *Repository) WithMembershipReader(reader func(context.Context, int64, in
 func (r *Repository) WithRepReader(reader func(context.Context, int64) ([]domain.Rep, error)) *Repository {
 	r.repReader = reader
 	return r
+}
+
+// ValidateAssignee checks a user can be given work in the business.
+func (r *Repository) ValidateAssignee(ctx context.Context, businessID, userID int64) error {
+	if r.memberReader == nil {
+		return errors.New("crm sales membership reader is not configured")
+	}
+	ok, err := r.memberReader(ctx, businessID, userID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return domain.ErrInvalidAssignee
+	}
+	return nil
+}
+
+func (r *Repository) ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error) {
+	if r.repReader == nil {
+		return nil, errors.New("crm sales rep reader is not configured")
+	}
+	return r.repReader(ctx, businessID)
+}
+
+// inTx runs fn in one transaction, committing only when it succeeds.
+func (r *Repository) inTx(ctx context.Context, fn func(q *sqlc.Queries, tx *sql.Tx) error) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			logger.Ctx(ctx).Error("failed to roll back crm sales transaction", logger.Error(rollbackErr))
+		}
+	}()
+	if err := fn(r.queries.WithTx(tx), tx); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func notFound(err, target error) error {
+	if errors.Is(err, sql.ErrNoRows) {
+		return target
+	}
+	return err
+}
+
+func nullString(value string) sql.NullString {
+	if value == "" {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: value, Valid: true}
+}
+
+func nullInt64(value *int64) sql.NullInt64 {
+	if value == nil {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: *value, Valid: true}
+}
+
+func someInt64(value int64) sql.NullInt64 {
+	return sql.NullInt64{Int64: value, Valid: true}
+}
+
+func nullInt64s(values []int64) []sql.NullInt64 {
+	out := make([]sql.NullInt64, 0, len(values))
+	for _, value := range values {
+		out = append(out, someInt64(value))
+	}
+	return out
+}
+
+func nullTime(value *time.Time) sql.NullTime {
+	if value == nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: *value, Valid: true}
+}
+
+func someTime(value time.Time) sql.NullTime {
+	return sql.NullTime{Time: value, Valid: true}
+}
+
+// nullDate parses a YYYY-MM-DD date; "" is NULL. Callers validate first.
+func nullDate(value string) sql.NullTime {
+	if value == "" {
+		return sql.NullTime{}
+	}
+	day, err := time.Parse(time.DateOnly, value)
+	if err != nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: day, Valid: true}
+}
+
+func nullDatePtr(value *string) sql.NullTime {
+	if value == nil {
+		return sql.NullTime{}
+	}
+	return nullDate(*value)
+}
+
+func nullAmount(value *money.Amount) sql.NullString {
+	if value == nil {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: value.String(), Valid: true}
+}
+
+func int64Ptr(value sql.NullInt64) *int64 {
+	if !value.Valid {
+		return nil
+	}
+	v := value.Int64
+	return &v
+}
+
+func timePtr(value sql.NullTime) *time.Time {
+	if !value.Valid {
+		return nil
+	}
+	v := value.Time.UTC()
+	return &v
+}
+
+func dateString(value sql.NullTime) string {
+	if !value.Valid {
+		return ""
+	}
+	return value.Time.Format(time.DateOnly)
+}
+
+func datePtr(value sql.NullTime) *string {
+	if !value.Valid {
+		return nil
+	}
+	v := value.Time.Format(time.DateOnly)
+	return &v
+}
+
+// amount reads a DECIMAL column. The database only holds valid decimals, so a
+// parse failure is logged rather than failing the whole read.
+func amount(value string) money.Amount {
+	parsed, err := money.FromString(value)
+	if err != nil {
+		logger.Global().Error("crm sales read an unparseable amount", logger.Any("value", value))
+		return 0
+	}
+	return parsed
+}
+
+func amountPtr(value sql.NullString) *money.Amount {
+	if !value.Valid || value.String == "" {
+		return nil
+	}
+	v := amount(value.String)
+	return &v
+}
+
+// likePattern turns search text into a contains pattern with LIKE's wildcards
+// escaped.
+func likePattern(search string) sql.NullString {
+	search = strings.TrimSpace(search)
+	if search == "" {
+		return sql.NullString{}
+	}
+	escaped := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(search)
+	return sql.NullString{String: "%" + escaped + "%", Valid: true}
+}
+
+// digitsPattern matches a search against phone numbers once it holds enough
+// digits to mean one.
+func digitsPattern(search string) sql.NullString {
+	digits := domain.PhoneDigits(search)
+	if len(digits) < 3 {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: "%" + digits + "%", Valid: true}
+}
+
+func dayStart(day time.Time) time.Time {
+	return time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, time.UTC)
 }

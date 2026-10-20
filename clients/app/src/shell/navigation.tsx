@@ -108,14 +108,17 @@ export function PortalNavLink({
     path === '/erp' ||
     path === '/finance' ||
     path === '/hr' ||
-    path === '/crm/sales' ||
     path === '/settings' ||
     path === '/automations'
       ? pathname === path
-      : path === '/team'
-        ? pathname === '/team' ||
-          (pathname.startsWith('/team/') && !pathname.startsWith('/team/groups'))
-        : pathname === path || pathname.startsWith(`${path}/`);
+      : path === '/crm/sales'
+        ? pathname === path ||
+          pathname.startsWith('/crm/sales/deals/') ||
+          pathname === '/crm/sales/pipelines'
+        : path === '/team'
+          ? pathname === '/team' ||
+            (pathname.startsWith('/team/') && !pathname.startsWith('/team/groups'))
+          : pathname === path || pathname.startsWith(`${path}/`);
   return (
     <Link
       to={path}

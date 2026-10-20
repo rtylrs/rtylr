@@ -84,23 +84,10 @@ func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID 
 		return domain.ErrCustomerNotFound
 	}
 
-	// The CRM schema has no foreign keys: rows in these tables would keep
-	// referencing the deleted customer forever (campaign/feedback stats join
-	// on them). Tables with NOT NULL customer_id are purged; nullable
-	// references are detached.
-	cleanup := []string{
-		"DELETE FROM crm_campaign_sends WHERE business_id = ? AND customer_id = ?",
-		"DELETE FROM crm_feedback WHERE business_id = ? AND customer_id = ?",
-		"DELETE FROM crm_loyalty_transactions WHERE business_id = ? AND customer_id = ?",
-		"DELETE FROM crm_customer_timeline WHERE business_id = ? AND customer_id = ?",
-		"UPDATE crm_contacts SET customer_id = NULL WHERE business_id = ? AND customer_id = ?",
-	}
-	for _, stmt := range cleanup {
-		if _, err := tx.ExecContext(ctx, stmt, businessID, customerID); err != nil {
-			logger.Ctx(ctx).Error("Failed to clean up customer dependencies", logger.Error(err))
+	if err := purgeCustomerReferences(ctx, r.queries.WithTx(tx), businessID, customerID); err != nil {
+		logger.Ctx(ctx).Error("Failed to clean up customer dependencies", logger.Error(err))
 
-			return err
-		}
+		return err
 	}
 
 	return tx.Commit()

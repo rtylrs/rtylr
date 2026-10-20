@@ -21,6 +21,18 @@ describe('CRM navigation inside Portal', () => {
     expect(canAccessCrmPath(user, '/crm/customers/import')).toBe(true);
     expect(canAccessCrmPath(user, '/crm/customers/merge')).toBe(false);
   });
+  it('lets a viewer work leads but only creators import them', () => {
+    const viewer = member(['crm:customers:view']);
+    expect(canAccessCrmPath(viewer, '/crm/sales/leads')).toBe(true);
+    expect(canAccessCrmPath(viewer, '/crm/sales/deals/4')).toBe(true);
+    expect(canAccessCrmPath(viewer, '/crm/sales/leads/import')).toBe(false);
+    expect(
+      canAccessCrmPath(
+        member(['crm:customers:view', 'crm:customers:create']),
+        '/crm/sales/leads/import'
+      )
+    ).toBe(true);
+  });
   it('denies CRM deep links when its license or app grant is absent', () => {
     expect(
       canAccessCrmPath(

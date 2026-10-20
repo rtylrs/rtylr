@@ -4,6 +4,7 @@ import { getHrNavItems, hrNavItems } from '../modules/hr/navigation';
 import { useHRConfigStore } from '../modules/hr/shared/stores/hrConfigStore';
 import '../modules/hr/hr.css';
 import {
+  Fragment,
   useEffect,
   useMemo,
   useRef,
@@ -45,7 +46,7 @@ import InsightsHeader from '../modules/insights/InsightsHeader';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { getFinanceHomePath, financeNavItems } from '../modules/finance/navigation';
 import { erpNavItems } from '../modules/erp/navigation';
-import { crmNavItems, crmSalesNavItems } from '../modules/crm/navigation';
+import { crmNavItems, crmSalesNavItems, crmSidebarItems } from '../modules/crm/navigation';
 import { insightsNavItems } from '../modules/insights/navigation';
 import ProfileMenu from './ProfileMenu';
 import { Tooltip } from '../shared/components/ui/tooltip';
@@ -237,7 +238,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
             : isErp
               ? [...erpNavItems]
               : isCrm
-                ? [...crmNavItems, ...crmSalesNavItems]
+                ? [...crmSidebarItems]
                 : [...rawNavItems, ...(isAddonEnabled(addons, 'menu') ? rawMenuSubItems : [])].sort(
                     (a, b) => Number(a.key === 'extensions') - Number(b.key === 'extensions')
                   )
@@ -382,18 +383,30 @@ export default function PortalShell({ children }: { children: ReactNode }) {
                         ? t('appNames.short.insights')
                         : t('common.portal.workspace')}
         </p>
-        {nav.map((item) => (
-          <PortalNavLink
-            path={item.path}
-            icon={item.icon}
-            key={item.path}
-            tourId={mobile ? undefined : item.key}
-            label={t(
-              `${isRecruit ? 'recruitAdmin.nav' : isHr ? 'hrNav' : isFinance ? 'financeNav' : isErp ? 'erpNav' : isCrm ? 'crmNav' : 'common.nav'}.${item.key}`
-            )}
-            onNavigate={() => setMobileOpen(false)}
-          />
-        ))}
+        {nav.map((item, index) => {
+          const group = 'group' in item ? item.group : undefined;
+          const previous = index > 0 ? nav[index - 1] : undefined;
+          const startsGroup =
+            group && (!previous || !('group' in previous) || previous.group !== group);
+          return (
+            <Fragment key={item.path}>
+              {startsGroup && (
+                <p className="portal-section-label portal-nav-group">
+                  {t(`crmNav.sections.${group}`)}
+                </p>
+              )}
+              <PortalNavLink
+                path={item.path}
+                icon={item.icon}
+                tourId={mobile ? undefined : item.key}
+                label={t(
+                  `${isRecruit ? 'recruitAdmin.nav' : isHr ? 'hrNav' : isFinance ? 'financeNav' : isErp ? 'erpNav' : isCrm ? 'crmNav' : 'common.nav'}.${item.key}`
+                )}
+                onNavigate={() => setMobileOpen(false)}
+              />
+            </Fragment>
+          );
+        })}
       </nav>
     </>
   );

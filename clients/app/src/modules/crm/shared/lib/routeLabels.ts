@@ -40,8 +40,9 @@ export const routeLabels: Readonly<Record<string, RouteLabel>> = {
   '/templates': label('crmNav.templates'),
   '/feedback': label('crmNav.feedback', 'crmNav.titles.feedback'),
   '/settings': label('crmNav.settings'),
-  '/sales': label('crmNav.pipeline'),
+  '/sales': label('crmNav.deals'),
   '/sales/leads': label('crmNav.leads'),
+  '/sales/tasks': label('crmNav.tasks'),
   '/sales/contracts': label('crmNav.contracts'),
 };
 

@@ -9,25 +9,33 @@ import {
   Contact,
   FileSignature,
   LayoutDashboard,
+  ListTodo,
 } from 'lucide-react';
 import { canEffectiveAccess, hasEffectiveAppAccess } from '@voxire/permissions';
 import type { StoredUser } from '../../shared/stores/userStore';
 
+/** Sidebar groups, labelled from crmNav.sections. */
+export type CrmNavGroup = 'sales' | 'customers' | 'marketing' | 'retention';
+
 export const crmNavItems = [
   { key: 'dashboard', path: '/crm', icon: LayoutDashboard },
-  { key: 'customers', path: '/crm/customers', icon: Users },
-  { key: 'loyalty', path: '/crm/loyalty', icon: Gift },
-  { key: 'campaigns', path: '/crm/campaigns', icon: Megaphone },
-  { key: 'segments', path: '/crm/segments', icon: Filter },
-  { key: 'templates', path: '/crm/templates', icon: FileText },
-  { key: 'feedback', path: '/crm/feedback', icon: MessageSquare },
+  { key: 'customers', path: '/crm/customers', icon: Users, group: 'customers' },
+  { key: 'campaigns', path: '/crm/campaigns', icon: Megaphone, group: 'marketing' },
+  { key: 'segments', path: '/crm/segments', icon: Filter, group: 'marketing' },
+  { key: 'templates', path: '/crm/templates', icon: FileText, group: 'marketing' },
+  { key: 'loyalty', path: '/crm/loyalty', icon: Gift, group: 'retention' },
+  { key: 'feedback', path: '/crm/feedback', icon: MessageSquare, group: 'retention' },
 ] as const;
 
 export const crmSalesNavItems = [
-  { key: 'pipeline', path: '/crm/sales', icon: Kanban },
-  { key: 'leads', path: '/crm/sales/leads', icon: Contact },
-  { key: 'contracts', path: '/crm/sales/contracts', icon: FileSignature },
+  { key: 'leads', path: '/crm/sales/leads', icon: Contact, group: 'sales' },
+  { key: 'deals', path: '/crm/sales', icon: Kanban, group: 'sales' },
+  { key: 'tasks', path: '/crm/sales/tasks', icon: ListTodo, group: 'sales' },
+  { key: 'contracts', path: '/crm/sales/contracts', icon: FileSignature, group: 'sales' },
 ] as const;
+
+/** The CRM sidebar in order: overview, then sales ahead of the other groups. */
+export const crmSidebarItems = [crmNavItems[0], ...crmSalesNavItems, ...crmNavItems.slice(1)];
 
 export function canAccessCrmPath(user: StoredUser | null, pathname: string): boolean {
   const access = user?.effectiveAccess;
@@ -42,6 +50,7 @@ export function canAccessCrmPath(user: StoredUser | null, pathname: string): boo
   const routes: Array<[string, string]> = [
     ['/crm/customers/new', 'crm:customers:create'],
     ['/crm/customers/import', 'crm:customers:create'],
+    ['/crm/sales/leads/import', 'crm:customers:create'],
     ['/crm/customers/merge', 'crm:customers:delete'],
     ['/crm/campaigns/email', 'crm:campaigns:create'],
     ['/crm/campaigns/sms', 'crm:campaigns:create'],

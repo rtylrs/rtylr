@@ -13,7 +13,7 @@ import { APP_NAMES } from '../../shared/config/appNames';
 import type { StoredUser } from '../../shared/stores/userStore';
 import { canAccessPortalPath } from '../../shared/utils/canAccessPortalPath';
 import { erpNavItems } from '../../modules/erp/navigation';
-import { crmNavItems } from '../../modules/crm/navigation';
+import { crmNavItems, crmSalesNavItems } from '../../modules/crm/navigation';
 import { flowNavItems } from '../../modules/flow/navigation';
 import { insightsNavItems } from '../../modules/insights/navigation';
 import { rawNavItems, rawMenuSubItems, settingsNavItems, type PortalNavItem } from '../navigation';
@@ -140,7 +140,7 @@ export function getPortalCommands(
   addPages([...hrNavItems], 'hr', 'hrNav');
   addPages([...recruitNavItems], 'recruit', 'recruitAdmin.nav');
   addPages([...erpNavItems], 'erp', 'erpNav');
-  addPages([...crmNavItems], 'crm', 'crmNav');
+  addPages([...crmNavItems, ...crmSalesNavItems], 'crm', 'crmNav');
   addPages(insightsPages, 'insights', 'insightsNav');
   for (const page of flowNavItems) {
     if (
