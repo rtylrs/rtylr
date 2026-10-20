@@ -315,7 +315,7 @@ jobs:
               --log-group-name "$GROUP" \
               --log-stream-name "$PREFIX/migrate/$TASK_ID" \
               --region "$AWS_REGION" \
-              --query 'events[].message' --output text 2>logs-error.txt; then
+              --query 'events[].[message]' --output text 2>logs-error.txt; then
               echo "(log stream $GROUP:$PREFIX/migrate/$TASK_ID not readable: $(head -c 400 logs-error.txt))"
             fi
             echo "--- end ---"
