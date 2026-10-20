@@ -168,8 +168,12 @@ test.describe('CRM sales', () => {
       'mailto:rana@cedarbakery.test'
     );
     const panel = page.getByRole('region', { name: 'Log activity' });
-    await expect(panel.getByRole('button', { name: 'Log call' })).toBeDisabled();
+    const logCall = panel.getByRole('button', { name: 'Log call' });
+    await expect(logCall).toBeDisabled();
+    await expect(logCall).toHaveAccessibleDescription('Pick how the call went to log it.');
     await panel.getByRole('button', { name: 'No answer' }).click();
+    await expect(logCall).toBeEnabled();
+    await expect(panel.getByText('Pick how the call went to log it.')).toHaveCount(0);
     await panel.getByRole('combobox').selectOption('tomorrow');
     await panel.getByRole('button', { name: 'Log call' }).click();
 

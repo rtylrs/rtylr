@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import {
@@ -74,6 +74,7 @@ export const LogActivityPanel: React.FC<{
   const [followUp, setFollowUp] = useState<(typeof FOLLOW_UPS)[number]['key']>('none');
   const [followUpDate, setFollowUpDate] = useState(addDaysISO(1));
   const log = useLogActivity();
+  const hintId = useId();
 
   const dueDate =
     followUp === 'none'
@@ -82,6 +83,11 @@ export const LogActivityPanel: React.FC<{
         ? followUpDate
         : addDaysISO(FOLLOW_UPS.find((item) => item.key === followUp)?.days ?? 1);
   const ready = type === 'call' ? Boolean(outcome) : type !== 'note' || notes.trim() !== '';
+  const blockedHint = ready
+    ? undefined
+    : type === 'call'
+      ? t('crmSales.activity.pickOutcome')
+      : t('crmSales.activity.notesRequired');
 
   const submit = (): void => {
     if (!ready) return;
@@ -224,7 +230,16 @@ export const LogActivityPanel: React.FC<{
           />
         )}
         <span className="sales-spacer" />
-        <Button onClick={submit} disabled={!ready || log.isPending}>
+        {blockedHint && (
+          <span id={hintId} className="sales-hint">
+            {blockedHint}
+          </span>
+        )}
+        <Button
+          onClick={submit}
+          disabled={!ready || log.isPending}
+          aria-describedby={blockedHint ? hintId : undefined}
+        >
           {log.isPending ? t('crmSales.common.saving') : t(`crmSales.activity.logAction.${type}`)}
         </Button>
       </div>

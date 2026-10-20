@@ -129,7 +129,7 @@ const LeadDetail: React.FC = () => {
           {!converted && (
             <Button onClick={() => setConverting(true)}>
               {t('crmSales.convert.action')}
-              <ArrowRight size={13} />
+              <ArrowRight size={13} className="sales-dir-icon" />
             </Button>
           )}
           {!converted && !disqualified && (

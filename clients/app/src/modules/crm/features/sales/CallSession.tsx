@@ -100,11 +100,11 @@ const CallSession: React.FC = () => {
             disabled={index === 0}
             aria-label={t('crmSales.call.previous')}
           >
-            <ChevronLeft size={14} />
+            <ChevronLeft size={14} className="sales-dir-icon" />
           </Button>
           <Button variant="outline" onClick={next} disabled={finished}>
             {t('crmSales.call.skip')}
-            <ChevronRight size={14} />
+            <ChevronRight size={14} className="sales-dir-icon" />
           </Button>
           <Button variant="ghost" onClick={() => navigate({ to: '/crm/sales/leads' })}>
             <X size={14} />
