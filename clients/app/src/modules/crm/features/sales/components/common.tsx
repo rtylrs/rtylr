@@ -109,18 +109,32 @@ export const DueDate: React.FC<{ date?: string; emptyLabel?: string }> = ({ date
   );
 };
 
+/** One cell of a stats strip; with onClick it opens the list it counts. */
 export const StatTile: React.FC<{
   label: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
   warning?: boolean;
-}> = ({ label, value, hint, warning }) => (
-  <div className={`sales-stat${warning ? ' is-warning' : ''}`}>
-    <div className="sales-stat-label">{label}</div>
-    <div className="sales-stat-value">{value}</div>
-    {hint !== undefined && <div className="sales-stat-hint">{hint}</div>}
-  </div>
-);
+  onClick?: () => void;
+}> = ({ label, value, hint, warning, onClick }) => {
+  const className = `sales-stat${warning ? ' is-warning' : ''}`;
+  const body = (
+    <>
+      <span className="sales-stat-label">{label}</span>
+      <span className="sales-stat-line">
+        <span className="sales-stat-value">{value}</span>
+        {hint !== undefined && <span className="sales-stat-hint">{hint}</span>}
+      </span>
+    </>
+  );
+  return onClick ? (
+    <button type="button" className={className} onClick={onClick}>
+      {body}
+    </button>
+  ) : (
+    <div className={className}>{body}</div>
+  );
+};
 
 /** A search box that reports its value after typing pauses. */
 export const SearchBox: React.FC<{

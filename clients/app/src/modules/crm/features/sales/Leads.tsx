@@ -150,86 +150,100 @@ const Leads: React.FC = () => {
           value={format((stats.data?.followUpsOverdue ?? 0) + (stats.data?.followUpsToday ?? 0))}
           hint={t('crmSales.leads.stats.overdueHint', { count: stats.data?.followUpsOverdue ?? 0 })}
           warning={(stats.data?.followUpsOverdue ?? 0) > 0}
+          onClick={() => {
+            setFilters({ statuses: WORKING_STATUSES, followUp: 'due' });
+            clearSelection();
+          }}
         />
         <StatTile
           label={t('crmSales.leads.stats.callsToday')}
           value={format(stats.data?.callsToday)}
           hint={t('crmSales.leads.stats.connectedHint', { count: stats.data?.connectedToday ?? 0 })}
         />
-        <StatTile label={t('crmSales.leads.stats.working')} value={format(counts('working'))} />
+        <StatTile
+          label={t('crmSales.leads.stats.working')}
+          value={format(counts('working'))}
+          onClick={() => {
+            setFilters({ statuses: WORKING_STATUSES });
+            clearSelection();
+          }}
+        />
         <StatTile
           label={t('crmSales.leads.stats.convertedThisMonth')}
           value={format(stats.data?.convertedThisMonth)}
         />
       </div>
 
-      <div className="sales-tabs" role="tablist" aria-label={t('crmSales.leads.statusFilter')}>
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            role="tab"
-            className="sales-tab"
-            aria-selected={activeTab === tab}
-            onClick={() => {
-              setFilters({ statuses: statusesOf(tab) });
-              clearSelection();
-            }}
-          >
-            {tab === 'working' || tab === 'all'
-              ? t(`crmSales.leads.tabs.${tab}`)
-              : t(`crmSales.leadStatus.${tab}`)}
-            <span className="sales-tab-count">{format(counts(tab))}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="sales-toolbar">
-        <LeadFilterChips
-          filters={filters}
-          onChange={(change) => {
-            setFilters(change);
-            clearSelection();
-          }}
-        />
-        <div className="sales-toolbar-actions">
-          {filtered && (
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setFilters({ ...NO_LEAD_FILTERS, search: '' });
+      <div className="sales-listbar">
+        <div className="sales-listbar-grid">
+          <div className="sales-tabs" role="tablist" aria-label={t('crmSales.leads.statusFilter')}>
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                className="sales-tab"
+                aria-selected={activeTab === tab}
+                onClick={() => {
+                  setFilters({ statuses: statusesOf(tab) });
+                  clearSelection();
+                }}
+              >
+                {tab === 'working' || tab === 'all'
+                  ? t(`crmSales.leads.tabs.${tab}`)
+                  : t(`crmSales.leadStatus.${tab}`)}
+                <span className="sales-tab-count">{format(counts(tab))}</span>
+              </button>
+            ))}
+          </div>
+          <div className="sales-toolbar-actions">
+            <SearchBox
+              value={filters.search}
+              onChange={(search) => setFilters({ search })}
+              placeholder={t('crmSales.leads.searchPlaceholder')}
+            />
+            <LeadFilterPopover
+              filters={filters}
+              onChange={(change) => {
+                setFilters(change);
                 clearSelection();
               }}
+              total={total}
+            />
+            <select
+              className="sales-select"
+              aria-label={t('crmSales.common.sortBy')}
+              value={filters.sort}
+              onChange={(event) => setFilters({ sort: event.target.value as typeof filters.sort })}
             >
-              <X size={13} />
-              {t('crmSales.common.clearFilters')}
-            </Button>
+              {LEAD_SORTS.map((sort) => (
+                <option key={sort} value={sort}>
+                  {t(`crmSales.leads.sort.${sort}`)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {activeLeadFilterGroups(filters).length > 0 && (
+            <div className="sales-listbar-chips">
+              <LeadFilterChips
+                filters={filters}
+                onChange={(change) => {
+                  setFilters(change);
+                  clearSelection();
+                }}
+              />
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setFilters({ ...NO_LEAD_FILTERS, search: '' });
+                  clearSelection();
+                }}
+              >
+                <X size={13} />
+                {t('crmSales.common.clearFilters')}
+              </Button>
+            </div>
           )}
-          <SearchBox
-            value={filters.search}
-            onChange={(search) => setFilters({ search })}
-            placeholder={t('crmSales.leads.searchPlaceholder')}
-          />
-          <LeadFilterPopover
-            filters={filters}
-            onChange={(change) => {
-              setFilters(change);
-              clearSelection();
-            }}
-            total={total}
-          />
-          <select
-            className="sales-select"
-            aria-label={t('crmSales.common.sortBy')}
-            value={filters.sort}
-            onChange={(event) => setFilters({ sort: event.target.value as typeof filters.sort })}
-          >
-            {LEAD_SORTS.map((sort) => (
-              <option key={sort} value={sort}>
-                {t(`crmSales.leads.sort.${sort}`)}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
