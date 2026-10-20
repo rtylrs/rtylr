@@ -1,26 +1,30 @@
 {
   "configUpdated": "Tax configuration updated",
-  "reportEmptyTitle": "No tax periods available yet",
-  "reportEmptyDescription": "Tax periods will appear here once invoices start generating tax activity.",
   "ratesEmptyTitle": "No tax rates configured yet",
   "ratesEmptyDescription": "Add a tax rate to start calculating tax on invoices and quotes.",
   "ratesEmptyCta": "Add tax rate",
-  "title": "Tax",
-  "subtitle": "VAT / Sales tax summary and filing periods",
-  "rates": "Tax Rates",
   "exportAria": "Export tax summary for accountant",
   "exportForAccountant": "Export for Accountant",
-  "rateConfiguration": "Tax Rate Configuration",
   "ratesInvalid": "Tax rates must be valid non-negative numbers",
-  "ratesSaved": "Tax rates saved",
-  "filingPeriods": "Filing Periods",
   "report": {
     "title": "Tax Summary",
-    "exportSoon": "Export coming in a future update",
     "collected": "Tax collected",
     "owed": "Tax owed",
-    "periodsToFile": "Periods to file"
+    "subtitle": "Tax collected on paid invoices and what is owed for the period",
+    "periods": {
+      "month": "This month",
+      "quarter": "This quarter",
+      "year": "This year"
+    },
+    "collectedHint": "From invoices paid in the period",
+    "owedHint": "Collected tax not yet remitted",
+    "nothingYet": "No tax recorded for {{period}}. Tax appears here once invoices that carry a tax rate are paid.",
+    "manageRates": "Manage tax rates"
   },
-  "collected": "Tax Collected",
-  "owed": "Tax Owed"
+  "ratesTitle": "Tax rates",
+  "ratesSubtitle": "The rates you can apply to invoices and quotes",
+  "rateName": "Name",
+  "rateNamePlaceholder": "VAT",
+  "rateValue": "Rate (%)",
+  "rateAdded": "Tax rate added"
 }

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/finance/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance/invoices/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -132,6 +134,15 @@ func (r *Repository) CreateExpenseCategory(ctx context.Context, businessID int64
 		Color:      sqlNullString(c.Color),
 		Icon:       sqlNullString(c.Icon),
 	})
+	var mysqlErr *mysql.MySQLError
+	if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+		// Category names are unique per business; reuse the one that exists.
+		var id int64
+		lookupErr := r.pool.QueryRowContext(ctx,
+			`SELECT id FROM finance_expense_categories WHERE business_id = ? AND name = ?`,
+			businessID, c.Name).Scan(&id)
+		return id, lookupErr
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create expense category", logger.Error(err))
 

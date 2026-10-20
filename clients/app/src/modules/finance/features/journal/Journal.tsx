@@ -177,7 +177,11 @@ const Journal: React.FC = () => {
       <HelmetContainer title={`${t('financeJournal.title')} · rtylr`} />
       <PageHeader
         title={t('financeJournal.title')}
-        subtitle={!isLoading && !isError ? `${data.length} entries` : undefined}
+        subtitle={
+          !isLoading && !isError
+            ? t('financeJournal.entryCount', { count: data.length })
+            : undefined
+        }
         actions={
           <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
             <Plus size={13} /> {t('financeJournal.newEntry')}
@@ -200,6 +204,17 @@ const Journal: React.FC = () => {
           <button type="button" style={ghostBtn} onClick={() => void refetch?.()}>
             {t('financeCommon.refresh')}
           </button>
+        </div>
+      ) : data.length === 0 && page === 1 ? (
+        <div
+          style={{ ...cardStyle, padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}
+        >
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--hub-text)' }}>
+            {t('financeJournal.emptyTitle')}
+          </h3>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text-muted)', lineHeight: 1.5 }}>
+            {t('financeJournal.emptyDescription')}
+          </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

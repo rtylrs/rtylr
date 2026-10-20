@@ -20,5 +20,12 @@
     "method": "Method",
     "reference": "Reference",
     "referencePlaceholder": "Transaction ID or receipt number"
-  }
+  },
+  "accountCount_one": "{{count}} connected account",
+  "accountCount_other": "{{count}} connected accounts",
+  "totalBalance": "total balance",
+  "loadFailed": "Bank accounts could not be loaded. Your accounts are not affected; try again in a moment.",
+  "emptyTitle": "No bank accounts yet",
+  "emptyDescription": "Add the accounts the business pays from and gets paid into. Their balances and transactions then show here and in Reconcile.",
+  "connect": "Connect account"
 }

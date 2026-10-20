@@ -72,10 +72,6 @@ export function useJournal(params: UseJournalParams = {}) {
       const res = await journalClient.listJournalEntries({
         page,
         limit: pageSize,
-        sortBy: '',
-        sortDir: '',
-        fromDate: '',
-        toDate: '',
       });
       const entries = z.array(journalEntrySchema).parse(
         (res.entries ?? []).map((e) => ({

@@ -90,48 +90,60 @@
     "title": "Profit & Loss",
     "exportAria": "Export profit and loss as CSV",
     "export": "Export",
-    "closeFiscalYear": "Close Fiscal Year",
     "statement": "P&L Statement",
     "revenue": "Revenue",
-    "grossRevenue": "Gross Revenue",
     "cogs": "Cost of Goods Sold",
     "directCosts": "Direct costs (COGS)",
     "operatingExpenses": "Operating Expenses",
     "totalOperatingExpenses": "Total Operating Expenses",
-    "totalOperating": "Total Operating",
-    "expensesByCategory": "Expenses by Category",
-    "categoryUnavailable": "Category breakdown not available yet.",
-    "lockingComingSoon": "Fiscal year period locking is coming soon",
-    "closeYear": "Close fiscal year",
     "grossProfit": "Gross Profit",
     "netProfit": "Net Profit",
     "netMargin": "Net Margin",
-    "closeYearConfirm": "This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
+    "subtitle": "Revenue from paid invoices against approved expenses",
+    "expenses": "Expenses",
+    "periods": {
+      "month": "This month",
+      "last_month": "Last month",
+      "quarter": "This quarter",
+      "year": "This year"
+    },
+    "periodLabel": "Reporting period",
+    "pendingNotice_one": "{{count}} expense ({{amount}}) in this period is waiting for approval and is not counted below.",
+    "pendingNotice_other": "{{count}} expenses ({{amount}}) in this period are waiting for approval and are not counted below.",
+    "reviewExpenses": "Review expenses",
+    "paidInvoices": "Paid invoices",
+    "noApprovedExpenses": "No approved expenses",
+    "grossMargin": "Gross margin: {{margin}}",
+    "netMarginLine": "Net margin: {{margin}}",
+    "basisNote": "Revenue counts invoices on the day they are paid. Expenses count once approved, on their expense date."
   },
   "dashboard": {
     "revenue": "Revenue",
     "expenses": "Expenses",
     "revenueVsExpenses": "Revenue vs Expenses",
-    "recentTransactions": "Recent Transactions",
-    "totalRevenueMtd": "Total Revenue (MTD)",
-    "totalExpensesMtd": "Total Expenses (MTD)",
-    "netProfitMtd": "Net Profit (MTD)",
-    "outstandingInvoices": "Outstanding Invoices"
+    "pendingNotice_one": "{{count}} expense ({{amount}}) is waiting for approval. The figures below count approved expenses only.",
+    "pendingNotice_other": "{{count}} expenses ({{amount}}) are waiting for approval. The figures below count approved expenses only.",
+    "overdueNotice_one": "{{count}} invoice is overdue, {{amount}} in total.",
+    "overdueNotice_other": "{{count}} invoices are overdue, {{amount}} in total.",
+    "viewInvoices": "View invoices",
+    "revenueThisMonth": "Revenue this month",
+    "revenueHint": "Invoices paid so far this month",
+    "expensesThisMonth": "Expenses this month",
+    "expensesHint": "Approved so far this month",
+    "netProfitThisMonth": "Net profit this month",
+    "outstanding": "Outstanding",
+    "outstandingHint": "Sent invoices not yet paid",
+    "overdueHint": "{{amount}} of it overdue",
+    "chartEmpty": "Nothing to chart yet. Paid invoices and approved expenses from the last six months appear here.",
+    "recentActivity": "Recent activity",
+    "activityEmpty": "No activity yet. Expenses you record and invoices your clients pay show up here.",
+    "invoicePaid": "Invoice paid"
   },
   "overdue": {
     "title": "Overdue Invoices",
-    "none": "No overdue invoices."
-  },
-  "reminders": {
-    "title": "Payment Reminders",
-    "description": "Automated emails sent to clients when invoices are approaching or past their due date.",
-    "comingSoon": "Reminder schedule coming in a future update",
-    "save": "Save schedule",
-    "onDueDate": "On due date",
-    "beforeDue_one": "{{count}} day before due",
-    "beforeDue_other": "{{count}} days before due",
-    "overdue_one": "{{count}} day overdue",
-    "overdue_other": "{{count}} days overdue"
+    "none": "No overdue invoices.",
+    "daysOverdue_one": "{{count}} day overdue",
+    "daysOverdue_other": "{{count}} days overdue"
   },
   "trial": {
     "addPayment": "Add a payment method to keep your data.",
@@ -151,12 +163,6 @@
   "pdf": {
     "download": "Download PDF",
     "comingSoon": "PDF download coming in a future update"
-  },
-  "kpi": {
-    "receivable": "Receivable",
-    "expensesMtd": "Expenses MTD",
-    "netProfitMtd": "Net Profit MTD",
-    "overdue": "Overdue"
   },
   "plChart": {
     "title": "Expenses by Category"

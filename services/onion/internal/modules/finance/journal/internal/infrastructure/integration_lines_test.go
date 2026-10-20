@@ -93,9 +93,15 @@ func TestPostJournalEntry_PostedAtIsSet(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	// Posting requires a balanced entry of at least two lines.
+	accounts := ensureJournalTestAccounts(t, db, 2)
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-12-01",
 		Description: "Posted-at check",
+		Lines: []domain.JournalLineInput{
+			{AccountID: accounts[0], Debit: 10},
+			{AccountID: accounts[1], Credit: 10},
+		},
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)

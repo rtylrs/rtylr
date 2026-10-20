@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/finance/expenses/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance/expenses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -254,11 +256,22 @@ func (r *Repository) CreateCategory(ctx context.Context, input domain.ExpenseCat
 		Name:       input.Name,
 		Color:      nullableString(input.Color),
 	})
+	if isDuplicateEntry(err) {
+		// Another request created the same name between the service's lookup
+		// and this insert. The unique key turned that race into this error.
+		return 0, domain.ErrCategoryNameTaken
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create expense category", logger.Error(err))
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+// isDuplicateEntry reports a unique-key violation (MySQL error 1062).
+func isDuplicateEntry(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	return errors.As(err, &mysqlErr) && mysqlErr.Number == 1062
 }
 
 func (r *Repository) UpdateCategory(ctx context.Context, businessID, id int64, input domain.ExpenseCategoryInput) error {
@@ -268,6 +281,9 @@ func (r *Repository) UpdateCategory(ctx context.Context, businessID, id int64, i
 		ID:         id,
 		BusinessID: businessID,
 	})
+	if isDuplicateEntry(err) {
+		return domain.ErrCategoryNameTaken
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense category", logger.Error(err))
 	}

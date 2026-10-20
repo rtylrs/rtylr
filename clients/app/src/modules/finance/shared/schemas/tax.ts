@@ -19,4 +19,16 @@ export const plReportSchema = z.object({
   operatingExpenses: z.number().default(0),
   grossProfit: z.number().default(0),
   netProfit: z.number().default(0),
+  expensesByCategory: z
+    .array(
+      z.object({
+        categoryId: z.coerce.number().optional(),
+        name: z.string().default(''),
+        color: z.string().default(''),
+        amount: z.number().default(0),
+      })
+    )
+    .default([]),
+  pendingExpenses: z.number().default(0),
+  pendingExpenseCount: z.coerce.number().default(0),
 });

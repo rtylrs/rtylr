@@ -20,5 +20,9 @@
   "creating": "Creating…",
   "twoLinesRequired": "Journal entry requires at least two lines",
   "entryLines": "Entry Lines",
-  "accountName": "Account name"
+  "accountName": "Account name",
+  "entryCount_one": "{{count}} entry",
+  "entryCount_other": "{{count}} entries",
+  "emptyTitle": "No journal entries yet",
+  "emptyDescription": "The journal holds manual double-entry adjustments and payroll postings. Invoices, bills and expenses feed the reports directly and are not posted here, so an empty journal is expected until you add an entry."
 }

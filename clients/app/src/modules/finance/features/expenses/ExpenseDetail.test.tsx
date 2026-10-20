@@ -61,8 +61,13 @@ vi.mock('@voxire/api', () => ({
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
 
+vi.mock('../../shared/lib/settings', () => ({
+  useSettings: (select: (s: { currency: string }) => unknown) => select({ currency: 'USD' }),
+}));
+
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ id: 'EXP-1' }),
+  useNavigate: () => vi.fn(),
 }));
 
 vi.mock('motion/react', () => ({
@@ -78,6 +83,7 @@ vi.mock('./useExpenseById', () => ({
 
 vi.mock('./useExpenses', () => ({
   useExpenseCategories: () => ({ data: [] }),
+  useDeleteExpense: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useExpenses', () => ({

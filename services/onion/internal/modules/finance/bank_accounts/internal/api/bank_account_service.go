@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance/bank_accounts/internal/application"
 	"github.com/voxire/onion/internal/modules/finance/bank_accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -36,6 +37,11 @@ func (a *BankAccountAPI) ListBankAccounts(ctx context.Context, req *financebanka
 		SortDir: req.GetSortDir(),
 	})
 	if listErr != nil {
+		// The response hides the cause, so record it: the portal has seen this
+		// 500 in production with no other trace of what failed.
+		logger.Ctx(ctx).Error("Failed to list bank accounts",
+			logger.Any("business_id", businessID),
+			logger.Error(listErr))
 		return nil, bankAccountStatusError(http.StatusInternalServerError, "Failed to list bank accounts")
 	}
 	out := make([]*financebankaccountv1.BankAccount, 0, len(page.Accounts))

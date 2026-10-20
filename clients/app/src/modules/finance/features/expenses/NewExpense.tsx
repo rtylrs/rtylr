@@ -15,6 +15,7 @@ import { useExpenseCategories } from '../../shared/hooks/useExpenseCategories';
 import { useCreateExpense } from './useExpenses';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
 import { todayIso } from '../../shared/lib/date';
+import { PAYMENT_METHODS, lastPaymentMethod, rememberPaymentMethod } from './expenseDisplay';
 
 const NewExpense: React.FC = () => {
   const { t } = useTranslation('financeCommon');
@@ -27,6 +28,8 @@ const NewExpense: React.FC = () => {
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
   const [date, setDate] = useState(todayIso());
   const [notes, setNotes] = useState('');
+  const [vendor, setVendor] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState(lastPaymentMethod);
   const createExpense = useCreateExpense();
 
   const handleSave = (): void => {
@@ -48,9 +51,12 @@ const NewExpense: React.FC = () => {
         expenseDate: date,
         receiptUrl: receipt ?? undefined,
         notes,
+        vendor: vendor.trim(),
+        paymentMethod,
       },
       {
         onSuccess: () => {
+          rememberPaymentMethod(paymentMethod);
           toast.success(t('financeExpenses.submitted'));
           navigate({ to: '/finance/expenses' });
         },
@@ -104,8 +110,11 @@ const NewExpense: React.FC = () => {
             </div>
           </div>
           <div>
-            <label style={labelStyle}>{t('financeExpenses.category')}</label>
+            <label style={labelStyle} htmlFor="expense-category">
+              {t('financeExpenses.category')}
+            </label>
             <select
+              id="expense-category"
               value={categoryId ?? ''}
               onChange={(e) =>
                 setCategoryId(e.target.value === '' ? undefined : Number(e.target.value))
@@ -119,6 +128,37 @@ const NewExpense: React.FC = () => {
                 </option>
               ))}
             </select>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={labelStyle} htmlFor="expense-vendor">
+                {t('financeExpenses.vendor')}
+              </label>
+              <input
+                id="expense-vendor"
+                value={vendor}
+                onChange={(e) => setVendor(e.target.value)}
+                style={{ ...inputStyle, marginTop: 6 }}
+                placeholder={t('financeExpenses.vendorPlaceholder')}
+              />
+            </div>
+            <div>
+              <label style={labelStyle} htmlFor="expense-payment-method">
+                {t('financeExpenses.paymentMethod')}
+              </label>
+              <select
+                id="expense-payment-method"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                style={{ ...inputStyle, marginTop: 6 }}
+              >
+                {PAYMENT_METHODS.map((method) => (
+                  <option key={method} value={method}>
+                    {t(`financeExpenses.paymentMethods.${method}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
             <label style={labelStyle}>{t('financeExpenses.notes')}</label>
@@ -153,7 +193,7 @@ const NewExpense: React.FC = () => {
           onClick={() => navigate({ to: '/finance/expenses' })}
           disabled={createExpense.isPending}
         >
-          <ArrowLeft size={13} /> Cancel
+          <ArrowLeft size={13} /> {t('financeCommon.cancel')}
         </button>
         <button
           type="button"
@@ -161,7 +201,8 @@ const NewExpense: React.FC = () => {
           onClick={handleSave}
           disabled={createExpense.isPending}
         >
-          <Save size={13} /> {createExpense.isPending ? 'Submitting...' : 'Submit'}
+          <Save size={13} />{' '}
+          {createExpense.isPending ? t('financeExpenses.submitting') : t('financeExpenses.submit')}
         </button>
       </div>
     </motion.div>

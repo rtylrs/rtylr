@@ -205,3 +205,47 @@ LIMIT ? OFFSET ?;
 
 -- name: CountInvoicesByCustomer :one
 SELECT COUNT(*) FROM finance_invoices WHERE business_id = ? AND customer_id = ?;
+
+-- cross-schema read from expenses — reports count approved expenses only, so
+-- the ones still awaiting approval are reported beside the totals instead.
+-- name: SumPendingExpenses :one
+SELECT COALESCE(SUM(amount),0) AS total, COUNT(*) AS expense_count
+FROM finance_expenses
+WHERE business_id = ? AND status = 'pending' AND expense_date BETWEEN ? AND ?;
+
+-- cross-schema read from expenses — split the period's approved expenses by category.
+-- name: SumExpensesByCategory :many
+SELECT e.category_id, COALESCE(c.name, '') AS name, COALESCE(c.color, '') AS color, COALESCE(SUM(e.amount),0) AS total
+FROM finance_expenses e
+LEFT JOIN finance_expense_categories c ON c.id = e.category_id AND c.business_id = e.business_id
+WHERE e.business_id = ? AND e.status = 'approved' AND e.expense_date BETWEEN ? AND ?
+GROUP BY e.category_id, c.name, c.color
+ORDER BY total DESC;
+
+-- name: MonthlyPaidInvoiceTotals :many
+SELECT DATE_FORMAT(paid_date, '%Y-%m') AS month, COALESCE(SUM(total),0) AS total
+FROM finance_invoices
+WHERE business_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?
+GROUP BY DATE_FORMAT(paid_date, '%Y-%m');
+
+-- cross-schema read from expenses — monthly approved expense totals for the dashboard chart.
+-- name: MonthlyExpenseTotals :many
+SELECT DATE_FORMAT(expense_date, '%Y-%m') AS month, COALESCE(SUM(amount),0) AS total
+FROM finance_expenses
+WHERE business_id = ? AND status = 'approved' AND expense_date BETWEEN ? AND ?
+GROUP BY DATE_FORMAT(expense_date, '%Y-%m');
+
+-- cross-schema read from expenses — latest expenses for the dashboard activity list.
+-- name: ListRecentExpenses :many
+SELECT id, description, amount, expense_date, status
+FROM finance_expenses
+WHERE business_id = ? AND status <> 'rejected'
+ORDER BY expense_date DESC, id DESC
+LIMIT ?;
+
+-- name: ListRecentPaidInvoices :many
+SELECT id, invoice_number, client_name, total, paid_date
+FROM finance_invoices
+WHERE business_id = ? AND status = 'paid' AND paid_date IS NOT NULL
+ORDER BY paid_date DESC, id DESC
+LIMIT ?;

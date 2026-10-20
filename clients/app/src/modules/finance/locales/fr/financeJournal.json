@@ -20,5 +20,9 @@
   "creating": "Création en cours…",
   "twoLinesRequired": "Une écriture demande au moins deux lignes",
   "entryLines": "Lignes de l'écriture",
-  "accountName": "Nom du compte"
+  "accountName": "Nom du compte",
+  "entryCount_one": "{{count}} écriture",
+  "entryCount_other": "{{count}} écritures",
+  "emptyTitle": "Aucune écriture de journal",
+  "emptyDescription": "Le journal contient les écritures manuelles en partie double et les écritures de paie. Les factures, achats et dépenses alimentent directement les rapports et n’y sont pas passés ; un journal vide est donc normal tant que vous n’ajoutez pas d’écriture."
 }

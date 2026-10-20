@@ -45,8 +45,15 @@ func NewService(_ context.Context, repo repository) *Service {
 	return &Service{repo: repo}
 }
 
+// invoicesScope is where the invoices module caches the finance dashboard,
+// whose expense totals and pending count read this module's table.
+const invoicesScope = "invoices"
+
 func invalidateExpensesScope(ctx context.Context, businessID int64) {
 	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(expensesScope, businessID))
+	// Approving an expense moves it into the dashboard's totals; without this
+	// the dashboard kept the old figures for up to a minute.
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(invoicesScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Expense, error) {
@@ -154,6 +161,11 @@ func (s *Service) CreateExpenseCategory(ctx context.Context, input domain.Expens
 		return domain.ExpenseCategory{}, false, err
 	}
 	id, err := s.repo.CreateCategory(ctx, input)
+	if errors.Is(err, domain.ErrCategoryNameTaken) {
+		// A concurrent request won the insert; hand back its category.
+		existing, findErr := s.repo.FindCategoryByName(ctx, input.BusinessID, input.Name)
+		return existing, false, findErr
+	}
 	if err != nil {
 		return domain.ExpenseCategory{}, false, err
 	}

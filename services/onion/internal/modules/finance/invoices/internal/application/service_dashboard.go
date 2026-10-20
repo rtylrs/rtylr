@@ -15,7 +15,7 @@ import (
 func (s *Service) GetDashboard(ctx context.Context, businessID int64) (domain.Dashboard, error) {
 	key := cacheKeys.Scoped(invoicesScope, businessID, "dashboard")
 
-	return cacher.Of[domain.Dashboard]().GetOrComputeSingle(ctx, key+"|domain=v2",
+	return cacher.Of[domain.Dashboard]().GetOrComputeSingle(ctx, key+"|domain=v3",
 		func(ctx context.Context) (domain.Dashboard, error) {
 			return s.fetchDashboard(ctx, businessID)
 		},
@@ -62,13 +62,74 @@ func (s *Service) fetchDashboard(ctx context.Context, businessID int64) (domain.
 
 	netProfitMTD := revenueMTD - totalExpensesMTD
 
-	return domain.Dashboard{
+	dashboard := domain.Dashboard{
 		TotalReceivable:  totalReceivable,
 		OverdueAmount:    overdueAmount,
 		TotalExpensesMTD: totalExpensesMTD,
 		TotalRevenueMTD:  revenueMTD,
 		NetProfitMTD:     netProfitMTD,
-	}, nil
+	}
+	if details, ok := s.repo.(reportDetailRepository); ok {
+		if err := s.fillDashboardDetails(ctx, details, businessID, now, &dashboard); err != nil {
+			return domain.Dashboard{}, err
+		}
+	}
+	return dashboard, nil
+}
+
+const (
+	dashboardMonths         = 6
+	dashboardRecentActivity = 8
+	dashboardOverdueListed  = 5
+)
+
+// fillDashboardDetails loads the chart series, the activity feed, the overdue
+// list and the expenses still waiting for approval.
+func (s *Service) fillDashboardDetails(ctx context.Context, details reportDetailRepository, businessID int64, now time.Time, dashboard *domain.Dashboard) error {
+	today := now.Format("2006-01-02")
+	chartFrom := time.Date(now.Year(), now.Month()-dashboardMonths+1, 1, 0, 0, 0, 0, time.UTC).Format("2006-01-02")
+	monthEnd := time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02")
+
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.Go(func() error {
+		var err error
+		// Any date: an expense waiting for approval needs attention whenever it was incurred.
+		dashboard.PendingExpenses, dashboard.PendingExpenseCount, err = details.SumPendingExpenses(groupCtx, businessID, "1000-01-01", "9999-12-31")
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		dashboard.Monthly, err = details.MonthlyTotals(groupCtx, businessID, chartFrom, monthEnd)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		dashboard.RecentActivity, err = details.RecentActivity(groupCtx, businessID, dashboardRecentActivity)
+		return err
+	})
+	group.Go(func() error {
+		invoices, err := details.GetOverdueInvoices(groupCtx, businessID, today, dashboardOverdueListed, 0)
+		if err != nil {
+			return err
+		}
+		dashboard.OverdueInvoices = make([]domain.OverdueInvoice, 0, len(invoices))
+		for _, inv := range invoices {
+			dashboard.OverdueInvoices = append(dashboard.OverdueInvoices, domain.OverdueInvoice{
+				ID:            inv.ID,
+				InvoiceNumber: inv.InvoiceNumber,
+				ClientName:    inv.ClientName,
+				AmountDue:     inv.AmountDue,
+				DaysOverdue:   int64(now.Sub(inv.DueDate).Hours() / 24),
+			})
+		}
+		return nil
+	})
+	group.Go(func() error {
+		var err error
+		dashboard.OverdueInvoiceCount, err = details.CountOverdueInvoices(groupCtx, businessID, today)
+		return err
+	})
+	return group.Wait()
 }
 
 func (s *Service) GetTaxReport(ctx context.Context, businessID int64, period, date string) (domain.TaxReport, error) {

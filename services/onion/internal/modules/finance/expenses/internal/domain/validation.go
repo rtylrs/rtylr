@@ -13,6 +13,27 @@ var ValidExpenseStatuses = map[string]struct{}{
 	"rejected": {},
 }
 
+// ValidPaymentMethods mirrors the finance_expenses.payment_method enum. An
+// empty value is stored as the column default, cash.
+var ValidPaymentMethods = map[string]struct{}{
+	"cash":          {},
+	"card":          {},
+	"bank_transfer": {},
+	"other":         {},
+}
+
+// ValidatePaymentMethod refuses a value the column would reject, so a bad
+// request is a 400 rather than a failed insert.
+func ValidatePaymentMethod(method string) error {
+	if method == "" {
+		return nil
+	}
+	if _, ok := ValidPaymentMethods[method]; !ok {
+		return fmt.Errorf("payment_method must be one of cash, card, bank_transfer or other")
+	}
+	return nil
+}
+
 // ValidatExpenseInput returns a non-nil error when the input fails basic
 // structural checks that can be evaluated without a database round-trip.
 func ValidatExpenseInput(amount float64, currency, description string, expenseDate time.Time) error {

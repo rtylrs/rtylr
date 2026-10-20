@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
@@ -26,7 +25,7 @@ const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'revenue', 'expense'] as 
 
 const ChartOfAccounts: React.FC = () => {
   const { t } = useTranslation('financeCommon');
-  const { data = [], isLoading } = useChartOfAccounts();
+  const { data = [], isLoading, isError, refetch } = useChartOfAccounts();
   const createMut = useCreateAccount();
   const [filter, setFilter] = useState<AccountType | 'all'>('all');
   const [query, setQuery] = useState('');
@@ -145,6 +144,33 @@ const ChartOfAccounts: React.FC = () => {
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
         </div>
+      ) : isError ? (
+        <div
+          role="alert"
+          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text)' }}>
+            {t('financeErrors.generic')}
+          </p>
+          <button
+            type="button"
+            style={{ ...ghostBtn, alignSelf: 'flex-start' }}
+            onClick={() => void refetch()}
+          >
+            {t('financeCommon.refresh')}
+          </button>
+        </div>
+      ) : data.length === 0 ? (
+        <div
+          style={{ ...cardStyle, padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}
+        >
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--hub-text)' }}>
+            {t('financeAccounts.emptyTitle')}
+          </h3>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text-muted)', lineHeight: 1.5 }}>
+            {t('financeAccounts.emptyDescription')}
+          </p>
+        </div>
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -160,7 +186,7 @@ const ChartOfAccounts: React.FC = () => {
                     key={h}
                     style={{
                       padding: '10px 16px',
-                      textAlign: h === 'Balance' ? 'end' : 'start',
+                      textAlign: h === t('financeAccounts.balance') ? 'end' : 'start',
                       fontSize: 11,
                       fontWeight: 600,
                       textTransform: 'uppercase',

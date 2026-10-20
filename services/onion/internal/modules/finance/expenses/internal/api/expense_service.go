@@ -104,6 +104,9 @@ func (a *ExpensesAPI) CreateExpense(ctx context.Context, req *financeexpensesv1.
 	if validationErr := domain.ValidatExpenseInput(req.GetAmount(), req.GetCurrency(), req.GetDescription(), expenseDate); validationErr != nil {
 		return nil, expenseStatusError(http.StatusBadRequest, validationErr.Error())
 	}
+	if validationErr := domain.ValidatePaymentMethod(req.GetPaymentMethod()); validationErr != nil {
+		return nil, expenseStatusError(http.StatusBadRequest, validationErr.Error())
+	}
 	id, createErr := a.Service.Create(ctx, domain.ExpenseInput{
 		OwnerID:         user.UserID,
 		BusinessID:      businessID,
@@ -149,6 +152,9 @@ func (a *ExpensesAPI) UpdateExpense(ctx context.Context, req *financeexpensesv1.
 		return nil, err
 	}
 	if validationErr := domain.ValidatExpenseInput(body.GetAmount(), body.GetCurrency(), body.GetDescription(), expenseDate); validationErr != nil {
+		return nil, expenseStatusError(http.StatusBadRequest, validationErr.Error())
+	}
+	if validationErr := domain.ValidatePaymentMethod(body.GetPaymentMethod()); validationErr != nil {
 		return nil, expenseStatusError(http.StatusBadRequest, validationErr.Error())
 	}
 	if updateErr := a.Service.Update(ctx, domain.ExpenseUpdateInput{

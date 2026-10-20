@@ -3,8 +3,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { bankTransactionsMock } = vi.hoisted(() => ({
+const { bankTransactionsMock, bankAccountsMock } = vi.hoisted(() => ({
   bankTransactionsMock: vi.fn(),
+  bankAccountsMock: vi.fn(),
 }));
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
@@ -27,7 +28,7 @@ vi.mock('../../shared/lib/financePermissions', () => ({
 }));
 
 vi.mock('../../shared/hooks/useBankAccounts', () => ({
-  useBankAccounts: () => ({ data: [], isLoading: false }),
+  useBankAccounts: () => bankAccountsMock(),
   useBankTransactions: (...args: unknown[]) => bankTransactionsMock(...args),
   useCreateBankAccount: () => ({ mutate: vi.fn(), isPending: false }),
 }));
@@ -56,9 +57,52 @@ vi.mock('../../shared/components/Modal', () => ({
 
 import BankFeeds from './BankFeeds';
 
+const oneAccount = {
+  data: [
+    { id: '1', name: 'Main', type: 'checking', balance: 100, institution: 'Bank', mask: '0001' },
+  ],
+  isLoading: false,
+  isError: false,
+};
+
 describe('BankFeeds transaction states', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    bankAccountsMock.mockReturnValue(oneAccount);
+  });
+
+  it('claims no account count while the accounts are still loading', () => {
+    bankAccountsMock.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+    bankTransactionsMock.mockReturnValue({ data: [], isLoading: false, isError: false });
+
+    render(<BankFeeds />);
+
+    expect(screen.queryByText(/financeBankAccounts.accountCount/)).not.toBeInTheDocument();
+  });
+
+  it('explains an empty account list instead of an empty grid', () => {
+    bankAccountsMock.mockReturnValue({ data: [], isLoading: false, isError: false });
+    bankTransactionsMock.mockReturnValue({ data: [], isLoading: false, isError: false });
+
+    render(<BankFeeds />);
+
+    expect(screen.getByText('financeBankAccounts.emptyTitle')).toBeInTheDocument();
+    expect(screen.getByText('financeBankAccounts.emptyDescription')).toBeInTheDocument();
+  });
+
+  it('shows the list failure rather than zero accounts', () => {
+    bankAccountsMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: vi.fn(),
+    });
+    bankTransactionsMock.mockReturnValue({ data: [], isLoading: false, isError: false });
+
+    render(<BankFeeds />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('financeBankAccounts.loadFailed');
+    expect(screen.queryByText(/accountCount/)).not.toBeInTheDocument();
   });
 
   it('renders a retryable error instead of an empty transaction table', () => {

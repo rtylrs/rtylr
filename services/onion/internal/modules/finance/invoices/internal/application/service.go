@@ -58,6 +58,18 @@ type repository interface {
 	SumTaxOwed(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error)
 }
 
+// reportDetailRepository is the part of the repository behind the report
+// breakdowns. It is optional so narrow test doubles keep compiling; without it
+// the reports carry their totals only.
+type reportDetailRepository interface {
+	SumPendingExpenses(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, int64, error)
+	SumExpensesByCategory(ctx context.Context, businessID int64, dateFrom, dateTo string) ([]domain.CategoryTotal, error)
+	MonthlyTotals(ctx context.Context, businessID int64, dateFrom, dateTo string) ([]domain.MonthTotal, error)
+	RecentActivity(ctx context.Context, businessID int64, limit int32) ([]domain.Activity, error)
+	GetOverdueInvoices(ctx context.Context, businessID int64, beforeDate string, limit, offset int32) ([]domain.Invoice, error)
+	CountOverdueInvoices(ctx context.Context, businessID int64, beforeDate string) (int64, error)
+}
+
 type invoiceEmailSender func(context.Context, domain.Invoice) error
 
 type Service struct {
