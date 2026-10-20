@@ -71,13 +71,12 @@ func (a notificationPublisherAdapter) CreateNotification(ctx context.Context, ow
 
 type emailQueueAdapter struct{ db *sql.DB }
 
-func (a emailQueueAdapter) QueueInvite(ctx context.Context, toEmail, inviteLink string) error {
-	subject := "Your team invited you to rtylr on rtylr"
-	return emailPkg.EnqueueTemplate(ctx, a.db, emailPkg.PriorityHigh, toEmail, subject, emailPkg.TemplateInvitation, emailPkg.InvitationData{
-		Subject:      subject,
-		InviterName:  "Your team",
-		BusinessName: "rtylr",
-		InviteLink:   inviteLink,
+func (a emailQueueAdapter) QueueInvite(ctx context.Context, invite application.InviteEmail) error {
+	return emailPkg.EnqueueInvitation(ctx, a.db, invite.To, emailPkg.InvitationData{
+		InviterName:  invite.InviterName,
+		BusinessName: invite.BusinessName,
+		InviteLink:   invite.Link,
+		ValidDays:    invite.ValidDays,
 	})
 }
 

@@ -88,11 +88,11 @@ func TestAcceptInviteWritesUnderTheInviteBusiness(t *testing.T) {
 			activatedBusiness = argAt(write.args, 0)
 		}
 	}
-	if provisioningBusiness != int64(inviteBusinessID) {
+	if provisioningBusiness != inviteBusinessID {
 		t.Fatalf("provisioning state written under business %v, want the invitation's business %d\n%s",
 			provisioningBusiness, inviteBusinessID, statementSummary(fake.Writes()))
 	}
-	if activatedBusiness != int64(inviteBusinessID) {
+	if activatedBusiness != inviteBusinessID {
 		t.Fatalf("membership activated under business %v, want the invitation's business %d\n%s",
 			activatedBusiness, inviteBusinessID, statementSummary(fake.Writes()))
 	}

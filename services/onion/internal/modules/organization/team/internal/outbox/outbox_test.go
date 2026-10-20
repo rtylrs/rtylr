@@ -43,7 +43,15 @@ func TestRecordAuditIsRelayedAsHubMutation(t *testing.T) {
 			ActorID int64  `json:"actor_id"`
 			Action  string `json:"action"`
 		}
-		raw, _ := fact.Payload.([]byte)
+		// The JSON column scans as json.RawMessage, a named byte type, so a
+		// plain []byte assertion would come back empty.
+		var raw []byte
+		switch p := fact.Payload.(type) {
+		case []byte:
+			raw = p
+		case json.RawMessage:
+			raw = p
+		}
 		if err := json.Unmarshal(raw, &payload); err != nil {
 			t.Fatalf("decode payload %T: %v", fact.Payload, err)
 		}

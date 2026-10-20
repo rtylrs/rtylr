@@ -7,6 +7,9 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 )
 
+// InviteTokenTTL is how long an invitation link works.
+const InviteTokenTTL = 7 * 24 * time.Hour
+
 var (
 	ErrPermissionNotFound = errors.New("user app permission not found")
 	ErrUserNotFound       = errors.New("user not found")

@@ -66,11 +66,9 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	if memberType == "" {
 		memberType = "member"
 	}
-	licensedApps := []string{}
+	licensedApps := existing.LicensedAppIDs
 	if input.LicensedAppIDs != nil {
 		licensedApps = *input.LicensedAppIDs
-	} else {
-		licensedApps = existing.LicensedAppIDs
 	}
 	assignments := make([]domain.AppRoleAssignmentInput, 0, len(existing.PermissionProfileAssignments))
 	for _, assignment := range existing.PermissionProfileAssignments {

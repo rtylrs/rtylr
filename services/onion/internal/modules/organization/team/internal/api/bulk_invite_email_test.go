@@ -20,10 +20,9 @@ import (
 
 type testEmailNotifications struct{ db *sql.DB }
 
-func (n testEmailNotifications) QueueInvite(ctx context.Context, toEmail, inviteLink string) error {
-	subject := "Your team invited you to rtylr on rtylr"
-	return emailPkg.EnqueueTemplate(ctx, n.db, emailPkg.PriorityHigh, toEmail, subject, emailPkg.TemplateInvitation, emailPkg.InvitationData{
-		Subject: subject, InviterName: "Your team", BusinessName: "rtylr", InviteLink: inviteLink,
+func (n testEmailNotifications) QueueInvite(ctx context.Context, invite application.InviteEmail) error {
+	return emailPkg.EnqueueInvitation(ctx, n.db, invite.To, emailPkg.InvitationData{
+		InviterName: invite.InviterName, BusinessName: invite.BusinessName, InviteLink: invite.Link, ValidDays: invite.ValidDays,
 	})
 }
 
@@ -135,8 +134,12 @@ func TestBulkInviteEnqueuesInvitationEmailForNewInvitee(t *testing.T) {
 		Scan(&subject, &html); err != nil {
 		t.Fatalf("read queued email: %v", err)
 	}
-	if !strings.Contains(subject, "invited") {
-		t.Fatalf("queued email subject = %q, want an invitation subject", subject)
+	// The inviter has no name, so their email stands in; the business is named.
+	if !strings.Contains(subject, "invited you to join Bulk Invite Business") || !strings.Contains(subject, "bulk-invite-actor-") {
+		t.Fatalf("queued email subject = %q, want the inviter and business named", subject)
+	}
+	if strings.Contains(subject, "rtylr on rtylr") || !strings.Contains(html, "expires in 7 days") {
+		t.Fatalf("queued invitation = %q, want real names and the expiry", subject)
 	}
 	if !strings.Contains(html, config.AuthAppURL+"/invite/"+token) {
 		t.Fatalf("queued invitation does not contain the invite link for the created token")

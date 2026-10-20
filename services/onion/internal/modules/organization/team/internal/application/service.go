@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/organization/team/internal/domain"
@@ -98,13 +99,29 @@ func (s *Service) WithTerminatedEmployeeSource(source terminatedEmployeeSource) 
 	return s
 }
 
-// EnqueueInviteEmail queues a team invitation email for the background worker to
-// deliver. Queue failures are returned to the invite workflow.
-func (s *Service) EnqueueInviteEmail(ctx context.Context, toEmail, inviteLink string) error {
+// EnqueueInviteEmail queues actorID's invitation to join businessID for the
+// background worker to deliver, naming the inviter (or their email) and the
+// business. Queue failures are returned to the invite workflow; a name that
+// can't be read is left out rather than failing the invite.
+func (s *Service) EnqueueInviteEmail(ctx context.Context, actorID, businessID int64, toEmail, inviteLink string) error {
 	if s.emails == nil {
 		return nil
 	}
-	return s.emails.QueueInvite(ctx, toEmail, inviteLink)
+	invite := InviteEmail{
+		To:        toEmail,
+		Link:      inviteLink,
+		ValidDays: int(domain.InviteTokenTTL / (24 * time.Hour)),
+	}
+	if email, fullName, _, err := s.repo.GetUserByID(ctx, actorID); err == nil {
+		invite.InviterName = strings.TrimSpace(fullName)
+		if invite.InviterName == "" {
+			invite.InviterName = strings.TrimSpace(email)
+		}
+	}
+	if name, _, err := s.repo.GetBusinessByID(ctx, businessID); err == nil {
+		invite.BusinessName = strings.TrimSpace(name)
+	}
+	return s.emails.QueueInvite(ctx, invite)
 }
 
 // EnqueueAccessRequestEmail queues an app-access-request notification to the

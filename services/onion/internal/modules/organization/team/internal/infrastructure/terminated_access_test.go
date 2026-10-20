@@ -79,5 +79,4 @@ func TestTerminatedAccessReconciliation_DeactivatesTerminatedOnly(t *testing.T) 
 	if after != "revoked" {
 		t.Fatalf("membership status after reconciliation = %q, want revoked", after)
 	}
-
 }

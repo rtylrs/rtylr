@@ -77,12 +77,28 @@ type WelcomeData struct {
 	Name    string
 }
 
-// InvitationData is the data for TemplateInvitation.
+// InvitationData is the data for TemplateInvitation. InviterName and
+// BusinessName may be empty; the email words around a missing one.
 type InvitationData struct {
 	Subject      string
 	InviterName  string
 	BusinessName string
 	InviteLink   string
+	// ValidDays is how long the link works; 0 leaves the expiry out.
+	ValidDays int
+}
+
+// InvitationSubject words an invitation's subject around the names it has.
+func InvitationSubject(inviterName, businessName string) string {
+	switch {
+	case inviterName != "" && businessName != "":
+		return inviterName + " invited you to join " + businessName + " on rtylr"
+	case businessName != "":
+		return "You're invited to join " + businessName + " on rtylr"
+	case inviterName != "":
+		return inviterName + " invited you to rtylr"
+	}
+	return "You're invited to rtylr"
 }
 
 // PasswordResetData is the data for TemplatePasswordReset.

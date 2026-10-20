@@ -15,8 +15,6 @@ func (r *Repository) ListActiveMemberUserIDs(ctx context.Context, businessID int
 		return nil, err
 	}
 	ids := make([]int64, 0, len(rows))
-	for _, row := range rows {
-		ids = append(ids, row)
-	}
+	ids = append(ids, rows...)
 	return ids, nil
 }

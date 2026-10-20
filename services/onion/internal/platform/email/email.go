@@ -159,6 +159,13 @@ func WithFrom(from string) Option { return func(p *SendParams) { p.From = from }
 // WithReplyTo sets the Reply-To address.
 func WithReplyTo(replyTo string) Option { return func(p *SendParams) { p.ReplyTo = replyTo } }
 
+// EnqueueInvitation queues a team invitation to `to`, with the subject worded
+// from the data's names.
+func EnqueueInvitation(ctx context.Context, db *sql.DB, to string, data InvitationData) error {
+	data.Subject = InvitationSubject(data.InviterName, data.BusinessName)
+	return EnqueueTemplate(ctx, db, PriorityHigh, to, data.Subject, TemplateInvitation, data)
+}
+
 // EnqueueTemplate renders tmpl with data and enqueues it on email_jobs at the
 // given priority (PriorityCritical/High/Normal) for the background worker to
 // deliver. Use it instead of SendTemplate when delivery can be deferred/retried.
