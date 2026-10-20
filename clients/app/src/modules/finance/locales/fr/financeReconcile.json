@@ -8,6 +8,7 @@
   "awaitingCount_other": "{{count}} transactions en attente de rapprochement",
   "matching": "Rapprochement…",
   "autoMatchAll": "Tout rapprocher",
+  "loadFailedTitle": "Les transactions bancaires ne se sont pas chargées",
   "loadFailed": "Les transactions bancaires n’ont pas pu être chargées ; rien ne peut encore être rapproché.",
   "noAccountsTitle": "Aucun compte bancaire connecté",
   "noAccountsDescription": "Le rapprochement associe les transactions bancaires à vos factures. Connectez d’abord un compte bancaire ; ses transactions apparaîtront ici.",

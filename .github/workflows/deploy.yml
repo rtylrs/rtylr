@@ -50,9 +50,22 @@ jobs:
       node_version: ${{ matrix.node_version }}
     secrets: inherit
 
+  # The API and the worker read the columns their release's migrations add, so
+  # the schema goes first. A failed migration stops their deploy: the running
+  # release keeps working against the schema it knows.
+  migrate:
+    name: Migrate the database
+    if: contains(inputs.ecs, '"app":"onion-api"') || contains(inputs.ecs, '"app":"onion-worker"')
+    uses: ./.github/workflows/migrate-onion-database.yml
+    with:
+      release_tag: ${{ inputs.release_tag }}
+      dry_run: false
+    secrets: inherit
+
   ecs:
     name: Deploy ${{ matrix.app }}
-    if: inputs.ecs != '[]'
+    needs: migrate
+    if: ${{ !cancelled() && inputs.ecs != '[]' && needs.migrate.result != 'failure' }}
     strategy:
       fail-fast: false
       matrix:
