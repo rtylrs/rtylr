@@ -6,7 +6,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Save, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { getOneKitErrorMessage } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import ReceiptUpload from '../../shared/components/ReceiptUpload';
 import CurrencyInput from '../../shared/components/CurrencyInput';
@@ -55,7 +54,6 @@ const NewExpense: React.FC = () => {
           toast.success(t('financeExpenses.submitted'));
           navigate({ to: '/finance/expenses' });
         },
-        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to submit expense')),
       }
     );
   };

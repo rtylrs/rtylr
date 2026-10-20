@@ -137,7 +137,16 @@ func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput
 		return err
 	}
 	if rows == 0 {
-		return domain.ErrExpenseNotFound
+		// MySQL counts changed rows, so saving an unchanged expense also
+		// reports 0. Re-read to tell that apart from a concurrent approval
+		// or delete.
+		after, err := r.GetByID(ctx, input.BusinessID, input.ID)
+		if err != nil {
+			return err
+		}
+		if after.Status == "approved" {
+			return domain.ErrApprovedExpenseImmutable
+		}
 	}
 	return nil
 }

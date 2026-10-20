@@ -14,9 +14,9 @@ message Expense {
   currency: string
   /// description is the description value for this contract.
   description: string
-  /// vendor is the vendor value for this contract.
+  /// vendor is who was paid, empty when not recorded.
   vendor: string
-  /// receipt_url is the receipt url value for this contract.
+  /// receipt_url links the uploaded receipt, empty when none is attached.
   receipt_url: string
   /// payment_method is the canonical payment method for accounting.
   payment_method: string
@@ -59,10 +59,10 @@ message CreateExpenseRequest {
   currency: string @required
   /// description is the description value for this contract.
   description: string @required
-  /// vendor is the vendor value for this contract.
-  vendor: string @required
-  /// receipt_url is the receipt url value for this contract.
-  receipt_url: string @required
+  /// vendor is who was paid, empty when not recorded.
+  vendor: string
+  /// receipt_url links the uploaded receipt, empty when none is attached.
+  receipt_url: string
   /// payment_method is the canonical payment method for accounting.
   payment_method: string
   /// is_tax_deductible indicates whether the expense is tax deductible.
@@ -175,10 +175,10 @@ message UpdateExpenseBody {
   currency: string @required
   /// description is the description value for this contract.
   description: string @required
-  /// vendor is the vendor value for this contract.
-  vendor: string @required
-  /// receipt_url is the receipt url value for this contract.
-  receipt_url: string @required
+  /// vendor is who was paid, empty when not recorded.
+  vendor: string
+  /// receipt_url links the uploaded receipt, empty when none is attached.
+  receipt_url: string
   /// payment_method is the canonical payment method for accounting.
   payment_method: string
   /// is_tax_deductible indicates whether the expense is tax deductible.
