@@ -465,15 +465,18 @@ const Expenses: React.FC = () => {
         title={t('financeExpenses.title')}
         subtitle={t('financeExpenses.subtitle')}
         actions={
-          <button
-            type="button"
-            onClick={addExpense}
-            style={primaryBtn}
-            aria-label={t('financeExpenses.addAria')}
-          >
-            <Plus size={15} />
-            {t('financeExpenses.add')}
-          </button>
+          // With no expenses at all the empty state carries this action instead.
+          loading || isError || allExpenses.length > 0 ? (
+            <button
+              type="button"
+              onClick={addExpense}
+              style={primaryBtn}
+              aria-label={t('financeExpenses.addAria')}
+            >
+              <Plus size={15} />
+              {t('financeExpenses.add')}
+            </button>
+          ) : undefined
         }
       />
 
@@ -513,7 +516,6 @@ const Expenses: React.FC = () => {
               icon={Receipt}
               title={t('financeExpenses.emptyMonthTitle', { month: monthName })}
               description={t('financeExpenses.emptyMonthDescription')}
-              action={{ label: t('financeExpenses.add'), onClick: addExpense }}
             />
           ) : (
             <>

@@ -20,8 +20,11 @@ type Account struct {
 	Type       string
 	Currency   string
 	Balance    float64
-	IsActive   bool
-	CreatedAt  time.Time
+	// CurrentBalance is Balance (the opening balance) plus the posted journal
+	// lines on the account, signed by its type.
+	CurrentBalance float64
+	IsActive       bool
+	CreatedAt      time.Time
 }
 
 // AccountTreeNode is a single node in the chart-of-accounts tree.

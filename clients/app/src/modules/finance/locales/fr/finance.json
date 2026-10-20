@@ -50,7 +50,17 @@
     "netCashFlow": "Flux de trésorerie net",
     "reports": "Rapports",
     "inflow": "Entrées",
-    "outflow": "Sorties"
+    "outflow": "Sorties",
+    "subtitle": "Entrées des factures payées et sorties des dépenses approuvées",
+    "chartLabel": "Entrées et sorties sur la période",
+    "periodLabel": "Période",
+    "periods": {
+      "month": "Ce mois-ci",
+      "quarter": "Ce trimestre",
+      "year": "Cette année"
+    },
+    "empty": "Aucune entrée ni sortie {{period}}. Les paiements de factures comptent comme entrées et les dépenses approuvées comme sorties.",
+    "basisNote": "Les dépenses en attente d’approbation ne sont pas comptées avant leur approbation."
   },
   "bills": {
     "receivedFromErp": "Reçues de l’Opérations, en attente de factures",
@@ -77,20 +87,26 @@
     "inventoryHint": "Valeur des stocks en temps réel depuis l'Opérations, affichée uniquement lorsque l'Opérations est activé pour cette entreprise.",
     "inventoryUnavailable": "Opérations non connecté",
     "title": "Bilan",
-    "asOf": "À la date du :",
     "assets": "Actif",
     "liabilities": "Passif",
     "equity": "Capitaux propres",
-    "totalAssets": "Total de l'actif",
+    "subtitle": "Ce que l’entreprise possède et doit, d’après le grand livre",
+    "asOfLabel": "Au",
+    "netIncome": "Résultat net à date",
+    "noBalances": "Aucun solde.",
+    "emptyNote": "Rien n’est inscrit au grand livre au {{date}}. Les dépenses approuvées et les paiements de factures y sont passés automatiquement ; les écritures de journal ajoutent le reste.",
+    "balanced": "Équilibré : l’actif ({{assets}}) est égal au passif et aux capitaux propres ({{liabilitiesAndEquity}}).",
+    "outOfBalance": "Déséquilibre de {{difference}}. Vérifiez le journal : une écriture vise peut-être un compte du mauvais type.",
+    "memo": {
+      "title": "Hors grand livre",
+      "description": "Ces montants viennent d’autres écrans et ne font pas partie de l’état ci-dessus.",
+      "bank": "Soldes saisis sur les comptes bancaires",
+      "receivable": "Factures ouvertes encore dues",
+      "payable": "Factures fournisseurs impayées"
+    },
+    "totalAssets": "Total de l’actif",
     "totalLiabilities": "Total du passif",
-    "totalEquity": "Total des capitaux propres",
-    "check": "Contrôle",
-    "rows": {
-      "cash": "Trésorerie",
-      "receivable": "Créances clients",
-      "payable": "Dettes fournisseurs",
-      "equity": "Capitaux propres"
-    }
+    "totalEquity": "Total des capitaux propres"
   },
   "profitLoss": {
     "title": "Compte de résultat",

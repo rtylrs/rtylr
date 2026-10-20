@@ -31,6 +31,16 @@ func (h *SubmitTimesheetHandler) Validate(_ context.Context, _ *SubmitTimesheetR
 }
 
 func (h *SubmitTimesheetHandler) Serve(ctx context.Context, _ *SubmitTimesheetRequest) (SubmitTimesheetResponse, error) {
+	id, parseErr := strconv.ParseInt(serverHttp.PathParam(ctx, "id"), 10, 64)
+	if parseErr != nil {
+		return SubmitTimesheetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")
+	}
+	return h.submit(ctx, id)
+}
+
+// submit acts on the timesheet with the given id. The hand-registered route reads
+// it from the path and the hr.time_entry.v1 contract from the request.
+func (h *SubmitTimesheetHandler) submit(ctx context.Context, id int64) (SubmitTimesheetResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return SubmitTimesheetResponse{}, onekiterrors.PermissionDenied()
@@ -39,12 +49,6 @@ func (h *SubmitTimesheetHandler) Serve(ctx context.Context, _ *SubmitTimesheetRe
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return SubmitTimesheetResponse{}, onekiterrors.PermissionDenied()
-	}
-
-	idStr := serverHttp.PathParam(ctx, "id")
-	id, parseErr := strconv.ParseInt(idStr, 10, 64)
-	if parseErr != nil {
-		return SubmitTimesheetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")
 	}
 
 	ts, err := h.Service.SubmitTimesheetForCaller(ctx, businessID, device.User.UserID, id)

@@ -66,9 +66,49 @@ func (r *Repository) List(ctx context.Context, businessID int64, limit, offset i
 			IsActive:   nullBool(row.IsActive),
 			CreatedAt:  nullTime(row.CreatedAt),
 		})
+		account := &items[len(items)-1]
+		netDebit, _ := strconv.ParseFloat(row.PostedNetDebit, 64)
+		if account.Type == "asset" || account.Type == "expense" {
+			account.CurrentBalance = account.Balance + netDebit
+		} else {
+			account.CurrentBalance = account.Balance - netDebit
+		}
 	}
 
 	return items, nil
+}
+
+// EnsureLedgerAccount returns the business's account with this code, type and
+// currency, creating it with a zero opening balance when there is none.
+func (r *Repository) EnsureLedgerAccount(ctx context.Context, ownerID, businessID int64, code, name, accountType, currency string) (int64, bool, error) {
+	id, err := r.queries.FindLedgerAccount(ctx, sqlc.FindLedgerAccountParams{
+		BusinessID:  businessID,
+		Code:        nullableString(code),
+		AccountType: sqlc.FinanceAccountsType(accountType),
+		Currency:    nullableString(currency),
+	})
+	if err == nil {
+		return id, false, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return 0, false, err
+	}
+	res, err := r.queries.CreateAccount(ctx, sqlc.CreateAccountParams{
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		Name:       name,
+		Code:       nullableString(code),
+		Type:       sqlc.FinanceAccountsType(accountType),
+		Currency:   nullableString(currency),
+		Balance:    nullableString("0.00"),
+		IsActive:   sql.NullBool{Bool: true, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to create ledger account", logger.String("code", code), logger.Error(err))
+		return 0, false, err
+	}
+	id, err = res.LastInsertId()
+	return id, true, err
 }
 
 func (r *Repository) ListForTree(ctx context.Context, businessID int64) ([]domain.Account, error) {

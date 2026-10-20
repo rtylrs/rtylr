@@ -43,6 +43,14 @@ func (m *mockRepo) PostPayrollJournal(_ context.Context, _ domain.PayrollJournal
 
 func (m *mockRepo) SetPayrollAccountProvider(financeaccounts.PayrollAccountProvider) {}
 
+func (m *mockRepo) ListUnpostedSources(context.Context, int64) ([]domain.OperationalSource, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) PostOperationalEntry(context.Context, domain.OperationalSource, int64, int64) (bool, error) {
+	return false, nil
+}
+
 func TestList_Delegates(t *testing.T) {
 	s := &Service{repo: &mockRepo{list: []domain.JournalEntry{{ID: 1}}}}
 	got, _, _ := s.List(context.Background(), 1, 1, 20)

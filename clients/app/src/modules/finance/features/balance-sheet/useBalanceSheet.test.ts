@@ -25,25 +25,34 @@ describe('useBalanceSheet', () => {
     vi.clearAllMocks();
   });
 
-  it('fetches balance sheet on mount', async () => {
+  it('asks for the chosen date and keeps the ledger lines', async () => {
     mockClient.getBalanceSheet.mockResolvedValue({
-      totalAssets: 10000,
+      asOf: '2026-10-31',
+      lines: [{ accountId: '7', code: '1010', name: 'Bank', type: 'asset', amount: 465 }],
+      netIncome: 465,
+      totalAssets: 465,
       totalLiabilities: 0,
-      totalEquity: 10000,
+      totalEquity: 465,
       cashBalance: 8000,
       accountsReceivable: 2000,
       accountsPayable: 0,
     });
-    const { result } = renderHook(() => useBalanceSheet(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useBalanceSheet('2026-10-31'), {
+      wrapper: createWrapper(),
+    });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockClient.getBalanceSheet).toHaveBeenCalledWith({});
-    expect(result.current.data?.totalAssets).toBe(10000);
-    expect(result.current.data?.assets).toHaveLength(2);
+    expect(mockClient.getBalanceSheet).toHaveBeenCalledWith({ asOf: '2026-10-31' });
+    expect(result.current.data?.lines).toEqual([
+      { accountId: '7', code: '1010', name: 'Bank', type: 'asset', amount: 465 },
+    ]);
+    expect(result.current.data?.totalEquity).toBe(465);
   });
 
   it('starts in loading state', () => {
     mockClient.getBalanceSheet.mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useBalanceSheet(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useBalanceSheet('2026-10-31'), {
+      wrapper: createWrapper(),
+    });
     expect(result.current.isLoading).toBe(true);
   });
 });

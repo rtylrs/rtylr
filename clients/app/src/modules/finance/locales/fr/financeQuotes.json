@@ -21,5 +21,7 @@
   "prev": "Précédent",
   "next": "Suivant",
   "createdToast": "Devis créé",
-  "convertedToast": "Devis converti en facture"
+  "convertedToast": "Devis converti en facture",
+  "quoteCount_one": "{{count}} devis",
+  "quoteCount_other": "{{count}} devis"
 }

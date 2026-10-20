@@ -20,6 +20,9 @@ message Account {
   created_at: string
   /// code is the optional account code/number.
   code: string
+  /// current_balance is balance (the opening balance) plus every posted
+  /// journal line on the account, signed by the account type.
+  current_balance: float64
 }
 
 /// ChartOfAccountsNode is a node in the hierarchical chart of accounts.

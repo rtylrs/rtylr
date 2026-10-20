@@ -8,6 +8,8 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/financeaccounts"
+	"github.com/voxire/onion/internal/platform/financejournal"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -22,6 +24,7 @@ type repository interface {
 	Delete(ctx context.Context, businessID, id int64) error
 	ListForTree(ctx context.Context, businessID int64) ([]domain.Account, error)
 	GetPayrollAccountMapping(ctx context.Context, businessID int64) (financeaccounts.PayrollAccountMapping, error)
+	EnsureLedgerAccount(ctx context.Context, ownerID, businessID int64, code, name, accountType, currency string) (int64, bool, error)
 }
 
 func (s *Service) GetPayrollAccountMapping(ctx context.Context, businessID int64) (financeaccounts.PayrollAccountMapping, error) {
@@ -29,7 +32,48 @@ func (s *Service) GetPayrollAccountMapping(ctx context.Context, businessID int64
 }
 
 type Service struct {
-	repo repository
+	repo   repository
+	ledger financejournal.LedgerSyncer
+}
+
+// SetLedgerSyncer lets the account list post outstanding expenses and
+// payments first, so balances include them.
+func (s *Service) SetLedgerSyncer(ledger financejournal.LedgerSyncer) {
+	s.ledger = ledger
+}
+
+// ledgerAccounts are the standard accounts operational postings use, by code.
+var ledgerAccounts = []struct {
+	code, name, accountType string
+	set                     func(*financeaccounts.LedgerAccounts, int64)
+}{
+	{"1000", "Cash", "asset", func(a *financeaccounts.LedgerAccounts, id int64) { a.Cash = id }},
+	{"1010", "Bank", "asset", func(a *financeaccounts.LedgerAccounts, id int64) { a.Bank = id }},
+	{"4000", "Sales", "revenue", func(a *financeaccounts.LedgerAccounts, id int64) { a.Sales = id }},
+	{"6000", "Operating expenses", "expense", func(a *financeaccounts.LedgerAccounts, id int64) { a.OperatingExpenses = id }},
+}
+
+// EnsureLedgerAccounts finds the business's Cash, Bank, Sales and Operating
+// expenses accounts in the currency, creating any it does not have. A business
+// that already keeps accounts under these codes keeps using its own.
+func (s *Service) EnsureLedgerAccounts(ctx context.Context, ownerID, businessID int64, currency string) (financeaccounts.LedgerAccounts, error) {
+	if currency == "" {
+		currency = "USD"
+	}
+	var out financeaccounts.LedgerAccounts
+	created := false
+	for _, account := range ledgerAccounts {
+		id, isNew, err := s.repo.EnsureLedgerAccount(ctx, ownerID, businessID, account.code, account.name, account.accountType, currency)
+		if err != nil {
+			return financeaccounts.LedgerAccounts{}, err
+		}
+		account.set(&out, id)
+		created = created || isNew
+	}
+	if created {
+		invalidateAccountsScope(ctx, businessID)
+	}
+	return out, nil
 }
 
 func NewService(_ context.Context, repo repository) *Service {
@@ -52,6 +96,12 @@ func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([
 	}
 	limit := int(pageSize) + 1
 	offset := int((page - 1) * pageSize)
+	if s.ledger != nil {
+		// A failed sync still lists the accounts, just without the newest postings.
+		if err := s.ledger.SyncOperationalPostings(ctx, businessID); err != nil {
+			logger.Ctx(ctx).Warn("Ledger sync before listing accounts failed", logger.Error(err))
+		}
+	}
 	items, err := s.repo.List(ctx, businessID, limit, offset)
 	if err != nil {
 		return nil, false, err

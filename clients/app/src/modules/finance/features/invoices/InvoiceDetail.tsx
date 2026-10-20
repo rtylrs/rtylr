@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
-import { useUserStore } from '../../../../shared/stores/userStore';
 
 const routeApi = getRouteApi('/business/finance/invoices/$id');
 import { motion } from 'motion/react';

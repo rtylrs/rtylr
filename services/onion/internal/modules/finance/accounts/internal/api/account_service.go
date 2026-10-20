@@ -135,15 +135,16 @@ func (a *AccountAPI) GetChartOfAccounts(ctx context.Context, _ *financeaccountv1
 
 func newAccountProto(a domain.Account) *financeaccountv1.Account {
 	return &financeaccountv1.Account{
-		Id:        a.ID,
-		OwnerId:   a.OwnerID,
-		Name:      a.Name,
-		Code:      a.Code,
-		Type:      a.Type,
-		Currency:  a.Currency,
-		Balance:   a.Balance,
-		IsActive:  a.IsActive,
-		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		Id:             a.ID,
+		OwnerId:        a.OwnerID,
+		Name:           a.Name,
+		Code:           a.Code,
+		Type:           a.Type,
+		Currency:       a.Currency,
+		Balance:        a.Balance,
+		CurrentBalance: a.CurrentBalance,
+		IsActive:       a.IsActive,
+		CreatedAt:      a.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
 

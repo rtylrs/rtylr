@@ -21,5 +21,7 @@
   "prev": "Prev",
   "next": "Next",
   "createdToast": "Quote created",
-  "convertedToast": "Quote converted to invoice"
+  "convertedToast": "Quote converted to invoice",
+  "quoteCount_one": "{{count}} quote",
+  "quoteCount_other": "{{count}} quotes"
 }

@@ -1,14 +1,47 @@
 package finance.statement.v1
 
-message GetBalanceSheetRequest {}
+message GetBalanceSheetRequest {
+  /// as_of is the date to report, YYYY-MM-DD. Empty means today.
+  as_of: string @query("as_of")
+}
 
 message GetBalanceSheetResponse {
+  /// total_assets sums the asset lines.
   total_assets: float64
+  /// total_liabilities sums the liability lines.
   total_liabilities: float64
+  /// total_equity sums the equity lines plus net_income.
   total_equity: float64
+  /// cash_balance is the balance recorded on the business's bank accounts.
+  /// It is shown beside the statement, not added to it.
   cash_balance: float64
+  /// accounts_receivable is what open invoices are still owed. The ledger
+  /// records invoices when paid, so this is not in total_assets.
   accounts_receivable: float64
+  /// accounts_payable is what unpaid bills still owe. Not in total_liabilities.
   accounts_payable: float64
+  /// as_of is the date the figures are for.
+  as_of: string
+  /// lines are the asset, liability and equity accounts with a balance on
+  /// as_of, each its opening balance plus the journal lines posted by then.
+  lines: BalanceSheetLine[]
+  /// net_income is revenue less expenses posted up to as_of. It is part of
+  /// total_equity and has no account of its own.
+  net_income: float64
+}
+
+/// BalanceSheetLine is one ledger account's balance on the report date.
+message BalanceSheetLine {
+  /// account_id is the ledger account.
+  account_id: int64
+  /// code is the account code, empty when the account has none.
+  code: string
+  /// name is the account name.
+  name: string
+  /// type is asset, liability or equity.
+  type: string
+  /// amount is the account balance, positive on its normal side.
+  amount: float64
 }
 
 message GetCashFlowRequest {

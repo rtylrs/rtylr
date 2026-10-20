@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -21,7 +22,7 @@ func NewStatementAPI(service *application.Service) *StatementAPI {
 	return &StatementAPI{Service: service}
 }
 
-func (a *StatementAPI) GetBalanceSheet(ctx context.Context, _ *financestatementv1.GetBalanceSheetRequest) (*financestatementv1.GetBalanceSheetResponse, error) {
+func (a *StatementAPI) GetBalanceSheet(ctx context.Context, req *financestatementv1.GetBalanceSheetRequest) (*financestatementv1.GetBalanceSheetResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -35,11 +36,28 @@ func (a *StatementAPI) GetBalanceSheet(ctx context.Context, _ *financestatementv
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	bs, err := a.Service.GetBalanceSheet(ctx, businessID)
+	asOf := ""
+	if req != nil {
+		asOf = req.AsOf
+	}
+	bs, err := a.Service.GetBalanceSheetAsOf(ctx, businessID, asOf)
+	if errors.Is(err, application.ErrInvalidAsOf) {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to generate balance sheet")
 	}
 
+	lines := make([]*financestatementv1.BalanceSheetLine, 0, len(bs.Lines))
+	for _, line := range bs.Lines {
+		lines = append(lines, &financestatementv1.BalanceSheetLine{
+			AccountId: line.AccountID,
+			Code:      line.Code,
+			Name:      line.Name,
+			Type:      line.Type,
+			Amount:    line.Amount,
+		})
+	}
 	return &financestatementv1.GetBalanceSheetResponse{
 		TotalAssets:        bs.TotalAssets,
 		TotalLiabilities:   bs.TotalLiabilities,
@@ -47,6 +65,9 @@ func (a *StatementAPI) GetBalanceSheet(ctx context.Context, _ *financestatementv
 		CashBalance:        bs.CashBalance,
 		AccountsReceivable: bs.AccountsReceivable,
 		AccountsPayable:    bs.AccountsPayable,
+		AsOf:               bs.AsOf,
+		Lines:              lines,
+		NetIncome:          bs.NetIncome,
 	}, nil
 }
 

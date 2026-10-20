@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/finance/finance_reports/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance/finance_reports/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -318,4 +319,57 @@ func (r *Repository) reportCurrency(ctx context.Context, businessID int64) (stri
 		return "", errors.New("finance reporting currency reader is not configured")
 	}
 	return r.reportingCurrency(ctx, businessID)
+}
+
+// ListBalanceSheetAccounts returns each asset, liability and equity account in
+// the reporting currency with its balance on asOf.
+func (r *Repository) ListBalanceSheetAccounts(ctx context.Context, businessID int64, asOf time.Time) ([]domain.BalanceSheetLine, error) {
+	currency, err := r.reportCurrency(ctx, businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.queries.ListBalanceSheetAccounts(ctx, sqlc.ListBalanceSheetAccountsParams{
+		BusinessID:        businessID,
+		AsOf:              asOf,
+		ReportingCurrency: sql.NullString{String: currency, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list balance sheet accounts", logger.Error(err))
+		return nil, err
+	}
+	lines := make([]domain.BalanceSheetLine, 0, len(rows))
+	for _, row := range rows {
+		lines = append(lines, domain.BalanceSheetLine{
+			AccountID: row.ID,
+			Code:      row.Code,
+			Name:      row.Name,
+			Type:      string(row.Type),
+			Amount:    toFloat64FromInterface(row.Amount),
+		})
+	}
+	return lines, nil
+}
+
+// SumPostedNetIncomeAsOf is revenue less expenses posted on or before asOf.
+func (r *Repository) SumPostedNetIncomeAsOf(ctx context.Context, businessID int64, asOf time.Time) (float64, error) {
+	currency, err := r.reportCurrency(ctx, businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	result, err := r.queries.SumPostedNetIncomeAsOf(ctx, sqlc.SumPostedNetIncomeAsOfParams{
+		BusinessID:        businessID,
+		AsOf:              asOf,
+		ReportingCurrency: sql.NullString{String: currency, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to sum posted net income", logger.Error(err))
+		return 0, err
+	}
+	return toFloat64FromInterface(result), nil
 }

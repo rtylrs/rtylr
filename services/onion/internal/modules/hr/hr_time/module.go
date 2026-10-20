@@ -3,7 +3,11 @@ package hr_time
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	stdhttp "net/http"
+
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/hr/hr_time/internal/infrastructure"
 
@@ -77,6 +81,14 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 
 func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
 	api.RegisterRoutes(ctx, router, m.service)
+}
+
+// RegisterAPI serves the hr.time_entry.v1 contract. Finance reads billable
+// hours and marks them invoiced through it.
+func (m *Module) RegisterAPI(mux *stdhttp.ServeMux) {
+	if err := hrtimeentryv1.RegisterTimeEntryServiceServer(api.NewTimeEntryAPI(m.service), hrtimeentryv1.WithMux(mux)); err != nil {
+		panic(fmt.Errorf("register hr time entry service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

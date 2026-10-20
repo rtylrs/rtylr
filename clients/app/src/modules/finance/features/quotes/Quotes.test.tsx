@@ -150,9 +150,10 @@ describe('Quotes empty state', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
+    // One way to start: the empty state's button, not a second copy in the header.
     const newQuoteButtons = screen.getAllByRole('button', { name: 'New Quote' });
-    expect(newQuoteButtons).toHaveLength(2);
-    fireEvent.click(newQuoteButtons[1]);
+    expect(newQuoteButtons).toHaveLength(1);
+    fireEvent.click(newQuoteButtons[0]);
 
     expect(screen.getByRole('dialog')).toHaveTextContent('New Quote');
   });
@@ -160,7 +161,7 @@ describe('Quotes empty state', () => {
   it('does not offer an Issue Date the create contract cannot store', () => {
     render(<Quotes />);
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'New Quote' })[1]);
+    fireEvent.click(screen.getByRole('button', { name: 'New Quote' }));
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveTextContent('Expires');

@@ -45,6 +45,10 @@ func (m *mockRepo) GetPayrollAccountMapping(context.Context, int64) (financeacco
 	return m.mapping, m.mappingErr
 }
 
+func (m *mockRepo) EnsureLedgerAccount(_ context.Context, _, _ int64, _, _, _, _ string) (int64, bool, error) {
+	return 0, false, nil
+}
+
 func TestGetPayrollAccountMapping_Delegates(t *testing.T) {
 	want := financeaccounts.PayrollAccountMapping{BusinessID: 7, ExpenseAccountID: 11, PayableAccountID: 12}
 	s := &Service{repo: &mockRepo{mapping: want}}

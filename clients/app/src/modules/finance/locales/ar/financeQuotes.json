@@ -21,5 +21,11 @@
   "prev": "السابق",
   "next": "التالي",
   "createdToast": "تم إنشاء عرض السعر",
-  "convertedToast": "تم تحويل عرض السعر إلى فاتورة"
+  "convertedToast": "تم تحويل عرض السعر إلى فاتورة",
+  "quoteCount_zero": "لا عروض أسعار",
+  "quoteCount_one": "عرض سعر واحد",
+  "quoteCount_two": "عرضا سعر",
+  "quoteCount_few": "{{count}} عروض أسعار",
+  "quoteCount_many": "{{count}} عرض سعر",
+  "quoteCount_other": "{{count}} عرض سعر"
 }
