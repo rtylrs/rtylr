@@ -44,14 +44,26 @@ func (a *ReportAPI) GetPLReport(ctx context.Context, req *financereportv1.GetPLR
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to generate P&L report")
 	}
 
+	byCategory := make([]*financereportv1.PLCategoryTotal, 0, len(report.ExpensesByCategory))
+	for _, total := range report.ExpensesByCategory {
+		byCategory = append(byCategory, &financereportv1.PLCategoryTotal{
+			CategoryId: total.CategoryID,
+			Name:       total.Name,
+			Color:      total.Color,
+			Amount:     total.Amount,
+		})
+	}
 	return &financereportv1.GetPLReportResponse{
-		Period:            report.Period,
-		Revenue:           report.Revenue,
-		Cogs:              report.COGS,
-		GrossProfit:       report.GrossProfit,
-		OperatingExpenses: report.OperatingExpenses,
-		NetProfit:         report.NetProfit,
-		MarginPct:         report.MarginPct,
+		Period:              report.Period,
+		Revenue:             report.Revenue,
+		Cogs:                report.COGS,
+		GrossProfit:         report.GrossProfit,
+		OperatingExpenses:   report.OperatingExpenses,
+		NetProfit:           report.NetProfit,
+		MarginPct:           report.MarginPct,
+		ExpensesByCategory:  byCategory,
+		PendingExpenses:     report.PendingExpenses,
+		PendingExpenseCount: report.PendingExpenseCount,
 	}, nil
 }
 

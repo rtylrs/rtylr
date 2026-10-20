@@ -1,10 +1,20 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/client';
 
 const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
+
+/**
+ * Refreshes everything an expense change can move: the lists, the P&L (which
+ * counts approved expenses and reports pending ones) and the dashboard.
+ */
+export function invalidateExpenseQueries(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: ['finance', 'expenses'] });
+  void queryClient.invalidateQueries({ queryKey: ['finance', 'pl'] });
+  void queryClient.invalidateQueries({ queryKey: ['finance', 'finance-dashboard'] });
+}
 
 export const useApproveExpense = () => {
   const queryClient = useQueryClient();
@@ -16,7 +26,7 @@ export const useApproveExpense = () => {
         .updateExpenseStatus({ id, body: { status: 'approved' } })
         .then(() => undefined),
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: ['finance', 'expenses'] });
+      invalidateExpenseQueries(queryClient);
       queryClient.invalidateQueries({ queryKey: ['finance', 'expense', id] });
       toast.success(t('financeExpenses.approved'));
     },
@@ -36,7 +46,7 @@ export const useRejectExpense = () => {
         .updateExpenseStatus({ id, body: { status: 'rejected' } })
         .then(() => undefined),
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: ['finance', 'expenses'] });
+      invalidateExpenseQueries(queryClient);
       queryClient.invalidateQueries({ queryKey: ['finance', 'expense', id] });
       toast.success(t('financeExpenses.rejected'));
     },

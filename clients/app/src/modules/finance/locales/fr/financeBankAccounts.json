@@ -20,5 +20,12 @@
     "method": "Méthode",
     "reference": "Référence",
     "referencePlaceholder": "ID de transaction ou numéro de reçu"
-  }
+  },
+  "accountCount_one": "{{count}} compte connecté",
+  "accountCount_other": "{{count}} comptes connectés",
+  "totalBalance": "de solde total",
+  "loadFailed": "Les comptes bancaires n’ont pas pu être chargés. Vos comptes ne sont pas affectés ; réessayez dans un instant.",
+  "emptyTitle": "Aucun compte bancaire",
+  "emptyDescription": "Ajoutez les comptes depuis lesquels l’entreprise paie et sur lesquels elle est payée. Leurs soldes et transactions apparaissent ensuite ici et dans le rapprochement.",
+  "connect": "Connecter un compte"
 }

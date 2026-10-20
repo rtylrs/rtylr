@@ -1,23 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
+import { Link } from '@tanstack/react-router';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { FileSpreadsheet, Download, Landmark } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
-import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { cardStyle, ghostBtn, ACCENT } from '../../shared/lib/tokens';
 import { taxReportSchema } from '../../shared/schemas/tax';
 import { todayIso } from '../../shared/lib/date';
+import { formatMoney } from '../../shared/lib/money';
+import { useSettings } from '../../shared/lib/settings';
+import { exportTaxSummaryCsv } from '../../shared/lib/exports';
 
 const reportClient = createOneKitClient(ReportServiceClient, 'finance');
 
+type Period = 'month' | 'quarter' | 'year';
+const PERIODS: Period[] = ['month', 'quarter', 'year'];
+
+/**
+ * Tax collected on paid invoices and tax owed for the chosen period. There is
+ * no filing workflow behind this page, so it reports the figures and says
+ * where they come from rather than showing filing statuses it cannot know.
+ */
 const TaxReport: React.FC = () => {
   const { t } = useTranslation('financeCommon');
+  const currency = useSettings((s) => s.currency);
+  const [period, setPeriod] = useState<Period>('month');
   const reportDate = todayIso();
   const {
     data: taxReport,
@@ -27,30 +39,17 @@ const TaxReport: React.FC = () => {
     isPending,
     refetch,
   } = useQuery({
-    queryKey: ['finance', 'tax-report', reportDate],
+    queryKey: ['finance', 'tax-report', period, reportDate],
     queryFn: async () => {
-      const response = await reportClient.getTaxReport({ period: 'month', date: reportDate });
+      const response = await reportClient.getTaxReport({ period, date: reportDate });
       return taxReportSchema.parse(response);
     },
   });
-  const loading = isPending && isFetching;
-  const failed = isError || (isPending && !isFetching);
 
-  const totalCollected = taxReport?.taxCollected ?? 0;
-  const totalOwed = taxReport?.taxOwed ?? 0;
-  const rows = taxReport
-    ? [
-        {
-          id: taxReport.period || 'current',
-          period: taxReport.period || 'Current period',
-          collected: totalCollected,
-          owed: totalOwed,
-          status: totalOwed > 0 ? 'Pending' : 'Filed',
-          dueDate: '-',
-        },
-      ]
-    : [];
-  const toFile = rows.filter((row) => row.status !== 'Filed').length;
+  const collected = taxReport?.taxCollected ?? 0;
+  const owed = taxReport?.taxOwed ?? 0;
+  const periodLabel = t(`financeTax.report.periods.${period}`);
+  const nothingYet = !!taxReport && collected === 0 && owed === 0;
 
   return (
     <motion.div
@@ -61,153 +60,133 @@ const TaxReport: React.FC = () => {
       <HelmetContainer title={pageTitle(t('financeCommon.pageTitles.taxSummary'))} />
       <PageHeader
         title={t('financeTax.report.title')}
-        breadcrumbs={[{ label: t('financeNav.reports') }, { label: t('financeNav.tax') }]}
+        subtitle={t('financeTax.report.subtitle')}
         actions={
-          <button type="button" style={ghostBtn} disabled title={t('financeTax.report.exportSoon')}>
-            <Download size={13} /> Export
+          <button
+            type="button"
+            style={ghostBtn}
+            disabled={!taxReport}
+            onClick={() => exportTaxSummaryCsv([{ period: periodLabel, collected, owed, paid: 0 }])}
+            aria-label={t('financeTax.exportAria')}
+          >
+            <Download size={13} /> {t('financeTax.exportForAccountant')}
           </button>
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-        <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-            {t('financeTax.report.collected')}
-          </div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}>
-            <MoneyDisplay amount={totalCollected} />
-          </div>
-        </div>
-        <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-            {t('financeTax.report.owed')}
-          </div>
-          <div
-            style={{ fontSize: 22, fontWeight: 700, color: 'var(--finance-warning)', marginTop: 6 }}
+      <div
+        role="tablist"
+        style={{
+          display: 'flex',
+          gap: 4,
+          padding: 4,
+          background: 'var(--hub-surface)',
+          borderRadius: 10,
+          border: '1px solid var(--hub-border)',
+          width: 'fit-content',
+        }}
+      >
+        {PERIODS.map((p) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={period === p}
+            key={p}
+            onClick={() => setPeriod(p)}
+            style={{
+              padding: '5px 16px',
+              borderRadius: 7,
+              border: 'none',
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: 'pointer',
+              background: period === p ? ACCENT : 'transparent',
+              color: period === p ? 'var(--finance-on-accent)' : 'var(--hub-text-muted)',
+            }}
           >
-            <MoneyDisplay amount={totalOwed} />
-          </div>
-        </div>
-        <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-            {t('financeTax.report.periodsToFile')}
-          </div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)', marginTop: 6 }}>
-            {toFile}
-          </div>
-        </div>
+            {t(`financeTax.report.periods.${p}`)}
+          </button>
+        ))}
       </div>
 
-      <div style={{ ...cardStyle, overflow: 'hidden' }}>
-        {loading ? (
+      {isPending ? (
+        <div style={{ ...cardStyle, padding: 20, fontSize: 13, color: 'var(--hub-text-muted)' }}>
+          {t('financeCommon.loading')}
+        </div>
+      ) : isError ? (
+        <div role="alert" style={{ ...cardStyle, padding: 20 }}>
+          <p style={{ margin: '0 0 12px', color: 'var(--hub-text)', fontSize: 13 }}>
+            {getOneKitErrorMessage(error, t('financeErrors.generic'))}
+          </p>
+          <button
+            type="button"
+            style={ghostBtn}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            {t('financeCommon.refresh')}
+          </button>
+        </div>
+      ) : (
+        <>
           <div
             style={{
-              padding: '32px 20px',
-              textAlign: 'center',
-              color: 'var(--hub-text-muted)',
-              fontSize: 13,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 14,
             }}
           >
-            Loading tax periods…
+            {[
+              {
+                id: 'collected',
+                label: t('financeTax.report.collected'),
+                hint: t('financeTax.report.collectedHint'),
+                value: collected,
+              },
+              {
+                id: 'owed',
+                label: t('financeTax.report.owed'),
+                hint: t('financeTax.report.owedHint'),
+                value: owed,
+              },
+            ].map((card) => (
+              <div key={card.id} style={{ ...cardStyle, padding: 20 }}>
+                <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{card.label}</div>
+                <div
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: 'var(--hub-text)',
+                    marginTop: 6,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {formatMoney(card.value, currency)}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--hub-text-dim)', marginTop: 4 }}>
+                  {card.hint}
+                </div>
+              </div>
+            ))}
           </div>
-        ) : failed ? (
-          <div role="alert" style={{ padding: '32px 20px', textAlign: 'center' }}>
-            <p style={{ margin: '0 0 12px', color: 'var(--hub-text)', fontSize: 13 }}>
-              {getOneKitErrorMessage(error, t('financeErrors.generic'))}
-            </p>
-            <button
-              type="button"
-              style={ghostBtn}
-              disabled={isFetching}
-              onClick={() => void refetch()}
+          {nothingYet && (
+            <div
+              style={{
+                ...cardStyle,
+                padding: 20,
+                fontSize: 13,
+                color: 'var(--hub-text-muted)',
+                lineHeight: 1.5,
+              }}
             >
-              {t('financeCommon.refresh')}
-            </button>
-          </div>
-        ) : rows.length === 0 ? (
-          <EmptyState
-            icon={Landmark}
-            title={t('financeTax.reportEmptyTitle')}
-            description={t('financeTax.reportEmptyDescription')}
-            action={{
-              label: t('financeCommon.refresh'),
-              onClick: () => void refetch(),
-            }}
-          />
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {['Period', 'Collected', 'Owed', 'Status', 'Due date', 'Actions'].map((h) => (
-                  <th
-                    key={h}
-                    style={{
-                      padding: '10px 16px',
-                      textAlign: 'start',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.07em',
-                      color: 'var(--hub-text-dim)',
-                    }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((p) => {
-                const filed = p.status === 'Filed';
-                return (
-                  <tr key={p.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                    <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
-                      {p.period}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: 13 }}>
-                      <MoneyDisplay amount={p.collected} />
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: 13 }}>
-                      <MoneyDisplay amount={p.owed} />
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          padding: '3px 10px',
-                          borderRadius: 20,
-                          fontWeight: 600,
-                          background: filed
-                            ? 'var(--finance-success-soft)'
-                            : 'color-mix(in srgb, var(--finance-warning) 12%, transparent)',
-                          color: filed ? 'var(--finance-success)' : 'var(--finance-warning)',
-                        }}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td
-                      style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
-                    >
-                      {p.dueDate}
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <button
-                        type="button"
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
-                        disabled
-                        onClick={undefined}
-                      >
-                        <FileSpreadsheet size={12} /> View
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+              {t('financeTax.report.nothingYet', { period: periodLabel.toLowerCase() })}{' '}
+              <Link to="/finance/tax" style={{ color: 'var(--finance-accent)', fontWeight: 600 }}>
+                {t('financeTax.report.manageRates')}
+              </Link>
+            </div>
+          )}
+        </>
+      )}
     </motion.div>
   );
 };

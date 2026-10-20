@@ -10,10 +10,21 @@ export interface InvoiceExport {
   status: string;
 }
 
+/**
+ * Quotes one cell. A cell a spreadsheet would read as a formula (it starts
+ * with =, +, -, @, tab or carriage return and is not a plain number) is
+ * prefixed with an apostrophe, so a vendor named "=HYPERLINK(...)" stays text
+ * while a loss of "-12.00" stays a number.
+ */
+function csvCell(value: unknown): string {
+  let text = String(value);
+  const isNumber = /^[+-]?\d+(\.\d+)?$/.test(text);
+  if (!isNumber && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
 function downloadCsv(filename: string, rows: string[][]) {
-  const csv = rows
-    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
-    .join('\n');
+  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -113,4 +124,43 @@ export function exportXeroInvoices(invoices: InvoiceExport[]) {
     ]),
   ];
   downloadCsv('xero_invoices.csv', rows);
+}
+
+export interface ExpenseExportRow {
+  date: string;
+  description: string;
+  vendor: string;
+  category: string;
+  paymentMethod: string;
+  status: string;
+  amount: number;
+  currency: string;
+  receiptUrl: string;
+}
+
+export function exportExpensesCsv(filename: string, rows: ExpenseExportRow[]): void {
+  downloadCsv(filename, [
+    [
+      'Date',
+      'Description',
+      'Vendor',
+      'Category',
+      'Payment method',
+      'Status',
+      'Amount',
+      'Currency',
+      'Receipt',
+    ],
+    ...rows.map((r) => [
+      r.date,
+      r.description,
+      r.vendor,
+      r.category,
+      r.paymentMethod,
+      r.status,
+      r.amount.toFixed(2),
+      r.currency,
+      r.receiptUrl,
+    ]),
+  ]);
 }

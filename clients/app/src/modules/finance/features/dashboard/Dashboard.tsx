@@ -2,265 +2,272 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
+import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
-import {
-  DollarSign,
-  TrendingDown,
-  TrendingUp,
-  FileText,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
-} from 'lucide-react';
-import { BarDataPoint, Transaction, OverdueInvoice } from '../../shared/services/financeApi';
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, Clock } from 'lucide-react';
 import { useFinanceDashboard } from './useDashboard';
-import FinanceKpiWidgets from '../../shared/components/FinanceKpiWidgets';
+import type { DashboardActivity, DashboardMonth } from '../../shared/schemas/dashboard';
 import OverdueInvoicesWidget from '../../shared/components/OverdueInvoicesWidget';
 import { ErrorBoundary } from '@voxire/ui';
 import { formatMoney, type Currency } from '../../shared/lib/money';
-import { ghostBtn } from '../../shared/lib/tokens';
+import { formatDate, formatDateShort } from '../../shared/lib/date';
+import { useSettings } from '../../shared/lib/settings';
+import { cardStyle, ghostBtn } from '../../shared/lib/tokens';
 
-const fmt = (n: number, currency = 'USD') => formatMoney(n, currency as Currency, 0);
+const card: React.CSSProperties = { ...cardStyle, padding: 20 };
 
-// ── Components ───────────────────────────────────────────────────
-const cardStyle: React.CSSProperties = {
-  background: 'var(--hub-card)',
-  border: '1px solid var(--hub-border)',
-  borderRadius: 12,
-  padding: 20,
-};
-
-interface StatCardProps {
-  /** Stable id, used as the React key: the label is a translation and changes with the language. */
-  id: string;
-  label: string;
-  value: string;
-  change: string;
-  up: boolean | null;
-  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-  color: string;
-}
-const StatCard: React.FC<StatCardProps> = ({ label, value, change, up, icon: Icon, color }) => (
-  <div style={cardStyle}>
+const StatCard: React.FC<{ label: string; value: string; hint?: string; tone?: string }> = ({
+  label,
+  value,
+  hint,
+  tone,
+}) => (
+  <div style={card}>
+    <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>{label}</div>
     <div
       style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        marginBottom: 12,
+        marginTop: 8,
+        fontSize: 24,
+        fontWeight: 700,
+        color: tone ?? 'var(--hub-text)',
+        fontVariantNumeric: 'tabular-nums',
       }}
     >
-      <span style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>{label}</span>
+      {value}
+    </div>
+    {hint && <div style={{ marginTop: 4, fontSize: 12, color: 'var(--hub-text-dim)' }}>{hint}</div>}
+  </div>
+);
+
+const Notice: React.FC<{
+  tone: 'warning' | 'danger';
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  to: string;
+  linkLabel: string;
+}> = ({ tone, icon, children, to, linkLabel }) => (
+  <div
+    role="status"
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+      flexWrap: 'wrap',
+      padding: '12px 16px',
+      borderRadius: 10,
+      background: `var(--finance-${tone}-soft)`,
+      border: `1px solid var(--finance-${tone}-border)`,
+      fontSize: 13,
+      color: 'var(--hub-text)',
+    }}
+  >
+    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {icon}
+      {children}
+    </span>
+    <Link to={to} style={{ fontWeight: 600, color: 'var(--finance-accent)' }}>
+      {linkLabel}
+    </Link>
+  </div>
+);
+
+/** Revenue and expense bars for each month, with the month under each pair. */
+const MonthlyChart: React.FC<{ months: DashboardMonth[]; currency: Currency }> = ({
+  months,
+  currency,
+}) => {
+  const { t } = useTranslation('financeCommon');
+  const chartH = 140;
+  const barW = 22;
+  const pairGap = 6;
+  const groupW = barW * 2 + pairGap;
+  const groupGap = 28;
+  const max = Math.max(...months.flatMap((m) => [m.revenue, m.expenses]), 1);
+  const totalW = months.length * (groupW + groupGap) - groupGap;
+  const label = (key: string): string => {
+    const [y, m] = key.split('-').map(Number);
+    return formatDate(new Date(y, m - 1, 1), { month: 'short' });
+  };
+  return (
+    <div>
+      <svg
+        viewBox={`0 0 ${totalW} ${chartH + 24}`}
+        width="100%"
+        role="img"
+        aria-label={t('finance.dashboard.revenueVsExpenses')}
+      >
+        {[0, 0.5, 1].map((f) => (
+          <line
+            key={f}
+            x1={0}
+            y1={chartH * (1 - f)}
+            x2={totalW}
+            y2={chartH * (1 - f)}
+            stroke="var(--hub-border)"
+            strokeWidth={1}
+          />
+        ))}
+        {months.map((m, i) => {
+          const x = i * (groupW + groupGap);
+          const revH = (m.revenue / max) * chartH;
+          const expH = (m.expenses / max) * chartH;
+          return (
+            <g key={m.month}>
+              <rect
+                x={x}
+                y={chartH - revH}
+                width={barW}
+                height={revH}
+                rx={4}
+                fill="var(--finance-success)"
+              >
+                <title>{`${label(m.month)} · ${t('finance.dashboard.revenue')}: ${formatMoney(m.revenue, currency)}`}</title>
+              </rect>
+              <rect
+                x={x + barW + pairGap}
+                y={chartH - expH}
+                width={barW}
+                height={expH}
+                rx={4}
+                fill="var(--finance-danger)"
+                opacity={0.75}
+              >
+                <title>{`${label(m.month)} · ${t('finance.dashboard.expenses')}: ${formatMoney(m.expenses, currency)}`}</title>
+              </rect>
+              <text
+                x={x + groupW / 2}
+                y={chartH + 16}
+                textAnchor="middle"
+                fontSize={10}
+                fill="var(--hub-text-dim)"
+                fontFamily="inherit"
+              >
+                {label(m.month)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <div
+        style={{
+          display: 'flex',
+          gap: 16,
+          marginTop: 10,
+          fontSize: 12,
+          color: 'var(--hub-text-muted)',
+        }}
+      >
+        {[
+          ['var(--finance-success)', t('finance.dashboard.revenue')],
+          ['var(--finance-danger)', t('finance.dashboard.expenses')],
+        ].map(([color, name]) => (
+          <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: color }} />
+            {name}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const EmptyNote: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p
+    style={{
+      margin: 0,
+      padding: '16px 0',
+      fontSize: 13,
+      color: 'var(--hub-text-muted)',
+      lineHeight: 1.5,
+    }}
+  >
+    {children}
+  </p>
+);
+
+const ActivityRow: React.FC<{ item: DashboardActivity; currency: Currency; last: boolean }> = ({
+  item,
+  currency,
+  last,
+}) => {
+  const { t } = useTranslation('financeCommon');
+  const income = item.kind === 'payment';
+  const to = income ? '/finance/invoices/$id' : '/finance/expenses/$id';
+  return (
+    <Link
+      to={to}
+      params={{ id: item.id }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 0',
+        borderBottom: last ? 'none' : '1px solid var(--hub-border)',
+        textDecoration: 'none',
+      }}
+    >
       <span
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 32,
-          height: 32,
+          width: 30,
+          height: 30,
           borderRadius: 8,
-          background: `${color}18`,
+          flexShrink: 0,
+          background: income ? 'var(--finance-success-soft)' : 'var(--finance-danger-soft)',
+          color: income ? 'var(--finance-success)' : 'var(--finance-danger)',
         }}
       >
-        <Icon size={15} style={{ color }} />
+        {income ? <ArrowDownLeft size={14} /> : <ArrowUpRight size={14} />}
       </span>
-    </div>
-    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--hub-text)', marginBottom: 6 }}>
-      {value}
-    </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
-      {up !== null &&
-        (up ? (
-          <ArrowUpRight size={13} style={{ color: 'var(--finance-success)' }} />
-        ) : (
-          <ArrowDownRight size={13} style={{ color: 'var(--finance-danger)' }} />
-        ))}
+      <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 500,
+            color: 'var(--hub-text)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {item.description}
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+          {formatDateShort(item.date)} ·{' '}
+          {income
+            ? t('finance.dashboard.invoicePaid')
+            : t(`financeExpenses.status.${item.status}`, { defaultValue: item.status })}
+        </span>
+      </span>
       <span
         style={{
-          color:
-            up === null
-              ? 'var(--hub-text-muted)'
-              : up
-                ? 'var(--finance-success)'
-                : 'var(--finance-danger)',
-          fontWeight: 500,
+          fontSize: 13,
+          fontWeight: 600,
+          fontVariantNumeric: 'tabular-nums',
+          color: income ? 'var(--finance-success)' : 'var(--hub-text)',
         }}
       >
-        {change}
+        {income ? '+' : ''}
+        {formatMoney(item.amount, currency)}
       </span>
-      {up !== null && <span style={{ color: 'var(--hub-text-dim)' }}>vs last month</span>}
-    </div>
-  </div>
-);
-
-const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
-  const { t } = useTranslation('financeCommon');
-  const chartH = 140;
-  const barW = 28;
-  const gap = 16;
-  const groupW = barW * 2 + gap;
-  const groupGap = 24;
-  const maxVal = Math.max(...barData.flatMap((d) => [d.revenue, d.expenses]), 1);
-  const totalW = barData.length * (groupW + groupGap) - groupGap;
-
-  return (
-    <svg viewBox={`0 0 ${totalW + 40} ${chartH + 32}`} width="100%" style={{ overflow: 'visible' }}>
-      {/* Grid lines */}
-      {[0, 0.25, 0.5, 0.75, 1].map((f) => (
-        <line
-          key={f}
-          x1={0}
-          y1={chartH * (1 - f)}
-          x2={totalW + 40}
-          y2={chartH * (1 - f)}
-          stroke="var(--hub-border)"
-          strokeWidth={1}
-        />
-      ))}
-
-      {barData.map((d, i) => {
-        const x = i * (groupW + groupGap);
-        const revH = (d.revenue / maxVal) * chartH;
-        const expH = (d.expenses / maxVal) * chartH;
-        return (
-          <g key={d.month}>
-            {/* Revenue bar */}
-            <rect
-              x={x}
-              y={chartH - revH}
-              width={barW}
-              height={revH}
-              rx={4}
-              fill="var(--finance-accent)"
-              opacity={0.85}
-            />
-            {/* Expenses bar */}
-            <rect
-              x={x + barW + gap}
-              y={chartH - expH}
-              width={barW}
-              height={expH}
-              rx={4}
-              fill="var(--finance-danger)"
-              opacity={0.7}
-            />
-            {/* Month label */}
-            <text
-              x={x + groupW / 2}
-              y={chartH + 18}
-              textAnchor="middle"
-              fontSize={10}
-              fill="var(--hub-text-dim)"
-              fontFamily="inherit"
-            >
-              {d.month}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Legend */}
-      <g transform={`translate(${totalW - 100}, ${chartH + 28})`}>
-        <rect
-          x={0}
-          y={-6}
-          width={10}
-          height={10}
-          rx={2}
-          fill="var(--finance-accent)"
-          opacity={0.85}
-        />
-        <text x={14} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
-          {t('finance.dashboard.revenue')}
-        </text>
-        <rect
-          x={60}
-          y={-6}
-          width={10}
-          height={10}
-          rx={2}
-          fill="var(--finance-danger)"
-          opacity={0.7}
-        />
-        <text x={74} y={4} fontSize={9} fill="var(--hub-text-muted)" fontFamily="inherit">
-          {t('finance.dashboard.expenses')}
-        </text>
-      </g>
-    </svg>
+    </Link>
   );
 };
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation('financeCommon');
-  const { data: dashData, isPending, isError, isFetching, refetch } = useFinanceDashboard();
-  const loading = isPending || (!dashData && !isError);
-
-  const expensesMtd = dashData?.totalExpensesMtd ?? 0;
-  const netProfitMtd = dashData?.netProfitMtd ?? 0;
-  const revenueMtd = dashData?.totalRevenueMtd ?? 0;
-
-  const statsItems: StatCardProps[] = [
-    {
-      id: 'totalRevenueMtd',
-
-      label: t('finance.dashboard.totalRevenueMtd'),
-      value: loading ? '…' : fmt(revenueMtd),
-      change: dashData?.totalRevenueMtdChange ?? '+0%',
-      up: true,
-      icon: DollarSign,
-      color: 'var(--finance-accent)',
-    },
-    {
-      id: 'totalExpensesMtd',
-
-      label: t('finance.dashboard.totalExpensesMtd'),
-      value: loading ? '…' : fmt(expensesMtd),
-      change: dashData?.totalExpensesMtdChange ?? '+0%',
-      up: false,
-      icon: TrendingDown,
-      color: 'var(--finance-danger)',
-    },
-    {
-      id: 'netProfitMtd',
-
-      label: t('finance.dashboard.netProfitMtd'),
-      value: loading ? '…' : fmt(netProfitMtd),
-      change: dashData?.netProfitChange ?? '+0%',
-      up: true,
-      icon: TrendingUp,
-      color: 'var(--finance-accent)',
-    },
-    {
-      id: 'outstandingInvoices',
-
-      label: t('finance.dashboard.outstandingInvoices'),
-      value: loading ? '…' : fmt(dashData?.totalReceivable ?? 0),
-      change: dashData?.outstandingInvoicesCount
-        ? `${dashData.outstandingInvoicesCount} invoices`
-        : `${fmt(dashData?.overdueAmount ?? 0)} overdue`,
-      up: null,
-      icon: FileText,
-      color: 'var(--finance-warning)',
-    },
-  ];
-
-  const barData: BarDataPoint[] = dashData?.barData ?? [];
-  const transactions: Transaction[] = dashData?.recentTransactions ?? [];
-  const overdueInvoices: OverdueInvoice[] = dashData?.overdueInvoices ?? [];
+  const currency = useSettings((s) => s.currency);
+  const { data, isPending, isError, isFetching, refetch } = useFinanceDashboard();
+  const money = (n: number): string => formatMoney(n, currency);
 
   if (isError) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.25 }}
-        style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
-      >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <HelmetContainer title={pageTitle(t('financeNav.dashboard'))} />
-        <div
-          role="alert"
-          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
-        >
+        <div role="alert" style={{ ...card, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <AlertTriangle size={16} style={{ color: 'var(--finance-danger)' }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
@@ -269,167 +276,163 @@ const Dashboard: React.FC = () => {
           </div>
           <button
             type="button"
-            style={ghostBtn}
+            style={{ ...ghostBtn, alignSelf: 'flex-start' }}
             disabled={isFetching}
             onClick={() => void refetch()}
           >
             {t('financeCommon.refresh')}
           </button>
         </div>
-      </motion.div>
+      </div>
     );
   }
+
+  const loading = isPending || !data;
+  const stat = (n: number | undefined): string => (loading || n === undefined ? '…' : money(n));
+  const monthly = data?.monthly ?? [];
+  const hasChartData = monthly.some((m) => m.revenue > 0 || m.expenses > 0);
+  const activity = data?.recentActivity ?? [];
+  const netProfit = data?.netProfitMtd ?? 0;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
       <HelmetContainer title={pageTitle(t('financeNav.dashboard'))} />
-      {/* Overdue alert */}
-      {overdueInvoices.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 12,
-            padding: '14px 16px',
-            borderRadius: 10,
-            background: 'var(--finance-danger-subtle)',
-            border: '1px solid var(--finance-danger-strong-border)',
-          }}
+
+      {data && data.pendingExpenseCount > 0 && (
+        <Notice
+          tone="warning"
+          icon={<Clock size={14} style={{ color: 'var(--finance-warning)', flexShrink: 0 }} />}
+          to="/finance/expenses"
+          linkLabel={t('finance.profitLoss.reviewExpenses')}
         >
-          <AlertTriangle
-            size={16}
-            style={{ color: 'var(--finance-danger)', flexShrink: 0, marginTop: 1 }}
-          />
-          <div>
-            <p
-              style={{
-                margin: 0,
-                fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--finance-danger)',
-                marginBottom: 4,
-              }}
-            >
-              {overdueInvoices.length} Overdue Invoice{overdueInvoices.length > 1 ? 's' : ''}
-            </p>
-            <p style={{ margin: 0, fontSize: 12, color: 'var(--hub-text-muted)' }}>
-              {overdueInvoices
-                .map(
-                  (inv) => `${inv.id} – ${inv.client} (${inv.amount}, ${inv.daysOverdue}d overdue)`
-                )
-                .join(' · ')}
-            </p>
-          </div>
-        </div>
+          {t('finance.dashboard.pendingNotice', {
+            count: data.pendingExpenseCount,
+            amount: money(data.pendingExpenses),
+          })}
+        </Notice>
+      )}
+      {data && data.overdueInvoiceCount > 0 && (
+        <Notice
+          tone="danger"
+          icon={
+            <AlertTriangle size={14} style={{ color: 'var(--finance-danger)', flexShrink: 0 }} />
+          }
+          to="/finance/invoices"
+          linkLabel={t('finance.dashboard.viewInvoices')}
+        >
+          {t('finance.dashboard.overdueNotice', {
+            count: data.overdueInvoiceCount,
+            amount: money(data.overdueAmount),
+          })}
+        </Notice>
       )}
 
-      {/* Stats grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-        {statsItems.map((s) => (
-          <StatCard key={s.id} {...s} />
-        ))}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 14,
+        }}
+      >
+        <StatCard
+          label={t('finance.dashboard.revenueThisMonth')}
+          value={stat(data?.totalRevenueMtd)}
+          hint={t('finance.dashboard.revenueHint')}
+        />
+        <StatCard
+          label={t('finance.dashboard.expensesThisMonth')}
+          value={stat(data?.totalExpensesMtd)}
+          hint={t('finance.dashboard.expensesHint')}
+        />
+        <StatCard
+          label={t('finance.dashboard.netProfitThisMonth')}
+          value={stat(data?.netProfitMtd)}
+          tone={
+            loading ? undefined : netProfit < 0 ? 'var(--finance-danger)' : 'var(--finance-success)'
+          }
+        />
+        <StatCard
+          label={t('finance.dashboard.outstanding')}
+          value={stat(data?.totalReceivable)}
+          hint={
+            data && data.overdueAmount > 0
+              ? t('finance.dashboard.overdueHint', { amount: money(data.overdueAmount) })
+              : t('finance.dashboard.outstandingHint')
+          }
+        />
       </div>
 
-      {/* KPI Widgets */}
-      <ErrorBoundary>
-        <FinanceKpiWidgets />
-      </ErrorBoundary>
-
-      {/* Overdue widget + chart grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 16,
+        }}
+      >
         <ErrorBoundary>
-          {barData.length > 0 ? (
-            <div style={{ ...cardStyle, padding: 20 }}>
-              <h2
-                style={{
-                  margin: '0 0 20px',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: 'var(--hub-text)',
-                }}
-              >
-                {t('finance.dashboard.revenueVsExpenses')}
-              </h2>
-              <BarChart barData={barData} />
-            </div>
-          ) : (
-            <div
+          <div style={card}>
+            <h2
               style={{
-                ...cardStyle,
-                padding: 20,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--hub-text-dim)',
-                fontSize: 13,
-                minHeight: 180,
+                margin: '0 0 16px',
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'var(--hub-text)',
               }}
             >
-              {loading ? 'Loading chart...' : 'No chart data available'}
-            </div>
-          )}
+              {t('finance.dashboard.revenueVsExpenses')}
+            </h2>
+            {loading ? (
+              <EmptyNote>{t('financeCommon.loading')}</EmptyNote>
+            ) : hasChartData ? (
+              <MonthlyChart months={monthly} currency={currency} />
+            ) : (
+              <EmptyNote>{t('finance.dashboard.chartEmpty')}</EmptyNote>
+            )}
+          </div>
         </ErrorBoundary>
         <ErrorBoundary>
+          <div style={card}>
+            <h2
+              style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}
+            >
+              {t('finance.dashboard.recentActivity')}
+            </h2>
+            {loading ? (
+              <EmptyNote>{t('financeCommon.loading')}</EmptyNote>
+            ) : activity.length === 0 ? (
+              <EmptyNote>{t('finance.dashboard.activityEmpty')}</EmptyNote>
+            ) : (
+              activity.map((item, i) => (
+                <ActivityRow
+                  key={`${item.kind}-${item.id}`}
+                  item={item}
+                  currency={currency}
+                  last={i === activity.length - 1}
+                />
+              ))
+            )}
+          </div>
+        </ErrorBoundary>
+      </div>
+
+      {data && data.overdueInvoices.length > 0 && (
+        <ErrorBoundary>
           <OverdueInvoicesWidget
-            items={overdueInvoices.map((i) => ({
-              id: i.id,
-              client: i.client,
-              amount: i.amount,
-              daysOverdue: i.daysOverdue,
+            items={data.overdueInvoices.map((inv) => ({
+              id: inv.id,
+              number: inv.invoiceNumber,
+              client: inv.clientName,
+              amount: inv.amountDue,
+              daysOverdue: inv.daysOverdue,
             }))}
           />
         </ErrorBoundary>
-      </div>
-
-      {/* Recent transactions */}
-      <ErrorBoundary>
-        <div style={cardStyle}>
-          <h2
-            style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}
-          >
-            {t('finance.dashboard.recentTransactions')}
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {transactions.map((t, i) => (
-              <div
-                key={t.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 0',
-                  borderBottom:
-                    i < transactions.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <span style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 500 }}>
-                    {t.description}
-                  </span>
-                  <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
-                    {t.id} · {t.date}
-                  </span>
-                </div>
-                <span
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: t.type === 'credit' ? 'var(--finance-success)' : 'var(--finance-danger)',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
-                  {t.amount}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </ErrorBoundary>
+      )}
     </motion.div>
   );
 };

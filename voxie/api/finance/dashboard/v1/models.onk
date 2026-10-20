@@ -13,4 +13,58 @@ message GetFinanceDashboardResponse {
   total_expenses_mtd: float64
   /// net_profit_mtd is the net profit mtd value for this contract.
   net_profit_mtd: float64
+  /// pending_expenses totals every expense still awaiting approval. Reports
+  /// count approved expenses only, so these are not in total_expenses_mtd.
+  pending_expenses: float64
+  /// pending_expense_count counts the expenses in pending_expenses.
+  pending_expense_count: int64
+  /// monthly holds revenue and approved expenses for the last six calendar
+  /// months, oldest first, ending with the current month.
+  monthly: DashboardMonth[]
+  /// recent_activity lists the latest expenses and paid invoices, newest first.
+  recent_activity: DashboardActivity[]
+  /// overdue_invoices lists the unpaid invoices longest past due, at most five.
+  overdue_invoices: DashboardOverdueInvoice[]
+  /// overdue_invoice_count counts every overdue invoice, not just those listed.
+  overdue_invoice_count: int64
+}
+
+/// DashboardMonth is one calendar month of revenue and approved expenses.
+message DashboardMonth {
+  /// month is the calendar month as YYYY-MM.
+  month: string
+  /// revenue is the total of invoices paid in the month.
+  revenue: float64
+  /// expenses is the total of approved expenses dated in the month.
+  expenses: float64
+}
+
+/// DashboardActivity is one recent money movement.
+message DashboardActivity {
+  /// kind is "expense" or "payment".
+  kind: string
+  /// id is the expense or invoice id.
+  id: int64
+  /// description is the expense description or the invoice number and client.
+  description: string
+  /// amount is the positive amount moved.
+  amount: float64
+  /// date is the expense date or the date the invoice was paid, YYYY-MM-DD.
+  date: string
+  /// status is the expense status; empty for payments.
+  status: string
+}
+
+/// DashboardOverdueInvoice is an unpaid invoice past its due date.
+message DashboardOverdueInvoice {
+  /// id is the invoice id.
+  id: int64
+  /// invoice_number is the invoice's display number.
+  invoice_number: string
+  /// client_name is who the invoice was issued to.
+  client_name: string
+  /// amount_due is what is still unpaid.
+  amount_due: float64
+  /// days_overdue is how many days have passed since the due date.
+  days_overdue: int64
 }

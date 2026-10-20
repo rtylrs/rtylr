@@ -31,11 +31,43 @@ func (a *DashboardAPI) GetFinanceDashboard(ctx context.Context, _ *financedashbo
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get finance dashboard")
 	}
 
+	monthly := make([]*financedashboardv1.DashboardMonth, 0, len(dashboard.Monthly))
+	for _, m := range dashboard.Monthly {
+		monthly = append(monthly, &financedashboardv1.DashboardMonth{Month: m.Month, Revenue: m.Revenue, Expenses: m.Expenses})
+	}
+	activity := make([]*financedashboardv1.DashboardActivity, 0, len(dashboard.RecentActivity))
+	for _, a := range dashboard.RecentActivity {
+		activity = append(activity, &financedashboardv1.DashboardActivity{
+			Kind:        a.Kind,
+			Id:          a.ID,
+			Description: a.Description,
+			Amount:      a.Amount,
+			Date:        a.Date,
+			Status:      a.Status,
+		})
+	}
+	overdue := make([]*financedashboardv1.DashboardOverdueInvoice, 0, len(dashboard.OverdueInvoices))
+	for _, inv := range dashboard.OverdueInvoices {
+		overdue = append(overdue, &financedashboardv1.DashboardOverdueInvoice{
+			Id:            inv.ID,
+			InvoiceNumber: inv.InvoiceNumber,
+			ClientName:    inv.ClientName,
+			AmountDue:     inv.AmountDue,
+			DaysOverdue:   inv.DaysOverdue,
+		})
+	}
+
 	return &financedashboardv1.GetFinanceDashboardResponse{
-		TotalReceivable:  dashboard.TotalReceivable,
-		OverdueAmount:    dashboard.OverdueAmount,
-		TotalExpensesMtd: dashboard.TotalExpensesMTD,
-		TotalRevenueMtd:  dashboard.TotalRevenueMTD,
-		NetProfitMtd:     dashboard.NetProfitMTD,
+		TotalReceivable:     dashboard.TotalReceivable,
+		OverdueAmount:       dashboard.OverdueAmount,
+		TotalExpensesMtd:    dashboard.TotalExpensesMTD,
+		TotalRevenueMtd:     dashboard.TotalRevenueMTD,
+		NetProfitMtd:        dashboard.NetProfitMTD,
+		PendingExpenses:     dashboard.PendingExpenses,
+		PendingExpenseCount: dashboard.PendingExpenseCount,
+		Monthly:             monthly,
+		RecentActivity:      activity,
+		OverdueInvoices:     overdue,
+		OverdueInvoiceCount: dashboard.OverdueInvoiceCount,
 	}, nil
 }

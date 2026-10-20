@@ -14,12 +14,9 @@ export function useBankAccounts() {
   return useQuery({
     queryKey: ['finance', 'bank-accounts'],
     queryFn: async () => {
-      const res = await bankAccountClient.listBankAccounts({
-        page: 1,
-        limit: 100,
-        sortBy: '',
-        sortDir: '',
-      });
+      // Unset sort fields are left out rather than sent empty; the server
+      // sorts by name by default.
+      const res = await bankAccountClient.listBankAccounts({ page: 1, limit: 100 });
       return z.array(bankAccountSchema).parse(
         unwrapList<NonNullable<typeof res.accounts>[number]>(res, 'accounts').map((a) => ({
           id: a.id,

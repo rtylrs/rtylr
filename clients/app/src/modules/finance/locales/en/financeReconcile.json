@@ -3,5 +3,14 @@
   "emptyDescription": "New transactions will show up here for matching as they come in.",
   "autoMatched": "Auto-match completed",
   "title": "Reconciliation",
-  "allDone": "All transactions reconciled."
+  "allDone": "All transactions reconciled.",
+  "awaitingCount_one": "{{count}} transaction awaiting a match",
+  "awaitingCount_other": "{{count}} transactions awaiting a match",
+  "matching": "Matching…",
+  "autoMatchAll": "Auto-match all",
+  "loadFailed": "Bank transactions could not be loaded, so nothing here can be matched yet.",
+  "noAccountsTitle": "No bank account connected",
+  "noAccountsDescription": "Reconciliation matches bank transactions to your invoices. Connect a bank account first, then its transactions show up here.",
+  "goToBankFeeds": "Go to Bank Feeds",
+  "noTransactions": "No bank transactions to reconcile yet."
 }

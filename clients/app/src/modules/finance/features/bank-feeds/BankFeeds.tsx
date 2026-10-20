@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import { motion } from 'motion/react';
 import { CheckCircle, Link as LinkIcon, Building2, CreditCard, PiggyBank } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -105,19 +104,19 @@ const BankFeeds: React.FC = () => {
       <PageHeader
         title={t('financeBankAccounts.title')}
         subtitle={
-          accountsError ? (
-            t('financeErrors.generic')
-          ) : (
+          // Nothing is claimed until the list has loaded: while the request
+          // was retrying, "0 connected accounts" read as a real answer.
+          isLoading || accountsError ? undefined : (
             <>
-              {accounts.length} connected accounts <>&middot;</> <MoneyDisplay amount={total} />{' '}
-              total balance
+              {t('financeBankAccounts.accountCount', { count: accounts.length })} &middot;{' '}
+              <MoneyDisplay amount={total} /> {t('financeBankAccounts.totalBalance')}
             </>
           )
         }
         actions={
           canManageAccounts ? (
             <button type="button" style={primaryBtn} onClick={() => setShowConnect(true)}>
-              <LinkIcon size={13} /> Connect Account
+              <LinkIcon size={13} /> {t('financeBankAccounts.connect')}
             </button>
           ) : undefined
         }
@@ -129,10 +128,30 @@ const BankFeeds: React.FC = () => {
         </div>
       ) : accountsError ? (
         <div role="alert" style={{ ...cardStyle, padding: 20, color: 'var(--hub-text-muted)' }}>
-          <p style={{ margin: '0 0 12px' }}>{t('financeErrors.generic')}</p>
+          <p style={{ margin: '0 0 12px' }}>{t('financeBankAccounts.loadFailed')}</p>
           <button type="button" style={ghostBtn} onClick={() => void refetchAccounts()}>
             {t('financeCommon.refresh')}
           </button>
+        </div>
+      ) : accounts.length === 0 ? (
+        <div
+          style={{ ...cardStyle, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--hub-text)' }}>
+            {t('financeBankAccounts.emptyTitle')}
+          </h3>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text-muted)', lineHeight: 1.5 }}>
+            {t('financeBankAccounts.emptyDescription')}
+          </p>
+          {canManageAccounts && (
+            <button
+              type="button"
+              style={{ ...primaryBtn, alignSelf: 'flex-start' }}
+              onClick={() => setShowConnect(true)}
+            >
+              <LinkIcon size={13} /> {t('financeBankAccounts.connect')}
+            </button>
+          )}
         </div>
       ) : (
         <>

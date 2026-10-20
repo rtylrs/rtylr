@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `finance_expense_categories` (
   `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_finance_expense_categories_business_name` (`business_id`,`name`),
   KEY `idx_finance_expense_categories_owner` (`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

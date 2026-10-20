@@ -187,7 +187,7 @@ func (s *Service) GetPLReport(ctx context.Context, businessID int64, period, dat
 		marginPct = (netProfit / revenue) * 100
 	}
 
-	return domain.PLReport{
+	report := domain.PLReport{
 		Period:            period,
 		Revenue:           revenue,
 		COGS:              0,
@@ -195,5 +195,14 @@ func (s *Service) GetPLReport(ctx context.Context, businessID int64, period, dat
 		OperatingExpenses: expenses,
 		NetProfit:         netProfit,
 		MarginPct:         marginPct,
-	}, nil
+	}
+	if details, ok := s.repo.(reportDetailRepository); ok {
+		if report.ExpensesByCategory, err = details.SumExpensesByCategory(ctx, businessID, dateFrom, dateTo); err != nil {
+			return domain.PLReport{}, err
+		}
+		if report.PendingExpenses, report.PendingExpenseCount, err = details.SumPendingExpenses(ctx, businessID, dateFrom, dateTo); err != nil {
+			return domain.PLReport{}, err
+		}
+	}
+	return report, nil
 }

@@ -2,71 +2,58 @@ import { describe, it, expect } from 'vitest';
 import { dashboardStatsSchema } from '../dashboard';
 
 describe('dashboardStatsSchema', () => {
-  it('defaults all numeric fields to zero', () => {
+  it('defaults every figure to zero and every list to empty', () => {
     const result = dashboardStatsSchema.parse({});
     expect(result.totalReceivable).toBe(0);
-    expect(result.overdueAmount).toBe(0);
-    expect(result.totalExpensesMtd).toBe(0);
     expect(result.netProfitMtd).toBe(0);
-    expect(result.outstandingInvoicesCount).toBe(0);
-  });
-
-  it('defaults array fields to empty arrays', () => {
-    const result = dashboardStatsSchema.parse({});
-    expect(result.recentTransactions).toEqual([]);
+    expect(result.pendingExpenseCount).toBe(0);
+    expect(result.monthly).toEqual([]);
+    expect(result.recentActivity).toEqual([]);
     expect(result.overdueInvoices).toEqual([]);
-    expect(result.barData).toEqual([]);
   });
 
-  it('parses recentTransactions and coerces transaction id', () => {
+  it('reads int64 counts and ids that arrive as strings', () => {
     const result = dashboardStatsSchema.parse({
-      recentTransactions: [
-        { id: 10, description: 'Sale', amount: '500', type: 'credit', date: '2026-05-01' },
+      pendingExpenses: 35,
+      pendingExpenseCount: '1',
+      overdueInvoiceCount: '2',
+      recentActivity: [
+        {
+          kind: 'expense',
+          id: '7',
+          description: 'Phone',
+          amount: 35,
+          date: '2026-10-19',
+          status: 'pending',
+        },
+      ],
+      overdueInvoices: [
+        { id: '4', invoiceNumber: 'INV-4', clientName: 'Acme', amountDue: 300, daysOverdue: '12' },
       ],
     });
-    expect(result.recentTransactions[0]?.id).toBe('10');
-    expect(result.recentTransactions[0]?.type).toBe('credit');
+    expect(result.pendingExpenseCount).toBe(1);
+    expect(result.overdueInvoiceCount).toBe(2);
+    expect(result.recentActivity[0]).toMatchObject({ id: '7', kind: 'expense', amount: 35 });
+    expect(result.overdueInvoices[0]?.daysOverdue).toBe(12);
   });
 
-  it('defaults transaction type to credit when invalid', () => {
+  it('treats an unknown activity kind as an expense and junk numbers as zero', () => {
     const result = dashboardStatsSchema.parse({
-      recentTransactions: [{ id: '1', description: 'X', amount: '0', type: 'unknown', date: '' }],
+      totalRevenueMtd: 'NaN',
+      recentActivity: [{ kind: 'refund', id: 1, amount: 'x' }],
     });
-    expect(result.recentTransactions[0]?.type).toBe('credit');
+    expect(result.totalRevenueMtd).toBe(0);
+    expect(result.recentActivity[0]).toMatchObject({ kind: 'expense', id: '1', amount: 0 });
   });
 
-  it('parses barData correctly', () => {
+  it('keeps the monthly series in order', () => {
     const result = dashboardStatsSchema.parse({
-      barData: [{ month: 'Jan', revenue: 3000, expenses: 1500 }],
+      monthly: [
+        { month: '2026-09', revenue: 3000, expenses: 1500 },
+        { month: '2026-10', revenue: 0, expenses: 35 },
+      ],
     });
-    expect(result.barData[0]?.month).toBe('Jan');
-    expect(result.barData[0]?.revenue).toBe(3000);
-  });
-
-  it('accepts the deployed backend payload', () => {
-    const result = dashboardStatsSchema.parse({
-      totalReceivable: 5000,
-      overdueAmount: 1200,
-      totalExpensesMtd: 20000,
-      netProfitMtd: 30000,
-    });
-    expect(result.netProfitMtd).toBe(30000);
-    expect(result.totalReceivable).toBe(5000);
-    expect(result.overdueAmount).toBe(1200);
-  });
-
-  it('normalizes snake_case numeric strings from the wire', () => {
-    const result = dashboardStatsSchema.parse({
-      total_receivable: '5000.25',
-      overdue_amount: '1200',
-      total_expenses_mtd: '20000',
-      net_profit_mtd: '30000',
-      outstanding_invoices_count: '7',
-      bar_data: [{ month: 'Jul', revenue: '9000', expenses: '4000' }],
-    });
-
-    expect(result.totalReceivable).toBe(5000.25);
-    expect(result.outstandingInvoicesCount).toBe(7);
-    expect(result.barData[0]).toMatchObject({ revenue: 9000, expenses: 4000 });
+    expect(result.monthly.map((m) => m.month)).toEqual(['2026-09', '2026-10']);
+    expect(result.monthly[1]?.expenses).toBe(35);
   });
 });

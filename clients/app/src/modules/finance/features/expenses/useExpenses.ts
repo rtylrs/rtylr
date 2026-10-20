@@ -8,6 +8,7 @@ import type {
   ExpenseCategory as ApiExpenseCategory,
 } from '@voxire/voxie/finance/expenses/v1/types';
 import type { Expense, ExpenseCategory } from '../../shared/services/financeApi';
+import { invalidateExpenseQueries } from '../../shared/hooks/queries/useExpenses';
 
 const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
 const EXPENSES_PAGE_SIZE = 500;
@@ -54,6 +55,7 @@ function fromApiExpense(e: ApiExpense): Expense {
     amount: toFiniteNumber(e.amount),
     currency: e.currency,
     vendor: e.vendor,
+    paymentMethod: e.paymentMethod,
     receiptUrl: e.receiptUrl,
     expenseDate: e.expenseDate ?? '',
     notes: e.notes ?? '',
@@ -111,13 +113,14 @@ export function useCreateExpense() {
         currency: data.currency ?? 'USD',
         description: data.description ?? '',
         vendor: data.vendor ?? '',
+        paymentMethod: data.paymentMethod ?? '',
         receiptUrl: data.receiptUrl ?? '',
         notes: data.notes ?? '',
         expenseDate: data.expenseDate ?? '',
       });
       return { expenseId: res.expenseId ?? '', message: res.message ?? '' };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['finance', 'expenses'] }),
+    onSuccess: () => invalidateExpenseQueries(qc),
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('financeErrors.generic'))),
   });
 }
@@ -141,6 +144,7 @@ export function useUpdateExpense() {
           currency: data.currency ?? 'USD',
           description: data.description ?? '',
           vendor: data.vendor ?? '',
+          paymentMethod: data.paymentMethod ?? '',
           receiptUrl: data.receiptUrl ?? '',
           notes: data.notes ?? '',
           expenseDate: data.expenseDate ?? '',
@@ -148,7 +152,7 @@ export function useUpdateExpense() {
       });
       return { message: res.message ?? '' };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['finance', 'expenses'] }),
+    onSuccess: () => invalidateExpenseQueries(qc),
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('financeErrors.generic'))),
   });
 }
@@ -161,7 +165,7 @@ export function useDeleteExpense() {
       const res = await expensesClient.deleteExpense({ id });
       return { message: res.message ?? '' };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['finance', 'expenses'] }),
+    onSuccess: () => invalidateExpenseQueries(qc),
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('financeErrors.generic'))),
   });
 }

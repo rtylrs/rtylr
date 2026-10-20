@@ -8,6 +8,7 @@ import type { CreateAccountRequest } from '@voxire/voxie/finance/account/v1/type
 import type { CreateJournalEntryRequest } from '@voxire/voxie/finance/journal/v1/types';
 import { expensesClient, financeCompatibilityClient, invoicesClient } from '../lib/clients';
 import { todayIso } from '../lib/date';
+import type { DashboardStats } from '../schemas/dashboard';
 
 export const plReportQueryParams = (params?: {
   period?: string;
@@ -25,44 +26,6 @@ export const plReportQueryParams = (params?: {
 };
 
 // ── Types ────────────────────────────────────────────────────────
-
-export interface DashboardStats {
-  // Returned by the deployed backend DashboardResponse.
-  totalReceivable: number;
-  overdueAmount: number;
-  totalRevenueMtd: number;
-  totalExpensesMtd: number;
-  netProfitMtd: number;
-  // Not yet returned by the backend; safe defaults applied by the schema.
-  outstandingInvoicesCount: number;
-  totalRevenueMtdChange: string;
-  totalExpensesMtdChange: string;
-  netProfitChange: string;
-  recentTransactions: Transaction[];
-  overdueInvoices: OverdueInvoice[];
-  barData: BarDataPoint[];
-}
-
-export interface Transaction {
-  id: string;
-  description: string;
-  amount: string;
-  type: 'credit' | 'debit';
-  date: string;
-}
-
-export interface OverdueInvoice {
-  id: string;
-  client: string;
-  amount: string;
-  daysOverdue: number;
-}
-
-export interface BarDataPoint {
-  month: string;
-  revenue: number;
-  expenses: number;
-}
 
 export interface Invoice {
   id: string;
@@ -106,6 +69,8 @@ export interface Expense {
   amount: number;
   currency?: string | null;
   vendor?: string | null;
+  /** cash, card, bank_transfer or other. */
+  paymentMethod?: string | null;
   receiptUrl?: string | null;
   expenseDate: string;
   status: string;
@@ -131,6 +96,11 @@ export interface PLReport {
   operatingExpenses: number;
   grossProfit: number;
   netProfit: number;
+  /** Approved expenses split by category, largest first. */
+  expensesByCategory: { categoryId?: number; name: string; color: string; amount: number }[];
+  /** Expenses in the period still awaiting approval; not in operatingExpenses. */
+  pendingExpenses: number;
+  pendingExpenseCount: number;
 }
 
 export interface TaxConfig {

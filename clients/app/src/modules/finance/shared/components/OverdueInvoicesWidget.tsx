@@ -7,6 +7,8 @@ import { cardStyle, ACCENT } from '../lib/tokens';
 
 export interface OverdueRow {
   id: string;
+  /** The invoice's display number; the row falls back to the id without one. */
+  number?: string;
   client: string;
   amount: number | string;
   daysOverdue: number;
@@ -71,10 +73,10 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
               >
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 600 }}>
-                    {item.id} <>&middot;</> {item.client}
+                    {item.number || item.id} <>&middot;</> {item.client}
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--finance-danger)' }}>
-                    {item.daysOverdue}d overdue
+                    {t('finance.overdue.daysOverdue', { count: item.daysOverdue })}
                   </div>
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 700, color: ACCENT }}>

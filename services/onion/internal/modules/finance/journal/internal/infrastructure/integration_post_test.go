@@ -14,9 +14,15 @@ func TestPostJournalEntry_ChangesStatus(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	// Posting requires a balanced entry of at least two lines.
+	accounts := ensureJournalTestAccounts(t, db, 2)
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-05",
 		Description: "Post test",
+		Lines: []domain.JournalLineInput{
+			{AccountID: accounts[0], Debit: 10},
+			{AccountID: accounts[1], Credit: 10},
+		},
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -40,9 +46,15 @@ func TestPostJournalEntry_AlreadyPosted_ReturnsError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	// Posting requires a balanced entry of at least two lines.
+	accounts := ensureJournalTestAccounts(t, db, 2)
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-06",
 		Description: "Double post test",
+		Lines: []domain.JournalLineInput{
+			{AccountID: accounts[0], Debit: 10},
+			{AccountID: accounts[1], Credit: 10},
+		},
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)

@@ -43,6 +43,27 @@ message GetPLReportResponse {
   operating_expenses: float64
   net_profit: float64
   margin_pct: float64
+  /// expenses_by_category splits operating_expenses by expense category,
+  /// largest first.
+  expenses_by_category: PLCategoryTotal[]
+  /// pending_expenses totals the period's expenses still awaiting approval.
+  /// They are not in operating_expenses until approved.
+  pending_expenses: float64
+  /// pending_expense_count counts the expenses in pending_expenses.
+  pending_expense_count: int64
+}
+
+/// PLCategoryTotal is one expense category's share of a period's approved
+/// expenses.
+message PLCategoryTotal {
+  /// category_id is the expense category; absent for uncategorized expenses.
+  category_id: int64?
+  /// name is the category name; empty for uncategorized expenses.
+  name: string
+  /// color is the category colour as a hex string.
+  color: string
+  /// amount is the approved expense total for the category.
+  amount: float64
 }
 
 message GetTaxReportRequest {

@@ -2,77 +2,54 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
+import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
-import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
-import { toast } from 'sonner';
+import { Clock, Download, TrendingDown } from 'lucide-react';
 import { useUserStore } from '../../../../shared/stores/userStore';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
 import { usePLByPeriod } from '../../shared/hooks/useTax';
-import PaymentReminderPanel from '../../shared/components/PaymentReminderPanel';
-import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { exportProfitLossCsv } from '../../shared/lib/exports';
-
+import { cardStyle, ghostBtn, ACCENT } from '../../shared/lib/tokens';
 import { useSettings } from '../../shared/lib/settings';
 import { formatMoney, type Currency } from '../../shared/lib/money';
 
-type Period = 'This Month' | 'Last Month' | 'This Quarter' | 'This Year';
+type Period = 'month' | 'last_month' | 'quarter' | 'year';
+const PERIODS: Period[] = ['month', 'last_month', 'quarter', 'year'];
 
-interface PeriodData {
-  revenue: number;
-  cogs: number;
-  operatingExpenses: number;
-}
+// A margin needs revenue to be a margin; without any it is shown as a dash.
+const pct = (n: number, of: number): string => (of === 0 ? '—' : `${((n / of) * 100).toFixed(1)}%`);
 
-const defaultPeriodData: Record<Period, PeriodData> = {
-  'This Month': { revenue: 0, cogs: 0, operatingExpenses: 0 },
-  'Last Month': { revenue: 0, cogs: 0, operatingExpenses: 0 },
-  'This Quarter': { revenue: 0, cogs: 0, operatingExpenses: 0 },
-  'This Year': { revenue: 0, cogs: 0, operatingExpenses: 0 },
-};
-
-const fmt = (n: number, currency = 'USD') => formatMoney(n, currency as Currency, 0);
-
-const pct = (n: number, of: number) => (of === 0 ? 'N/A' : `${((n / of) * 100).toFixed(1)}%`);
-
-const ACCENT = 'var(--finance-accent)';
-
-const cardStyle: React.CSSProperties = {
-  background: 'var(--hub-card)',
-  border: '1px solid var(--hub-border)',
-  borderRadius: 12,
-  overflow: 'hidden',
+const sectionLabel: React.CSSProperties = {
+  padding: '6px 24px',
+  fontSize: 10,
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.1em',
+  color: 'var(--hub-text-dim)',
 };
 
 interface RowProps {
-  label: string;
+  label: React.ReactNode;
   value: number;
+  currency: Currency;
   indent?: boolean;
-  bold?: boolean;
-  positive?: boolean;
-  negative?: boolean;
-  separator?: boolean;
+  total?: boolean;
   sub?: string;
-  large?: boolean;
-  currency?: string;
+  tone?: 'profit' | 'neutral';
 }
 
-const PLRow: React.FC<RowProps> = ({
-  label,
-  value,
-  indent,
-  bold,
-  positive,
-  negative,
-  separator,
-  sub,
-  large,
-  currency = 'USD',
-}) => {
-  const color = positive
-    ? 'var(--finance-success)'
-    : negative
-      ? 'var(--finance-danger)'
+/**
+ * One statement line. Amounts are shown as they are: costs are listed under
+ * their own heading, so they read as positive figures rather than carrying a
+ * minus sign that turned an empty month into "-$0".
+ */
+const PLRow: React.FC<RowProps> = ({ label, value, currency, indent, total, sub, tone }) => {
+  const color =
+    tone === 'profit'
+      ? value < 0
+        ? 'var(--finance-danger)'
+        : 'var(--finance-success)'
       : 'var(--hub-text)';
   return (
     <div
@@ -80,58 +57,42 @@ const PLRow: React.FC<RowProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: large ? '12px 0' : '8px 0',
-        borderTop: separator ? '1px solid var(--hub-border)' : 'none',
-        paddingInlineStart: indent ? 16 : 0,
+        gap: 12,
+        padding: total ? '12px 24px' : '7px 24px',
+        borderTop: total ? '1px solid var(--hub-border)' : 'none',
+        paddingInlineStart: indent ? 40 : 24,
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <span
           style={{
-            fontSize: large ? 15 : 13,
-            fontWeight: bold ? 700 : 400,
-            color: bold ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+            fontSize: total ? 14 : 13,
+            fontWeight: total ? 700 : 400,
+            color: total ? 'var(--hub-text)' : 'var(--hub-text-muted)',
           }}
         >
           {label}
         </span>
-        {sub && (
-          <span
-            style={{
-              fontSize: 11,
-              color: 'var(--hub-text-muted)',
-              paddingInlineStart: indent ? 16 : 0,
-            }}
-          >
-            {sub}
-          </span>
-        )}
+        {sub && <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{sub}</span>}
       </div>
       <span
         style={{
-          fontSize: large ? 16 : 13,
-          fontWeight: bold ? 700 : 500,
+          fontSize: total ? 15 : 13,
+          fontWeight: total ? 700 : 500,
           color,
           fontVariantNumeric: 'tabular-nums',
+          whiteSpace: 'nowrap',
         }}
       >
-        {fmt(value, currency)}
+        {formatMoney(value, currency)}
       </span>
     </div>
   );
 };
 
-const PERIOD_PARAMS: Record<Period, string> = {
-  'This Month': 'month',
-  'Last Month': 'last_month',
-  'This Quarter': 'quarter',
-  'This Year': 'year',
-};
-
 const ProfitLoss: React.FC = () => {
   const { t } = useTranslation('financeCommon');
-  const [period, setPeriod] = useState<Period>('This Month');
-  const [showClose, setShowClose] = useState(false);
+  const [period, setPeriod] = useState<Period>('month');
   const currency = useSettings((s) => s.currency);
   const {
     data: plData,
@@ -140,63 +101,38 @@ const ProfitLoss: React.FC = () => {
     isError = false,
     isFetching = false,
     refetch,
-  } = usePLByPeriod(PERIOD_PARAMS[period]);
+  } = usePLByPeriod(period);
   const effectiveAccess = useUserStore((state) => state.user?.effectiveAccess);
   const canExport = canFinancePermission('finance:reports:export', effectiveAccess);
   const loading = Boolean(isPending || isLoading);
-  const reportUnavailable = !plData && !isError && !loading;
+  const periodLabel = t(`finance.profitLoss.periods.${period}`);
 
-  const data: PeriodData = plData
-    ? {
-        revenue: plData.revenue ?? 0,
-        cogs: plData.cogs ?? 0,
-        operatingExpenses: plData.operatingExpenses ?? 0,
-      }
-    : defaultPeriodData[period];
+  const revenue = plData?.revenue ?? 0;
+  const cogs = plData?.cogs ?? 0;
+  const operatingExpenses = plData?.operatingExpenses ?? 0;
+  const grossProfit = revenue - cogs;
+  const netProfit = grossProfit - operatingExpenses;
+  const categories = plData?.expensesByCategory ?? [];
+  const pendingCount = plData?.pendingExpenseCount ?? 0;
 
-  const grossProfit = data.revenue - data.cogs;
-  const grossMargin = pct(grossProfit, data.revenue);
-  const netProfit = grossProfit - data.operatingExpenses;
-  const netMargin = pct(netProfit, data.revenue);
-
-  const periods: Period[] = ['This Month', 'Last Month', 'This Quarter', 'This Year'];
-
-  // Summary cards
-  const summaryItems = [
+  const summary = [
     {
       id: 'revenue',
-
       label: t('finance.profitLoss.revenue'),
-      value: data.revenue,
-      color: 'var(--finance-accent)',
-      Icon: TrendingUp,
+      value: formatMoney(revenue, currency),
     },
     {
-      id: 'grossProfit',
-
-      label: t('finance.profitLoss.grossProfit'),
-      value: grossProfit,
-      color: 'var(--finance-info)',
-      Icon: TrendingUp,
+      id: 'expenses',
+      label: t('finance.profitLoss.expenses'),
+      value: formatMoney(cogs + operatingExpenses, currency),
     },
     {
       id: 'netProfit',
-
       label: t('finance.profitLoss.netProfit'),
-      value: netProfit,
-      color: netProfit >= 0 ? 'var(--finance-success)' : 'var(--finance-danger)',
-      Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
+      value: formatMoney(netProfit, currency),
+      color: netProfit < 0 ? 'var(--finance-danger)' : 'var(--finance-success)',
     },
-    {
-      id: 'netMargin',
-
-      label: t('finance.profitLoss.netMargin'),
-      value: parseFloat(netMargin),
-      color: 'var(--finance-warning)',
-      Icon: TrendingUp,
-      isMeta: true,
-      display: netMargin,
-    },
+    { id: 'netMargin', label: t('finance.profitLoss.netMargin'), value: pct(netProfit, revenue) },
   ];
 
   return (
@@ -207,75 +143,49 @@ const ProfitLoss: React.FC = () => {
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
       <HelmetContainer title={pageTitle(t('financeNav.pl'))} />
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          flexWrap: 'wrap',
+        }}
+      >
         <div>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hub-text)' }}>
             {t('finance.profitLoss.title')}
           </h2>
           <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
-            Financial statement for {period.toLowerCase()}
+            {t('finance.profitLoss.subtitle')}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {canExport && (
-            <button
-              type="button"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '7px 14px',
-                borderRadius: 8,
-                border: '1px solid var(--hub-border)',
-                background: 'var(--hub-hover)',
-                color: 'var(--hub-text-muted)',
-                fontSize: 13,
-                cursor: loading || isError || reportUnavailable ? 'not-allowed' : 'pointer',
-                opacity: loading || isError || reportUnavailable || isFetching ? 0.5 : 1,
-              }}
-              disabled={loading || isError || reportUnavailable || isFetching || !plData}
-              onClick={() =>
-                exportProfitLossCsv({
-                  period,
-                  revenue: data.revenue,
-                  cogs: data.cogs,
-                  grossProfit,
-                  operatingExpenses: data.operatingExpenses,
-                  netProfit,
-                })
-              }
-              aria-label={t('finance.profitLoss.exportAria')}
-            >
-              <Download size={14} />
-              {t('finance.profitLoss.export')}
-            </button>
-          )}
+        {canExport && (
           <button
             type="button"
-            onClick={() => setShowClose(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '7px 14px',
-              borderRadius: 8,
-              border: '1px solid color-mix(in srgb, var(--finance-warning) 30%, transparent)',
-              background: 'color-mix(in srgb, var(--finance-warning) 8%, transparent)',
-              color: 'var(--finance-warning)',
-              fontSize: 13,
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
+            style={ghostBtn}
+            disabled={loading || isError || isFetching || !plData}
+            onClick={() =>
+              exportProfitLossCsv({
+                period: periodLabel,
+                revenue,
+                cogs,
+                grossProfit,
+                operatingExpenses,
+                netProfit,
+              })
+            }
+            aria-label={t('finance.profitLoss.exportAria')}
           >
-            <Lock size={13} />
-            {t('finance.profitLoss.closeFiscalYear')}
+            <Download size={14} />
+            {t('finance.profitLoss.export')}
           </button>
-        </div>
+        )}
       </div>
 
-      {/* Period selector */}
       <div
+        role="tablist"
+        aria-label={t('finance.profitLoss.periodLabel')}
         style={{
           display: 'flex',
           gap: 4,
@@ -286,9 +196,11 @@ const ProfitLoss: React.FC = () => {
           width: 'fit-content',
         }}
       >
-        {periods.map((p) => (
+        {PERIODS.map((p) => (
           <button
             type="button"
+            role="tab"
+            aria-selected={period === p}
             key={p}
             onClick={() => setPeriod(p)}
             style={{
@@ -299,11 +211,11 @@ const ProfitLoss: React.FC = () => {
               fontWeight: 500,
               cursor: 'pointer',
               background: period === p ? ACCENT : 'transparent',
-              color: period === p ? 'var(--finance-white)' : 'var(--hub-text-muted)',
+              color: period === p ? 'var(--finance-on-accent)' : 'var(--hub-text-muted)',
               transition: 'all 0.15s',
             }}
           >
-            {p}
+            {t(`finance.profitLoss.periods.${p}`)}
           </button>
         ))}
       </div>
@@ -312,7 +224,7 @@ const ProfitLoss: React.FC = () => {
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
         </div>
-      ) : isError || reportUnavailable ? (
+      ) : isError || !plData ? (
         <div
           role="alert"
           style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
@@ -325,17 +237,7 @@ const ProfitLoss: React.FC = () => {
           </div>
           <button
             type="button"
-            style={{
-              alignSelf: 'flex-start',
-              border: 'none',
-              borderRadius: 8,
-              background: 'var(--hub-hover)',
-              color: 'var(--hub-text-muted)',
-              padding: '7px 12px',
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: isFetching ? 'wait' : 'pointer',
-            }}
+            style={{ ...ghostBtn, alignSelf: 'flex-start' }}
             disabled={isFetching}
             onClick={() => void refetch?.()}
           >
@@ -344,56 +246,66 @@ const ProfitLoss: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* Summary cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-            {summaryItems.map(({ id, label, value, color, Icon, isMeta, display }) => (
-              <div
-                key={id}
-                style={{
-                  background: 'var(--hub-card)',
-                  border: '1px solid var(--hub-border)',
-                  borderRadius: 12,
-                  padding: 18,
-                }}
+          {pendingCount > 0 && (
+            <div
+              role="status"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+                flexWrap: 'wrap',
+                padding: '12px 16px',
+                borderRadius: 10,
+                background: 'var(--finance-warning-soft)',
+                border: '1px solid var(--finance-warning-border)',
+                fontSize: 13,
+                color: 'var(--hub-text)',
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Clock size={14} style={{ color: 'var(--finance-warning)', flexShrink: 0 }} />
+                {t('finance.profitLoss.pendingNotice', {
+                  count: pendingCount,
+                  amount: formatMoney(plData.pendingExpenses, currency),
+                })}
+              </span>
+              <Link
+                to="/finance/expenses"
+                style={{ fontSize: 13, fontWeight: 600, color: 'var(--finance-accent)' }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: 10,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--hub-text-muted)',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.07em',
-                    }}
-                  >
-                    {label}
-                  </span>
-                  <Icon size={14} style={{ color }} />
+                {t('finance.profitLoss.reviewExpenses')}
+              </Link>
+            </div>
+          )}
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: 14,
+            }}
+          >
+            {summary.map(({ id, label, value, color }) => (
+              <div key={id} style={{ ...cardStyle, padding: 18 }}>
+                <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginBottom: 8 }}>
+                  {label}
                 </div>
                 <div
                   style={{
                     fontSize: 22,
                     fontWeight: 700,
-                    color,
+                    color: color ?? 'var(--hub-text)',
                     fontVariantNumeric: 'tabular-nums',
                   }}
                 >
-                  {isMeta ? display : fmt(value, currency)}
+                  {value}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* P&L Statement */}
-          <div style={cardStyle}>
-            {/* Header row */}
+          <div style={{ ...cardStyle, overflow: 'hidden' }}>
             <div
               style={{
                 display: 'flex',
@@ -404,170 +316,97 @@ const ProfitLoss: React.FC = () => {
                 background: 'var(--hub-surface)',
               }}
             >
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: 'var(--hub-text)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                }}
-              >
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hub-text)' }}>
                 {t('finance.profitLoss.statement')}
               </span>
-              <span style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{period}</span>
+              <span style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{periodLabel}</span>
             </div>
 
-            {/* Revenue section */}
             <div style={{ padding: '8px 0' }}>
-              <div
-                style={{
-                  padding: '6px 24px',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--hub-text-dim)',
-                }}
-              >
-                {t('finance.profitLoss.revenue')}
-              </div>
+              <div style={sectionLabel}>{t('finance.profitLoss.revenue')}</div>
               <PLRow
-                label={t('finance.profitLoss.grossRevenue')}
-                value={data.revenue}
-                positive
+                label={t('finance.profitLoss.paidInvoices')}
+                value={revenue}
                 currency={currency}
-              />
-            </div>
-
-            {/* COGS */}
-            <div style={{ borderTop: '1px solid var(--hub-border)', padding: '8px 0' }}>
-              <div
-                style={{
-                  padding: '6px 24px',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--hub-text-dim)',
-                }}
-              >
-                {t('finance.profitLoss.cogs')}
-              </div>
-              <PLRow
-                label={t('finance.profitLoss.directCosts')}
-                value={data.cogs}
                 indent
-                negative
-                currency={currency}
               />
             </div>
 
-            {/* Gross Profit */}
+            {cogs > 0 && (
+              <div style={{ borderTop: '1px solid var(--hub-border)', padding: '8px 0' }}>
+                <div style={sectionLabel}>{t('finance.profitLoss.cogs')}</div>
+                <PLRow
+                  label={t('finance.profitLoss.directCosts')}
+                  value={cogs}
+                  currency={currency}
+                  indent
+                />
+              </div>
+            )}
+
             <PLRow
-              label="= Gross Profit"
+              label={t('finance.profitLoss.grossProfit')}
               value={grossProfit}
-              bold
-              separator
-              positive={grossProfit >= 0}
-              negative={grossProfit < 0}
-              sub={`Gross margin: ${grossMargin}`}
-              large
               currency={currency}
+              total
+              tone="profit"
+              sub={t('finance.profitLoss.grossMargin', { margin: pct(grossProfit, revenue) })}
             />
 
-            {/* Operating expenses */}
             <div style={{ borderTop: '1px solid var(--hub-border)', padding: '8px 0' }}>
-              <div
-                style={{
-                  padding: '6px 24px',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--hub-text-dim)',
-                }}
-              >
-                {t('finance.profitLoss.operatingExpenses')}
-              </div>
+              <div style={sectionLabel}>{t('finance.profitLoss.operatingExpenses')}</div>
+              {categories.length === 0 ? (
+                <PLRow
+                  label={t('finance.profitLoss.noApprovedExpenses')}
+                  value={0}
+                  currency={currency}
+                  indent
+                />
+              ) : (
+                categories.map((c) => (
+                  <PLRow
+                    key={c.categoryId ?? 'none'}
+                    label={
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            background: c.color || 'var(--finance-gray)',
+                          }}
+                        />
+                        {c.name || t('financeExpenses.uncategorized')}
+                      </span>
+                    }
+                    value={c.amount}
+                    currency={currency}
+                    indent
+                  />
+                ))
+              )}
               <PLRow
                 label={t('finance.profitLoss.totalOperatingExpenses')}
-                value={data.operatingExpenses}
-                indent
-                negative
+                value={operatingExpenses}
                 currency={currency}
+                total
               />
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '6px 24px',
-                  borderTop: '1px solid var(--hub-border)',
-                  marginTop: 4,
-                }}
-              >
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text-muted)' }}>
-                  {t('finance.profitLoss.totalOperating')}
-                </span>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: 'var(--finance-danger)',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
-                  -{fmt(data.operatingExpenses, currency)}
-                </span>
-              </div>
             </div>
 
-            {/* Net Profit */}
             <PLRow
-              label="= Net Profit"
+              label={t('finance.profitLoss.netProfit')}
               value={netProfit}
-              bold
-              separator
-              positive={netProfit >= 0}
-              negative={netProfit < 0}
-              sub={`Net margin: ${netMargin}`}
-              large
               currency={currency}
+              total
+              tone="profit"
+              sub={t('finance.profitLoss.netMarginLine', { margin: pct(netProfit, revenue) })}
             />
           </div>
-
-          {/* By-category + reminders */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            <div style={{ ...cardStyle, padding: 20 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  marginBottom: 12,
-                }}
-              >
-                {t('finance.profitLoss.expensesByCategory')}
-              </div>
-              <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: 0 }}>
-                {t('finance.profitLoss.categoryUnavailable')}
-              </p>
-            </div>
-            <PaymentReminderPanel />
-          </div>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--hub-text-dim)' }}>
+            {t('finance.profitLoss.basisNote')}
+          </p>
         </>
       )}
-
-      <ConfirmDialog
-        open={showClose}
-        onClose={() => setShowClose(false)}
-        onConfirm={() => toast.info(t('finance.profitLoss.lockingComingSoon'))}
-        title={t('finance.profitLoss.closeYear')}
-        message={t('finance.profitLoss.closeYearConfirm')}
-        confirmLabel={t('financeCommon.closeYear')}
-        destructive
-      />
     </motion.div>
   );
 };

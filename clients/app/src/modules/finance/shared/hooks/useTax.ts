@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
-import type { TaxConfig, TaxReport, PLReport } from '../services/financeApi';
-import { taxConfigSchema, taxReportSchema, plReportSchema } from '../schemas/tax';
+import type { TaxConfig, PLReport } from '../services/financeApi';
+import { taxConfigSchema, plReportSchema } from '../schemas/tax';
 import { toLocalIso } from '../lib/date';
 
 const reportClient = createOneKitClient(ReportServiceClient, 'finance');
@@ -16,16 +16,6 @@ export function useTaxConfig() {
     queryFn: async () => {
       const res = await reportClient.listTaxConfig({});
       return z.array(taxConfigSchema).parse(res.configs) as TaxConfig[];
-    },
-  });
-}
-
-export function useTaxReport() {
-  return useQuery({
-    queryKey: ['finance', 'tax-report'],
-    queryFn: async () => {
-      const res = await reportClient.getTaxReport({ period: 'month', date: '' });
-      return taxReportSchema.parse(res) as TaxReport;
     },
   });
 }
@@ -43,7 +33,6 @@ export function useCreateTaxConfig() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['finance', 'tax-config'] });
-      qc.invalidateQueries({ queryKey: ['finance', 'tax-report'] });
     },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('financeErrors.generic'))),
   });

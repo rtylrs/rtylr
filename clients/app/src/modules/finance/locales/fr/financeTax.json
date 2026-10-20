@@ -1,26 +1,30 @@
 {
   "configUpdated": "Configuration fiscale mise à jour",
-  "reportEmptyTitle": "Aucune période fiscale disponible pour le moment",
-  "reportEmptyDescription": "Les périodes fiscales apparaîtront ici une fois que les factures génèreront une activité fiscale.",
   "ratesEmptyTitle": "Aucun taux de taxe configuré",
   "ratesEmptyDescription": "Ajoutez un taux de taxe pour commencer à calculer la taxe sur les factures et devis.",
   "ratesEmptyCta": "Ajouter un taux de taxe",
-  "title": "Fiscalité",
-  "subtitle": "Récapitulatif de TVA et périodes de déclaration",
-  "rates": "Taux de TVA",
   "exportAria": "Exporter le récapitulatif fiscal pour le comptable",
   "exportForAccountant": "Exporter pour le comptable",
-  "rateConfiguration": "Configuration des taux",
   "ratesInvalid": "Les taux doivent être des nombres positifs ou nuls",
-  "ratesSaved": "Taux enregistrés",
-  "filingPeriods": "Périodes de déclaration",
   "report": {
     "title": "Récapitulatif fiscal",
-    "exportSoon": "L'export arrivera dans une prochaine mise à jour",
     "collected": "TVA collectée",
     "owed": "TVA due",
-    "periodsToFile": "Périodes à déclarer"
+    "subtitle": "Taxe perçue sur les factures payées et montant dû pour la période",
+    "periods": {
+      "month": "Ce mois-ci",
+      "quarter": "Ce trimestre",
+      "year": "Cette année"
+    },
+    "collectedHint": "Sur les factures payées durant la période",
+    "owedHint": "Taxe perçue pas encore reversée",
+    "nothingYet": "Aucune taxe enregistrée pour {{period}}. La taxe apparaît ici dès que des factures avec un taux de taxe sont payées.",
+    "manageRates": "Gérer les taux de taxe"
   },
-  "collected": "TVA collectée",
-  "owed": "TVA due"
+  "ratesTitle": "Taux de taxe",
+  "ratesSubtitle": "Les taux applicables à vos factures et devis",
+  "rateName": "Nom",
+  "rateNamePlaceholder": "TVA",
+  "rateValue": "Taux (%)",
+  "rateAdded": "Taux de taxe ajouté"
 }

@@ -263,4 +263,26 @@ func TestExpenses_PortalFormBodyIsAcceptedOverHTTP(t *testing.T) {
 	if missing := send(http.MethodPost, "/finance/expenses/v1/expenses", `{"amount":35,"currency":"USD","expense_date":"2026-10-19"}`); missing.Code != http.StatusBadRequest {
 		t.Fatalf("create without a description = %d, want 400", missing.Code)
 	}
+
+	// The form now asks how the expense was paid. A value outside the column's
+	// enum is a 400, not a failed insert.
+	card := strings.Replace(form, `"notes":""`, `"notes":"","payment_method":"card"`, 1)
+	withCard := send(http.MethodPost, "/finance/expenses/v1/expenses", card)
+	if withCard.Code != http.StatusOK {
+		t.Fatalf("create paid by card = %d %s", withCard.Code, withCard.Body.String())
+	}
+	var cardRes struct {
+		ExpenseID string `json:"expense_id"`
+	}
+	if err := json.Unmarshal(withCard.Body.Bytes(), &cardRes); err != nil {
+		t.Fatalf("card response: %v", err)
+	}
+	got := send(http.MethodGet, "/finance/expenses/v1/expenses/"+cardRes.ExpenseID, "")
+	if !strings.Contains(got.Body.String(), `"payment_method":"card"`) {
+		t.Fatalf("stored expense = %s, want payment_method card", got.Body.String())
+	}
+	cheque := strings.Replace(form, `"notes":""`, `"notes":"","payment_method":"cheque"`, 1)
+	if bad := send(http.MethodPost, "/finance/expenses/v1/expenses", cheque); bad.Code != http.StatusBadRequest {
+		t.Fatalf("create with an unknown payment method = %d %s, want 400", bad.Code, bad.Body.String())
+	}
 }

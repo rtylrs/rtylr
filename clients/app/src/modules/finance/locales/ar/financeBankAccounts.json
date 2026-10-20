@@ -20,5 +20,16 @@
     "method": "طريقة السداد",
     "reference": "المرجع",
     "referencePlaceholder": "رقم العملية أو الإيصال"
-  }
+  },
+  "accountCount_zero": "لا حسابات مرتبطة",
+  "accountCount_one": "حساب واحد مرتبط",
+  "accountCount_two": "حسابان مرتبطان",
+  "accountCount_few": "{{count}} حسابات مرتبطة",
+  "accountCount_many": "{{count}} حسابًا مرتبطًا",
+  "accountCount_other": "{{count}} حساب مرتبط",
+  "totalBalance": "إجمالي الرصيد",
+  "loadFailed": "تعذر تحميل الحسابات البنكية. حساباتك لم تتأثر؛ حاول مرة أخرى بعد قليل.",
+  "emptyTitle": "لا توجد حسابات بنكية بعد",
+  "emptyDescription": "أضف الحسابات التي تدفع منها الشركة وتتلقى عليها المدفوعات. ستظهر أرصدتها ومعاملاتها هنا وفي التسوية.",
+  "connect": "ربط حساب"
 }

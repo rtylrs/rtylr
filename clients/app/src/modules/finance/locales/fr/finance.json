@@ -96,50 +96,60 @@
     "title": "Compte de résultat",
     "exportAria": "Exporter le compte de résultat en CSV",
     "export": "Exporter",
-    "closeFiscalYear": "Clôturer l'exercice",
     "statement": "Compte de résultat",
     "revenue": "Produits",
-    "grossRevenue": "Produits bruts",
     "cogs": "Coût des ventes",
     "directCosts": "Coûts directs",
     "operatingExpenses": "Charges d'exploitation",
     "totalOperatingExpenses": "Total des charges d'exploitation",
-    "totalOperating": "Total d'exploitation",
-    "expensesByCategory": "Charges par catégorie",
-    "categoryUnavailable": "La répartition par catégorie n'est pas encore disponible.",
-    "lockingComingSoon": "Le verrouillage des périodes arrive bientôt",
-    "closeYear": "Clôturer l'exercice",
     "grossProfit": "Marge brute",
     "netProfit": "Résultat net",
     "netMargin": "Marge nette",
-    "closeYearConfirm": "Cela verrouillera toutes les écritures de l'exercice en cours. Tout ajustement demandera une nouvelle période. Continuer ?"
+    "subtitle": "Revenus des factures payées face aux dépenses approuvées",
+    "expenses": "Dépenses",
+    "periods": {
+      "month": "Ce mois-ci",
+      "last_month": "Le mois dernier",
+      "quarter": "Ce trimestre",
+      "year": "Cette année"
+    },
+    "periodLabel": "Période",
+    "pendingNotice_one": "{{count}} dépense ({{amount}}) de cette période attend une approbation et n’est pas comptée ci-dessous.",
+    "pendingNotice_other": "{{count}} dépenses ({{amount}}) de cette période attendent une approbation et ne sont pas comptées ci-dessous.",
+    "reviewExpenses": "Voir les dépenses",
+    "paidInvoices": "Factures payées",
+    "noApprovedExpenses": "Aucune dépense approuvée",
+    "grossMargin": "Marge brute : {{margin}}",
+    "netMarginLine": "Marge nette : {{margin}}",
+    "basisNote": "Les revenus comptent les factures le jour de leur paiement. Les dépenses comptent une fois approuvées, à leur date."
   },
   "dashboard": {
     "revenue": "Produits",
     "expenses": "Dépenses",
     "revenueVsExpenses": "Produits et dépenses",
-    "recentTransactions": "Transactions récentes",
-    "totalRevenueMtd": "Produits du mois",
-    "totalExpensesMtd": "Dépenses du mois",
-    "netProfitMtd": "Résultat net du mois",
-    "outstandingInvoices": "Factures en attente"
+    "pendingNotice_one": "{{count}} dépense ({{amount}}) attend une approbation. Les chiffres ci-dessous ne comptent que les dépenses approuvées.",
+    "pendingNotice_other": "{{count}} dépenses ({{amount}}) attendent une approbation. Les chiffres ci-dessous ne comptent que les dépenses approuvées.",
+    "overdueNotice_one": "{{count}} facture est en retard, {{amount}} au total.",
+    "overdueNotice_other": "{{count}} factures sont en retard, {{amount}} au total.",
+    "viewInvoices": "Voir les factures",
+    "revenueThisMonth": "Revenus ce mois-ci",
+    "revenueHint": "Factures payées depuis le début du mois",
+    "expensesThisMonth": "Dépenses ce mois-ci",
+    "expensesHint": "Approuvées depuis le début du mois",
+    "netProfitThisMonth": "Bénéfice net ce mois-ci",
+    "outstanding": "À encaisser",
+    "outstandingHint": "Factures envoyées non encore payées",
+    "overdueHint": "dont {{amount}} en retard",
+    "chartEmpty": "Rien à afficher pour l’instant. Les factures payées et les dépenses approuvées des six derniers mois apparaissent ici.",
+    "recentActivity": "Activité récente",
+    "activityEmpty": "Aucune activité pour l’instant. Les dépenses que vous saisissez et les factures payées par vos clients apparaissent ici.",
+    "invoicePaid": "Facture payée"
   },
   "overdue": {
     "title": "Factures en retard",
-    "none": "Aucune facture en retard."
-  },
-  "reminders": {
-    "title": "Relances de paiement",
-    "description": "E-mails envoyés automatiquement aux clients à l'approche de l'échéance ou après.",
-    "comingSoon": "La planification des relances arrivera dans une prochaine mise à jour",
-    "save": "Enregistrer la planification",
-    "onDueDate": "À l'échéance",
-    "beforeDue_one": "{{count}} jour avant l'échéance",
-    "beforeDue_many": "{{count}} de jours avant l'échéance",
-    "beforeDue_other": "{{count}} jours avant l'échéance",
-    "overdue_one": "{{count}} jour de retard",
-    "overdue_many": "{{count}} de jours de retard",
-    "overdue_other": "{{count}} jours de retard"
+    "none": "Aucune facture en retard.",
+    "daysOverdue_one": "{{count}} jour de retard",
+    "daysOverdue_other": "{{count}} jours de retard"
   },
   "trial": {
     "addPayment": "Ajoutez un moyen de paiement pour conserver vos données.",
@@ -159,12 +169,6 @@
   "pdf": {
     "download": "Télécharger le PDF",
     "comingSoon": "Le téléchargement PDF arrivera dans une prochaine mise à jour"
-  },
-  "kpi": {
-    "receivable": "Créances",
-    "expensesMtd": "Dépenses du mois",
-    "netProfitMtd": "Résultat net du mois",
-    "overdue": "En retard"
   },
   "plChart": {
     "title": "Charges par catégorie"

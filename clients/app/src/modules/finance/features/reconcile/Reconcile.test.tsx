@@ -58,7 +58,12 @@ vi.mock('@voxire/api', () => ({
 }));
 
 vi.mock('../../shared/hooks/useBankAccounts', () => ({
-  useBankTransactions: () => ({ data: transactions }),
+  useBankAccounts: () => ({ data: [{ id: 'acct-1' }], isLoading: false, isError: false }),
+  useBankTransactions: () => ({ data: transactions, isLoading: false, isError: false }),
+}));
+
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children }: { children?: React.ReactNode }) => <a>{children}</a>,
 }));
 
 vi.mock('../../shared/hooks/queries/useInvoices', () => ({
