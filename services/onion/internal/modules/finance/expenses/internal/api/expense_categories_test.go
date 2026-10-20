@@ -3,8 +3,12 @@ package api
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"strings"
 	"testing"
 
 	moduleinfra "github.com/voxire/onion/internal/modules/finance/expenses/internal/infrastructure"
@@ -212,4 +216,51 @@ func TestExpenseCategories_ExpenseRejectsAnotherBusinessCategory(t *testing.T) {
 		CategoryId: &foreignID, Amount: 5, Currency: "USD", Description: "Probe", ExpenseDate: "2026-10-01",
 	})
 	wantStatus(t, err, http.StatusBadRequest)
+}
+
+// Regression: the contract required a vendor and a receipt URL, which the
+// portal's expense form never collects, so every expense filed from the form
+// was refused. This goes through the generated HTTP handler, request
+// validation included, with the body the portal actually sends.
+func TestExpenses_PortalFormBodyIsAcceptedOverHTTP(t *testing.T) {
+	db := testutil.OpenDB(t)
+	api, ctx := expenseCategoriesAPI(t, db)
+	category, err := api.CreateExpenseCategory(ctx, &financeexpensesv1.CreateExpenseCategoryRequest{Name: "Communications"})
+	if err != nil {
+		t.Fatalf("create category: %v", err)
+	}
+	mux := http.NewServeMux()
+	if err := financeexpensesv1.RegisterExpensesServiceServer(api, financeexpensesv1.WithMux(mux)); err != nil {
+		t.Fatalf("register: %v", err)
+	}
+	send := func(method, path, body string) *httptest.ResponseRecorder {
+		t.Helper()
+		req := httptest.NewRequest(method, path, strings.NewReader(body)).WithContext(ctx)
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, req)
+		return rec
+	}
+
+	categoryID := strconv.FormatInt(category.GetCategory().GetId(), 10)
+	form := `{"category_id":"` + categoryID + `","amount":35,"currency":"USD","description":"Phone number","vendor":"","receipt_url":"","notes":"","expense_date":"2026-10-19"}`
+	created := send(http.MethodPost, "/finance/expenses/v1/expenses", form)
+	if created.Code != http.StatusOK {
+		t.Fatalf("create from portal form = %d %s", created.Code, created.Body.String())
+	}
+	var res struct {
+		ExpenseID string `json:"expense_id"`
+	}
+	if err := json.Unmarshal(created.Body.Bytes(), &res); err != nil || res.ExpenseID == "" {
+		t.Fatalf("create response %s: %v", created.Body.String(), err)
+	}
+
+	updated := send(http.MethodPut, "/finance/expenses/v1/expenses/"+res.ExpenseID, form)
+	if updated.Code != http.StatusOK {
+		t.Fatalf("update from portal form = %d %s", updated.Code, updated.Body.String())
+	}
+
+	if missing := send(http.MethodPost, "/finance/expenses/v1/expenses", `{"amount":35,"currency":"USD","expense_date":"2026-10-19"}`); missing.Code != http.StatusBadRequest {
+		t.Fatalf("create without a description = %d, want 400", missing.Code)
+	}
 }

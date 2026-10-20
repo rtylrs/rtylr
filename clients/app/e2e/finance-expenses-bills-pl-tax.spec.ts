@@ -115,6 +115,83 @@ test.describe('Finance - Expenses list', () => {
     await expect(page.getByText('$1,200').first()).toBeVisible({ timeout: 10_000 });
   });
 
+  // Regression: the contract required a vendor and a receipt URL, which this
+  // form never collects, so the generated client refused the request before
+  // sending it and Submit appeared to do nothing.
+  test('submits an expense with no vendor, notes or receipt', async ({ page }) => {
+    await page.route(`${API_URL}/finance/expenses/v1/categories`, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          categories: [
+            { id: '11', name: 'Communications', color: '#14b8a6' },
+            { id: '12', name: 'Communications', color: '#14b8a6' },
+          ],
+        }),
+      })
+    );
+    let posted: Record<string, unknown> | null = null;
+    await page.route(`${API_URL}/finance/expenses/v1/expenses`, async (route) => {
+      if (route.request().method() === 'POST') {
+        posted = route.request().postDataJSON() as Record<string, unknown>;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ expense_id: '501', message: 'Expense created' }),
+        });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ expenses: [] }),
+      });
+    });
+
+    await page.goto(`${FINANCE_URL}/expenses/new`);
+    await page.getByPlaceholder('Client dinner, Uber ride...').fill('Phone number');
+    await page.getByPlaceholder('0.00').fill('35.00');
+    await page.locator('input[type="date"]').fill('2026-10-19');
+    await page.locator('select').selectOption('11');
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page).toHaveURL(/\/finance\/expenses$/, { timeout: 15_000 });
+    expect(posted).toMatchObject({
+      category_id: '11',
+      amount: 35,
+      description: 'Phone number',
+      expense_date: '2026-10-19',
+    });
+  });
+
+  test('says why when the server refuses a new expense', async ({ page }) => {
+    await page.route(`${API_URL}/finance/expenses/v1/categories`, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ categories: [{ id: '11', name: 'Communications' }] }),
+      })
+    );
+    await page.route(`${API_URL}/finance/expenses/v1/expenses`, (route) =>
+      route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Expense category not found' }),
+      })
+    );
+
+    await page.goto(`${FINANCE_URL}/expenses/new`);
+    await page.getByPlaceholder('Client dinner, Uber ride...').fill('Phone number');
+    await page.getByPlaceholder('0.00').fill('35.00');
+    await page.locator('select').selectOption('11');
+    await page.getByRole('button', { name: 'Submit' }).click();
+
+    await expect(page.getByText('Expense category not found')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-sonner-toast]')).toHaveCount(1);
+    await expect(page).toHaveURL(/\/finance\/expenses\/new$/);
+  });
+
   test('shows expense descriptions even when receipt flag differs', async ({ page }) => {
     await page.route(`${API_URL}/finance/expenses/v1/expenses`, async (route) => {
       if (route.request().method() !== 'GET') {
