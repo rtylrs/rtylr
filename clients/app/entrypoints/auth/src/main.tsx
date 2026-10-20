@@ -7,6 +7,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import i18next from './shared/services/i18next';
 import { Toaster } from 'sonner';
+import '@voxire/ui/toast.css';
 import { queryClient } from './shared/lib/queryClient';
 import { router } from './router';
 
@@ -24,7 +25,7 @@ if (rootElement) {
       <I18nextProvider i18n={i18next}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
-          <Toaster expand={false} richColors />
+          <Toaster className="rtylr-toaster" expand={false} offset={20} mobileOffset={16} />
         </QueryClientProvider>
       </I18nextProvider>
     </Suspense>

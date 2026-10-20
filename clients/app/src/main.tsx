@@ -7,6 +7,7 @@ import { FullScreenLoader } from './shared/components/FullScreenLoader';
 import { I18nextProvider } from 'react-i18next';
 import i18next from './shared/services/i18next';
 import { Toaster } from 'sonner';
+import '@voxire/ui/toast.css';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './shared/lib/react-query';
@@ -39,7 +40,7 @@ if (rootElement) {
               <HelmetContainer title="Portal - RTYLR" favicon="/favicon.ico" />
               <CookieBanner />
               <RouterProvider router={router} />
-              <Toaster expand={false} richColors />
+              <Toaster className="rtylr-toaster" expand={false} offset={20} mobileOffset={16} />
             </I18nextProvider>
           </Suspense>
         </CookiesProvider>
