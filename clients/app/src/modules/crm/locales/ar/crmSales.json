@@ -125,7 +125,9 @@
     "overdue": "متأخرة",
     "today": "مستحقة اليوم",
     "due": "مستحقة الآن",
-    "upcoming": "قادمة"
+    "upcoming": "قادمة",
+    "scheduled": "لديه متابعة",
+    "none": "بدون متابعة"
   },
   "leads": {
     "title": "العملاء المحتملون",
@@ -612,5 +614,109 @@
     "stageInUse": "ما زالت في مرحلة أزلتها صفقات. انقلها أولًا.",
     "importClosed": "انتهى هذا الاستيراد. ابدأ استيرادًا جديدًا.",
     "badAssignee": "هذا الشخص ليس من فريق هذه الشركة."
+  },
+  "filters": {
+    "button": "تصفية",
+    "title": "عوامل التصفية",
+    "clearAll": "مسح الكل",
+    "close": "إغلاق عوامل التصفية",
+    "showResults_zero": "لا يوجد عملاء محتملون",
+    "showResults_one": "عرض عميل محتمل واحد",
+    "showResults_two": "عرض عميلين محتملين",
+    "showResults_few": "عرض {{count}} عملاء محتملين",
+    "showResults_many": "عرض {{count}} عميلًا محتملًا",
+    "showResults_other": "عرض {{count}} عميل محتمل",
+    "sections": {
+      "contact": "بيانات الاتصال",
+      "owner": "المسؤول والمصدر",
+      "company": "الشركة",
+      "activity": "النشاط",
+      "value": "القيمة",
+      "dates": "التواريخ"
+    },
+    "any": "الكل",
+    "has": "موجود",
+    "missing": "غير موجود",
+    "contactedYes": "تم التواصل",
+    "contactedNo": "أبدًا",
+    "contacted": "تم التواصل",
+    "unassigned": "غير مُسنَد",
+    "searchOptions": "بحث",
+    "noOptions": "لا توجد قيم بعد",
+    "noMatches": "لا نتائج",
+    "anyImport": "أي استيراد",
+    "import": "الاستيراد",
+    "anyFollowUp": "الكل",
+    "attempts": "محاولات الاتصال",
+    "lastActivity": "آخر نشاط",
+    "added": "تاريخ الإضافة",
+    "min": "الأدنى",
+    "max": "الأقصى",
+    "from": "من",
+    "to": "إلى",
+    "selected_zero": "لم يُحدَّد شيء",
+    "selected_one": "تم تحديد واحد",
+    "selected_two": "تم تحديد اثنين",
+    "selected_few": "تم تحديد {{count}}",
+    "selected_many": "تم تحديد {{count}}",
+    "selected_other": "تم تحديد {{count}}",
+    "presence": {
+      "phone": {
+        "label": "الهاتف",
+        "yes": "لديه هاتف",
+        "no": "بدون هاتف"
+      },
+      "email": {
+        "label": "البريد",
+        "yes": "لديه بريد",
+        "no": "بدون بريد"
+      },
+      "website": {
+        "label": "الموقع",
+        "yes": "لديه موقع",
+        "no": "بدون موقع"
+      },
+      "linkedin": {
+        "label": "لينكدإن",
+        "yes": "لديه لينكدإن",
+        "no": "بدون لينكدإن"
+      },
+      "company": {
+        "label": "الشركة",
+        "yes": "لديه شركة",
+        "no": "بدون شركة"
+      },
+      "value": {
+        "label": "القيمة محددة",
+        "yes": "لديه قيمة",
+        "no": "بدون قيمة"
+      },
+      "contacted": {
+        "label": "تم التواصل",
+        "yes": "تم التواصل",
+        "no": "لم يتم التواصل أبدًا"
+      }
+    },
+    "chip": {
+      "reps": "المندوب: {{values}}",
+      "sources": "المصدر: {{values}}",
+      "industries": "القطاع: {{values}}",
+      "sizes": "الحجم: {{values}}",
+      "countries": "الدولة: {{values}}",
+      "cities": "المدينة: {{values}}",
+      "billing": "الفوترة: {{values}}",
+      "importId": "الاستيراد: {{values}}",
+      "followUp": "المتابعة: {{values}}",
+      "attempts": "المكالمات: {{values}}",
+      "value": "القيمة: {{values}}",
+      "created": "أُضيف: {{values}}",
+      "active": "آخر نشاط: {{values}}",
+      "more": "{{values}} +{{count}}",
+      "remove": "إزالة عامل التصفية: {{label}}",
+      "atLeast": "{{value}} أو أكثر",
+      "atMost": "حتى {{value}}",
+      "since": "منذ {{value}}",
+      "until": "حتى {{value}}"
+    }
   }
 }

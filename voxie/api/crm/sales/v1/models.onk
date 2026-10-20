@@ -272,15 +272,51 @@ message LeadFields {
 message ListLeadsRequest {
   /// statuses is a comma-separated list of statuses; all when empty.
   statuses: string @query("statuses")
-  /// assigned_to filters to one rep's leads; 0 selects unassigned leads.
-  assigned_to: int64? @query("assigned_to")
-  /// source filters to one source.
-  source: string @query("source")
+  /// reps is a comma-separated list of rep user ids; 0 selects unassigned
+  /// leads.
+  reps: string @query("reps")
+  /// sources is a JSON array of sources to include.
+  sources: string @query("sources")
+  /// industries is a JSON array of industries to include.
+  industries: string @query("industries")
+  /// sizes is a JSON array of company sizes to include.
+  sizes: string @query("sizes")
+  /// countries is a JSON array of countries to include.
+  countries: string @query("countries")
+  /// cities is a JSON array of cities to include.
+  cities: string @query("cities")
+  /// billing is a comma-separated list of billing periods.
+  billing: string @query("billing")
   /// import_id filters to one import's leads.
   import_id: int64? @query("import_id")
-  /// follow_up is overdue, today, due (overdue or today) or upcoming.
+  /// follow_up is overdue, today, due (overdue or today), upcoming,
+  /// scheduled (any date) or none.
   follow_up: string @query("follow_up")
-  /// search matches names, company, email and phone.
+  /// has_phone is yes or no; any when empty. The other has_* fields work the
+  /// same way.
+  has_phone: string @query("has_phone")
+  has_email: string @query("has_email")
+  has_website: string @query("has_website")
+  has_linkedin: string @query("has_linkedin")
+  has_company: string @query("has_company")
+  /// has_value is whether an estimated value is set.
+  has_value: string @query("has_value")
+  /// contacted is yes (worked at least once) or no (never worked).
+  contacted: string @query("contacted")
+  /// attempts_min and attempts_max bound the call attempts, inclusive.
+  attempts_min: int32? @query("attempts_min")
+  attempts_max: int32? @query("attempts_max")
+  /// value_min and value_max bound the estimated value (decimal strings).
+  value_min: string @query("value_min")
+  value_max: string @query("value_max")
+  /// created_from and created_to bound the date added (YYYY-MM-DD, the
+  /// caller's days, inclusive).
+  created_from: string @query("created_from")
+  created_to: string @query("created_to")
+  /// active_from and active_to bound the last activity date the same way.
+  active_from: string @query("active_from")
+  active_to: string @query("active_to")
+  /// search matches names, company, email, job title and phone.
   search: string @query("search")
   /// sort is newest, follow_up, recent_activity or company.
   sort: string @query("sort")
@@ -290,6 +326,9 @@ message ListLeadsRequest {
   limit: int32 @query("limit")
   /// today is the caller's date, which follow-up windows are relative to.
   today: string @query("today")
+  /// utc_offset_minutes is the caller's offset from UTC, so date bounds start
+  /// at the caller's midnight.
+  utc_offset_minutes: int32 @query("utc_offset_minutes")
 }
 
 /// ListLeadsResponse is one page of leads.
@@ -304,8 +343,52 @@ message ListLeadsResponse {
 
 /// GetLeadStatsRequest selects whose prospecting to summarise.
 message GetLeadStatsRequest {
-  /// assigned_to limits the stats to one rep; everyone when absent.
-  assigned_to: int64? @query("assigned_to")
+  /// reps is a comma-separated list of rep user ids; 0 selects unassigned
+  /// leads.
+  reps: string @query("reps")
+  /// sources is a JSON array of sources to include.
+  sources: string @query("sources")
+  /// industries is a JSON array of industries to include.
+  industries: string @query("industries")
+  /// sizes is a JSON array of company sizes to include.
+  sizes: string @query("sizes")
+  /// countries is a JSON array of countries to include.
+  countries: string @query("countries")
+  /// cities is a JSON array of cities to include.
+  cities: string @query("cities")
+  /// billing is a comma-separated list of billing periods.
+  billing: string @query("billing")
+  /// import_id filters to one import's leads.
+  import_id: int64? @query("import_id")
+  /// follow_up is overdue, today, due (overdue or today), upcoming,
+  /// scheduled (any date) or none.
+  follow_up: string @query("follow_up")
+  /// has_phone is yes or no; any when empty. The other has_* fields work the
+  /// same way.
+  has_phone: string @query("has_phone")
+  has_email: string @query("has_email")
+  has_website: string @query("has_website")
+  has_linkedin: string @query("has_linkedin")
+  has_company: string @query("has_company")
+  /// has_value is whether an estimated value is set.
+  has_value: string @query("has_value")
+  /// contacted is yes (worked at least once) or no (never worked).
+  contacted: string @query("contacted")
+  /// attempts_min and attempts_max bound the call attempts, inclusive.
+  attempts_min: int32? @query("attempts_min")
+  attempts_max: int32? @query("attempts_max")
+  /// value_min and value_max bound the estimated value (decimal strings).
+  value_min: string @query("value_min")
+  value_max: string @query("value_max")
+  /// created_from and created_to bound the date added (YYYY-MM-DD, the
+  /// caller's days, inclusive).
+  created_from: string @query("created_from")
+  created_to: string @query("created_to")
+  /// active_from and active_to bound the last activity date the same way.
+  active_from: string @query("active_from")
+  active_to: string @query("active_to")
+  /// search matches names, company, email, job title and phone.
+  search: string @query("search")
   /// today is the caller's date.
   today: string @query("today")
   /// utc_offset_minutes is the caller's offset from UTC, so "today" counts
@@ -337,13 +420,21 @@ message GetLeadStatsResponse {
   converted_this_month: int64 @encode(number)
 }
 
-/// ListLeadSourcesRequest takes no parameters.
-message ListLeadSourcesRequest {}
+/// ListLeadFacetsRequest takes no parameters.
+message ListLeadFacetsRequest {}
 
-/// ListLeadSourcesResponse lists the sources leads have, for filters.
-message ListLeadSourcesResponse {
+/// ListLeadFacetsResponse lists the distinct values leads have, for filters.
+message ListLeadFacetsResponse {
   /// sources are the distinct non-empty sources.
   sources: string[]
+  /// industries are the distinct non-empty industries.
+  industries: string[]
+  /// sizes are the distinct non-empty company sizes.
+  sizes: string[]
+  /// countries are the distinct non-empty countries.
+  countries: string[]
+  /// cities are the distinct non-empty cities.
+  cities: string[]
 }
 
 /// GetLeadRequest selects one lead.

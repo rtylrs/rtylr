@@ -7,37 +7,27 @@ import (
 )
 
 // ListLeads returns one page of leads. day is the caller's calendar day, which
-// follow-up windows are relative to.
+// follow-up windows and date bounds are relative to.
 func (s *Service) ListLeads(ctx context.Context, businessID int64, f domain.LeadFilter, day domain.CallerDay) (domain.LeadPage, error) {
-	if f.Sort == "" {
-		f.Sort = domain.LeadSortNewest
-	}
-	if !f.Sort.IsValid() {
-		return domain.LeadPage{}, &domain.ValidationError{Message: "unknown sort"}
-	}
-	for _, status := range f.Statuses {
-		if !status.IsValid() {
-			return domain.LeadPage{}, &domain.ValidationError{Message: "unknown lead status"}
-		}
-	}
-	if !f.FollowUp.IsValid() {
-		return domain.LeadPage{}, &domain.ValidationError{Message: "unknown follow-up window"}
-	}
-	if len([]rune(f.Search)) > 100 {
-		f.Search = string([]rune(f.Search)[:100])
+	if err := f.Normalize(); err != nil {
+		return domain.LeadPage{}, err
 	}
 	f.Limit = pageSize(f.Limit)
-	return s.repo.ListLeads(ctx, businessID, f, day.Date)
+	return s.repo.ListLeads(ctx, businessID, f, day)
 }
 
-// LeadStats summarises prospecting for one rep, or everyone when assignedTo
-// is nil.
-func (s *Service) LeadStats(ctx context.Context, businessID int64, assignedTo *int64, day domain.CallerDay) (domain.LeadStats, error) {
-	return s.repo.LeadStats(ctx, businessID, assignedTo, day.Date, day.StartUTC, day.MonthStartUTC())
+// LeadStats summarises the leads a filter selects, counting every status.
+func (s *Service) LeadStats(ctx context.Context, businessID int64, f domain.LeadFilter, day domain.CallerDay) (domain.LeadStats, error) {
+	f.Statuses = nil
+	if err := f.Normalize(); err != nil {
+		return domain.LeadStats{}, err
+	}
+	return s.repo.LeadStats(ctx, businessID, f, day)
 }
 
-func (s *Service) ListLeadSources(ctx context.Context, businessID int64) ([]string, error) {
-	return s.repo.ListLeadSources(ctx, businessID)
+// LeadFacets lists the values leads have, for the filter pickers.
+func (s *Service) LeadFacets(ctx context.Context, businessID int64) (domain.LeadFacets, error) {
+	return s.repo.LeadFacets(ctx, businessID)
 }
 
 func (s *Service) GetLead(ctx context.Context, businessID, id int64) (domain.Lead, error) {

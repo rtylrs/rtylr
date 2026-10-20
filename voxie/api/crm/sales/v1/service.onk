@@ -6,11 +6,12 @@ service LeadService {
   /// Returns one page of leads.
   listLeads(ListLeadsRequest) -> ListLeadsResponse @get("/leads")
 
-  /// Summarises prospecting for the leads page header.
+  /// Summarises prospecting for the leads page header, for the same filters
+  /// as the list (statuses aside).
   getLeadStats(GetLeadStatsRequest) -> GetLeadStatsResponse @get("/leads/stats")
 
-  /// Lists the sources leads have.
-  listLeadSources(ListLeadSourcesRequest) -> ListLeadSourcesResponse @get("/leads/sources")
+  /// Lists the distinct sources, industries, sizes and places leads have.
+  listLeadFacets(ListLeadFacetsRequest) -> ListLeadFacetsResponse @get("/leads/facets")
 
   /// Returns a single lead.
   getLead(GetLeadRequest) -> GetLeadResponse @get("/leads/{id}")

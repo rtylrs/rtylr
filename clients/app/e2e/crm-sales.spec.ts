@@ -7,7 +7,7 @@ import {
   encodeLeadImportResponse,
   encodeListActivitiesResponse,
   encodeListLeadImportsResponse,
-  encodeListLeadSourcesResponse,
+  encodeListLeadFacetsResponse,
   encodeListLeadsResponse,
   encodeListPipelinesResponse,
   encodeListRepsResponse,
@@ -92,8 +92,14 @@ async function stubSales(page: Page): Promise<Request[]> {
     );
   await json('reps', encodeListRepsResponse({ reps: [{ id: '1', name: 'Sam Test' }] }));
   await json(
-    'leads/sources',
-    encodeListLeadSourcesResponse({ sources: ['Referral', 'Spring list'] })
+    'leads/facets',
+    encodeListLeadFacetsResponse({
+      sources: ['Referral', 'Spring list'],
+      industries: ['Food, Beverage', 'Retail'],
+      sizes: ['1-10'],
+      countries: ['Lebanon'],
+      cities: ['Beirut', 'Tripoli'],
+    })
   );
   await json(
     'leads/stats',
@@ -141,6 +147,58 @@ test.describe('CRM sales', () => {
     await expect(nav.getByText('Sales', { exact: true })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Leads' })).toHaveAttribute('aria-current', 'page');
     await page.screenshot({ path: 'test-results/crm-sales-leads.png', fullPage: true });
+  });
+
+  test('narrows the leads with the filter popover', async ({ page }) => {
+    const sent = await stubSales(page);
+    const lastList = () =>
+      new URL(
+        sent
+          .filter((request) => new URL(request.url()).pathname === '/crm/sales/v1/leads')
+          .at(-1)
+          ?.url() ?? 'http://x'
+      ).searchParams;
+    await page.goto(`${PORTAL_URL}/crm/sales/leads`);
+    await expect(page.getByText('Showing 2 of 2')).toBeVisible();
+
+    await page.getByRole('button', { name: /^Filter( \d+)?$/ }).click();
+    const panel = page.getByRole('dialog', { name: 'Filters' });
+    await expect(panel).toBeVisible();
+    await panel
+      .getByRole('radiogroup', { name: 'Phone' })
+      .getByRole('radio', { name: 'Has' })
+      .click();
+    await expect.poll(() => lastList().get('has_phone')).toBe('yes');
+
+    await panel.getByRole('button', { name: /^Industry:/ }).click();
+    await page.getByRole('checkbox', { name: 'Food, Beverage' }).click();
+    await expect.poll(() => lastList().get('industries')).toBe('["Food, Beverage"]');
+    await page.keyboard.press('Escape');
+
+    await panel
+      .getByRole('radiogroup', { name: 'Contacted' })
+      .getByRole('radio', { name: 'Never' })
+      .click();
+    await panel
+      .getByRole('group', { name: 'Call attempts' })
+      .getByLabel('Call attempts Min')
+      .fill('1');
+    await expect.poll(() => lastList().get('attempts_min')).toBe('1');
+    expect(lastList().get('contacted')).toBe('no');
+    await expect(page.getByRole('button', { name: /^Filter( \d+)?$/ })).toContainText('4');
+    await page.screenshot({ path: 'test-results/crm-sales-filters.png' });
+
+    await panel.getByRole('button', { name: /Show 2 leads/ }).click();
+    await expect(panel).toBeHidden();
+    const chip = page.getByRole('button', { name: 'Remove filter: Industry: Food, Beverage' });
+    await expect(chip).toBeVisible();
+    await expect(page.getByText('Has phone')).toBeVisible();
+    await chip.click();
+    await expect.poll(() => lastList().get('industries')).toBeNull();
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(page.getByRole('button', { name: /^Filter( \d+)?$/ })).toHaveText('Filter');
+    await expect(page.getByRole('button', { name: /^Remove filter/ })).toHaveCount(0);
+    await expect(page.getByText('Showing 2 of 2')).toBeVisible();
   });
 
   test('loads the next page of leads when scrolled to the bottom', async ({ page }) => {

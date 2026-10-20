@@ -59,8 +59,18 @@ export type LeadSort = (typeof LEAD_SORTS)[number];
 export const DEAL_SORTS = ['newest', 'close_date', 'value'] as const;
 export type DealSort = (typeof DEAL_SORTS)[number];
 
-export const FOLLOW_UP_WINDOWS = ['overdue', 'today', 'due', 'upcoming'] as const;
+export const FOLLOW_UP_WINDOWS = [
+  'overdue',
+  'today',
+  'due',
+  'upcoming',
+  'scheduled',
+  'none',
+] as const;
 export type FollowUpWindow = (typeof FOLLOW_UP_WINDOWS)[number];
+
+/** Whether a field is filled in: any, yes or no. */
+export type Presence = '' | 'yes' | 'no';
 
 export const DEAL_STATUSES = ['open', 'won', 'lost'] as const;
 export type DealStatus = (typeof DEAL_STATUSES)[number];

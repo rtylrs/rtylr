@@ -27,11 +27,13 @@ import type {
 import i18next from 'i18next';
 import { toast } from 'sonner';
 import {
+  type Billing,
   type DealSort,
   type DealStatus,
   type FollowUpWindow,
   type LeadSort,
   type LeadStatus,
+  type Presence,
   type RepFilter,
   repFilterParam,
   todayISO,
@@ -124,54 +126,116 @@ export function useReps() {
 
 // ── Leads ────────────────────────────────────────────────────────────────
 
+/**
+ * The leads list's filters. Sets are empty when unused, ranges are the
+ * inputs' text, and reps may hold "0" for unassigned leads.
+ */
 export interface LeadListFilters {
   statuses: LeadStatus[];
-  rep: RepFilter;
-  source: string;
+  reps: string[];
+  sources: string[];
+  industries: string[];
+  sizes: string[];
+  countries: string[];
+  cities: string[];
+  billing: Billing[];
   importId?: string;
   followUp: FollowUpWindow | '';
+  hasPhone: Presence;
+  hasEmail: Presence;
+  hasWebsite: Presence;
+  hasLinkedin: Presence;
+  hasCompany: Presence;
+  hasValue: Presence;
+  contacted: Presence;
+  attemptsMin: string;
+  attemptsMax: string;
+  valueMin: string;
+  valueMax: string;
+  createdFrom: string;
+  createdTo: string;
+  activeFrom: string;
+  activeTo: string;
   search: string;
   sort: LeadSort;
 }
 
+const wholeNumber = (value: string): number | undefined =>
+  /^\d+$/.test(value.trim()) ? Number(value.trim()) : undefined;
+const amount = (value: string): string | undefined =>
+  /^\d+(\.\d{1,2})?$/.test(value.trim()) ? value.trim() : undefined;
+
+/**
+ * The filter's query parameters, shared by the list and its stats. Text sets
+ * go as JSON arrays so values with commas survive; half-typed ranges are left
+ * out until they parse.
+ */
+export function leadFilterParams(filters: LeadListFilters) {
+  const set = (values: string[]) => (values.length > 0 ? JSON.stringify(values) : undefined);
+  return {
+    reps: filters.reps.join(',') || undefined,
+    sources: set(filters.sources),
+    industries: set(filters.industries),
+    sizes: set(filters.sizes),
+    countries: set(filters.countries),
+    cities: set(filters.cities),
+    billing: filters.billing.join(',') || undefined,
+    importId: filters.importId || undefined,
+    followUp: filters.followUp || undefined,
+    hasPhone: filters.hasPhone || undefined,
+    hasEmail: filters.hasEmail || undefined,
+    hasWebsite: filters.hasWebsite || undefined,
+    hasLinkedin: filters.hasLinkedin || undefined,
+    hasCompany: filters.hasCompany || undefined,
+    hasValue: filters.hasValue || undefined,
+    contacted: filters.contacted || undefined,
+    attemptsMin: wholeNumber(filters.attemptsMin),
+    attemptsMax: wholeNumber(filters.attemptsMax),
+    valueMin: amount(filters.valueMin),
+    valueMax: amount(filters.valueMax),
+    createdFrom: filters.createdFrom || undefined,
+    createdTo: filters.createdTo || undefined,
+    activeFrom: filters.activeFrom || undefined,
+    activeTo: filters.activeTo || undefined,
+    search: filters.search.trim() || undefined,
+    today: todayISO(),
+    utcOffsetMinutes: utcOffsetMinutes(),
+  };
+}
+
 export function useLeadList(filters: LeadListFilters, pageSize = PAGE) {
+  const params = leadFilterParams(filters);
   return useInfiniteQuery({
-    queryKey: [ROOT, 'leads', filters, pageSize],
+    queryKey: [ROOT, 'leads', params, filters.statuses, filters.sort, pageSize],
     initialPageParam: '',
     queryFn: ({ pageParam }) =>
       leadClient.listLeads({
+        ...params,
         statuses: filters.statuses.join(',') || undefined,
-        assignedTo: repFilterParam(filters.rep),
-        source: filters.source || undefined,
-        importId: filters.importId || undefined,
-        followUp: filters.followUp || undefined,
-        search: filters.search.trim() || undefined,
         sort: filters.sort,
         cursor: pageParam || undefined,
         limit: pageSize,
-        today: todayISO(),
       }),
     getNextPageParam: (last) => last.nextCursor || undefined,
     placeholderData: keepPreviousData,
   });
 }
 
-export function useLeadStats(rep: RepFilter) {
+/** Counts per status and the header stats, for the same filters (statuses aside). */
+export function useLeadStats(filters: LeadListFilters) {
+  const params = leadFilterParams(filters);
   return useQuery({
-    queryKey: [ROOT, 'lead-stats', rep],
-    queryFn: () =>
-      leadClient.getLeadStats({
-        assignedTo: repFilterParam(rep),
-        today: todayISO(),
-        utcOffsetMinutes: utcOffsetMinutes(),
-      }),
+    queryKey: [ROOT, 'lead-stats', params],
+    queryFn: () => leadClient.getLeadStats(params),
+    placeholderData: keepPreviousData,
   });
 }
 
-export function useLeadSources() {
+/** The distinct sources, industries, sizes and places leads have. */
+export function useLeadFacets() {
   return useQuery({
-    queryKey: [ROOT, 'lead-sources'],
-    queryFn: async () => (await leadClient.listLeadSources({})).sources ?? [],
+    queryKey: [ROOT, 'lead-facets'],
+    queryFn: () => leadClient.listLeadFacets({}),
     staleTime: 60_000,
   });
 }
