@@ -74,7 +74,7 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 
 	if password == "" && token != "" {
 		inviteLink := config.AuthAppURL + "/invite/" + token
-		if emailErr := a.Service.EnqueueInviteEmail(ctx, req.GetEmail(), inviteLink); emailErr != nil {
+		if emailErr := a.Service.EnqueueInviteEmail(ctx, actorID, device.BusinessID, req.GetEmail(), inviteLink); emailErr != nil {
 			logger.Ctx(ctx).Warn("failed to enqueue invite email", logger.Error(emailErr))
 		}
 		return &hubteaminvitationsv1.InviteUserResponse{UserId: userID, Message: "Invitation sent"}, nil
@@ -115,7 +115,7 @@ func (a *InvitationsAPI) BulkInvite(ctx context.Context, req *hubteaminvitations
 	if _, permissionErr := requireHubPermission(ctx, "hub:team:invite"); permissionErr != nil {
 		return nil, permissionErr
 	}
-	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
+	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -157,7 +157,7 @@ func (a *InvitationsAPI) BulkInvite(ctx context.Context, req *hubteaminvitations
 		// same way the single-invite path does; existing members need no email.
 		if r.Status == "invited" && r.Token != "" {
 			inviteLink := config.AuthAppURL + "/invite/" + r.Token
-			if emailErr := a.Service.EnqueueInviteEmail(ctx, r.Email, inviteLink); emailErr != nil {
+			if emailErr := a.Service.EnqueueInviteEmail(ctx, actorID, businessID, r.Email, inviteLink); emailErr != nil {
 				logger.Ctx(ctx).Warn("failed to enqueue bulk invite email",
 					logger.String("email", r.Email), logger.Error(emailErr))
 				message = "invitation created but the invitation email could not be sent"

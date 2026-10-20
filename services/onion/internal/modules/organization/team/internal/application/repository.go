@@ -60,7 +60,17 @@ type repository interface {
 	UpsertProvisioningState(ctx context.Context, userID, businessID int64, mode, state string, emailVerified, passwordChangeRequired bool) error
 }
 
+// InviteEmail is an invitation to send. InviterName and BusinessName are empty
+// when they couldn't be read; the email words around them.
+type InviteEmail struct {
+	To           string
+	Link         string
+	InviterName  string
+	BusinessName string
+	ValidDays    int
+}
+
 type teamEmailNotifications interface {
-	QueueInvite(ctx context.Context, toEmail, inviteLink string) error
+	QueueInvite(ctx context.Context, invite InviteEmail) error
 	QueueAccessRequest(ctx context.Context, toEmail, requesterName, requesterEmail, app string) error
 }

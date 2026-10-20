@@ -286,7 +286,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	}
 	token := hex.EncodeToString(tokenBytes)
 
-	expiresAt := time.Now().Add(7 * 24 * time.Hour) // 7 days
+	expiresAt := time.Now().Add(domain.InviteTokenTTL)
 	if err := s.repo.CreateInviteToken(ctx, userID, ownerID, businessID, token, expiresAt); err != nil {
 		return cleanupCreatedUser(err)
 	}

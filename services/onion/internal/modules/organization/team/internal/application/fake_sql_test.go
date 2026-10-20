@@ -35,7 +35,7 @@ type fakeDatabase struct {
 	statements []recordedStatement
 }
 
-func (f *fakeDatabase) respond(query string, args []driver.Value) *scriptedQuery {
+func (f *fakeDatabase) respond(query string, _ []driver.Value) *scriptedQuery {
 	for i := range f.script {
 		if f.script[i].match == nil || f.script[i].match(query) {
 			return &f.script[i]
