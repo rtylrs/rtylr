@@ -139,9 +139,9 @@
 }
 .sales-select {
   height: 36px;
-  padding-inline: 8px;
+  padding-inline-start: 10px;
   border-radius: 8px;
-  background: var(--hub-input-bg);
+  background-color: var(--hub-input-bg);
   border: 1px solid var(--hub-border);
   color: var(--hub-text);
   font-size: 13px;
@@ -215,6 +215,13 @@
   text-overflow: ellipsis;
 }
 .sales-muted {
+  color: var(--hub-text-muted);
+}
+[dir='rtl'] .sales-dir-icon {
+  transform: scaleX(-1);
+}
+.sales-hint {
+  font-size: 12px;
   color: var(--hub-text-muted);
 }
 .sales-link {

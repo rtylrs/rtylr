@@ -88,12 +88,22 @@ export const Button: React.FC<
     },
     danger: { background: '#ef4444', color: '#fff' },
   };
+  const filled = variant === 'primary' || variant === 'danger';
+  const disabledFill: React.CSSProperties = {
+    background: 'var(--hub-hover)',
+    color: 'var(--hub-text-muted)',
+    border: '1px solid var(--hub-border)',
+  };
   return (
     <button
       type="button"
       {...props}
-      className="portal-crm-button"
-      style={{ ...base, ...variants[variant], ...style }}
+      className={filled ? 'portal-crm-button is-filled' : 'portal-crm-button'}
+      style={{
+        ...base,
+        ...(filled && props.disabled ? disabledFill : variants[variant]),
+        ...style,
+      }}
     >
       {children}
     </button>
