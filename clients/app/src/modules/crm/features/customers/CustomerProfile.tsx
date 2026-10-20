@@ -42,6 +42,7 @@ import {
   ConsentBanner,
   LoyaltyPointsInput,
 } from '../../shared/components/crm';
+import { useLoadOnScroll } from '../../../../shared/hooks/useLoadOnScroll';
 import { useSupportEngagement } from '../../shared/hooks/queries/useSupportEngagement';
 import { useCustomerOutstandingBalance } from '../../shared/hooks/queries/useCustomerOutstandingBalance';
 import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
@@ -105,6 +106,11 @@ const CustomerProfile: React.FC = () => {
     setTimelineEntries([]);
   }, [customerId]);
   const timeline = timelineEntries;
+  const nextTimelineCursor = fetchedTimeline?.nextCursor;
+  const nextTimeline = useLoadOnScroll(
+    Boolean(nextTimelineCursor) && !timelineQuery.isFetching && !timelineQuery.isError,
+    () => setTimelineCursor(nextTimelineCursor)
+  );
 
   if (customerLoading) {
     return (
@@ -555,10 +561,11 @@ const CustomerProfile: React.FC = () => {
                   <TimelineEntryRow key={entry.id} entry={entry} />
                 ))}
               </div>
-              {fetchedTimeline?.nextCursor && (
+              {nextTimelineCursor && (
                 <Button
+                  ref={nextTimeline}
                   variant="outline"
-                  onClick={() => setTimelineCursor(fetchedTimeline.nextCursor)}
+                  onClick={() => setTimelineCursor(nextTimelineCursor)}
                   style={{ marginTop: '14px' }}
                 >
                   {t('crm.customerProfile.loadMore')}

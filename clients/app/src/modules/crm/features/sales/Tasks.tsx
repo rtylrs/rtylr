@@ -109,12 +109,7 @@ const Tasks: React.FC = () => {
                 repName={names.get(task.assignedTo ?? '')}
               />
             ))}
-            <ListFooter
-              shown={rows.length}
-              hasMore={Boolean(tasks.hasNextPage)}
-              loading={tasks.isFetchingNextPage}
-              onMore={() => void tasks.fetchNextPage()}
-            />
+            <ListFooter shown={rows.length} pages={tasks} />
           </>
         )}
       </div>

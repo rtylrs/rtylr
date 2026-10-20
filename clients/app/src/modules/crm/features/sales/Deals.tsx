@@ -38,6 +38,7 @@ import {
   SearchBox,
   StatTile,
   useMoney,
+  useNextPageOnScroll,
   useRepNames,
 } from './components/common';
 import { DealFormModal, LoseDealModal, WinDealModal } from './components/DealModals';
@@ -116,6 +117,7 @@ const StageColumn: React.FC<{
   const { t, i18n } = useTranslation();
   const money = useMoney();
   const list = useStageDeals(stage.id, filters);
+  const sentinel = useNextPageOnScroll(list);
   const [over, setOver] = useState(false);
   const rows = list.data?.pages.flatMap((page) => page.deals ?? []) ?? [];
   return (
@@ -166,11 +168,12 @@ const StageColumn: React.FC<{
       ))}
       {list.hasNextPage && (
         <Button
+          ref={sentinel}
           variant="ghost"
           onClick={() => void list.fetchNextPage()}
           disabled={list.isFetchingNextPage}
         >
-          {t('crmSales.common.loadMore')}
+          {list.isFetchingNextPage ? t('crmSales.common.loading') : t('crmSales.common.loadMore')}
         </Button>
       )}
       {list.isPending && (
@@ -286,13 +289,7 @@ const DealTable: React.FC<{ pipelineId?: string; rep: string; search: string }> 
               </tbody>
             </table>
           </div>
-          <ListFooter
-            shown={rows.length}
-            total={deals.data?.pages[0]?.total}
-            hasMore={Boolean(deals.hasNextPage)}
-            loading={deals.isFetchingNextPage}
-            onMore={() => void deals.fetchNextPage()}
-          />
+          <ListFooter shown={rows.length} total={deals.data?.pages[0]?.total} pages={deals} />
         </>
       )}
     </div>

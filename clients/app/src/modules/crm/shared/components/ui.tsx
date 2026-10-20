@@ -62,6 +62,7 @@ export const PageHeader: React.FC<{
 export const Button: React.FC<
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
     variant?: 'primary' | 'ghost' | 'danger' | 'outline';
+    ref?: React.Ref<HTMLButtonElement>;
   }
 > = ({ variant = 'primary', style, children, ...props }) => {
   const base: React.CSSProperties = {

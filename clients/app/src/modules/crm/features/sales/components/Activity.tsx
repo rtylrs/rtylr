@@ -35,7 +35,7 @@ import {
   useLogActivity,
   useTaskList,
 } from '../data/queries';
-import { DueDate, useRepNames } from './common';
+import { DueDate, useNextPageOnScroll, useRepNames } from './common';
 
 export const ACTIVITY_ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
   call: Phone,
@@ -252,6 +252,7 @@ export const Timeline: React.FC<{ subject: Subject }> = ({ subject }) => {
   const { t, i18n } = useTranslation();
   const names = useRepNames();
   const activities = useActivities(subject);
+  const sentinel = useNextPageOnScroll(activities);
   const remove = useDeleteActivity();
   const items = activities.data?.pages.flatMap((page) => page.activities ?? []) ?? [];
 
@@ -319,11 +320,14 @@ export const Timeline: React.FC<{ subject: Subject }> = ({ subject }) => {
       )}
       {activities.hasNextPage && (
         <Button
+          ref={sentinel}
           variant="outline"
           onClick={() => void activities.fetchNextPage()}
           disabled={activities.isFetchingNextPage}
         >
-          {t('crmSales.common.loadMore')}
+          {activities.isFetchingNextPage
+            ? t('crmSales.common.loading')
+            : t('crmSales.common.loadMore')}
         </Button>
       )}
     </section>

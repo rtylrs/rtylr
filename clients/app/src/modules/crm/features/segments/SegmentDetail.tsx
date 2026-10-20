@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertCircle, ArrowLeft, FileQuestion, Mail, PieChart, Users } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import { useLoadOnScroll } from '../../../../shared/hooks/useLoadOnScroll';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
@@ -69,6 +70,10 @@ const SegmentDetail: React.FC = () => {
   const segmentIsMissing = segmentQueryFailed
     ? isNotFoundError(segmentError, notFoundTitle)
     : segmentQuery.isSuccess && !segment;
+  const nextCustomers = useLoadOnScroll(
+    hasNextPage && !isFetchingNextPage && !customersNextPageError,
+    () => void fetchNextPage()
+  );
   const retryCustomers = (): void => {
     void (customersNextPageError ? fetchNextPage() : refetchCustomers());
   };
@@ -327,7 +332,10 @@ const SegmentDetail: React.FC = () => {
                 </div>
               ))}
               {hasNextPage && (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 16px' }}>
+                <div
+                  ref={nextCustomers}
+                  style={{ display: 'flex', justifyContent: 'center', padding: '14px 16px' }}
+                >
                   <Button
                     variant="outline"
                     onClick={() => void fetchNextPage()}
