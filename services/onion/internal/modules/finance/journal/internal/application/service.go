@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/financeaccounts"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -23,6 +24,8 @@ type repository interface {
 	Post(ctx context.Context, businessID, id int64) error
 	PostPayrollJournal(ctx context.Context, input domain.PayrollJournalInput) error
 	SetPayrollAccountProvider(financeaccounts.PayrollAccountProvider)
+	ListUnpostedSources(ctx context.Context, businessID int64) ([]domain.OperationalSource, error)
+	PostOperationalEntry(ctx context.Context, src domain.OperationalSource, debitAccountID, creditAccountID int64) (bool, error)
 }
 
 func (s *Service) SetPayrollAccountProvider(provider financeaccounts.PayrollAccountProvider) {
@@ -30,7 +33,62 @@ func (s *Service) SetPayrollAccountProvider(provider financeaccounts.PayrollAcco
 }
 
 type Service struct {
-	repo repository
+	repo           repository
+	ledgerAccounts financeaccounts.LedgerAccountProvider
+}
+
+func (s *Service) SetLedgerAccountProvider(provider financeaccounts.LedgerAccountProvider) {
+	s.ledgerAccounts = provider
+}
+
+// SyncOperationalPostings posts every approved expense and recorded invoice
+// payment that is not in the journal yet, as a balanced two-line entry:
+//
+//	expense:          Dr Operating expenses   Cr Cash or Bank
+//	invoice payment:  Dr Cash or Bank         Cr Sales
+//
+// Cash is used when the payment method is cash, Bank otherwise. Before this,
+// nothing but payroll and manual entries reached the journal, so the balance
+// sheet, journal and account balances never saw an expense or a payment.
+// Each source posts at most once, so callers run it before every ledger read.
+func (s *Service) SyncOperationalPostings(ctx context.Context, businessID int64) error {
+	if s.ledgerAccounts == nil {
+		return nil
+	}
+	sources, err := s.repo.ListUnpostedSources(ctx, businessID)
+	if err != nil || len(sources) == 0 {
+		return err
+	}
+	accountsByCurrency := map[string]financeaccounts.LedgerAccounts{}
+	posted := false
+	for _, src := range sources {
+		accounts, ok := accountsByCurrency[src.Currency]
+		if !ok {
+			// Accounts follow the module convention of owner_id = business id.
+			accounts, err = s.ledgerAccounts.EnsureLedgerAccounts(ctx, businessID, businessID, src.Currency)
+			if err != nil {
+				return err
+			}
+			accountsByCurrency[src.Currency] = accounts
+		}
+		moneyAccount := accounts.Bank
+		if src.PaidInCash {
+			moneyAccount = accounts.Cash
+		}
+		debit, credit := accounts.OperatingExpenses, moneyAccount
+		if src.Kind == domain.SourceInvoicePayment {
+			debit, credit = moneyAccount, accounts.Sales
+		}
+		ok, err := s.repo.PostOperationalEntry(ctx, src, debit, credit)
+		if err != nil {
+			return err
+		}
+		posted = posted || ok
+	}
+	if posted {
+		invalidateJournalScope(ctx, businessID)
+	}
+	return nil
 }
 
 func NewService(_ context.Context, repo repository) *Service {
@@ -42,6 +100,10 @@ func invalidateJournalScope(ctx context.Context, businessID int64) {
 }
 
 func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([]domain.JournalEntry, bool, error) {
+	// A failed sync still lists what is posted; the next read retries it.
+	if err := s.SyncOperationalPostings(ctx, businessID); err != nil {
+		logger.Ctx(ctx).Warn("Ledger sync before listing the journal failed", logger.Error(err))
+	}
 	limit, offset := paginate(page, pageSize)
 	key := cacheKeys.Scoped(journalScope, businessID, fmt.Sprintf("list|p=%d|ps=%d", page, pageSize))
 	rows, err := cacher.Of[[]domain.JournalEntry]().GetOrComputeSingle(ctx, key+"|domain=v2",

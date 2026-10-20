@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { getOneKitErrorMessage } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';

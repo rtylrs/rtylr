@@ -1,60 +1,81 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { pageTitle } from '../../shared/lib/pageTitle';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
-import MoneyDisplay from '../../shared/components/MoneyDisplay';
-import AccountTypeBadge, { type AccountType } from '../../shared/components/AccountTypeBadge';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useBalanceSheet } from './useBalanceSheet';
 import { useErpInventoryValuation } from '../../shared/hooks/queries/useErpInventoryValuation';
-import { cardStyle, ACCENT } from '../../shared/lib/tokens';
-import { toLocalIso } from '../../shared/lib/date';
+import type { BalanceSheetLine } from '../../shared/schemas/balanceSheet';
+import { cardStyle, ghostBtn, inputStyle } from '../../shared/lib/tokens';
+import { formatDate, todayIso } from '../../shared/lib/date';
+import { formatMoney } from '../../shared/lib/money';
+import { useSettings } from '../../shared/lib/settings';
+
+interface Row {
+  key: string;
+  label: string;
+  code?: string;
+  amount: number;
+}
 
 const Section: React.FC<{
   title: string;
-  rows: { label: string; amount: number; type: string }[];
+  totalLabel: string;
+  rows: Row[];
   total: number;
-}> = ({ title, rows, total }) => {
+  emptyText: string;
+}> = ({ title, totalLabel, rows, total, emptyText }) => {
+  const currency = useSettings((s) => s.currency);
   return (
-    <div style={{ ...cardStyle, padding: 20 }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 14,
-        }}
-      >
-        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--hub-text)' }}>
-          {title}
-        </h3>
-        <AccountTypeBadge type={(rows[0]?.type ?? 'asset') as AccountType} />
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {/* Index, not r.label: most rows carry a server-supplied label, but the
-            inventory row appends a translated one, so keying off the label
-            would remount the section whenever the reader switches language.
-            The list is built in a fixed order and only ever appended to. */}
-        {rows.map((r, i) => (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '8px 0',
-              borderBottom: '1px solid var(--hub-border)',
-              fontSize: 13,
-              color: 'var(--hub-text-muted)',
-            }}
-          >
-            <span>{r.label}</span>
-            <span style={{ color: 'var(--hub-text)', fontWeight: 600 }}>
-              <MoneyDisplay amount={r.amount} />
-            </span>
-          </div>
-        ))}
+    <div style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column' }}>
+      <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'var(--hub-text)' }}>
+        {title}
+      </h3>
+      <div style={{ flex: 1 }}>
+        {rows.length === 0 ? (
+          <p style={{ margin: '6px 0', fontSize: 13, color: 'var(--hub-text-dim)' }}>{emptyText}</p>
+        ) : (
+          rows.map((r) => (
+            <div
+              key={r.key}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                padding: '8px 0',
+                borderBottom: '1px solid var(--hub-border)',
+                fontSize: 13,
+              }}
+            >
+              <span style={{ color: 'var(--hub-text-muted)' }}>
+                {r.code && (
+                  <span
+                    style={{
+                      marginInlineEnd: 8,
+                      color: 'var(--hub-text-dim)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {r.code}
+                  </span>
+                )}
+                {r.label}
+              </span>
+              <span
+                style={{
+                  color: 'var(--hub-text)',
+                  fontWeight: 600,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {formatMoney(r.amount, currency)}
+              </span>
+            </div>
+          ))
+        )}
       </div>
       <div
         style={{
@@ -63,45 +84,128 @@ const Section: React.FC<{
           paddingTop: 12,
           fontSize: 14,
           fontWeight: 700,
-          color: ACCENT,
+          color: 'var(--hub-text)',
+          fontVariantNumeric: 'tabular-nums',
         }}
       >
-        <span>Total {title}</span>
-        <MoneyDisplay amount={total} />
+        <span>{totalLabel}</span>
+        <span>{formatMoney(total, currency)}</span>
       </div>
     </div>
   );
 };
 
+const toRows = (lines: BalanceSheetLine[], type: BalanceSheetLine['type']): Row[] =>
+  lines
+    .filter((l) => l.type === type)
+    .map((l) => ({ key: l.accountId, label: l.name, code: l.code, amount: l.amount }));
+
 const BalanceSheet: React.FC = () => {
   const { t } = useTranslation('finance');
-  const { data, isLoading, dataUpdatedAt } = useBalanceSheet();
-  // ERP->FIN-02: the Inventory line exists only when ERP answers. A tenant
-  // without ERP gets no section at all, never a zero: a balance sheet that
-  // silently reports 0 inventory misstates the business (#845).
+  const currency = useSettings((s) => s.currency);
+  const [asOf, setAsOf] = useState(todayIso);
+  const { data, isLoading, isError, isFetching, refetch } = useBalanceSheet(asOf);
+  // ERP->FIN-02: inventory is shown only when ERP answers; it is valued
+  // outside the ledger, so it sits with the other figures beside the statement.
   const { data: inventory } = useErpInventoryValuation();
 
-  if (isLoading || !data) {
+  const header = (
+    <PageHeader
+      title={t('finance.balanceSheet.title')}
+      subtitle={t('finance.balanceSheet.subtitle')}
+      breadcrumbs={[{ label: t('financeNav.reports') }, { label: t('financeNav.balanceSheet') }]}
+      actions={
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 12,
+            color: 'var(--hub-text-muted)',
+          }}
+        >
+          {t('finance.balanceSheet.asOfLabel')}
+          <input
+            type="date"
+            value={asOf}
+            max={todayIso()}
+            onChange={(e) => e.target.value && setAsOf(e.target.value)}
+            style={{ ...inputStyle, width: 'auto' }}
+          />
+        </label>
+      }
+    />
+  );
+
+  if (isLoading) {
     return (
-      <div>
-        <PageHeader
-          title={t('finance.balanceSheet.title')}
-          breadcrumbs={[
-            { label: t('financeNav.reports') },
-            { label: t('financeNav.balanceSheet') },
-          ]}
-        />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {header}
         <div style={{ ...cardStyle, padding: 20 }}>
           <SkeletonRow />
         </div>
       </div>
     );
   }
+  if (isError || !data) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {header}
+        <div
+          role="alert"
+          style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--hub-text)' }}>
+            {t('financeErrors.generic')}
+          </p>
+          <button
+            type="button"
+            style={{ ...ghostBtn, alignSelf: 'flex-start' }}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            {t('financeCommon.refresh')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const erpInventory = inventory?.totalValue ?? 0;
-  const totalAssets = (data.totalAssets ?? 0) + erpInventory;
-  const totalLiab = data.totalLiabilities ?? 0;
-  const totalEquity = data.totalEquity ?? 0;
+  const equityRows = toRows(data.lines, 'equity');
+  if (data.netIncome !== 0) {
+    equityRows.push({
+      key: 'net-income',
+      label: t('finance.balanceSheet.netIncome'),
+      amount: data.netIncome,
+    });
+  }
+  const difference = data.totalAssets - (data.totalLiabilities + data.totalEquity);
+  const balanced = Math.abs(difference) < 0.005;
+  const nothingPosted = data.lines.length === 0 && data.netIncome === 0;
+  const dateLabel = formatDate(data.asOf || asOf, {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  const memo = [
+    { key: 'bank', label: t('finance.balanceSheet.memo.bank'), amount: data.cashBalance },
+    {
+      key: 'receivable',
+      label: t('finance.balanceSheet.memo.receivable'),
+      amount: data.accountsReceivable,
+    },
+    { key: 'payable', label: t('finance.balanceSheet.memo.payable'), amount: data.accountsPayable },
+    ...(inventory
+      ? [
+          {
+            key: 'inventory',
+            label: t('finance.balanceSheet.inventory'),
+            amount: inventory.totalValue,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <motion.div
@@ -110,95 +214,112 @@ const BalanceSheet: React.FC = () => {
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
       <HelmetContainer title={pageTitle(t('financeCommon.pageTitles.balanceSheet'))} />
-      {/* The API is point-in-time only, so the only honest date to show is
-          when these figures were fetched. */}
-      <PageHeader
-        title={t('finance.balanceSheet.title')}
-        subtitle={`${t('finance.balanceSheet.asOf')} ${toLocalIso(new Date(dataUpdatedAt))}`}
-        breadcrumbs={[{ label: t('financeNav.reports') }, { label: t('financeNav.balanceSheet') }]}
-      />
+      {header}
+
+      {nothingPosted && (
+        <div
+          style={{
+            ...cardStyle,
+            padding: 16,
+            fontSize: 13,
+            color: 'var(--hub-text-muted)',
+            lineHeight: 1.6,
+          }}
+        >
+          {t('finance.balanceSheet.emptyNote', { date: dateLabel })}
+        </div>
+      )}
 
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: 16,
         }}
       >
         <Section
           title={t('finance.balanceSheet.assets')}
-          rows={
-            inventory
-              ? [
-                  ...data.assets,
-                  {
-                    label: t('finance.balanceSheet.inventory'),
-                    amount: inventory.totalValue,
-                    type: 'asset',
-                  },
-                ]
-              : data.assets
-          }
-          total={totalAssets}
+          totalLabel={t('finance.balanceSheet.totalAssets')}
+          rows={toRows(data.lines, 'asset')}
+          total={data.totalAssets}
+          emptyText={t('finance.balanceSheet.noBalances')}
         />
         <Section
           title={t('finance.balanceSheet.liabilities')}
-          rows={data.liabilities}
-          total={totalLiab}
+          totalLabel={t('finance.balanceSheet.totalLiabilities')}
+          rows={toRows(data.lines, 'liability')}
+          total={data.totalLiabilities}
+          emptyText={t('finance.balanceSheet.noBalances')}
         />
-        <Section title={t('finance.balanceSheet.equity')} rows={data.equity} total={totalEquity} />
+        <Section
+          title={t('finance.balanceSheet.equity')}
+          totalLabel={t('finance.balanceSheet.totalEquity')}
+          rows={equityRows}
+          total={data.totalEquity}
+          emptyText={t('finance.balanceSheet.noBalances')}
+        />
       </div>
 
       <div
+        role="status"
         style={{
           ...cardStyle,
-          padding: 20,
+          padding: '14px 20px',
           display: 'flex',
-          justifyContent: 'space-around',
           alignItems: 'center',
+          gap: 10,
+          fontSize: 13,
+          color: 'var(--hub-text)',
         }}
       >
-        <Stat label={t('finance.balanceSheet.totalAssets')} value={totalAssets} />
-        <Stat
-          label={t('finance.balanceSheet.totalLiabilities')}
-          value={totalLiab}
-          color="var(--finance-danger)"
-        />
-        <Stat
-          label={t('finance.balanceSheet.totalEquity')}
-          value={totalEquity}
-          color="var(--finance-purple)"
-        />
-        <Stat
-          label={t('finance.balanceSheet.check')}
-          value={totalAssets - (totalLiab + totalEquity)}
-          color={ACCENT}
-        />
+        {balanced ? (
+          <CheckCircle size={16} style={{ color: 'var(--finance-success)', flexShrink: 0 }} />
+        ) : (
+          <AlertTriangle size={16} style={{ color: 'var(--finance-danger)', flexShrink: 0 }} />
+        )}
+        {balanced
+          ? t('finance.balanceSheet.balanced', {
+              assets: formatMoney(data.totalAssets, currency),
+              liabilitiesAndEquity: formatMoney(data.totalLiabilities + data.totalEquity, currency),
+            })
+          : t('finance.balanceSheet.outOfBalance', {
+              difference: formatMoney(difference, currency),
+            })}
+      </div>
+
+      <div style={{ ...cardStyle, padding: 20 }}>
+        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
+          {t('finance.balanceSheet.memo.title')}
+        </h3>
+        <p style={{ margin: '4px 0 10px', fontSize: 12, color: 'var(--hub-text-dim)' }}>
+          {t('finance.balanceSheet.memo.description')}
+        </p>
+        {memo.map((m) => (
+          <div
+            key={m.key}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '7px 0',
+              borderTop: '1px solid var(--hub-border)',
+              fontSize: 13,
+            }}
+          >
+            <span style={{ color: 'var(--hub-text-muted)' }}>{m.label}</span>
+            <span
+              style={{
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {formatMoney(m.amount, currency)}
+            </span>
+          </div>
+        ))}
       </div>
     </motion.div>
   );
 };
-
-const Stat: React.FC<{ label: string; value: number; color?: string }> = ({
-  label,
-  value,
-  color = 'var(--hub-text)',
-}) => (
-  <div style={{ textAlign: 'center' }}>
-    <div
-      style={{
-        fontSize: 11,
-        color: 'var(--hub-text-dim)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-      }}
-    >
-      {label}
-    </div>
-    <div style={{ fontSize: 18, fontWeight: 700, color, marginTop: 4 }}>
-      <MoneyDisplay amount={value} />
-    </div>
-  </div>
-);
 
 export default BalanceSheet;

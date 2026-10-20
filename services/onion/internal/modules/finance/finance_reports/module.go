@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/finance/finance_reports/internal/api"
 	"github.com/voxire/onion/internal/modules/finance/finance_reports/internal/application"
+	"github.com/voxire/onion/internal/platform/financejournal"
 	financestatementv1 "github.com/voxire/voxie/gen/go/finance/statement/v1"
 )
 
@@ -35,6 +36,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{}
+}
+
+// SetLedgerSyncer makes the balance sheet post outstanding expenses and
+// invoice payments before reading the ledger.
+func (m *Module) SetLedgerSyncer(ledger financejournal.LedgerSyncer) {
+	m.service.SetLedgerSyncer(ledger)
 }
 
 func (m *Module) WithReportingCurrency(read func(context.Context, int64) (string, error)) *Module {

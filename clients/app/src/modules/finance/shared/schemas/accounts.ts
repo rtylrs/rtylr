@@ -95,5 +95,7 @@ export const chartOfAccountSchema = z
     code: z.string().optional().nullable(),
     type: z.string().optional().nullable(),
     balance: z.number().optional().nullable(),
+    /** Opening balance plus posted journal lines. */
+    currentBalance: z.number().optional().nullable(),
   })
   .passthrough();

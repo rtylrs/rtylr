@@ -50,7 +50,17 @@
     "netCashFlow": "Net cash flow",
     "reports": "Reports",
     "inflow": "Inflow",
-    "outflow": "Outflow"
+    "outflow": "Outflow",
+    "subtitle": "Money in from paid invoices and out through approved expenses",
+    "chartLabel": "Money in and out over the period",
+    "periodLabel": "Period",
+    "periods": {
+      "month": "This month",
+      "quarter": "This quarter",
+      "year": "This year"
+    },
+    "empty": "No money in or out {{period}}. Invoice payments count as money in and approved expenses as money out.",
+    "basisNote": "Expenses waiting for approval are not counted until they are approved."
   },
   "bills": {
     "receivedFromErp": "Received from Operations, awaiting bills",
@@ -61,20 +71,26 @@
     "inventoryHint": "Live stock value from Operations; shown only when Operations is enabled for this business.",
     "inventoryUnavailable": "Operations not connected",
     "title": "Balance Sheet",
-    "asOf": "As of Date:",
     "assets": "Assets",
     "liabilities": "Liabilities",
     "equity": "Equity",
-    "totalAssets": "Total Assets",
-    "totalLiabilities": "Total Liabilities",
-    "totalEquity": "Total Equity",
-    "check": "Check",
-    "rows": {
-      "cash": "Cash",
-      "receivable": "Accounts Receivable",
-      "payable": "Accounts Payable",
-      "equity": "Equity"
-    }
+    "subtitle": "What the business owns and owes, from the ledger",
+    "asOfLabel": "As of",
+    "netIncome": "Net income to date",
+    "noBalances": "No balances.",
+    "emptyNote": "Nothing is in the ledger by {{date}}. Approved expenses and invoice payments are posted automatically, and journal entries add anything else.",
+    "balanced": "Balanced: assets {{assets}} equal liabilities and equity {{liabilitiesAndEquity}}.",
+    "outOfBalance": "Out of balance by {{difference}}. Check the journal for an entry posted to the wrong account type.",
+    "memo": {
+      "title": "Outside the ledger",
+      "description": "These figures come from other screens and are not part of the statement above.",
+      "bank": "Balances recorded on bank accounts",
+      "receivable": "Open invoices still owed to you",
+      "payable": "Unpaid bills"
+    },
+    "totalAssets": "Total assets",
+    "totalLiabilities": "Total liabilities",
+    "totalEquity": "Total equity"
   },
   "unbilled": {
     "region": "Unbilled billable time",

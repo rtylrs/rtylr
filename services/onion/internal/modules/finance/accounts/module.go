@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance/accounts/internal/api"
 	"github.com/voxire/onion/internal/modules/finance/accounts/internal/application"
 	"github.com/voxire/onion/internal/platform/financeaccounts"
+	"github.com/voxire/onion/internal/platform/financejournal"
 	financeaccountv1 "github.com/voxire/voxie/gen/go/finance/account/v1"
 )
 
@@ -20,6 +21,18 @@ type Module struct {
 
 func (m *Module) PayrollAccountProvider() financeaccounts.PayrollAccountProvider {
 	return m.service
+}
+
+// LedgerAccountProvider gives journal the standard accounts that approved
+// expenses and invoice payments post to.
+func (m *Module) LedgerAccountProvider() financeaccounts.LedgerAccountProvider {
+	return m.service
+}
+
+// SetLedgerSyncer makes the account list post outstanding operational entries
+// before it reads balances.
+func (m *Module) SetLedgerSyncer(ledger financejournal.LedgerSyncer) {
+	m.service.SetLedgerSyncer(ledger)
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {

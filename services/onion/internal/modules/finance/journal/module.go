@@ -23,6 +23,17 @@ func (m *Module) SetPayrollAccountProvider(provider financeaccounts.PayrollAccou
 	m.service.SetPayrollAccountProvider(provider)
 }
 
+// SetLedgerAccountProvider supplies the accounts operational postings use.
+func (m *Module) SetLedgerAccountProvider(provider financeaccounts.LedgerAccountProvider) {
+	m.service.SetLedgerAccountProvider(provider)
+}
+
+// LedgerSyncer lets other modules post outstanding expenses and payments
+// before reading the ledger.
+func (m *Module) LedgerSyncer() financejournal.LedgerSyncer {
+	return m.service
+}
+
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db))}
 }

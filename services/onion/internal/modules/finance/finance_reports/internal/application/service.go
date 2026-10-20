@@ -2,9 +2,12 @@ package application
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance/finance_reports/internal/domain"
+	"github.com/voxire/onion/internal/platform/financejournal"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type repository interface {
@@ -17,12 +20,26 @@ type repository interface {
 	SumExpensesInRange(ctx context.Context, businessID int64, from, to string) (float64, error)
 }
 
+// balanceSheetLineRepository reads the ledger account by account. Without it
+// (narrow test doubles) the balance sheet carries totals only.
+type balanceSheetLineRepository interface {
+	ListBalanceSheetAccounts(ctx context.Context, businessID int64, asOf time.Time) ([]domain.BalanceSheetLine, error)
+	SumPostedNetIncomeAsOf(ctx context.Context, businessID int64, asOf time.Time) (float64, error)
+}
+
 type invoicePaymentRepository interface {
 	SumInvoicePaymentsInRange(ctx context.Context, businessID int64, from, to string) (float64, error)
 }
 
 type Service struct {
-	repo repository
+	repo   repository
+	ledger financejournal.LedgerSyncer
+}
+
+// SetLedgerSyncer makes the balance sheet post outstanding expenses and
+// invoice payments to the journal before reading it.
+func (s *Service) SetLedgerSyncer(ledger financejournal.LedgerSyncer) {
+	s.ledger = ledger
 }
 
 func NewService(_ context.Context, repo repository) *Service {
@@ -30,8 +47,67 @@ func NewService(_ context.Context, repo repository) *Service {
 }
 
 func (s *Service) GetBalanceSheet(ctx context.Context, businessID int64) (domain.BalanceSheet, error) {
-	return s.computeBalanceSheet(ctx, businessID)
+	return s.GetBalanceSheetAsOf(ctx, businessID, "")
 }
+
+// GetBalanceSheetAsOf reports the ledger on asOf (YYYY-MM-DD, today when
+// empty). Approved expenses and invoice payments are posted first, so the
+// statement includes everything the operational screens show.
+func (s *Service) GetBalanceSheetAsOf(ctx context.Context, businessID int64, asOf string) (domain.BalanceSheet, error) {
+	date := time.Now().UTC()
+	if asOf != "" {
+		parsed, err := time.Parse("2006-01-02", asOf)
+		if err != nil {
+			return domain.BalanceSheet{}, ErrInvalidAsOf
+		}
+		date = parsed
+	}
+	if s.ledger != nil {
+		if err := s.ledger.SyncOperationalPostings(ctx, businessID); err != nil {
+			logger.Ctx(ctx).Warn("Ledger sync before the balance sheet failed", logger.Error(err))
+		}
+	}
+	bs, err := s.computeBalanceSheet(ctx, businessID)
+	if err != nil {
+		return domain.BalanceSheet{}, err
+	}
+	bs.AsOf = date.Format("2006-01-02")
+	lines, ok := s.repo.(balanceSheetLineRepository)
+	if !ok {
+		return bs, nil
+	}
+	accounts, err := lines.ListBalanceSheetAccounts(ctx, businessID, date)
+	if err != nil {
+		return domain.BalanceSheet{}, err
+	}
+	netIncome, err := lines.SumPostedNetIncomeAsOf(ctx, businessID, date)
+	if err != nil {
+		return domain.BalanceSheet{}, err
+	}
+	// The totals are the sums of the lines shown, so the statement adds up on
+	// the page; they used to be ledger totals beside rows from other tables.
+	bs.Lines = bs.Lines[:0]
+	bs.TotalAssets, bs.TotalLiabilities, bs.TotalEquity = 0, 0, netIncome
+	for _, line := range accounts {
+		if line.Amount == 0 {
+			continue
+		}
+		bs.Lines = append(bs.Lines, line)
+		switch line.Type {
+		case "asset":
+			bs.TotalAssets += line.Amount
+		case "liability":
+			bs.TotalLiabilities += line.Amount
+		case "equity":
+			bs.TotalEquity += line.Amount
+		}
+	}
+	bs.NetIncome = netIncome
+	return bs, nil
+}
+
+// ErrInvalidAsOf reports an as-of date that is not YYYY-MM-DD.
+var ErrInvalidAsOf = errors.New("as_of must be a date in YYYY-MM-DD format")
 
 func (s *Service) computeBalanceSheet(ctx context.Context, businessID int64) (domain.BalanceSheet, error) {
 	assets, err := s.repo.SumAccountsByType(ctx, businessID, "asset")

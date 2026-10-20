@@ -51,6 +51,7 @@ func (modules *apiModules) apiRegistrars() []http.APIRegistrar {
 		modules.HROvertime,
 		modules.HRPerformance,
 		modules.HRSetup,
+		modules.HRTime,
 		modules.Insights,
 		modules.Integrations,
 		modules.Inventory,

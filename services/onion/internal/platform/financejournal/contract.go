@@ -19,3 +19,11 @@ type PayrollJournalEntry struct {
 type PayrollJournalPoster interface {
 	PostPayrollJournal(ctx context.Context, entry PayrollJournalEntry) error
 }
+
+// LedgerSyncer posts approved expenses and recorded invoice payments that are
+// not in the journal yet. Each source posts at most once, so it is safe to
+// call before every ledger read; reports call it so the books they show
+// include everything the operational screens already do.
+type LedgerSyncer interface {
+	SyncOperationalPostings(ctx context.Context, businessID int64) error
+}

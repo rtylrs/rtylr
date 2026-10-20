@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -195,22 +194,24 @@ const Quotes: React.FC = () => {
       <PageHeader
         title={t('financeQuotes.title')}
         subtitle={
-          isError || loading || listUnavailable ? undefined : (
+          isError || loading || listUnavailable || data.length === 0 ? undefined : (
             <>
-              {data.length} quotes <>&middot;</> <MoneyDisplay amount={total} />{' '}
+              {t('financeQuotes.quoteCount', { count: data.length })} <>&middot;</>{' '}
+              <MoneyDisplay amount={total} />{' '}
               {isPaginated ? t('financeCommon.subtotal') : t('financeCommon.total')}
             </>
           )
         }
         actions={
-          canManageQuotes ? (
+          // An empty list offers the same action in its empty state; one is enough.
+          canManageQuotes && !(data.length === 0 && !loading && !isError && !listUnavailable) ? (
             <button
               type="button"
               style={primaryBtn}
               aria-label={t('financeQuotes.newQuote')}
               onClick={() => setShowCreate(true)}
             >
-              <Plus size={13} /> New Quote
+              <Plus size={13} /> {t('financeQuotes.newQuote')}
             </button>
           ) : undefined
         }

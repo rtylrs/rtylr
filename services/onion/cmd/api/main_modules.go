@@ -255,6 +255,11 @@ func initializeModules(ctx context.Context) *apiModules {
 	accountsModule := accounts.NewModule(ctx, dbclient.Pool())
 	journalModule := journal.NewModule(ctx, dbclient.Pool())
 	journalModule.SetPayrollAccountProvider(accountsModule.PayrollAccountProvider())
+	// Approved expenses and invoice payments post to the journal against the
+	// standard ledger accounts; reports that read the ledger sync them first.
+	journalModule.SetLedgerAccountProvider(accountsModule.LedgerAccountProvider())
+	accountsModule.SetLedgerSyncer(journalModule.LedgerSyncer())
+	financeReportsModule.SetLedgerSyncer(journalModule.LedgerSyncer())
 	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
 	posDaySummaryModule := daysummary.NewModule(ctx, dbclient.Pool())

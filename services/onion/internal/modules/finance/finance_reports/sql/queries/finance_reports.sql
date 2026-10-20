@@ -72,3 +72,42 @@ WHERE e.business_id = sqlc.arg(business_id)
   AND e.status = 'approved'
   AND e.expense_date BETWEEN ? AND ?
   AND COALESCE(NULLIF(e.currency, ''), 'USD') = sqlc.arg(reporting_currency);
+
+-- cross-schema read from accounts and journal — each balance sheet account on a
+-- date: its opening balance plus the lines posted on or before that date.
+-- name: ListBalanceSheetAccounts :many
+SELECT a.id, COALESCE(a.code, '') AS code, a.name, a.type,
+       CAST(COALESCE(a.balance, 0) + CASE
+           WHEN a.type = 'asset' THEN COALESCE(p.debit, 0) - COALESCE(p.credit, 0)
+           ELSE COALESCE(p.credit, 0) - COALESCE(p.debit, 0)
+       END AS DECIMAL(15,2)) AS amount
+FROM finance_accounts a
+LEFT JOIN (
+    SELECT l.account_id,
+           SUM(CAST(l.debit AS DECIMAL(15,2))) AS debit,
+           SUM(CAST(l.credit AS DECIMAL(15,2))) AS credit
+    FROM finance_journal_lines l
+    JOIN finance_journal_entries e ON e.id = l.entry_id
+    WHERE e.business_id = sqlc.arg(business_id)
+      AND e.status = 'posted'
+      AND e.date <= sqlc.arg(as_of)
+    GROUP BY l.account_id
+) p ON p.account_id = a.id
+WHERE a.business_id = sqlc.arg(business_id)
+  AND a.type IN ('asset', 'liability', 'equity')
+  AND COALESCE(NULLIF(a.currency, ''), 'USD') = sqlc.arg(reporting_currency)
+  AND a.is_active = TRUE
+ORDER BY a.type ASC, a.code ASC, a.name ASC;
+
+-- cross-schema read from accounts and journal — revenue less expenses posted on
+-- or before a date.
+-- name: SumPostedNetIncomeAsOf :one
+SELECT COALESCE(SUM(CAST(l.credit AS DECIMAL(15,2)) - CAST(l.debit AS DECIMAL(15,2))), 0)
+FROM finance_journal_lines l
+JOIN finance_journal_entries e ON e.id = l.entry_id AND e.status = 'posted'
+JOIN finance_accounts a ON a.id = l.account_id AND a.business_id = e.business_id
+WHERE e.business_id = sqlc.arg(business_id)
+  AND e.date <= sqlc.arg(as_of)
+  AND a.type IN ('revenue', 'expense')
+  AND COALESCE(NULLIF(a.currency, ''), 'USD') = sqlc.arg(reporting_currency)
+  AND a.is_active = TRUE;

@@ -227,7 +227,7 @@ const ChartOfAccounts: React.FC = () => {
                       textAlign: 'end',
                     }}
                   >
-                    <MoneyDisplay amount={a.balance} />
+                    <MoneyDisplay amount={a.currentBalance ?? a.balance} />
                   </td>
                 </tr>
               ))}

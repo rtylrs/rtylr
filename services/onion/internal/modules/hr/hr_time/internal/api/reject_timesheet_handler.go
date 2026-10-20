@@ -33,6 +33,16 @@ func (h *RejectTimesheetHandler) Validate(_ context.Context, _ *RejectTimesheetR
 }
 
 func (h *RejectTimesheetHandler) Serve(ctx context.Context, req *RejectTimesheetRequest) (RejectTimesheetResponse, error) {
+	id, parseErr := strconv.ParseInt(serverHttp.PathParam(ctx, "id"), 10, 64)
+	if parseErr != nil {
+		return RejectTimesheetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")
+	}
+	return h.reject(ctx, id, req.RejectionReason)
+}
+
+// reject acts on the timesheet with the given id. The hand-registered route reads
+// it from the path and the hr.time_entry.v1 contract from the request.
+func (h *RejectTimesheetHandler) reject(ctx context.Context, id int64, rejectionReason string) (RejectTimesheetResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return RejectTimesheetResponse{}, onekiterrors.PermissionDenied()
@@ -43,13 +53,7 @@ func (h *RejectTimesheetHandler) Serve(ctx context.Context, req *RejectTimesheet
 		return RejectTimesheetResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	idStr := serverHttp.PathParam(ctx, "id")
-	id, parseErr := strconv.ParseInt(idStr, 10, 64)
-	if parseErr != nil {
-		return RejectTimesheetResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timesheet id")
-	}
-
-	ts, err := h.Service.RejectTimesheet(ctx, businessID, id, device.User.UserID, req.RejectionReason)
+	ts, err := h.Service.RejectTimesheet(ctx, businessID, id, device.User.UserID, rejectionReason)
 	if err != nil {
 		if errors.Is(err, domain.ErrTimesheetAccessDenied) || errors.Is(err, domain.ErrTimesheetApproverNotAllowed) || errors.Is(err, domain.ErrTimesheetSelfApproval) {
 			return RejectTimesheetResponse{}, onekiterrors.PermissionDenied()
