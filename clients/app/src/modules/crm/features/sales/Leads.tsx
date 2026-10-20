@@ -385,13 +385,7 @@ const Leads: React.FC = () => {
                 </tbody>
               </table>
             </div>
-            <ListFooter
-              shown={rows.length}
-              total={total}
-              hasMore={Boolean(leads.hasNextPage)}
-              loading={leads.isFetchingNextPage}
-              onMore={() => void leads.fetchNextPage()}
-            />
+            <ListFooter shown={rows.length} total={total} pages={leads} />
           </>
         )}
       </div>

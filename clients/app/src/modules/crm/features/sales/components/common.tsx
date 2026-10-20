@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { UseInfiniteQueryResult } from '@tanstack/react-query';
 import { AlertCircle, Search } from 'lucide-react';
 import { useBusinessCurrency } from '../../../../../shared/hooks/queries/useBusinesses';
+import { useLoadOnScroll } from '../../../../../shared/hooks/useLoadOnScroll';
 import { formatMoney } from '../../../../../shared/lib/money';
 import { Button } from '../../../shared/components/ui';
 import { useReps } from '../data/queries';
@@ -178,26 +180,45 @@ export const EmptyBlock: React.FC<{
   </div>
 );
 
-/** "Showing 50 of 80,000" with a load-more button while pages remain. */
-export const ListFooter: React.FC<{
-  shown: number;
-  total?: number;
-  hasMore: boolean;
-  loading: boolean;
-  onMore: () => void;
-}> = ({ shown, total, hasMore, loading, onMore }) => {
+type Pages = Pick<
+  UseInfiniteQueryResult,
+  'hasNextPage' | 'isFetchingNextPage' | 'isFetchNextPageError' | 'fetchNextPage'
+>;
+
+/**
+ * Ref for the element whose scrolling into view loads the next page. A failed
+ * page stops it, so it can't retry in a loop; the load-more button retries.
+ */
+export function useNextPageOnScroll(pages: Pages): (node: Element | null) => void {
+  return useLoadOnScroll(
+    pages.hasNextPage && !pages.isFetchingNextPage && !pages.isFetchNextPageError,
+    () => void pages.fetchNextPage()
+  );
+}
+
+/** "Showing 50 of 80,000"; the next page loads as the footer nears the view. */
+export const ListFooter: React.FC<{ shown: number; total?: number; pages: Pages }> = ({
+  shown,
+  total,
+  pages,
+}) => {
   const { t, i18n } = useTranslation();
+  const sentinel = useNextPageOnScroll(pages);
   const format = (value: number) => new Intl.NumberFormat(i18n.language).format(value);
   return (
-    <div className="sales-footer">
+    <div className="sales-footer" ref={sentinel}>
       <span>
         {total !== undefined
           ? t('crmSales.common.showingOf', { shown: format(shown), total: format(total) })
           : t('crmSales.common.showing', { shown: format(shown) })}
       </span>
-      {hasMore && (
-        <Button variant="outline" onClick={onMore} disabled={loading}>
-          {loading ? t('crmSales.common.loading') : t('crmSales.common.loadMore')}
+      {pages.hasNextPage && (
+        <Button
+          variant="outline"
+          onClick={() => void pages.fetchNextPage()}
+          disabled={pages.isFetchingNextPage}
+        >
+          {pages.isFetchingNextPage ? t('crmSales.common.loading') : t('crmSales.common.loadMore')}
         </Button>
       )}
     </div>

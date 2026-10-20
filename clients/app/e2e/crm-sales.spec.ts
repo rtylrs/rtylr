@@ -143,6 +143,46 @@ test.describe('CRM sales', () => {
     await page.screenshot({ path: 'test-results/crm-sales-leads.png', fullPage: true });
   });
 
+  test('loads the next page of leads when scrolled to the bottom', async ({ page }) => {
+    await stubSales(page);
+    const lead = (n: number): Lead => ({
+      id: String(100 + n),
+      firstName: 'Lead',
+      lastName: String(n),
+      companyName: `Company ${n}`,
+      status: 'new',
+      billing: 'one_time',
+      createdAt: '1760000000',
+    });
+    const pages: string[] = [];
+    await page.route(
+      (url) => url.origin === API_URL && url.pathname === '/crm/sales/v1/leads',
+      (route) => {
+        const cursor = new URL(route.request().url()).searchParams.get('cursor') ?? '';
+        pages.push(cursor);
+        const from = cursor === 'p2' ? 60 : 0;
+        return route.fulfill({
+          json: encodeListLeadsResponse({
+            leads: Array.from({ length: 60 }, (_, i) => lead(from + i)),
+            total: 120,
+            nextCursor: cursor === 'p2' ? '' : 'p2',
+          }),
+        });
+      }
+    );
+    await page.goto(`${PORTAL_URL}/crm/sales/leads`);
+
+    await expect(page.getByText('Showing 60 of 120')).toBeVisible();
+    // The footer sits well below the fold, so nothing more loads until scrolling.
+    await page.waitForTimeout(500);
+    expect(pages).toEqual(['']);
+    await page.getByRole('row', { name: /Company 59/ }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole('row', { name: /Company 119/ })).toBeAttached();
+    await expect(page.getByText('Showing 120 of 120')).toBeVisible();
+    expect(pages).toEqual(['', 'p2']);
+    await expect(page.getByRole('button', { name: 'Load more' })).toHaveCount(0);
+  });
+
   test('logs a call with its outcome and a follow-up', async ({ page }) => {
     await stubSales(page);
     let logged: Record<string, unknown> | undefined;
