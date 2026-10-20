@@ -24,7 +24,7 @@ vi.mock('../lib/clients', () => ({
   crmSegmentClient: mockClients.segment,
 }));
 
-import { crmApi, toContractUpdatePayload, toCreateContractPayload } from './crmApi';
+import { crmApi } from './crmApi';
 
 describe('crmApi', () => {
   it('routes legacy CRM reads through the generated compatibility client', async () => {
@@ -130,64 +130,6 @@ describe('crmApi', () => {
 
     expect(mockClients.customer.deleteCustomer).toHaveBeenCalledWith({ id: '3' });
     expect(mockClients.segment.deleteSegment).toHaveBeenCalledWith({ id: '4' });
-  });
-
-  it('maps contract creation fields and omits invalid optional ids', async () => {
-    crmApi.createContract({
-      leadId: 7,
-      plan: '  POS setup for 3 branches  ',
-      value: 1200,
-      billing: 'yearly',
-      startDate: '2026-11-01',
-      endDate: '',
-      signedAt: '2026-08-16',
-      signedBy: '  Jane Doe  ',
-      closedBy: null,
-      notes: 'signed',
-    });
-    await Promise.resolve();
-    // Sales has no contract at all, so createContract goes over REST at
-    // POST /crm/sales/contracts and receives the payload directly.
-    expect(mockClients.compatibility.createContract).toHaveBeenCalledWith({
-      lead_id: 7,
-      plan: 'POS setup for 3 branches',
-      value: 1200,
-      billing: 'yearly',
-      start_date: '2026-11-01',
-      end_date: undefined,
-      signed_at: '2026-08-16',
-      signed_by_name: 'Jane Doe',
-      closed_by: undefined,
-      notes: 'signed',
-    });
-    expect(
-      toContractUpdatePayload({
-        plan: 'Monthly support',
-        signedBy: 'Jane Doe',
-        closedBy: Number.NaN,
-      })
-    ).toEqual({
-      plan: 'Monthly support',
-      value: undefined,
-      billing: undefined,
-      startDate: undefined,
-      endDate: undefined,
-      signedAt: undefined,
-      signedByName: 'Jane Doe',
-      closedBy: undefined,
-      notes: undefined,
-    });
-    expect(
-      toCreateContractPayload({
-        leadId: 1,
-        plan: 'Setup',
-        value: 0,
-        billing: 'one_time',
-        signedAt: '',
-        signedBy: '',
-        closedBy: 12,
-      })
-    ).toMatchObject({ leadId: 1, signedAt: undefined, signedByName: '', closedBy: 12 });
   });
 });
 

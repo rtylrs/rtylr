@@ -3,14 +3,26 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { SEGMENT_RULE_FIELDS, SEGMENT_RULE_OPERATORS } from '../shared/lib/segmentRules';
+import {
+  ACTIVITY_TYPES,
+  BILLINGS,
+  CALL_OUTCOMES,
+  DEAL_SORTS,
+  DEAL_STATUSES,
+  FOLLOW_UP_WINDOWS,
+  LEAD_SORTS,
+  LEAD_STATUSES,
+  TASK_TYPES,
+} from '../features/sales/data/model';
+import { IMPORT_FIELDS } from '../features/sales/data/leadImport';
 
 /**
  * Keys that are built rather than written, and so are invisible to
  * `i18n-key-resolution.test.ts`, which collects literal `t('a.b')` keys only.
  *
- * crm grew three such families when its module-level label maps became id
- * lists: lead stages, segment rule fields and segment rule operators. Each is
- * read as `` t(`crm.<family>.${id}`) ``, so nothing else checks that the ids
+ * crm builds these from id lists: segment rule fields and operators, and the
+ * sales statuses, outcomes, types and sorts. Each is read as
+ * `` t(`<namespace>.<family>.${id}`) ``, so nothing else checks that the ids
  * and the locale files still agree.
  *
  * dash has the same guard for the same reason (rtylr#1266). The precedent there
@@ -42,18 +54,17 @@ function resolves(tree: Record<string, unknown>, dotted: string): boolean {
 /** Operators are symbols in code; these are the key suffixes they map to. */
 const OPERATOR_SUFFIX: Record<string, string> = { '>': 'gt', '<': 'lt', '=': 'eq', '!=': 'ne' };
 
-const LEAD_STAGES = [
-  'cold',
-  'contacted',
-  'demo_booked',
-  'demo_done',
-  'proposal_sent',
-  'contracted',
-  'lost',
-];
-
 const FAMILIES: Record<string, string[]> = {
-  leadStages: LEAD_STAGES.map((s) => `crm.leadStages.${s}`),
+  leadStatus: LEAD_STATUSES.map((s) => `crmSales.leadStatus.${s}`),
+  dealStatus: DEAL_STATUSES.map((s) => `crmSales.dealStatus.${s}`),
+  outcome: CALL_OUTCOMES.map((o) => `crmSales.outcome.${o}`),
+  activityType: ACTIVITY_TYPES.map((a) => `crmSales.activityType.${a}`),
+  taskType: TASK_TYPES.map((a) => `crmSales.taskType.${a}`),
+  billing: BILLINGS.map((b) => `crmSales.billing.${b}`),
+  followUpWindow: FOLLOW_UP_WINDOWS.map((w) => `crmSales.followUpWindow.${w}`),
+  leadSort: LEAD_SORTS.map((s) => `crmSales.leads.sort.${s}`),
+  dealSort: DEAL_SORTS.map((s) => `crmSales.deals.sort.${s}`),
+  importField: IMPORT_FIELDS.map((f) => `crmSales.import.fields.${f}`),
   segmentFields: SEGMENT_RULE_FIELDS.map((f) => `crm.segmentFields.${f}`),
   segmentOperators: SEGMENT_RULE_OPERATORS.map((o) => `crm.segmentOperators.${OPERATOR_SUFFIX[o]}`),
 };

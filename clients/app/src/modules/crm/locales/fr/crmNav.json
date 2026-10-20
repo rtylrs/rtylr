@@ -8,7 +8,6 @@
   "templates": "Modèles",
   "feedback": "Avis",
   "settings": "Paramètres",
-  "pipeline": "Pipeline",
   "leads": "Prospects",
   "contracts": "Contrats",
   "newCustomer": "Nouveau client",
@@ -33,5 +32,13 @@
   "actions": {
     "importCustomersCsv": "Importer des clients depuis un CSV",
     "loyaltyRewardsCatalog": "Catalogue de récompenses de fidélité"
+  },
+  "deals": "Affaires",
+  "tasks": "Tâches",
+  "sections": {
+    "sales": "Ventes",
+    "customers": "Clients",
+    "marketing": "Marketing",
+    "retention": "Fidélisation"
   }
 }

@@ -13,34 +13,27 @@ import (
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
 	moduleinfra "github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/eventbus"
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	crmsalesv1 "github.com/voxire/voxie/gen/go/crm/sales/v1"
 )
 
+// Module is CRM sales: leads, deals in pipelines, activities, tasks, lead
+// imports and contracts. docs/crm-model.md describes the flow.
 type Module struct {
 	service    *application.Service
 	repository *moduleinfra.Repository
-	links      customerLinkWriter
-}
-
-type customerLinkWriter interface {
-	LinkCustomerToContact(context.Context, int64, int64, int64) error
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	repository := moduleinfra.NewRepository(db)
 	return &Module{
 		service:    application.NewService(ctx, repository),
-		links:      repository,
 		repository: repository,
 	}
 }
 
-func (m *Module) WithBusinessOwnerResolver(resolver application.BusinessOwnerResolver) *Module {
-	m.service.WithBusinessOwnerResolver(resolver)
-	return m
-}
-
+// DispatchEvent records the customer a converted lead's person became. Links
+// for pre-redesign lead contacts still in flight are ignored: nothing reads
+// those contacts any more.
 func (m *Module) DispatchEvent(ctx context.Context, event eventbus.Event) error {
 	if event.Type != crmcontract.CustomerLinkedType {
 		return nil
@@ -53,36 +46,33 @@ func (m *Module) DispatchEvent(ctx context.Context, event eventbus.Event) error 
 	if err := json.Unmarshal(payload, &linked); err != nil {
 		return fmt.Errorf("decode crm customer link event: %w", err)
 	}
-	if linked.SourceType != "crm_contact" {
+	if linked.SourceType != moduleinfra.LeadSubjectType {
 		return nil
 	}
 	if event.BusinessID <= 0 || linked.SourceID <= 0 || linked.CustomerID <= 0 {
 		return fmt.Errorf("crm customer link event requires positive business, source, and customer ids")
 	}
-	if err := m.links.LinkCustomerToContact(ctx, event.BusinessID, linked.SourceID, linked.CustomerID); err != nil {
-		return err
-	}
-	m.service.CustomerLinkUpdated(ctx, event.BusinessID)
-	return nil
+	return m.service.LinkLeadCustomer(ctx, event.BusinessID, linked.SourceID, linked.CustomerID)
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {
-	api.RegisterRoutes(ctx, router, m.service)
-}
-
-func (m *Module) GetAnonymousRoutes() []string {
-	return []string{}
-}
-
-// RegisterAPI mounts the generated crm.sales.v1 contract service on the
-// shared oneKit mux (#809). The legacy chi routes stay until every caller is
-// switched to the generated client.
+// RegisterAPI mounts the generated crm.sales.v1 services on the shared oneKit
+// mux.
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
-	if err := crmsalesv1.RegisterContractServiceServer(
-		api.NewContractAPI(m.service),
-		crmsalesv1.WithMux(mux),
-	); err != nil {
-		panic(fmt.Errorf("register crm sales service: %w", err))
+	salesAPI := api.New(m.service)
+	registrations := []struct {
+		name     string
+		register func() error
+	}{
+		{"lead", func() error { return crmsalesv1.RegisterLeadServiceServer(mux, salesAPI) }},
+		{"activity", func() error { return crmsalesv1.RegisterActivityServiceServer(mux, salesAPI) }},
+		{"deal", func() error { return crmsalesv1.RegisterDealServiceServer(mux, salesAPI) }},
+		{"lead import", func() error { return crmsalesv1.RegisterLeadImportServiceServer(mux, salesAPI) }},
+		{"contract", func() error { return crmsalesv1.RegisterContractServiceServer(mux, salesAPI) }},
+	}
+	for _, registration := range registrations {
+		if err := registration.register(); err != nil {
+			panic(fmt.Errorf("register crm sales %s service: %w", registration.name, err))
+		}
 	}
 }
 
@@ -91,14 +81,14 @@ func (m *Module) WithMembershipReader(reader func(context.Context, int64, int64)
 	return m
 }
 
-// Rep is a teammate a lead can be assigned to.
+// Rep is a teammate work can be assigned to.
 type Rep struct {
 	ID   int64
 	Name string
 }
 
 // WithRepReader supplies the business's assignable teammates (owner and
-// active members) for the lead rep picker.
+// active members) for the rep pickers.
 func (m *Module) WithRepReader(reader func(context.Context, int64) ([]Rep, error)) *Module {
 	m.repository.WithRepReader(func(ctx context.Context, businessID int64) ([]domain.Rep, error) {
 		reps, err := reader(ctx, businessID)

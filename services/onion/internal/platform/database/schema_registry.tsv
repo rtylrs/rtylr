@@ -143,3 +143,4 @@ internal/modules/organization/api_keys/sql/migration_20261017_key_prefix_width.s
 internal/modules/crm/crm_sales/sql/migration_20261018_generic_contracts.sql	internal/modules/crm/crm_sales/sql/migration_20261018_generic_contracts.sql
 internal/modules/finance/expenses/sql/migration_20261020_expense_category_names_unique.sql	internal/modules/finance/expenses/sql/migration_20261020_expense_category_names_unique.sql
 internal/modules/finance/bank_accounts/sql/migration_20261020_bank_account_columns.sql	internal/modules/finance/bank_accounts/sql/migration_20261020_bank_account_columns.sql
+internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql	internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql

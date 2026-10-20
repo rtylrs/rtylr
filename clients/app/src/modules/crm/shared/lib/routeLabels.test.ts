@@ -27,11 +27,13 @@ describe('pageTitleKey', () => {
   it('prefers the most specific nested route label', () => {
     expect(pageTitleKey('/sales/leads/42')).toBe('crmNav.leads');
     expect(pageTitleKey('/sales/contracts/42')).toBe('crmNav.contracts');
+    expect(pageTitleKey('/sales/deals/7')).toBe('crmNav.deals');
+    expect(pageTitleKey('/sales/tasks')).toBe('crmNav.tasks');
   });
 
   it('does not treat similarly named paths as nested routes', () => {
     // '/salesforce' starts with '/sales', so matching on the bare prefix would
-    // title it "Pipeline".
+    // title it "Deals".
     expect(pageTitleKey('/salesforce')).toBe(FALLBACK_TITLE_KEY);
   });
 

@@ -279,19 +279,10 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 		return err
 	}
 
-	// The CRM schema has no foreign keys: without migrating these, the
-	// survivor loses the secondary's campaign history and feedback, and
-	// lead contacts keep pointing at a deleted row.
-	for _, stmt := range []string{
-		"UPDATE crm_campaign_sends SET customer_id = ? WHERE customer_id = ? AND business_id = ?",
-		"UPDATE crm_feedback SET customer_id = ? WHERE customer_id = ? AND business_id = ?",
-		"UPDATE crm_contacts SET customer_id = ? WHERE customer_id = ? AND business_id = ?",
-	} {
-		if _, err := tx.ExecContext(ctx, stmt, input.PrimaryID, input.SecondaryID, input.BusinessID); err != nil {
-			logger.Ctx(ctx).Error("Failed to migrate customer references during merge", logger.Error(err))
+	if err := moveCustomerReferences(ctx, queries, input.BusinessID, input.SecondaryID, input.PrimaryID); err != nil {
+		logger.Ctx(ctx).Error("Failed to migrate customer references during merge", logger.Error(err))
 
-			return err
-		}
+		return err
 	}
 
 	_, err = queries.DeleteCustomer(ctx, sqlc.DeleteCustomerParams{

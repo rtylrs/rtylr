@@ -2,40 +2,41 @@ package api
 
 import (
 	"context"
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"testing"
 
-	moduleinfra "github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure"
-
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/application"
+	moduleinfra "github.com/voxire/onion/internal/modules/crm/crm_sales/internal/infrastructure"
+	"github.com/voxire/onion/internal/modules/organization/scopes"
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
+	crmsalesv1 "github.com/voxire/voxie/gen/go/crm/sales/v1"
 )
+
+// directLeadID is the lead seeded by testutil/fixtures/70_direct_authorization.sql.
+const directLeadID = 7101
+
+func directAPI(ctx context.Context) *API {
+	db := testutil.DirectAuthorizationDB(ctx)
+	repository := moduleinfra.NewRepository(db).WithMembershipReader(scopes.NewReader(db).IsBusinessUser)
+	return New(application.NewService(ctx, repository))
+}
 
 func TestDirectAuthorizationMatrix(t *testing.T) {
 	cases := []testutil.DirectAuthorizationCase{
-		{Name: "crm customers view", App: authorization.AppCRM, Permission: "crm:customers:view", Call: func(ctx context.Context) (any, error) {
-			response, err := (&ListContactsHandler{Service: application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))}).Serve(ctx, &ListContactsRequest{})
-			return response, err
+		{Name: "crm sales view", App: authorization.AppCRM, Permission: "crm:customers:view", Call: func(ctx context.Context) (any, error) {
+			return directAPI(ctx).ListLeads(ctx, &crmsalesv1.ListLeadsRequest{})
 		}},
-		{Name: "crm customers create", App: authorization.AppCRM, Permission: "crm:customers:create", Call: func(ctx context.Context) (any, error) {
-			response, err := (&CreateContactHandler{Service: application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))}).Serve(ctx, &CreateContactRequest{LeadID: 7101, Name: "Authorization Probe"})
-			return response, err
+		{Name: "crm sales create", App: authorization.AppCRM, Permission: "crm:customers:create", Call: func(ctx context.Context) (any, error) {
+			return directAPI(ctx).CreateLead(ctx, &crmsalesv1.CreateLeadRequest{Lead: &crmsalesv1.LeadFields{CompanyName: "Authorization Probe"}})
 		}},
-		{Name: "crm customers edit", App: authorization.AppCRM, Permission: "crm:customers:edit", Call: func(ctx context.Context) (any, error) {
-			response, err := (&UpdateContactHandler{Service: application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))}).Serve(withContactID(ctx), &UpdateContactRequest{Name: "Authorization Probe"})
-			return response, err
+		{Name: "crm sales edit", App: authorization.AppCRM, Permission: "crm:customers:edit", Call: func(ctx context.Context) (any, error) {
+			return directAPI(ctx).UpdateLead(ctx, &crmsalesv1.UpdateLeadRequest{Id: directLeadID, Body: &crmsalesv1.UpdateLeadBody{
+				Lead: &crmsalesv1.LeadFields{CompanyName: "Authorization Probe"},
+			}})
 		}},
-		{Name: "crm customers delete", App: authorization.AppCRM, Permission: "crm:customers:delete", Call: func(ctx context.Context) (any, error) {
-			response, err := (&DeleteContactHandler{Service: application.NewService(ctx, moduleinfra.NewRepository(testutil.DirectAuthorizationDB(ctx)))}).Serve(withContactID(ctx), &DeleteContactRequest{})
-			return response, err
+		{Name: "crm sales delete", App: authorization.AppCRM, Permission: "crm:customers:delete", Call: func(ctx context.Context) (any, error) {
+			return directAPI(ctx).DeleteLead(ctx, &crmsalesv1.DeleteLeadRequest{Id: directLeadID})
 		}},
 	}
 	testutil.RunDirectAuthorizationCases(t, cases)
-}
-
-func withContactID(ctx context.Context) context.Context {
-	routeCtx := map[string]string{}
-	routeCtx["id"] = ("7102")
-	return serverHttp.WithPathParams(ctx, routeCtx)
 }

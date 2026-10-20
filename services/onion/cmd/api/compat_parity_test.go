@@ -67,8 +67,8 @@ func (parityDelete) Serve(_ context.Context, req *parityDeleteRequest) (parityDe
 func TestCompatContractsAnswerExactlyLikeTheLegacyRoutes(t *testing.T) {
 	ctx := context.Background()
 	routes := http.NewLegacyRoutes()
-	http.RegisterGET[parityListRequest, parityListResponse](ctx, routes, []string{"/crm/sales/leads"}, parityList{})
-	http.RegisterPUTWithValidation[parityUpdateRequest, parityUpdateResponse](ctx, routes, []string{"/crm/sales/leads/{id}"}, parityUpdate{})
+	http.RegisterGET[parityListRequest, parityListResponse](ctx, routes, []string{"/crm/customers"}, parityList{})
+	http.RegisterPUTWithValidation[parityUpdateRequest, parityUpdateResponse](ctx, routes, []string{"/crm/automations/{id}"}, parityUpdate{})
 	http.RegisterDELETE[parityDeleteRequest, parityDeleteResponse](ctx, routes, []string{"/crm/customers"}, parityDelete{})
 
 	legacy := stdhttp.NewServeMux()
@@ -85,12 +85,12 @@ func TestCompatContractsAnswerExactlyLikeTheLegacyRoutes(t *testing.T) {
 		// bodies where the legacy helper rejected the request.
 		statusOnly, lenient bool
 	}{
-		{stdhttp.MethodGet, "/crm/sales/leads?search=acme&limit=5", "", false, false},
-		{stdhttp.MethodGet, "/crm/sales/leads?limit=notanumber", "", true, false},
-		{stdhttp.MethodPut, "/crm/sales/leads/42", `{"name":"Rana"}`, false, false},
-		{stdhttp.MethodPut, "/crm/sales/leads/42", `{"name":""}`, false, false},
-		{stdhttp.MethodPut, "/crm/sales/leads/42", `{"name":"boom"}`, false, false},
-		{stdhttp.MethodPut, "/crm/sales/leads/42", `{"name":"a"}{"name":"b"}`, false, true},
+		{stdhttp.MethodGet, "/crm/customers?search=acme&limit=5", "", false, false},
+		{stdhttp.MethodGet, "/crm/customers?limit=notanumber", "", true, false},
+		{stdhttp.MethodPut, "/crm/automations/42", `{"name":"Rana"}`, false, false},
+		{stdhttp.MethodPut, "/crm/automations/42", `{"name":""}`, false, false},
+		{stdhttp.MethodPut, "/crm/automations/42", `{"name":"boom"}`, false, false},
+		{stdhttp.MethodPut, "/crm/automations/42", `{"name":"a"}{"name":"b"}`, false, true},
 		{stdhttp.MethodDelete, "/crm/customers", `{"id":7}`, false, false},
 		{stdhttp.MethodDelete, "/crm/customers?id=9", "", false, false},
 	}

@@ -60,13 +60,6 @@ message ExportCustomerRequest {
   customer_id: int32? @query("customer_id")
 }
 
-message ContactsRequest {
-  lead_id: int32? @query("lead_id")
-  customer_id: int32? @query("customer_id")
-  limit: int32? @query("limit")
-  offset: int32? @query("offset")
-}
-
 message BodyRequest {
   body: json
 }

@@ -2,409 +2,127 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/crm/crm_sales/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	"github.com/voxire/onion/internal/platform/money"
 )
 
 const (
 	crmSalesScope = "crm_sales"
 	crmSalesTTL   = 5 * time.Minute
+
+	defaultPageSize = 50
+	maxPageSize     = 200
 )
 
-func invalidateCRMSalesScope(ctx context.Context, businessID int64) {
-	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(crmSalesScope, businessID))
-}
-
+// repository is the persistence the service needs; infrastructure.Repository
+// implements it.
 type repository interface {
-	ListLeads(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Lead, error)
-	CountLeads(ctx context.Context, businessID int64) (int64, error)
-	GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error)
-	CreateLead(ctx context.Context, businessID int64, req domain.CreateLeadRequest) (domain.Lead, error)
-	UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error)
-	ValidateLeadAssignee(ctx context.Context, businessID, userID int64) error
+	ValidateAssignee(ctx context.Context, businessID, userID int64) error
 	ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error)
-	DeleteLead(ctx context.Context, id, businessID int64) error
-	GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error)
-	ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
-	CountSignedContracts(ctx context.Context, businessID int64) (int64, error)
-	ListUnsignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
-	CountUnsignedContracts(ctx context.Context, businessID int64) (int64, error)
 
-	ListContacts(ctx context.Context, businessID int64, leadID *int64, limit, offset int32) ([]domain.Contact, error)
-	CountContacts(ctx context.Context, businessID int64, leadID *int64) (int64, error)
-	CreateContact(ctx context.Context, businessID, ownerID int64, req domain.CreateContactRequest) (domain.Contact, error)
-	UpdateContact(ctx context.Context, id, businessID int64, req domain.UpdateContactRequest) (domain.Contact, error)
-	DeleteContact(ctx context.Context, id, businessID int64) error
+	ListLeads(ctx context.Context, businessID int64, f domain.LeadFilter, today time.Time) (domain.LeadPage, error)
+	LeadStats(ctx context.Context, businessID int64, assignedTo *int64, today, dayStartUTC, monthStartUTC time.Time) (domain.LeadStats, error)
+	ListLeadSources(ctx context.Context, businessID int64) ([]string, error)
+	GetLead(ctx context.Context, businessID, id int64) (domain.Lead, error)
+	CreateLead(ctx context.Context, businessID, ownerID int64, in domain.LeadInput) (domain.Lead, error)
+	UpdateLead(ctx context.Context, businessID, id int64, changes domain.LeadChanges) (domain.Lead, error)
+	DeleteLead(ctx context.Context, businessID, id int64) error
+	DeleteLeads(ctx context.Context, businessID int64, ids []int64) (int64, error)
+	UpdateLeads(ctx context.Context, businessID int64, update domain.BulkLeadUpdate) (int64, error)
+	ConvertLead(ctx context.Context, businessID, actorID, id int64, deal *domain.DealInput, stage *domain.Stage, now time.Time) (domain.Lead, *domain.Deal, error)
+	LinkLeadCustomer(ctx context.Context, businessID, leadID, customerID int64) error
 
-	ListTouchpoints(ctx context.Context, businessID, leadID int64) ([]domain.Touchpoint, error)
-	CreateTouchpoint(ctx context.Context, businessID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error)
-	DeleteTouchpoint(ctx context.Context, id, businessID int64) error
+	LogActivity(ctx context.Context, businessID, actorID int64, in domain.ActivityInput) (domain.Activity, *domain.Task, error)
+	ListLeadActivities(ctx context.Context, businessID, leadID int64, cursor string, limit int) (domain.ActivityPage, error)
+	ListDealActivities(ctx context.Context, businessID int64, deal domain.Deal, cursor string, limit int) (domain.ActivityPage, error)
+	DeleteActivity(ctx context.Context, businessID, id int64) error
 
-	ListContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
-	CountContracts(ctx context.Context, businessID int64) (int64, error)
-	GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error)
-	CreateContract(ctx context.Context, businessID int64, req domain.CreateContractRequest) (domain.Contract, error)
-	UpdateContract(ctx context.Context, id, businessID int64, req domain.UpdateContractRequest) (domain.Contract, error)
+	CreateTask(ctx context.Context, businessID, actorID int64, in domain.TaskInput) (domain.Task, error)
+	GetTask(ctx context.Context, businessID, id int64) (domain.Task, error)
+	UpdateTask(ctx context.Context, businessID, id int64, in domain.TaskInput) (domain.Task, error)
+	CompleteTask(ctx context.Context, businessID, id int64, done bool, now time.Time) (domain.Task, error)
+	DeleteTask(ctx context.Context, businessID, id int64) error
+	ListTasks(ctx context.Context, businessID int64, f domain.TaskFilter, today time.Time) (domain.TaskPage, error)
+	CountTasks(ctx context.Context, businessID int64, assignedTo *int64, today time.Time) (domain.TaskCounts, error)
+
+	EnsureDefaultPipeline(ctx context.Context, businessID int64) error
+	ListPipelines(ctx context.Context, businessID int64) ([]domain.Pipeline, error)
+	GetPipeline(ctx context.Context, businessID, id int64) (domain.Pipeline, error)
+	GetStage(ctx context.Context, businessID, id int64) (domain.Stage, error)
+	CreatePipeline(ctx context.Context, businessID int64, in domain.PipelineInput) (int64, error)
+	UpdatePipeline(ctx context.Context, businessID, id int64, in domain.PipelineInput) error
+	DeletePipeline(ctx context.Context, businessID, id int64) error
+
+	ListDeals(ctx context.Context, businessID int64, f domain.DealFilter) (domain.DealPage, error)
+	ListStageDeals(ctx context.Context, businessID, pipelineID, stageID int64, assignedTo *int64, search, cursor string, limit int) ([]domain.Deal, string, error)
+	StageTotals(ctx context.Context, businessID, pipelineID int64, assignedTo *int64, search string) (map[int64]domain.StageTotal, error)
+	DealOutcomesSince(ctx context.Context, businessID int64, pipelineID, assignedTo *int64, since time.Time) (domain.DealOutcome, error)
+	GetDeal(ctx context.Context, businessID, id int64) (domain.Deal, error)
+	CreateDeal(ctx context.Context, businessID, actorID int64, in domain.DealInput, stage domain.Stage, now time.Time) (domain.Deal, error)
+	UpdateDeal(ctx context.Context, businessID, id int64, in domain.DealInput) (domain.Deal, error)
+	MoveDeal(ctx context.Context, businessID, actorID, id int64, stage domain.Stage, lostReason string, contract *domain.ContractInput, now time.Time) (domain.Deal, *domain.Contract, error)
+	DeleteDeal(ctx context.Context, businessID, id int64) error
+	DealContract(ctx context.Context, businessID, dealID int64) (*domain.Contract, error)
+
+	CreateImportBatch(ctx context.Context, businessID, actorID int64, fileName string, totalRows int) (domain.ImportBatch, error)
+	GetImportBatch(ctx context.Context, businessID, id int64) (domain.ImportBatch, error)
+	ListImportBatches(ctx context.Context, businessID int64) ([]domain.ImportBatch, error)
+	ImportLeadRows(ctx context.Context, businessID, actorID, batchID int64, opts domain.ImportOptions, rows []domain.ImportRow, failed []domain.ImportRowResult) ([]domain.ImportRowResult, error)
+	FinishImport(ctx context.Context, businessID, id int64, now time.Time) (domain.ImportBatch, error)
+	UndoImport(ctx context.Context, businessID, id int64, now time.Time) (domain.UndoImportResult, error)
+
+	ListContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, int64, error)
+	ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, int64, error)
+	ListUnsignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, int64, error)
+	GetContract(ctx context.Context, businessID, id int64) (domain.Contract, error)
+	CreateContract(ctx context.Context, businessID, actorID int64, in domain.ContractInput) (domain.Contract, error)
+	UpdateContract(ctx context.Context, businessID, id int64, in domain.ContractInput) (domain.Contract, error)
 }
 
 type Service struct {
-	repo    repository
-	ownerOf BusinessOwnerResolver
-}
-
-type BusinessOwnerResolver interface {
-	GetBusinessOwnerID(context.Context, int64) (int64, error)
+	repo repository
+	now  func() time.Time
 }
 
 func NewService(_ context.Context, repo repository) *Service {
-	return &Service{repo: repo}
+	return &Service{repo: repo, now: func() time.Time { return time.Now().UTC() }}
 }
 
-func (s *Service) WithBusinessOwnerResolver(resolver BusinessOwnerResolver) *Service {
-	s.ownerOf = resolver
+// WithClock replaces the service's clock, for tests.
+func (s *Service) WithClock(now func() time.Time) *Service {
+	s.now = now
 	return s
 }
 
-// normalizePagination applies the standard list defaults: limit falls back to
-// 20 when unset, is capped at 100, and offset is clamped to zero or above.
-func normalizePagination(limit, offset int32) (int32, int32) {
+// Now is the service's current time.
+func (s *Service) Now() time.Time { return s.now() }
+
+// invalidate drops cached contract reads after any write that can change a
+// contract. Lists of leads and deals are read live.
+func (s *Service) invalidate(ctx context.Context, businessID int64) {
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(crmSalesScope, businessID))
+}
+
+func pageSize(limit int) int {
 	if limit <= 0 {
-		limit = 20
+		return defaultPageSize
 	}
-	if limit > 100 {
-		limit = 100
+	if limit > maxPageSize {
+		return maxPageSize
 	}
-	if offset < 0 {
-		offset = 0
-	}
-	return limit, offset
+	return limit
 }
 
-func (s *Service) ListLeads(ctx context.Context, businessID int64, limit, offset int32) (domain.LeadPage, error) {
-	limit, offset = normalizePagination(limit, offset)
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("leads|n=%d|o=%d", limit, offset))
-	// v3: leads carry NextFollowUp.
-	return cacher.Of[domain.LeadPage]().GetOrComputeSingle(ctx, key+"|domain=v3",
-		func(ctx context.Context) (domain.LeadPage, error) {
-			leads, err := s.repo.ListLeads(ctx, businessID, limit, offset)
-			if err != nil {
-				return domain.LeadPage{}, err
-			}
-			total, err := s.repo.CountLeads(ctx, businessID)
-			if err != nil {
-				return domain.LeadPage{}, err
-			}
-			return domain.LeadPage{Leads: leads, Total: total, Limit: limit, Offset: offset}, nil
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
+func (s *Service) validateAssignee(ctx context.Context, businessID int64, userID *int64) error {
+	if userID == nil || *userID <= 0 {
+		return nil
+	}
+	return s.repo.ValidateAssignee(ctx, businessID, *userID)
 }
 
-// ListReps returns the teammates a lead can be assigned to. It is not
-// cached: membership changes outside this module would leave it stale.
 func (s *Service) ListReps(ctx context.Context, businessID int64) ([]domain.Rep, error) {
 	return s.repo.ListReps(ctx, businessID)
-}
-
-func (s *Service) GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error) {
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("lead=%d", id))
-	return cacher.Of[domain.Lead]().GetOrComputeSingle(ctx, key+"|domain=v3",
-		func(ctx context.Context) (domain.Lead, error) {
-			return s.repo.GetLead(ctx, id, businessID)
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
-}
-
-func (s *Service) CreateLead(ctx context.Context, businessID int64, req domain.CreateLeadRequest) (domain.Lead, error) {
-	if req.CompanyName == "" {
-		req.CompanyName = "Unknown"
-	}
-	if req.Source == "" {
-		req.Source = "cold_email"
-	}
-	if req.Stage == "" {
-		req.Stage = domain.LeadStageCold
-	}
-	if !req.Stage.IsValid() {
-		return domain.Lead{}, fmt.Errorf("%w: %q", domain.ErrInvalidLeadStage, string(req.Stage))
-	}
-	if req.AssignedTo != nil {
-		if err := s.repo.ValidateLeadAssignee(ctx, businessID, *req.AssignedTo); err != nil {
-			return domain.Lead{}, err
-		}
-	}
-	lead, err := s.repo.CreateLead(ctx, businessID, req)
-	if err == nil {
-		invalidateCRMSalesScope(ctx, businessID)
-	}
-	return lead, err
-}
-
-func (s *Service) UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
-	current, err := s.repo.GetLead(ctx, id, businessID)
-	if err != nil {
-		return domain.Lead{}, err
-	}
-	if req.CompanyName == "" {
-		req.CompanyName = current.CompanyName
-	}
-	if req.Source == "" {
-		req.Source = current.Source
-	}
-	if req.Stage == "" {
-		req.Stage = current.Stage
-	}
-	if !req.Stage.IsValid() {
-		return domain.Lead{}, fmt.Errorf("%w: %q", domain.ErrInvalidLeadStage, string(req.Stage))
-	}
-	if !current.Stage.CanTransitionTo(req.Stage) {
-		return domain.Lead{}, fmt.Errorf("%w: %s -> %s", domain.ErrInvalidLeadTransition, current.Stage, req.Stage)
-	}
-	if req.AssignedTo != nil {
-		if err := s.repo.ValidateLeadAssignee(ctx, businessID, *req.AssignedTo); err != nil {
-			return domain.Lead{}, err
-		}
-	}
-	lead, err := s.repo.UpdateLead(ctx, id, businessID, req)
-	if err == nil {
-		invalidateCRMSalesScope(ctx, businessID)
-	}
-	return lead, err
-}
-
-func (s *Service) DeleteLead(ctx context.Context, id, businessID int64) error {
-	if err := s.repo.DeleteLead(ctx, id, businessID); err != nil {
-		return err
-	}
-	invalidateCRMSalesScope(ctx, businessID)
-	return nil
-}
-
-func (s *Service) GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error) {
-	return cacher.Of[[]domain.PipelineSummary]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(crmSalesScope, businessID, "pipeline")+"|domain=v2",
-		func(ctx context.Context) ([]domain.PipelineSummary, error) {
-			return s.repo.GetPipeline(ctx, businessID)
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
-}
-
-func (s *Service) ListContacts(ctx context.Context, businessID int64, leadID *int64, limit, offset int32) (domain.ContactPage, error) {
-	limit, offset = normalizePagination(limit, offset)
-	lead := int64(0)
-	if leadID != nil {
-		lead = *leadID
-	}
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contacts|l=%d|n=%d|o=%d", lead, limit, offset))
-	return cacher.Of[domain.ContactPage]().GetOrComputeSingle(ctx, key+"|domain=v2",
-		func(ctx context.Context) (domain.ContactPage, error) {
-			contacts, err := s.repo.ListContacts(ctx, businessID, leadID, limit, offset)
-			if err != nil {
-				return domain.ContactPage{}, err
-			}
-			total, err := s.repo.CountContacts(ctx, businessID, leadID)
-			if err != nil {
-				return domain.ContactPage{}, err
-			}
-			return domain.ContactPage{Contacts: contacts, Total: total, Limit: limit, Offset: offset}, nil
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
-}
-
-func (s *Service) CreateContact(ctx context.Context, businessID int64, req domain.CreateContactRequest) (domain.Contact, error) {
-	if s.ownerOf == nil {
-		return domain.Contact{}, fmt.Errorf("create crm contact requires a business owner resolver")
-	}
-	ownerID, err := s.ownerOf.GetBusinessOwnerID(ctx, businessID)
-	if err != nil {
-		return domain.Contact{}, err
-	}
-	if ownerID <= 0 {
-		return domain.Contact{}, fmt.Errorf("create crm contact resolved an invalid business owner")
-	}
-	c, err := s.repo.CreateContact(ctx, businessID, ownerID, req)
-	if err == nil {
-		invalidateCRMSalesScope(ctx, businessID)
-	}
-	return c, err
-}
-
-func (s *Service) UpdateContact(ctx context.Context, id, businessID int64, req domain.UpdateContactRequest) (domain.Contact, error) {
-	c, err := s.repo.UpdateContact(ctx, id, businessID, req)
-	if err == nil {
-		invalidateCRMSalesScope(ctx, businessID)
-	}
-	return c, err
-}
-
-func (s *Service) DeleteContact(ctx context.Context, id, businessID int64) error {
-	if err := s.repo.DeleteContact(ctx, id, businessID); err != nil {
-		return err
-	}
-	invalidateCRMSalesScope(ctx, businessID)
-	return nil
-}
-
-func (s *Service) CustomerLinkUpdated(ctx context.Context, businessID int64) {
-	invalidateCRMSalesScope(ctx, businessID)
-}
-
-func (s *Service) ListTouchpoints(ctx context.Context, businessID, leadID int64) ([]domain.Touchpoint, error) {
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("touchpoints|l=%d", leadID))
-	return cacher.Of[[]domain.Touchpoint]().GetOrComputeSingle(ctx, key+"|domain=v2",
-		func(ctx context.Context) ([]domain.Touchpoint, error) {
-			return s.repo.ListTouchpoints(ctx, businessID, leadID)
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
-}
-
-func (s *Service) CreateTouchpoint(ctx context.Context, businessID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error) {
-	if req.Type == "" {
-		req.Type = "call"
-	}
-	if req.Outcome == "" {
-		req.Outcome = "other"
-	}
-	tp, err := s.repo.CreateTouchpoint(ctx, businessID, createdBy, req)
-	if err == nil {
-		invalidateCRMSalesScope(ctx, businessID)
-	}
-	return tp, err
-}
-
-func (s *Service) DeleteTouchpoint(ctx context.Context, id, businessID int64) error {
-	if err := s.repo.DeleteTouchpoint(ctx, id, businessID); err != nil {
-		return err
-	}
-	invalidateCRMSalesScope(ctx, businessID)
-	return nil
-}
-
-func (s *Service) ListContracts(ctx context.Context, businessID int64, limit, offset int32) (domain.ContractPage, error) {
-	limit, offset = normalizePagination(limit, offset)
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contracts|n=%d|o=%d", limit, offset))
-	return cacher.Of[domain.ContractPage]().GetOrComputeSingle(ctx, key+"|domain=v2",
-		func(ctx context.Context) (domain.ContractPage, error) {
-			contracts, err := s.repo.ListContracts(ctx, businessID, limit, offset)
-			if err != nil {
-				return domain.ContractPage{}, err
-			}
-			total, err := s.repo.CountContracts(ctx, businessID)
-			if err != nil {
-				return domain.ContractPage{}, err
-			}
-			return domain.ContractPage{Contracts: contracts, Total: total, Limit: limit, Offset: offset}, nil
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
-}
-
-func (s *Service) GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error) {
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contract=%d", id))
-	return cacher.Of[domain.Contract]().GetOrComputeSingle(ctx, key+"|domain=v2",
-		func(ctx context.Context) (domain.Contract, error) {
-			return s.repo.GetContract(ctx, id, businessID)
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
-}
-
-func (s *Service) CreateContract(ctx context.Context, businessID int64, req domain.CreateContractRequest) (domain.Contract, error) {
-	if req.Plan == "" {
-		req.Plan = "pro"
-	}
-	if req.Seats == 0 {
-		req.Seats = 1
-	}
-	req.Value, req.Billing = contractTerms(req.Value, req.Billing, req.MRR)
-	req.MRR = domain.MonthlyEquivalent(req.Value, req.Billing)
-	c, err := s.repo.CreateContract(ctx, businessID, req)
-	if err == nil {
-		invalidateCRMSalesScope(ctx, businessID)
-	}
-	return c, err
-}
-
-func (s *Service) UpdateContract(ctx context.Context, id, businessID int64, req domain.UpdateContractRequest) (domain.Contract, error) {
-	if req.Plan == "" {
-		req.Plan = "pro"
-	}
-	if req.Seats == 0 {
-		req.Seats = 1
-	}
-	req.Value, req.Billing = contractTerms(req.Value, req.Billing, req.MRR)
-	req.MRR = domain.MonthlyEquivalent(req.Value, req.Billing)
-	c, err := s.repo.UpdateContract(ctx, id, businessID, req)
-	if err == nil {
-		invalidateCRMSalesScope(ctx, businessID)
-	}
-	return c, err
-}
-
-// ListSignedContracts returns the page of contracts whose signature is
-// complete. Backs crm.sales.v1's signed=true filter (#839): a caller asking
-// for billable contracts must not page through drafts, and the total must be
-// the filtered count rather than a full count trimmed afterwards.
-func (s *Service) ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) (domain.ContractPage, error) {
-	return s.listContractsBySignState(ctx, businessID, true, limit, offset)
-}
-
-// ListUnsignedContracts is the signed=false variant of the above.
-func (s *Service) ListUnsignedContracts(ctx context.Context, businessID int64, limit, offset int32) (domain.ContractPage, error) {
-	return s.listContractsBySignState(ctx, businessID, false, limit, offset)
-}
-
-func (s *Service) listContractsBySignState(ctx context.Context, businessID int64, signed bool, limit, offset int32) (domain.ContractPage, error) {
-	limit, offset = normalizePagination(limit, offset)
-	state := "unsigned"
-	if signed {
-		state = "signed"
-	}
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contracts|%s|n=%d|o=%d", state, limit, offset))
-	return cacher.Of[domain.ContractPage]().GetOrComputeSingle(ctx, key+"|domain=v2",
-		func(ctx context.Context) (domain.ContractPage, error) {
-			var (
-				contracts []domain.Contract
-				total     int64
-				err       error
-			)
-			if signed {
-				contracts, err = s.repo.ListSignedContracts(ctx, businessID, limit, offset)
-				if err == nil {
-					total, err = s.repo.CountSignedContracts(ctx, businessID)
-				}
-			} else {
-				contracts, err = s.repo.ListUnsignedContracts(ctx, businessID, limit, offset)
-				if err == nil {
-					total, err = s.repo.CountUnsignedContracts(ctx, businessID)
-				}
-			}
-			if err != nil {
-				return domain.ContractPage{}, err
-			}
-			return domain.ContractPage{Contracts: contracts, Total: total, Limit: limit, Offset: offset}, nil
-		},
-		cacher.WithExpiry(ctx, crmSalesTTL),
-	)
-}
-
-// contractTerms fills value and billing for a caller that still sends only
-// MRR, the old shape: a monthly contract worth that MRR.
-func contractTerms(value money.Amount, billing domain.Billing, mrr money.Amount) (money.Amount, domain.Billing) {
-	if billing == "" {
-		billing = domain.BillingMonthly
-	}
-	if value == 0 && mrr > 0 {
-		return mrr, domain.BillingMonthly
-	}
-	return value, billing
 }
