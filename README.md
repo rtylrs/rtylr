@@ -61,9 +61,10 @@ A push to `main` releases and deploys:
    plus a `release.json` manifest), and creates the tag and GitHub release.
 2. The same run picks the deploy targets whose own paths changed, using
    `.github/deploy-targets.json`, and `.github/workflows/deploy.yml` builds the
-   new tag through `rtylrs/pipelines` and ships it — Pages apps and ECS
-   services through the same entrypoint. A change that touches no target's paths
-   (CI only, for example) cuts a release and deploys nothing.
+   new tag and ships it — Pages apps and ECS services through the same
+   entrypoint. ECS images build while the database migrates, and the services
+   roll out once both are done. A change that touches no target's paths (CI
+   only, for example) cuts a release and deploys nothing.
 3. To re-ship or roll back an existing tag, run `redeploy.yml` with the tag and
    a target name (or `all`).
 
@@ -71,7 +72,10 @@ Each target in `deploy-targets.json` lists the path prefixes that trigger it
 (with optional `ignore` prefixes) and carries `working_directory` (for example
 `clients/app`) plus `dist_dir`, so one entrypoint serves every product. Adding an app is one entry in that file.
 
-Deploys do not run database migrations; use `migrate-onion-database.yml`.
+A release that ships the API or the worker first applies its database
+migrations with `migrate-onion-database.yml`, unless that exact set
+(`.github/scripts/migration-key.sh`) already applied cleanly. Run that workflow
+by hand to rehearse a migration (`dry_run`) or to apply one again.
 
 Other workflows:
 

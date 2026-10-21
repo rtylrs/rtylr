@@ -1,0 +1,148 @@
+name: Build a release ECS image
+
+# Builds an exact source release and pushes it as an immutable ECR tag.
+# deploy.yml runs this while the database migrates, then ships the tag with
+# deploy-ecs-release.yml. Nothing in this workflow runs on a source push.
+on:
+  workflow_call:
+    inputs:
+      source_repository:
+        description: Repository containing the release
+        required: true
+        type: string
+      source_ref:
+        description: GitHub release tag to checkout
+        required: true
+        type: string
+      version:
+        description: Immutable image tag
+        required: true
+        type: string
+      dockerfile:
+        description: Dockerfile relative to the source repository root
+        required: true
+        type: string
+      image_repository:
+        description: ECR repository path without the registry hostname
+        required: true
+        type: string
+      ecr_registry:
+        description: ECR registry hostname
+        required: false
+        default: 101533649486.dkr.ecr.eu-west-1.amazonaws.com
+        type: string
+      runs_on:
+        description: Runner label
+        required: false
+        default: ubuntu-24.04
+        type: string
+    secrets:
+      PAT_TOKEN:
+        required: false
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: eu-west-1
+
+jobs:
+  build:
+    name: Build ${{ inputs.image_repository }}:${{ inputs.version }}
+    runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: 45
+    env:
+      IMAGE_URI: ${{ inputs.ecr_registry }}/${{ inputs.image_repository }}:${{ inputs.version }}
+    steps:
+      - name: Verify GitHub release exists
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || github.token }}
+          SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+        run: gh api "repos/$SOURCE_REPOSITORY/releases/tags/$SOURCE_REF" --silent
+
+      - name: Require AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+            exit 0
+          fi
+          echo 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be passed to the ECS image build' >&2
+          exit 1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ inputs.ecr_registry }}
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      # A release tag always names the same commit, so a redeploy or a re-run
+      # can ship the image an earlier run already pushed.
+      - name: Check for an existing image
+        id: existing
+        run: |
+          if docker buildx imagetools inspect "$IMAGE_URI" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "$IMAGE_URI is already pushed; not rebuilding it"
+          fi
+
+      - name: Checkout promoted source release
+        if: steps.existing.outputs.exists != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source_repository }}
+          ref: ${{ inputs.source_ref }}
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN || github.token }}
+
+      - name: Verify generated contract reference
+        if: steps.existing.outputs.exists != 'true'
+        run: |
+          if [ -x ./scripts/check-voxie-ref.sh ]; then
+            ./scripts/check-voxie-ref.sh
+          fi
+
+      - name: Resolve source commit
+        if: steps.existing.outputs.exists != 'true'
+        id: source
+        run: echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        if: steps.existing.outputs.exists != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push immutable image
+        if: steps.existing.outputs.exists != 'true'
+        env:
+          IMAGE_REPOSITORY: ${{ inputs.image_repository }}
+          VERSION: ${{ inputs.version }}
+          DOCKERFILE: ${{ inputs.dockerfile }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          set -euo pipefail
+          docker buildx build \
+            --cache-from type=gha,scope="$IMAGE_REPOSITORY" \
+            --cache-to type=gha,scope="$IMAGE_REPOSITORY",mode=max \
+            -f "$DOCKERFILE" \
+            --build-arg VERSION="$VERSION" \
+            --build-arg COMMIT="$SOURCE_SHA" \
+            --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -t "$IMAGE_URI" \
+            --push \
+            .
+          echo "Pushed $IMAGE_URI"

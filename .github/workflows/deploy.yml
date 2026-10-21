@@ -1,7 +1,8 @@
 name: Deploy release
 
 # Reusable: builds one immutable release tag and ships the selected targets
-# through deploy-pages-release.yml and deploy-ecs-release.yml. Pages apps and ECS services share this entrypoint.
+# through deploy-pages-release.yml and, for ECS, build-ecs-image.yml then
+# deploy-ecs-release.yml. Pages apps and ECS services share this entrypoint.
 # Callers (release.yml on a push to main, redeploy.yml by hand) pass the target
 # lists produced by .github/scripts/plan-deploys.sh.
 on:
@@ -22,6 +23,11 @@ on:
       ecs:
         description: JSON array of ECS targets
         required: true
+        type: string
+      migrate:
+        description: "'false' when the release's migrations are already applied; anything else migrates"
+        required: false
+        default: 'true'
         type: string
 
 permissions:
@@ -50,22 +56,41 @@ jobs:
       node_version: ${{ matrix.node_version }}
     secrets: inherit
 
-  # The API and the worker read the columns their release's migrations add, so
-  # the schema goes first. A failed migration stops their deploy: the running
-  # release keeps working against the schema it knows.
   migrate:
     name: Migrate the database
-    if: contains(inputs.ecs, '"app":"onion-api"') || contains(inputs.ecs, '"app":"onion-worker"')
+    if: inputs.migrate != 'false' && (contains(inputs.ecs, '"app":"onion-api"') || contains(inputs.ecs, '"app":"onion-worker"'))
     uses: ./.github/workflows/migrate-onion-database.yml
     with:
       release_tag: ${{ inputs.release_tag }}
       dry_run: false
     secrets: inherit
 
+  # Images don't depend on the schema, so they build while the database migrates.
+  images:
+    name: Build ${{ matrix.app }}
+    if: inputs.ecs != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.ecs) }}
+    uses: ./.github/workflows/build-ecs-image.yml
+    with:
+      source_repository: rtylrs/rtylr
+      source_ref: ${{ inputs.release_tag }}
+      version: ${{ inputs.version }}
+      dockerfile: ${{ matrix.dockerfile }}
+      image_repository: ${{ matrix.image_repository }}
+    secrets: inherit
+
+  # The API and the worker read the columns their release's migrations add, so
+  # they ship only after the migration succeeded or was not needed. A failed
+  # (or cancelled) migration stops their deploy: the running release keeps
+  # working against the schema it knows. A failed image build stops every ECS
+  # deploy of the release.
   ecs:
     name: Deploy ${{ matrix.app }}
-    needs: migrate
-    if: ${{ !cancelled() && inputs.ecs != '[]' && needs.migrate.result != 'failure' }}
+    needs: [images, migrate]
+    if: ${{ !cancelled() && inputs.ecs != '[]' && needs.images.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') }}
     strategy:
       fail-fast: false
       matrix:
@@ -75,14 +100,13 @@ jobs:
       cancel-in-progress: false
     uses: ./.github/workflows/deploy-ecs-release.yml
     with:
-      source_repository: rtylrs/rtylr
       source_ref: ${{ inputs.release_tag }}
       version: ${{ inputs.version }}
-      dockerfile: ${{ matrix.dockerfile }}
       image_repository: ${{ matrix.image_repository }}
       cluster: ${{ matrix.cluster }}
       service: ${{ matrix.service }}
       container: ${{ matrix.container }}
       desired_count: ${{ matrix.desired_count }}
       health_url: ${{ matrix.health_url }}
+      version_url: ${{ matrix.version_url }}
     secrets: inherit
