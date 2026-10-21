@@ -139,6 +139,7 @@ func (s *Service) linkGoogleUser(
 	// Mirrors the existing Register flow -- failure here is logged but
 	// non-fatal; user can complete business setup from the dashboard.
 	businessName = strings.TrimSpace(businessName)
+	var businessID int64
 	if businessName != "" {
 		bizID, bizErr := s.repo.CreateBusiness(ctx, businessName, userID)
 		if bizErr != nil {
@@ -151,12 +152,20 @@ func (s *Service) linkGoogleUser(
 				logger.Error(setErr),
 				logger.Any("user_id", userID),
 			)
-		} else if empErr := s.ensureEmployeeForUser(ctx, userID, bizID, userID, newUser.FullName, newUser.Email); empErr != nil {
-			logger.Ctx(ctx).Warn("failed to create employee record for google-signup owner",
-				logger.Error(empErr),
-				logger.Any("user_id", userID),
-			)
+		} else {
+			businessID = bizID
+			if empErr := s.ensureEmployeeForUser(ctx, userID, bizID, userID, newUser.FullName, newUser.Email); empErr != nil {
+				logger.Ctx(ctx).Warn("failed to create employee record for google-signup owner",
+					logger.Error(empErr),
+					logger.Any("user_id", userID),
+				)
+			}
 		}
+	}
+
+	// Google has already verified this address.
+	if err := s.repo.CreateSignupProvisioning(ctx, userID, businessID, true); err != nil {
+		return nil, err
 	}
 
 	if subErr := s.AssignSubscription(ctx, userID, DefaultSignupPlanSlug); subErr != nil {

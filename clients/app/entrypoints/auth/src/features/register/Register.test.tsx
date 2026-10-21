@@ -118,7 +118,7 @@ describe('Register Feature Component', () => {
   });
 
   it.each(['constructor', 'api'])(
-    'falls back to Dash for an invalid redirect app id: %s',
+    'sends the new account to verification without an invalid redirect app id: %s',
     async (redirect) => {
       const assigned = captureRedirectLocation(`?redirect=${redirect}`);
       render(<Register />);
@@ -142,7 +142,7 @@ describe('Register Feature Component', () => {
       const options = mockMutate.mock.calls[0][1] as { onSuccess: () => void };
       options.onSuccess();
 
-      expect(assigned).toEqual(['http://localhost:5175']);
+      expect(assigned).toEqual(['/verify?email=alex%40acme.com&sent=1']);
     }
   );
 });

@@ -22,6 +22,8 @@ const (
 	TemplateInvitation Template = "team/invitation"
 	// TemplatePasswordReset is sent on a password-reset request.
 	TemplatePasswordReset Template = "auth/password_reset"
+	// TemplateEmailVerification asks a new account to confirm its email.
+	TemplateEmailVerification Template = "auth/email_verification"
 	// TemplateInvoice is sent with an invoice.
 	TemplateInvoice Template = "billing/invoice"
 	// TemplateAccessRequest notifies a business owner that a user requested app access.
@@ -35,6 +37,7 @@ var wiredTemplates = []Template{
 	TemplateWelcome,
 	TemplateInvitation,
 	TemplatePasswordReset,
+	TemplateEmailVerification,
 	TemplateInvoice,
 	TemplateAccessRequest,
 }
@@ -105,6 +108,14 @@ func InvitationSubject(inviterName, businessName string) string {
 type PasswordResetData struct {
 	Subject   string
 	ResetLink string
+}
+
+// VerificationData is the data for TemplateEmailVerification. Code is
+// the whole token the verification page accepts, user id included.
+type VerificationData struct {
+	Subject    string
+	VerifyLink string
+	Code       string
 }
 
 // InvoiceData is the data for TemplateInvoice.

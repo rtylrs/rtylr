@@ -16,6 +16,7 @@ import (
 )
 
 func TestRegisterCreatesRequestedBusinessBeforeIssuingToken(t *testing.T) {
+	t.Setenv("EMAIL_VERIFICATION_SECRET", rand.Text())
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	service := application.NewService(moduleinfra.NewRepository(db), "")
@@ -40,6 +41,8 @@ func TestRegisterCreatesRequestedBusinessBeforeIssuingToken(t *testing.T) {
 				}
 				for _, query := range []string{
 					"DELETE FROM authorization_business_members WHERE user_id = ?",
+					"DELETE FROM user_provisioning_states WHERE user_id = ?",
+					"DELETE FROM user_email_verification_tokens WHERE user_id = ?",
 					"DELETE FROM hr_employees WHERE user_id = ?",
 					"DELETE FROM subscriptions WHERE owner_id = ?",
 					"DELETE FROM businesses WHERE owner_id = ?",
@@ -53,6 +56,25 @@ func TestRegisterCreatesRequestedBusinessBeforeIssuingToken(t *testing.T) {
 			claims := &application.AccessTokenClaims{}
 			if err := service.JWT.ValidateToken(ctx, res.Token, claims); err != nil {
 				t.Fatal(err)
+			}
+			// The account can load /users/me but nothing else until the code
+			// mailed at signup is used.
+			var mode, state string
+			var provisionedBusinessID int64
+			var emailVerified bool
+			if err := db.QueryRowContext(ctx, "SELECT mode, state, business_id, email_verified FROM user_provisioning_states WHERE user_id = ?", res.UserId).
+				Scan(&mode, &state, &provisionedBusinessID, &emailVerified); err != nil {
+				t.Fatalf("signup provisioning row: %v", err)
+			}
+			if mode != "self_signup" || state != "active" || emailVerified || provisionedBusinessID != businessID.Int64 {
+				t.Fatalf("provisioning = %s/%s business=%d verified=%t", mode, state, provisionedBusinessID, emailVerified)
+			}
+			var pendingCodes int
+			if err := db.QueryRowContext(ctx, "SELECT COUNT(*) FROM user_email_verification_tokens WHERE user_id = ? AND consumed_at IS NULL", res.UserId).Scan(&pendingCodes); err != nil {
+				t.Fatal(err)
+			}
+			if pendingCodes != 1 {
+				t.Fatalf("pending verification codes = %d, want 1", pendingCodes)
 			}
 			if strings.TrimSpace(name) == "" {
 				if businessID.Int64 != 0 || claims.BusinessID != 0 {

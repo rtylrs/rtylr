@@ -1,0 +1,7 @@
+{{define "body"}}
+<h1>Verify your email</h1>
+<p>Confirm your email address to finish setting up your rtylr account.</p>
+{{template "button" (action .VerifyLink "Verify my email")}}
+<p>Or enter this code on the verification page: <strong>{{.Code}}</strong></p>
+<p class="muted">This link expires in 10 minutes and can only be used once. If you didn't create an rtylr account, you can ignore this email.</p>
+{{end}}

@@ -98,7 +98,7 @@ func TestEmailVerification_CodeDoesNotVerifyAnotherAccount(t *testing.T) {
 
 	// The attacker names their own user id and reuses the victim's code.
 	crossToken := fmt.Sprintf("%d.%s", otherID, issued.Code)
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), crossToken); !errors.Is(err, infrastructure.ErrInvalidEmailVerificationCode) {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), crossToken); !errors.Is(err, infrastructure.ErrInvalidEmailVerificationCode) {
 		t.Fatalf("cross-user token = %v, want ErrInvalidEmailVerificationCode", err)
 	}
 
@@ -114,7 +114,7 @@ func TestEmailVerification_CodeDoesNotVerifyAnotherAccount(t *testing.T) {
 	}
 
 	// The owner's own token works.
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); err != nil {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); err != nil {
 		t.Fatalf("owner's own token: %v", err)
 	}
 	if err := db.QueryRowContext(context.Background(),
@@ -135,7 +135,7 @@ func TestEmailVerification_LegacyAndReplayAreRefused(t *testing.T) {
 
 	_, email := setupVerificationUser(t, db)
 
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), "123456"); !errors.Is(err, infrastructure.ErrSupersededEmailVerificationCode) {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), "123456"); !errors.Is(err, infrastructure.ErrSupersededEmailVerificationCode) {
 		t.Fatalf("legacy code = %v, want ErrSupersededEmailVerificationCode", err)
 	}
 
@@ -143,10 +143,10 @@ func TestEmailVerification_LegacyAndReplayAreRefused(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateEmailVerificationCode: %v", err)
 	}
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); err != nil {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); err != nil {
 		t.Fatalf("first consume: %v", err)
 	}
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); !errors.Is(err, infrastructure.ErrInvalidEmailVerificationCode) {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); !errors.Is(err, infrastructure.ErrInvalidEmailVerificationCode) {
 		t.Fatalf("replay = %v, want ErrInvalidEmailVerificationCode", err)
 	}
 }
@@ -167,7 +167,7 @@ func TestEmailVerification_SecretRotationInvalidatesOutstandingCodes(t *testing.
 	}
 
 	t.Setenv("EMAIL_VERIFICATION_SECRET", "secret-b")
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); !errors.Is(err, infrastructure.ErrInvalidEmailVerificationCode) {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), issued.Token); !errors.Is(err, infrastructure.ErrInvalidEmailVerificationCode) {
 		t.Fatalf("after rotation = %v, want ErrInvalidEmailVerificationCode", err)
 	}
 }

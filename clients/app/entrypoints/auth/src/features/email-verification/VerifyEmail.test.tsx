@@ -277,4 +277,10 @@ describe('VerifyEmail (#1027)', () => {
     expect(resendMutate).not.toHaveBeenCalled();
     expect(notifyMock.error).toHaveBeenCalledWith('auth.verify.emailRequired');
   });
+
+  it('names the address the signup link went to', () => {
+    search.value = '?email=new%40example.com&sent=1';
+    render(<VerifyEmail />);
+    expect(screen.getByText('auth.verify.sentTo')).toBeInTheDocument();
+  });
 });

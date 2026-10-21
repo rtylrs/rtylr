@@ -419,7 +419,7 @@ func TestConsumeEmailVerificationCodeDoesNotCrossUsers(t *testing.T) {
 	// The attacker submits the victim's code under their own user id. The
 	// digest is recomputed over (attackerID, code), which is not the stored
 	// digest for (ownerID, code), so the row is not found.
-	err = repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(otherID, code))
+	_, err = repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(otherID, code))
 	if !errors.Is(err, ErrInvalidEmailVerificationCode) {
 		t.Fatalf("cross-user token error = %v, want ErrInvalidEmailVerificationCode", err)
 	}
@@ -431,7 +431,7 @@ func TestConsumeEmailVerificationCodeDoesNotCrossUsers(t *testing.T) {
 	}
 
 	// The owner's own token verifies and does spend the row.
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(ownerID, code)); err != nil {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(ownerID, code)); err != nil {
 		t.Fatalf("owner's token: %v", err)
 	}
 	if !probe.committed {
@@ -454,7 +454,7 @@ func TestConsumeEmailVerificationCodeScopesLookupByUser(t *testing.T) {
 	probe := &verificationProbe{}
 	repo := NewRepository(newProbeDB(t, probe))
 
-	_ = repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(userID, "0000000001"))
+	_, _ = repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(userID, "0000000001"))
 
 	if len(probe.selects) == 0 {
 		t.Fatal("no verification query was issued")
@@ -487,7 +487,7 @@ func TestConsumeEmailVerificationCodeRefusesLegacySixDigitCode(t *testing.T) {
 	probe := &verificationProbe{}
 	repo := NewRepository(newProbeDB(t, probe))
 
-	err := repo.ConsumeEmailVerificationCode(context.Background(), "123456")
+	_, err := repo.ConsumeEmailVerificationCode(context.Background(), "123456")
 	if !errors.Is(err, ErrSupersededEmailVerificationCode) {
 		t.Fatalf("legacy code error = %v, want ErrSupersededEmailVerificationCode", err)
 	}
@@ -512,13 +512,13 @@ func TestConsumeEmailVerificationCodeStopsAtTheAttemptCap(t *testing.T) {
 		// A distinct wrong code each time, so only the per-user budget is
 		// being charged.
 		token := formatEmailVerificationToken(userID, fmt.Sprintf("%010d", i+1))
-		if err := repo.ConsumeEmailVerificationCode(context.Background(), token); !errors.Is(err, ErrInvalidEmailVerificationCode) {
+		if _, err := repo.ConsumeEmailVerificationCode(context.Background(), token); !errors.Is(err, ErrInvalidEmailVerificationCode) {
 			t.Fatalf("attempt %d: error = %v, want ErrInvalidEmailVerificationCode", i+1, err)
 		}
 	}
 
 	overCap := formatEmailVerificationToken(userID, "9999999999")
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), overCap); !errors.Is(err, ErrTooManyEmailVerificationAttempts) {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), overCap); !errors.Is(err, ErrTooManyEmailVerificationAttempts) {
 		t.Fatalf("past the cap: error = %v, want ErrTooManyEmailVerificationAttempts", err)
 	}
 	if len(probe.selects) != emailVerificationUserAttempts {
@@ -540,16 +540,16 @@ func TestConsumeEmailVerificationCodeDoesNotSpendAnotherUsersBudget(t *testing.T
 	// The attacker burns their own budget.
 	for i := 0; i < emailVerificationUserAttempts; i++ {
 		token := formatEmailVerificationToken(attacker, fmt.Sprintf("%010d", i+1))
-		if err := repo.ConsumeEmailVerificationCode(context.Background(), token); !errors.Is(err, ErrInvalidEmailVerificationCode) {
+		if _, err := repo.ConsumeEmailVerificationCode(context.Background(), token); !errors.Is(err, ErrInvalidEmailVerificationCode) {
 			t.Fatalf("attacker attempt %d: error = %v, want ErrInvalidEmailVerificationCode", i+1, err)
 		}
 	}
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(attacker, "8888888888")); !errors.Is(err, ErrTooManyEmailVerificationAttempts) {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(attacker, "8888888888")); !errors.Is(err, ErrTooManyEmailVerificationAttempts) {
 		t.Fatalf("attacker over cap: error = %v, want ErrTooManyEmailVerificationAttempts", err)
 	}
 
 	// The victim still has their whole budget.
-	if err := repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(victim, "1111111111")); !errors.Is(err, ErrInvalidEmailVerificationCode) {
+	if _, err := repo.ConsumeEmailVerificationCode(context.Background(), formatEmailVerificationToken(victim, "1111111111")); !errors.Is(err, ErrInvalidEmailVerificationCode) {
 		t.Fatalf("victim's first attempt: error = %v, want ErrInvalidEmailVerificationCode", err)
 	}
 }

@@ -22,6 +22,7 @@ import {
 
 import { getCookie, hasEffectiveAppAccess, parseEffectiveAccess } from '@voxire/auth';
 import { getEmailError } from '../../shared/lib/validation';
+import { verifyEmailPath } from '../email-verification/verifyEmailPath';
 
 const userClient = createOneKitClient(UserServiceClient, 'auth');
 
@@ -46,6 +47,16 @@ const Login: React.FC = (): React.JSX.Element => {
     try {
       const res = await userClient.getMe({});
       const provisioningStatus = res.provisioningStatus;
+      // Nothing past /users/me answers an account whose email is unverified, so
+      // it waits on the verification screen before any destination.
+      if (provisioningStatus?.emailVerified === false) {
+        window.location.href = verifyEmailPath({
+          email: res.email,
+          redirect: redirectParam,
+          returnTo: new URLSearchParams(window.location.search).get('returnTo'),
+        });
+        return;
+      }
       // MFA is resolved before any destination is chosen, including an explicit
       // `redirect` param. Honouring that param first let a user who owes MFA
       // enrolment name another app and skip the Portal enrolment gate entirely.

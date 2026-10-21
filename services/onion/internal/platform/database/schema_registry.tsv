@@ -144,3 +144,4 @@ internal/modules/crm/crm_sales/sql/migration_20261018_generic_contracts.sql	inte
 internal/modules/finance/expenses/sql/migration_20261020_expense_category_names_unique.sql	internal/modules/finance/expenses/sql/migration_20261020_expense_category_names_unique.sql
 internal/modules/finance/bank_accounts/sql/migration_20261020_bank_account_columns.sql	internal/modules/finance/bank_accounts/sql/migration_20261020_bank_account_columns.sql
 internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql	internal/modules/crm/crm_sales/sql/migration_20261020_sales_redesign.sql
+shared/zz_self_signup_provisioning.sql	internal/modules/organization/sql/schema/shared/zz_self_signup_provisioning.sql

@@ -22,6 +22,7 @@ import PasswordStrengthMeter, {
 } from '../../shared/components/PasswordStrengthMeter';
 import { getCookie } from '@voxire/auth';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
+import { verifyEmailPath } from '../email-verification/verifyEmailPath';
 
 const DEFAULT_SIGNUP_PLAN_SLUG = 'free';
 
@@ -80,11 +81,17 @@ const Register: React.FC = (): React.JSX.Element => {
     return getRedirectAppId(params.get('redirect'));
   }, []);
 
+  // The store flips to signed-in while the mutation settles. Without this the
+  // already-signed-in redirect below would beat the verification screen to the
+  // portal.
+  const registeringRef = useRef(false);
+
   const handleRegister = (): void => {
     if (password !== confirmPassword) {
       notify.error('Passwords do not match');
       return;
     }
+    registeringRef.current = true;
     registerMutation.mutate(
       {
         email,
@@ -94,8 +101,12 @@ const Register: React.FC = (): React.JSX.Element => {
         planSlug: DEFAULT_SIGNUP_PLAN_SLUG,
       },
       {
+        // A new account stays on sign-in until its email is verified.
         onSuccess: () => {
-          window.location.href = getRedirectUrl(redirectParam);
+          window.location.href = verifyEmailPath({ email, sent: true, redirect: redirectParam });
+        },
+        onError: () => {
+          registeringRef.current = false;
         },
       }
     );
@@ -118,6 +129,7 @@ const Register: React.FC = (): React.JSX.Element => {
   }, [clearError]);
 
   useEffect((): void => {
+    if (registeringRef.current) return;
     if (isAuthenticated && getCookie('token')) {
       window.location.href = getRedirectUrl(redirectParam);
     }

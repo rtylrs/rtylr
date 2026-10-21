@@ -222,4 +222,19 @@ describe('Login redirect target and the MFA gate', () => {
     expect(assigned[0]).toBe('http://localhost:5175');
     expect(assigned[0]).not.toContain('evil.example.com');
   });
+
+  it('sends an account with an unverified email to verification before any destination', async () => {
+    const assigned = setLocation('?redirect=crm&returnTo=%2Fdeals');
+    mockGetMe.mockResolvedValue({
+      email: 'new@example.com',
+      provisioningStatus: { emailVerified: false },
+      effectiveAccess: effectiveAccessFor('crm'),
+    });
+
+    render(<Login />);
+    await signIn();
+
+    await waitFor(() => expect(assigned.length).toBeGreaterThan(0));
+    expect(assigned[0]).toBe('/verify?email=new%40example.com&redirect=crm&returnTo=%2Fdeals');
+  });
 });

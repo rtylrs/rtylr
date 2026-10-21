@@ -182,10 +182,18 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 		return 0, err
 	}
 
+	var businessID int64
 	if businessName != "" {
 		if err := s.CreateBusinessForUser(ctx, userID, businessName); err != nil {
 			return 0, fmt.Errorf("create registration business: %w", err)
 		}
+		if businessID, err = s.repo.GetUserBusinessID(ctx, userID); err != nil {
+			return 0, fmt.Errorf("read registration business: %w", err)
+		}
+	}
+
+	if err := s.repo.CreateSignupProvisioning(ctx, userID, businessID, false); err != nil {
+		return 0, fmt.Errorf("create signup provisioning: %w", err)
 	}
 
 	if s.emails != nil {
@@ -199,8 +207,15 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 		}
 	}
 
+	// The account stays on the verification screen until this code is used.
+	// A failed send is not fatal: that screen can send another.
+	if err := s.IssueEmailVerificationCode(ctx, normalizedEmail); err != nil {
+		logger.Ctx(ctx).Error("failed to send signup verification email", logger.Error(err))
+	}
+
 	return userID, nil
 }
+
 func (s *Service) Authenticate(ctx context.Context, identifier, password string) (int64, error) {
 	user, err := s.repo.GetUserByIdentifier(ctx, strings.ToLower(strings.TrimSpace(identifier)))
 	if err != nil {
