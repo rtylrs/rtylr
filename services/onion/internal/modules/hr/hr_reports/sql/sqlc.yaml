@@ -43,6 +43,7 @@ sql:
       - "../../sql/schema/hr_payroll/schema.sql"
       - "../../sql/schema/hr_overtime/schema.sql"
       - "../../sql/schema/hr_time/schema.sql"
+      - "../../sql/schema/hr_shifts/schema.sql"
     gen:
       go:
         package: "sqlc"

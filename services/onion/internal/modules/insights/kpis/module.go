@@ -2,14 +2,12 @@ package kpis
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 
-	moduleinfra "github.com/voxire/onion/internal/modules/insights/kpis/internal/infrastructure"
-
 	"github.com/voxire/onion/internal/modules/insights/kpis/internal/api"
 	"github.com/voxire/onion/internal/modules/insights/kpis/internal/application"
+	moduleinfra "github.com/voxire/onion/internal/modules/insights/kpis/internal/infrastructure"
 	hubdashboardv1 "github.com/voxire/voxie/gen/go/hub/dashboard/v1"
 )
 
@@ -17,9 +15,12 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context, db *sql.DB) *Module {
+// Sources are the owning modules the KPI summary is read from.
+type Sources = moduleinfra.Sources
+
+func NewModule(ctx context.Context, sources Sources) *Module {
 	return &Module{
-		service: application.NewService(ctx, moduleinfra.NewRepository(db)),
+		service: application.NewService(ctx, moduleinfra.NewRepository(sources)),
 	}
 }
 

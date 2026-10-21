@@ -3,7 +3,7 @@ package infrastructure
 import (
 	"testing"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
+	financecontract "github.com/voxire/onion/internal/contracts/finance"
 )
 
 // TestInvoiceAgingBucketsMatchContract pins B74-R08: the API must expose every
@@ -11,9 +11,9 @@ import (
 // (current, 1-30, 31-60, 61-90, 90+) in order, including not-yet-due
 // receivables in "current", so total outstanding covers current receivables.
 func TestInvoiceAgingBucketsMatchContract(t *testing.T) {
-	rows := []sqlc.GetInvoiceAgingRow{
-		{Bucket: "current", InvoiceCount: 2, AmountDue: []byte("50000.00")},
-		{Bucket: "31-60", InvoiceCount: 1, AmountDue: []byte("125.50")},
+	rows := []financecontract.InvoiceAgingBucket{
+		{Bucket: "current", InvoiceCount: 2, AmountMinorUnits: 5000000},
+		{Bucket: "31-60", InvoiceCount: 1, AmountMinorUnits: 12550},
 	}
 
 	buckets := invoiceAgingBucketsFromRows(rows)

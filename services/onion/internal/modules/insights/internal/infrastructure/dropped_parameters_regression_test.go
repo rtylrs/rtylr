@@ -21,7 +21,7 @@ func TestCustomerMetricsAndTopCustomersHonorPeriodSortAndPage(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	businessID := nextRegressionBusinessID()
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 
 	insertCustomer := func(name string, createdAt time.Time) int64 {
 		t.Helper()
@@ -113,7 +113,7 @@ func TestHeadcountTimeOffAndUtilizationHonorPeriodAndTerminationHistory(t *testi
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	businessID := nextRegressionBusinessID()
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 
 	insertEmployee := func(name, status string, start, end time.Time) int64 {
 		t.Helper()
@@ -197,7 +197,7 @@ func TestScheduledReportPaginationAndActivePresenceArePersisted(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	businessID := nextRegressionBusinessID()
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, `DELETE FROM insights_scheduled_reports WHERE business_id = ?`, businessID)
 	})
@@ -277,7 +277,7 @@ func TestInsightsSettingsRoundTripAllContractFields(t *testing.T) {
 	db := testutil.OpenDB(t)
 	ctx := context.Background()
 	businessID := nextRegressionBusinessID()
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, `DELETE FROM insights_settings WHERE business_id = ?`, businessID)
 	})

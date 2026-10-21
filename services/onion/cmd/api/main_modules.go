@@ -247,8 +247,15 @@ func initializeModules(ctx context.Context) *apiModules {
 	financeBankFeedsModule := financebankfeeds.NewModule(ctx, dbclient.Pool())
 	financeReconciliationModule := financereconciliation.NewModule(ctx, dbclient.Pool())
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool()).WithReportingCurrency(businessModule.ReportingCurrency)
+	hrReportsModule := hr_reports.NewModule(ctx, dbclient.Pool())
 	insightsModule := insights.NewModule(ctx, dbclient.Pool(), insightsadapters.NewFlowReader(flowInsightsModule), insights.DashboardReaders{
 		Finance: financeReportsModule,
+		POS:     posOrdersModule,
+		CRM:     customersModule,
+	}, insights.Sources{
+		Finance: financeReportsModule,
+		HR:      hrReportsModule,
+		ERP:     productsModule,
 		POS:     posOrdersModule,
 		CRM:     customersModule,
 	})
@@ -261,7 +268,12 @@ func initializeModules(ctx context.Context) *apiModules {
 	accountsModule.SetLedgerSyncer(journalModule.LedgerSyncer())
 	financeReportsModule.SetLedgerSyncer(journalModule.LedgerSyncer())
 	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
-	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
+	kpisModule := kpis.NewModule(ctx, kpis.Sources{
+		Staff:     hrReportsModule,
+		Customers: customersModule,
+		Products:  productsModule,
+		Orders:    posOrdersModule,
+	})
 	posDaySummaryModule := daysummary.NewModule(ctx, dbclient.Pool())
 	invoicesModule := invoices.NewModule(ctx, dbclient.Pool())
 	invoicesModule.SetBillableTimeReader(invoiceadapters.NewBillableTimeReader(hrTimeModule))
@@ -342,7 +354,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		HROvertime:            hrOvertimeModule,
 		HRPayroll:             hrPayrollModule,
 		HRPerformance:         hr_performance.NewModule(ctx, dbclient.Pool()),
-		HRReports:             hr_reports.NewModule(ctx, dbclient.Pool()),
+		HRReports:             hrReportsModule,
 		HRSetup:               hr_setup.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRShifts:              hr_shifts.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRTime:                hrTimeModule,

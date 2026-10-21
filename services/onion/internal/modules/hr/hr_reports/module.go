@@ -14,11 +14,13 @@ import (
 
 type Module struct {
 	service     *application.Service
+	repository  *moduleinfra.Repository
 	permissions *hr_core.Module
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
-	return &Module{service: application.NewService(ctx, moduleinfra.NewRepository(db)), permissions: hr_core.NewModule(ctx, db)}
+	repo := moduleinfra.NewRepository(db)
+	return &Module{service: application.NewService(ctx, repo), repository: repo, permissions: hr_core.NewModule(ctx, db)}
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router serverHttp.LegacyRouter, _ ...interface{}) {

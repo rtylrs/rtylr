@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -30,7 +29,7 @@ func BenchmarkGetLTVDistribution(b *testing.B) {
 	}
 
 	db := testutil.OpenDB(b)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	b.ResetTimer()

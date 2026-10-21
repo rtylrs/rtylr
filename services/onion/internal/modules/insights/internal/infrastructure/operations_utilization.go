@@ -2,10 +2,9 @@ package infrastructure
 
 import (
 	"context"
-	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"time"
 
-	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -27,28 +26,18 @@ func inclusiveWorkdays(from, to time.Time) int64 {
 }
 
 func (r *Repository) GetUtilization(ctx context.Context, businessID int64, from, to time.Time) (UtilizationRow, error) {
-	active, err := r.queries.CountEmployeesAsOf(ctx, sqlc.CountEmployeesAsOfParams{
-		BusinessID: businessID,
-		StartDate:  dateParam(to),
-		EndDate:    dateParam(to),
-	})
+	active, err := r.sources.HR.InsightsHeadcountAsOf(ctx, businessID, dateOnly(to))
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: utilization employee count failed", logger.Error(err))
 		return UtilizationRow{}, err
 	}
-
-	scheduled, err := r.queries.SumScheduledHoursInRange(ctx, sqlc.SumScheduledHoursInRangeParams{
-		BusinessID: businessID,
-		Date:       dateOnly(from),
-		Date_2:     dateOnly(to),
-	})
+	scheduled, err := r.sources.HR.InsightsScheduledHours(ctx, businessID, dateOnly(from), dateOnly(to))
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: utilization scheduled hours failed", logger.Error(err))
 		return UtilizationRow{}, err
 	}
-
 	return UtilizationRow{
-		ScheduledHours: toFloat(scheduled),
+		ScheduledHours: float64(decimalToMinorUnits(scheduled)) / 100,
 		AvailableHours: float64(active) * float64(inclusiveWorkdays(from, to)) * 8,
 	}, nil
 }

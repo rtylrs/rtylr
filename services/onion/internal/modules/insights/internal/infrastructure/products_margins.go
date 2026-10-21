@@ -2,8 +2,8 @@ package infrastructure
 
 import (
 	"context"
-	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -23,23 +23,18 @@ var marginBuckets = []struct {
 }
 
 func (r *Repository) GetMarginDistribution(ctx context.Context, businessID int64) ([]MarginBucketRow, error) {
-	// cross-schema read from erp_products — aggregate the fixed histogram in SQL.
-	counts, err := r.queries.GetProductMarginDistribution(ctx, businessID)
+	bucketCounts, err := r.sources.ERP.InsightsMarginDistribution(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: margin distribution query failed", logger.Error(err))
 		return nil, err
 	}
-	bucketCounts := []int64{
-		counts.BelowZeroCount,
-		counts.ZeroToTenCount,
-		counts.TenToTwentyFiveCount,
-		counts.TwentyFiveToFiftyCount,
-		counts.FiftyToSeventyFiveCount,
-		counts.SeventyFivePlusCount,
-	}
 	out := make([]MarginBucketRow, 0, len(marginBuckets))
 	for i, b := range marginBuckets {
-		out = append(out, MarginBucketRow{Label: b.Label, LowerPct: b.Lower, UpperPct: b.Upper, ProductCount: bucketCounts[i]})
+		var count int64
+		if i < len(bucketCounts) {
+			count = bucketCounts[i]
+		}
+		out = append(out, MarginBucketRow{Label: b.Label, LowerPct: b.Lower, UpperPct: b.Upper, ProductCount: count})
 	}
 	return out, nil
 }

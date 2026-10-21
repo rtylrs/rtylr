@@ -5,13 +5,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/voxire/onion/internal/modules/insights/kpis/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
 
 func TestGetKPIs_QueryFailure_ReturnsError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 
 	// A failing database must surface as an error instead of a zero-filled
 	// summary, which the application service would otherwise cache for 2
@@ -27,7 +26,7 @@ func TestGetKPIs_QueryFailure_ReturnsError(t *testing.T) {
 
 func TestGetKPIs_CanceledContext_ReturnsError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -39,7 +38,7 @@ func TestGetKPIs_CanceledContext_ReturnsError(t *testing.T) {
 
 func TestGetKPIs_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -51,7 +50,7 @@ func TestGetKPIs_NoError(t *testing.T) {
 
 func TestGetKPIs_CustomerCountNonNegative(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -65,7 +64,7 @@ func TestGetKPIs_CustomerCountNonNegative(t *testing.T) {
 
 func TestGetKPIs_CustomerCountAtLeastFixtures(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -80,7 +79,7 @@ func TestGetKPIs_CustomerCountAtLeastFixtures(t *testing.T) {
 
 func TestGetKPIs_StaffCountNonNegative(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -94,7 +93,7 @@ func TestGetKPIs_StaffCountNonNegative(t *testing.T) {
 
 func TestGetKPIs_LowStockCountNonNegative(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -108,7 +107,7 @@ func TestGetKPIs_LowStockCountNonNegative(t *testing.T) {
 
 func TestGetKPIs_OrderCountNonNegative(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -122,7 +121,7 @@ func TestGetKPIs_OrderCountNonNegative(t *testing.T) {
 
 func TestGetKPIs_RevenueNonNegative(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -136,7 +135,7 @@ func TestGetKPIs_RevenueNonNegative(t *testing.T) {
 
 func TestGetKPIs_UnknownOwner_ReturnsZeros(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, 9999999)
@@ -153,7 +152,7 @@ func TestGetKPIs_UnknownOwner_ReturnsZeros(t *testing.T) {
 
 func TestGetKPIs_AllFieldsPopulated(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -171,7 +170,7 @@ func TestGetKPIs_AllFieldsPopulated(t *testing.T) {
 
 func TestGetKPIs_Idempotent(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -189,7 +188,7 @@ func TestGetKPIs_Idempotent(t *testing.T) {
 
 func TestGetKPIs_NegativeOwner_ReturnsZeros(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, -1)
@@ -203,7 +202,7 @@ func TestGetKPIs_NegativeOwner_ReturnsZeros(t *testing.T) {
 
 func TestGetKPIs_ZeroOwner_ReturnsZeros(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, 0)
@@ -217,7 +216,7 @@ func TestGetKPIs_ZeroOwner_ReturnsZeros(t *testing.T) {
 
 func TestGetKPIs_OrderCountNonNegative_NewOwner(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, 9999999)
@@ -231,7 +230,7 @@ func TestGetKPIs_OrderCountNonNegative_NewOwner(t *testing.T) {
 
 func TestGetKPIs_RevenueNonNegative_NewOwner(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, 9999999)
@@ -245,7 +244,7 @@ func TestGetKPIs_RevenueNonNegative_NewOwner(t *testing.T) {
 
 func TestGetKPIs_LowStockCount_NewOwner_IsZero(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, 9999999)
@@ -259,7 +258,7 @@ func TestGetKPIs_LowStockCount_NewOwner_IsZero(t *testing.T) {
 
 func TestGetKPIs_StaffCountAtLeastFixture(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -274,7 +273,7 @@ func TestGetKPIs_StaffCountAtLeastFixture(t *testing.T) {
 
 func TestGetKPIs_RevenueIdempotent(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -292,7 +291,7 @@ func TestGetKPIs_RevenueIdempotent(t *testing.T) {
 
 func TestGetKPIs_OrderCountIdempotent(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -310,7 +309,7 @@ func TestGetKPIs_OrderCountIdempotent(t *testing.T) {
 
 func TestGetKPIs_LargeOwnerID_ReturnsZeros(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	kpis, err := repo.GetKPIs(ctx, 1<<40)
@@ -324,7 +323,7 @@ func TestGetKPIs_LargeOwnerID_ReturnsZeros(t *testing.T) {
 
 func TestGetKPIs_StaffCountIdempotent(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
@@ -342,7 +341,7 @@ func TestGetKPIs_StaffCountIdempotent(t *testing.T) {
 
 func TestGetKPIs_LowStockCountIdempotent(t *testing.T) {
 	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
+	repo := newRepository(db)
 	ctx := context.Background()
 
 	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
