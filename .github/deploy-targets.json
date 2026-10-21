@@ -115,7 +115,8 @@
     "service": "api",
     "container": "api",
     "desired_count": "1",
-    "health_url": "https://api.voxire.com/health"
+    "health_url": "https://api.voxire.com/health",
+    "version_url": "https://api.voxire.com/version"
   },
   {
     "app": "onion-worker",

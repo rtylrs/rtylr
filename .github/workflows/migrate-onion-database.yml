@@ -124,7 +124,8 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --depth 1 origin "$TOOLING_SHA"
-          git checkout "$TOOLING_SHA" -- services/onion/scripts services/onion/Dockerfile.migrate
+          git checkout "$TOOLING_SHA" -- services/onion/scripts services/onion/Dockerfile.migrate \
+            .github/scripts/migration-key.sh
           echo "Migration tooling taken from $TOOLING_SHA"
           echo "Schema set remains at ${{ inputs.release_tag }}"
 
@@ -329,3 +330,23 @@ jobs:
             exit 1
           fi
           echo "Migrations applied."
+
+      # release.yml skips this job for a release whose migration key is
+      # recorded here. Record only a clean, real run of the release's schemas.
+      - name: Compute the migration key
+        id: key
+        if: ${{ !inputs.dry_run && success() }}
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          key="$(bash .github/scripts/migration-key.sh HEAD)"
+          echo "$key" > .migrations-applied
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+
+      - name: Record the applied migrations
+        if: ${{ !inputs.dry_run && steps.key.outputs.key != '' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .migrations-applied
+          key: onion-migrations-applied-${{ steps.key.outputs.key }}
