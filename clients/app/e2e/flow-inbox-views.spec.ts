@@ -147,6 +147,45 @@ test.describe('Flow - Inbox & Features Sweep', () => {
     await expect(page.locator('body')).toBeVisible();
   });
 
+  test('my issues windows a long task list', async ({ page }) => {
+    const tasks = Array.from({ length: 300 }, (_, i) => ({
+      ...FAKE_TASK,
+      id: String(1000 + i),
+      title: `Long list task ${i}`,
+      identifier: `AP-${1000 + i}`,
+    }));
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/my(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ tasks }),
+      })
+    );
+    await page.goto(`${FLOW_URL}/my-issues`);
+
+    // Undated tasks land in "No date", which starts collapsed.
+    await page.getByRole('button', { name: /^No date/ }).click();
+    const first = page.getByText('Long list task 0', { exact: true });
+    await expect(first).toBeVisible();
+    // Only the rows near the viewport render; the rest hold their space.
+    const rows = page.getByRole('button', { name: /Long list task \d+/ });
+    await expect.poll(() => rows.count()).toBeLessThan(80);
+    await expect(page.getByText('Long list task 299', { exact: true })).not.toBeAttached();
+
+    const scrollTo = (where: 'top' | 'bottom') =>
+      first.evaluate((el, where) => {
+        let scroller = el.parentElement;
+        while (scroller && getComputedStyle(scroller).overflowY !== 'auto') {
+          scroller = scroller.parentElement;
+        }
+        scroller!.scrollTo({ top: where === 'top' ? 0 : scroller!.scrollHeight });
+      }, where);
+    await scrollTo('bottom');
+    await expect(page.getByText('Long list task 299', { exact: true })).toBeVisible();
+    await expect(page.getByText('Long list task 0', { exact: true })).not.toBeAttached();
+    await expect.poll(() => rows.count()).toBeLessThan(80);
+  });
+
   test('central settings navigation opens Flow sections', async ({ page }) => {
     await page.goto(`${FLOW_URL.replace(/\/flow$/, '')}/settings/flow`);
     await page.waitForLoadState('networkidle');

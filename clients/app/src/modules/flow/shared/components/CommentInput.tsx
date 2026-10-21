@@ -14,7 +14,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
   const [value, setValue] = useState('');
   const [mentionOpen, setMentionOpen] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
-  const { members } = useFlowStore();
+  const members = useFlowStore((state) => state.members);
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === '@') {

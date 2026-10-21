@@ -24,6 +24,8 @@ import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { withAlpha, onTint } from '../../shared/lib/colorUtils';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
+import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
+import { VirtualList } from '../../../../shared/components/VirtualList';
 
 type FilterType = 'all' | 'unread' | 'assigned';
 
@@ -51,13 +53,18 @@ function formatTimestamp(ts: string, t: TFunction, lang: string): string {
 const NotificationRow: React.FC<{
   notification: ApiNotification;
   onOpen: (notification: ApiNotification) => void;
-}> = ({ notification, onOpen }) => {
+  /** From a windowed list (see VirtualList). */
+  rowProps?: RowProps;
+}> = ({ notification, onOpen, rowProps }) => {
   const { t, i18n } = useTranslation();
+  // Windowed rows mount as they scroll into view; no entrance or layout animation.
+  const windowed = rowProps?.['data-index'] !== undefined;
   return (
     <motion.button
+      {...rowProps}
       type="button"
-      layout
-      initial={{ opacity: 0, y: 6 }}
+      layout={!windowed}
+      initial={windowed ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -12 }}
       transition={{ duration: 0.18 }}
@@ -272,16 +279,22 @@ const Inbox: React.FC = () => {
                   />
                 </motion.div>
               ) : (
-                filtered.map((n) => (
-                  <NotificationRow
-                    key={n.id}
-                    notification={n}
-                    onOpen={(notification) => {
-                      markRead.mutate(notification.id);
-                      if (notification.taskId) openTask(notification.taskId);
-                    }}
-                  />
-                ))
+                <VirtualList
+                  key="list"
+                  count={filtered.length}
+                  estimateSize={73}
+                  renderRow={(index, rowProps) => (
+                    <NotificationRow
+                      key={filtered[index].id}
+                      rowProps={rowProps}
+                      notification={filtered[index]}
+                      onOpen={(notification) => {
+                        markRead.mutate(notification.id);
+                        if (notification.taskId) openTask(notification.taskId);
+                      }}
+                    />
+                  )}
+                />
               )}
             </AnimatePresence>
           </>

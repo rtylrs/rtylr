@@ -63,7 +63,10 @@ vi.mock('./useMilestones', () => ({
 }));
 
 vi.mock('../../shared/stores/flowStore', () => ({
-  useFlowStore: () => ({ activeWorkspaceId: 'ws1' }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { activeWorkspaceId: 'ws1' };
+    return selector ? selector(state) : state;
+  },
 }));
 
 describe('Milestones create form', () => {

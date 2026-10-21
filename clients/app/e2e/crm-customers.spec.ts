@@ -299,6 +299,49 @@ test.describe('CRM customers flow', () => {
     await stubCrmAPI(page);
   });
 
+  test('windows a long customer list and keeps an expanded row in place', async ({ page }) => {
+    // Long names only near the top: unlocked, the name column would narrow
+    // once those rows scroll away.
+    const name = (i: number) =>
+      i < 40 ? `Customer ${i} with a much longer name` : `Customer ${i}`;
+    customers = Array.from({ length: 150 }, (_, i) => ({
+      ...FAKE_CUSTOMER,
+      id: 1000 + i,
+      first_name: 'Customer',
+      last_name: name(i).replace('Customer ', ''),
+      name: name(i),
+      email: `c${String(i).padStart(3, '0')}@example.com`,
+      initials: 'CU',
+    }));
+    await page.goto(`${CRM_URL}/customers`);
+    await expect(page.getByText(name(0), { exact: true })).toBeVisible({ timeout: 15_000 });
+
+    // Each customer is its own tbody; only those near the viewport render.
+    const rendered = page.locator('table tbody[data-index]');
+    await expect.poll(() => rendered.count()).toBeLessThan(60);
+    await expect(page.getByText(name(149), { exact: true })).not.toBeAttached();
+
+    const headers = page.locator('table thead th');
+    const widths = () => headers.evaluateAll((cells) => cells.map((c) => c.clientWidth));
+    const before = await widths();
+
+    // Expanding a row grows its tbody, which the list measures.
+    await page.getByText(name(1), { exact: true }).click();
+    await expect(page.getByText('c001@example.com').nth(1)).toBeVisible();
+
+    const main = page.locator('#main-content');
+    await main.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+    await expect(page.getByText(name(149), { exact: true })).toBeVisible();
+    await expect(page.getByText(name(0), { exact: true })).not.toBeAttached();
+    // Columns hold their width as rows come and go.
+    const after = await widths();
+    after.forEach((width, i) => expect(Math.abs(width - before[i])).toBeLessThanOrEqual(1));
+
+    await main.evaluate((el) => el.scrollTo({ top: 0 }));
+    await expect(page.getByText(name(0), { exact: true })).toBeVisible();
+    await expect(page.getByText('c001@example.com').nth(1)).toBeVisible();
+  });
+
   test('empty customer list shows the empty state', async ({ page }) => {
     await page.goto(`${CRM_URL}/customers`);
     await expect(page.getByRole('heading', { name: /No customers found/i })).toBeVisible({

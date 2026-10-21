@@ -19,7 +19,8 @@ const t = (key: string, options?: Record<string, unknown>): string =>
   i18next.t(key, options) as string;
 
 export const BulkEditBar: React.FC = () => {
-  const { selectedTaskIds, clearSelection } = useFlowStore();
+  const selectedTaskIds = useFlowStore((state) => state.selectedTaskIds);
+  const clearSelection = useFlowStore((state) => state.clearSelection);
   // Resolve the selection from the task query rather than the Zustand store.
   // `setTasks` has no call site anywhere in the app, so `tasks` was
   // permanently [], no selected task could ever be resolved, and the guard

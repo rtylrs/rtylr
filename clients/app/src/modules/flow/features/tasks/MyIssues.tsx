@@ -7,6 +7,7 @@ import { useMyIssues } from './useMyIssues';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { TaskRow } from '../../shared/components/TaskRow';
+import { VirtualList } from '../../../../shared/components/VirtualList';
 import {
   bucketForMyTask,
   MY_TASK_BUCKET_LABEL_KEY,
@@ -32,7 +33,8 @@ const MyIssues: React.FC = () => {
   // GetMyTasks doesn't filter archived server-side, so exclude client-side
   // to match Triage/FocusToday/FlowLayout.
   const tasks = useMemo(() => rawTasks.map(apiTaskToTask).filter((t) => !t.archived), [rawTasks]);
-  const { selectedTaskIds, setQuickCreateOpen } = useFlowStore();
+  const selectedTaskIds = useFlowStore((state) => state.selectedTaskIds);
+  const setQuickCreateOpen = useFlowStore((state) => state.setQuickCreateOpen);
   const [collapsed, setCollapsed] = useState<ReadonlySet<MyTaskBucket>>(
     MY_TASK_BUCKET_COLLAPSED_BY_DEFAULT
   );
@@ -114,7 +116,7 @@ const MyIssues: React.FC = () => {
                     </span>
                   </button>
                 </h2>
-                <div
+                <VirtualList
                   id={`my-tasks-${bucket}`}
                   hidden={isCollapsed}
                   className="rounded-xl overflow-hidden"
@@ -122,16 +124,18 @@ const MyIssues: React.FC = () => {
                     background: 'var(--flow-card)',
                     border: '1px solid var(--flow-border)',
                   }}
-                >
-                  {bucketTasks.map((task) => (
+                  count={isCollapsed ? 0 : bucketTasks.length}
+                  estimateSize={41}
+                  renderRow={(index, rowProps) => (
                     <TaskRow
-                      key={task.id}
-                      task={task}
+                      key={bucketTasks[index].id}
+                      rowProps={rowProps}
+                      task={bucketTasks[index]}
                       showProject
-                      selected={selectedTaskIds.includes(task.id)}
+                      selected={selectedTaskIds.includes(bucketTasks[index].id)}
                     />
-                  ))}
-                </div>
+                  )}
+                />
               </motion.section>
             );
           })}

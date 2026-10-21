@@ -238,7 +238,8 @@ const TaskDetail: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const milestonesQuery = useMilestones(taskProjectId ?? '');
   const { data: milestones = [] } = milestonesQuery;
   const { data: projectSections = [] } = useProjectColumns(taskProjectId ?? '');
-  const { members, projects } = useFlowStore();
+  const members = useFlowStore((state) => state.members);
+  const projects = useFlowStore((state) => state.projects);
 
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);

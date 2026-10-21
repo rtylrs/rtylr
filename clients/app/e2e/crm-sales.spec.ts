@@ -235,10 +235,26 @@ test.describe('CRM sales', () => {
     await page.waitForTimeout(500);
     expect(pages).toEqual(['']);
     await page.getByRole('row', { name: /Company 59/ }).scrollIntoViewIfNeeded();
-    await expect(page.getByRole('row', { name: /Company 119/ })).toBeAttached();
     await expect(page.getByText('Showing 120 of 120')).toBeVisible();
     expect(pages).toEqual(['', 'p2']);
     await expect(page.getByRole('button', { name: 'Load more' })).toHaveCount(0);
+
+    // Past 80 rows the table windows: only the rows near the viewport render,
+    // and the table still reports the whole count.
+    const table = page.locator('.sales-table');
+    const rendered = table.locator('tbody tr:not(.virtual-spacer)');
+    await expect(table).toHaveAttribute('aria-rowcount', '121');
+    await expect.poll(() => rendered.count()).toBeLessThan(60);
+    const main = page.locator('#main-content');
+    await main.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+    await expect(page.getByRole('row', { name: /Company 119\b/ })).toBeVisible();
+    await expect(page.getByRole('row', { name: /Company 0\b/ })).not.toBeAttached();
+    await expect(page.getByRole('row', { name: /Company 119\b/ })).toHaveAttribute(
+      'aria-rowindex',
+      '121'
+    );
+    await main.evaluate((el) => el.scrollTo({ top: 0 }));
+    await expect(page.getByRole('row', { name: /Company 0\b/ })).toBeVisible();
   });
 
   test('logs a call with its outcome and a follow-up', async ({ page }) => {

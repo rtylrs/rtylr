@@ -57,7 +57,10 @@ vi.mock('../../shared/stores/flowStore', () => ({
   // activeWorkspaceId is '' in production, since the workspace layer was
   // removed. The old submit guard required it, so a mock carrying 'ws-1' would
   // hide the very defect these tests cover.
-  useFlowStore: () => ({ activeWorkspaceId: '', projects: storeProjects.value }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { activeWorkspaceId: '', projects: storeProjects.value };
+    return selector ? selector(state) : state;
+  },
   // PriorityIcon reads this, so it is only needed once a test renders a task.
   PRIORITY_COLORS: {
     urgent: '#ef4444',

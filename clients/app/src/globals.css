@@ -236,3 +236,10 @@
 .shepherd-arrow:before {
   background: var(--dash-surface) !important;
 }
+
+/* Space held for the rows a windowed list isn't rendering (VirtualSpacer). */
+.virtual-spacer,
+.virtual-spacer:hover {
+  background: none !important;
+  pointer-events: none;
+}

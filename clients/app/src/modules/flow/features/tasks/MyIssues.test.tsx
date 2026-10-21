@@ -28,7 +28,10 @@ vi.mock('./useMyIssues', () => ({
 const setQuickCreateOpen = vi.hoisted(() => vi.fn());
 
 vi.mock('../../shared/stores/flowStore', () => ({
-  useFlowStore: () => ({ selectedTaskIds: [], setQuickCreateOpen }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { selectedTaskIds: [], setQuickCreateOpen };
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('../../shared/components/TaskRow', () => ({

@@ -30,6 +30,7 @@ import {
   useFilteredTasks,
 } from './useViews';
 import TaskRow from '../../shared/components/TaskRow';
+import { VirtualList } from '../../../../shared/components/VirtualList';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ViewFilterChips, { EMPTY_FILTERS, hasActiveFilters } from './ViewFilterChips';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
@@ -347,9 +348,18 @@ const Views: React.FC = () => {
                   }}
                 />
               )}
-              {tasks.map((t) => (
-                <TaskRow key={t.id} task={t} showProject />
-              ))}
+              <VirtualList
+                count={tasks.length}
+                estimateSize={41}
+                renderRow={(index, rowProps) => (
+                  <TaskRow
+                    key={tasks[index].id}
+                    rowProps={rowProps}
+                    task={tasks[index]}
+                    showProject
+                  />
+                )}
+              />
             </>
           )}
         </motion.div>

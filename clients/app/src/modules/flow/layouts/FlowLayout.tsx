@@ -47,13 +47,11 @@ export default function FlowLayout({ children }: { children: ReactNode }) {
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const { preferences, update } = useSidebarPreferences();
   const { prefs: lifePrefs } = useLifePreferences();
-  const {
-    setProjects,
-    setMembers,
-    setQuickCreateOpen,
-    projectCreateOpen: projectOpen,
-    setProjectCreateOpen: setProjectOpen,
-  } = useFlowStore();
+  const setProjects = useFlowStore((state) => state.setProjects);
+  const setMembers = useFlowStore((state) => state.setMembers);
+  const setQuickCreateOpen = useFlowStore((state) => state.setQuickCreateOpen);
+  const projectOpen = useFlowStore((state) => state.projectCreateOpen);
+  const setProjectOpen = useFlowStore((state) => state.setProjectCreateOpen);
   const { data: projects } = useProjects({
     enabled: canFlowPermission('flow:projects:view', user?.effectiveAccess),
   });

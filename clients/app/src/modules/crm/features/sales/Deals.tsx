@@ -42,18 +42,22 @@ import {
   useRepNames,
 } from './components/common';
 import { DealFormModal, LoseDealModal, WinDealModal } from './components/DealModals';
+import { type RowProps, useVirtualRows } from '../../../../shared/hooks/useVirtualRows';
+import { VirtualSpacer, VirtualSpacerRow } from '../../../../shared/components/VirtualList';
 
 const DealCard: React.FC<{
   deal: Deal;
   names: Map<string, string>;
   onOpen: () => void;
   draggable: boolean;
-}> = ({ deal, names, onOpen, draggable }) => {
+  rowProps?: RowProps;
+}> = ({ deal, names, onOpen, draggable, rowProps }) => {
   const { t } = useTranslation();
   const owner = deal.assignedTo ? names.get(deal.assignedTo) : undefined;
   const closeState = deal.status === 'open' ? dueState(deal.expectedCloseDate) : undefined;
   return (
     <button
+      {...rowProps}
       type="button"
       className="sales-deal-card"
       draggable={draggable}
@@ -120,6 +124,7 @@ const StageColumn: React.FC<{
   const sentinel = useNextPageOnScroll(list);
   const [over, setOver] = useState(false);
   const rows = list.data?.pages.flatMap((page) => page.deals ?? []) ?? [];
+  const virtual = useVirtualRows(rows.length, { estimateSize: 96, gap: 8 });
   return (
     <section
       className={`sales-column${over ? ' is-drop-target' : ''}`}
@@ -157,15 +162,23 @@ const StageColumn: React.FC<{
           )}
         </div>
       </div>
-      {rows.map((deal) => (
-        <DealCard
-          key={deal.id}
-          deal={deal}
-          names={names}
-          onOpen={() => onOpen(deal)}
-          draggable={deal.status === 'open'}
-        />
-      ))}
+      <div ref={virtual.listRef} className="sales-column-cards">
+        <VirtualSpacer height={virtual.before} />
+        {virtual.indexes.map((index) => {
+          const deal = rows[index];
+          return (
+            <DealCard
+              key={deal.id}
+              rowProps={virtual.rowProps(index)}
+              deal={deal}
+              names={names}
+              onOpen={() => onOpen(deal)}
+              draggable={deal.status === 'open'}
+            />
+          );
+        })}
+        <VirtualSpacer height={virtual.after} />
+      </div>
       {list.hasNextPage && (
         <Button
           ref={sentinel}
@@ -198,6 +211,7 @@ const DealTable: React.FC<{ pipelineId?: string; rep: string; search: string }> 
   const [sort, setSort] = useState<DealSort>('close_date');
   const deals = useDealList({ pipelineId, statuses, rep, search, sort });
   const rows = deals.data?.pages.flatMap((page) => page.deals ?? []) ?? [];
+  const virtual = useVirtualRows(rows.length, { estimateSize: 53, headerRows: 1 });
   const pipeline = board.data?.pipeline;
   return (
     <div className="sales-card">
@@ -256,36 +270,45 @@ const DealTable: React.FC<{ pipelineId?: string; rep: string; search: string }> 
                   <th>{t('crmSales.fields.status')}</th>
                 </tr>
               </thead>
-              <tbody>
-                {rows.map((deal) => (
-                  <tr key={deal.id} onClick={() => navigate({ to: `/crm/sales/deals/${deal.id}` })}>
-                    <td>
-                      <div className="sales-cell-main">{deal.title}</div>
-                      <div className="sales-cell-sub">
-                        {[deal.companyName, deal.contactName].filter(Boolean).join(' · ')}
-                      </div>
-                    </td>
-                    <td>{stageById(pipeline, deal.stageId)?.name ?? '—'}</td>
-                    <td>
-                      <Money value={deal.value} billing={deal.billing} />
-                    </td>
-                    <td>
-                      <RepName id={deal.assignedTo} names={names} />
-                    </td>
-                    <td>
-                      <DueDate
-                        date={deal.status === 'open' ? deal.expectedCloseDate : undefined}
-                        emptyLabel={deal.expectedCloseDate || '—'}
-                      />
-                    </td>
-                    <td>
-                      <DueDate date={deal.nextFollowUp} />
-                    </td>
-                    <td>
-                      <DealStatusBadge status={deal.status} />
-                    </td>
-                  </tr>
-                ))}
+              <tbody ref={virtual.listRef}>
+                <VirtualSpacerRow height={virtual.before} columns={7} />
+                {virtual.indexes.map((index) => {
+                  const deal = rows[index];
+                  return (
+                    <tr
+                      key={deal.id}
+                      {...virtual.rowProps(index)}
+                      onClick={() => navigate({ to: `/crm/sales/deals/${deal.id}` })}
+                    >
+                      <td>
+                        <div className="sales-cell-main">{deal.title}</div>
+                        <div className="sales-cell-sub">
+                          {[deal.companyName, deal.contactName].filter(Boolean).join(' · ')}
+                        </div>
+                      </td>
+                      <td>{stageById(pipeline, deal.stageId)?.name ?? '—'}</td>
+                      <td>
+                        <Money value={deal.value} billing={deal.billing} />
+                      </td>
+                      <td>
+                        <RepName id={deal.assignedTo} names={names} />
+                      </td>
+                      <td>
+                        <DueDate
+                          date={deal.status === 'open' ? deal.expectedCloseDate : undefined}
+                          emptyLabel={deal.expectedCloseDate || '—'}
+                        />
+                      </td>
+                      <td>
+                        <DueDate date={deal.nextFollowUp} />
+                      </td>
+                      <td>
+                        <DealStatusBadge status={deal.status} />
+                      </td>
+                    </tr>
+                  );
+                })}
+                <VirtualSpacerRow height={virtual.after} columns={7} />
               </tbody>
             </table>
           </div>

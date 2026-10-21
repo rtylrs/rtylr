@@ -1183,3 +1183,8 @@ a.sales-contact-line:hover {
   white-space: nowrap;
   border: 0;
 }
+.sales-column-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

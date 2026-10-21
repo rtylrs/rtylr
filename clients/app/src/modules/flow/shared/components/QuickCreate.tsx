@@ -53,7 +53,9 @@ export const QuickCreate: React.FC = () => {
   const openTask = useOpenTask();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const { quickCreateOpen, quickCreateColumnId, setQuickCreateOpen } = useFlowStore();
+  const quickCreateOpen = useFlowStore((state) => state.quickCreateOpen);
+  const quickCreateColumnId = useFlowStore((state) => state.quickCreateColumnId);
+  const setQuickCreateOpen = useFlowStore((state) => state.setQuickCreateOpen);
   const user = useUserStore((s) => s.user);
   const { projectId: currentProjectId } = useParams({ strict: false });
   const canCreate = canFlowPermission('flow:tasks:create', user?.effectiveAccess);

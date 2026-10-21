@@ -19,6 +19,8 @@ import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { useOpenTask } from '../../shared/lib/useOpenTask';
 import { useCanEditTask, useCanCreateTask } from '../../shared/lib/currentUser';
 import ProjectViewTabs from './ProjectViewTabs';
+import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
+import { VirtualList } from '../../../../shared/components/VirtualList';
 
 interface StatusGroupDef {
   id: Task['status'];
@@ -44,9 +46,14 @@ export function groupIsVisible(group: { alwaysShown: boolean }, taskCount: numbe
 interface TaskRowProps {
   task: Task;
   depth?: number;
+  /** From a windowed list (see VirtualList). */
+  rowProps?: RowProps;
 }
 
-export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
+export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0, rowProps }) => {
+  // Windowed rows mount as they scroll into view, so they skip the entrance
+  // and layout animations a short list uses.
+  const windowed = rowProps?.['data-index'] !== undefined;
   const { t } = useTranslation();
   const [checked, setChecked] = useState(task.status === 'done');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -83,6 +90,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
   return (
     <motion.div
+      {...rowProps}
       role="button"
       tabIndex={0}
       aria-label={t('flowCommon.taskRow.openTask', {
@@ -96,8 +104,8 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
           openTask(task.id);
         }
       }}
-      layout
-      initial={{ opacity: 0, x: -6 }}
+      layout={!windowed}
+      initial={windowed ? false : { opacity: 0, x: -6 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.15 }}
       className="flex items-center gap-3 px-4 py-2.5 group hover:bg-[var(--flow-hover)] transition-colors cursor-pointer"
@@ -227,9 +235,13 @@ export const StatusGroup: React.FC<{
             transition={{ duration: 0.18 }}
             style={{ overflow: 'hidden' }}
           >
-            {tasks.map((task) => (
-              <TaskRow key={task.id} task={task} />
-            ))}
+            <VirtualList
+              count={tasks.length}
+              estimateSize={41}
+              renderRow={(index, rowProps) => (
+                <TaskRow key={tasks[index].id} rowProps={rowProps} task={tasks[index]} />
+              )}
+            />
 
             {canCreate && (
               <button
@@ -380,9 +392,17 @@ const ProjectList: React.FC = () => {
                     {block.tasks.length}
                   </span>
                 </div>
-                {block.tasks.map((task) => (
-                  <TaskRow key={task.id} task={task} />
-                ))}
+                <VirtualList
+                  count={block.tasks.length}
+                  estimateSize={41}
+                  renderRow={(index, rowProps) => (
+                    <TaskRow
+                      key={block.tasks[index].id}
+                      rowProps={rowProps}
+                      task={block.tasks[index]}
+                    />
+                  )}
+                />
                 {canCreate && (
                   <button
                     type="button"
