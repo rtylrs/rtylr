@@ -14,6 +14,7 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
 import { TaskRowSkeleton } from '../../shared/components/Skeleton';
+import { VirtualList } from '../../../../shared/components/VirtualList';
 
 const Archive: React.FC = () => {
   const { t } = useTranslation();
@@ -68,52 +69,60 @@ const Archive: React.FC = () => {
             }}
           />
         ) : (
-          archived.map((task) => (
-            <div
-              key={task.id}
-              className="flex items-center gap-3 px-6 py-3 hover:bg-[var(--flow-hover)] group"
-              style={{ borderBottom: '1px solid var(--flow-border)' }}
-            >
-              {/* The glyph and title dim together, S-14's 62%. Restore stays
+          <VirtualList
+            count={archived.length}
+            estimateSize={45}
+            renderRow={(index, rowProps) => {
+              const task = archived[index];
+              return (
+                <div
+                  key={task.id}
+                  {...rowProps}
+                  className="flex items-center gap-3 px-6 py-3 hover:bg-[var(--flow-hover)] group"
+                  style={{ borderBottom: '1px solid var(--flow-border)' }}
+                >
+                  {/* The glyph and title dim together, S-14's 62%. Restore stays
                   outside this wrapper: dimming the row as a whole would take
                   the one control on it down with the content. */}
-              <span className="flex min-w-0 flex-1 items-center gap-3 opacity-[0.62]">
-                <PriorityIcon priority={task.priority} size={12} />
-                <button
-                  type="button"
-                  onClick={() => openTask(String(task.id))}
-                  className="min-w-0 flex-1 truncate text-left text-flow-meta"
-                  style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
-                >
-                  {task.title}
-                </button>
-              </span>
-              <span
-                className="text-flow-meta shrink-0 hidden group-hover:inline"
-                style={{ color: 'var(--flow-text-dim)' }}
-              >
-                {task.projectName}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  restoreTask.mutate(
-                    { id: task.id, data: { archived: false } },
-                    {
-                      onSuccess: () => toast.success(t('flowToasts.task.restored')),
-                      onError: () => toast.error(t('flowToasts.task.restoreFailed')),
+                  <span className="flex min-w-0 flex-1 items-center gap-3 opacity-[0.62]">
+                    <PriorityIcon priority={task.priority} size={12} />
+                    <button
+                      type="button"
+                      onClick={() => openTask(String(task.id))}
+                      className="min-w-0 flex-1 truncate text-left text-flow-meta"
+                      style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
+                    >
+                      {task.title}
+                    </button>
+                  </span>
+                  <span
+                    className="text-flow-meta shrink-0 hidden group-hover:inline"
+                    style={{ color: 'var(--flow-text-dim)' }}
+                  >
+                    {task.projectName}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      restoreTask.mutate(
+                        { id: task.id, data: { archived: false } },
+                        {
+                          onSuccess: () => toast.success(t('flowToasts.task.restored')),
+                          onError: () => toast.error(t('flowToasts.task.restoreFailed')),
+                        }
+                      )
                     }
-                  )
-                }
-                disabled={restoreTask.isPending}
-                className="flex items-center gap-1 px-2 py-1 rounded-sm text-flow-meta font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
-                title={t('flowArchive.restoreTitle')}
-              >
-                <RotateCcw size={10} /> {t('flowArchive.restore')}
-              </button>
-            </div>
-          ))
+                    disabled={restoreTask.isPending}
+                    className="flex items-center gap-1 px-2 py-1 rounded-sm text-flow-meta font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+                    title={t('flowArchive.restoreTitle')}
+                  >
+                    <RotateCcw size={10} /> {t('flowArchive.restore')}
+                  </button>
+                </div>
+              );
+            }}
+          />
         )}
       </div>
     </div>

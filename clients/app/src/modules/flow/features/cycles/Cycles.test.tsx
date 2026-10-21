@@ -15,7 +15,10 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('../../shared/stores/flowStore', () => ({
-  useFlowStore: () => ({ activeWorkspaceId: 'ws-1' }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { activeWorkspaceId: 'ws-1' };
+    return selector ? selector(state) : state;
+  },
 }));
 
 const mutateSpy = vi.fn();

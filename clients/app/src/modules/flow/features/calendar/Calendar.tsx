@@ -45,7 +45,7 @@ const Calendar: React.FC = () => {
   const tasks = apiTasks as ApiTask[];
   const tasksFailed = hasQueryFailed(tasksQuery);
   const tasksLoading = tasksQuery.isPending && !tasksFailed;
-  const { projects } = useFlowStore();
+  const projects = useFlowStore((state) => state.projects);
   const { data: labels = [] } = useLabels();
   const createTask = useCreateTask();
   const [cursor, setCursor] = useState(() => new Date());

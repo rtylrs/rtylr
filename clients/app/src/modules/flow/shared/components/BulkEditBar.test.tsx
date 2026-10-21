@@ -23,7 +23,10 @@ const { storeState, tasksResult, detailsState, roleQuery, restrictingRole } = vi
 }));
 
 vi.mock('../stores/flowStore', () => ({
-  useFlowStore: () => storeState,
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = storeState;
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('../../features/tasks/useTasks', () => ({

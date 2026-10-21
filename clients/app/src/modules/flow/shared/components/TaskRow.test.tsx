@@ -27,7 +27,10 @@ const flowStoreState = vi.hoisted(() => ({
 }));
 vi.mock('../stores/flowStore', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../stores/flowStore')>()),
-  useFlowStore: () => flowStoreState,
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = flowStoreState;
+    return selector ? selector(state) : state;
+  },
 }));
 
 import { TaskRow } from './TaskRow';

@@ -11,6 +11,8 @@ import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/
 import { getCustomerTier } from '../../shared/lib/tiers';
 import { Users } from 'lucide-react';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import { useVirtualRows } from '../../../../shared/hooks/useVirtualRows';
+import { VirtualSpacer } from '../../../../shared/components/VirtualList';
 
 const LoyaltyMembers: React.FC = () => {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ const LoyaltyMembers: React.FC = () => {
 
   const members = [...(loadedMembers ?? [])].sort((a, b) => b.points - a.points);
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
+  const virtual = useVirtualRows(filtered.length, { estimateSize: 61 });
   const hasMore = !exhausted && fetched?.length === pageSize;
 
   return (
@@ -114,42 +117,49 @@ const LoyaltyMembers: React.FC = () => {
               }
             />
           ) : (
-            <div>
-              {filtered.map((m, i) => (
-                <div
-                  key={m.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
-                    padding: '12px 16px',
-                    borderBottom: i < filtered.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                  }}
-                >
-                  <span
+            <div ref={virtual.listRef}>
+              <VirtualSpacer height={virtual.before} />
+              {virtual.indexes.map((i) => {
+                const m = filtered[i];
+                return (
+                  <div
+                    key={m.id}
+                    {...virtual.rowProps(i)}
                     style={{
-                      width: '24px',
-                      textAlign: 'right',
-                      fontSize: '11px',
-                      color: 'var(--hub-text-dim)',
-                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '14px',
+                      padding: '12px 16px',
+                      borderBottom:
+                        i < filtered.length - 1 ? '1px solid var(--hub-border)' : 'none',
                     }}
                   >
-                    {i + 1}
-                  </span>
-                  <CustomerAvatar initials={m.initials} points={m.points} size={36} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                      {m.name}
+                    <span
+                      style={{
+                        width: '24px',
+                        textAlign: 'right',
+                        fontSize: '11px',
+                        color: 'var(--hub-text-dim)',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                    <CustomerAvatar initials={m.initials} points={m.points} size={36} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                        {m.name}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                        {m.visits} visits • last active {m.lastActive}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      {m.visits} visits • last active {m.lastActive}
-                    </div>
+                    <TierBadge tier={getCustomerTier(m.points, m.tier)} />
+                    <PointsBadge points={m.points} trend="up" />
                   </div>
-                  <TierBadge tier={getCustomerTier(m.points, m.tier)} />
-                  <PointsBadge points={m.points} trend="up" />
-                </div>
-              ))}
+                );
+              })}
+              <VirtualSpacer height={virtual.after} />
               {hasMore && (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
                   <Button

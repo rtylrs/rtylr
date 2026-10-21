@@ -9,6 +9,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { useTasks } from '../tasks/useTasks';
 import TaskRow from '../../shared/components/TaskRow';
+import { VirtualList } from '../../../../shared/components/VirtualList';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { ListLoadFailed } from '../../shared/components/ListLoadFailed';
@@ -27,7 +28,7 @@ const Triage: React.FC = () => {
   // query that ran, so the count and the empty state both wait for it.
   const resolved = !isLoading && !loadFailed;
   const tasks: Task[] = (apiTasks ?? []).map(apiTaskToTask);
-  const { selectedTaskIds } = useFlowStore();
+  const selectedTaskIds = useFlowStore((state) => state.selectedTaskIds);
 
   const needsTriage = useMemo(() => {
     return tasks.filter(
@@ -77,9 +78,19 @@ const Triage: React.FC = () => {
             }}
           />
         ) : (
-          needsTriage.map((t) => (
-            <TaskRow key={t.id} task={t} showProject selected={selectedTaskIds.includes(t.id)} />
-          ))
+          <VirtualList
+            count={needsTriage.length}
+            estimateSize={41}
+            renderRow={(index, rowProps) => (
+              <TaskRow
+                key={needsTriage[index].id}
+                rowProps={rowProps}
+                task={needsTriage[index]}
+                showProject
+                selected={selectedTaskIds.includes(needsTriage[index].id)}
+              />
+            )}
+          />
         )}
       </div>
     </div>

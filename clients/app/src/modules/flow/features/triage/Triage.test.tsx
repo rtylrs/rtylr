@@ -14,7 +14,10 @@ vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
 vi.mock('@tanstack/react-router', () => ({ useNavigate: () => vi.fn() }));
 
 vi.mock('../../shared/stores/flowStore', () => ({
-  useFlowStore: () => ({ selectedTaskIds: [] }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { selectedTaskIds: [] };
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('../../shared/components/TaskRow', () => ({

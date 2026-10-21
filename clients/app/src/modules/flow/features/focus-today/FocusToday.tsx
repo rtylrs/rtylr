@@ -62,7 +62,7 @@ const FocusSection: React.FC<{
 const FocusToday: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { projects } = useFlowStore();
+  const projects = useFlowStore((state) => state.projects);
   const myIssuesQuery = useMyIssues();
   const { data: myTasks } = myIssuesQuery;
   // A failed load must not render as "nothing due today": that tells the user

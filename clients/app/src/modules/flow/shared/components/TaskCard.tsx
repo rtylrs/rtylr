@@ -47,7 +47,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const openTask = useOpenTask();
-  const { projects } = useFlowStore();
+  const projects = useFlowStore((state) => state.projects);
   const { data: allLabels = [] } = useLabels();
   const taskLabels = labelsForTask(allLabels, task);
   const project = projects.find((p) => p.id === task.projectId);

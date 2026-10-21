@@ -32,6 +32,8 @@ import {
 } from './components/common';
 import { LeadFilterChips, LeadFilterPopover } from './components/LeadFilters';
 import LeadFormModal from './components/LeadFormModal';
+import { useVirtualRows } from '../../../../shared/hooks/useVirtualRows';
+import { VirtualSpacerRow } from '../../../../shared/components/VirtualList';
 import { ReasonPicker } from './components/ReasonPicker';
 
 type Tab = 'working' | 'all' | LeadStatus;
@@ -81,6 +83,7 @@ const Leads: React.FC = () => {
     [leads.data]
   );
   const total = leads.data?.pages[0]?.total;
+  const virtual = useVirtualRows(rows.length, { estimateSize: 53, headerRows: 1 });
   const counts = useMemo(() => {
     const byStatus = new Map(
       (stats.data?.byStatus ?? []).map((item) => [item.status, item.count ?? 0])
@@ -304,14 +307,17 @@ const Leads: React.FC = () => {
                     <th>{t('crmSales.fields.source')}</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {rows.map((lead) => {
+                <tbody ref={virtual.listRef}>
+                  <VirtualSpacerRow height={virtual.before} columns={8} />
+                  {virtual.indexes.map((index) => {
+                    const lead = rows[index];
                     const id = lead.id ?? '';
                     const person = personName(lead);
                     const href = telHref(lead.phone);
                     return (
                       <tr
                         key={id}
+                        {...virtual.rowProps(index)}
                         className={selected.has(id) ? 'is-selected' : undefined}
                         onClick={() => open(lead)}
                       >
@@ -363,6 +369,7 @@ const Leads: React.FC = () => {
                       </tr>
                     );
                   })}
+                  <VirtualSpacerRow height={virtual.after} columns={8} />
                 </tbody>
               </table>
             </div>

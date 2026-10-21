@@ -45,7 +45,8 @@ const ProjectOverview: React.FC = () => {
   const { data } = overviewQuery;
   const overviewFailed = hasQueryFailed(overviewQuery);
   const isLoading = overviewQuery.isPending && !overviewFailed;
-  const { projects, members } = useFlowStore();
+  const projects = useFlowStore((state) => state.projects);
+  const members = useFlowStore((state) => state.members);
   const project = projects.find((p) => p.id === projectId);
 
   if (isLoading)

@@ -12,18 +12,30 @@ import AssigneeAvatar from './AssigneeAvatar';
 import { Check } from 'lucide-react';
 import { TaskContextMenu, ContextMenuState } from './TaskContextMenu';
 import { withAlpha, onTint } from '../lib/colorUtils';
+import type { RowProps } from '../../../../shared/hooks/useVirtualRows';
 
 interface TaskRowProps {
   task: Task;
   showProject?: boolean;
   selected?: boolean;
   onSelect?: (e: React.MouseEvent | React.KeyboardEvent) => void;
+  /** From a windowed list (see VirtualList). */
+  rowProps?: RowProps;
 }
 
-export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
+export const TaskRow: React.FC<TaskRowProps> = ({
+  task,
+  showProject,
+  selected,
+  onSelect,
+  rowProps,
+}) => {
   const { t } = useTranslation();
   const openTask = useOpenTask();
-  const { projects, toggleSelectTask } = useFlowStore();
+  // Selectors, not the whole store: a list renders hundreds of these, and any
+  // store change would otherwise re-render every one.
+  const projects = useFlowStore((state) => state.projects);
+  const toggleSelectTask = useFlowStore((state) => state.toggleSelectTask);
   // See TaskCard: the store's `labels` is never populated, so this read from
   // the query is what makes the chips appear.
   const { data: allLabels = [] } = useLabels();
@@ -66,6 +78,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
   return (
     <>
       <div
+        {...rowProps}
         onClick={activateRow}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {

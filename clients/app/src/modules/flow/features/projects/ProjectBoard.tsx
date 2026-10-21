@@ -271,7 +271,9 @@ const ProjectBoard: React.FC = () => {
   const { t } = useTranslation();
   const { projectId = '' } = useParams({ strict: false });
 
-  const { selectedTaskIds, toggleSelectTask } = useFlowStore();
+  const selectedTaskIds = useFlowStore((state) => state.selectedTaskIds);
+
+  const toggleSelectTask = useFlowStore((state) => state.toggleSelectTask);
   const {
     project,
     isLoading: projectLoading,

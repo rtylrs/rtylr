@@ -18,7 +18,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { projects } = useFlowStore();
+  const projects = useFlowStore((state) => state.projects);
   const current = projects.find((p) => p.id === value);
 
   return (

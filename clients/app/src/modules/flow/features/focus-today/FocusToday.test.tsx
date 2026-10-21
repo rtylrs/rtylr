@@ -39,7 +39,10 @@ vi.mock('../tasks/useMyIssues', () => ({
 // out of this module; only the hook is replaced.
 vi.mock('../../shared/stores/flowStore', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../shared/stores/flowStore')>()),
-  useFlowStore: () => ({ projects: [], activeWorkspaceId: '' }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { projects: [], activeWorkspaceId: '' };
+    return selector ? selector(state) : state;
+  },
 }));
 
 // The existing tests below all render with no tasks, so this only affects the

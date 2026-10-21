@@ -31,7 +31,10 @@ vi.mock('@tanstack/react-router', () => ({
 
 vi.mock('@voxire/components', () => ({ HelmetContainer: () => null }));
 vi.mock('../../shared/stores/flowStore', () => ({
-  useFlowStore: () => ({ projects: [] }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { projects: [] };
+    return selector ? selector(state) : state;
+  },
   STATUS_COLORS: {
     backlog: '#6b7280',
     todo: '#9ca3af',

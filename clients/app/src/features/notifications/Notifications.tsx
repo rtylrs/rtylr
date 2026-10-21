@@ -13,6 +13,7 @@ import {
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
 } from '../../shared/hooks/queries/useNotifications';
+import { VirtualList } from '../../shared/components/VirtualList';
 
 const TABS = ['all', 'unread'] as const;
 
@@ -150,16 +151,20 @@ const Notifications: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="p-2">
-                  {filtered.map((n) => (
+                <VirtualList
+                  className="p-2"
+                  count={filtered.length}
+                  estimateSize={72}
+                  renderRow={(index, rowProps) => (
                     <NotificationItem
-                      key={n.id}
-                      notification={n}
+                      key={filtered[index].id}
+                      rowProps={rowProps}
+                      notification={filtered[index]}
                       onRead={(id) => markRead.mutate(id)}
                       onClick={handleNotificationClick}
                     />
-                  ))}
-                </div>
+                  )}
+                />
               )}
               {hasNextPage && (
                 <div className="px-2 pb-2 pt-1 flex justify-center">

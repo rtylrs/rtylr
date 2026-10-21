@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 import AppBadge from './AppBadge';
 import type { Notification } from '../../hooks/queries/useNotifications';
+import type { RowProps } from '../../hooks/useVirtualRows';
 
 function formatRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -18,6 +19,8 @@ export interface NotificationItemProps {
   notification: Notification;
   onRead?: (id: string) => void;
   onClick?: (n: Notification) => void;
+  /** From a windowed list (see VirtualList). */
+  rowProps?: RowProps;
 }
 
 const TYPE_META = {
@@ -31,12 +34,14 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   onRead,
   onClick,
+  rowProps,
 }) => {
   const meta = TYPE_META[notification.type];
   const Icon = meta.icon;
 
   return (
     <div
+      {...rowProps}
       className="flex items-start gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)] cursor-pointer"
       onClick={() => {
         if (!notification.read) onRead?.(notification.id);

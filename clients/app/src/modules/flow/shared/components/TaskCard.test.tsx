@@ -47,7 +47,10 @@ vi.mock('../stores/flowStore', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../stores/flowStore')>();
   return {
     ...actual,
-    useFlowStore: () => flowStoreState,
+    useFlowStore: (selector?: (state: object) => unknown) => {
+      const state = flowStoreState;
+      return selector ? selector(state) : state;
+    },
   };
 });
 

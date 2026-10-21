@@ -1,13 +1,5 @@
 import { useEffect, useEffectEvent, useState } from 'react';
-
-/** The nearest ancestor that actually scrolls vertically, or null for the viewport. */
-function scrollRoot(node: Element): Element | null {
-  for (let el = node.parentElement; el; el = el.parentElement) {
-    const { overflowY } = getComputedStyle(el);
-    if (/(auto|scroll|overlay)/.test(overflowY) && el.scrollHeight > el.clientHeight) return el;
-  }
-  return null;
-}
+import { scrollParent } from '../lib/scrollParent';
 
 /**
  * Infinite lists: calls `onLoad` once the element given the returned ref comes
@@ -29,7 +21,7 @@ export function useLoadOnScroll(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) load();
       },
-      { root: scrollRoot(node), rootMargin: `${margin}px 0px` }
+      { root: scrollParent(node), rootMargin: `${margin}px 0px` }
     );
     observer.observe(node);
     return () => observer.disconnect();

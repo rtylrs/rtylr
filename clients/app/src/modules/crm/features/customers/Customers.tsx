@@ -25,6 +25,8 @@ import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm'
 import { customersToCsv } from './customerExport';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
 import { hasQueryFailed } from '../../../../shared/lib/queryFailureUtils';
+import { useVirtualRows } from '../../../../shared/hooks/useVirtualRows';
+import { VirtualSpacerRow } from '../../../../shared/components/VirtualList';
 
 const ACCENT = 'var(--crm-accent)';
 
@@ -40,7 +42,7 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
     >
-      <td colSpan={9} style={{ padding: 0 }}>
+      <td colSpan={10} style={{ padding: 0 }}>
         <div
           style={{
             padding: '20px 24px',
@@ -147,6 +149,15 @@ const Customers: React.FC = () => {
   const customers = loadedCustomers;
   const hasMore = !exhausted && fetchedCustomers?.length === pageSize;
 
+  const filtered = customers.filter((c) => {
+    const matchTier =
+      tierFilter === 'All' ||
+      getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds) === tierFilter;
+    return matchTier;
+  });
+
+  const virtual = useVirtualRows(filtered.length, { estimateSize: 61 });
+
   if (customersLoadFailed && customers.length === 0) {
     return (
       <div role="alert" className="space-y-4 py-10">
@@ -157,13 +168,6 @@ const Customers: React.FC = () => {
       </div>
     );
   }
-
-  const filtered = customers.filter((c) => {
-    const matchTier =
-      tierFilter === 'All' ||
-      getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds) === tierFilter;
-    return matchTier;
-  });
 
   const allSelected = filtered.length > 0 && filtered.every((c) => selected.has(c.id));
   const toggleAll = () => {
@@ -481,164 +485,168 @@ const Customers: React.FC = () => {
                     ))}
                   </tr>
                 </thead>
-                <tbody>
-                  <AnimatePresence>
-                    {filtered.map((c) => {
-                      const tier = getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds);
-                      const isExpanded = expandedId === c.id;
-                      const isSelected = selected.has(c.id);
-                      return (
-                        <React.Fragment key={c.id}>
-                          <tr
-                            style={{
-                              borderBottom: isExpanded ? 'none' : '1px solid var(--hub-border)',
-                              cursor: 'pointer',
-                              transition: 'background 0.12s',
-                              background:
-                                isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
-                            }}
-                            onMouseEnter={(e) => {
-                              if (!isExpanded)
-                                (e.currentTarget as HTMLElement).style.background =
-                                  'var(--hub-hover)';
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isExpanded)
-                                (e.currentTarget as HTMLElement).style.background = isSelected
-                                  ? 'rgba(59,130,246,0.04)'
-                                  : 'transparent';
-                            }}
-                          >
-                            <td
-                              style={{ padding: '12px 12px 12px 16px' }}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <input
-                                type="checkbox"
-                                disabled={!canEdit}
-                                checked={isSelected}
-                                onChange={() => toggleOne(c.id)}
-                                style={{ accentColor: ACCENT, cursor: 'pointer' }}
-                              />
-                            </td>
-                            <td
-                              style={{ padding: '12px 16px' }}
-                              onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <CustomerAvatar
-                                  initials={c.initials}
-                                  points={c.loyaltyPoints}
-                                  size={32}
-                                />
-                                <div>
-                                  <div
-                                    style={{
-                                      fontSize: '13px',
-                                      fontWeight: 500,
-                                      color: 'var(--hub-text)',
-                                    }}
-                                  >
-                                    {c.name}
-                                  </div>
-                                  <TierBadge tier={tier} />
-                                </div>
-                              </div>
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '12px',
-                                color: 'var(--hub-text-muted)',
-                              }}
-                            >
-                              {c.email}
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '12px',
-                                color: 'var(--hub-text-muted)',
-                              }}
-                            >
-                              {c.phone}
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '13px',
-                                fontWeight: 600,
-                                color: 'var(--hub-text)',
-                              }}
-                            >
-                              {c.totalSpent.toLocaleString()}
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '13px',
-                                color: 'var(--hub-text)',
-                              }}
-                            >
-                              {c.visits}
-                            </td>
-                            <td style={{ padding: '12px 16px' }}>
-                              <span
-                                style={{
-                                  fontSize: '13px',
-                                  color: 'var(--hub-text)',
-                                  fontWeight: 500,
-                                }}
-                              >
-                                {c.loyaltyPoints.toLocaleString()}
-                              </span>
-                            </td>
-                            <td style={{ padding: '12px 16px' }}>
+                {/* One tbody per customer, so a row and its expanded detail
+                    measure as one when the list is windowed. */}
+                <tbody ref={virtual.listRef}>
+                  <VirtualSpacerRow height={virtual.before} columns={10} />
+                </tbody>
+                {virtual.indexes.map((index) => {
+                  const c = filtered[index];
+                  const tier = getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds);
+                  const isExpanded = expandedId === c.id;
+                  const isSelected = selected.has(c.id);
+                  return (
+                    <tbody key={c.id} {...virtual.rowProps(index)}>
+                      <tr
+                        style={{
+                          borderBottom: isExpanded ? 'none' : '1px solid var(--hub-border)',
+                          cursor: 'pointer',
+                          transition: 'background 0.12s',
+                          background:
+                            isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isExpanded)
+                            (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isExpanded)
+                            (e.currentTarget as HTMLElement).style.background = isSelected
+                              ? 'rgba(59,130,246,0.04)'
+                              : 'transparent';
+                        }}
+                      >
+                        <td
+                          style={{ padding: '12px 12px 12px 16px' }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="checkbox"
+                            disabled={!canEdit}
+                            checked={isSelected}
+                            onChange={() => toggleOne(c.id)}
+                            style={{ accentColor: ACCENT, cursor: 'pointer' }}
+                          />
+                        </td>
+                        <td
+                          style={{ padding: '12px 16px' }}
+                          onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <CustomerAvatar
+                              initials={c.initials}
+                              points={c.loyaltyPoints}
+                              size={32}
+                            />
+                            <div>
                               <div
                                 style={{
-                                  display: 'flex',
-                                  gap: '4px',
-                                  flexWrap: 'wrap',
-                                  maxWidth: '160px',
+                                  fontSize: '13px',
+                                  fontWeight: 500,
+                                  color: 'var(--hub-text)',
                                 }}
                               >
-                                {(c.tags || []).slice(0, 2).map((t) => (
-                                  <TagChip key={t} label={t} />
-                                ))}
+                                {c.name}
                               </div>
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '12px',
-                                color: 'var(--hub-text-muted)',
-                              }}
-                            >
-                              {c.lastVisit}
-                            </td>
-                            <td
-                              style={{ padding: '12px 16px', textAlign: 'right' }}
-                              onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                            >
-                              {isExpanded ? (
-                                <ChevronUp size={14} style={{ color: ACCENT }} />
-                              ) : (
-                                <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />
-                              )}
-                            </td>
-                          </tr>
-                          <AnimatePresence>
-                            {isExpanded && (
-                              <ExpandedDetail
-                                customer={c}
-                                onView={() => navigate({ to: `/crm/customers/${c.id}` })}
-                              />
-                            )}
-                          </AnimatePresence>
-                        </React.Fragment>
-                      );
-                    })}
-                  </AnimatePresence>
+                              <TierBadge tier={tier} />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {c.email}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {c.phone}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            color: 'var(--hub-text)',
+                          }}
+                        >
+                          {c.totalSpent.toLocaleString()}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '13px',
+                            color: 'var(--hub-text)',
+                          }}
+                        >
+                          {c.visits}
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span
+                            style={{
+                              fontSize: '13px',
+                              color: 'var(--hub-text)',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {c.loyaltyPoints.toLocaleString()}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '4px',
+                              flexWrap: 'wrap',
+                              maxWidth: '160px',
+                            }}
+                          >
+                            {(c.tags || []).slice(0, 2).map((t) => (
+                              <TagChip key={t} label={t} />
+                            ))}
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {c.lastVisit}
+                        </td>
+                        <td
+                          style={{ padding: '12px 16px', textAlign: 'right' }}
+                          onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                        >
+                          {isExpanded ? (
+                            <ChevronUp size={14} style={{ color: ACCENT }} />
+                          ) : (
+                            <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />
+                          )}
+                        </td>
+                      </tr>
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <ExpandedDetail
+                            customer={c}
+                            onView={() => navigate({ to: `/crm/customers/${c.id}` })}
+                          />
+                        )}
+                      </AnimatePresence>
+                    </tbody>
+                  );
+                })}
+                <tbody>
+                  <VirtualSpacerRow height={virtual.after} columns={10} />
                 </tbody>
               </table>
               {hasMore && filtered.length > 0 && (

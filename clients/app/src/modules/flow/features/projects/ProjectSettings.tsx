@@ -47,7 +47,7 @@ const ProjectSettings: React.FC = () => {
   const { t } = useTranslation();
   const { projectId } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { projects } = useFlowStore();
+  const projects = useFlowStore((state) => state.projects);
   const project = projects.find((p) => p.id === projectId);
   const projectsQuery = useProjects();
 

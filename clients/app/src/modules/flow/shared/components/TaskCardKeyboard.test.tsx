@@ -10,7 +10,10 @@ vi.mock('../lib/useOpenTask', () => ({ useOpenTask: () => openTask }));
 vi.mock('../../features/tasks/useLabels', () => ({ useLabels: () => ({ data: [] }) }));
 vi.mock('../stores/flowStore', async (load) => ({
   ...(await load<typeof import('../stores/flowStore')>()),
-  useFlowStore: () => ({ projects: [] }),
+  useFlowStore: (selector?: (state: object) => unknown) => {
+    const state = { projects: [] };
+    return selector ? selector(state) : state;
+  },
 }));
 beforeEach(async () => {
   await initTestI18n();
