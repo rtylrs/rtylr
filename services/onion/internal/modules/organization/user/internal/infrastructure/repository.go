@@ -167,28 +167,28 @@ func (r *Repository) CreateEmailVerificationCode(ctx context.Context, email stri
 // way to verify them is a digest-only lookup — the exact lookup that lets a
 // guessed code spend an unrelated account's row. They are at most ten minutes
 // old, and resend-verification mints a replacement in one click.
-func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token string) error {
+func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token string) (int64, error) {
 	userID, code, ok := parseEmailVerificationToken(token)
 	if !ok {
 		if isLegacyEmailVerificationCode(token) {
-			return ErrSupersededEmailVerificationCode
+			return 0, ErrSupersededEmailVerificationCode
 		}
-		return ErrInvalidEmailVerificationCode
+		return 0, ErrInvalidEmailVerificationCode
 	}
 
 	hash, err := emailVerificationHash(userID, code)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	userKey := strconv.FormatInt(userID, 10)
 	codeKey := userKey + "|" + hash
 	if !emailVerificationAttempts.check(userKey, codeKey) {
-		return ErrTooManyEmailVerificationAttempts
+		return 0, ErrTooManyEmailVerificationAttempts
 	}
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	rollback := func(cause error) error {
 		_ = tx.Rollback()
@@ -207,14 +207,14 @@ func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token str
 		FOR UPDATE`, userID, hash).Scan(&tokenID)
 	if errors.Is(err, sql.ErrNoRows) {
 		emailVerificationAttempts.recordFailure(userKey, codeKey)
-		return rollback(ErrInvalidEmailVerificationCode)
+		return 0, rollback(ErrInvalidEmailVerificationCode)
 	}
 	if err != nil {
-		return rollback(err)
+		return 0, rollback(err)
 	}
 	if _, err = tx.ExecContext(ctx, `
 		UPDATE user_email_verification_tokens SET consumed_at = NOW() WHERE id = ?`, tokenID); err != nil {
-		return rollback(err)
+		return 0, rollback(err)
 	}
 	if _, err = tx.ExecContext(ctx, `
 		UPDATE user_provisioning_states
@@ -222,20 +222,30 @@ func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token str
 		    state = CASE WHEN password_change_required THEN 'pending_activation' ELSE 'active' END,
 		    updated_at = NOW()
 		WHERE user_id = ?`, userID); err != nil {
-		return rollback(err)
+		return 0, rollback(err)
 	}
 	if _, err = tx.ExecContext(ctx, `
 		UPDATE authorization_business_members
 		SET status = 'active', authorization_version = authorization_version + 1, updated_at = NOW()
 		WHERE user_id = ? AND status IN ('pending', 'suspended')`, userID); err != nil {
-		return rollback(err)
+		return 0, rollback(err)
 	}
 	if err = tx.Commit(); err != nil {
-		return err
+		return 0, err
 	}
 	emailVerificationAttempts.resetUser(userKey)
 
-	return nil
+	return userID, nil
+}
+
+// CreateSignupProvisioning records a self-signup account. It starts active, so
+// /users/me loads, and the auth middleware keeps it to the verification
+// endpoints until emailVerified is true.
+func (r *Repository) CreateSignupProvisioning(ctx context.Context, userID, businessID int64, emailVerified bool) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO user_provisioning_states (user_id, business_id, mode, state, email_verified, password_change_required)
+		VALUES (?, ?, 'self_signup', 'active', ?, FALSE)`, userID, businessID, emailVerified)
+	return err
 }
 
 // EmailExists reports whether a user row with the given email exists. The

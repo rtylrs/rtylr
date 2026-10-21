@@ -90,10 +90,25 @@ function BusinessRoute(): React.JSX.Element | null {
     setToken(token);
     setLoading(true);
     setAuthLoadFailed(false);
+    let leaving = false;
 
     userClient
       .getMe({})
       .then((res) => {
+        // Nothing past /users/me answers an account whose email is
+        // unverified, so it goes back to the sign-in app's verification screen.
+        if (res.provisioningStatus?.emailVerified === false) {
+          leaving = true;
+          const verify = new URL('/verify', resolveAuthUrl());
+          if (res.email) verify.searchParams.set('email', res.email);
+          verify.searchParams.set('redirect', 'dash');
+          verify.searchParams.set(
+            'returnTo',
+            window.location.pathname + window.location.search + window.location.hash
+          );
+          window.location.href = verify.href;
+          return;
+        }
         const effectiveAccess = parseEffectiveAccess(res.effectiveAccess);
         if (Number(res.businessId ?? 0) > 0 && !effectiveAccess) {
           throw new Error('Account authorization is unavailable');
@@ -143,7 +158,9 @@ function BusinessRoute(): React.JSX.Element | null {
       .catch(() => {
         setAuthLoadFailed(true);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!leaving) setLoading(false);
+      });
   }, [
     token,
     reloadCount,

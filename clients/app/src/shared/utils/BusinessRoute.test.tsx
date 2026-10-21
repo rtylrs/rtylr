@@ -247,4 +247,46 @@ describe('BusinessRoute authorization', () => {
 
     await waitFor(() => expect(screen.getByTestId('outlet')).toBeTruthy());
   });
+
+  it('sends an account with an unverified email back to sign-in to verify it', async () => {
+    const original = window.location;
+    const assigned: string[] = [];
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        hostname: 'localhost',
+        pathname: '/crm',
+        search: '?tab=deals',
+        hash: '',
+        get href(): string {
+          return 'http://localhost:5175/crm?tab=deals';
+        },
+        set href(value: string) {
+          assigned.push(value);
+        },
+      },
+    });
+    try {
+      mockGetMe.mockResolvedValue({
+        id: '1',
+        email: 'new@example.com',
+        businessId: '10',
+        effectiveAccess: accessDocument({ isOwner: true }),
+        provisioningStatus: { emailVerified: false },
+      });
+
+      render(<BusinessRoute />);
+
+      await waitFor(() => expect(assigned).toHaveLength(1));
+      const target = new URL(assigned[0]);
+      expect(target.pathname).toBe('/verify');
+      expect(target.searchParams.get('email')).toBe('new@example.com');
+      expect(target.searchParams.get('redirect')).toBe('dash');
+      expect(target.searchParams.get('returnTo')).toBe('/crm?tab=deals');
+      expect(screen.queryByRole('alert')).toBeNull();
+      expect(screen.queryByTestId('outlet')).toBeNull();
+    } finally {
+      Object.defineProperty(window, 'location', { configurable: true, value: original });
+    }
+  });
 });

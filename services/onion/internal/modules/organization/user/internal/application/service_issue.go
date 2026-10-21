@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/url"
 	"strings"
 
@@ -34,15 +33,7 @@ func (s *Service) IssueEmailVerificationCode(ctx context.Context, emailAddress s
 	if s.emails == nil {
 		return errors.New("email notifications are not configured")
 	}
-	err = s.emails.SendVerification(ctx, strings.ToLower(strings.TrimSpace(emailAddress)), "Verify your rtylr email address", fmt.Sprintf(
-		"<p>Confirm your email address to finish setting up your rtylr account.</p>"+
-			"<p><a href=\"%s\">Verify my email</a></p>"+
-			"<p>Or enter this code on the verification page: <strong>%s</strong></p>"+
-			"<p>This expires in 10 minutes and can only be used once.</p>",
-		verifyLink, issued.Code), fmt.Sprintf(
-		"Confirm your email address to finish setting up your rtylr account.\n\nVerify my email: %s\n\nOr enter this code on the verification page: %s\n\nThis expires in 10 minutes and can only be used once.",
-		verifyLink, issued.Code))
-	return err
+	return s.emails.QueueVerification(ctx, strings.ToLower(strings.TrimSpace(emailAddress)), verifyLink, issued.Token)
 }
 
 // VerifyEmailCode spends a verification token. The three failure modes are kept
@@ -52,9 +43,12 @@ func (s *Service) IssueEmailVerificationCode(ctx context.Context, emailAddress s
 // one error so the anonymous endpoint cannot be used to probe which accounts
 // have a pending code.
 func (s *Service) VerifyEmailCode(ctx context.Context, token string) error {
-	err := s.repo.ConsumeEmailVerificationCode(ctx, token)
+	userID, err := s.repo.ConsumeEmailVerificationCode(ctx, token)
 	switch {
 	case err == nil:
+		// The cached /users/me still says unverified, and the apps poll it to
+		// know when to move on.
+		invalidateUserScope(ctx, userID)
 		return nil
 	case errors.Is(err, domain.ErrSupersededEmailVerificationCode):
 		return ErrEmailCodeSuperseded

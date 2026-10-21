@@ -57,7 +57,10 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 	if err != nil {
 		return domain.MyProfile{}, err
 	}
-	if !found || provisioningStatus.State != authorization.ProvisioningActive || !provisioningStatus.EmailVerified {
+	// An unverified email is not refused here. The auth middleware already
+	// keeps such an account to /users/me and the verification endpoints, and
+	// /users/me has to load for the apps to send it to verification.
+	if !found || provisioningStatus.State != authorization.ProvisioningActive {
 		return domain.MyProfile{}, domain.ErrForbidden
 	}
 

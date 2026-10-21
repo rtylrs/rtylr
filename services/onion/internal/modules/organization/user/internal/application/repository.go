@@ -10,9 +10,10 @@ type repository interface {
 	AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error
 	BusinessNameExists(ctx context.Context, name string) (bool, error)
 	CheckBusinessAccess(ctx context.Context, userID, businessID int64) (bool, error)
-	ConsumeEmailVerificationCode(ctx context.Context, token string) error
+	ConsumeEmailVerificationCode(ctx context.Context, token string) (int64, error)
 	CreateBusiness(ctx context.Context, name string, ownerID int64) (int64, error)
 	CreateEmailVerificationCode(ctx context.Context, email string) (*domain.EmailVerification, error)
+	CreateSignupProvisioning(ctx context.Context, userID, businessID int64, emailVerified bool) error
 	CreateUser(ctx context.Context, user *domain.User) (int64, error)
 	DeleteUser(ctx context.Context, id int64) error
 	EmailExists(ctx context.Context, email string) (bool, error)
@@ -31,7 +32,7 @@ type repository interface {
 }
 
 type emailNotifications interface {
-	SendVerification(ctx context.Context, to, subject, htmlBody, textBody string) error
+	QueueVerification(ctx context.Context, to, verifyLink, token string) error
 	QueueWelcome(ctx context.Context, to, name string) error
 	QueuePasswordReset(ctx context.Context, to, resetLink string) error
 }

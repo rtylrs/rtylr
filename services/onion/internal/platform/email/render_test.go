@@ -29,6 +29,10 @@ var renderCases = map[Template]struct {
 		data: PasswordResetData{Subject: "Reset", ResetLink: "https://x.test/r"},
 		want: []string{"https://x.test/r"},
 	},
+	TemplateEmailVerification: {
+		data: VerificationData{Subject: "Verify", VerifyLink: "https://x.test/verify?token=7.0123456789", Code: "7.0123456789"},
+		want: []string{"https://x.test/verify?token=7.0123456789", "7.0123456789", "10 minutes"},
+	},
 	TemplateInvoice: {
 		data: InvoiceData{Subject: "Invoice", CustomerName: "Jordan", InvoiceNumber: "INV-42", Amount: "$10", DueDate: "soon", ViewLink: "https://x.test/v"},
 		want: []string{"Invoice INV-42", "Jordan", "$10", "https://x.test/v"},

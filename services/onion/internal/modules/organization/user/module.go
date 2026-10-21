@@ -47,9 +47,9 @@ type userTokenValidator struct {
 
 type emailNotificationAdapter struct{ db *sql.DB }
 
-func (a emailNotificationAdapter) SendVerification(ctx context.Context, to, subject, htmlBody, textBody string) error {
-	_, err := email.Send(ctx, email.SendParams{To: []string{to}, Subject: subject, HTML: htmlBody, Text: textBody})
-	return err
+func (a emailNotificationAdapter) QueueVerification(ctx context.Context, to, verifyLink, token string) error {
+	return email.EnqueueTemplate(ctx, a.db, email.PriorityCritical, to, "Verify your rtylr email address", email.TemplateEmailVerification,
+		email.VerificationData{Subject: "Verify your rtylr email address", VerifyLink: verifyLink, Code: token})
 }
 
 func (a emailNotificationAdapter) QueueWelcome(ctx context.Context, to, name string) error {
