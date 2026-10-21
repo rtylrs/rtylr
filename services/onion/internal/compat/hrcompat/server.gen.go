@@ -19,6 +19,8 @@ type CompatibilityService struct{ Routes *serverHttp.LegacyRoutes }
 func CompatibilityServiceRoutes() []string {
 	return []string{
 		"GET /hr/employees/me",
+		"GET /hr/time-off",
+		"POST /hr/time-off",
 		"POST /hr/time-off/approve",
 		"GET /hr/shifts",
 		"GET /hr/shifts/availability",
@@ -102,6 +104,22 @@ func CompatibilityServiceRoutes() []string {
 
 func (s CompatibilityService) GetMyEmployee(ctx context.Context, req *hrcompatv1.EmptyRequest) (*hrcompatv1.JsonResponse, error) {
 	data, err := s.serve(ctx, http.MethodGet, "/hr/employees/me", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) ListTimeOff(ctx context.Context, req *hrcompatv1.QueryRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodGet, "/hr/time-off", nil)
+	if err != nil {
+		return nil, err
+	}
+	return &hrcompatv1.JsonResponse{Data: data}, nil
+}
+
+func (s CompatibilityService) SubmitTimeOff(ctx context.Context, req *hrcompatv1.BodyRequest) (*hrcompatv1.JsonResponse, error) {
+	data, err := s.serve(ctx, http.MethodPost, "/hr/time-off", req.GetBody())
 	if err != nil {
 		return nil, err
 	}
