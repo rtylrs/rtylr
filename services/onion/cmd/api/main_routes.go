@@ -158,8 +158,9 @@ func setupRoutes(ctx context.Context, mux *stdhttp.ServeMux) []http.MiddlewareFu
 		},
 	)
 
+	// Request screening (scanner paths, spoofed forwarding headers, injection
+	// params) happens at the Cloudflare WAF in front of the API, not here.
 	middlewares := []http.MiddlewareFunc{
-		http.SecurityMiddleware(),
 		jwtutils.JWTMiddleware(),
 		http.RequestLoggerMiddleware(ctx),
 		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver, teamSvc),
