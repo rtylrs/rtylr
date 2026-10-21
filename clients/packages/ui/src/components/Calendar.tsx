@@ -339,8 +339,10 @@ const Calendar = ({
                 !inMonth && "text-muted/50",
                 inMonth && !selected && "text-inherit hover:bg-muted/15",
                 isToday && !selected && "font-semibold text-accent",
+                // The app's solid action fill where the portal sets one, so
+                // the selected day matches the app's buttons.
                 selected &&
-                  "bg-accent font-semibold text-accent-foreground hover:opacity-90",
+                  "bg-[color:var(--app-action-bg,var(--color-accent))] font-semibold text-[color:var(--app-on-action,var(--color-accent-foreground))] hover:opacity-90",
               )}
             >
               {date.getUTCDate()}

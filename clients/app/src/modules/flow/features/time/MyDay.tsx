@@ -127,7 +127,7 @@ const MyDay = (): React.JSX.Element => {
                 className="flow-focus relative flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-md py-1.5 text-flow-meta font-medium md:min-h-0"
                 style={{
                   background: active ? 'var(--flow-active)' : 'var(--flow-hover)',
-                  color: active ? 'var(--flow-on-accent)' : 'var(--flow-text)',
+                  color: active ? 'var(--accent-on-muted)' : 'var(--flow-text)',
                 }}
               >
                 {formatWeekDayShort(d, i18n.language)}
@@ -137,7 +137,7 @@ const MyDay = (): React.JSX.Element => {
                 <span
                   className="mt-0.5 text-flow-meta tabular-nums"
                   style={{
-                    color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
+                    color: active ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
                     opacity: dayMinutes > 0 ? 1 : 0.55,
                   }}
                 >

@@ -278,8 +278,8 @@ button.sales-stat:hover {
   height: 18px;
   padding-inline: 5px;
   border-radius: 999px;
-  background: var(--crm-accent);
-  color: var(--crm-on-accent);
+  background: var(--crm-action);
+  color: var(--crm-on-action);
   font-size: 11px;
   line-height: 18px;
   text-align: center;
@@ -365,8 +365,8 @@ button.sales-stat:hover {
   padding-inline: 14px;
   border: 0;
   border-radius: 8px;
-  background: var(--crm-accent);
-  color: var(--crm-on-accent);
+  background: var(--crm-action);
+  color: var(--crm-on-action);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -550,9 +550,9 @@ button.sales-stat:hover {
   background: var(--hub-input-bg);
 }
 .sales-multi-option[aria-checked='true'] .sales-multi-box {
-  border-color: var(--crm-accent);
-  background: var(--crm-accent);
-  color: var(--crm-on-accent);
+  border-color: var(--crm-action);
+  background: var(--crm-action);
+  color: var(--crm-on-action);
 }
 .sales-multi-label {
   overflow: hidden;

@@ -22,6 +22,7 @@ import { describe, it, expect } from 'vitest';
 import {
   contrastRatio,
   deriveAccentFg,
+  deriveActionFill,
   deriveOnAccent,
   hexLuminance,
   hexToHsl,
@@ -232,6 +233,67 @@ describe('deriveOnAccent', () => {
     for (const bad of ['', 'nonsense', '#ggg', '#abc', '64c5b9']) {
       expect(() => deriveOnAccent(bad)).not.toThrow();
       expect([NEAR_BLACK, NEAR_WHITE]).toContain(deriveOnAccent(bad));
+    }
+  });
+});
+
+// ── deriveActionFill ────────────────────────────────────────────────
+
+describe('deriveActionFill', () => {
+  // The portal's mid-tone app accents: CRM violet, Flow red, POS blue. Each
+  // measured better with near-black text, which is how the CRM shipped black
+  // on violet.
+  const MID_TONES = ['#8b5cf6', '#ef4444', '#3b82f6'];
+
+  it('deepens a mid-tone just enough for white text, keeping its hue', () => {
+    for (const accent of MID_TONES) {
+      expect(deriveOnAccent(accent)).toBe(NEAR_BLACK);
+      const fill = deriveActionFill(accent);
+      expect(deriveOnAccent(fill)).toBe(NEAR_WHITE);
+      expect(contrastRatio(NEAR_WHITE, fill)).toBeGreaterThanOrEqual(
+        CONTRAST_TARGET,
+      );
+      expect(hueDelta(hexToHsl(fill).h, hexToHsl(accent).h)).toBeLessThan(2);
+      // One walk step lighter must fail, or the fill went darker than needed.
+      const lighter = hslToHex({
+        ...hexToHsl(fill),
+        l: hexToHsl(fill).l + 0.5,
+      });
+      expect(contrastRatio(NEAR_WHITE, lighter)).toBeLessThan(CONTRAST_TARGET);
+    }
+    expect(deriveActionFill('#8b5cf6')).toBe('#8452f5');
+  });
+
+  it('leaves light accents alone, where near-black is the right text', () => {
+    for (const accent of [
+      ...ACCENT_SWATCHES.map((swatch) => swatch.hex),
+      '#10b981',
+      '#f59e0b',
+    ]) {
+      expect(deriveActionFill(accent)).toBe(normalizeHex(accent));
+    }
+  });
+
+  it('leaves dark accents alone, where white already clears', () => {
+    for (const accent of STRESS_ACCENTS) {
+      expect(deriveActionFill(accent)).toBe(normalizeHex(accent));
+      expect(deriveOnAccent(accent)).toBe(NEAR_WHITE);
+    }
+  });
+
+  it('clears the floor with its derived text for every fixture', () => {
+    for (const accent of [...ALL_ACCENTS, ...MID_TONES]) {
+      const fill = deriveActionFill(accent);
+      expect(contrastRatio(deriveOnAccent(fill), fill)).toBeGreaterThanOrEqual(
+        CONTRAST_FLOOR,
+      );
+    }
+  });
+
+  it('never throws on malformed input', () => {
+    for (const bad of ['', 'nonsense', '#ggg', '#abc', '64c5b9']) {
+      expect(() => deriveActionFill(bad)).not.toThrow();
+      expect(isValidHex(deriveActionFill(bad))).toBe(true);
     }
   });
 });

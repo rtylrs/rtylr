@@ -330,10 +330,15 @@ const Customers: React.FC = () => {
                   background:
                     tierFilter === t
                       ? t === 'All'
-                        ? ACCENT
+                        ? 'var(--crm-action)'
                         : tierColor[t as Tier]
                       : 'transparent',
-                  color: tierFilter === t ? '#fff' : 'var(--hub-text-muted)',
+                  color:
+                    tierFilter === t
+                      ? t === 'All'
+                        ? 'var(--crm-on-action)'
+                        : '#fff'
+                      : 'var(--hub-text-muted)',
                   transition: 'all 0.15s',
                 }}
               >
