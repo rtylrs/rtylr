@@ -145,7 +145,10 @@ test.describe('CRM sales', () => {
     await expect(page.getByRole('tab', { name: /Working/ })).toContainText('2');
     await expect(page.getByText('Showing 2 of 2')).toBeVisible();
 
-    const nav = page.locator('#portal-app-navigation');
+    // Phones keep the app's sidebar in a drawer, opened from the top bar.
+    const phone = page.viewportSize()!.width <= 900;
+    if (phone) await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
+    const nav = page.locator(phone ? '#portal-mobile-navigation' : '#portal-app-navigation');
     await expect(nav.getByText('Sales', { exact: true })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Leads' })).toHaveAttribute('aria-current', 'page');
     await page.screenshot({ path: 'test-results/crm-sales-leads.png', fullPage: true });
