@@ -107,8 +107,17 @@ const CreateCustomer: React.FC = () => {
                   height: '22px',
                   borderRadius: '50%',
                   background:
-                    i < step ? '#3b82f6' : i === step ? 'rgba(59,130,246,0.2)' : 'var(--hub-hover)',
-                  color: i < step ? '#fff' : i === step ? '#3b82f6' : 'var(--hub-text-muted)',
+                    i < step
+                      ? 'var(--crm-action)'
+                      : i === step
+                        ? 'color-mix(in srgb, var(--crm-accent) 20%, transparent)'
+                        : 'var(--hub-hover)',
+                  color:
+                    i < step
+                      ? 'var(--crm-on-action)'
+                      : i === step
+                        ? 'var(--hub-text)'
+                        : 'var(--hub-text-muted)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

@@ -80,14 +80,14 @@ export const Button: React.FC<
     whiteSpace: 'nowrap',
   };
   const variants: Record<string, React.CSSProperties> = {
-    primary: { background: 'var(--crm-accent)', color: 'var(--crm-on-accent)' },
+    primary: { background: 'var(--crm-action)', color: 'var(--crm-on-action)' },
     ghost: { background: 'transparent', color: 'var(--hub-text-muted)' },
     outline: {
       background: 'transparent',
       color: 'var(--hub-text)',
       border: '1px solid var(--hub-border)',
     },
-    danger: { background: '#ef4444', color: '#fff' },
+    danger: { background: '#dc2626', color: '#fff' },
   };
   const filled = variant === 'primary' || variant === 'danger';
   const disabledFill: React.CSSProperties = {

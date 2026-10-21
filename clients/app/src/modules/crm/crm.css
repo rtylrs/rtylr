@@ -1,6 +1,9 @@
 :root {
   --crm-accent: #8b5cf6;
-  --crm-on-accent: #0a0a0a;
+  /* Solid fills (buttons, badges, checked boxes) take a slightly deeper violet
+     so white text clears AA; PortalShell derives both from the accent. */
+  --crm-action: #8452f5;
+  --crm-on-action: #ffffff;
   --crm-text: var(--dash-text);
   --crm-border: var(--dash-border);
   /* Lucide chevron-down, stroked in --dash-text-dim for each theme. */
@@ -71,7 +74,7 @@
 }
 
 .portal-page.is-crm button.bg-accent {
-  background: var(--crm-accent);
-  color: var(--crm-on-accent);
+  background: var(--crm-action);
+  color: var(--crm-on-action);
   border-radius: 8px;
 }

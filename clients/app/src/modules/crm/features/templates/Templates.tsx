@@ -101,8 +101,8 @@ const Templates: React.FC = () => {
                 fontWeight: 600,
                 cursor: 'pointer',
                 border: '1px solid var(--hub-border)',
-                background: filter === f ? '#3b82f6' : 'transparent',
-                color: filter === f ? '#fff' : 'var(--hub-text-muted)',
+                background: filter === f ? 'var(--crm-action)' : 'transparent',
+                color: filter === f ? 'var(--crm-on-action)' : 'var(--hub-text-muted)',
                 textTransform: 'capitalize',
               }}
             >

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import {
   useLoyaltyConfig,
   useLoyaltyTransactions,
@@ -276,8 +275,8 @@ const Loyalty: React.FC = () => {
                   borderRadius: '8px',
                   fontSize: '13px',
                   fontWeight: 600,
-                  background: ACCENT,
-                  color: '#fff',
+                  background: 'var(--crm-action)',
+                  color: 'var(--crm-on-action)',
                   border: 'none',
                   cursor: !config || updateConfig.isPending ? 'not-allowed' : 'pointer',
                   opacity: !config || updateConfig.isPending ? 0.7 : 1,

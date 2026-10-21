@@ -237,7 +237,7 @@ const Calendar: React.FC = () => {
                       className="text-flow-meta font-semibold h-5 w-5 flex items-center justify-center rounded-full"
                       style={{
                         background: isToday ? 'var(--flow-active)' : 'transparent',
-                        color: isToday ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
+                        color: isToday ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
                       }}
                     >
                       {c.date.getDate()}

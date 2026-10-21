@@ -5,7 +5,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { EmptyState } from '@voxire/ui';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import {
   Users,
   Star,
@@ -320,8 +319,8 @@ function RuleBuilder({
               borderRadius: '8px',
               fontSize: '13px',
               fontWeight: 600,
-              background: ACCENT,
-              color: '#fff',
+              background: 'var(--crm-action)',
+              color: 'var(--crm-on-action)',
               border: 'none',
               cursor: 'pointer',
             }}
@@ -592,8 +591,8 @@ const Segments: React.FC = () => {
               borderRadius: '8px',
               fontSize: '13px',
               fontWeight: 600,
-              background: ACCENT,
-              color: '#fff',
+              background: 'var(--crm-action)',
+              color: 'var(--crm-on-action)',
               border: 'none',
               cursor: 'pointer',
             }}

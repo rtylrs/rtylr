@@ -18,7 +18,14 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { resolveApiBase, resolveAppUrl } from '@voxire/config';
 import { ThemeScopeProvider } from '@voxire/ui';
-import { useMediaQuery, deriveAccentFgAcross, deriveOnAccent, compositeOver } from '@voxire/utils';
+import {
+  useMediaQuery,
+  deriveAccentFgAcross,
+  deriveActionFill,
+  deriveOnAccent,
+  compositeOver,
+  NEAR_WHITE,
+} from '@voxire/utils';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { PanelLeft, Search, Bell, Settings, Webhook, Plus, X } from 'lucide-react';
 import {
@@ -100,12 +107,15 @@ export default function PortalShell({ children }: { children: ReactNode }) {
     theme === 'dark' || (theme === 'system' && systemDark)
       ? ['#0a0a0a', '#111111', '#161616']
       : ['#f8f8f8', '#ffffff'];
-  const actionAccent = accent ?? '#111111';
+  // Solid buttons take a fill white text reads on wherever the accent is a
+  // mid-tone (CRM violet, Flow red); see deriveActionFill.
+  const actionFill = deriveActionFill(accent ?? '#111111');
+  const onAction = deriveOnAccent(actionFill);
   const appStyle: CSSProperties & Record<string, string> = accent
     ? {
-        '--app-action-bg': actionAccent,
-        '--app-on-action': deriveOnAccent(actionAccent),
-        '--app-action-hover': `color-mix(in srgb, ${actionAccent} 90%, white)`,
+        '--app-action-bg': actionFill,
+        '--app-on-action': onAction,
+        '--app-action-hover': `color-mix(in srgb, ${actionFill} 90%, ${onAction === NEAR_WHITE ? 'black' : 'white'})`,
         '--app-selection-bg': `color-mix(in srgb, ${accent} 12%, transparent)`,
         '--app-on-selection': deriveAccentFgAcross(
           accent,
@@ -130,8 +140,8 @@ export default function PortalShell({ children }: { children: ReactNode }) {
         '--hub-on-accent': deriveOnAccent(accent),
         ...(appId === 'flow'
           ? {
-              '--flow-action-bg': accent,
-              '--flow-on-accent': deriveOnAccent(accent),
+              '--flow-action-bg': actionFill,
+              '--flow-on-accent': onAction,
               '--flow-active': `color-mix(in srgb, ${accent} 12%, transparent)`,
               '--flow-border-focus': deriveAccentFgAcross(accent, grounds),
               '--flow-focus-ring': deriveAccentFgAcross(accent, grounds),
@@ -144,7 +154,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
               '--hr-on-accent': deriveOnAccent(accent),
             }
           : {}),
-        ...(appId === 'crm' ? { '--crm-on-accent': deriveOnAccent(accent) } : {}),
+        ...(appId === 'crm' ? { '--crm-action': actionFill, '--crm-on-action': onAction } : {}),
       }
     : {};
   const settingsOpen = useSettingsModalStore((state) => state.path !== null);

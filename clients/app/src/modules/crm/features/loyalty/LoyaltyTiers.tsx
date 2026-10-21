@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import { Award, Check, Pencil, X } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import { useLoyaltyTiers, useUpsertTier } from '../../shared/hooks/queries/useLoyalty';
@@ -147,8 +146,8 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
             borderRadius: '6px',
             fontSize: '12px',
             fontWeight: 600,
-            background: 'var(--accent)',
-            color: 'var(--crm-on-accent)',
+            background: 'var(--crm-action)',
+            color: 'var(--crm-on-action)',
             border: 'none',
             cursor: upsert.isPending ? 'not-allowed' : 'pointer',
             opacity: upsert.isPending ? 0.7 : 1,

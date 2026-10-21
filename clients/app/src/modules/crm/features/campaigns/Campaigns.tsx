@@ -4,7 +4,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { useUserStore } from '../../../../shared/stores/userStore';
 import {
   Plus,
   Mail,
@@ -335,8 +334,8 @@ function CampaignCard({
                 borderRadius: '7px',
                 fontSize: '12px',
                 fontWeight: 600,
-                background: ACCENT,
-                color: '#fff',
+                background: 'var(--crm-action)',
+                color: 'var(--crm-on-action)',
                 border: 'none',
                 cursor: statusPending ? 'not-allowed' : 'pointer',
                 opacity: statusPending ? 0.6 : 1,
@@ -556,8 +555,8 @@ const Campaigns: React.FC = () => {
                   borderRadius: '8px',
                   fontSize: '13px',
                   fontWeight: 600,
-                  background: ACCENT,
-                  color: '#fff',
+                  background: 'var(--crm-action)',
+                  color: 'var(--crm-on-action)',
                   border: 'none',
                   cursor: 'pointer',
                 }}
@@ -592,8 +591,8 @@ const Campaigns: React.FC = () => {
                 fontWeight: 500,
                 cursor: 'pointer',
                 border: 'none',
-                background: statusFilter === f ? ACCENT : 'transparent',
-                color: statusFilter === f ? '#fff' : 'var(--hub-text-muted)',
+                background: statusFilter === f ? 'var(--crm-action)' : 'transparent',
+                color: statusFilter === f ? 'var(--crm-on-action)' : 'var(--hub-text-muted)',
                 transition: 'all 0.15s',
               }}
             >
