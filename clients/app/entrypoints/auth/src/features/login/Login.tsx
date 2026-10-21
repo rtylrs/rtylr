@@ -6,7 +6,7 @@ import { APP_URLS, PORTAL_URL, resolvePortalReturn } from '@voxire/config';
 
 import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin } from '../../shared/hooks/useAuth';
-import { startGoogleLogin } from '../../shared/lib/social';
+import { GOOGLE_SIGN_IN_ENABLED, startGoogleLogin } from '../../shared/lib/social';
 import notify from '../../shared/lib/notify/notify';
 import { createOneKitClient } from '@voxire/api';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
@@ -199,21 +199,25 @@ const Login: React.FC = (): React.JSX.Element => {
             {t('auth.login.submit')}
           </Button>
 
-          <AuthDivider label={t('auth.common.or')} />
+          {GOOGLE_SIGN_IN_ENABLED && (
+            <>
+              <AuthDivider label={t('auth.common.or')} />
 
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={44}
-            onClick={() => void handleGoogleLogin()}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaGoogle className="text-[#444]" />
-              {t('auth.common.continueWithGoogle')}
-            </span>
-          </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={44}
+                onClick={() => void handleGoogleLogin()}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaGoogle className="text-[#444]" />
+                  {t('auth.common.continueWithGoogle')}
+                </span>
+              </Button>
+            </>
+          )}
         </form>
       </AuthShell>
     </>

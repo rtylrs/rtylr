@@ -9,6 +9,10 @@ export const SOCIAL_AUTH_REDIRECT_KEY = 'social_auth_redirect';
 export const SOCIAL_AUTH_BUSINESS_NAME_KEY = 'social_auth_business_name';
 export const GOOGLE_AUTH_STATE_KEY = 'google_auth_state';
 
+// Google sign-in is switched off for now. Set this to true to bring back the
+// "Continue with Google" button on the sign-in and sign-up pages.
+export const GOOGLE_SIGN_IN_ENABLED = false;
+
 // Keep the redirect target and OAuth state in this tab only for callback validation.
 export async function startGoogleLogin(
   redirectParam: string | null,
