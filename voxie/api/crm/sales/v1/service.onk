@@ -95,6 +95,10 @@ service DealService {
   /// Summarises a pipeline.
   getDealStats(GetDealStatsRequest) -> GetDealStatsResponse @get("/deals/stats")
 
+  /// Returns calls, new leads and won deals per day over a window, with its
+  /// totals and each rep's share, for the dashboard.
+  getSalesActivity(GetSalesActivityRequest) -> GetSalesActivityResponse @get("/activity")
+
   /// Returns one page of deals.
   listDeals(ListDealsRequest) -> ListDealsResponse @get("/deals")
 

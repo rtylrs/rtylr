@@ -105,6 +105,18 @@ then phone, then company plus name, and returns a result per row. Failed rows
 are kept with their reason for download. An import can be undone while its
 leads are untouched.
 
+## Dashboard
+
+The dashboard reads aggregates only. Pipeline value, weighted value, win rate
+and cycle time come from the deal stats; the lead funnel, follow-ups due and
+today's calls from the lead stats; open tasks from the task counts. Activity
+over a 7, 30 or 90-day window comes from `getSalesActivity`
+(`dashboard.sql`): calls and reached calls, leads added and deals won per day,
+plus each rep's calls, qualified leads and won and lost deals. Days are the
+caller's own: timestamps shift by the caller's UTC offset before the day is
+taken, and quiet days are filled in as zeros. Calls count for whoever logged
+them, leads and deals for whoever they are assigned to.
+
 ## Navigation
 
 | Group     | Pages |

@@ -17,6 +17,7 @@ const optionalFiniteNumber = z.preprocess((value) => {
 // undefined instead of being presented as a real zero.
 export const topCustomerSchema = z
   .object({
+    id: z.union([z.string(), z.number()]).optional(),
     name: z.string().optional(),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
@@ -27,6 +28,7 @@ export const topCustomerSchema = z
     loyaltyTier: z.string().optional(),
   })
   .transform((c) => ({
+    id: c.id === undefined || c.id === '' ? undefined : String(c.id),
     name: c.name ?? `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim(),
     spend: c.spend ?? String(c.totalSpent ?? 0),
     visits: c.visits,

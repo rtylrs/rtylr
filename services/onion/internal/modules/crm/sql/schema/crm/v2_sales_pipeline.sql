@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS `crm_leads` (
   KEY `idx_crm_leads_biz_company` (`business_id`,`company_name`,`id`),
   KEY `idx_crm_leads_biz_email` (`business_id`,`email`),
   KEY `idx_crm_leads_biz_phone` (`business_id`,`phone_digits`),
-  KEY `idx_crm_leads_biz_batch` (`business_id`,`import_batch_id`)
+  KEY `idx_crm_leads_biz_batch` (`business_id`,`import_batch_id`),
+  KEY `idx_crm_leads_biz_converted` (`business_id`,`converted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Pre-redesign lead contacts. Their primary contact was copied onto the lead;
@@ -188,7 +189,8 @@ CREATE TABLE IF NOT EXISTS `crm_touchpoints` (
   KEY `idx_crm_touchpoints_business` (`business_id`),
   KEY `idx_crm_touchpoints_biz_lead` (`business_id`,`lead_id`,`occurred_at`,`id`),
   KEY `idx_crm_touchpoints_biz_deal` (`business_id`,`deal_id`,`occurred_at`,`id`),
-  KEY `idx_crm_touchpoints_biz_rep` (`business_id`,`created_by`,`occurred_at`)
+  KEY `idx_crm_touchpoints_biz_rep` (`business_id`,`created_by`,`occurred_at`),
+  KEY `idx_crm_touchpoints_biz_type` (`business_id`,`type`,`occurred_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `crm_tasks` (

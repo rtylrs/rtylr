@@ -60,6 +60,10 @@ type repository interface {
 	ListStageDeals(ctx context.Context, businessID, pipelineID, stageID int64, assignedTo *int64, search, cursor string, limit int) ([]domain.Deal, string, error)
 	StageTotals(ctx context.Context, businessID, pipelineID int64, assignedTo *int64, search string) (map[int64]domain.StageTotal, error)
 	DealOutcomesSince(ctx context.Context, businessID int64, pipelineID, assignedTo *int64, since time.Time) (domain.DealOutcome, error)
+	// SalesActivity counts calls, new leads and won deals per caller day
+	// (keyed YYYY-MM-DD, shifted by offsetMinutes) since `since`, and each
+	// rep's share.
+	SalesActivity(ctx context.Context, businessID int64, rep *int64, since time.Time, offsetMinutes int64) (map[string]domain.ActivityDay, []domain.RepActivity, error)
 	GetDeal(ctx context.Context, businessID, id int64) (domain.Deal, error)
 	CreateDeal(ctx context.Context, businessID, actorID int64, in domain.DealInput, stage domain.Stage, now time.Time) (domain.Deal, error)
 	UpdateDeal(ctx context.Context, businessID, id int64, in domain.DealInput) (domain.Deal, error)
